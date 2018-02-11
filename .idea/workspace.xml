@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="update table fomat">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-timeline-component.html" afterPath="" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -16,15 +16,25 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="job.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="job.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1057">
-              <caret line="1417" column="14" lean-forward="true" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
+              <caret line="1417" column="14" lean-forward="false" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
               <folding>
                 <marker date="1518328255000" expanded="true" signature="4761:4767" ph=" " />
                 <marker date="1518328255000" expanded="true" signature="38738:38752" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-timeline-component.vue" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -155,6 +165,11 @@
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="ChangesBrowser.SHOW_FLATTEN" value="false" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/web/component" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -180,7 +195,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1518319222660</updated>
-      <workItem from="1518319223805" duration="2953000" />
+      <workItem from="1518319223805" duration="3278000" />
     </task>
     <task id="LOCAL-00001" summary="update table fomat">
       <created>1518319506068</created>
@@ -200,14 +215,13 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="2953000" />
+    <option name="totallyTimeSpent" value="3278000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="773" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31328124" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" x="480" y="67" width="320" height="685" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31328124" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" x="480" y="67" width="320" height="685" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -270,7 +284,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="update table fomat" />
-    <option name="LAST_COMMIT_MESSAGE" value="update table fomat" />
+    <MESSAGE value="remove vue-timeinlie-component.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove vue-timeinlie-component.html" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -320,11 +335,27 @@
     <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1057">
-          <caret line="1417" column="14" lean-forward="true" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
+          <caret line="1417" column="14" lean-forward="false" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
           <folding>
             <marker date="1518328255000" expanded="true" signature="4761:4767" ph=" " />
             <marker date="1518328255000" expanded="true" signature="38738:38752" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
