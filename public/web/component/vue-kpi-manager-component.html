@@ -1,0 +1,373 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-kpi-manager-component"  ----------*/
+	<template>
+		<div class='row'>
+			<div class="col-lg-2" id="nav" style="display: none;">
+				<div class="panel" style="border-radius: 0px;">
+					<div class="panel-body" style="padding-left:5px;padding-top: 5px;">
+						<vue-kpi-tree-component :model="model.data"></vue-kpi-tree-component>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-12" id="content" style="padding-left:10px;">
+				<div class="panel" style="border-radius: 0px;">
+					<div class="panel-body" style="padding:0px 15px;">
+						<div id="custom-toolbar2">
+							<span id="title-path" @click="toogleView">
+								<button class="btn btn-default btn-xs"><i class="fa fa-caret-right navtoggle"></i></button>
+							</span>
+							<span @click="newKpiModal"><button class="btn btn-success btn-xs"><i class="fa fa-plus"></i> New</button></span>
+						</div>
+						<div class="table-responsive data-table">
+							<vue-bootstrap-table id="dataTable"
+												 :columns="search.result.columns"
+												 :options="search.result.options"
+												 :dataset="search.result.data"
+												 contextMenu="context-menu">
+							</vue-bootstrap-table>
+						</div>
+						<!-- context menu -->
+						<ul id="context-menu" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"kpi","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
+							<li data-item='{"num": "1", "app":"kpi","item":"history","show":"table"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-history fa-fw"></i> History</a></li>
+							<li data-item='{"num": "2", "app":"kpi","item":"add","show":"command"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i> New Action</a></li>
+						</ul>
+					</div>
+					<div class="panel-footer">
+						<i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
+						<i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
+						<i class="fa fa-clock-o"></i> Time: ${moment().format("LLL")} &nbsp;&nbsp;
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-kpi-manager-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+
+	    },
+        data: function(){
+			return {
+                model: {
+                    data: [],
+                    preColumns: ["id", "name", "day", "class"],
+                    gauge: {
+                        groupby: [],
+                        list: []
+                    }
+                },
+                search: {
+                    params: {
+                        at: '#',
+                        class: '#/matrix/system/kpi/',
+                        subclass: ':',
+                        top: 'top 200',
+                        lua: ""
+                    },
+                    filter: [],
+                    input: {
+                        type: {type: "kpi", quick: ""},
+                        term: ""
+                    },
+                    preset: {},
+                    regexp: {
+                        top: /top (\d+(\.\d)*)/gmi,
+                        undefined: /undefined/g,
+                        doubleGrep: /\|(\s+(\|))/g,
+
+                    },
+                    result: {
+                        data: [],
+                        columns: [],
+                        options: {
+                            classes: "table table-striped",
+                            search: true,
+                            locale: '{{.Lang}}',
+                            rowStyle: function rowStyle(row, index) {
+                                return {
+                                    classes: 'text-nowrap'
+                                };
+                            },
+                            toolbar: "#custom-toolbar2",
+                        }
+                    },
+                    gauge: {
+                        groupby: [],
+                        list: []
+                    }
+                },
+                ifShowNav: false,
+                target: "#dataTable",
+                timer: {
+                    sched: Object,
+                    timer: Object
+                }
+            }
+
+		},
+        created: function() {
+            let self = this;
+
+            eventHub.$on('preset-selected-event', self.setPresetDefault);
+            eventHub.$on("input-term-event", self.setSearchTerm);
+            eventHub.$on("input-reset-event", self.setSearchReset);
+        },
+        mounted: function() {
+            let self = this;
+
+            self.$nextTick(function() {
+
+                self.onSearch();
+
+                self.sched = later.parse.text('every 5 min');
+                self.timer = later.setInterval(self.onSearch, self.sched);
+
+            })
+        },
+        watch: {
+            'search.result.data':{
+                handler: function(val, oldVal){
+                    let self = this;
+
+                    $(self.target).bootstrapTable('load',val);
+
+                    self.setGauge();
+                },
+                deep:true
+            },
+            'model.gauge.list':{
+                handler: function(val, oldVal){
+                    let self = this;
+
+                    $('.selectpicker').selectpicker('refresh');
+                },
+                deep:true
+            }
+        },
+        methods: {
+            setPresetDefault: function(event){
+                let self = this;
+
+                self.search.preset = event;
+            },
+            setSearchReset: function(){
+                let self = this;
+                let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
+                let _preset = self.search.preset.default;
+
+                _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
+
+                self.setSearchTerm("");
+                self.searchHandler(_param, null);
+            },
+            setSearchTerm: function (term){
+                let self = this;
+
+                self.search.input.term = term;
+            },
+            onSearch: function() {
+                let self = this;
+                let _param = "";
+                let _preset = {value:""};//self.search.preset.default;
+                let _ifDebug = "";
+
+                _ifDebug = "";//self.search.preset.others.ifDebug?"debug> ":"";
+                self.search.params.at = "";//self.search.preset.others.ifHistory?"":"#";
+
+                if(!_.isEmpty(self.search.input.term)){
+
+                    let _top = self.search.input.term.match(self.search.regexp.top);
+
+                    if(!_.isEmpty(_top)){
+                        self.search.params.top = _.last(_top);
+                    }
+
+                    _param = self.search.params.at + self.search.params.class + self.search.params.subclass + " | " + self.search.input.term;
+                } else {
+                    _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
+                }
+
+                if(!_.isEmpty(_preset)) {
+                    _param = _param + _preset.value + self.search.fortime;
+                } else {
+                    _param = _param + _preset.value;
+                }
+                _param = _param + " | " + self.search.params.top;
+
+                _param = _ifDebug + _param.replace(self.search.regexp.undefined,"").replace(self.search.regexp.doubleGrep," | ");
+
+                self.searchHandler(_param, null);
+            },
+            searchHandler: function(param,func){
+                let self = this;
+
+                console.log(param)
+
+                jQuery.ajax({
+                    url: '/mxobject/search',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        cond: param,
+                        flag: false
+                    },
+                    complete: function(xhr, textStatus) {
+                        //called when complete
+                    },
+                    success: function(data, textStatus, xhr) {
+                        console.log(JSON.stringify(data))
+
+                        let _list = data;
+                        let _columns = [];
+
+                        if(_.isEmpty(_list.message)){
+                            self.search.result.data = [];
+                            return false;
+                        }
+
+                        let _classKeys = _.keys(_list.meta.classes);
+
+                        _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
+                            let _sortable = false;
+
+                            if (v.type === 'timestamp'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: true,
+                                    formatter: function(value, row, index) {
+                                        return moment(value).format("LLL");
+                                    }
+                                });
+                            } else if (v.type === 'smallint'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: true,
+                                    formatter: function(value, row, index) {
+
+                                        if(!v.enum) return false;
+
+                                        let _enum = v.enum[value];
+
+                                        if (!_.isEmpty(_enum)) {
+                                            return _enum[0];
+                                        } else {
+                                            return 'Unknown';
+                                        }
+
+                                    },
+                                    cellStyle: function(value,row,index){
+
+                                        if(!v.enum) return false;
+
+                                        let _enum = v.enum[value];
+
+                                        if (!_.isEmpty(_enum)) {
+                                            return {classes: v.name+value};
+                                        } else {
+                                            return {classes: v.name+'_1'};
+                                        }
+
+                                    }
+                                });
+
+                            } else {
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: _sortable
+                                });
+                            }
+
+                        })
+
+                        self.search.result.columns = _columns;
+                        self.search.result.data = _list.message;
+
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                    }
+                });
+            },
+            toogleView: function() {
+                let self = this;
+
+                if(self.ifShowNav) {
+
+                    $("#nav").hide();
+
+                    $("#content").removeClass("col-lg-10");
+                    $("#content").addClass("col-lg-12")
+                        .css("padding-left","10px");
+                    //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
+
+                    $(".navtoggle").removeClass("fa fa-caret-left");
+                    $(".navtoggle").addClass("fa fa-caret-right");
+
+                    self.ifShowNav = false;
+                } else {
+                    $("#nav").slideDown(500);
+                    $("#nav").show();
+
+                    $("#content").removeClass("col-lg-12");
+                    $("#content").addClass("col-lg-10")
+                        .css("padding-left","0px");
+                    //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+
+                    $(".navtoggle").removeClass("fa fa-caret-right");
+                    $(".navtoggle").addClass("fa fa-caret-left");
+
+                    self.ifShowNav = true;
+                }
+            },
+            newKpiModal: function(){
+                let self = this;
+                var selected = $(self.target).bootstrapTable('getSelections');
+
+                if(_.isEmpty(selected)) {
+                    swal("Please select kpi to generate DashBoard!","","info");
+                    return false;
+                } else {
+                    $('#addDashBoardModal').modal('show')
+                }
+            },
+            setGauge: function(){
+                let self = this;
+                let host = window.GLOBAL_OBJECT.company.object.performance.preconfig.host[0];
+
+                self.model.gauge.list = _.omit(_.groupBy(_.sortBy(_.map(_.cloneDeep(self.model.data), function(v,k){
+                    var regex = /<b[^>]*>.*\/b>/i;
+                    let m;
+                    if ((m = regex.exec(v.value)) !== null) {
+                        m.forEach((match, groupIndex) => {
+                            v.value = match.replace(/<b>/,"").replace(/<\/b>/,"");
+                        });
+                    }
+                    return v;
+                }),host),host),["undefined",""]);
+
+                _.forEach(_.keys(self.model.gauge.list),function(k){
+                    $(".selectpicker.performance-kpi." + k).on("changed.bs.select", function (e) {
+                        $(".performance-widget."+k).find("p").html($(this).selectpicker('val'));
+                    });
+                })
+            }
+        }
+
+	}
+	</script>
+
+</code>

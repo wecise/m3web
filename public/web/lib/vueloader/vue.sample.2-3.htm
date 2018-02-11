@@ -1,0 +1,63 @@
+
+<!-- 一个文件可包含多个组件，每个组件包含在code中，script id是必须的，其它都是可选的 -->
+<!-- 如果一个文件中只包含一个组件，可以不包含在code中 -->
+<code>
+
+	<style>
+	.vue-sample-2 {
+		display: inline-block;
+		background-color: #80FF80;
+	}
+	.test-vue-sample-2 {
+		font-size: 24pt;
+	}
+	</style>
+
+	<!-- 最外层element会自动增加组件同名 class="vue-sample-2" -->
+	<template>
+		<div>
+			vue component sample
+			{{info}}
+		</div>
+	</template>
+
+	<!-- id是vue组件的name，内容是vue组件的option参数 -->
+	<script id="vue-sample-2">
+	{
+		props: {
+			info: { default: "test 2", },
+		},
+		methods: {
+		},
+	}
+	</script>
+
+</code>
+
+<code>
+
+	<style>
+	.vue-sample-3 {
+		display: inline-block;
+		background-color: #FF8080;
+	}
+	</style>
+
+	<template>
+		<div class="vue-sample-3">
+			vue component sample
+			{{info}}
+		</div>
+	</template>
+
+	<script id="vue-sample-3">
+	{
+		props: {
+			info: { default: "test 3", },
+		},
+		methods: {
+		},
+	}
+	</script>
+
+</code>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>vue loader sample</title>
+<!-- 依赖的组件 jquery -->
+<script src="../vendor/jquery/jquery.js"></script>
+<!-- 依赖的组件 vue -->
+<script src="../vendor/vue/vue.js"></script>
+<!-- link加载方式,在document interactive之后,同步加载,可以保证在document completed之前加载完成 -->
+<link rel="vc" href="vue.sample.1.htm"></link>
+<!-- link加载方式,在document interactive之后,异步加载,不能保证在document completed之前加载完成 -->
+<link rel="vc" href="vue.sample.2-3.htm" type="async"></link>
+<!-- Vue Component Loader -->
+<script src="vue.loader.js"></script>
+<!-- link加载方式,在vue.loader.js之后,异步加载,不能保证在window.onload之前加载完成 -->
+<link rel="vc" href="vue.sample.4-5.htm"></link>
+<!-- 应用脚本 -->
+<script>
+VueLoader.onloaded(["vue-sample-3", "vue-sample-5", "vue-sample-6"],function(){ //确保指定组件加载完成后再执行的操作
+//window.onload = (function() { //不能保证所有组件在window.onload之前加载完成
+//$(function() { ////不能保证所有组件在document load completed之前加载完成
+	console.log("组件加载完成回调方式3");
+	console.log("now "+document.readyState);
+	var vm = new Vue({el:"#vue"});
+});
+</script>
+<link rel="vc" href="vue.sample.6.htm"></link>
+</head>
+<body>
+<div id="vue">
+<vue-sample-1>正在加载......</vue-sample-1><br/>
+<vue-sample-2 skin="test"></vue-sample-2><br/>
+<vue-sample-3 info="测试参数"></vue-sample-3><br/>
+<vue-sample-4></vue-sample-4><br/>
+<vue-sample-5></vue-sample-5><br/>
+<vue-sample-6></vue-sample-6><br/>
+</div>
+</body>
+</html>

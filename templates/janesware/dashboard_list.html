@@ -1,0 +1,738 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+<!-- sweetalert core CSS -->
+<link href="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+
+    .bootstrap-tagsinput {
+        background-color: transparent;
+        border-style: none;
+        box-shadow: none;
+    }
+
+    .modal-dialog {
+        position: relative;
+        display: table;
+        overflow-y: auto;
+        overflow-x: auto;
+        width: auto;
+        min-width: 85%;
+    }
+
+    .stats-desc{
+        color: #7d7974!important;
+    }
+
+    .btn.dropdown-toggle {
+        padding: 7px 12px;
+        border-radius: 0px;
+    }
+    .vue-search-input-component > .btn-group > .btn.dropdown-toggle {
+        border-bottom: 2px solid rgb(182, 194, 202);
+    }
+</style>
+
+<div id="app"></div>
+
+<!-- sweetalert core JS -->
+<script src="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
+
+<script type="text/javascript">
+    
+    VueLoader.onloaded(["vue-search-preset-component",
+                        "vue-search-input-component"
+                        ],function() {
+
+        $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/dashboard_list"><i class="fa fa-tachometer"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>');
+    
+        $(function() {
+            
+            Vue.component('bootstraptag-component',{
+                delimiters: ['${', '}'],
+                template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
+                mounted: function() {
+                    var self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                    })
+                },
+                methods: {
+                    init: function(){
+                        var self = this;
+
+                        $(self.$el).tagsinput({
+                            tagClass: function(item) {
+
+                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                    return 'label label-danger label-important';
+                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                    return 'label label-warning';
+                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                    return 'label label-primary';
+                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                    return 'label label-success';
+                                } else if (item.indexOf("黑色") > -1) {
+                                    return 'label label-default';
+                                } else {
+                                    return 'label label-default';
+                                }
+                            },
+                        })
+
+                        $(self.$el).on('itemAdded', function(event) {
+
+                            var oneLevelLoading;
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all.push(event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                    oneLevelLoading = layer.load(3, {
+                                        shade: [0.1, '#ccc'],
+                                        time: 30 * 1000
+                                    });
+                                },
+                                complete: function(xhr, textStatus) {
+                                    layer.close(oneLevelLoading);
+                                },
+                                success: function(data, textStatus, xhr) {
+
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    layer.close(oneLevelLoading);
+                                }
+                            });
+                        })
+
+                        $(self.$el).on('itemRemoved', function(event) {
+
+                            var oneLevelLoading;
+
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                    oneLevelLoading = layer.load(3, {
+                                        shade: [0.1, '#ccc'],
+                                        time: 30 * 1000
+                                    });
+                                },
+                                complete: function(xhr, textStatus) {
+                                    layer.close(oneLevelLoading);
+                                },
+                                success: function(data, textStatus, xhr) {
+
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    layer.close(oneLevelLoading);
+                                }
+                            });
+                        })
+                    }
+                }
+            })
+
+            var appVue = new Vue({
+                delimiters: ['${', '}'],
+                el: '#app',
+                template: '#app-template',
+                data: {
+                    model: [],
+                    search: {
+                        class: "/matrix/filesystem",
+                        params: ['#', '/matrix/filesystem/: | type=idas', '| top 200'],
+                        term: "",
+                        default: {},
+                        fortime: " for vtime ",
+                        inputModel: {type:"event",quick: ""},
+                        filter:[],
+                    }
+                },
+                mounted: function() {
+                    var self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                        self.load();
+                    })
+                },
+                watch: {
+                    model: function(newValue, oldValue){
+                        var self = this;
+
+                        if( !_.isEqual(newValue,oldValue) ) {
+                            self.refresh();
+                        }
+                    }
+                },
+                created: function() {
+                    var self = this;
+
+                    eventHub.$on("input-term-event", self.setSearchTerm);
+                    eventHub.$on("input-reset-event", self.setSearchReset);
+                    eventHub.$on('preset-others-event',self.setPresetOthers);
+                    eventHub.$on('preset-selected-event', self.setPresetDefault);
+                },
+                methods: {
+                    init: function() {
+                        var self = this;
+
+                    },
+                    setPresetDefault: function(event){
+                        var self = this;
+                        
+                        self.search.default = event;
+                    },
+                    setPresetOthers: function(event){
+                        var self = this;
+
+                        self.search.fortime = event.forTime;
+                    },
+                    setSearchReset: function(){
+                        var self = this;
+                        var param = self.search.params.join("");
+                        
+                        param = param + self.search.default.value + self.search.fortime;
+                        
+                        self.setSearchTerm("");
+                        self.searchHandler(param, null);
+                    },
+                    setSearchTerm: function (event){
+                        var self = this;
+
+                        self.search.term = event;
+                    },
+                    onSearch: function() {
+                        var self = this;
+
+                        var param = "";
+
+                        if(!_.isUndefined(self.search.term) && !_.isNull(self.search.term)  && self.search.term.length > 0){
+                            param = self.search.params[0] + self.search.params[1] + self.search.params[2]  + self.search.params[3] + self.search.params[4] + self.search.term;
+                        } else {
+                            param = self.search.params.join("");
+                        }
+                        
+                        if(!_.isEmpty(self.search.default.value)) {
+                            param = param + self.search.default.value + self.search.fortime;
+                        } else {
+                            param = param + self.search.default.value ;
+                        }
+
+                        param = param.replace(/undefined/g,"");
+
+                        self.searchHandler(param,null);
+                    },
+                    searchHandler: function(param,func) {
+                        var self = this;
+                        
+                        console.log(param)
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: param,
+                                flag: false
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                var data = data.message;
+
+                                self.model = _.map(data,function(v,k){
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                            });
+                                _.delay(self.refresh,100);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+                    },
+                    load: function() {
+                        var self = this;
+                        
+                        jQuery.ajax({
+                            url: '/fs/home/dashboard',
+                            type: 'GET',
+                            dataType: 'text json',
+                            contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'dir'
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                if(_.isEmpty(data.message)) return false;
+                                
+                                let _data = data.message;
+
+                                self.model = _.map(_data,function(v,k){
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                            });
+                                
+                                _.delay(self.refresh,100);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+                    },
+                    newModal: function() {
+                        var self = this;
+                        let _selectedTemplate = $(this).data("id");
+
+                        var modal = $("#addDashBoardModal");
+                        modal.modal("show");
+                        //modal.find('#name').val(selectedTemplate + "_" + Math.floor(_.now()/1000));
+                        modal.find('#title').val('');
+                        modal.find('#tags').selectpicker('val', _selectedTemplate);
+
+                        $("#tags").tagsinput({
+                            tagClass: function(item) {
+                                return _.sample(['label label-important','label label-danger','label label-warning','label label-primary','label label-success','label label-default']);
+                            },
+                        })
+                    },
+                    /*
+                    add: function() {
+                        var self = this;
+                        var oneLevelLoading;
+                        var modal = $("#addDashBoardModal");
+                        var name = "dashboard_" + _.now(); //modal.find('#name').val();
+                        var title = modal.find('#title').val();
+                        if (_.isEmpty(title)) {
+                            swal("视图标题不能空啊！", "", "warning");
+                            modal.find('#title').setFocus();
+                            return false;
+                        }
+                        var tags = modal.find("#tags").tagsinput('items');
+                        var ispublic = $("#ispublic input:radio:checked").val();
+                        var skin = $('input[name=radiooptions]:checked').val();
+                        var data = new Object();
+
+                        data.class = '/matrix/dashboard';
+                        data.name = name;
+                        data.title = title;
+                        data.tag = {
+                            "_all": JSON.stringify(tags)
+                        };
+                        data.star = 0;
+                        data.username = '{{.SignedUser.Name}}';
+                        data.ispublic = ispublic;
+                        data.portlet = null;
+                        data.theme = new Array(skin);
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(data),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                                oneLevelLoading = layer.load(3, {
+                                    shade: [0.1, '#ccc'],
+                                    time: 30 * 1000
+                                });
+                            },
+                            complete: function(xhr, textStatus) {
+                                layer.close(oneLevelLoading);
+                            },
+                            success: function(data, textStatus, xhr) {
+                                modal.modal("hide");
+                                _.delay(self.load,500);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                layer.close(oneLevelLoading);
+                            }
+                        })
+                    },
+                    */
+                    add: function() {
+                        var self = this;
+                        var modal = $("#addDashBoardModal");
+                        var name = modal.find('#title').val() + ".idas";//"dashboard_" + Math.floor(_.now() / 1000);
+                        //var title = modal.find('#title').val();
+                        if (_.isEmpty(name)) {
+                            swal("视图标题不能空！", "", "warning");
+                            modal.find('#title').setFocus();
+                            return false;
+                        }
+
+                        var tags = modal.find("#tags").tagsinput('items');
+                        var ispublic = $("#ispublic input:radio:checked").val();
+                        var skin = $('input[name=radioTheme]:checked').val();
+                        var type = $('input[name=radioType]:checked').val();
+
+                        var data = new Object();
+                        data.name = name;
+                        data.title = name;
+                        data.tag = {
+                            "_all": JSON.stringify(tags)
+                        };
+                        data.star = 0;
+                        data.username = '{{.SignedUser.Name}}';
+                        data.ispublic = ispublic;
+
+                        var o = new Object();
+                        o.option =  {
+                                        title:{
+                                            text: "",
+                                        },
+                                        series:{
+                                            type: "line"
+                                        }
+                                    };
+                        o.col = 6;
+                        o.param = "/matrix/devops/performance: | top 2880 |  sort ctime asc | host=";
+                        o.id = _.random(_.now()) + "";
+                        var options = [JSON.stringify(o)];
+
+                        data.portlet = options;
+                        data.theme = new Array(skin);
+                        
+                        jQuery.ajax({
+                            url: '/fs/home/dashboard/'+ name,
+                            type: 'PUT',
+                            //contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'file',
+                                data: JSON.stringify(data),
+                                attr: ""
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                modal.modal("hide");
+                                _.delay(function() {
+                                    self.load();
+                                }, 200);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.log(xhr,textStatus,errorThrown);
+                            }
+                        })
+                    },
+                    remove: function(event) {
+                        var self = this;
+                        
+                        swal({
+                            title: event.name,
+                            text: "Confirm Delete it?",
+                            type: "warning",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "Cancel",
+                            confirmButtonText: "Delete",
+                            confirmButtonColor: "#ff0000"
+                        }).then(function () {
+                            jQuery.ajax({
+                                url: '/fs' + event.parent + '/' + event.name,
+                                type: 'DELETE',
+                                dataType: 'text json',
+                                contentType: "application/text; charset=utf-8",
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                    
+                                    if (data.status == "ok") {
+                                        _.delay(function(){
+                                            self.load();
+                                        }, 500);
+                                        swal("Success!", "", "success");
+                                    } else {
+                                        swal("Failed!", data.message, "warning");
+                                    }
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    console.log(errorThrown)
+                                    self.load();
+                                }
+                            });
+                        })
+                    },
+                    refresh: function() {
+                        var self = this;
+
+                        $(".tagsLabel").tagsinput({
+                            tagClass: function(item) {
+                                return _.sample(['label label-important','label label-danger','label label-warning','label label-primary','label label-success','label label-default']);
+                            }
+                        });
+                        $(".tagsLabel").on('itemAdded', function(event) {
+
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all.push(event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+                        });
+
+                        $(".tagsLabel").on('itemRemoved', function(event) {
+
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+
+                        });
+                    },
+                    validate: function(event) {
+                        var self = this;
+                        var name = event.val();
+                        var retValue = {};
+
+                        if (name == "") {
+                            retValue.status = false;
+                            retValue.msg = "";
+                        } else {
+                            retValue.status = true;
+                        }
+
+                        return retValue;
+                    },
+                    openDashboard: function(item){
+                        var self = this;
+                        let _obj = {};
+                        
+                        _obj.name = item.name;
+                        _obj.parent = item.parent
+
+                        localStorage.setItem("dashboard-object", JSON.stringify(_obj));
+
+                        window.open(
+                                "/janesware/dashboard",
+                                "_parent"
+                            );
+                    }
+                }
+            })
+        })
+    })
+</script>
+
+<!-- Templates -->
+<script type="text/x-template" id="app-template">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">DashBoard</h2>
+                        <span class="pull-right" style="color: #777777;position: relative;margin: -17px 0px;cursor: pointer;">
+                            <a href="#" @click="newModal"><i class="fa fa-plus fa-1x fa-fw" data-id="dashboard"></i>{{.i18n.Tr "mxdashboard_add"}}</a>
+                        </span>
+                        <div class="modal fade" id="addDashBoardModal" tabindex="-1" role="dialog" aria-labelledby="addDashBoardModalLabel">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="addDashBoardModalLabel">{{.i18n.Tr "mxdashboard_add"}}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_title"}}</label>
+                                            <input type="text" class="form-control" id="title" name="title" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="">
+                                          </div>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_tag"}}</label><BR/>
+                                            <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}">
+                                          </div>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_theme"}}</label><BR/>
+                                            <form class="form-horizontal" role="form">
+
+                                              <div class="form-group">
+                                                  <div class="col-lg-12">
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="blue" autocomplete="off" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_blue"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_blue.png" style="width:128px;height:90px;"></p>
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="dark">&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_dark"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_dark.png" style="width:128px;height:90px;"></p>
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="gray">&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_gray"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_gray.png" style="width:128px;height:90px;bordre:1px;"></p>
+                                                        </label>
+                                                  </div>
+                                              </div>
+
+                                            </form>
+
+                                          </div>
+                                          
+                                          <div class="form-group" id="ispublic">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_ifshare"}}</label><BR/>
+                                             <form class="form-horizontal" role="form">
+
+                                              <div class="form-group">
+                                                  <div class="col-lg-12">
+
+                                                        <label class="radio-inline" style="margin-left:15px;">
+                                                            <input type="radio" name="inlineRadioOptions" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_yes"}}
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="inlineRadioOptions" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_no"}}
+                                                        </label>
+
+                                                  </div>
+                                              </div>
+
+                                            </form>
+                                          </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">{{.i18n.Tr "mxdashboard_modal_cancel"}}</button>
+                                        <button type="button" class="btn btn-primary" @click="add">{{.i18n.Tr "mxdashboard_modal_submit"}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body" style="padding:10px;">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="input-group searchinput">
+                                    <vue-search-input-component :model="search.inputModel"></vue-search-input-component>
+                                    <div class="input-group-btn">
+                                        <vue-search-preset-component></vue-search-preset-component>
+                                    </div>
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="padding:5px;"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3" v-for="(item,index) in model">
+                                <div class="widget widget-stats bg-info">
+                                    <div>
+                                        <a  href="javascript:void(0)"
+                                            @click="openDashboard(item)">
+                                            <div class="stats-number" style="font-size:14px;"><i class='fa fa-braille'></i> ${_.replace(item.name,'.idas','')}</div>
+                                        </a>
+                                        <span>
+                                            <a href="javascript:void(0)"
+                                               @click="openDashboard(item.name)">
+                                                <img :src="_.attempt(JSON.parse.bind(null, item.attr)).pic" style="width:75%;height:140px; margin: 0px 35px;">
+                                            </a>
+                                        </span>
+                                      <i class='fa fa-tags' style='color:#337ab7;'></i> <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tag._all" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                                    </div>
+                                    <div class="stats-desc">
+                                      <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username} &nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-clock-o' style='color:#337ab7;'></i> ${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;
+                                      <span class="rating" v-for="data in item.star">
+                                        <span style="color:gold;">☆</span>
+                                      </span>
+                                      &nbsp;&nbsp;&nbsp;&nbsp;
+                                      <i class="fa fa-share-alt" style='color:rgba(0,0,0,.5);position: absolute;right: 30px;top: 5px;z-index: 100;'></i>&nbsp;&nbsp;&nbsp;&nbsp;
+                                      <i class='fa fa-remove' style='color:rgba(0,0,0,.5);cursor:pointer;position: absolute;right: 10px;top: 5px;z-index: 100;' v-on:click="remove(item)"></i>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>  
+        </div>
+    </div>
+</script>
+{{template "base/footer" .}}

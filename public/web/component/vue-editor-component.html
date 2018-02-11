@@ -1,0 +1,109 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-editor-component"  ----------*/
+	<template>
+		<div :id="id" style="padding-bottom:20px; height:95%;"></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-editor-component">
+	{
+	    delimiters: ['${', '}'],
+        props: {
+            id: String,
+            model: Object
+        },
+        data: function(){
+            return {
+                editor: Object,
+                inputText: String,
+            }
+        },
+        mounted: function(){
+            var self = this;
+
+            self.$nextTick(function(){
+                self.init();
+            })
+        },
+        watch: {
+            'model.newInput': {
+            	handler:function(val,oldVal){
+                    var self = this;
+
+                    self.editor.setValue(val);
+                },
+                deep:true
+            }
+        },
+        created: function () {
+            var self = this;
+
+        },
+        methods: {
+            init: function() {
+                var self = this;
+
+                self.editor = ace.edit(self.id);
+                
+                self.editor.setOptions({
+                    maxLines: Infinity,
+                    minLines: 20
+                });
+                self.editor.$blockScrolling = Infinity;
+                self.editor.setShowPrintMargin(self.model.printMargin);
+                self.editor.setReadOnly(self.model.readOnly); 
+                self.editor.getSession().setUseSoftTabs(true);
+
+                self.setTheme();
+                self.setMode();
+                
+            },
+            setTheme: function(){
+                var self = this;
+
+                if(_.isEmpty(self.model.theme)){
+                	self.editor.setTheme("ace/theme/tomorrow");
+                } else {
+                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                }
+                
+            },
+            setMode: function(){
+                var self = this;
+
+                if(_.isEmpty(self.model.mode)){
+                	self.editor.getSession().setMode("ace/mode/json");
+                } else {
+                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                }
+                
+            },
+            setValue: function(){
+                var self = this;
+
+                self.editor.setValue(self.model.oldInput);
+            },
+            getSelected: function(){
+                var self = this;
+                var temp = self.editor.getSelectedText();
+
+                if(_.isEmpty(temp)){
+                    self.inputText = self.editor.getValue();
+                } else {
+                    self.inputText = temp;
+                }
+            }
+        }
+    
+	
+	}
+	</script>
+
+</code>

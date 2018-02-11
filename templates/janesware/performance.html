@@ -1,0 +1,1078 @@
+{{template "base/head" .}}
+
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/lib/tree/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<!-- Bootstrap Select CSS -->
+<link href='{{AppSubUrl}}/web/lib/bootstrap-select/dist/css/bootstrap-select.css' rel='stylesheet'>
+<link href="{{AppSubUrl}}/web/lib/table/export/bootstrap-editable.css" rel="stylesheet">
+
+
+<style type="text/css" media="screen">
+    body {
+        background-color: #d9e0e7;
+    }
+
+    /* Data Table Start */
+
+    .data-table > .fixed-table-container {
+        border-radius: 0px;
+        -webkit-border-radius: 0px;
+        -moz-border-radius: 0px;
+    }
+
+    .data-table > .fixed-table-container thead th:first-child,
+    .data-table > .fixed-table-container thead th:last-child {
+        border: none;
+        border-top-left-radius: 0px;
+        -webkit-bordertop-left-radius: 0px;
+        -moz-bordertop-left-radius: 0px;
+    }
+
+    .data-table > .bootstrap-table .table thead > tr > th {
+        background-color: #b6c2ca;
+        color: #fff;
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container thead th .th-inner, .fixed-table-container tbody td .th-inner {
+        padding: 2px;
+        line-height: 20px;
+    }
+
+    .data-table > .bootstrap-table .table:not(.table-condensed), .bootstrap-table .table:not(.table-condensed) > tbody > tr > th, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > th, .bootstrap-table .table:not(.table-condensed) > thead > tr > td, .bootstrap-table .table:not(.table-condensed) > tbody > tr > td, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+        padding: 5px;
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-body {
+        height: -moz-calc(100vh - 330px);
+        height: -webkit-calc(100vh - 330px);
+        height: calc(100vh - 330px);
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-pagination {
+        margin: 0px 10px
+    }
+
+    /* Data Table End */
+
+    .dropdown-toggle.btn-xs {
+        border-radius: 0px;
+        padding: 7px;
+    }
+
+    .nav-main > .btn-xs {
+        border-radius: 0px;
+    }
+
+    table > tbody > tr:not(.detail-view):hover > td {
+        background-color: #c3e4f5;
+    }
+
+    table > tbody > tr:not(.detail-view).selected > td {
+        background-color: #c3e4f5;
+        border: 1px dashed #cccccc;
+    }
+
+    .breadcrumb {
+        padding: 8px 15px 0px 15px;
+        margin: 0px;
+        background-color: transparent;
+    }
+
+    /* For performance gauge */
+    .widget.performance-widget {
+        margin-bottom: 0px;
+        border-bottom-right-radius: 0px;
+        border-bottom-left-radius: 0px;
+    }
+
+    .bootstrap-select.performance-kpi {
+        width: 100% !important;
+    }
+
+    .bootstrap-select.performance-kpi > button {
+        background-color: #358ee2;
+        border: none;
+        border-top: 1px solid #5ca5e8;
+        font-size: 0.7em;
+        border-top-right-radius: 0px;
+        border-top-left-radius: 0px;
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu {
+        padding: 0px 5px;
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu {
+        background-color: rgb(102, 175, 245);
+    }
+
+    .bootstrap-select.performance-kpi > .btn-default.active, .btn-default:active, .btn-default:focus, .btn-default:hover, .open .dropdown-toggle.btn-default {
+        background: rgb(102, 175, 245);
+        border-color: rgb(102, 175, 245);
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu {
+        background-color: rgb(102, 175, 245);
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu > li .selected > a {
+        background-color: rgb(43, 142, 226);
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu > li a:hover {
+        background-color: rgb(137, 193, 247);
+    }
+
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu > li a:active,
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu > li a:focus,
+    .bootstrap-select.performance-kpi > .dropdown-menu > .dropdown-menu > li a:visited {
+        background-color: rgb(43, 142, 226);
+    }
+
+</style>
+
+<div id="app"></div>
+
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
+
+<!-- ECharts单文件引入 -->
+<script src="{{AppSubUrl}}/web/lib/echart/echarts.min.js"></script>
+
+<!-- Bootstrap Select JS -->
+<script src='{{AppSubUrl}}/web/lib/bootstrap-select/dist/js/bootstrap-select.js'></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-radial-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-linear-component.html"></link>
+
+<script>
+
+    /*var RENDER_BY_LUA = `| lua value=<lua>
+                                        if 'usedpercent' == param or 'response rate' == param or 'success rate' == param or 'cpu' == param then
+                                            if value > 60 then
+                                              return "<span class='pull-right' style='color:#FF0000;' title='超过阈值｛60％｝'><b>" .. string.format("%.2f",value) .. " %</b> <i class='fa fa-sort-up'></i></span>"
+                                            else
+                                              return "<span class='pull-right' style='color:#0088CC;'><b>" .. string.format("%.2f",value) .. " %</b></span>"
+                                            end
+                                        elseif 'cores' == param then
+                                            return "<span class='pull-right' style='color:#0088CC;'><b>" .. value .. "</b></span>"
+                                        elseif 'response time' == param then
+                                            return "<span class='pull-right' style='color:#0088CC;'><b>" .. string.format("%.2f",value) .. " MS</b></span>"
+                                        elseif 'transaction' == param then
+                                            return "<span class='pull-right' style='color:#0088CC;'><b>" .. value .. " 笔</b></span>"
+                                        else
+                                            --return "<span class='pull-right' style='color:#9999CC;'><b>" .. value .. " </b></span>"
+                                            return "<span class='pull-right' style='color:#9999CC;'><b>" .. string.format("%.2f",value/1024/1024) .. " MB</b></span>"
+                                        end
+                                      </lua>`;*/
+
+    VueLoader.onloaded(["vue-editor-component",
+        "vue-entity-tree-component",
+        "vue-search-preset-component",
+        "vue-search-input-component",
+        "vue-bootstrap-table",
+        "vue-gauge-radial-component",
+        "vue-gauge-linear-component"], function () {
+
+        var current_class_path = "/matrix/devops/performance";
+
+        $(function () {
+
+            $(".current-active-item").html(`<a class="active item" href="/janesware/performance"><i class="fa fa-signal"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
+
+
+            var appVue = new Vue({
+                delimiters: ['${', '}'],
+                el: "#app",
+                template: "#app-template",
+                data: {
+                    search: {
+                        filter: [],
+                        params: {
+                            at: '#',
+                            class: '/matrix/devops/performance/',
+                            subclass: ':',
+                            top: 'top 200',
+                            lua: ""
+                        },
+                        input: {
+                            type: {type: "performance", quick: ""},
+                            term: ""
+                        },
+                        preset: {},
+                        regexp: {
+                            top: /top (\d+(\.\d)*)/gmi,
+                            undefined: /undefined/g,
+                            doubleGrep: /\|(\s+(\|))/g,
+
+                        },
+                        result: {
+                            dataList: [],
+                            data: [],
+                            columns: [],
+                            options: {
+                                classes: "table table-striped",
+                                toolbar: "#custom-toolbar1",
+                                detailView: false,
+                                search: true,
+                                pageSize: "60",
+                                pageList: "[15,30,45,60]",
+                                locale: '{{.Lang}}'
+                            },
+                            gauge: {
+                                groupby: [],
+                                list: [],
+                                selected: {}
+                            }
+                        }
+                    },
+                    target: "#dataTable",
+                    timer: {
+                        sched: Object,
+                        timer: Object
+                    },
+                    toggle: {
+                        left: false,
+                        top: true,
+                        mode: [{name: 'd', title: 'Diagnosis Mode', icon: 'fa fa-desktop'},
+                            {name: 'o', title: 'Operation Mode', icon: 'fa fa-laptop'},
+                            {name: 'm', title: 'Monitoring Mode', icon: 'fa fa-tachometer'},
+                        ]
+                    }
+                },
+                created: function () {
+                    let self = this;
+
+                    self.defaultSearch();
+
+                    eventHub.$on('preset-selected-event', self.setPresetDefault);
+                    eventHub.$on("input-term-event", self.setSearchTerm);
+                    eventHub.$on("input-reset-event", self.setSearchReset);
+
+                },
+                mounted: function () {
+                    let self = this;
+
+                    self.$nextTick(function () {
+
+                        $("a[data-toggle='tab']").on("shown.bs.tab", function () {
+                            eventHub.$emit("chart-resize-event", null);
+                        })
+
+                        $(document).keypress(function (event) {
+                            var keycode = (event.keyCode ? event.keyCode : event.which);
+                            if (keycode == 13) {
+                                self.onSearch();
+                            } else if (keycode == 27) {
+                                self.setSearchReset();
+                                self.onSearch();
+                            }
+                        })
+
+                        self.sched = later.parse.text('every 5 min');
+                        self.timer = later.setInterval(self.onSearch, self.sched);
+
+                        self.initFilter();
+
+                        self.onSearch();
+
+                    })
+                },
+                watch: {
+                    'search.result.data': {
+                        handler: function (val, oldVal) {
+                            let self = this;
+
+                            $(self.target).bootstrapTable('load', val);
+
+                            self.groupBy(val);
+
+                            self.setGauge();
+                        },
+                        deep: true
+                    },
+                    'search.result.gauge.list': {
+                        handler: function (val, oldVal) {
+                            let self = this;
+
+                            $('.selectpicker').selectpicker('refresh');
+                        },
+                        deep: true
+                    }
+                },
+                methods: {
+                    defaultSearch: function () {
+                        let self = this;
+                        let _tmp = localStorage.getItem("search-open-performance");
+
+                        if (!_.isEmpty(_tmp)) {
+                            let _searchObject = _.attempt(JSON.parse.bind(null, _tmp));
+
+                            self.search.preset = _searchObject.preset;
+                            self.search.input.term = _searchObject.id;
+
+                            localStorage.setItem("search-open-performance", "");
+                        }
+
+                    },
+                    setPresetDefault: function (event) {
+                        let self = this;
+
+                        self.search.preset = event;
+                    },
+                    onSearch: function () {
+                        let self = this;
+                        let _param = "";
+                        let _preset = null;
+                        let _ifDebug = "";
+
+                        if(!_.isEmpty(self.search.preset)){
+                            _preset = self.search.preset.default;
+                            _ifDebug = self.search.preset.others.ifDebug ? "debug> " : "";
+                        }
+
+                        if (!_.isEmpty(self.search.input.term)) {
+
+                            let _top = self.search.input.term.match(self.search.regexp.top);
+
+                            if (!_.isEmpty(_top)) {
+                                self.search.params.top = _.last(_top);
+                            }
+
+                            _param = self.search.params.at + self.search.params.class + self.search.params.subclass + " | " + self.search.input.term;
+                        } else {
+                            _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
+                        }
+
+                        if (!_.isEmpty(_preset)) {
+                            _param = _param + _preset.value + self.search.fortime;
+                        } else {
+                            _param = _param + _preset.value;
+                        }
+                        _param = _param + " | " + self.search.params.top;
+
+                        _param = _ifDebug + _param.replace(self.search.regexp.undefined, "").replace(self.search.regexp.doubleGrep, " | ");
+
+                        self.searchHandler(_param, null);
+                    },
+                    setSearchReset: function () {
+                        let self = this;
+                        let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
+                        let _preset = self.search.preset.default;
+
+                        _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
+
+                        self.setSearchTerm("");
+                        self.searchHandler(_param, null);
+                    },
+                    setSearchTerm: function (term) {
+                        let self = this;
+
+                        self.search.input.term = term;
+                    },
+                    filterByTimeLine: function (event) {
+                        let self = this;
+
+                        self.search.result.data = _.filter(self.search.result.dataList, function (d) {
+                            var time = moment(d.ctime).format("YYYY-MM-DD HH");
+                            var tmp = moment.duration(moment(time).diff(event)).asMinutes();
+
+                            if (tmp < 15 && tmp >= 0) {
+                                return d;
+                            }
+                        })
+                    },
+                    initTempTable: function () {
+                        let self = this;
+                        let param = editor.getValue();
+                        let cols = [];
+
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {cond: param, flag: false},
+                            beforeSend: function (xhr) {
+                            },
+                            complete: function (xhr, textStatus) {
+                            },
+                            success: function (data, textStatus, xhr) {
+
+                                var data = data.message;
+
+                                $("#tempDataTable").bootstrapTable('destroy');
+
+                                $.map(data[0], function (k, v) {
+
+                                    var col = v;
+
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true
+                                    })
+
+                                });
+
+                                $("#tempDataTable").bootstrapTable({columns: cols});
+
+                                $("#tempDataTable").bootstrapTable('load', data);
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                            }
+                        });
+                    },
+                    searchHandler: function (param, func) {
+                        let self = this;
+
+                        console.log(param)
+
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: param,
+                                flag: false
+                            },
+                            complete: function (xhr, textStatus) {
+                                //called when complete
+                            },
+                            success: function (data, textStatus, xhr) {
+
+                                if (_.isEmpty(data.message)) {
+                                    self.search.result.columns = [];
+                                    self.search.result.data = [];
+                                    _.delay(self.setGauge, 500);
+                                    return false;
+                                }
+
+                                var list = data.message;
+                                var cols = [];
+
+                                cols = window.GLOBAL_OBJECT.company.object.performance.columns;
+                                self.preconfig = window.GLOBAL_OBJECT.company.object.performance.preconfig;
+
+                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
+
+                                if (!_.isEmpty(tmp)) {
+                                    _.forEach(tmp, function (v) {
+                                        var fIndex = _.findIndex(cols, {field: v});
+                                        if (fIndex == -1) {
+                                            cols.push({field: v, title: _.upperFirst(v), visible: false});
+                                        }
+                                    });
+                                }
+
+                                if (_.isEmpty(_.find(cols, {
+                                        field: "state",
+                                        checkbox: "true"
+                                    }))) {
+                                    cols.unshift({
+                                        field: "state",
+                                        checkbox: "true"
+                                    });
+                                }
+
+                                self.search.result.columns = cols;
+                                self.search.result.data = list;
+                                _.delay(self.setGauge, 500);
+
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
+                        });
+                    },
+                    toggleTop: function () {
+                        let self = this;
+
+                        if (self.toggle.top) {
+
+                            $(".event-top").slideDown(500);
+                            $(".event-top").css("display", "");
+
+                            $(".toggle-top").removeClass("fa-caret-right");
+                            $(".toggle-top").addClass("fa-caret-down");
+
+                            $(".fixed-table-body").css({
+                                "height": "-moz-calc(100vh - 440px)",
+                                "height": "-webkit-calc(100vh - 440px)",
+                                "height": "calc(100vh - 440px)"
+                            });
+
+                            self.toggle.top = false;
+
+                        } else {
+
+                            $(".event-top").slideUp(500, function () {
+                                $(".event-top").css("display", "none");
+
+                                $(".toggle-top").removeClass("fa-caret-down");
+                                $(".toggle-top").addClass("fa-caret-right");
+
+                                $(".fixed-table-body").css({
+                                    "height": "-moz-calc(100vh - 305px)",
+                                    "height": "-webkit-calc(100vh - 305px)",
+                                    "height": "calc(100vh - 305px)"
+                                });
+
+                                self.toggle.top = true;
+
+                            })
+                        }
+
+                        eventHub.$emit("chart-resize-event", null);
+                    },
+                    toggleLeft: function () {
+                        let self = this;
+
+                        if (self.toggle.left) {
+
+                            $("#nav").hide();
+
+                            $("#content").removeClass("col-lg-10");
+                            $("#content").addClass("col-lg-12");
+                            //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
+
+                            $(".navtoggle").removeClass("fa fa-caret-left");
+                            $(".navtoggle").addClass("fa fa-caret-right");
+
+                            self.toggle.left = false;
+                        } else {
+                            $("#nav").slideDown(500);
+                            $("#nav").show();
+
+                            $("#content").removeClass("col-lg-12");
+                            $("#content").addClass("col-lg-10");
+                            //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+
+                            $(".navtoggle").removeClass("fa fa-caret-right");
+                            $(".navtoggle").addClass("fa fa-caret-left");
+
+                            self.toggle.left = true;
+                        }
+                    },
+                    toggleMode: function () {
+                        let self = this;
+                        let _default = _.head(self.toggle.mode);
+                        let _head = _.nth(self.toggle.mode, 1);
+
+                        if (_default.name == 'd') {
+                            $(".navbar-fixed-top").css({"display": "none"});
+                            $("#page-container").css({"padding-top": "0px"});
+
+                            $(".fixed-table-body").css({
+                                "height": "-moz-calc(100vh - 275px)",
+                                "height": "-webkit-calc(100vh - 275px)",
+                                "height": "calc(100vh - 275px)"
+                            });
+
+                        } else if (_default.name == 'o') {
+
+                            $(".performance-search").css({"display": "none"});
+
+                            $(".fixed-table-body").css({
+                                "height": "-moz-calc(100vh - 200px)",
+                                "height": "-webkit-calc(100vh - 200px)",
+                                "height": "calc(100vh - 200px)"
+                            });
+
+                        } else {
+                            $(".navbar-fixed-top").css({"display": ""});
+                            $("#page-container").css({"padding-top": "54px"});
+                            $(".performance-search").css({"display": ""});
+
+                            $(".fixed-table-body").css({
+                                "height": "-moz-calc(100vh - 330px)",
+                                "height": "-webkit-calc(100vh - 330px)",
+                                "height": "calc(100vh - 330px)"
+                            });
+                        }
+
+                        $(".toggle-mode").removeClass(_default.icon);
+                        $(".toggle-mode").addClass(_head.icon);
+                        $(".toggle-mode").attr("title", _head.title);
+
+                        self.toggle.mode.push(self.toggle.mode.shift());
+                    },
+                    toggleFilter: function (filter) {
+                        let self = this;
+
+                        self.setSearchTerm(" | " + filter);
+                        self.onSearch();
+                    },
+                    initFilter: function () {
+                        let self = this;
+
+                        let _tmp = localStorage.getItem(window.GLOBAL_OBJECT.company.name + "_quick_list_performance");
+                        if (!_.isNull(_tmp)) {
+                            self.search.filter = _.map(_.attempt(JSON.parse.bind(null, _tmp)), function (v) {
+                                return {name: v.name, value: v.value};
+                            });
+                        }
+                    },
+                    topN: function () {
+                        let self = this;
+
+                        eventHub.$emit("input-set-event", "inst=cpu* | param=usedpercent | sort value desc | top 10");
+
+                        self.onSearch();
+                    },
+                    shareIt: function () {
+                        let self = this;
+                        var term = ` inst=cpu* | param=usedpercent | top 5  | sort value desc | value > 1 | lua value=<lua>return "<pre class='pull-right'  style='color:#3dad00;font-size:22px'><b>" .. string.format("%.2f",_value).. "%</b>&nbsp;<hr><label style='font-size:14px;'>接收人：</label><input class='form-control'><hr><button class='btn btn-xs btn-success' onclick='javascript:alert(111)'>发送</button></pre>"</lua>`;
+
+                        $(".searchinput").find("input").val(term);
+                        self.onSearch();
+                    },
+                    openDashBoardModal: function () {
+                        let self = this;
+                        var selected = $(self.target).bootstrapTable('getSelections');
+
+                        if (_.isEmpty(selected)) {
+                            swal("Please select kpi to generate DashBoard!", "", "info");
+                            return false;
+                        } else {
+                            $('#addDashBoardModal').modal('show')
+                        }
+                    },
+                    saveDashboard: function (ifOpen) {
+                        let self = this;
+                        var modal = $("#addDashBoardModal");
+                        var name = modal.find('#title').val() + ".idas";//"dashboard_" + Math.floor(_.now() / 1000);
+                        //var title = modal.find('#title').val();
+                        if (_.isEmpty(name)) {
+                            swal("视图标题不能空！", "", "warning");
+                            modal.find('#title').setFocus();
+                            return false;
+                        }
+
+                        var tags = modal.find("#tags").tagsinput('items');
+                        var ispublic = $("#ispublic input:radio:checked").val();
+                        var skin = $('input[name=radioTheme]:checked').val();
+                        var type = $('input[name=radioType]:checked').val();
+
+                        var data = new Object();
+                        data.class = '/matrix/dashboard';
+                        data.name = name;
+                        data.title = title;
+                        data.tag = {
+                            //"_all": JSON.stringify(tags)
+                        };
+                        data.star = 0;
+                        data.username = '{{.SignedUser.Name}}';
+                        data.ispublic = ispublic;
+
+                        var options = $.map($(self.target).bootstrapTable('getSelections'), function (row) {
+                            var o = new Object();
+                            o.option = {
+                                title: {
+                                    text: row.host,
+                                },
+                                series: {
+                                    type: type
+                                }
+                            };
+                            o.col = 6;
+                            o.param = "id=" + row.id + " | nearest 1day " + window.GLOBAL_OBJECT.company.object.performance.preconfig.time[0];
+                            o.id = _.random(_.now()) + "";
+                            return JSON.stringify(o);
+                        });
+
+                        data.portlet = options;
+                        data.theme = new Array(skin);
+
+                        jQuery.ajax({
+                            url: '/fs/home/dashboard/' + name,
+                            type: 'PUT',
+                            //contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'file',
+                                data: JSON.stringify(data),
+                                attr: ""
+                            },
+                            beforeSend: function (xhr) {
+                            },
+                            complete: function (xhr, textStatus) {
+                            },
+                            success: function (data, textStatus, xhr) {
+
+                                modal.modal("hide");
+
+                                _.delay(function () {
+                                    if (ifOpen) {
+
+                                        let _obj = {};
+
+                                        _obj.name = name;
+                                        _obj.parent = "/home/dashboard";
+                                        localStorage.setItem("dashboard-object", JSON.stringify(_obj));
+
+                                        window.open(
+                                            "/janesware/dashboard",
+                                            "_blank"
+                                        );
+                                    }
+                                }, 1000);
+
+                            },
+                            error: function (xhr, textStatus, errorThrown) {
+                            }
+                        })
+                    },
+                    groupBy: function (event) {
+                        let self = this;
+
+                        self.search.result.gauge.groupby = _.omit(_.groupBy(event, "host"), ["undefined", ""]);
+                    },
+                    setGauge: function () {
+                        let self = this;
+                        let host = window.GLOBAL_OBJECT.company.object.performance.preconfig.host[0];
+
+                        self.search.result.gauge.list = _.omit(_.groupBy(_.sortBy(_.map(_.cloneDeep(self.search.result.data), function (v, k) {
+                            var regex = /<b[^>]*>.*\/b>/i;
+                            let m;
+                            if ((m = regex.exec(v.value)) !== null) {
+                                m.forEach((match, groupIndex) => {
+                                    v.value = match.replace(/<b>/, "").replace(/<\/b>/, "");
+                                });
+                            }
+                            return v;
+                        }), host), host), ["undefined", ""]);
+
+                        _.forEach(_.keys(self.search.result.gauge.list), function (k) {
+                            $(".selectpicker.performance-kpi." + k).on("changed.bs.select", function (e) {
+                                self.search.result.gauge.selected["gauge_" + k] = $(this).selectpicker('val');
+                                self.onSearch();
+                            });
+                        })
+                    }
+                }
+            })
+        });
+
+        function initTempTable() {
+
+            var param = editor.getValue();
+
+            var cols = [];
+
+            jQuery.ajax({
+                url: '/mxobject/search',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    cond: param,
+                    flag: false
+                },
+                beforeSend: function (xhr) {
+                },
+                complete: function (xhr, textStatus) {
+                },
+                success: function (data, textStatus, xhr) {
+
+                    var data = data.message;
+
+                    $("#tempDataTable").bootstrapTable('destroy');
+
+                    $.map(data[0], function (k, v) {
+
+                        var col = v;
+
+                        cols.push({
+                            field: col,
+                            title: col,
+                            sortable: true
+                        })
+
+                    });
+
+                    $("#tempDataTable").bootstrapTable({
+                        columns: cols
+                    });
+
+                    $("#tempDataTable").bootstrapTable('load', data);
+
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                }
+            });
+        }
+
+        /**
+         * @author cnwangzd
+         * @todo 工具栏级别过滤
+         */
+        $('.selectpicker.param').on('changed.bs.select', function (e) {
+            var selected = $(this).val();
+        });
+
+        function formaterDate(value, row, index) {
+            return moment(value).format('YYYY-MM-DD HH:mm:ss');
+        }
+    })
+
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div class="container-fluid">
+        <div class="row performance-search">
+            <div class="col-lg-12">
+                <h5 style="margin-top:5px;"><i class="fa fa-search"></i> {{.i18n.Tr "mxperformance_search_title"}}</h5>
+            </div>
+        </div>
+        <div class="row performance-search">
+            <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
+                <div class="input-group searchinput">
+                    <vue-search-input-component :model="search.input"></vue-search-input-component>
+                    <div class="input-group-btn">
+                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                    </div>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search"
+                                                                                           style="font-size:18px;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div row="col-lg-12">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div role="tabpanel">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs nav-main" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Performance</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#gauge" aria-controls="gauge" role="tab" data-toggle="tab">Gauge</a>
+                        </li>
+
+                        <li role="presentation" style="display: -webkit-box;">
+                            <a href="javascript:void(0)"
+                               v-for="(item,index) in search.filter"
+                               class="btn btn-xs btn-success"
+                               @click="toggleFilter(item.value)"
+                               style="min-width: 60px;padding:0px 10px;background-color:#dae0e8!important;">
+                                ${item.name}
+                            </a>
+                        </li>
+
+                        <li role="presentation" class="pull-right" style="display: -webkit-box;">
+                            <a href="javascript:void(0)" @click="toggleMode"><i
+                                    class="fa fa-desktop fa-fw toggle-mode"></i></a>
+                            <a href="javascript:void(0)" @click="toggleTop"><i
+                                    class="fa fa-caret-down fa-fw toggle-top"></i></a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content nav-main" style="padding:0px;">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <div class='row'>
+                                <div class="col-lg-2" id="nav"
+                                     style="display: none;padding-left:10px;padding-right:5px;">
+                                    <div class="panel" style="border-radius: 0px;">
+                                        <div class="panel-heading">
+                                            <i class="fa fa-th-large toggle-nav"></i>
+                                            Entity
+                                        </div>
+                                        <div class="panel-body" style="padding-left:5px;padding-top: 5px;">
+                                            <vue-entity-tree-component :model="search.result.data"></vue-entity-tree-component>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12" id="content" style="padding-left:10px;">
+                                    <div class="panel" style="border-radius: 0px;">
+                                        <div class="panel-body" style="padding:0px 15px;">
+                                            <div id="custom-toolbar1">
+                                                <span id="title-path" @click="toggleLeft"><button
+                                                        class="btn btn-default btn-xs"><i
+                                                        class="fa fa-caret-right navtoggle"></i></button></span>
+                                                <span @click="openDashBoardModal"><button
+                                                        class="btn btn-default btn-xs"><i class="fa fa-tachometer"></i> New DashBoard</button></span>
+                                            </div>
+                                            <div class="table-responsive data-table">
+                                                <vue-bootstrap-table id="dataTable"
+                                                                     :columns="search.result.columns"
+                                                                     :options="search.result.options"
+                                                                     :dataset="search.result.data"
+                                                                     contextMenu="context-menu">
+                                                </vue-bootstrap-table>
+                                            </div>
+                                            <!-- context menu -->
+                                            <ul id="context-menu" class="dropdown-menu">
+                                                <li data-item='{"num": "0", "app":"performance","item":"detail", "show":"list"}'>
+                                                    <a href="javascript:void(0)" style="cursor:hand;"><i
+                                                            class="fa fa-list fa-fw"></i> Details</a></li>
+                                                <li data-item='{"num": "1", "app":"performance","item":"history","show":"chart"}'>
+                                                    <a href="javascript:void(0)" style="cursor:hand;"><i
+                                                            class="fa fa-history fa-fw"></i> History</a></li>
+                                                <li data-item='{"num": "2", "app":"performance","item":"kpi","show":"kpi"}'>
+                                                    <a href="javascript:void(0)" style="cursor:hand;"><i
+                                                            class="fa fa-wrench fa-fw"></i> Threshold</a></li>
+                                                <li data-item='{"num": "3", "app":"performance","item":"add","show":"command"}'>
+                                                    <a href="javascript:void(0)" style="cursor:hand;"><i
+                                                            class="fa fa-plus fa-fw"></i> New Action</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="panel-footer">
+                                            <i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
+                                            <i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
+                                            <i class="fa fa-clock-o"></i> Time: ${moment().format("LLL")} &nbsp;&nbsp;
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="gauge">
+                            <div class="panel">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <!-- begin col-3 -->
+                                        <div class="col-md-3 col-sm-6" v-for="(item,key) in search.result.gauge.list"
+                                             style="margin-bottom:10px;">
+                                            <div :class="'widget widget-stats bg-blue performance-widget '+ key">
+                                                <div class="stats-icon"><i class="fa fa-television"></i></div>
+                                                <div class="stats-info">
+                                                    <h4>${key}</h4>
+                                                </div>
+                                                <vue-gauge-radial-component :id="key"
+                                                                            :value="search.result.gauge.selected['gauge_'+key]"></vue-gauge-radial-component>
+                                            </div>
+                                            <select :class="'selectpicker performance-kpi ' + key">
+                                                <optgroup :label="subkey"
+                                                          v-for="(subitem,subkey) in _.groupBy(item,'inst')">
+                                                    <option v-for="(v,k) in subitem" :value="v.value">${subkey}
+                                                        <small style="font-size:10px;color:#81ff76;">${v.param}</small>
+                                                    </option>
+                                                </optgroup>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addDashBoardModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">{{.i18n.Tr "mxperformance_actions_title"}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="recipient-name" class="col-sm-2 control-label">{{.i18n.Tr "mxperformance_actions_view_title"}}:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" id="title" name="title"
+                                           placeholder='{{.i18n.Tr "mxperformance_actions_view_title"}}'>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="message-text" class="col-sm-2 control-label">{{.i18n.Tr "mxperformance_actions_view_tags"}}:</label>
+                                <div class="col-sm-10">
+                                    <input id="tags" name="tags"
+                                           placeholder='{{.i18n.Tr "mxperformance_actions_view_tags"}}'>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="ispublic">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="inlineRadioOptions" value="1" checked>{{.i18n.Tr "mxperformance_actions_view_public"}}
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="inlineRadioOptions" value="0">{{.i18n.Tr "mxperformance_actions_view_private"}}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="display:none;">
+                                <label for="recipient-name" class="col-sm-2 control-label">{{.i18n.Tr "mxperformance_actions_view_datasource"}}:</label>
+                                <div class="col-sm-10">
+                                    <pre id="selectedId"></pre>
+                                </div>
+                            </div>
+                            <div class="collapse" id="collapseSearchTempData" style="display:none;">
+                                <table id="tempDataTable" data-toggle="table" class="table-striped"
+                                       data-click-to-select="true" data-page-size="15" data-page-list="[15,30,45,60]">
+                                </table>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{.i18n.Tr "mxperformance_actions_view_type"}}:</label>
+                                <div class="col-sm-10">
+                                    <div class='pull-center'>
+                                        <label class='radio-inline'>
+                                            <input type='radio' id='options1' name='radioType' value='line' checked>
+                                            Line
+                                        </label>
+                                        <label class='radio-inline'>
+                                            <input type='radio' id='options2' name='radioType' value='bar'> Bar
+                                        </label>
+                                        <label class='radio-inline'>
+                                            <input type='radio' id='options3' name='radioType' value='pie'> Pie
+                                        </label>
+                                        <label class='radio-inline'>
+                                            <input type='radio' id='options4' name='radioType' value='guage'> Guage
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">{{.i18n.Tr "mxperformance_actions_view_theme"}}:</label>
+                                <div class="col-sm-10">
+                                    <label class="radio-inline">
+                                        <input type="radio" name="radioTheme" value="blue" autocomplete="off">&nbsp;{{.i18n.Tr "mxperformance_actions_view_theme_blue"}}
+                                        <!--p><img src="{{AppSubUrl}}/web/assets/images/theme_blue.png" style="width:128px;height:90px;"></p-->
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="radioTheme" value="dark">&nbsp;{{.i18n.Tr "mxperformance_actions_view_theme_dark"}}
+                                        <!--p><img src="{{AppSubUrl}}/web/assets/images/theme_dark.png" style="width:128px;height:90px;"></p-->
+                                    </label>
+                                    <label class="radio-inline">
+                                        <input type="radio" name="radioTheme" value="gray" checked>&nbsp;{{.i18n.Tr "mxperformance_actions_view_theme_gray"}}
+                                        <!--p><img src="{{AppSubUrl}}/web/assets/images/theme_gray.png" style="width:128px;height:90px;bordre:1px;"></p-->
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="button" class="btn btn-primary" @click="saveDashboard(false)">
+                                        {{.i18n.Tr "mxperformance_actions_view_save"}}
+                                    </button>
+                                    <button type="button" class="btn btn-success" data-dismiss="modal"
+                                            @click.deleage="saveDashboard(true)">{{.i18n.Tr "mxperformance_actions_view_save&open"}}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+{{template "base/footer" .}}

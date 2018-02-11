@@ -1,0 +1,9 @@
+{{template "base/head" .}}
+<div class="ui container center">
+	<p style="margin-top: 100px"><img src="{{AppSubUrl}}/img/404.png" alt="404"/></p>
+	<div class="ui divider"></div>
+	<br>
+	{{if .ShowFooterVersion}}<p>Application Version: {{AppVer}}</p>{{end}}
+	<p>如果你认为这是个问题，可以开个工单 <a href="{{AppSubUrl}}/issues/new">创建工单</a>.</p>
+</div>
+{{template "base/footer" .}}

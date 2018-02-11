@@ -1,0 +1,779 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<!-- sweetalert core CSS -->
+<link href="{{AppSubUrl}}/web/lib/alert/bootstrap-sweetalert/lib/sweetalert.css" rel="stylesheet">
+
+<!-- Bootstrap x-editable CSS -->
+<link href="{{AppSubUrl}}/web/lib/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+
+<style>
+  body {
+    background-color: rgba(255,255,255,1);
+    margin-top:50px;
+  }
+
+  .panel {
+    background-color: rgba(227,227,227,1);
+    border-style: none;
+    margin-bottom: 0px;
+    border-radius: 0px;
+  }
+
+  .table-bordered:hover{
+    box-shadow:0px 0px 8px #888888;
+  }
+
+  td{
+    height:36px;
+    border: 5px solid !important;
+    color: #bbbbbb;
+    background-color: #f7f7f7;
+  }
+
+  h3{
+    color: rgba(130,130,130,1);
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+  ul {
+    padding-left: 1em;
+    line-height: 1.5em;
+    list-style-type: dot;
+  }
+  li{
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    line-height: 20px;
+    text-align: left;
+    white-space: nowrap;
+    outline: 0;
+  }
+  
+  li>a:active{
+    background-color: rgba(81,172,241,1);
+  }
+  
+  li>a:hover{
+    background-color: rgba(81,172,241,1);
+  }
+
+
+  .rating {
+    unicode-bidi: bidi-override;
+    direction: rtl;
+    text-align: center;
+  }
+  .rating > span {
+    display: inline-block;
+    position: relative;
+    width: 1.1em;
+  }
+  .rating > span:hover,
+  .rating > span:hover ~ span {
+    color: transparent;
+  }
+  .rating > span:hover:before,
+  .rating > span:hover ~ span:before {
+     content: "\2605";
+     position: absolute;
+     left: 0;
+     color: gold;
+  }
+
+  .bootstrap-tagsinput{
+    background-color: transparent;
+    border-style: none;
+    box-shadow: none;
+  }
+
+  .label{
+    font-size: 12px;
+  }
+
+  .input{
+    width: auto;
+  }
+
+  .modal-dialog{
+      position: relative;
+      display: table;
+      overflow-y: auto;    
+      overflow-x: auto;
+      width: auto;
+      min-width: 85%;   
+  }
+
+  .well {
+    
+    -webkit-box-shadow: 1px 1px 3px 0px rgba(0,0,0,0.5);
+    min-widthmoz-box-shadow: 1px 1px 3px 0px rgba(0,0,0,0.5);
+    box-shadow: 1px 1px 3px 0px rgba(0,0,0,0.5);
+  }
+
+</style>
+
+<div class="container-fluid">
+
+  <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h2 class="panel-title">我的IT地图</h2>
+              <span class="pull-right" style="color: #777777;position: relative;margin: -17px 0px;cursor: pointer;">
+                <a href="#" class="dashboard-add"><i class="fa fa-plus fa-1x fa-fw" data-id="dashboard"></i>创建我的IT地图</a>
+              </span>
+            </div>
+            <div class="panel-body" style="padding:10px 10px 0px 10px;">
+              <input class="form-control search" type="text" placeholder={{.i18n.Tr "mxdashboard_search"}}><BR>
+            </div>
+          </div>  
+      </div>  
+  </div>
+  
+  <div class="row">
+     
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+
+      <div class="panel panel-default">
+        
+        <div class="panel-body" style="height:auto;padding: 0px 10px 10px 0px;" id="div_template">
+          
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" v-for="(item,index) in items">
+            
+            <div class="well well-sm" style="margin: 0px -10px 15px 1px;min-height: 160px;">
+              
+              <span>
+                <a :href="'/janesware/itmap?name='+item.name" style="color:rgba(0,0,0,.5);"><h4><i class='fa fa-braille' style='color:#a5771a;'></i> ${item.title}</h4></a>
+              </span>
+              <hr>
+              <span>
+                <img :src="item.portlet[1]" style="width:75%;height:140px; margin: 0px 35px;">
+              </span>
+              <hr>
+              <span>
+                <i class='fa fa-tags' style='color:#337ab7;'></i> <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tag" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+              </span>
+              <span class="pull-left" style="font-size: 10px;">
+                <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username} &nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-clock-o' style='color:#337ab7;'></i> ${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="rating" v-for="data in item.star">
+                  <span style="color:gold;">☆</span>
+                </span>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <i class="fa fa-share-alt" style='color:rgba(0,0,0,.5);position: absolute;right: 30px;top: 5px;z-index: 100;'></i>&nbsp;&nbsp;&nbsp;&nbsp;
+                <i class='fa fa-remove' style='color:rgba(0,0,0,.5);cursor:pointer;position: absolute;right: 10px;top: 5px;z-index: 100;' v-on:click="remove(item.name)"></i>
+              </span>
+              <br><br> 
+            </div>
+
+          </div>
+
+          <div class="modal fade" id="addDashBoardModal" tabindex="-1" role="dialog" aria-labelledby="addDashBoardModalLabel">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="addDashBoardModalLabel">添加视图</h4>
+                </div>
+                <div class="modal-body">
+                  <form>
+                    
+                    <!--div class="form-group">
+                      <label class="control-label">视图名称:</label>
+                      <input type="text" class="form-control" id="name" name="name" placeholder="名称" data-validate="validateServerLabel">
+                    </div-->
+                    
+                    <div class="form-group">
+                      <label class="control-label">视图标题:</label>
+                      <input type="text" class="form-control" id="title" name="title" placeholder="视图标题" autofocus="">
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="control-label">设置标签:</label><BR>
+                      <input id="tags" name="tags" placeholder="标签">
+                    </div>
+                    
+                    <div class="form-group">
+                      <label class="control-label">选择主题:</label><BR>
+                      <form class="form-horizontal" role="form">
+
+                        <div class="form-group">
+                            <div class="col-lg-12">
+                                <label class="radio-inline"> 
+                                  <input type="radio" name="radiooptions" value="blue" autocomplete="off" checked>&nbsp;蓝色天空
+                                  <p><img src="{{AppSubUrl}}/web/assets/images/theme_blue.png" style="width:128px;height:90px;"></p>
+                                </label>
+                                <label class="radio-inline">
+                                  <input type="radio" name="radiooptions" value="dark">&nbsp;黑色夜晚
+                                  <p><img src="{{AppSubUrl}}/web/assets/images/theme_dark.png" style="width:128px;height:90px;"></p>
+                                </label>
+                                <label class="radio-inline"> 
+                                  <input type="radio" name="radiooptions" value="gray">&nbsp;灰色世界
+                                  <p><img src="{{AppSubUrl}}/web/assets/images/theme_gray.png" style="width:128px;height:90px;bordre:1px;"></p>
+                                </label>
+                            </div>
+                        </div>
+
+                      </form>
+
+                    </div>
+                    
+                    <div class="form-group" id="ispublic">
+                      <label class="control-label">是否分享:</label><BR>
+                       <form class="form-horizontal" role="form">
+
+                        <div class="form-group">
+                            <div class="col-lg-12">
+
+                                <label class="radio-inline" style="margin-left:15px;"> 
+                                  <input type="radio" name="inlineRadioOptions" value="1" checked>&nbsp;公开
+                                </label>
+                                <label class="radio-inline">
+                                  <input type="radio" name="inlineRadioOptions" value="0">&nbsp;私有
+                                </label>
+
+                            </div>
+                        </div>
+
+                      </form>
+                    </div>
+
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                  <button type="button" class="btn btn-primary" @click="add">创建</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- sweetalert core JS -->
+<script src="{{AppSubUrl}}/web/lib/alert/bootstrap-sweetalert/lib/sweetalert.min.js"></script>
+
+<!-- Bootstrap x-editable JS -->
+<script src="{{AppSubUrl}}/web/lib/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
+
+<!--Layer Core JS-->
+<script src="{{AppSubUrl}}/web/lib/layer2/layer.js"></script> 
+
+<!--VUE Core JS-->
+<script src="{{AppSubUrl}}/web/lib/vue/2.0.5/dist/vue.js"></script> 
+
+<script type="text/javascript">
+
+
+  $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}" style="color:#ffffff;"><i class="fa fa-sitemap"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>');
+
+  var templateListVue;
+
+  var timeoutId = 0;
+
+  var theme = {
+    "blue": {
+      "body":"rgba(4,83,119,1)",
+      "panel":"rgba(7,121,173,.8)",
+      "h3":"rgba(255,255,255,0.9)",
+      "h4": "rgba(255,255,255,.8)",
+      "smal": "rgba(255,255,255,.6)",
+      "thumbnail": "rgba(3,169,244,1)"
+    },
+    "dark": {
+      "body":"rgba(0,0,0,1)",
+      "panel":"rgba(47,47,47,1)",
+      "h3":"rgba(255,255,255,0.5)",
+      "h4": "rgba(128,0,128,1)",
+      "smal": "rgba(0,0,0,1)",
+      "thumbnail": "rgba(32,32,32,1)"
+    },
+    "gray": {
+      "body":"rgba(255,255,255,1)",
+      "panel":"rgba(237,237,237,1)",
+      "h3":"rgba(130,130,130,1)",
+      "h4": "rgba(0,0,0,0.8)",
+      "smal": "rgba(0,0,0,1)",
+      "thumbnail": "rgba(227,227,227,1)"
+    }
+  };
+
+  /**
+   * @author cnwangzd
+   * @todo Vue
+   */
+  templateListVue = new Vue({
+    delimiters: ['${', '}'],
+    el: '#div_template',
+    data: {
+      items:[]
+    },
+    mounted: function () {
+      this.$nextTick(function () {
+        
+        loadTemplate();
+
+        $(".tagsLabel").tagsinput({
+            
+          tagClass: function(item) {
+            
+            if (item.indexOf("事件")>-1 || item.indexOf("event")>-1) {
+              return 'label label-danger label-important';
+            } else if( item.indexOf("性能")>-1 || item.indexOf("performance")>-1 ) {
+              return 'label label-warning';
+            } else if( item.indexOf("日志")>-1 || item.indexOf("log")>-1  || item.indexOf("蓝色")>-1 ) {
+              return 'label label-primary';
+            } else if( item.indexOf("作业")>-1 || item.indexOf("job")>-1  || item.indexOf("绿色")>-1 ) {
+              return 'label label-success';
+            } else if( item.indexOf("黑色")>-1 ) {
+              return 'label label-default';
+            } else {
+              return 'label label-default';
+            }
+          },
+        });
+
+        $(".tagsLabel").on('itemAdded', function(event) {
+          
+          var oneLevelLoading;
+
+          var index = $(this).data("index");
+          
+          templateListVue.items[index].tag.push(event.item);
+          
+          jQuery.ajax({
+            url: '/mxobject/actiontoclass',
+            type: 'POST',
+            dataType: 'json',
+            data: { data: JSON.stringify(templateListVue.items[index]), ctype:"insert"},
+            beforeSend:function(xhr){ 
+              oneLevelLoading = layer.load(3, {
+                shade: [0.1,'#ccc'],
+                time: 30*1000
+              });
+            },
+            complete: function(xhr, textStatus) {
+              layer.close(oneLevelLoading);
+            },
+            success: function(data, textStatus, xhr) {
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+              layer.close(oneLevelLoading);
+            }
+          });
+        });
+
+        $(".tagsLabel").on('itemRemoved', function(event) {
+          
+          var oneLevelLoading;
+
+          var index = $(this).data("index");
+          
+          templateListVue.items[index].tag = _.pull(templateListVue.items[index].tag, event.item);
+          
+          jQuery.ajax({
+            url: '/mxobject/actiontoclass',
+            type: 'POST',
+            dataType: 'json',
+            data: { data: JSON.stringify(templateListVue.items[index]), ctype:"insert"},
+            beforeSend:function(xhr){ 
+              oneLevelLoading = layer.load(3, {
+                shade: [0.1,'#ccc'],
+                time: 30*1000
+              });
+            },
+            complete: function(xhr, textStatus) {
+              layer.close(oneLevelLoading);
+            },
+            success: function(data, textStatus, xhr) {
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+              layer.close(oneLevelLoading);
+            }
+          });
+        });
+      })
+    },
+    methods: {
+      add: function () {
+        addTemplate();
+      },
+      remove: function (name) {
+        removeTemplate(name);
+      },
+      refresh: function(){
+        $(".tagsLabel").tagsinput({
+          tagClass: function(item) {
+              
+            if (item.indexOf("事件")>-1 || item.indexOf("event")>-1) {
+              return 'label label-danger label-important';
+            } else if( item.indexOf("性能")>-1 || item.indexOf("performance")>-1 ) {
+              return 'label label-warning';
+            } else if( item.indexOf("日志")>-1 || item.indexOf("log")>-1  || item.indexOf("蓝色")>-1 ) {
+              return 'label label-primary';
+            } else if( item.indexOf("作业")>-1 || item.indexOf("job")>-1  || item.indexOf("绿色")>-1 ) {
+              return 'label label-success';
+            } else if( item.indexOf("黑色")>-1 ) {
+              return 'label label-default';
+            } else {
+              return 'label label-default';
+            }
+          },
+
+        });
+        $(".tagsLabel").on('itemAdded', function(event) {
+            
+            var oneLevelLoading;
+
+            var index = $(this).data("index");
+            
+            templateListVue.items[index].tag.push(event.item);
+            
+            jQuery.ajax({
+              url: '/mxobject/actiontoclass',
+              type: 'POST',
+              dataType: 'json',
+              data: { data: JSON.stringify(templateListVue.items[index]), ctype:"insert"},
+              beforeSend:function(xhr){ 
+                oneLevelLoading = layer.load(3, {
+                  shade: [0.1,'#ccc'],
+                  time: 30*1000
+                });
+              },
+              complete: function(xhr, textStatus) {
+                layer.close(oneLevelLoading);
+              },
+              success: function(data, textStatus, xhr) {
+
+              },
+              error: function(xhr, textStatus, errorThrown) {
+                layer.close(oneLevelLoading);
+              }
+            });
+        });
+
+        $(".tagsLabel").on('itemRemoved', function(event) {
+          
+          var oneLevelLoading;
+
+          var index = $(this).data("index");
+          
+          templateListVue.items[index].tag = _.pull(templateListVue.items[index].tag, event.item);
+          
+          jQuery.ajax({
+            url: '/mxobject/actiontoclass',
+            type: 'POST',
+            dataType: 'json',
+            data: { data: JSON.stringify(templateListVue.items[index]), ctype:"insert"},
+            beforeSend:function(xhr){ 
+              oneLevelLoading = layer.load(3, {
+                shade: [0.1,'#ccc'],
+                time: 30*1000
+              });
+            },
+            complete: function(xhr, textStatus) {
+              layer.close(oneLevelLoading);
+            },
+            success: function(data, textStatus, xhr) {
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+              layer.close(oneLevelLoading);
+            }
+          });
+          
+        });
+        
+      }
+    }
+
+  });
+
+  $("#tags").tagsinput({
+    tagClass: function(item) {
+              
+      if (item.indexOf("事件")>-1 || item.indexOf("event")>-1) {
+        return 'label label-danger label-important';
+      } else if( item.indexOf("性能")>-1 || item.indexOf("performance")>-1 ) {
+        return 'label label-warning';
+      } else if( item.indexOf("日志")>-1 || item.indexOf("log")>-1  || item.indexOf("蓝色")>-1 ) {
+        return 'label label-primary';
+      } else if( item.indexOf("作业")>-1 || item.indexOf("job")>-1  || item.indexOf("绿色")>-1 ) {
+        return 'label label-success';
+      } else if( item.indexOf("黑色")>-1 ) {
+        return 'label label-default';
+      } else {
+        return 'label label-default';
+      }
+    },
+
+  });
+
+  function loadTemplate() {
+
+    var oneLevelLoading;
+    
+    var param = [
+                  `#/matrix/itmap: | username=` + {{.SignedUser.Name}},
+                  `#/matrix/itmap: | ispublic=1`
+                ];
+    $.each(param, function(index, val) {
+       jQuery.ajax({
+        url: '/mxobject/search',
+        type: 'POST',
+        dataType: 'json',
+        data: {cond:val},
+        beforeSend:function(xhr){ 
+          oneLevelLoading = layer.load(3, {
+            shade: [0.1,'#ccc'],
+            time: 30*1000
+          });
+        },
+        complete: function(xhr, textStatus) {
+          layer.close(oneLevelLoading);
+        },
+        success: function(data, textStatus, xhr) {
+          
+          var data = data.message;
+    
+          templateListVue.items = _.sortBy(data,"vtime").reverse(); 
+          _.delay(function(){
+            templateListVue.refresh();  
+          }, 500, "later");
+          
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          layer.close(oneLevelLoading);
+        }
+      });
+    });
+  }
+
+  function addTemplate() {
+
+    var oneLevelLoading;
+
+    var modal = $("#addDashBoardModal");
+    var name = "itmap_" + Math.floor(_.now()/1000);//modal.find('#name').val();
+    var title = modal.find('#title').val();
+    if(_.isEmpty(title)){
+      swal("视图标题不能空啊！","","warning");
+      modal.find('#title').setFocus();
+      return false;
+    }
+
+    var tags = modal.find("#tags").tagsinput('items');
+    var ispublic = $("#ispublic input:radio:checked").val();    
+    var skin = $('input[name=radiooptions]:checked').val();
+
+    var data = new Object();
+    data.class = '/matrix/itmap';
+    data.name = name;
+    data.title = title;
+    data.tag = {"all":JSON.stringify(tags)};
+    data.star = 0;
+    data.username = '{{.SignedUser.Name}}';
+    data.ispublic = ispublic;
+    data.portlet = null;
+    data.theme = new Array(JSON.stringify(theme[skin]));
+    
+    jQuery.ajax({
+      url: '/mxobject/actiontoclass',
+      type: 'POST',
+      dataType: 'json',
+      data: { data: JSON.stringify(data), ctype:"insert"},
+      beforeSend:function(xhr){ 
+        oneLevelLoading = layer.load(3, {
+          shade: [0.1,'#ccc'],
+          time: 30*1000
+        });
+      },
+      complete: function(xhr, textStatus) {
+        layer.close(oneLevelLoading);
+      },
+      success: function(data, textStatus, xhr) {
+  
+        _.delay(function(){
+            loadTemplate();
+        },1000,"later");
+
+        modal.modal("hide");
+
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        layer.close(oneLevelLoading);
+      }
+    });
+
+  }
+
+  function removeTemplate(name) {
+
+    var oneLevelLoading;
+
+    var param = `#/matrix/itmap: | name=`+name+` | delete`;
+           
+    swal({
+      title: name, 
+      text: "Confirm Delete?", 
+      type: "warning",
+      showCancelButton: true,
+      closeOnConfirm: false,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Delete",
+      confirmButtonColor: "#ff0000"
+    }, function() {
+      
+      jQuery.ajax({
+        url: '/mxobject/search',
+        type: 'POST',
+        dataType: 'json',
+        data: {cond:param},
+        beforeSend:function(xhr){ 
+          oneLevelLoading = layer.load(3, {
+            shade: [0.1,'#ccc'],
+            time: 30*1000
+          });
+        },
+        complete: function(xhr, textStatus) {
+          layer.close(oneLevelLoading);
+        },
+        success: function(data, textStatus, xhr) {
+          
+          if(data.status == "ok") {
+              swal("删除成功！", "", "success");
+              loadTemplate();
+          } else {
+              swal("删除失败！", data.message, "warning");
+          }   
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          layer.close(oneLevelLoading);
+        }
+      });  
+
+    });
+  }
+
+
+  $(".dashboard-add").click(function(e){
+    
+    selectedTemplate = $(this).data("id");
+
+    var modal = $("#addDashBoardModal");
+    modal.modal("show");
+    //modal.find('#name').val(selectedTemplate + "_" + Math.floor(_.now()/1000));
+    modal.find('#title').val('');
+    modal.find('#tags').selectpicker('val', selectedTemplate);
+  });
+
+  /**
+   * @author cnwangzd
+   * @todo 初始化搜索栏
+   */
+  $(function(){
+      
+    $search = $(".search");
+    
+    $search.off("keyup drop").on("keyup drop", function (event) {
+        
+        clearTimeout(timeoutId); // doesn't matter if it's 0
+        timeoutId = setTimeout(function () {
+            onSearch(_.trim($search.val()));
+        }, 500);
+    });
+  })
+
+  function onSearch(term) {
+      
+      var oneLevelLoading;
+      
+      var param;
+
+      if(_.isEmpty(term)) {
+        param = `#/matrix/itmap: | username=` + {{.SignedUser.Name}} + ` | ispublic=1 `;
+      } else {
+        param = `#/matrix/itmap: | username=` + {{.SignedUser.Name}} + ` | ispublic=1  | ` + term;
+      }
+
+      jQuery.ajax({
+        url: '/mxobject/search',
+        type: 'POST',
+        dataType: 'json',
+        data: {cond: param, flag: false},
+        beforeSend:function(xhr){ 
+          oneLevelLoading = layer.load(3, {
+            shade: [0.1,'#ccc'],
+            time: 30*1000
+          });
+        },
+        complete: function(xhr, textStatus) {
+          layer.close(oneLevelLoading);
+        },
+        success: function(data, textStatus, xhr) {
+          var data = data.message;
+  
+          templateListVue.items = _.sortBy(data,"vtime").reverse(); 
+          _.delay(function(){
+            templateListVue.refresh();  
+          }, 500, "later");
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          layer.close(oneLevelLoading);
+        }
+      });
+  }
+
+  function validateServerLabel(el) {
+    var name = el.val();
+    var retValue = {};
+
+    if (name == "") {
+      retValue.status = false;
+      retValue.msg = "";
+    } else {
+      retValue.status = true;
+    }
+
+    return retValue;
+  };
+
+</script>
+
+{{template "base/footer" .}}

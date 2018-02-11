@@ -1,0 +1,775 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+<!-- sweetalert core CSS -->
+<link href="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style>
+
+    .table-bordered:hover {
+        box-shadow: 0px 0px 8px #888888;
+    }
+
+    td {
+        height: 36px;
+        border: 5px solid !important;
+        color: #bbbbbb;
+        background-color: #f7f7f7;
+    }
+
+    h3 {
+        color: rgba(130, 130, 130, 1);
+    }
+
+    .bold {
+        font-weight: bold;
+    }
+
+    ul {
+        padding-left: 1em;
+        line-height: 1.5em;
+        list-style-type: dot;
+    }
+
+    li {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        line-height: 20px;
+        text-align: left;
+        white-space: nowrap;
+        outline: 0;
+    }
+
+    li>a:active {
+        background-color: rgba(81, 172, 241, 1);
+    }
+
+    li>a:hover {
+        background-color: rgba(81, 172, 241, 1);
+    }
+
+    .rating {
+        unicode-bidi: bidi-override;
+        direction: rtl;
+        text-align: center;
+    }
+
+    .rating > span {
+        display: inline-block;
+        position: relative;
+        width: 1.1em;
+    }
+
+    .rating > span:hover,
+    .rating > span:hover ~ span {
+        color: transparent;
+    }
+
+    .rating > span:hover:before,
+    .rating > span:hover ~ span:before {
+        content: "\2605";
+        position: absolute;
+        left: 0;
+        color: gold;
+    }
+
+    .bootstrap-tagsinput {
+        background-color: transparent;
+        border-style: none;
+        box-shadow: none;
+    }
+
+    .label {
+        font-size: 12px;
+    }
+
+    .input {
+        width: auto;
+    }
+
+    .modal-dialog {
+        position: relative;
+        display: table;
+        overflow-y: auto;
+        overflow-x: auto;
+        width: auto;
+        min-width: 85%;
+    }
+
+    .stats-desc{
+        color: #7d7974!important;
+    }
+
+    .btn.dropdown-toggle {
+        padding: 7px 12px;
+        border-radius: 0px;
+    }
+    .vue-search-input-component > .btn-group > .btn.dropdown-toggle {
+        border-bottom: 2px solid rgb(182, 194, 202);
+    }
+
+</style>
+<div id="app"></div>
+<!-- sweetalert core JS -->
+<script src="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.js"></script>
+<!-- Bootstrap x-editable JS -->
+<script src="{{AppSubUrl}}/web/lib/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
+
+<script type="text/javascript">
+    
+    VueLoader.onloaded(["vue-search-preset-component",
+                        "vue-search-input-component"
+                        ],function() {
+
+        $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}"><i class="fa fa-sitemap"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>');
+
+        $(function() {
+            
+            var theme = {
+                "blue": {
+                    "body": "rgba(4,83,119,1)",
+                    "panel": "rgba(7,121,173,.8)",
+                    "h3": "rgba(255,255,255,0.9)",
+                    "h4": "rgba(255,255,255,.8)",
+                    "smal": "rgba(255,255,255,.6)",
+                    "thumbnail": "rgba(3,169,244,1)"
+                },
+                "dark": {
+                    "body": "rgba(0,0,0,1)",
+                    "panel": "rgba(47,47,47,1)",
+                    "h3": "rgba(255,255,255,0.5)",
+                    "h4": "rgba(128,0,128,1)",
+                    "small": "rgba(0,0,0,1)",
+                    "thumbnail": "rgba(32,32,32,1)"
+                },
+                "gray": {
+                    "body": "rgba(255,255,255,1)",
+                    "panel": "rgba(237,237,237,1)",
+                    "h3": "rgba(130,130,130,1)",
+                    "h4": "rgba(0,0,0,0.8)",
+                    "small": "rgba(0,0,0,1)",
+                    "thumbnail": "rgba(227,227,227,1)"
+                }
+            };
+
+            Vue.component('bootstraptag-component', {
+                delimiters: ['${', '}'],
+                template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
+                mounted: function() {
+                    var self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                    })
+                },
+                methods: {
+                    init: function() {
+                        var self = this;
+
+                        $(self.$el).tagsinput({
+                            tagClass: function(item) {
+
+                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                    return 'label label-danger label-important';
+                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                    return 'label label-warning';
+                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                    return 'label label-primary';
+                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                    return 'label label-success';
+                                } else if (item.indexOf("黑色") > -1) {
+                                    return 'label label-default';
+                                } else {
+                                    return 'label label-default';
+                                }
+                            },
+                        })
+
+                        $(self.$el).on('itemAdded', function(event) {
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all.push(event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+                        })
+
+                        $(self.$el).on('itemRemoved', function(event) {
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+                        })
+                    }
+                }
+            })
+
+            var appVue = new Vue({
+                delimiters: ['${', '}'],
+                el: '#app',
+                template: '#app-template',
+                data: {
+                    model: [],
+                    search: {
+                        class: "/matrix/filesystem",
+                        params: ['#', '/matrix/filesystem/: | type=imap', '| top 200'],
+                        term: "",
+                        default: {},
+                        fortime: " for vtime ",
+                        inputModel: {type:"event",quick: ""},
+                        filter:[],
+                    }
+
+                },
+                mounted: function() {
+                    var self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                        self.load();
+                    })
+                },
+                watch: {
+                    model: function(newValue, oldValue) {
+                        var self = this;
+
+                        if (!_.isEqual(newValue, oldValue)) {
+                            self.refresh();
+                        }
+                    }
+                },
+                created: function() {
+                    var self = this;
+
+                    eventHub.$on("input-term-event", self.setSearchTerm);
+                    eventHub.$on("input-reset-event", self.setSearchReset);
+                    eventHub.$on('preset-others-event',self.setPresetOthers);
+                    eventHub.$on('preset-selected-event', self.setPresetDefault);
+                },
+                methods: {
+                    init: function() {
+                        var self = this;
+
+                    },
+                    setPresetDefault: function(event){
+                        var self = this;
+                        
+                        self.search.default = event;
+                    },
+                    setPresetOthers: function(event){
+                        var self = this;
+
+                        self.search.fortime = event.forTime;
+                    },
+                    setSearchReset: function(){
+                        var self = this;
+                        var param = self.search.params.join("");
+                        
+                        param = param + self.search.default.value + self.search.fortime;
+                        
+                        self.setSearchTerm("");
+                        self.searchHandler(param, null);
+                    },
+                    setSearchTerm: function (event){
+                        var self = this;
+
+                        self.search.term = event;
+                    },
+                    onSearch: function() {
+                        var self = this;
+
+                        var param = "";
+
+                        if(!_.isUndefined(self.search.term) && !_.isNull(self.search.term)  && self.search.term.length > 0){
+                            param = self.search.params[0] + self.search.params[1] + self.search.params[2]  + self.search.params[3] + self.search.params[4] + self.search.term;
+                        } else {
+                            param = self.search.params.join("");
+                        }
+                        
+                        if(!_.isEmpty(self.search.default.value)) {
+                            param = param + self.search.default.value + self.search.fortime;
+                        } else {
+                            param = param + self.search.default.value ;
+                        }
+
+                        param = param.replace(/undefined/g,"");
+
+                        self.searchHandler(param,null);
+                    },
+                    searchHandler: function(param,func) {
+                        var self = this;
+
+                        console.log(param)
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: param,
+                                flag: false
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                var data = data.message;
+
+                                self.model = _.map(data,function(v,k){
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                            });
+                                _.delay(self.refresh,100);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        })
+                    },
+                    load: function() {
+                        var self = this;
+                        
+                        jQuery.ajax({
+                            url: '/fs/home/itmap',
+                            type: 'GET',
+                            dataType: 'text json',
+                            contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'dir'
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                var data = data.message;
+
+                                self.model = _.map(data,function(v,k){
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                            });
+
+                                _.delay(self.refresh, 500);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+                    },
+                    newModal: function() {
+                        var self = this;
+                        selectedTemplate = $(this).data("id");
+
+                        var modal = $("#addDashBoardModal");
+                        modal.modal("show");
+                        //modal.find('#name').val(selectedTemplate + "_" + Math.floor(_.now()/1000));
+                        modal.find('#title').val('');
+                        modal.find('#tags').selectpicker('val', selectedTemplate);
+
+                        $("#tags").tagsinput({
+                            tagClass: function(item) {
+
+                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                    return 'label label-danger label-important';
+                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                    return 'label label-warning';
+                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                    return 'label label-primary';
+                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                    return 'label label-success';
+                                } else if (item.indexOf("黑色") > -1) {
+                                    return 'label label-default';
+                                } else {
+                                    return 'label label-default';
+                                }
+                            },
+                        })
+                    },
+                    add: function() {
+                        var self = this;
+                        var modal = $("#addDashBoardModal");
+                        var name = modal.find('#title').val() + ".imap";//"itmap_" + _.now(); //modal.find('#name').val();
+                        if (_.isEmpty(name)) {
+                            swal("地图标题不能空！", "", "warning");
+                            modal.find('#title').setFocus();
+                            return false;
+                        }
+
+                        jQuery.ajax({
+                            url: '/fs/home/itmap/'+ name,
+                            type: 'PUT',
+                            contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'file'
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                modal.modal("hide");
+                                _.delay(function() {
+                                    self.load();
+                                }, 200);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.log(xhr,textStatus,errorThrown);
+                            }
+                        })
+                    },
+                    remove: function(event) {
+                        var self = this;
+                        
+                        swal({
+                            title: event.name,
+                            text: "Confirm Delete it?",
+                            type: "warning",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "Cancel",
+                            confirmButtonText: "Delete",
+                            confirmButtonColor: "#ff0000"
+                        }).then(function () {
+
+                            jQuery.ajax({
+                                url: '/fs' + event.parent + '/' + event.name,
+                                type: 'DELETE',
+                                dataType: 'text json',
+                                contentType: "application/text; charset=utf-8",
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                    
+                                    if (data.status == "ok") {
+                                        _.delay(function() {
+                                            swal("Success deleted！", "", "success");
+                                            self.load();
+                                        }, 300);
+                                    } else {
+                                        swal("Delete failed", data.message, "warning");
+                                    }
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    console.log(errorThrown)
+                                    self.load();
+                                }
+                            });
+
+                        })
+                    },
+                    refresh: function() {
+                        var self = this;
+
+                        $(".tagsLabel").tagsinput({
+                            tagClass: function(item) {
+
+                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                    return 'label label-danger label-important';
+                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                    return 'label label-warning';
+                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                    return 'label label-primary';
+                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                    return 'label label-success';
+                                } else if (item.indexOf("黑色") > -1) {
+                                    return 'label label-default';
+                                } else {
+                                    return 'label label-default';
+                                }
+                            },
+
+                        });
+                        $(".tagsLabel").on('itemAdded', function(event) {
+
+                            var index = $(this).data("index");
+                            var arr = [];
+                            arr.push(event.item);
+                            
+                            self.model[index].tag._all = arr;
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                    console.log(JSON.stringify(data))
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+                        });
+
+                        $(".tagsLabel").on('itemRemoved', function(event) {
+
+                            var index = $(this).data("index");
+
+                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                            jQuery.ajax({
+                                url: '/mxobject/actiontoclass',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    data: JSON.stringify(self.model[index]),
+                                    ctype: "insert"
+                                },
+                                beforeSend: function(xhr) {
+                                },
+                                complete: function(xhr, textStatus) {
+                                },
+                                success: function(data, textStatus, xhr) {
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                }
+                            });
+
+                        });
+                    },
+                    validate: function(event) {
+                        var self = this;
+                        var name = event.val();
+                        var retValue = {};
+
+                        if (name == "") {
+                            retValue.status = false;
+                            retValue.msg = "";
+                        } else {
+                            retValue.status = true;
+                        }
+
+                        return retValue;
+                    },
+                    searchByInput: function (event){
+                        var self = this;
+
+                        self.search(event);
+                    },
+                    openGraphPanel: function(type,name,parent){
+                        var self = this;
+                        let _lang = `{{.Lang}}`;
+                        let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
+                        let obj = {};
+                        obj.lang = lang;
+                        obj.type = type;
+                        obj.name = name;
+                        obj.parent = parent;
+                        
+                        localStorage.setItem("graph-object",JSON.stringify(obj));
+
+                        window.open(
+                                "/web/lib/mxgraph/graph/index.html",
+                                "_blank"
+                            );
+                    }
+                }
+            })
+        })
+    })
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h2 class="panel-title">IT Map</h2>
+                        <span class="pull-right" style="color: #777777;position: relative;margin: -17px 0px;cursor: pointer;">
+                            <a href="#" @click="newModal"><i class="fa fa-plus fa-1x fa-fw" data-id="dashboard"></i>{{.i18n.Tr "mxitmap_add"}}</a>
+                        </span>
+                        <div class="modal fade" id="addDashBoardModal" tabindex="-1" role="dialog" aria-labelledby="addDashBoardModalLabel">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="addDashBoardModalLabel">{{.i18n.Tr "mxitmap_add"}}</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_title"}}</label>
+                                            <input type="text" class="form-control" id="title" name="title" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="">
+                                          </div>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_tag"}}</label><BR/>
+                                            <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}">
+                                          </div>
+                                          
+                                          <div class="form-group">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_theme"}}</label><BR/>
+                                            <form class="form-horizontal" role="form">
+
+                                              <div class="form-group">
+                                                  <div class="col-lg-12">
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="blue" autocomplete="off" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_blue"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_blue.png" style="width:128px;height:90px;"></p>
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="dark">&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_dark"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_dark.png" style="width:128px;height:90px;"></p>
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="radioTheme" value="gray">&nbsp;{{.i18n.Tr "mxdashboard_modal_theme_gray"}}
+                                                            <p><img src="{{AppSubUrl}}/web/assets/images/theme_gray.png" style="width:128px;height:90px;bordre:1px;"></p>
+                                                        </label>
+                                                  </div>
+                                              </div>
+
+                                            </form>
+
+                                          </div>
+                                          
+                                          <div class="form-group" id="ispublic">
+                                            <label class="control-label">{{.i18n.Tr "mxdashboard_modal_ifshare"}}</label><BR/>
+                                             <form class="form-horizontal" role="form">
+
+                                              <div class="form-group">
+                                                  <div class="col-lg-12">
+
+                                                        <label class="radio-inline" style="margin-left:15px;">
+                                                            <input type="radio" name="inlineRadioOptions" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_yes"}}
+                                                        </label>
+                                                        <label class="radio-inline">
+                                                            <input type="radio" name="inlineRadioOptions" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_no"}}
+                                                        </label>
+
+                                                  </div>
+                                              </div>
+
+                                            </form>
+                                          </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">{{.i18n.Tr "mxdashboard_modal_cancel"}}</button>
+                                        <button type="button" class="btn btn-primary" @click="add">{{.i18n.Tr "mxdashboard_modal_submit"}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body" style="padding:10px;">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="input-group searchinput">
+                                    <vue-search-input-component :model="search.inputModel"></vue-search-input-component>
+                                    <div class="input-group-btn">
+                                        <vue-search-preset-component></vue-search-preset-component>
+                                    </div>
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12" style="padding:5px;"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3" v-for="(item,index) in model">
+                                <div class="widget widget-stats bg-info">
+                                    <div>
+                                        <a href="javascript:void(0)" 
+                                           @click=openGraphPanel(1,item.name,item.parent)>
+                                            <div class="stats-number" style="font-size:14px;"><i class='fa fa-braille'></i> ${item.name.split(".")[0]}</div>
+                                        </a>
+                                        <span>
+                                            <a href="javascript:void(0)" 
+                                               @click=openGraphPanel(1,item.name,item.parent)>
+                                                <img :src="_.attempt(JSON.parse.bind(null, item.attr)).pic" style="width:75%;height:140px; margin: 0px 35px;">
+                                            </a>
+                                        </span>
+                                      <i class='fa fa-tags' style='color:#337ab7;'></i> <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tag._all" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                                    </div>
+                                    <div class="stats-desc">
+                                        <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username} &nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-clock-o' style='color:#337ab7;'></i> ${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <span class="rating" v-for="data in item.star">
+                                            <span style="color:gold;">☆</span>
+                                        </span>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a href="javascript:void(0)" 
+                                           @click=openGraphPanel(2,item.name,item.parent)>
+                                            <i class="fa fa-television" style='color:rgba(0,0,0,.5);position: absolute;right: 30px;top: 5px;z-index: 100;'></i>&nbsp;&nbsp;&nbsp;&nbsp;
+                                        </a>
+                                        <i class='fa fa-remove' style='color:rgba(0,0,0,.5);cursor:pointer;position: absolute;right: 10px;top: 5px;z-index: 100;' v-on:click="remove(item)"></i>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>  
+        </div>
+    </div>
+</script>
+{{template "base/footer" .}}

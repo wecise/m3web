@@ -1,0 +1,3139 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/lib/tree/zTree/css/mxconfigTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+<!-- FullCalendar CSS -->
+<link href='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/fullcalendar.min.css' rel='stylesheet' />
+<link href='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.css' rel='stylesheet' />
+<!--<link href='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/fullcalendar.print.min.css' rel='stylesheet' />-->
+
+<!-- SCO CSS-->
+<link href="{{AppSubUrl}}/web/lib/sco/css/scojs.css" rel="stylesheet">
+
+<style type="text/css">
+
+    body {
+        background-color: #d9e0e7;
+    }
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .block__list_words li > .widget-stats > .stats-info h4 > a {
+        color: #ffffff;
+    }
+
+    .block__list_words .sortable-ghost {
+        opacity: 0.4;
+        background-color: #F4E2C9;
+    }
+
+    .block__list_words li:first-letter {
+        text-transform: uppercase;
+    }
+    .block__list_collapse{
+        min-width: 300px;
+        background-color: #dae0e7;
+        margin-top: -55px;
+        padding: 15px;
+        z-index: 100;
+        position: absolute;
+        box-shadow: 1px 1px 1px 1px #b2bcc7;
+    }
+
+    .drag-handle {
+        margin-right: 10px;
+        font: bold 20px Sans-Serif;
+        color: #5F9EDF;
+        display: inline-block;
+        cursor: move;
+        cursor: -webkit-grabbing;  /* overrides 'move' */
+    }
+
+    #etcd_value {
+        min-height: calc(100vh - 225px);
+        max-height: calc(100vh - 230px);
+    }
+</style>
+
+<div id="app"></div>
+
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.excheck-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.exedit-3.5.js"></script>
+<!-- Jquery Timer JS-->
+<script src="{{AppSubUrl}}/web/lib/timer/jquery.timer.js"></script>
+
+<!-- SCO JS-->
+<script src="{{AppSubUrl}}/web/lib/sco/js/sco.tooltip.js"></script>
+<!-- Sortable JS-->
+<script src="{{AppSubUrl}}/web/lib/Sortable/Sortable.min.js"></script>
+
+<!-- FullCalendar JS-->
+<script src='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/fullcalendar.min.js'></script>
+<script src='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.js'></script>
+<script src='{{AppSubUrl}}/web/lib/calendar/fullcalendar/3.8.2/lang-all.js'></script>
+
+
+<script type="text/javascript">
+    
+    var eventHub = new Vue();
+
+    function removeUser(event){
+        eventHub.$emit('user-remove', event);
+    }
+
+    $(function() {
+        
+        $(".current-active-item").html(`<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}"><i class="fa fa-cogs"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
+        
+        Vue.component('bootstrap-table', {
+            template: `<table :id="id" class="table table-striped" data-locale="zh-CN"></table>`,
+            props:{
+                columns: Array,
+                data: Array,
+                options: Object,
+                id: String,
+            },
+            mounted: function () {
+                let self = this;
+
+                self.$nextTick(function () {
+                    
+                    $('#userTable').on('check.bs.table', function (e, row) {
+                        eventHub.$emit('user-table-select', row);
+                    })
+
+                    window.actionEvents = {
+                        'click .like': function (e, value, row, index) {
+                            alert('You click like icon, row: ' + JSON.stringify(row));
+                            console.log(value, row, index);
+                        },
+                        'click .edit': function (e, value, row, index) {
+                            alert('You click edit icon, row: ' + JSON.stringify(row));
+                            console.log(value, row, index);
+                        },
+                        'click .remove': function (e, value, row, index) {
+                            alert('You click remove icon, row: ' + JSON.stringify(row));
+                            console.log(value, row, index);
+                        }
+                    };
+                })
+            },
+            watch: {
+                data: function (val) {
+                    let self = this;
+
+                    $(self.$el).bootstrapTable('load', val);
+                },
+                columns: function(val) {
+                    let self = this;
+
+                    $(self.$el).bootstrapTable({                    
+                        columns: val,
+                        data: self.data
+                    });
+                },
+
+                options: function(val) {
+                    let self = this;
+
+                    $(self.$el).bootstrapTable('refreshOptions', val);
+                }
+            },
+            methods: {
+                
+            }
+        });
+
+        Vue.component('tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" :id="zId" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Object,
+                zId: String,
+
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        check: {
+                            enable: true
+                        },
+                        edit: {
+                            enable: true
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                this.$nextTick(function(){
+                    let self = this;
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onExpand = self.zTreeOnExpand;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
+                },
+                zNodes: function(val){
+
+                    $.fn.zTree.init($(this.$el), this.setting, val);
+                    this.zTree = $.fn.zTree.getZTreeObj(this.zId);
+                    var nodes = this.zTree.getNodes();
+                    if (nodes.length > 0) {
+                        this.zTree.expandNode(nodes[0], true, false, true);
+                    }
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    let self = this;
+                }
+            }
+        })
+
+        Vue.component('byobject-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="byObjectTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Array,
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        check: {
+                            enable: true,
+                            chkStyle: "checkbox",
+                            chkboxType: { "Y": "s", "N": "s" }
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true,
+                                idKey: "cid",
+                                pIdKey: "pid",
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onCheck = self.zTreeOnCheck;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    let self = this;
+
+                    self.zTree = $.fn.zTree.init($(this.$el), val, self.zNodes);
+                },
+                zNodes: function(val){
+                    let self = this;
+
+                    $.fn.zTree.init($(self.$el), self.setting, val);
+                    $.fn.zTree.getZTreeObj("byObjectTree").expandAll(true);
+                    $("#byObjectTable").bootstrapTable('removeAll');
+                    $("#byPropertyTable").bootstrapTable('removeAll');
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    let self = this;
+
+                },
+                zTreeOnCheck: function (event, treeId, treeNode) {
+                    let self = this;
+
+                    var zTree = $.fn.zTree.getZTreeObj("byObjectTree");
+                    var nodes = zTree.getCheckedNodes(true);
+                    if (nodes.length > 0) {
+                        eventHub.$emit('byObjectTree-select', _.map(nodes,function(v){
+                            return _.pick(v,['cid', 'pid', 'name','auth']);
+                        }));
+                    } else {
+                        eventHub.$emit('byObjectTree-select', []);
+                    }
+                }
+
+            }
+        })
+
+        Vue.component('byProperty-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="byPropertyTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Array,
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true,
+                                idKey: "cid",
+                                pIdKey: "pid",
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    let self = this;
+
+                    self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
+                },
+                zNodes: function(val){
+                    let self = this;
+
+                    $.fn.zTree.init($(self.$el), self.setting, val);
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    let self = this;
+
+                    var zTree = $.fn.zTree.getZTreeObj("byPropertyTree");
+                    var nodes = zTree.getSelectedNodes();
+                    if (nodes.length > 0) {
+                        eventHub.$emit('byPropertyTree-select', nodes);
+                    } else {
+                        eventHub.$emit('byPropertyTree-select', []);
+                    }
+                }
+            }
+        })
+
+        Vue.component('user-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="userTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: null,
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true,
+                                idKey: "fullname",
+                                pIdKey: "parent",
+                            },
+                            key: {
+                                name: "username",
+                            }
+                        }
+                    },
+                }
+            },
+            created: function() {
+                let self = this;
+
+                eventHub.$on("user-remove-node", self.removeNode);
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function(){
+                    
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    let self = this;
+
+                    $.fn.zTree.init($(self.$el), val, self.zNodes);
+                },
+                zNodes: function(val){
+                    let self = this;
+
+                    $.fn.zTree.init($(self.$el), self.setting, val);
+                }
+            },
+            methods: {
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    let self = this;
+
+                    if (treeNode.isParent) {
+                        eventHub.$emit("user-click",{parent:true,node:treeNode});
+                    } else {
+                        eventHub.$emit("user-click",{parent:false,node:treeNode});
+                    }
+                },
+                removeNode: function(event) {
+                    let self = this;
+                    var zTree = $.fn.zTree.getZTreeObj("userTree");
+                    var nodes = zTree.getSelectedNodes();
+                    
+                    for (var i=0, l=nodes.length; i < l; i++) {
+                        if(nodes[i].isParent){
+                            for(var j=0;j<nodes[i].children.length;j++){
+                                if(nodes[i].children[j].fullname === event){
+                                    zTree.removeNode(nodes[i].children[j]);
+                                }        
+                            }
+                        } else {
+                            if(nodes[i].fullname === event){
+                                zTree.removeNode(nodes[i]);
+                            }  
+                        }
+                    }
+                }
+            }
+        })
+
+        Vue.component('config-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="configTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Object,
+
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            },
+                            key: {
+                                name: "key",
+                                children: "nodes"
+                            }
+                        }
+                    },
+                    selectedNodeName: ""
+                }
+            },
+            created: function(){
+                let self = this;
+
+                eventHub.$on("config-refresh-event",self.refresh);
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onExpand = self.zTreeOnExpand;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    let self = this;
+
+                    self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
+                },
+                zNodes: function(val){
+                    let self = this;
+
+                    $.fn.zTree.init($(self.$el), self.setting, val);
+                    self.zTree = $.fn.zTree.getZTreeObj("configTree");
+                    var nodes = self.zTree.getNodes();
+                    if (nodes.length > 0) {
+                        self.zTree.expandNode(nodes[0], true, false, true);
+                    }
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    let self = this;
+                    var node = self.zTree.getSelectedNodes();
+                    
+                    $("[title='" + self.selectedNodeName + "']").removeClass('curSelectedNode');
+                    self.selectedNodeName = treeNode.key;
+                    
+                    jQuery.ajax({
+                        url: '/config/get',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            key: treeNode.key
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            
+                            if(!_.isEmpty(data.message)){
+                                self.zTree.removeChildNodes(node[0]);
+                                let _tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
+                                let rtn = _.attempt(JSON.parse.bind(null, _tmp));
+                                self.zTree.addNodes(treeNode, eval(rtn.nodes));
+
+                            }
+                            /**
+                             * @todo  赋键值
+                             */
+                            eventHub.$emit('editor-value', treeNode);
+
+
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                },
+                refresh: function () {
+                    let self = this;
+
+                    var treeObj = $.fn.zTree.getZTreeObj("configTree");
+                    var sNodes = treeObj.getSelectedNodes();
+
+                    if (sNodes.length > 0) {
+                        var pNode = sNodes[0].getParentNode() || sNodes[0];
+                        console.log(123,pNode.key)
+                        jQuery.ajax({
+                            url: '/config/get',
+                            type: 'GET',
+                            dataType: 'json',
+                            data: {
+                                key: pNode.key
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                /**
+                                 * @todo  刷新当前节点结构
+                                 */
+                                self.zTree.removeChildNodes(pNode);
+                                var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
+                                self.zTree.addNodes(pNode, eval(rtn.message.nodes));
+                                /**
+                                 * @todo  选中当前节点
+                                 */
+                                $("[title='" + self.selectedNodeName + "']").addClass('curSelectedNode');
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        })
+                    } 
+                }
+            }
+        })
+
+        Vue.component('rules-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="rulesTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Object,
+
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            },
+                            key: {
+                                name: "key",
+                                children: "nodes"
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onExpand = self.zTreeOnExpand;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
+                },
+                zNodes: function(val){
+
+                    $.fn.zTree.init($(this.$el), this.setting, val);
+                    this.zTree = $.fn.zTree.getZTreeObj("rulesTree");
+                    var nodes = this.zTree.getNodes();
+                    if (nodes.length > 0) {
+                        this.zTree.expandNode(nodes[0], true, false, true);
+                    }
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    self = this;
+                    var node = self.zTree.getSelectedNodes();
+
+                    jQuery.ajax({
+                        url: '/config/get',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            key: treeNode.key
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            /**
+                             * @todo  刷新当前节点结构
+                             */
+                            self.zTree.removeChildNodes(node[0]);
+                            var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
+                            self.zTree.addNodes(treeNode, eval(rtn.message.node.nodes));
+
+                            /**
+                             * @todo  赋键值
+                             */
+                            eventHub.$emit('editor-value', treeNode);
+
+
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                }
+            }
+        })
+
+        Vue.component('notify-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="notifyTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Object,
+
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                this.$nextTick(function(){
+                    let self = this;
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onExpand = self.zTreeOnExpand;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
+                },
+                zNodes: function(val){
+
+                    $.fn.zTree.init($(this.$el), this.setting, val);
+                    this.zTree = $.fn.zTree.getZTreeObj("notifyTree");
+                    var nodes = this.zTree.getNodes();
+                    if (nodes.length > 0) {
+                        this.zTree.expandNode(nodes[0], true, false, true);
+                    }
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    self = this;
+                }
+            }
+        })
+
+        Vue.component('maintain-tree-component',{
+            delimiters: ['${', '}'],
+            template: '<ul class="ztree" id="maintainTree" style="overflow:auto;"></ul>',
+            props: {
+                zNodes: Object,
+
+            },
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: {
+                        edit: {
+                            enable: false
+                        },
+                        callback: {
+
+                        },
+                        data: {
+                            simpleData: {
+                                enable: true
+                            }
+                        }
+                    },
+                }
+            },
+            mounted: function() {
+                this.$nextTick(function(){
+                    let self = this;
+                    self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.callback.onExpand = self.zTreeOnExpand;
+                })
+            },
+            watch: {
+                setting: function(val){
+                    this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
+                },
+                zNodes: function(val){
+
+                    $.fn.zTree.init($(this.$el), this.setting, val);
+                    this.zTree = $.fn.zTree.getZTreeObj("maintainTree");
+                    var nodes = this.zTree.getNodes();
+                    if (nodes.length > 0) {
+                        this.zTree.expandNode(nodes[0], true, false, true);
+                    }
+                }
+            },
+            methods: {
+                zTreeOnExpand: function (event, treeId, treeNode) {
+                    if (treeNode.dir) {
+                        treeNode.isParent = true;
+                    } else {
+                        treeNode.isParent = false;
+                    }
+                },
+                zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                    self = this;
+                }
+            }
+        })
+
+        Vue.component('config-manage',{
+            delimiters: ['${', '}'],
+            template: "#config-manage-template",
+            data: function() {
+                return {
+                    editor: Object,
+                    etcd: {
+                        createdIndex: String,
+                        modifiedIndex: String,
+                        ttl: -1,
+                        expiration: Number,
+                    },
+                    etcdKey: String,
+                    breadcrumb: []
+                }
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.initEditer();
+                })
+            },
+            created: function(){
+                let self = this;
+
+                eventHub.$on("editor-value", self.setEditor);
+            },
+            methods: {
+                initEditer: function(){
+                    let self = this;
+
+                    self.editor = ace.edit("etcd_value");
+                    ace.require('ace/ext/settings_menu').init(self.editor);
+                    let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+
+                    self.editor.setOptions({
+                        minLines: 10,
+                        autoScrollEditorIntoView: true,
+                    });
+                    self.editor.commands.addCommands([{
+                        name: "showSettingsMenu",
+                        bindKey: {
+                            win: "Ctrl-9",
+                            mac: "Command-9"
+                        },
+                        exec: function(editor) {
+                            self.editor.showSettingsMenu();
+                        },
+                        readOnly: true
+                    }]);
+                    self.editor.$blockScrolling = Infinity;
+                    self.editor.setTheme("ace/theme/tomorrow");
+                    self.editor.getSession().setMode("ace/mode/toml");
+                    self.editor.getSession().setTabSize(2);
+                    self.editor.getSession().setUseWrapMode(true);
+                },
+                setEditor: function(event) {
+                    let self = this;
+
+                    self.breadcrumb = [];
+                    self.breadcrumb = event.key.split("/");
+                    self.etcdKey = event.key;
+                    self.editor.setValue(event.value);
+                    self.editor.setValue(self.editor.getValue(), 1);
+                    self.editor.getSession().on('change', function() {
+                        $(".config-editor-save").css("display", "");
+                    });
+
+                    /**
+                     * @todo  当前节点为目录，隐藏键值输入框并显示节点［添加］按钮
+                     */
+                    if (event.dir) {
+                        $("#etcd_value").hide();
+                        $("#etcd_label").hide();
+                        $("#config_btn_new_modal").show();
+                    } else {
+                        /**
+                         * @todo  当前为节点，显示键值输入框并隐藏节点［添加］按钮，调用刷新为正常显示键值（codemirror's bug)
+                         */
+                        $("#etcd_value").show();
+                        $("#etcd_label").show();
+                        $("#config_btn_new_modal").hide();
+
+                    }
+                    /**
+                     * @todo  设置节点其它值信息
+                     */
+                    self.etcd.createdIndex = event.createdIndex;
+                    self.etcd.modifiedIndex = event.modifiedIndex;
+                    self.etcd.ttl = event.ttl;
+                    self.etcd.expiration = event.expiration;
+
+                    $(".config-editor-save").css("display","none");
+                },
+                addNode:function() {
+                    let self = this;
+
+                    var key = $("#config_key").val();
+                    var value = self.editor.getValue();
+                    var ttl = $("#config_ttl").val();
+                    var ifDir = $('input[type=checkbox]').is(':checked');
+                    
+                    if (ifDir == true) {
+                        jQuery.ajax({
+                            url: '/config/set',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                key,
+                                ttl
+                            },
+                            complete: function(xhr, textStatus) {
+                                //called when complete
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                                //called when successful
+                                swal("success!", "", "success");
+                                
+                                eventHub.$emit("config-refresh-event",key);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                //called when there is an error
+                            }
+                        })
+                    } else {
+                        jQuery.ajax({
+                            url: '/config/set',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                key,
+                                value,
+                                ttl
+                            },
+                            complete: function(xhr, textStatus) {
+                                //called when complete
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                                //called when successful
+                                swal("success!", "", "success");
+
+                                eventHub.$emit("config-refresh-event",key);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                //called when there is an error
+                            }
+                        })
+                    }
+                },
+                removeNode: function() {
+                    let self = this;
+                    let _key = self.etcdKey;
+
+                    swal({
+                        title: _key,
+                        text: 'Are you sure,delete it?',
+                        type: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.value) {
+                            jQuery.ajax({
+                                url: '/config/del',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    key:_key
+                                },
+                                complete: function(xhr, textStatus) {
+                                    //called when complete
+                                },
+                                success: function(data, textStatus, xhr) {
+
+                                    swal("Deleted!", self.etcdKey, "success");
+                                    
+                                    eventHub.$emit("config-refresh-event", _key);
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    //called when there is an error
+                                }
+                            })
+                        }
+                    })
+                },
+                saveNode: function(){
+                    let self = this;
+                    var key = self.etcdKey;
+                    var value = self.editor.getValue();
+                    var ttl = self.etcd.ttl;
+
+                    jQuery.ajax({
+                        url: '/config/set',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            key,
+                            value,
+                            ttl
+                        },
+                        complete: function(xhr, textStatus) {
+                            //called when complete
+                        },
+                        success: function(data, textStatus, xhr) {
+
+                            swal("success!", self.etcdKey, "success");
+                            
+                            eventHub.$emit("config-refresh-event", key);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            //called when there is an error
+                        }
+                    })
+                },
+                debug: function () {
+                    let self = this;
+                    
+                    mxLog.consoleName = 'M³ Debug Console' + " Trigger";
+                    mxLog.show();
+
+                    let debugMe = function () {
+
+                        let _param = "#/matrix/consolelog/rule: | sort vtime asc  | top 100";
+                        
+                        mxLog.write("");
+
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: { 
+                                cond: _param, 
+                                flag: false 
+                            },
+                            beforeSend:function(xhr){ 
+                            },
+                            complete: function(xhr, textStatus) {
+                                //func.call();
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                if(_.isEmpty(data.message)) {
+                                  return false;
+                                }
+
+                                let _tmp = _.map(data.message,_.partialRight(_.pick, ['vtime','msg']));
+                                _.forEach(_tmp,function(v,index) {
+                                    mxLog.writeln("["+moment(v.vtime).format("LLL")+"] " + v.msg); 
+                                });
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                mxLog.warn(errorThrown);
+                            }
+                        })   
+                    }
+
+                    debugMe();
+                    let _sched = later.parse.text('every 15 sec');
+                    let _timer = later.setInterval(debugMe, _sched);
+                }
+            }
+        })
+
+        Vue.component('user-manage',{
+            delimiters: ['${', '}'],
+            template: '#user-manage-template',
+            data: function(){
+                return {
+                    model:{
+                        data: [],
+                        columns: [],
+                        options: {},
+                    },
+                    byObjectTreeModel: {
+                        data: [],
+                        columns: [],
+                        options: {},  
+                    },
+                    byPropertyTreeModel: {
+                        data: [],
+                        columns: [],
+                        options: {},  
+                    },
+                    byObjectTreeNodes: [],
+                    byPropertyTreeNodes: [],
+                }
+            },
+            created: function(){
+                let self = this;
+
+                eventHub.$on("user-new-event",self.newUser);
+                eventHub.$on('user-table-select',self.loadByClassTreeNodes);
+                eventHub.$on("user-click", self.loadUserData);
+                eventHub.$on("user-remove", self.removeUserData);
+                eventHub.$on("byObjectTree-select", self.setByObjectTreeModel)
+                eventHub.$on("byPropertyTree-select", self.setByPropertyTreeModel)
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function () {
+
+                    self.model.columns = [
+                                            {
+                                                field: 'state',
+                                                radio: true,
+                                                align: 'center',
+                                                valign: 'middle'
+                                            },
+                                            {"field":"email",title:"Email", sortable: true, formatter: function(v){
+                                                return v.join("\n");
+                                            }},
+                                            {"field":"username",title:"UserName", sortable: true},
+                                            {"field":"passwd",title:"Password", sortable: true, formatter:function(v){
+                                                return v.substr(-10);
+                                            }},
+                                            {"field":"parent",title:"Group", sortable: true},
+                                            {"field":"isactive",title:"Status", 
+                                             "align":"center", sortable: true, 
+                                             formatter:function(v){
+                                                return v?`<i class='fa fa-check-square-o' style='color:#1ab394'></i>`:`<i class='fa fa-square-o'></i>`;
+                                            }},
+                                            {"field":"fullname", title:"Actions", align: 'center', formatter: function(v,r){
+                                                return `<a href='#' onClick='removeUser("`+r.fullname+`")'><i class='fa fa-trash'></i></a>`;
+                                            }},
+                                        ];
+                    self.model.options = {
+                        toggle: "table",
+                        classes: "table table-striped",
+                        pagination: true,
+                        pageSize: "15",
+                        pageList: "[15,30,45,60]",
+                        clickToSelect: true,
+                        treeShowField: 'name'
+                    };
+
+                    
+                    self.byObjectTreeModel.columns = self.byPropertyTreeModel.columns = [
+                                                    {"field":"name",title:"Name"},
+                                                    {"field":"add",title:"Add", align: 'center',
+                                                        formatter:function(v){
+                                                            return `<input type="checkbox" value="" checked="checked">`;
+                                                        }
+                                                    },
+                                                    {"field":"remove",title:"Delete", align: 'center',
+                                                        formatter:function(v){
+                                                            return `<input type="checkbox" value="" checked="checked">`;
+                                                        }
+                                                    },
+                                                    {"field":"update",title:"Modify", align: 'center',
+                                                        formatter:function(v){
+                                                            return `<input type="checkbox" value="" checked="checked">`;
+                                                        }
+                                                    },
+                                                    {"field":"search",title:"Search", align: 'center',
+                                                        formatter:function(v){
+                                                            return `<input type="checkbox" value="" checked="checked">`;
+                                                        }
+                                                    },
+                                                ];
+                    self.byObjectTreeModel.options =  self.byPropertyTreeModel.options = {
+                                                    toggle: "table",
+                                                    classes: "table table-striped",
+                                                    pagination: true,
+                                                    pageSize: "15",
+                                                    pageList: "[15,30,45,60]",
+                                                };
+                })
+            },
+            methods: {
+                newUser: function(){
+                    let self = this;
+
+                    swal({
+                        title: '添加用户',
+                        showConfirmButton: false,
+                        html: `<form class="form-horizontal" action="/user/sign_up" method="post">
+                                    {{.CsrfTokenHtml}}
+
+                                    {{template "base/alert" .}}
+                                    {{if .DisableRegistration}}
+                                        <p>{{.i18n.Tr "auth.disable_register_prompt"}}</p>
+                                    {{else}}
+                                        
+                                        <div class="form-group {{if .Err_UserName}}error{{end}}">
+                                            <label for="user_name" class="col-lg-3 control-label">{{.i18n.Tr "username"}}</label>
+                                            <div class="col-lg-8">
+                                                <input id="user_name" name="user_name" class="form-control" value="{{.user_name}}" autofocus required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group {{if .Err_Email}}error{{end}}">
+                                            <label for="email" class="col-lg-3 control-label">{{.i18n.Tr "email"}}</label>
+                                            <div class="col-lg-8">
+                                                <input id="email" name="email" class="form-control" type="email" value="{{.email}}" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group {{if .Err_Password}}error{{end}}">
+                                            <label for="password" class="col-lg-3 control-label">{{.i18n.Tr "password"}}</label>
+                                            <div class="col-lg-8">
+                                                <input id="password" name="password" class="form-control" type="password" value="{{.password}}" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group {{if .Err_Password}}error{{end}}">
+                                            <label for="retype" class="col-lg-3 control-label">{{.i18n.Tr "re_type"}}</label>
+                                            <div class="col-lg-8">
+                                                <input id="retype" name="retype" class="form-control" type="password" value="{{.retype}}" required>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <div class="col-lg-offset-3 col-lg-9">
+                                                {{.Captcha.CreateHtml}}
+                                            </div>
+                                        </div>
+                                        <div class="form-group {{if .Err_Captcha}}error{{end}}">
+                                            <label for="captcha" class="col-lg-3 control-label">{{.i18n.Tr "captcha"}}</label>
+                                            <div class="col-lg-offset-3 col-lg-9">
+                                                <input id="captcha" name="captcha" class="form-control" value="{{.captcha}}" autocomplete="off">
+                                            </div>
+                                        </div>
+                                    
+
+                                        <div class="form-group">
+                                            <label></label>
+                                            <div class="col-lg-offset-3 col-lg-9">
+                                                <button class="btn btn-success">{{.i18n.Tr "auth.create_new_account"}}</button>
+                                            </div>
+                                        </div>
+                                        
+                                    {{end}}
+
+                                </form>`
+                    })
+                },
+                loadUserData: function(event) {
+                    let self = this;
+                    var param = "";
+
+                    if(event.parent){
+                        param = `#/matrix/ldap/: | parent=` + event.node.fullname;
+                    } else {
+                        param = `#/matrix/ldap/: | ` + event.node.name;
+                    }
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: param
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            var data = data.message;
+
+                            self.model.data = data;
+
+                            self.byObjectTreeNodes = [];
+                            self.byPropertyTreeNodes = [];
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                saveUserData: function(){
+                    let self = this;
+                    var action = ["add","delete","update","view"];
+                    var auth = {
+                                Fields:{
+                                    add: [],
+                                    delete: [],
+                                    update: [],
+                                    view: []
+                                },
+                                Conds:{
+                                    add: [],
+                                    delete: [],
+                                    update: [],
+                                    view: []
+                                },
+                                Rels:{
+                                    add: [],
+                                    delete: [],
+                                    update: [],
+                                    view: []
+                                }
+                              };
+                    auth.Fields.view = [];
+                    //auth.Conds.view = [{"type":"match","field":"class","value":"/matrix/devops/"}];
+
+                    var userData = $("#userTable").bootstrapTable('getSelections');
+                    var userByObjectData = $("#byObjectTable").bootstrapTable('getData');
+                    
+                    if(_.isEmpty(userData)) {
+                        swal("请选择用户！","","info");
+                        return false;
+                    }
+
+                    _.forEach(action,function(v,k){
+                        var tmp = { "type": "contains", "field": "class", "values": []};
+                        tmp.values = _.map(userByObjectData,function(d){
+                            return d.name;
+                        });
+                        auth.Conds[v].push(tmp);
+                    })
+                    
+                    var sql = [];
+                    sql[0] = "insert";
+                    sql[1] = "into";
+                    sql[2] = "/matrix/ldap";
+                    sql[3] = "fullname='" + userData[0].fullname + "'";
+                    sql[4] = "auth='" + JSON.stringify(auth) + "'";
+                    
+                    console.log("sql------>",sql.join(" "));
+                    
+                    jQuery.ajax({
+                        url: "/mxobject/list/sql",
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {ctype:"obj",sql:sql.join(" ")},
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            
+                            if(data.status!="ok"){
+                                console.log(data.message);
+                            } else {
+                                
+                            }
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(errorThrown)
+                        }
+                    })
+                    var byObjectTableData = $("#byObjectTable").bootstrapTable('getData');
+
+                },
+                removeUserData: function(event) {
+                    let self = this;
+                    var param = `#/matrix/ldap/: | ` + event + ` | delete`;
+                    
+                    swal({
+                        title: name,
+                        text: "确定要删除该用户吗?",
+                        type: "warning",
+                        showCancelButton: true,
+                        closeOnConfirm: false,
+                        cancelButtonText: "取消",
+                        confirmButtonText: "删除",
+                        confirmButtonColor: "#ff0000"
+                    }).then(function () {
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: param
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                                if (data.status == "ok") {
+                                    
+                                    eventHub.$emit('user-remove-node',event);
+
+                                    swal("删除成功！", "", "success");
+                                } else {
+                                    swal("删除失败！", data.message, "warning");
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.log(errorThrown);
+                            }
+                        });
+                    })
+                },
+                loadByClassTreeNodes: function(event){
+                    let self = this;
+                    var selectCurUser = "";
+
+                    if(!_.isEmpty(event)){
+                        selectCurUser = event.fullname;
+                    }
+
+                    self.getObjectTreeNode(event);
+                },
+                getObjectTreeNode: function(event) {
+                    let self = this;
+                    var auth = _.attempt(JSON.parse.bind(null, event.auth));
+                    console.log(event.auth)
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: `call tree {"ftype":"class","parent":"/"}`
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            
+                            if(_.isEmpty(data.message)) return false;
+
+                            self.byObjectTreeNodes = _.map(data.message[0].tree, function(v){
+                                                        return _.pick(v,['cid', 'pid', 'name']);
+                                                     });
+                            if(!_.isEmpty(auth)) {
+                                _.forEach(auth.conds.add[0].values, function(v,k){
+                                    self.byObjectTreeNodes = _.map(self.byObjectTreeNodes, function(d){
+                                                                if(d.name == v){
+                                                                    return _.assign(d, {checked: true, open:true});
+                                                                } else {
+                                                                    return d;
+                                                                }
+                                                            })
+                                });
+                            }
+                            
+                            self.setByObjectTreeModel(_.filter(self.byObjectTreeNodes,function(d){
+                                                    return d.checked;
+                                                }));
+
+                            self.byPropertyTreeNodes =  _.map(data.message[0].tree, function(v){
+                                                            return _.pick(v,['cid', 'pid', 'name', 'fields']);
+                                                        });
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(errorThrown);
+                        }
+                    });
+                },
+                setByObjectTreeModel: function(event) {
+                    let self = this;
+
+                    self.byObjectTreeModel.data = event;
+                },
+                setByPropertyTreeModel: function(event) {
+                    let self = this;
+
+                    console.log(JSON.stringify(event))
+                    self.byPropertyTreeModel.data = _.map(event[0].fields,function(v){
+                                                        return {name:v};
+                                                    });
+                }
+            }
+        })
+
+        Vue.component('notify-manage',{
+            delimiters: ['${', '}'],
+            template: '#notify-manage-template',
+            data: function(){
+                return {
+                    model:{
+                        data: [],
+                        columns: [],
+                        options: {},
+                    },
+                    byTreeModel: {
+                        data: [],
+                        columns: [],
+                        options: {},  
+                    },
+                    byClassTreeNodes: {},
+                    bySeverityTreeNodes: {},
+                    byNotifyPeopleTreeNodes: {},
+                    byNotifyModeTreeNodes: {},
+                }
+            },
+            mounted: function(){
+                this.$nextTick(function () {
+                    this.model.columns = [
+                                            {"field":"name",title:"规则"},
+                                            {"field":"config",title:"定义"},
+                                            {"field":"status",title:"状态"},
+                                            {"field":"ctime",title:"创建时间"},
+                                        ];
+                    this.model.data = [];
+                    this.model.options = {
+                        toggle: "table",
+                        classes: "table table-striped",
+                        pagination: true,
+                        pageSize: "15",
+                        pageList: "[15,30,45,60]",
+                    };
+
+                    this.byClassTreeNodes = [
+                                                { id:1, pId:0, name:"事件", open:true},
+                                                
+                                                { id:12, pId:1, name:"应用事件"},
+                                                { id:121, pId:12, name:"Cassandra"},
+                                                { id:122, pId:12, name:"Etcd"},
+                                                { id:123, pId:12, name:"Nats"},
+                                                { id:124, pId:12, name:"Web"},
+
+                                                { id:13, pId:1, name:"服务器事件"},
+                                                { id:131, pId:13, name:"mxsvr201"},
+                                                { id:132, pId:13, name:"mxsvr211"},
+                                                { id:133, pId:13, name:"mxsvr221"},
+                                                { id:134, pId:13, name:"mxsvr231"},
+                                                { id:134, pId:13, name:"mxsvr232"},
+                                                { id:136, pId:13, name:"tsoracle.bmc.com"},
+                                                { id:137, pId:13, name:"truesight"},
+
+                                                { id:2, pId:0, name:"网银系统事件", open:true},
+                                                { id:3, pId:0, name:"银行业务系统事件", open:true},
+                                            ];
+
+                    this.bySeverityTreeNodes = [
+                                                { id:1, pId:0, name:"重大告警", open:true},
+                                                { id:2, pId:0, name:"严重告警", open:true},
+                                                { id:3, pId:0, name:"次要告警", open:true},
+                                                { id:4, pId:0, name:"一般告警", open:true},
+                                                { id:5, pId:0, name:"正常告警", open:true},
+                                                { id:6, pId:0, name:"未知告警", open:true},
+                                            ];
+
+                    this.byNotifyPeopleTreeNodes = [
+                                                { id:1, pId:0, name:"北京值班组", open:true},
+                                                
+                                                { id:12, pId:1, name:"运维值班"},
+                                                { id:13, pId:1, name:"网络值班"},
+                                                { id:14, pId:1, name:"系统值班"},
+                                                { id:15, pId:1, name:"应用值班"},
+                                                { id:16, pId:1, name:"主机值班"},
+
+                                                { id:2, pId:0, name:"上海值班组", open:true},
+
+                                                { id:21, pId:2, name:"运维值班"},
+                                                { id:22, pId:2, name:"网络值班"},
+                                                { id:23, pId:2, name:"系统值班"},
+                                                { id:24, pId:2, name:"应用值班"},
+                                                { id:25, pId:2, name:"主机值班"},
+                                            ];
+                    this.byNotifyModeTreeNodes = [
+                                                { id:1, pId:0, name:"邮件", open:true},
+                                                { id:2, pId:0, name:"短信", open:true},
+                                            ];
+
+
+                })
+            },
+        })
+
+        Vue.component('session-manage',{
+            delimiters: ['${', '}'],
+            template: '#session-manage-template',
+            data: function(){
+                return {
+                    model:{
+                        data: [],
+                        columns: [],
+                        options: {},
+                    }
+                }
+            },
+            mounted: function(){
+                this.$nextTick(function(){
+                    this.model.columns = [
+                                            {"field":"key",title:"Key"},
+                                            {"field":"data",title:"Data"}
+                                        ];
+                    
+                    this.model.options = {
+                        toggle: "table",
+                        classes: "table table-striped",
+                        search: true,
+                        pagination: true,
+                        pageSize: "15",
+                        pageList: "[15,30,45,60]",
+                    };
+                    this.init();
+                })
+            },
+            methods: {
+                init: function(){
+                    let self = this;
+                    var sql = `select json * from mxsystem.session`;
+                    jQuery.ajax({
+                        url: '/mxobject/action',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            sql
+                        },
+                        complete: function(xhr, textStatus) {
+
+                        },
+                        success: function(data, textStatus, xhr) {
+                            self.model.data = JSON.parse(data.message);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+
+                        }
+                    });
+                }
+            }
+        })
+
+        Vue.component('tools-manage',{
+            delimiters: ['${', '}'],
+            template: '#tools-manage-template',
+            data: function(){
+                return {
+                    model: [],
+                    isDragging: false,
+                    delayedDragging:false
+                }
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick( function(){
+                    self.init(); 
+                })
+            },
+            watch: {
+                isDragging: function(newValue) {
+                    let self = this;
+
+                    if (newValue){
+                        self.delayedDragging = true;
+                        return;
+                    }
+                    self.$nextTick( function(){
+                        self.delayedDragging = false;
+                    })
+                }
+            },
+            methods: {
+                init: function(){
+                    let self = this;
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: `#/matrix/portal/tools:| sort name asc, vtime desc`
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            self.model = _.orderBy(data.message,["seat"],["asc"]);
+                            
+                            /*
+                            _.delay(function(){
+                                var list = document.getElementById("ul-li");
+                                Sortable.create(list, {
+                                    handle: '.drag-handle',
+                                    animation: 150
+                                });    
+                            },500)
+                            */
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                },
+                add: function(event){
+                    let self = this;
+                    var obj = _.assign({
+                                    class: '/matrix/portal/tools',
+                                    name: "tools_"+_.now()},
+                                self.toJsonString(event));
+
+                    jQuery.ajax({
+                        url: '/mxobject/actiontoclass',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            data: JSON.stringify(obj),
+                            ctype: "insert"
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            self.resetForm();
+                            self.init();
+                            swal("Success","","success");
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                update: function(event){
+                    let self = this;
+                    var obj = _.assign({
+                                    class: '/matrix/portal/tools',
+                                    name: event},
+                                self.toJsonString(event));
+                    
+                    jQuery.ajax({
+                        url: '/mxobject/actiontoclass',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            data: JSON.stringify(obj),
+                            ctype: "insert"
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            self.resetForm();
+                            self.init();
+                            $("#collapse"+event).collapse("hide");
+                            swal("Success","","success");
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                remove: function(event) {
+                    let self = this;
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: `#/matrix/portal/tools:| name=` + event + `| delete`,
+                            flag: false
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            self.init();
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                resetForm: function(){
+                    let self = this;
+
+                    var elements = $("form.tools").find( "input,select,textarea" );
+                    for( var i = 0; i < elements.length; ++i ) {
+                        var element = elements[i];
+                        var id = element.id;
+                        var value = element.value;
+
+                        if( id ) {
+                            $(id).val("");
+                        } 
+                    }
+                },
+                toJsonString: function(event) {
+                    var obj = {};                    
+                    var elements = $("form."+event).find( "input,select,textarea" );
+                    
+                    for( var i = 0; i < elements.length; ++i ) {
+                        var element = elements[i];
+                        var id = element.id;
+                        var value = element.value;
+
+                        if( id ) {
+                            if( id === "groups" ){
+                                obj[id] = { id:value } ;
+                            } else {
+                                obj[id] = value;
+                            }
+                        } 
+                    }
+                    return obj;
+                }
+
+            }
+        })
+
+        Vue.component('calendar-manage',{
+            delimiters: ['${', '}'],
+            template: '#calendar-manage-template',
+            data: function () {
+                return {
+                    event: []
+                }
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.initCalendar();
+                })
+            },
+            methods: {
+                init: function(){
+                    let self = this;
+                    let _menu = {
+                        "open": {
+                            name: "打开", icon: "fa-folder-o",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                self.open(_item);
+                            }
+                        },
+                        "download": {
+                            name: "下载", icon: "fa-cloud-download",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                self.download(_item);
+                            }
+                        },
+                        "-": "-",
+                        "new-folder": {
+                            name: "新建配置组", icon: "fa-copy",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                console.log($(this).data("item"))
+                                self.mkdir(_item);
+                            }
+                        },
+                        "new-ci": {
+                            name: "新建配置项", icon: "fa-paste",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                //self.mkfile(_item);
+                            }
+                        },
+                        "delete": {
+                            name: "删除", icon: "fa-trash",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                self.delete(_item);
+                            }
+                        },
+                        "--": "--",
+                        "history": {
+                            name: "配置历史", icon: "fa-clock-o",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                self.open(_item);
+                            }
+                        },
+                        "detail": {
+                            name: "配置卡片", icon: "fa-tasks",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                self.look('config', '');
+                            }
+                        },
+                        "compare": {
+                            name: "配置比对", icon: "fa-list-alt",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                self.look('config', '');
+                            }
+                        },
+                        "connect": {
+                            name: "配置关联", icon: "fa-sitemap",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                let _item = $(this).data("item");
+                                self.open(_item);
+                            }
+                        },
+                        "---": "---",
+                        "event": {
+                            name: "事件", icon: "fa-warning",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                self.look('itsm', '/janesware/event');
+                            }
+                        },
+                        "performance": {
+                            name: "性能", icon: "fa-line-chart",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                self.look('itsm', '/janesware/performance');
+                            }
+                        },
+                        "log": {
+                            name: "日志", icon: "fa-file-code-o",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                self.look('itsm', '/janesware/log');
+                            }
+                        },
+                        "----": "----",
+                        "new-content": {
+                            name: "新增", icon: "fa-plus",
+                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                swal("新增", "新增配置相关内容", "info");
+                            }
+                        }
+                    };
+
+                    $.contextMenu({
+                        selector: '#calendar',
+                        callback: function (key, options) {
+                            var m = "clicked: " + key;
+                            console.log(m);
+                        },
+                        items: _menu
+                    });
+                },
+                load: function () {
+                    let self = this;
+
+                    self.event = fetchData('#/matrix/system/calendar/: | top 200');
+                },
+                initCalendar: function(){
+                    let _locale = `{{.Lang}}`;
+                    let t = new Date;
+                    let n = t.getMonth();
+                    let r = t.getFullYear();
+                    let i = $('#calendar').fullCalendar({
+                                schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+                                themeSystem:'bootstrap3',
+                                header: {
+                                    left: 'prev,next today',
+                                    center: 'title',
+                                    right: 'month,agendaWeek,agendaDay,listMonth'
+                                },
+                                locale: _locale,
+                                firstDay: 1,
+                                businessHours: {
+                                    dow: [ 1, 2, 3, 4, 5 ], // Monday - Thursday
+                                    start: '08:30', // a start time (10am in this example)
+                                    end: '17:30', // an end time (6pm in this example)
+                                },
+                                selectable: true,
+                                selectHelper: true,
+                                droppable: true,
+                                drop: function(e, t) {
+                                    var n = $(this).data("eventObject");
+                                    var r = $.extend({}, n);
+                                    r.start = e;
+                                    r.allDay = t;
+                                    $("#calendar").fullCalendar("renderEvent", r, true);
+                                    if ($("#drop-remove").is(":checked")) {
+                                        $(this).remove()
+                                    }
+                                },
+                                select: function(e, t, n) {
+                                    var r = prompt("Event Title:");
+                                    if (r) {
+                                        i.fullCalendar("renderEvent", {
+                                            title: r,
+                                            start: e,
+                                            end: t,
+                                            allDay: n
+                                        }, true)
+                                    }
+                                    i.fullCalendar("unselect")
+                                },
+                                eventClick: function(calEvent, jsEvent, view) {
+
+                                    alert('Event: ' + calEvent.title);
+                                    alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
+                                    alert('View: ' + view.name);
+
+                                    // change the border color just for fun
+                                    $(this).css('border-color', 'red');
+
+                                },
+                                eventRender: function(e, t, n) {
+                                    console.log(e,t,n)
+                                    var r = e.media ? e.media : "";
+                                    var i = e.description ? e.description : "";
+                                    t.find(".fc-event-title").after($('<span class="fc-event-icons"></span>').html(r));
+                                    t.find(".fc-event-title").append("<small>" + i + "</small>")
+                                },
+                                editable: true,
+                                events: [{
+                                    title: "Event",
+                                    start: new Date(r, n, 0),
+                                    end: new Date(r, n, 1),
+                                    className: "bg-purple",
+                                    media: '<i class="fa fa-trophy"></i>',
+                                    description: "Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus."
+                                }, {
+                                    title: "Daily Meeting",
+                                    start: new Date(r, n, 10),
+                                    end: new Date(r, n, 12),
+                                    allDay: false,
+                                    className: "bg-blue",
+                                    media: '<i class="fa fa-users"></i>',
+                                    description: "Lorem ipsum dolor sit amet adipiscing elit."
+                                }, {
+                                    title: "Click for Google",
+                                    start: new Date(r, n, 15),
+                                    end: new Date(r, n, 17),
+                                    url: "",
+                                    className: "bg-green",
+                                    media: '<i class="fa fa-google-plus"></i>',
+                                    description: "Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos."
+                                }]
+                            });
+
+                    _.delay(self.init,500);
+                }
+            }
+        })
+
+        Vue.component('rules-manage',{
+            delimiters: ['${', '}'],
+            template: '#rules-manage-template',
+            data: function() {
+                return {
+                    editor: Object,
+                    etcd: {
+                        createdIndex: String,
+                        modifiedIndex: String,
+                        ttl: -1,
+                        expiration: Number,
+                    },
+                    etcdKey: String,
+                }
+            },
+            mounted: function(){
+                this.$nextTick(function(){
+                    this.initEditer();
+                })
+            },
+            created: function(){
+                eventHub.$on("editor-value", this.setEditor);
+            },
+            methods: {
+                initEditer: function(){
+                    self = this;
+                    self.editor = ace.edit("etcd_value");
+                    ace.require('ace/ext/settings_menu').init(self.editor);
+                    self.editor.setOptions({
+                        maxLines: 30,//Infinity,
+                        minLines: 10,
+                    });
+                    self.editor.commands.addCommands([{
+                        name: "showSettingsMenu",
+                        bindKey: {
+                            win: "Ctrl-9",
+                            mac: "Command-9"
+                        },
+                        exec: function(editor) {
+                            self.editor.showSettingsMenu();
+                        },
+                        readOnly: true
+                    }]);
+                    self.editor.$blockScrolling = Infinity;
+                    self.editor.setTheme("ace/theme/xcode");
+                    self.editor.getSession().setMode("ace/mode/ini");
+                    self.editor.getSession().setTabSize(2);
+                    self.editor.getSession().setUseWrapMode(true);
+                },
+                setEditor: function(event) {
+                    self = this;
+                    self.etcdKey = event.key;
+                    self.editor.setValue(event.value);
+                    self.editor.setValue(self.editor.getValue(), 1);
+
+                    /**
+                     * @todo  当前节点为目录，隐藏键值输入框并显示节点［添加］按钮
+                     */
+                    if (event.dir) {
+                        $("#etcd_value").hide();
+                        $("#etcd_label").hide();
+                        $("#config_btn_new_modal").show();
+                    } else {
+                        /**
+                         * @todo  当前为节点，显示键值输入框并隐藏节点［添加］按钮，调用刷新为正常显示键值（codemirror's bug)
+                         */
+                        $("#etcd_value").show();
+                        $("#etcd_label").show();
+                        $("#config_btn_new_modal").hide();
+
+                    }
+                    /**
+                     * @todo  设置节点其它值信息
+                     */
+                    self.etcd.createdIndex = event.createdIndex;
+                    self.etcd.modifiedIndex = event.modifiedIndex;
+                    self.etcd.ttl = event.ttl;
+                    self.etcd.expiration = event.expiration;
+                },
+                addNode:function() {
+
+                },
+                removeNode: function() {
+
+                },
+                saveNode: function(){
+                    self = this;
+                    var key = self.etcdKey;
+                    var value = self.editor.getValue();
+                    var ttl = self.etcd.ttl;
+                    
+                    jQuery.ajax({
+                        url: '/mxconfig/set',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            key,
+                            value,
+                            ttl
+                        },
+                        complete: function(xhr, textStatus) {
+                            //called when complete
+                        },
+                        success: function(data, textStatus, xhr) {
+
+                            swal("Success!", self.etcdKey, "success");
+                            return false;
+                            var treeObj = $.fn.zTree.getZTreeObj("tree1");
+                            var sNodes = treeObj.getSelectedNodes();
+                            if (sNodes.length > 0) {
+                                var node = sNodes[0].getParentNode();
+
+                                refreshNodeData(node);
+                            }
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            //called when there is an error
+                        }
+                    })
+                }
+            }
+        })
+
+        Vue.component('queue-manage',{
+            delimiters: ['${', '}'],
+            template: '#queue-manage-template',
+            data: function(){
+                return {
+                    model:{
+                        data: [],
+                    }
+                }
+            },
+            mounted: function(){
+                this.$nextTick(function () {
+                    this.initQueueData();
+                })
+            },
+            methods: {
+                initQueueData: function(){
+                    let self = this;
+
+                    jQuery.ajax({
+                        url: '/mxqueue',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {data: ""},
+                        beforeSend:function(xhr){
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            console.log(data.message)
+                            self.model.data = data.message.splice(0);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                      });
+                }
+            }
+        })
+
+        var appVue = new Vue({
+            el: "#app",
+            template: "#app-template",
+            data: {
+                currentView: 'config-manage',
+                userTreeNodes: {},
+                configTreeNodes: {},
+                rulesTreeNodes: {},
+                notifyTreeNodes: {},
+                maintainTreeNodes: {},
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    var name = {{.SignedUser.IsAdmin}};
+                    var ospace = `{{.SignedUser.Company.OSpace}}`;
+
+                    if(name && ospace=='matrix'){
+                        self.loadTreeData('/','configTreeNodes');
+                    } else {
+                        self.loadTreeData('/'+ospace,'configTreeNodes');
+                    }
+                    self.loadTreeData('/matrix/probes', 'rulesTreeNodes');
+                    self.initUserTreeNodes();
+                    self.initNotifyTreeNodes();
+                    self.initMaintainTreeNodes();
+                })
+            },
+            created: function () {
+                //eventHub.$on('return-dispatch-manage', this.toggleView);
+            },
+            methods: {
+                toggleView: function(event) {
+                    this.currentView=event;
+                },
+                loadTreeData: function(event, param){
+                    let self = this;
+                    jQuery.ajax({
+                        url: '/config/get',
+                        type: 'GET',
+                        dataType: 'json',
+                        data: {
+                            key: event
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            
+                            if(!_.isEmpty(data.message)){
+                                let _tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
+                                let rtn = _.attempt(JSON.parse.bind(null, _tmp));
+                                self[param] = rtn;
+                            }
+                            
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                },
+                refreshUser: function(){
+                    let self = this;
+
+                    self.initUserTreeNodes();
+                },
+                initUserTreeNodes: function() {
+                    let self = this;
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: `#/matrix/ldap/:`
+                            //cond: `call user { "ftype": "query",  "object":{ "fullname": "/" } }`
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            var rtn = data.message;
+                            
+                            self.userTreeNodes = rtn;
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                },
+                initNotifyTreeNodes: function() {
+                    let self = this;
+                    self.notifyTreeNodes = {name: "值班组", children: [
+                                            {name: "上海值班"},
+                                            {name: "北京值班"}
+                                        ]};
+                },
+                initMaintainTreeNodes: function() {
+                    let self = this;
+                    self.maintainTreeNodes = {name: "实体", children: [
+                                            {name: "应用"},
+                                            {name: "服务器"},
+                                            {name: "网络"},
+                                            {name: "存储"},
+                                            {name: "集群"}
+                                        ]};
+                },
+                saveUserGroup: function(){
+                    let self = this;
+
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: `#/matrix/ldap/:`
+                            //cond: `call user { "ftype": "query",  "object":{ "fullname": "/" } }`
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            var rtn = data.message;
+                            
+                            self.userTreeNodes = rtn;
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                newUser: function(){
+                    eventHub.$emit("user-new-event",null);
+                },
+                toggleLeft: function() {
+                    let self = this;
+
+                    if(self.toggle.left) {
+
+                        $("#nav").hide();
+
+                        $("#content").removeClass("col-lg-10");
+                        $("#content").addClass("col-lg-12");
+                        //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
+
+                        $(".navtoggle").removeClass("fa fa-caret-left");
+                        $(".navtoggle").addClass("fa fa-caret-right");
+
+                        self.toggle.left = false;
+                    } else {
+                        $("#nav").slideDown(500);
+                        $("#nav").show();
+
+                        $("#content").removeClass("col-lg-12");
+                        $("#content").addClass("col-lg-10");
+                        //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+
+                        $(".navtoggle").removeClass("fa fa-caret-right");
+                        $(".navtoggle").addClass("fa fa-caret-left");
+
+                        self.toggle.left = true;
+                    }
+                }
+            }
+        })
+    });
+
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div class="container-fluid">
+        <!--row-->
+        <div class="row">
+            <div  class="col-lg-3" id="nav">
+                <!--Accordion view-->
+                <div class="panel-group" id="accordion">
+                    
+                    <div class="panel panel-grey">
+                        <div class="panel-heading">
+                            <i class="fa fa-tree"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse01" style="color:#000000;" @click="toggleView('config-manage')">Config</a>
+                            <span class="pull-right">
+                              <a id="btnAddDomainDiv" href="#"> <i class="icon-congs"></i>
+                              </a>
+                            </span>
+                        </div>
+                        <div id="collapse01" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <config-tree-component :zNodes="configTreeNodes" @click.native="toggleView('config-manage')"></config-tree-component>
+                            </div>
+                            <div class="panel-footer" id="treePanelFooter"></div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-grey">
+                        <div class="panel-heading">
+                            <i class="fa fa-users"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse02" aria-expanded="false" aria-controls="collapseTwo" style="color:#000000;" @click="toggleView('user-manage')">
+                              User & Group
+                            </a>
+                            <span class="pull-right">
+                                <div class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer;">
+                                        <i class="fa fa-ellipsis-v" style="color: rgba(0,0,0,.5);"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#" @click="newUser">
+                                                <i class="fa fa-user fa-fw"></i> New User
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>
+                        <div id="collapse02" class="panel-collapse collapse" role="tabpanel">
+                            <div class="panel-body">
+                                <user-tree-component :zNodes="userTreeNodes" @click.native="toggleView('user-manage')"></user-tree-component>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-grey" style="display:none;">
+                        <div class="panel-heading">
+                            <i class="fa fa-bell"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse03" aria-expanded="false" aria-controls="collapseThree" style="color:#000000;" @click="toggleView('notify-manage')">
+                              通知中心
+                            </a>
+                            <span class="pull-right">
+                                <div class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer;">
+                                        <i class="fa fa-ellipsis-v" style="color: rgba(0,0,0,.5);"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li role="presentation">
+                                            <a role="menuitem" tabindex="-1" href="#" @click="newUser">
+                                                <i class="fa fa-user fa-fw"></i> 新建通知规则
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </span>
+                        </div>
+                        <div id="collapse03" class="panel-collapse collapse" role="tabpanel">
+                            <div class="panel-body">
+                                <notify-tree-component :zNodes="notifyTreeNodes" @click.native="toggleView('notify-manage')"></notify-tree-component>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-grey">
+                        <div class="panel-heading">
+                            <i class="fa fa-calendar"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse06" aria-expanded="false" aria-controls="collapseSix" style="color:#000000;" @click="toggleView('calendar-manage')">
+                              Calendar
+                            </a>
+                        </div>
+                        <div id="collapse06" class="panel-collapse collapse" role="tabpanel" style="display: none;">
+                            <div class="panel-body">
+                                <!--<maintain-tree-component :zNodes="maintainTreeNodes" @click.native="toggleView('calendar-manage')"></maintain-tree-component>-->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-grey" style="display:;">
+                        <div class="panel-heading">
+                            <i class="fa fa-calendar"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse061" aria-expanded="false" aria-controls="collapseSixOne" style="color:#000000;" @click="toggleView('tools-manage')">
+                              Applicaton
+                            </a>
+                        </div>
+                        <div id="collapse061" class="panel-collapse collapse" role="tabpanel">
+                          
+                        </div>
+                    </div>
+
+                    <div class="panel panel-grey" style="display:none;">
+                        <div class="panel-heading">
+                            <i class="fa fa-slideshare"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse07" aria-expanded="false" aria-controls="collapseSeven" style="color:#000000;" @click="toggleView('session-manage')">
+                              会话管理
+                            </a>
+                        </div>
+                        <div id="collapse07" class="panel-collapse collapse" role="tabpanel">
+                          
+                        </div>
+                    </div>
+                       
+                    <div class="panel panel-grey" style="display:none;">
+                        <div class="panel-heading">
+                            <i class="fa fa-exchange"></i>
+                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse08" aria-expanded="false" aria-controls="collapseEight" style="color:#000000;" @click="toggleView('queue-manage')">
+                              队列管理
+                            </a>
+                        </div>
+                        <!--div id="collapse08" class="panel-collapse collapse" role="tabpanel">
+                          <div class="panel-body">
+                            
+                          </div>
+                        </div-->
+                    </div>
+                                            
+                </div>
+                <!--/Accordion view-->
+            </div>
+            <div class="col-lg-9" id="content" style="padding-left:0px;">
+                <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
+            </div>
+        </div>
+        <!--/row-->
+    </div>    
+</script>
+
+<script type="text/x-template" id="config-manage-template">
+    <div>
+        <div class="panel-group" id="accordionContent" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-grey">
+                <div class="panel-heading" role="tab" id="headingOne" style="padding: 5px 15px;">
+                    <div class="panel-heading-btn">
+                        <div class="btn-group">
+                            <a class="btn btn-xs btn-success" data-toggle="modal" data-target="#configAddModal">
+                                <i class="fa fa-plus"></i>
+                                New&nbsp;
+                            </a>
+                            <a  href="#"
+                                class="btn btn-xs btn-success config-editor-save"
+                                data-trigger="tooltip"
+                                data-content="保存新增目录或节点"
+                                @click="saveNode"
+                                style="display:none;">
+                                <i class="fa fa-save"></i> Submit
+                            </a>
+                            <a href="#" class="btn btn-xs btn-danger" readonly @click="removeNode">
+                                <i class="fa fa-trash"></i>
+                                Delete&nbsp;
+                            </a>
+                            <a href="javascript:void(0)" @click="debug" class="btn btn-xs btn-default">
+                                <i class="fa fa-television"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div style="display:-webkit-inline-box;">
+                        <span>
+                            <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigInfo">
+                                <i class="fa fa-home" style="padding:7px 0px;"></i>
+                            </a>
+                        </span>
+                        <ol class="breadcrumb">
+                            <li v-for="item in breadcrumb">
+                                <a href="#">${item}</a>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+                <div id="collapseConfigInfo" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body" style="padding:0px;">
+                        <pre id="etcd_value" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;"></pre>
+                    </div>
+                    <div class="panel-footer" id="statusBar">
+
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-grey">
+                <div class="panel-heading" role="tab" id="headingTwo">
+                    <i class="fa fa-desktop"></i>
+                    <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigMonitorInfo">TTL...</a>
+                </div>
+                <div id="collapseConfigMonitorInfo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                    <div class="panel-body">
+                        <label for="">TTL</label>
+                        <input type="number" class="form-control" :value='etcd.ttl'>
+                        <BR/>
+                        <label for="">Out Of Time</label>
+                        <input type="text" class="form-control text-primary" readonly :value='etcd.expiration'>
+                        <BR/>
+                        <label for="">createdIndex</label>
+                        <input type="text" class="form-control" readonly :value='etcd.createdIndex'>
+                        <BR/>
+                        <label for="">modifiedIndex</label>
+                        <input type="text" class="form-control" readonly :value='etcd.modifiedIndex'>
+                        <div id="panel_dashboard"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Add Modal -->
+        <div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">New Config</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label for="">Node Name</label>
+                        <input type="text" class="form-control" id="config_key" :value="etcdKey">
+                        <BR/>
+                        <label for="">Dir</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                            <input type="checkbox" id="config_dir" value="true"></span>
+                            <label class="form-control well"></label>
+                        </div>
+                        <BR/>
+                        <div id="modal_config_value">
+                            <label for="">Value</label>
+                            <pre id="config_value"></pre>
+                        </div>
+                        <BR/>
+                        <label for="">TTL</label>
+                        <input type="number" class="form-control" id="config_ttl">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal">Cancel</a>
+                        <a href="javascript:void(0)" class="btn btn-primary" data-dismiss="modal" @click="addNode">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Config Add Modal -->
+    </div>
+</script>
+
+<script type="text/x-template" id="user-manage-template">
+    <div>
+        
+        <div class="panel panel-grey">
+            <div class="panel-heading">
+                <span style="">
+                    <b>User Info</b>
+                </span>
+                <span class="pull-right">
+                    <button class="btn btn-xs btn-info" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> Save</button>
+                </span>
+            </div>
+            <div class="panel-body">
+                <bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
+            </div>
+        </div>
+
+        <h5>Authority</h5>
+        <hr>
+        <div role="tabpanel">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs">
+                <li role="presentation" class="active">
+                    <a href="#byObject" aria-controls="byObject" role="tab" data-toggle="tab">By Object</a>
+                </li>
+                <li role="presentation">
+                    <a href="#byProperty" aria-controls="byProperty" role="tab" data-toggle="tab">By Attributes</a>
+                </li>
+            </ul>
+        
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div role="tabpanel" class="tab-pane active fade in" id="byObject">
+                    <div class="panel panel-grey">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                    <bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade in" id="byProperty">
+                    <div class="panel panel-grey">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
+                                </div>
+                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                                    <bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</script>
+
+<script type="text/x-template" id="notify-manage-template">
+    <div>
+        
+        <div class="panel panel-grey">
+            <div class="panel-heading">
+                <span>
+                    通知规则
+                </span>
+            </div>
+            <div class="panel-body">
+                <input class="form-control" type="text" placeholder="搜索" style="width:100%;"><BR/>
+                <bootstrap-table :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
+                <h5>规则定义</h5>
+                <hr style="margin-top: 10px;margin-bottom: 10px;border-top: 1px solid #ddd;">
+                <div role="tabpanel">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#byClass" aria-controls="tab" role="tab" data-toggle="tab">告警分类</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#bySeverity" aria-controls="tab" role="tab" data-toggle="tab">告警级别</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#byNotifyPeople" aria-controls="tab" role="tab" data-toggle="tab">通知人员</a>
+                        </li>
+                        <li role="presentation">
+                            <a href="#byNotifyMode" aria-controls="tab" role="tab" data-toggle="tab">通知方式</a>
+                        </li>
+                    </ul>
+                
+                    <!-- Tab panes -->
+                    <div class="tab-content"  style="background-color: #ffffff;border: 1px solid #ddd;border-top: 0px;padding: 10px 10px;">
+                        <div role="tabpanel" class="tab-pane active" id="byClass">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <tree-component :zNodes="byClassTreeNodes" :zId="byClassTree"></tree-component>      
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane active" id="bySeverity">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <tree-component :zNodes="bySeverityTreeNodes" :zId="bySeverityTree"></tree-component>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="byNotifyPeople">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <tree-component :zNodes="byNotifyPeopleTreeNodes" :zId="byNotifyPeopleTree"></tree-component>
+                                </div>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="byNotifyMode">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <tree-component :zNodes="byNotifyModeTreeNodes" :zId="byNotifyModeTree"></tree-component>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</script>
+
+<script type="text/x-template" id="rules-manage-template">
+    <div>
+        <div class="panel-group" id="accordionContent" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-grey">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <span data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigInfo">
+                      <i class="fa fa-home"></i>
+                    </span>
+                    <span id="olNav" style="font-size: 12px;font-weight: bold;"></span>
+                    <span class="pull-right">
+                        <a class="btn btn-xs btn-default" data-toggle="modal" data-target="#configAddModal">
+                            <i class="icon-plus"></i>
+                            添加&nbsp;
+                        </a>
+                        <a href="#" class="btn btn-xs btn-default" data-trigger="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
+                            <i class="icon-save"></i>
+                            提交
+                        </a>
+                        <a id="config_btn_help" class="btn btn-xs btn-default">
+                            <i class="icon-question-sign"></i> 帮助
+                        </a>
+                        <a href="#" class="btn btn-xs btn-danger" readonly  @click="removeNode">
+                            <i class="icon-remove"></i>
+                            删除&nbsp;
+                        </a>
+                    </span>
+                </div>
+                <div id="collapseConfigInfo" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <label id="etcd_label" for="">节点值</label>
+                        <pre id="etcd_value"></pre>
+                        <BR/>
+                        <label for="">TTL(生存周期)</label>
+                        <input type="number" class="form-control" :value='etcd.ttl'>
+                        <BR/>
+                        <label for="">失效时间</label>
+                        <input type="text" class="form-control text-primary" readonly :value='etcd.expiration'>
+                        <BR/>
+                        <label for="">createdIndex</label>
+                        <input type="text" class="form-control" readonly :value='etcd.createdIndex'>
+                        <BR/>
+                        <label for="">modifiedIndex</label>
+                        <input type="text" class="form-control" readonly :value='etcd.modifiedIndex'>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-grey">
+                <div class="panel-heading" role="tab" id="headingTwo">
+                    <i class="fa fa-desktop"></i>
+                    <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigMonitorInfo">监控信息</a>
+                </div>
+                <div id="collapseConfigMonitorInfo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                    <div class="panel-body">
+                        <div id="panel_dashboard"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Config Add Modal -->
+        <div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">配置添加</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label for="">节点名称</label>
+                        <input type="text" class="form-control" id="config_key">
+                        <BR/>
+                        <label for="">目录</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                  <input type="checkbox" id="config_dir" value="true"></span>
+                            <label class="form-control well"></label>
+                        </div>
+                        <BR/>
+                        <div id="modal_config_value">
+                            <label for="">节点值</label>
+                            <pre id="config_value"></pre>
+                        </div>
+                        <BR/>
+                        <label for="">TTL(生存周期)</label>
+                        <input type="number" class="form-control" id="config_ttl">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="config_btn_new" data-dismiss="modal">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /Config Add Modal -->
+    </div>
+</script>
+
+<script type="text/x-template" id="tools-manage-template">
+    <div role="tabpanel">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#tools-list" aria-controls="tools-list" role="tab" data-toggle="tab">应用</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#tools-keep" aria-controls="tools-keep" role="tab" data-toggle="tab">发布</a>
+                    </li>
+                </ul>
+            
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="tools-list">
+                        <div class="panel panel-grey">
+                            <div class="panel-body">
+                                <div class="block__list_words">      
+                                    <transition-group id="ul-li" type="transition" tag="ul">
+                                        <li class="col-lg-3" v-for="(item,index) in model" :key="index">
+                                            <div class="widget widget-stats bg-blue">
+                                                <div class="stats-icon drag-handle"><i :class="item.icon"></i></div>
+                                                <div class="stats-info">
+                                                    <h4>
+                                                        <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
+                                                            ${item.cnname}
+                                                        </a>
+                                                    </h4>
+                                                </div>
+                                                <div class="stats-link">
+                                                    <a href="#" @click="remove(item.name)" class="btn btn-xs"><i class="fa fa-remove fa-fw" style="color:#efefef;"></i></a>    
+                                                </div>
+                                            </div>
+                                            <div class="collapse block__list_collapse" :id="'collapse'+item.name">
+                                                <form :class="item.name">
+                                                    <div class="form-group">
+                                                        <label for="">中文名</label>
+                                                        <input type="text" class="form-control" id="cnname" placeholder="中文名称" :value="item.cnname">
+                                                        <label for="">英文名称</label>
+                                                        <input type="text" class="form-control" id="enname" placeholder="English Name" :value="item.enname">
+                                                        <label for="">位置</label>
+                                                        <input type="text" class="form-control" id="seat" placeholder="位置" :value="item.seat">
+                                                        <label for="">url</label>
+                                                        <input type="text" class="form-control" id="url" placeholder="Url" :value="item.url">
+                                                        <label for="">图标</label>
+                                                        <input type="text" class="form-control" id="icon" placeholder="Icon" :value="item.icon">
+                                                        <label for="">Target</label>
+                                                        <input type="text" class="form-control" id="target" placeholder="Target" :value="item.target">
+                                                        <label for="">是否选择</label>
+                                                        <input type="number" name="" id="selected" class="form-control" value="" min="0" max="1" step="" required="required" title="" :value="item.selected">
+                                                        <label for="">分组</label>
+                                                        <input type="text" class="form-control" id="groups" placeholder="分组" :value="item.groups">
+                                                    </div>
+                                                </form>
+                                                <button class="btn btn-success" @click="update(item.name)">更新</button>
+                                                <button class="btn btn-default" data-toggle="collapse" :data-target="'#collapse'+item.name">取消</button>
+                                            </div>
+                                        </li>
+                                    </transition-group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="tools-keep">
+                        <div class="panel panel-grey">
+                            <div class="panel-body">
+                                <form class="tools-new">
+                                    <div class="form-group">
+                                        <label for="">中文名</label>
+                                        <input type="text" class="form-control" id="cnname" placeholder="中文名称">
+                                        <label for="">英文名称</label>
+                                        <input type="text" class="form-control" id="enname" placeholder="English Name">
+                                        <label for="">位置</label>
+                                        <input type="text" class="form-control" id="seat" placeholder="位置">
+                                        <label for="">url</label>
+                                        <input type="text" class="form-control" id="url" placeholder="Url">
+                                        <label for="">图标</label>
+                                        <input type="text" class="form-control" id="icon" placeholder="Icon" value="fa fa-globe">
+                                        <label for="">Target</label>
+                                        <input type="text" class="form-control" id="target" placeholder="Target">
+                                        <label for="">是否选择</label>
+                                        <input type="number" name="" id="selected" class="form-control" value="0" min="0" max="1" step="" required="required" title="">
+                                        <label for="">分组</label>
+                                        <input type="text" class="form-control" id="groups" placeholder="分组">
+                                    </div>
+                                </form>
+                                <button class="btn btn-success" @click="add('tools-new')">发布</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</script>
+
+<script type="text/x-template" id="calendar-manage-template">
+    <div class="panel panel-grey">
+        <div class="panel-heading">
+            <i class="fa fa-clock-o"></i> 日历管理
+        </div>
+        <div class="panel-body">
+            <div id='calendar'></div>  
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="session-manage-template">
+    <div class="panel panel-grey">
+        <div class="panel-heading">
+            会话管理
+        </div>
+        <div class="panel-body">
+            <bootstrap-table :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="queue-manage-template">
+    <div class="panel-group" id="accordionx" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-grey" v-for="(value, index) in model.data">
+                    <div class="panel-heading" role="tab" :id="'heading' + index">
+                      <h5 class="panel-title">
+                        <i class="fa fa-server fa-fw" style="color:#4dd00b;"></i> 
+                        <a role="button" data-toggle="collapse" data-parent="#accordionx" :href="'#collapse' + index" aria-expanded="true" :aria-controls="'collapse'+index">
+                           ${value.Name}
+                        </a>
+                      </h5>
+                    </div>
+                    <div :id="'collapse' + index" :class="[index=='0'?'in':''] + ' panel-collapse collapse '" role="tabpanel" :aria-labelledby="'heading' + index">
+                        <div clas="panel-body">
+
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs" role="tablist">
+                              <li role="presentation" class="active">
+                                <a :href="'#varz_' + index" :aria-controls="'varz_' + index" role="tab" data-toggle="tab" style="border-radius: 0;border-left:none;">varz</a>
+                              </li>
+                              <li role="presentation">
+                                <a :href="'#connz_' + index" :aria-controls="'connz_' + index" role="tab" data-toggle="tab" style="border-radius: 0;">connz</a>
+                              </li>
+                              <li role="presentation">
+                                <a :href="'#routez_' + index" :aria-controls="'routez_' + index" role="tab" data-toggle="tab" style="border-radius: 0;">routez</a>
+                              </li>
+                              <li role="presentation">
+                                <a :href="'#subsz_' + index" :aria-controls="'subsz_' + index" role="tab" data-toggle="tab" style="border-radius: 0;">subsz</a>
+                              </li>
+                            </ul>
+
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+
+                              <div role="tabpanel" class="tab-pane active" :id="'varz_' + index">
+                                <div class="panel panel-grey" style="border:none;">
+                                  <div class="panel-body">
+                                    <ul class="nav">
+                                      <li class="col-md-3" v-for="(v, k) in value.Content[0].Content">
+                                        <div class="well">
+                                          <h5 style="color:#a95353;text-transform:uppercase;text-align:center;font-weight:bolder;">
+                                            ${ k }
+                                          </h5>
+                                          <h5 style="text-align:center;color:#333333;white-space: wrap;"><b>${ v } </b></h5>
+                                          <span class='pull-right octicon icon-caret-up' style="color:green;"></span>
+                                        </div>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div role="tabpanel" class="tab-pane" :id="'connz_' + index">
+                                <div class="panel panel-grey" style="border:none;">
+                                  <div class="panel-body">
+                                    <ul class="nav">
+                                      <li class="col-md-3" v-for="(v, k) in value.Content[1].Content">
+
+                                        <div class="well">
+                                          <h5 style="color:#a95353;text-transform:uppercase;text-align:center;font-weight:bolder;">
+                                            ${ k }
+                                          </h5>
+                                          <h5 style="text-align:center;color:#333333;white-space: wrap;"><b>${ v } </b></h5>
+                                          <span class='pull-right octicon icon-caret-up' style="color:green;"></span>
+                                        </div>
+
+                                      </li>
+
+                                    </ul>
+
+                                    <table class="table" v-for="(b, a) in value.Content[1].Content.connections">
+                                      <thead>
+                                        <tr>
+                                          <th class="well" v-for="(j, i) in b">
+                                            ${ i }
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tr>
+                                        <td class="well" v-for="(j, i) in b">
+                                          ${ j }
+                                        </td>
+                                      </tr>
+
+                                    </table>
+
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div role="tabpanel" class="tab-pane" :id="'routez_' + index">
+                                <div class="panel panel-grey" style="border:none;">
+                                  <div class="panel-body">
+                                    <ul class="nav">
+                                      <li class="col-md-3" v-for="(v, k) in value.Content[2].Content">
+                                        <div class="well">
+                                          <h5 style="color:#a95353;text-transform:uppercase;text-align:center;font-weight:bolder;">
+                                            ${ k }
+                                          </h5>
+                                          <h5 style="text-align:center;color:#333333;white-space: wrap;"><b>${ v } </b></h5>
+                                          <span class='pull-right octicon icon-caret-up' style="color:green;"></span>
+                                        </div>
+                                      </li>
+                                    </ul>
+
+                                    <table class="table" v-for="(b, a) in value.Content[2].Content.routes">
+                                      <thead>
+                                        <tr>
+                                          <th class="well" v-for="(j, i) in b">
+                                            ${ i }
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tr>
+                                        <td class="well" v-for="(j, i) in b">
+                                          ${ j }
+                                        </td>
+                                      </tr>
+
+                                    </table>
+
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div role="tabpanel" class="tab-pane" :id="'subsz_' + index">
+                                <div class="panel panel-grey" style="border:none;">
+                                  <div class="panel-body">
+                                    <ul class="nav">
+                                      <li class="col-md-3" v-for="(v, k) in value.Content[3].Content">
+                                        <div class="well">
+                                          <h5 style="color:#a95353;text-transform:uppercase;text-align:center;font-weight:bolder;">
+                                            ${ k }
+                                          </h5>
+                                          <h5 style="text-align:center;color:#333333;white-space: wrap;"><b>${ v } </b></h5>
+                                          <span class='pull-right octicon icon-caret-up' style="color:green;"></span>
+                                        </div>
+                                      </li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</script>
+
+{{template "base/footer" .}}

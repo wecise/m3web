@@ -1,0 +1,837 @@
+{{template "base/head" .}}
+<!-- Bootstrap Table CSS -->
+<link href="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table.css" rel="stylesheet">
+<!-- sweetalert core CSS -->
+<link href="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+
+<style type="text/css" media="screen">
+    
+    .container-fluid {
+        margin-top: 10%;
+    }
+
+
+
+    .panel {
+        background-color: transparent;
+        border: 0px;
+        -webkit-box-shadow: 0 0px 0px rgba(0, 0, 0, .05);
+        box-shadow: 0 0px 0px rgba(0, 0, 0, .05);
+    }
+
+    mark {
+        background-color: rgba(253, 245, 154, 0.6);
+    }
+
+    .btn-primary {
+        color: #fff;
+        background-color: #03a9f4;
+        border-color: #03a9f4;
+    }
+
+    .btn-primary.focus, .btn-primary:hover {
+        color: #fff;
+        background-color: #03a9f4;
+        border-color: #03a9f4;
+    }
+
+    .btn-primary.focus, .btn-primary:focus {
+        color: #fff;
+        background-color: #03a9f4;
+        border-color: #03a9f4;
+    }
+
+    .btn-primary.focus, .btn-primary:active {
+        color: #fff;
+        background-color: #03a9f4;
+        border-color: #03a9f4;
+    }
+
+    .tile {
+        width: 100px;
+        min-width: 100px;
+        min-height:  70px;
+        max-height:  70px;
+        color: #FFFFFF;
+        padding: 10px 10px;
+        text-align: center;
+        margin-top: 10px;
+        margin-left: 5px;
+        margin-right: 5px;
+        background-color: #03a9f4;
+        display: inline-block;
+        vertical-align: top;
+        -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+        box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+    }
+    .tile_name {
+        cursor: move;
+        padding-bottom: 0px;
+        border-bottom: 0px solid rgba(255,255,255,.2);
+    }
+
+    .tile__list {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .tile__list:last-child {
+        margin-right: 0;
+        min-height: 80px;
+    }
+
+    .tile__list img {
+        cursor: move;
+        margin: 10px;
+        border-radius: 100%;
+    }
+
+    .tile_plus{
+        min-height:  70px;
+        max-height:  70px;
+        display: block;
+        text-align: center;
+        margin: -10px -12px;
+        background-color: #e9eaf0;
+        color: #949599;
+        width: 15%;
+        min-width: 100px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        border: 0px dashed rgba(0,0,0,.5);
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    a:hover{
+        text-decoration: none;
+        cursor: hand;
+    }
+
+    .search{
+        border-radius: 0px;
+        -webkit-box-shadow: inset 0 0px 0px rgba(0,0,0,.075);
+        ox-shadow: inset 0 0px 0px rgba(0,0,0,.075);
+        -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
+        -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        height: 36px;
+    }
+    
+    /*----------  Search Result Panel  ----------*/
+    #search-result-panel {
+        position: relative;
+        min-width: 75vw;
+        margin-right:75px;
+        border:1px solid #f0f3f4;
+        border-top:1px solid #f0f3f4;
+        background-color:#FFFFFF;
+        margin-top: 8px;
+    }
+    #search-result-panel:after {
+        bottom: 100%;
+        left: 5%;
+        border: 1px solid #f0f3f4;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: rgba(247, 247, 247, 0);
+        border-bottom-color: #f0f3f4;
+        border-width: 8px;
+        margin-left: -30px;
+    }
+
+    .search-result-row:not(:last-child) {
+        margin: 0px 0px 1px 0px;
+        background-color: #f0f3f4;
+        min-height: 32px;
+        padding: 5px;
+        color: #8f99a0;
+    }
+
+    .search-result-row:last-child {
+        margin: 0px;
+        background-color: #f0f3f4;
+        min-height: 32px;
+        padding: 5px;
+        color: #8f99a0;
+    }
+
+    h5 {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+   
+
+    /* ----------------------- For Plus Button ----------------------- */
+    .nav-secondary-plus {
+      display: block;
+      text-align: center;
+      padding: 3px 3px;
+      background-color: #e9eaf0;
+      color: #949599;
+      width: 90px;
+      height: 75px;
+      -webkit-border-radius: 5px;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+      border: 1px dashed rgba(0,0,0,.5);
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-secondary-plus a span {
+      display: block;
+      font-size: 20px;
+      font-weight: normal;
+      line-height: normal;
+      margin: 15px auto 0;
+    }
+
+    .nav-secondary-plus a:hover,
+    .nav-secondary-plus .active a {
+      text-decoration: none;
+      background-color: #389abe;
+      color: #ffffff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    .nav-secondary-plus.inverse a {
+      background-color: #389abe;
+      color: #ffffff;
+      text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    }
+    .nav-secondary-plus.inverse a:hover,
+    .nav-secondary-plus.inverse .active a {
+      background-color: #e9eaf0;
+      color: #949599;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    /* For App Button */
+    .layer.btn.btn-primary{
+        padding: 10px 5px 0px 5px;
+        margin: 5px;
+        min-width: 110px;
+        max-width: 110px;
+        height: 75px;
+        background-color: rgb(33, 149, 244);
+    }
+
+    .layer.select.btn.btn-primary{
+        padding: 5px 5px 0px 5px;
+        margin: 5px;
+        min-width: 110px;
+        max-width: 110px;
+        height: 75px;
+        background-color: rgb(33, 149, 244);
+    }
+
+    .layer > .dropdown {
+        position:relative;
+        left:40px;
+        bottom:10px;
+    }
+
+    .layer > .dropdown > a {
+        color: #6eb4ec;
+    }
+</style>
+
+<div id="app"></div>
+
+<!--Bootstrap Table JS-->
+<script src="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table.js"></script>
+<script src="{{AppSubUrl}}/web/lib/table/bootstrap/locale/bootstrap-table-zh-CN.js"></script>
+<!-- sweetalert core JS -->
+<script src="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.js"></script>
+<!-- Validator Core JS -->
+<script src="{{AppSubUrl}}/web/lib/validator/dist/validator.js"></script>
+<!-- Sortable JS-->
+<script src="{{AppSubUrl}}/web/lib/Sortable/Sortable.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+
+<script src="{{AppSubUrl}}/web/lib/jquery/jquery-migrate-1.1.0.min.js"></script>
+<script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
+
+<script defer>
+    
+    var eventHub = new Vue();
+
+    VueLoader.onloaded(["vue-editor-component",
+                        "vue-search-preset-component"],function() {
+        
+        $(function() {
+
+            var timeoutId = 0;
+         
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $("#robot").html(`<div style="position: absolute;right:0px;top: -38px;cursor: pointer;"><img src="/web/assets/images/robot.svg" style="width:120px;height:120px;transform: scale(0.5);"></div>`).click(function(){
+                swal({
+                  title: "Save it, Find it, Enjoy it.",
+                  text: "This is M³ System.",
+                  timer: 2000,
+                  showConfirmButton: false
+                });
+            });
+
+            var appVue = new Vue({
+                delimiters: ['${', '}'],
+                el: '#app',
+                template: '#app-template',
+                data: {
+                    search: {
+                        input: {
+                            type: {type:"home",quick: ""},
+                            term: ""
+                        },
+                        preset: {},
+                        regexp: {
+                            top: /top (\d+(\.\d)*)/gmi,
+                            undefined:  /undefined/g,
+                            doubleGrep: /\|(\s+(\|))/g,
+
+                        }
+                    },
+                    user: {
+                        appsId: [],
+                        apps: [],
+                        appList: []
+                    },
+                    path: {
+                        view: {}
+                    }
+                },
+                created: function(){
+                    let self = this;
+                    let _appsId = `{{.SignedUser.Remark}}`;
+                    console.log(123, _appsId)
+
+                    eventHub.$on('preset-selected-event', self.setPresetDefault);
+
+                    if(!_.isEmpty(_appsId)){
+                        self.user.appsId = _appsId.split(",");
+                    }
+                },
+                mounted: function(){
+                    let self = this;
+
+                    self.$nextTick(function(){
+                        self.loadApps();
+                        self.init();
+                        App.init();
+                    })
+                },
+                methods: {
+                    init: function() {
+                        let self = this;
+                        
+                        $search = $(".search");
+                        $search.off("keyup drop").on("keyup drop", function(event) {
+
+                            clearTimeout(timeoutId);
+                            timeoutId = setTimeout(function() {
+                                let term = _.trim($search.val());
+                                
+                                if(!_.isEmpty(term)){
+                                    self.nowSearch(term);
+                                }
+
+                            }, 500);
+                        })
+                    },
+                    setPresetDefault: function(event){
+                        let self = this;
+                        
+                        self.search.preset = event;
+                    },
+                    setDefaultView: function(){
+                        let self = this;
+
+                        localStorage.setItem("default-view", JSON.stringify({name:self.path.view.name,url:self.path.view.url}));
+
+                    },
+                    nowSearch: function(term) {
+                        let self = this;
+                        let _param = "";
+                        let _preset = self.search.preset.default;
+                        let _ifHistory = self.search.preset.others.ifHistory?"":"#";
+                        let _ifDebug = self.search.preset.others.ifDebug?"debug> ":"";
+                        let _forTime = self.search.preset.others.forTime;
+                        
+                        if(_.isEmpty(_preset)){
+                            _param = term;
+                        } else {
+                            _param = term + _preset.value;
+                        }
+
+                        _param = _ifDebug + _ifHistory + _param + _forTime;
+
+                        console.log(_param);
+
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: _param,
+                                flag: false
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                if(_.isEmpty(data.message)){
+                                    $("#search-result-panel").fadeOut(500);
+                                    $("#search-result-panel").hide();
+                                    return false;
+                                }
+
+                                self.searchResult(data);
+
+                                $("#search-result-panel").fadeIn(500);
+                                $("#search-result-panel").show();
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
+                        })
+                    },
+                    searchResult: function(result){
+                        var self = this;
+
+                        $("#search-result-panel").empty();
+                        $("#search-result-panel").append(`<div id="search-result-content"></div>`);
+                        
+                        var resultVue = new Vue({
+                            delimiters: ['${', '}'],
+                            el: "#search-result-content",
+                            template: "#search-result-content-template",
+                            data: {
+                                model:[],
+                            },
+                            mounted: function(){
+                                let self = this;
+
+                                self.$nextTick(function(){
+                                    self.init();
+                                })
+                            },
+                            watch: {
+                                model: {
+                                    handler: function(val,oldVal){
+                                        let self = this;
+
+                                        if(_.isEmpty(val)){
+
+                                        }
+                                    },
+                                    deep:true
+                                }
+                            },
+                            methods: {
+                                init: function(){
+                                    let self = this;
+                                    var _groupByClass = _.omit(_.groupBy(result.message,'class'),["undefined",""]);
+
+                                    self.model = _.map(_groupByClass, function(v,k){
+                                                    let _minTime = moment(_.minBy(v,'vtime')['vtime']).format('LLL');
+                                                    let _maxTime = moment(_.maxBy(v,'vtime')['vtime']).format('LLL');
+                                                    return {name: k, count: v.length, from:_minTime, to:_maxTime, list: v};
+                                                });
+                                },
+                                copyToClipBoard: function() {
+                                    let self = this;
+                                    var clipboard = new Clipboard('.btn-copy', {
+                                                        text: function() {
+                                                            return self.model.list;
+                                                        }
+                                                    });
+
+                                    clipboard.on('success', function(e) {
+                                        swal({ 
+                                              title: "Tip", 
+                                              text: "Copyed it.", 
+                                              timer: 1000, 
+                                              showConfirmButton: false 
+                                            });
+                                    });
+
+                                    clipboard.on('error', function(e) {
+                                        console.log(e);
+                                    });
+                                }
+                            }
+                        });
+                    },
+                    hideSearch: function(){
+                        $("#search-result-panel").hide();
+                    },
+                    onSearch: function() {
+                        let self = this;
+                        let _term = _.trim($(".search").val());
+
+                        if (_term.length < 1) {
+                            swal("Enter the search words！", "", "info");
+                            $(".search").focus();
+                            return false;
+                        }
+
+                        localStorage.setItem("search-object",JSON.stringify({
+                                                                cond:_term,
+                                                                preset:self.search.preset
+                                                             })
+                                            );
+                        window.open(
+                                "/janesware/search",
+                                "_parent"
+                            );                    
+                    },
+                    loadApps: function() {
+                        let self = this;
+                        
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: `#/matrix/portal/tools/: | sort by seat asc`
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                                console.log(JSON.stringify(data, null, 2))
+                                let _data = data.message;
+
+                                self.user.appList = _.orderBy(_data,["seat"],["asc"]);
+                                self.user.apps = [];
+
+                                _.forEach(self.user.appsId,function(v){
+                                    _.find(self.user.appList,function(val){
+                                        if( val.id === v ){
+                                            self.user.apps.push(val);
+                                        }
+                                    })
+                                });
+                                
+                                self.user.appList = _.map(self.user.appList,function(v){
+                                                        let _idx =  _.find(self.user.apps,function(val){ 
+                                                                        return v.id === val.id
+                                                                    });
+                                                        
+                                                        if(!_.isEmpty(_idx)){
+                                                            v.selected = 1;
+                                                        }else{
+                                                            v.selected = 0;
+                                                        }
+                                                        return v;
+                                                    });
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
+                        });
+                    },
+                    toogle: function(item) {
+                        let self = this;
+                        let ldap = new Object();
+                        
+                        ldap.class = "/matrix/ldap";
+                        ldap.fullname = `{{.SignedUser.FullName}}`;
+                        ldap.fullname = ldap.fullname.replace(/"/g,"");
+                        console.log(2323,self.user.appsId, JSON.stringify(item))
+                        if(_.indexOf(self.user.appsId, item.id) != -1){
+                            _.pull(self.user.appsId,item.id);
+                        } else {
+                            self.user.appsId.push(item.id);
+                        }
+
+                        ldap.remark = self.user.appsId.join(",");
+
+                        let _ldap = JSON.stringify(ldap);
+
+                        console.log(_ldap)
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: _ldap,
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                if(data.status!="ok"){
+                                    console.log(data.message);
+                                } else {
+                                    self.loadApps();    
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
+                        })
+                    },
+                    add: function(event){
+                        let self = this;
+                        var obj = _.assign({
+                                        class: '/matrix/portal/tools',
+                                        name: "tools_"+_.now()},
+                                    self.toJsonString(event));
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(obj),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                $("#collapseAddApp").removeClass('active');
+                                self.load();
+                                self.resetForm();
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        })
+                    },
+                    resetForm: function(){
+                        let self = this;
+
+                        var elements = $("form").find( "input,select,textarea" );
+                        for( var i = 0; i < elements.length; ++i ) {
+                            var element = elements[i];
+                            var id = element.id;
+                            var value = element.value;
+
+                            if( id ) {
+                                $(id).val("");
+                            } 
+                        }
+                    },
+                    toJsonString: function(event) {
+                        var obj = {};                    
+                        var elements = $("form."+event).find( "input,select,textarea" );
+                        
+                        for( var i = 0; i < elements.length; ++i ) {
+                            var element = elements[i];
+                            var id = element.id;
+                            var value = element.value;
+
+                            if( id ) {
+                                if( id === "groups" ){
+                                    obj[id] = { id:value } ;
+                                } else {
+                                    obj[id] = value;
+                                }
+                            } 
+                        }
+                        return obj;
+                    },
+                    openHelpPanel: function(){
+                        let self = this;
+
+                        var w = $( window ).width();
+                        var h = $( window ).height();
+                        var wW = $( window ).width()*2/3;
+                        var hH = $( window ).height()*1.5/3;
+                        var lrwh = [10, 148, wW, hH];//[(w-wW)/3.1, (h-hH)/3, wW, hH];
+                        var tb = document.createElement('div');
+
+                        $(tb).append(`  <div id="editor-keywords"></div>`
+                                    );
+                        self.win = new mxWindow("How to Search", tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+                        self.win.setMaximizable(true);
+                        self.win.setResizable(true);
+                        self.win.setClosable(true);
+                        self.win.setVisible(true);
+
+                        var helpVue = new Vue({
+                            el: "#editor-keywords",
+                            template: `<vue-editor-component id="help-editor" :model="model"></vue-editor-component>`,
+                            data: {
+                                model:{
+                                    oldInput: "",
+                                    newInput: "",
+                                    mode: "toml",
+                                    theme: "tomorrow",
+                                    printMargin: false,
+                                    readOnly: true
+                                }
+                            },
+                            created: function(){
+                                let self = this;
+
+                            },
+                            mounted: function(){
+                                let self = this;
+
+                                self.$nextTick(function () {
+                                    _.delay(function(){
+                                        self.model.newInput = GLOBAL_CONFIG.global.help.join("\n");
+                                    },500)
+                                })
+                            }
+                        });
+                    }
+                }
+            });
+        })
+    })
+
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div class="container-fluid">
+        <div class="pace  pace-inactive">
+            <div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
+                <div class="pace-progress-inner"></div>
+            </div>
+            <div class="pace-activity"></div>
+        </div>
+        <div class="row-fluid">
+            <div class="col-lg-12">
+                <div id="my_amazing_modal"></div>
+            </div>
+        </div>
+        <div class="row-fluid">
+            <div class="col-lg-offset-2 col-lg-8 col-lg-offset-2">
+                <div class="input-group">
+                    <div class="input-group-btn">
+                        <a href="javascript:void(0)" @click="openHelpPanel" class="btn btn-xs btn-help" style="background-color: rgb(240, 243, 244);border-top: 1px solid rgb(204, 204, 204);border-right: none;border-bottom: 1px solid rgb(204, 204, 204);border-left: 1px solid rgb(204, 204, 204);border-image: initial;width: 24px;height: 36px;border-radius: 0px;padding: 10px 5px;">
+                            <i class="fa fa-question"></i>
+                        </a>
+                    </div>
+                    <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;border-left:none;">
+                    <div class="input-group-btn">
+                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                     </div>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
+                    </div>
+                </div>
+                <!-- /.input-group -->
+                <div class="collapse collapseShowresult" id="search-result-panel" v-on:blur="hideSearch">
+                    <div id="search-result-content"></div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+        <BR/>
+        <BR/>
+        <BR/>
+        <BR/>
+        <div class="row-fluid">
+            <div class="col-lg-offset-3 col-lg-6">
+                <div>
+                    <div id="multi" style="margin-left: 30px">
+                        <div class="layer btn btn-primary" v-for="item in user.apps">
+                            <a :href="item.url" :target="item.target" style="color:#ffffff;">
+                                <div class="tile_name">
+                                    <i :class="item.icon" style="font-size:22px;"></i>
+                                    <p class="small">${item.{{.i18n.Tr "mxhome_portlet_name"}}}</p>
+                                </div>
+                            </a>
+                            <div class="dropdown">
+                                <a href="#" class="email-header-link" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down m-l-5"></i></a>
+                                <ul class="dropdown-menu">
+                                    <li class="">
+                                        <a href="javascript:void">
+                                            <label>
+                                                <input type="radio" :id="item.name" :value="{name:item.name,url:item.url}"  @click="setDefaultView" v-model="path.view"> Default View
+                                            </label>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="layer btn btn-primary" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 1px;min-width: 110px;">
+                            <a href="#addAppModal" data-toggle="modal"><span class="fa fa-plus" style="font-size: 20px;"></span>
+                            </a>
+                        </div>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+        <div class="modal fade" id="addAppModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">{{.i18n.Tr "add_app"}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <a href="javascript:void(0);" :target="item.target" class="layer select btn btn-primary" v-for="item in user.appList">
+                                    <i :class="item.icon"></i> 
+                                    <p class="small">
+                                        ${item.{{.i18n.Tr "mxhome_portlet_name"}}}
+                                    </p>
+                                    <p>
+                                        <input type="checkbox" :value="item.name" v-model='item.selected' @click="toogle(item)">
+                                    </p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /container -->
+</script>
+
+<script type="text/x-template" id="search-result-content-template">
+    <div>
+        <div class="row search-result-row" 
+             v-for="item in model">
+            <div class="col-lg-4">
+                {{.i18n.Tr "mxsearch_search_result_class"}}
+                <p>${item.name}</p>
+            </div>
+            <div class="col-lg-2">
+                {{.i18n.Tr "mxsearch_search_result_count"}}
+                <p>${item.count}</p>
+            </div>
+            <div class="col-lg-5">
+                {{.i18n.Tr "mxsearch_search_daterange"}}
+                <p>${item.from} - ${item.to}</p>
+            </div>
+            <div>
+                <a href="#" class="btn btn-xs btn-default btn-copy" @click="copyToClipBoard" alt="拷贝到剪切板" title="拷贝到剪切板" style="height: 22px;"><i class="fa fa-clipboard"></i></a>
+            </div>
+            <div class="col-lg-12" style="display:none;">
+                <div class="panel">
+                    <div class="panel-body">
+                        ${JSON.stringify(item.list)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</script>
+
+{{template "base/footer" .}}

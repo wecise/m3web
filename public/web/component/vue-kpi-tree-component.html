@@ -1,0 +1,161 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-kpi-tree-component"  ----------*/
+	<template>
+		<ul class="ztree" style="overflow:auto;"></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-kpi-tree-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+	        model: Array
+	    },
+	    data: function(){
+	        return {
+	            zTree: Object,
+	            setting: Object,
+	            nodes: Array,
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	        self.init();
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+	            
+	            self.setting = {
+	                            view: {
+	                                showLine: true,
+	                                selectedMulti: false,
+	                                dblClickExpand: false
+	                            },
+	                            edit: {
+	                                enable: true,
+	                            },
+	                            data: {
+	                                simpleData: {
+	                                    enable: true,
+	                                    idKey: "cid",
+	                                    pIdKey: "pid",
+	                                },
+	                                key: {
+	                                    name: 'name',
+	                                    title: "title"
+	                                }
+	                            },
+	                            callback: {
+	                                onClick: self.onClick,
+	                            }
+	                        };
+
+	        })
+
+	    },
+	    watch: {
+	        setting: {
+	            handler:function(val, oldVal){
+	                var self = this;
+
+	                self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
+	            },
+	            deep: true
+	        },
+	        model: {
+	            handler:function(val,oldVal){
+	                var self = this;
+
+
+	            },
+	            deep: true
+	        }
+	    },
+	    methods: {
+	        init: function() {
+	            var self = this;
+	            
+	            jQuery.ajax({
+	                url: '/mxobject/search',
+	                type: 'POST',
+	                dataType: 'json',
+	                data: {
+	                    cond: `call tree {"ftype":"class", "parent":"/matrix/system/kpi","fields":["agent","catalog","name"]}`//top 1000`
+	                },
+	                beforeSend: function(xhr) {
+	                    
+	                },
+	                complete: function(xhr, textStatus) {
+	                    
+	                },
+	                success: function(data, textStatus, xhr) {
+	                    console.log(123,JSON.stringify(data))
+	                    if(_.isEmpty(data.message)) return false;
+	                    
+	                    self.nodes = _.map(data.message[0].tree,function(v,k){
+	                        return _.merge(v,{title:v.name});
+	                    });
+	                    self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
+	                    
+	                },
+	                error: function(xhr, textStatus, errorThrown) {
+	                    console.log(errorThrown);
+	                }
+	            });
+	        },
+	        onClick: function(event, treeId, treeNode) {
+	            var self = this;
+	            
+	            // entity object data false
+	            if(treeNode.name.indexOf("/") < 0){
+	                eventHub.$emit('treenode-selected-event', treeNode.name);
+	                return false;
+	            }
+
+	            jQuery.ajax({
+	                url: '/mxobject/search',
+	                type: 'POST',
+	                dataType: 'json',
+	                data: {
+	                    cond: `#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`
+	                },
+	                beforeSend: function(xhr) {
+	                },
+	                complete: function(xhr, textStatus) {
+	                },
+	                success: function(data, textStatus, xhr) {
+	                    
+	                    if(!_.isEmpty(data.message)) {
+	                        var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
+	                        var nodes = tree.getSelectedNodes();
+	                        if (nodes && nodes.length>0) {
+	                            tree.removeChildNodes(nodes[0]);
+	                        }
+	                        
+	                        // append sub nodes
+	                        tree.addNodes(treeNode, data.message);
+
+	                    }
+	                    
+	                },
+	                error: function(xhr, textStatus, errorThrown) {
+	                    console.log(errorThrown);
+	                }
+	            });
+	        }
+	    }
+	
+	}
+	</script>
+
+</code>

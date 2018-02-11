@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+<head data-suburl="{{AppSubUrl}}">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="author" content="Matrix - Portal Service" />
+	<meta name="description" content="Matrix - Portal Service write in go" />
+	<meta name="keywords" content="matrix,bigdata,cassandra,go">
+	<meta name="referrer" content="no-referrer" />
+	<meta name="_csrf" content="{{.CsrfToken}}" />
+	<meta name="_suburl" content="{{AppSubUrl}}" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="shortcut icon" href="" id="favicon"/>
+	
+	<!--Jquery JS-->
+	<script src="{{AppSubUrl}}/web/lib/jquery/jquery-3.3.1.min.js"></script>
+	<!--Jquery UI JS-->
+	<script src="{{AppSubUrl}}/web/lib/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+	<!-- font-awesome  CSS -->
+	<link href="{{AppSubUrl}}/web/lib/font-awesome/4.7.1/css/font-awesome.min.css" rel="stylesheet" >
+	<!-- animate CSS -->
+	<link href="{{AppSubUrl}}/web/lib/animate/animate.min.css" rel="stylesheet" >
+
+	<!-- Bootstrap core CSS -->
+	<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
+	<script src="{{AppSubUrl}}/web/lib/less/dist/less.min.js"></script>
+	<!-- Less core JavaScript-->
+	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">-->
+	<script src="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+
+	<!-- Color Theme core CSS -->
+	<link href="{{AppSubUrl}}/web/css/color/color_style.min.css" rel="stylesheet">
+	<link href="{{AppSubUrl}}/web/css/color/color_style_responsive.min.css" rel="stylesheet">
+	<link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
+
+	<!-- sweetalert core CSS -->
+	<link href="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+	<!-- sweetalert core JS -->
+	<script src="{{AppSubUrl}}/web/lib/sweetalert2/dist/sweetalert2.min.js"></script>
+
+	<!-- Bootstrap Select CSS -->
+	<link href='{{AppSubUrl}}/web/lib/bootstrap-select/dist/css/bootstrap-select.min.css' rel='stylesheet' >
+	<!-- Bootstrap Select JS -->
+	<script src='{{AppSubUrl}}/web/lib/bootstrap-select/dist/js/bootstrap-select.min.js'></script>
+	
+	<!-- bootstrap-tagsinput core CSS -->
+	<link rel="stylesheet" href="{{AppSubUrl}}/web/lib/bootstrap-tagsinput/dist/bootstrap-tagsinput.css">
+	<script src="{{AppSubUrl}}/web/lib/bootstrap-tagsinput/dist/bootstrap-tagsinput.js"></script>
+
+	<!--lodash JS-->
+	<script src="{{AppSubUrl}}/web/lib/lodash/dist/lodash.min.js"></script>
+	
+	<!--Mark JS-->
+	<script src="{{AppSubUrl}}/web/lib/mark/dist/jquery.mark.min.js"></script>
+
+	<!--Util JS-->
+	<script src="{{AppSubUrl}}/web/lib/util/moment.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/util/moment-with-locales.min.js"></script>
+
+	<!-- Flatpickr JS & CSS-->	
+	<link href="{{AppSubUrl}}/web/lib/flatpickr/dist/flatpickr.min.css" rel="stylesheet" >
+	<script src="{{AppSubUrl}}/web/lib/flatpickr/dist/flatpickr.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/flatpickr/dist/l10n/zh.js"></script>
+	
+	<!--VUE Core JS-->
+	<script src="{{AppSubUrl}}/web/lib/vue/2.4.2/dist/vue.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/vueloader/vue.loader.min.js"></script>
+	
+	<!--Later Core JS-->
+	<script src="{{AppSubUrl}}/web/lib/later/later.js"></script>
+
+	<!-- localForage Core JS-->
+	<script src="{{AppSubUrl}}/web/lib/localForage/dist/localforage.min.js"></script>
+
+	<!-- ACE JS-->
+	<script src="{{AppSubUrl}}/web/lib/ace/src-noconflict/ace.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/ace/src-noconflict/ext-language_tools.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/ace/src-noconflict/ext-split.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/ace/src-noconflict/ext-settings_menu.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/ace/src-noconflict/ext-statusbar.js"></script>
+
+	<!-- Object-Hash JS-->
+	<script src="{{AppSubUrl}}/web/lib/object-hash/dist/object_hash.js"></script>
+	
+	<!-- Split Frame JS-->
+	<script src="{{AppSubUrl}}/web/lib/split/split.min.js"></script>
+	<!-- Tippy JS-->
+	<script src="{{AppSubUrl}}/web/lib/tippyjs/dist/tippy.all.min.js"></script>
+	<!-- iscroll JS-->
+	<script src="{{AppSubUrl}}/web/lib/iscroll/iscroll.js"></script>
+
+	<script src="{{AppSubUrl}}/web/js/util.js"></script>
+	<script src="{{AppSubUrl}}/web/js/cfg.js"></script>
+	<script src="{{AppSubUrl}}/web/js/init.js"></script>
+
+	<!--Pace Progress JS & CSS-->	
+	<script src="{{AppSubUrl}}/web/lib/pace/pace.min.js"></script>
+	<script>
+
+		$(document).ajaxStart(function() { Pace.restart(); });
+		
+		let lang = `{{.Lang}}`;
+		lang = lang.replace(/"/g,"");
+		moment.locale(lang);
+	</script>
+
+	<!--Defiant JS-->	
+	<script src="{{AppSubUrl}}/web/lib/defiantjs/defiant.min.js"></script>
+
+	<!--MXClient JS & CSS-->	
+	<script>
+		mxBasePath = '{{AppSubUrl}}/web/lib/mxgraph/src';
+		mxLanguage = '{{.Lang}}'.replace(/"/g,"").replace(/en/g,"eg").split("-")[0];
+	</script>
+	<script src="{{AppSubUrl}}/web/lib/mxgraph/src/js/mxClient.js" type="text/javascript"></script>
+	<link href="{{AppSubUrl}}/web/lib/mxgraph/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+	<script>
+		mxResources.add('{{AppSubUrl}}/web/lib/mxgraph/graph/resources/grapheditor');
+	</script>
+
+	<!-- Your project file goes here -->
+    <link href="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.contextMenu.css" type="text/css" rel="stylesheet">
+    <script src="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.ui.position.js"></script>
+    <script src="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.contextMenu.js"></script>
+
+	<!-- Bootstrap Table CSS -->
+	<link href="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table.min.css" rel="stylesheet">
+	<link href="{{AppSubUrl}}/web/lib/table/export/bootstrap-editable.css" rel="stylesheet">
+	<link href="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table-fixed-columns.css" rel="stylesheet">
+	<link href="{{AppSubUrl}}/web/lib/table/dragtable/dragtable.css" rel="stylesheet"
+	>
+	
+	<!--Bootstrap Table JS-->
+	<script src="{{AppSubUrl}}/web/lib/table/dragtable/dragtable.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/locale/bootstrap-table-{{.i18n.Tr "bootstrap_table_locate"}}.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/extensions/export/bootstrap-table-export.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/extensions/export/tableExport.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/extensions/reorder-columns/bootstrap-table-reorder-columns.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/extensions/editable/bootstrap-table-editable.js"></script>
+	<!--script src="{{AppSubUrl}}/web/lib/table/export/bootstrap-table-editable.js"></script-->
+	<!--script src="{{AppSubUrl}}/web/lib/table/export/bootstrap-editable.js"></script-->
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table-contextmenu.min.js"></script>
+	<script src="{{AppSubUrl}}/web/lib/table/bootstrap/bootstrap-table-fixed-columns.js"></script>
+	
+	<!-- X-editable Table JS & CSS-->
+	<link href="{{AppSubUrl}}/web/lib/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
+	<script src="{{AppSubUrl}}/web/lib/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+	
+	<!--Gauge JS-->
+	<script src="{{AppSubUrl}}/web/lib/gauge/gauge.min.js"></script>
+
+	<!--Clipboard JS-->
+	<script src="{{AppSubUrl}}/web/lib/clipboard/dist/clipboard.min.js"></script>
+	
+	<title> {{.SignedUser.Company.Fullname}}</title>
+
+	<style>
+		
+		body {
+			font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+			background-color: #ffffff; /*#f0f0f0;*/
+			overflow-x: hidden;
+		}
+
+		.container-fluid {
+		    margin-top: 5px;
+		    margin-bottom: 45px;
+		    margin: 5px -10px;
+		}
+		
+		#company_logo::selection {
+			background: #fff;
+			color: white;
+		}
+		
+		/* For mxWindwoPane Start*/
+		div.mxWindowPane {
+			overflow: auto!important;
+			background-color: #ffffff;
+		}
+		div.mxWindow{
+			z-index: 1000!important;
+
+		    -webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
+		    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
+		    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
+		}
+
+
+		/* For mxWindwoPane End*/
+
+		.navbar.navbar-default.navbar-fixed-top {
+			z-index: 999;
+			border-color: transparent!important;
+			background-color: #2195f4;/*#348fe2;*#03a9f4;*/
+			-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+    		box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+		}
+
+		
+		.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
+		    background-color: #03A9F4;
+		    color: #666;
+		}
+
+		.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:hover {
+		    background-color: #1db7fc;
+		    color: #666;
+		}
+
+		.navbar-default .navbar-nav > li > a.item.active {
+		    background-color: #fff;
+		    color: #666;
+		}
+
+		.navbar-default .navbar-nav > li > a.item {
+		    color: #fff;
+		}
+
+		.modal-header{
+			background-color: #2195f4;/*#348fe2;*/
+    		color: #ffffff;
+		}
+
+		.img-responsive{
+			max-width: 120px;
+			height: auto;
+		}
+
+	    /* For Table */
+
+	    .bootstrap-table > .fixed-table-toolbar > .columns > .btn-group > .dropdown-menu {
+	    	width: 220px;
+	    }
+
+	    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+			vertical-align: middle;
+		}
+
+		.bootstrap-table .table:not(.table-condensed), .bootstrap-table .table:not(.table-condensed) > tbody > tr > th, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > th, .bootstrap-table .table:not(.table-condensed) > thead > tr > td, .bootstrap-table .table:not(.table-condensed) > tbody > tr > td, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+	        padding: 4px!important;
+	        white-space: wrap;
+	    }
+
+	    /* For Table Click Change Cell Style */
+	    .cell-style-selected {
+			/*background-color: #b6c2ca!important;*/
+	    }
+
+		/* For Button default Style */
+	    .btn.btn-default.dropdown-toggle{
+	    	font-size: 12px;
+	    }
+
+	    /*----------  Pace Loading  ----------*/
+	    .btn.btn-primary {
+	    	background-color: rgb(33, 149, 244);
+	    }
+		
+		/*----------  mxWindow ----------*/
+	    html td.mxWindowTitle {
+			background-color: rgb(238, 238, 238);
+			background-image: linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224));
+		    background-repeat: repeat-x;
+	    }
+
+	    div.mxWindowPane {
+	        border-top: 1px solid rgb(221, 221, 221);
+	    }
+		
+		div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
+	    	min-height: calc(100vh - 330px);
+	    	max-height: calc(100vh - 140px);
+	    	overflow: auto;
+	    }
+		
+		/* dropdown-menu */
+	    .dropdown-menu {
+		    border: none;
+		    -webkit-box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
+		    box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
+		    font-size: 12px;
+		}
+
+		.dropdown-menu>li>a {
+		    padding: 5px 5px;
+		}
+
+	    .dropdown-menu > li > a > .fa {
+	    	color: rgb(33, 148, 245);
+	    }
+		
+		.dropdown-menu > li.context-menu-separator {
+	    	padding: 0;
+		    margin: .25em 0;
+		    border-bottom: 1px solid rgb(230, 230, 230);
+	    }
+
+	    .context-menu-icon.context-menu-icon--fa::before {
+		    color: rgb(33, 148, 245)!important;
+		}
+
+		.context-menu-item {
+		    padding: 0.25em 2em!important;
+		    color: rgb(71, 71, 71)!important;
+		    /*line-height: 1.428571;*/
+		}
+		.context-menu-hover {
+		    background-color: rgb(237, 240, 246)!important;
+		}
+	</style>
+</head>
+<body>
+	
+	<noscript>Please enable JavaScript in your browser!</noscript>
+	<div id="page-container" class="page-sidebar-fixed page-header-fixed">
+		
+		<div class="navbar navbar-default navbar-fixed-top">
+			<div class="container-fluid" style="margin:0px;padding:0px;">
+				
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#">
+						<img id="company_logo" src="">
+					</a>
+			    </div>
+
+			    <ul class="nav navbar-nav navbar-right">
+
+					{{if .IsSigned}}
+
+						
+						<li id="robot">
+						</li>
+
+						<li>
+							<a class="head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"><i class="fa fa-home fa-fw"></i> &nbsp;{{.i18n.Tr "home"}}</a>
+						</li>
+
+						<li class="current-active-item"></li>
+
+					{{else}}
+						<li>
+							<a class="{{if .PageIsInfo}} active{{end}}" href="{{AppSubUrl}}/"><i class="icon-comment"></i> &nbsp;{{.i18n.Tr "info"}}</a>
+						</li>
+					{{end}}
+
+
+					{{if .IsSigned}}
+
+						<li class="dropdown">
+
+							<a id="drop3" href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								<!--img class="ui mini image" src="{{.SignedUser.AvatarLink}}"-->
+								<i class="fa fa-user"></i> {{.SignedUser.Name}}
+								<i class="caret"></i>
+							</a>
+
+							<ul class="dropdown-menu" aria-labelledby="drop3" style="padding:10px 0px;">
+								<li>
+									<a href="{{AppSubUrl}}/janesware/user?name={{.SignedUser.Name}}">
+										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}} 
+									</a>
+								</li>
+								{{if .IsAdmin}}
+									<li role="separator" class="divider"></li>
+									<li>
+										<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
+											<i class="fa fa-cogs"></i>
+											{{.i18n.Tr "system"}}<!-- Admin Panel -->
+										</a>
+									</li>
+								{{end}}
+								<li role="separator" class="divider"></li>
+								<li>
+									<a target="_blank" href="/janesware/files">
+										<i class="fa fa-files-o"></i>
+										{{.i18n.Tr "files"}}
+									</a>
+								</li>
+								<li role="separator" class="divider"></li>
+								<li>
+									<a target="_blank" href="/janesware/api">
+										<i class="fa fa-gear"></i>
+										REST API
+									</a>
+								</li>
+								<li role="separator" class="divider"></li>
+								<li>
+									<a href="{{AppSubUrl}}/user/logout/{{.company}}">
+										<i class="fa fa-sign-out"></i>
+										{{.i18n.Tr "sign_out"}}<!-- Sign Out -->
+									</a>
+								</li>
+							</ul>
+						</li>
+
+					{{else}}
+						<li>
+							<a class="item" target="_blank" href="http://golang.org/" rel="noreferrer">{{.i18n.Tr "help"}}</a>
+						</li>
+
+						{{if .ShowRegistrationButton}}
+							<li>
+								<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
+									<i class="icon octicon octicon-person-add"></i> {{.i18n.Tr "register"}}
+								</a>
+							</li>
+						{{end}}
+						<li>
+							<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login">
+								<i class="icon octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
+							</a>
+						</li>
+
+					{{end}}
+
+				</ul>
+
+			</div><!-- end container -->
+		</div>
+	
+{{/*
+
+</body>
+</html>
+*/}}

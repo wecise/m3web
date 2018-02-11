@@ -1,0 +1,24 @@
+
+<style>
+.vue-sample-1 {
+	display: inline-block;
+	background-color: lightblue;
+}
+</style>
+
+<template>
+	<div class="vue-sample-1">
+		vue component sample
+		{{info}}
+	</div>
+</template>
+
+<script id="vue-sample-1">
+{
+	props: {
+		info: { default: "test 1", },
+	},
+	methods: {
+	},
+}
+</script>

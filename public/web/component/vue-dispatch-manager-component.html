@@ -1,0 +1,520 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.vue-dispatch-manager-component{
+			border:1px solid #efefef;
+		}
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-dispatch-manager-component"  ----------*/
+	<template>
+		<div>
+			<!-- TAB NAVIGATION -->
+			<ul class="nav nav-tabs nav-tabs-no-bg" role="tablist">
+				<li class="active"><a href="#tab11" role="tab" data-toggle="tab">脚本管理</a></li>
+				<li><a href="#tab22" role="tab" data-toggle="tab">下发向导</a></li>
+			</ul>
+			<!-- TAB CONTENT -->
+			<div class="tab-content">
+				<div class="active tab-pane fade in" id="tab11">
+					<vue-script-manager-component></vue-script-manager-component>
+				</div>
+				<div class="tab-pane fade" id="tab22">
+					<div id="wizard" class="bwizard clearfix">
+						<ol class="bwizard-steps clearfix">
+							<li class="active">
+								<span class="label badge-inverse">1</span>
+								<a href="#step1">
+									全局设置
+								</a>
+								<a href="#step1">
+									<small>运行策略，环境变量设置。</small>
+								</a>
+								<a href="#step1"></a>
+							</li>
+							<li>
+								<span class="label">2</span>
+								<a href="#step2">
+									部署对象
+								</a>
+								<a href="#step2">
+									<small>选择部署对象。</small>
+								</a>
+								<a href="#step2"></a>
+							</li>
+							<li>
+								<span class="label">3</span>
+								<a href="#step3">
+									处理规则
+								</a>
+								<a href="#step3">
+									<small>数据处理规则，KPI选择。</small>
+								</a>
+								<a href="#step3"></a>
+							</li>
+							<li>
+								<span class="label">4</span>
+								<a href="#step4">
+									开始下发
+								</a>
+								<a href="#step4">
+									<small>下发开始，状态监控。</small>
+								</a>
+								<a href="#step4"></a>
+							</li>
+						</ol>
+
+						<div class="tab-content">
+							<div id="step1" class="bwizard-activated">
+								<fieldset>
+									<h5 class="pull-left width-full">运行策略</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-4 -->
+										<div class="col-md-12">
+											<div class="form-group">
+												<input type="text" name="firstname" placeholder="John" class="form-control" value="cron 5 0 * * *">
+											</div>
+										</div>
+										<!-- end col-4 -->
+									</div>
+									<!-- end row -->
+									<h5 class="pull-left width-full">环境变量</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-4 -->
+										<div class="col-md-12">
+											<div class="form-group">
+												<div class="input-group">
+													<input type="text" class="form-control"
+														   placeholder="输入环境变量" value="ETCDPATH=localhost:2380">
+													<div class="input-group-addon btn btn-default">+</div>
+												</div>
+											</div>
+										</div>
+										<!-- end col-4 -->
+									</div>
+									<!-- end row -->
+								</fieldset>
+							</div>
+							<div id="step2" class="tab-pane">
+								<fieldset>
+									<h5 class="pull-left width-full">部署对象</h5>
+									<!-- begin row -->
+									<div class="row">
+										<div class="col-md-12">
+											<div role="tabpanel" id="dispatch-server">
+												<!-- Nav tabs -->
+												<ul class="nav nav-tabs nav-main  nav-tabs-no-bg" role="tablist">
+													<li role="presentation" class="active" id="dispatch-server-li-linux">
+														<a href="#linux" aria-controls="linux" role="tab" data-toggle="tab">Linux</a>
+													</li>
+													<li role="presentation" id="dispatch-server-li-unix">
+														<a href="#unix" aria-controls="unix" role="tab" data-toggle="tab">Unix</a>
+													</li>
+													<li role="presentation" id="dispatch-server-li-windows">
+														<a href="#windows" aria-controls="windows" role="tab"
+														   data-toggle="tab">Windows</a>
+													</li>
+													<li role="presentation">
+														<a href="#newServerGroup" aria-controls="newServerGroup" role="tab"
+														   data-toggle="tab"><i class="fa fa-plus fa-fw"></i> 新建服务器组</a>
+													</li>
+												</ul>
+
+												<!-- Tab panes -->
+												<div class="tab-content">
+													<div role="tabpanel" class="tab-pane active" id="linux">
+														<vue-base-table-component :columns="linux.columns" :options="linux.options"
+																				  :dataset="linux.dataset"></vue-base-table-component>
+													</div>
+													<div role="tabpanel" class="tab-pane" id="unix">
+														<vue-base-table-component :columns="unix.columns" :options="unix.options"
+																				  :dataset="unix.dataset"></vue-base-table-component>
+													</div>
+													<div role="tabpanel" class="tab-pane" id="windows">
+														<vue-base-table-component :columns="windows.columns"
+																				  :options="windows.options"
+																				  :dataset="windows.dataset"></vue-base-table-component>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<!-- end row -->
+									<h5 class="pull-left width-full">运行策略</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-4 -->
+										<div class="col-md-12">
+											<div class="form-group">
+												<input type="text" name="firstname" placeholder="John" class="form-control" value="cron 5 0 * * *">
+											</div>
+										</div>
+										<!-- end col-4 -->
+									</div>
+									<!-- end row -->
+									<h5 class="pull-left width-full">环境变量</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-4 -->
+										<div class="col-md-12">
+											<div class="form-group">
+												<div class="input-group">
+													<input type="text" class="form-control"
+														   placeholder="输入环境变量" value="ETCDPATH=localhost:2380">
+													<div class="input-group-addon btn btn-default">+</div>
+												</div>
+											</div>
+										</div>
+										<!-- end col-4 -->
+									</div>
+									<!-- end row -->
+								</fieldset>
+							</div>
+							<div id="step3" class="tab-pane">
+								<fieldset>
+									<h5 class="pull-left width-full">处理规则</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-12 -->
+										<div class="col-md-12">
+											<div class="btn-group">
+
+												<button type="button" class="btn btn-sm btn-grey">引用规则：cpu_linux</button>
+												<button type="button" class="btn btn-sm btn-grey dropdown-toggle"
+														data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+													<span class="caret"></span>
+												</button>
+												<ul class="dropdown-menu">
+													<li><a href="#">cpu_linux</a></li>
+													<li><a href="#">performance_linux</a></li>
+													<li><a href="#">log_apache</a></li>
+													<li role="separator" class="divider"></li>
+													<li><a href="#">新建规则</a></li>
+												</ul>
+											</div>
+											<div class="pull-right">
+												<a href="javascript:void(0);" class="btn btn-sm btn-success"> 指标选择</a>
+											</div>
+											<BR/><BR/>
+											<pre id="rules-config"></pre>
+										</div>
+										<!-- end col-12 -->
+									</div>
+									<!-- end row -->
+								</fieldset>
+							</div>
+							<div id="step4" class="tab-pane">
+								<fieldset>
+									<a href="javascript:void(0)" class="btn btn-success">开始下发</a>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-12 -->
+
+										<!-- end col-12 -->
+									</div>
+									<!-- end row -->
+								</fieldset>
+							</div>
+						</div>
+						<ul class="pager bwizard-buttons">
+							<li class="previous disabled" role="button" aria-disabled="true"><a href="#">← 前一步</a></li>
+							<li class="next" role="button" aria-disabled="false"><a href="#">下一步 →</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-dispatch-manager-component">
+	{
+		delimiters: ['${', '}'],
+		data: function () {
+			return {
+				dispatchTreeNodes: {},
+				agentModel: [
+					{name: "bin", type: "isFolder"},
+					{name: "cfg", type: "isFolder"},
+					{name: "etc", type: "isFolder"},
+					{name: "log", type: "isFolder"},
+					{name: "readme.txt", type: "file"},
+				],
+                selectedScript: "",
+                dispatch: {
+                    columns: [
+                        {
+                            title: '脚本',
+                            field: 'name',
+                            align: 'left',
+                            valign: 'middle',
+                            sortable: true,
+                        },
+                        {
+                            title: '指标',
+                            field: 'kpi',
+                            sortable: true,
+                            align: 'left',
+                        },
+                        {
+                            title: '创建时间',
+                            field: 'ctime',
+                            sortable: true,
+                            align: 'center',
+                            formatter: function(value, row, index) {
+											return moment(_.now()).format('LLL');
+							           }
+                        }
+                    ],
+                    options: {
+                        classes: 'table table-hover table-striped',
+                        clickToSelect: true,
+                        locale: 'zh-CN',
+                    },
+                    dataset: [],
+                },
+                linux: {
+                    columns: [
+                        {
+                            field: "state",
+                            checkbox: "true"
+                        },
+                        {
+                            field: 'host',
+                            title: 'Host',
+                            sortable: true,
+                            align: 'left'
+                        },
+                        {
+                            field: 'ip',
+                            title: 'IP',
+                            sortable: true,
+                            align: 'center'
+                        },
+                        {
+                            field: 'config',
+                            title: 'Config',
+                            align: 'left',
+
+                        }
+                    ],
+                    options: {
+                        classes: 'table table-hover table-striped table-linux',
+                        pagination: false,
+                        search: false,
+                        clickToSelect: true,
+                        maintainSelected: true,
+                        locale: 'zh-CN',
+                    },
+                    dataset: [
+                        {
+                            "host": 'mxsvr201',
+                            "ip": '192.168.31.201',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr211',
+                            "ip": '192.168.31.211',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr221',
+                            "ip": '192.168.31.221',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr231',
+                            "ip": '192.168.31.231',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr232',
+                            "ip": '192.168.31.232',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        }
+                    ]
+                },
+                unix: {
+                    columns: [
+                        {
+                            field: "state",
+                            checkbox: "true"
+                        },
+                        {
+                            field: 'host',
+                            title: 'Host',
+                            sortable: true,
+                            align: 'left'
+                        },
+                        {
+                            field: 'ip',
+                            title: 'IP',
+                            sortable: true,
+                            align: 'center'
+                        },
+                        {
+                            field: 'config',
+                            title: 'Config',
+                            align: 'left',
+
+                        }
+                    ],
+                    options: {
+                        classes: 'table table-hover table-striped table-unix',
+                        pagination: true,
+                        search: true,
+                        clickToSelect: true,
+                        maintainSelected: true,
+                        locale: 'zh-CN',
+                    },
+                    dataset: [
+                        {
+                            "host": 'mxsvr201',
+                            "ip": '192.168.31.201',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr211',
+                            "ip": '192.168.31.211',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr221',
+                            "ip": '192.168.31.221',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr231',
+                            "ip": '192.168.31.231',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr232',
+                            "ip": '192.168.31.232',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        }
+                    ]
+                },
+                windows: {
+                    columns: [
+                        {
+                            field: "state",
+                            checkbox: "true"
+                        },
+                        {
+                            field: 'host',
+                            title: 'Host',
+                            sortable: true,
+                            align: 'left'
+                        },
+                        {
+                            field: 'ip',
+                            title: 'IP',
+                            sortable: true,
+                            align: 'center'
+                        },
+                        {
+                            field: 'config',
+                            title: 'Config',
+                            align: 'left',
+
+                        }
+                    ],
+                    options: {
+                        classes: 'table table-hover table-striped table-windows',
+                        pagination: true,
+                        search: true,
+                        clickToSelect: true,
+                        maintainSelected: true,
+                        locale: 'zh-CN',
+                    },
+                    dataset: [
+                        {
+                            "host": 'mxsvr201',
+                            "ip": '192.168.31.201',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr211',
+                            "ip": '192.168.31.211',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr221',
+                            "ip": '192.168.31.221',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr231',
+                            "ip": '192.168.31.231',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        },
+                        {
+                            "host": 'mxsvr232',
+                            "ip": '192.168.31.232',
+                            "config": '4C 16GB Linux mxsvr221 3.10.0-327.el7.x86_64'
+                        }
+                    ]
+                }
+			}
+		},
+        mounted: function () {
+            var self = this;
+
+            self.$nextTick(function () {
+
+            })
+        },
+		methods: {
+			toggleEvent: function (event) {
+			    let self = this;
+
+                self.loadTreeData('/', 'dispatchTreeNodes');
+
+			},
+			toggleView: function (event) {
+                let self = this;
+
+				self.currentView = event;
+			},
+			loadTreeData: function (event, param) {
+				let self = this;
+
+				jQuery.ajax({
+					url: '/mxconfig/get',
+					type: 'POST',
+					dataType: 'json',
+					data: {
+						key: event
+					},
+					beforeSend: function (xhr) {
+					},
+					complete: function (xhr, textStatus) {
+					},
+					success: function (data, textStatus, xhr) {
+						var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
+						self[param] = rtn.message.node;
+
+					},
+					error: function (xhr, textStatus, errorThrown) {
+					}
+				});
+			},
+			newGroup: function () {
+
+			},
+			newUser: function () {
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>
+

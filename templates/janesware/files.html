@@ -1,0 +1,1463 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<!-- zTree Core CSS -->
+<!--link href="{{AppSubUrl}}/web/lib/tree/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet"-->
+<link href="{{AppSubUrl}}/web/lib/tree/zTree/css/font-awesome/font-awesome-zTree.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/lib/tree/zTree/css/font-awesome/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+<link href="{{AppSubUrl}}/web/lib/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
+
+<!-- Contextmenu core CSS -->
+<link href="{{AppSubUrl}}/web/lib/contextmenu/contextmenu.css"  rel="stylesheet" >
+
+<link href="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.contextMenu.min.css" rel="stylesheet" />
+
+<style>
+    body {
+        background-color: #d9e0e7;
+    }
+
+    .btn.dropdown-toggle {
+        padding: 7px 12px;
+        border-radius: 0px;
+    }
+
+    /* For zTree */
+    .ztree{
+        overflow: auto;
+    }
+
+    .p-20 {
+        padding: 10px 30px!important;
+    }
+
+</style>
+
+<div id="app"></div>
+
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/lib/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+
+<!-- Contextmenu core JS -->
+<script src="{{AppSubUrl}}/web/lib/contextmenu/contextmenu.js"></script>
+
+<script src="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.contextMenu.js" ></script>
+<script src="{{AppSubUrl}}/web/lib/jquery-contextmenu/dist/jquery.ui.position.min.js" ></script>
+
+<script src="{{AppSubUrl}}/web/js/{{.Lang}}/app.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+    /**
+     * @author cnwangzd
+     * @todo Vue
+     */
+    
+    wait(500);
+
+    $(function() {
+
+        var timeoutId = 0;
+
+        var eventHub = new Vue();
+
+        const ENTITIES_OBJECT = {
+                                    '/matrix/entities/biz': {name:'业务'},
+                                    '/matrix/entities/app': {name:'应用'},
+                                    '/matrix/entities/host': {name:'服务器'},
+                                    '/matrix/entities/network': {name:'网络'},
+                                    '/matrix/entities/cluster': {name:'集群'},
+                                    '/matrix/entities/storage': {name:'存储'}
+                                };
+
+        Vue.component('tree-component',{
+            template: '<ul class="ztree"></ul>',
+            data: function(){
+                return {
+                    zTree: Object,
+                    setting: Object,
+                    nodes: Array,
+                }
+            },
+            created:function(){
+                var self = this;
+
+                eventHub.$on('tree-refresh-event',self.refresh);
+
+                self.init();
+            },
+            mounted: function() {
+                var self = this;
+
+                self.$nextTick(function(){
+                    
+                    self.setting = {
+                                    view: {
+                                        showLine: true,
+                                        selectedMulti: false,
+                                        dblClickExpand: false
+                                    },
+                                    edit: {
+                                        enable: false,
+                                    },
+                                    data: {
+                                        simpleData: {
+                                            enable: true
+                                        },
+                                        key: {
+                                            name: 'title',
+                                            title: "title"
+                                        }
+                                    },
+                                    callback: {
+                                        onClick: self.onClick,
+                                    }
+                                };
+
+                })
+            },
+            watch: {
+                setting: {
+                    handler:function(val, oldVal){
+                        var self = this;
+
+                        self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
+                    },
+                    deep: true
+                },
+                nodes: {
+                    handler:function(val, oldVal){
+                        var self = this;
+
+                        self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
+
+                        eventHub.$emit('file-view-event', _.filter(val,function(v){if(v.id > 1) return v;}));
+                    },
+                    deep: true
+                }
+            },
+            methods: {
+                init: function() {
+                    var self = this;
+                    
+                    jQuery.ajax({
+                        url: '/fs/home',
+                        type: 'GET',
+                        data: {
+                            type: 'dir'
+                        },
+                        dataType: 'text json',
+                        contentType: "application/text; charset=utf-8",
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            console.log(JSON.stringify(data.message))
+                            if(_.isEmpty(data.message)){
+                                self.nodes = [];
+                            } else {
+                                self.nodes = _.map(data.message,function(v,k){
+                                                var type = "dir";
+                                                
+                                                if(!_.isEmpty(v.type)){
+                                                    type = v.type;
+                                                }
+
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: type});
+                                             });
+                            }
+
+                            self.nodes.push({id:1, pId: -1, isParent: true, name: 'home', title: 'Documents', type: 'dir', open:true});
+                            
+                            self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(errorThrown);
+                        }
+                    });
+                },
+                refresh: function(event){
+                    var self = this;
+                    var url = "/fs/home";
+
+                    if(!_.isEmpty(event)){
+                        url = url + '/' +  event.name
+                    }
+                    console.log(111,url)
+                    jQuery.ajax({
+                        url: url,
+                        type: 'GET',
+                        data: {
+                            type: 'dir'
+                        },
+                        dataType: 'text json',
+                        contentType: "application/text; charset=utf-8",
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            
+                            if(_.isEmpty(data.message)){
+                                self.nodes = [];
+                            } else {
+                                self.nodes = _.map(data.message,function(v,k){
+                                                var type = "dir";
+                                                
+                                                if(!_.isEmpty(v.type)){
+                                                    type = v.type;
+                                                }
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: type});
+                                             });
+                            }
+
+                            self.nodes.push({id:1, pId: -1, isParent: true, name: 'home', title: '我的所有文件', type: 'dir', open:true});
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(errorThrown);
+                        }
+                    });
+                },
+                onClick: function(event, treeId, treeNode) {
+                    var self = this;
+                    
+                    if(!treeNode.isParent) return false;
+                    
+                    if(treeNode.type === 'dir' && treeNode.id === 1){
+                        self.refresh(null);
+                        return false;
+                    } else if(treeNode.type === 'dir'){
+                        jQuery.ajax({
+                            url: url = '/fs/home/' + treeNode.name,
+                            type: 'GET',
+                            dataType: 'text json',
+                            data: {
+                                type: 'dir'
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                if(!_.isEmpty(data.message)) {
+
+                                    var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
+                                    var nodes = tree.getSelectedNodes();
+                                    if (nodes && nodes.length>0) {
+                                        tree.removeChildNodes(nodes[0]);
+                                    }
+                                    
+                                    // append sub nodes
+                                    var subNodes = _.map(data.message,function(v,k){
+                                                        var type = "dir";
+                                            
+                                                        if(!_.isEmpty(v.type)){
+                                                            type = v.type;
+                                                        }
+                                                        return _.merge(v, { pId: treeNode.id, isParent: v.isdir, title: v.name, type: type})
+                                                    });
+
+                                    tree.addNodes(treeNode, subNodes);
+                                    
+                                    var parentObj = [{id: treeNode.id, name: treeNode.parent, title: "上一级", parent:treeNode.name, type: 'parent'}];
+                                    subNodes.unshift(parentObj[0]);
+                                    eventHub.$emit('file-view-event', _.filter(subNodes,function(v){if(v.id > 1) return v;}));
+                                }
+                                
+                                //if(!treeNode.isParent) {
+                                    //console.log(222,treeNode.name)
+                                    //eventHub.$emit('node-selected-event', treeNode.name);
+                                //}
+                                
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                console.log(errorThrown);
+                            }
+                        });
+                    }
+
+                    
+                }
+            }
+        })
+
+        Vue.component('bootstraptag-component', {
+            delimiters: ['${', '}'],
+            template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
+            mounted: function() {
+                var self = this;
+
+                self.$nextTick(function() {
+                    self.init();
+                })
+            },
+            methods: {
+                init: function() {
+                    var self = this;
+
+                    $(self.$el).tagsinput({
+                        tagClass: function(item) {
+
+                            if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                return 'label label-danger label-important';
+                            } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                return 'label label-warning';
+                            } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                return 'label label-primary';
+                            } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                return 'label label-success';
+                            } else if (item.indexOf("黑色") > -1) {
+                                return 'label label-default';
+                            } else {
+                                return 'label label-default';
+                            }
+                        },
+                    })
+
+                    $(self.$el).on('itemAdded', function(event) {
+
+                        var oneLevelLoading;
+                        var index = $(this).data("index");
+
+                        self.model[index].tag._all.push(event.item);
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(self.model[index]),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                                oneLevelLoading = layer.load(3, {
+                                    shade: [0.1, '#ccc'],
+                                    time: 30 * 1000
+                                });
+                            },
+                            complete: function(xhr, textStatus) {
+                                layer.close(oneLevelLoading);
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                layer.close(oneLevelLoading);
+                            }
+                        });
+                    })
+
+                    $(self.$el).on('itemRemoved', function(event) {
+
+                        var oneLevelLoading;
+
+                        var index = $(this).data("index");
+
+                        self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(self.model[index]),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                                oneLevelLoading = layer.load(3, {
+                                    shade: [0.1, '#ccc'],
+                                    time: 30 * 1000
+                                });
+                            },
+                            complete: function(xhr, textStatus) {
+                                layer.close(oneLevelLoading);
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                layer.close(oneLevelLoading);
+                            }
+                        });
+                    })
+                }
+            }
+        })
+
+        Vue.component('file-view-component',{
+            delimiters: ['${', '}'],
+            template: `#file-view-component-template`,
+            data: function(){
+                return {
+                    model: {
+                        list: [],
+                        theme: "",
+                        parse: {
+                            list: []
+                        }
+                    },
+                    contextmenu: {
+                        container: {},
+                        dir: {},
+                        file: {},
+                        selected: {}
+                    },
+                    upload:{
+                        option: {
+                                    url: '/fs/home',
+                                    dataType: 'json',
+                                    autoUpload: false,
+                                    acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt)$/i,
+                                    maxFileSize: 999000,
+                                    disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
+                                    previewMaxWidth: 100,
+                                    previewMaxHeight: 100,
+                                    previewCrop: true
+                                },
+                        swal: {}
+                    },
+                    currentView: 'file-view-icon-component',
+                }
+            },
+            mounted: function() {
+                var self = this;
+
+                self.$nextTick(function() {
+                    self.init();
+
+                    $(self.$el).dblclick(function(){
+                        $(self.$el).find('.btn-info').removeClass('btn btn-info');
+                    })
+                })
+            },
+            watch: {
+                'contextmenu.selected': {
+                    handler: function(val,oldVal){
+                                var self = this;
+
+                                if(val.type === 'dir'){
+                                    $('#fileupload').fileupload({url: '/fs' + val.parent + '/' + val.name});
+                                }
+                             },
+                    deep:true
+                }
+            },
+            created: function(){
+                var self = this;
+
+                eventHub.$on('file-view-event', self.setData);
+
+                eventHub.$on("file-mouseover-event",self.mouseOver);
+                eventHub.$on("file-mouseout-event",self.mouseOut);
+                eventHub.$on("file-click-event",self.click);
+                eventHub.$on("file-dblclick-event",self.dblClick);
+                eventHub.$on("file-rightclick-event",self.rightClick);
+
+            },
+            methods: {
+                init: function(){
+                    var self = this;
+
+                    self.initContentMenu();
+                    self.initFileUpload();
+
+                },
+                initFileUpload: function(){
+                    var self = this;
+                    var uploadButton = $('<button/>')
+                                        .addClass('btn btn-primary')
+                                        .prop('disabled', true)
+                                        .text('Processing...')
+                                        .on('click', function () {
+                                            var $this = $(this),
+                                                data = $this.data();
+                                            $this
+                                                .off('click')
+                                                .text('中止')
+                                                .on('click', function () {
+                                                    $this.remove();
+                                                    data.abort();
+                                                });
+                                            data.submit().always(function () {
+                                                $this.remove();
+                                            });
+                                        });
+                    
+                    $('#fileupload').fileupload(self.upload.option)
+                    .on('fileuploadadd', function (e, data) {
+                        self.swal = swal({
+                                        title: '',
+                                        type: 'info',
+                                        html:`  <div id="progress" class="progress">
+                                                    <div class="progress-bar progress-bar-success"></div>
+                                                </div>
+                                                <div id="files" class="files"></div>`,
+                                        showConfirmButton: false,
+                                    });
+                        data.context = $('<div/>').appendTo('#files');
+                        $.each(data.files, function (index, file) {
+                            var node = $('<p/>')
+                                    .append($('<span/>').text(file.name));
+                            if (!index) {
+                                node
+                                    .append('<br>')
+                                    .append(uploadButton.clone(true).data(data));
+                            }
+                            node.appendTo(data.context);
+                        });
+                    })
+                    .on('fileuploadprocessalways', function (e, data) {
+                        var index = data.index,
+                            file = data.files[index],
+                            node = $(data.context.children()[index]);
+                        if (file.preview) {
+                            node
+                                .prepend('<hr>')
+                                .prepend(file.preview);
+                        }
+                        if (file.error) {
+                            node
+                                .append('<hr>')
+                                .append($('<span class="text-danger"/>').text(file.error));
+                        }
+                        if (index + 1 === data.files.length) {
+                            data.context.find('button')
+                                .text('上传')
+                                .prop('disabled', !!data.files.error);
+                        }
+                    })
+                    .on('fileuploadprogressall', function (e, data) {
+                        var progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css(
+                            'width',
+                            progress + '%'
+                        );
+                    })
+                    .on('fileuploaddone', function (e, data) {
+                        $.each(data.result.files, function (index, file) {
+                            if (file.url) {
+                                var link = $('<a>')
+                                    .attr('target', '_blank')
+                                    .prop('href', file.url);
+                                $(data.context.children()[index])
+                                    .wrap(link);
+                            } else if (file.error) {
+                                var error = $('<span class="text-danger"/>').text(file.error);
+                                $(data.context.children()[index])
+                                    .append('<br>')
+                                    .append(error);
+                            }
+                        });
+
+                        eventHub.$emit('tree-refresh-event',null);
+
+                        swal.close();
+                        
+                    })
+                    .on('fileuploadfail', function (e, data) {
+                        $.each(data.files, function (index) {
+                            var error = $('<span class="text-danger"/>').text('上传失败。');
+                            $(data.context.children()[index])
+                                .append('<br>')
+                                .append(error);
+                        });
+                        swal.close();
+                    })
+                    .prop('disabled', !$.support.fileInput)
+                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+                },
+                initContentMenu: function(){
+                    var self = this;
+
+                    self.contextmenu.dir = contextmenu([
+                                            {
+                                                label: "打开",
+                                                onclick: function (e){
+                                                    self.open(self.contextmenu.selected);
+                                                }},
+                                            {
+                                                label: "下载",
+                                                onclick: function (e){
+                                                    self.download(self.contextmenu.selected);
+                                                }
+                                            },
+                                            {hr : true},
+                                            {
+                                                label: "新建文件夹",
+                                                onclick: function (e){
+                                                    self.mkdir(self.contextmenu.selected);
+                                                }
+                                            } ,
+                                            {
+                                                label: "新建文件",
+                                                onclick: function (e){
+                                                    self.mkfile(self.contextmenu.selected);
+                                                }
+                                            },
+                                            {hr : true},
+                                            {
+                                                label: "删除",
+                                                onclick: function(e){
+                                                    self.delete(self.contextmenu.selected);
+                                                }
+                                            }
+                                        ]);
+
+                    self.contextmenu.file = contextmenu([
+                                            {
+                                                label: "打开",
+                                                onclick: function (e){
+                                                    self.open(self.contextmenu.selected);
+                                                }},
+                                            {
+                                                label: "下载",
+                                                onclick: function (e){
+                                                    self.download(self.contextmenu.selected);
+                                                }
+                                            },
+                                            {hr : true},
+                                            {
+                                                label: "删除",
+                                                onclick: function(e){
+                                                    self.delete(self.contextmenu.selected);
+                                                }
+                                            }
+                                        ]);
+
+                    contextmenu.attach($("#files-container"), self.contextmenu.dir);
+
+                    //contextmenu.show(self.contextmenu.container, 300, 200);
+                    //contextmenu.show(self.contextmenu.dir, 300, 200);
+                    //contextmenu.show(self.contextmenu.file, 300, 200);
+                },
+                mouseOver: function(event){
+                    var self = this;
+                    
+                    //$('#file_'+event.id).css({'background-color':'#caecfb'});
+
+                },
+                mouseOut: function(event){
+                    var self = this;
+
+                    $('#file_'+event.id).css({'background-color':''});
+                },
+                click: function(event){
+                    var self = this;
+
+                    $(self.$el).find('.btn-info').removeClass('btn btn-info');
+                    $('#file_'+event.id).addClass('btn btn-info');
+
+
+                    self.contextmenu.selected = event;
+
+                },
+                dblClick: function(event){
+                    var self = this;
+                    var parentObj = [{id: _.random(event.id), name: event.parent, title: "上一级", parent:event.name, type: 'parent'}];
+
+                    self.contextmenu.selected = event;
+                    
+                    if(event.type === 'dir') {
+                        jQuery.ajax({
+                            url: '/fs/home/' + event.name,
+                            type: 'GET',
+                            dataType: 'text json',
+                            contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'dir'
+                            },
+                            beforeSend: function(xhr) {
+                                oneLevelLoading = layer.load(3, {
+                                    shade: [0.1, '#ccc'],
+                                    time: 30 * 1000
+                                });
+                            },
+                            complete: function(xhr, textStatus) {
+                                layer.close(oneLevelLoading);
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                var rtn = data.message;
+
+                                if(!_.isEmpty(rtn)){
+                                    rtn = _.map(rtn, function(v,k){
+                                                return _.merge(v,{title:v.name});
+                                            });
+                                    rtn.unshift(parentObj[0]);
+                                    eventHub.$emit('file-view-event', rtn);
+                                } else {
+                                    eventHub.$emit('file-view-event', parentObj);
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                layer.close(oneLevelLoading);
+                                console.log(errorThrown);
+                            }
+                        });
+                    } else if(event.type === 'parent'){
+
+                        jQuery.ajax({
+                            url: '/fs/home/' + event.parent,
+                            type: 'GET',
+                            dataType: 'text json',
+                            contentType: "application/text; charset=utf-8",
+                            data: {
+                                type: 'dir'
+                            },
+                            beforeSend: function(xhr) {
+                                oneLevelLoading = layer.load(3, {
+                                    shade: [0.1, '#ccc'],
+                                    time: 30 * 1000
+                                });
+                            },
+                            complete: function(xhr, textStatus) {
+                                layer.close(oneLevelLoading);
+                            },
+                            success: function(data, textStatus, xhr) {
+                                
+                                var rtn = data.message;
+
+                                if(!_.isEmpty(rtn)){
+                                    rtn = _.map(rtn, function(v,k){
+                                                return _.merge(v,{title:v.name});
+                                            });
+                                    rtn.unshift(parentObj[0]);
+                                    eventHub.$emit('file-view-event', rtn);
+                                } else {
+                                    eventHub.$emit('file-view-event', parentObj);
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                layer.close(oneLevelLoading);
+                                console.log(errorThrown);
+                            }
+                        });
+                    } else {
+                        self.open();
+                    }
+                },
+                rightClick: function(event){
+                    var self = this;
+
+                    alert(event.name)
+                },
+                setData: function(event) {
+                    var self = this;
+                    
+                    self.model.list = event;
+                },
+                mkdir: function(){
+                    var self = this;
+                    
+                    swal({
+                        title: '输入名称',
+                        input: 'text',
+                        showCancelButton: true,
+                        confirmButtonText:'确定',
+                        cancelButtonText:'取消',
+                        inputValidator: function (value) {
+                            return new Promise(function (resolve, reject) {
+                                if (value) {
+                                    var url = "";
+
+                                    if(_.isEmpty(self.contextmenu.selected.name)){
+                                        url = '/fs/home/' + value;
+                                    } else {
+                                        url = '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name + '/' + value;
+                                    }
+                                    console.log(url)
+                                    jQuery.ajax({
+                                        url: url,
+                                        type: 'PUT',
+                                        dataType: 'text',
+                                        contentType: "application/x-www-form-urlencoded",
+                                        data: {
+                                            type:'dir'
+                                        },
+                                        beforeSend: function(xhr) {
+                                            oneLevelLoading = layer.load(3, {
+                                                shade: [0.1, '#ccc'],
+                                                time: 30 * 1000
+                                            });
+                                        },
+                                        complete: function(xhr, textStatus) {
+                                            layer.close(oneLevelLoading);
+                                        },
+                                        success: function(data, textStatus, xhr) {
+                                            eventHub.$emit('tree-refresh-event',null);
+                                            resolve();
+                                        },
+                                        error: function(xhr, textStatus, errorThrown) {
+                                            layer.close(oneLevelLoading);
+                                            console.log(errorThrown);
+                                        }
+                                    });
+                                } else {
+                                    reject('输入名称!')
+                                }
+                            })
+                        }
+                    }).then(
+                        function () {
+                            swal({
+                                type: 'success'
+                            });
+                        }
+                    )
+                    
+                },
+                open: function(){
+                    var self = this;
+
+                    if(_.isEmpty(self.contextmenu.selected.name)) return false;
+
+                    if(self.contextmenu.selected.type === 'dir'){
+                        self.dblClick(self.contextmenu.selected);
+                    } else {
+                        var contents = '/fs' + self.contextmenu.selected.parent + '/'  + self.contextmenu.selected.name + '?type=download';
+                        
+                        if(self.contextmenu.selected.type === 'png'){
+                            //contents = `<img src="/fs` + self.contextmenu.selected.parent + `/`  + self.contextmenu.selected.name + `?type=download" class="img-responsive" alt="Image">`;
+                        }
+
+                        layer.open({
+                            type: 2,
+                            title: self.contextmenu.selected.name,
+                            shadeClose: true,
+                            shade: false,
+                            maxmin: true,
+                            area: ['1024px', '600px'],
+                            content: contents
+                        });
+                    }
+                },
+                download: function(){
+                    var self = this;
+
+                    if(_.isEmpty(self.contextmenu.selected.name)) return false;
+
+                    window.location = '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name + '?type=download';
+                },
+                delete: function(){
+                    var self = this;
+
+                    if(_.isEmpty(self.contextmenu.selected.name)) return false;
+
+                    console.log('/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name);
+                    
+                    jQuery.ajax({
+                        url: '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name,
+                        type: 'DELETE',
+                        dataType: 'text json',
+                        contentType: "application/text; charset=utf-8",
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            eventHub.$emit('tree-refresh-event',null);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(xhr,textStatus, errorThrown);
+                            eventHub.$emit('tree-refresh-event',null);
+                        }
+                    });
+                },
+                parse: function(event){
+                    var self = this;
+                    console.log("/web/data/"+event)
+                    Papa.parse("/web/data/"+event, {
+                        download: true,
+                        complete: function(results, file) {
+                            //self.model.parse.list = results.data;
+                            //console.log("Parsing complete:", JSON.stringify(results), file);
+                        },
+                        step: function(results, parser) {
+                            //console.log("Row data:", JSON.stringify(results.data));
+                            self.model.parse.list.push(results.data[0].join(" "));
+                        }
+                    })
+
+                    if($(".parse-container").hasClass('parse-container-active')){
+                        console.log(1)
+                        $(".parse-container").removeClass('parse-container-active');
+                        $(".parse-container").css("display","none");
+                    } else {
+                        console.log(2)
+                        $(".parse-container").addClass('parse-container-active');
+                        $(".parse-container").css("display","");
+                    }
+                },
+                toogleView: function(){
+                    eventHub.$emit("toggle-nav-event",null);
+                },
+                view: function(event){
+                    var self = this;
+
+                    self.currentView = event;
+
+                    $("a.btn-xs").removeClass('active');
+                    $("."+event).addClass('active');
+                }
+            }
+        })
+
+        Vue.component('file-view-icon-component',{
+            delimiters: ['${', '}'],
+            props: {
+                model: Array
+            },
+            template: `#file-view-icon-component-template`,
+            mounted: function() {
+                var self = this;
+
+                self.$nextTick(function() {
+                    
+                })
+            },
+            methods: {
+                mouseOver: function(item){
+                    eventHub.$emit("file-mouseover-event",item);
+                },
+                mouseOut: function(item){
+                    eventHub.$emit("file-mouseout-event",item);
+                },
+                click: function(item){
+                    eventHub.$emit("file-click-event",item);
+                },
+                dblClick: function(item){
+                    eventHub.$emit("file-dblclick-event",item);
+                },
+                rightClick: function(item){
+                    eventHub.$emit("file-rightclick-event",item);
+                }
+            }
+        })
+
+        Vue.component('file-view-table-component',{
+            delimiters: ['${', '}'],
+            props: {
+                model: Array
+            },
+            template: `#file-view-table-component-template`,
+            data: function(){
+                return {
+                    columns: [
+                                {field: "state", title: "", checkbox: true},
+                                {field: "title", title: "Name"},
+                                {field: "type", title: "Type"},
+                                {field: "modtime", title: "Create Time", formatter: function(value,row,index){
+                                                                                    return moment(value).format("YYYY-MM-DD HH:mm:ss");
+                                                                                }},
+                             ],
+                    data:[],
+                    options: {
+                                class: "table table-bordered",
+                                showColumns: false,
+                                search: true,
+                                clickToSelect: true,
+                                pageList: [15,30,60,80,100],
+                                pageSize: 15
+                            },
+                }
+            },
+            watch: {
+                model: {
+                    handler: function(val,oldValue){
+                        var self = this;
+
+                        self.data = val;
+                        console.log(val.length)
+                    },
+                    deep: true
+                }
+            },
+            mounted: function(){
+                var self = this;
+
+                self.$nextTick(function() {
+                    
+                })
+            },
+            methods: {
+                init: function(){
+                    var self = this;
+                },
+                mouseOver: function(item){
+                    eventHub.$emit("file-mouseover-event",item);
+                },
+                mouseOut: function(item){
+                    eventHub.$emit("file-mouseout-event",item);
+                },
+                click: function(item){
+                    eventHub.$emit("file-click-event",item);
+                },
+                dblClick: function(item){
+                    eventHub.$emit("file-dblclick-event",item);
+                },
+                rightClick: function(item){
+                    eventHub.$emit("file-rightclick-event",item);
+                }
+            }
+        })
+        
+        var appVue = new Vue({
+            delimiters: ['${', '}'],
+            el: '#app',
+            template: '#app-template',
+            data: {
+                model: [],
+                ifShowNav: true,
+            },
+            created: function(){
+                var self = this;
+
+                eventHub.$on("toggle-nav-event",self.toogleView);
+            },
+            mounted: function() {
+                var self = this;
+
+                self.$nextTick(function() {
+                    self.init();
+                })
+            },
+            watch: {
+                model: function(newValue, oldValue) {
+                    var self = this;
+
+                    if (!_.isEqual(newValue, oldValue)) {
+                        self.refresh();
+                    }
+                }
+            },
+            methods: {
+                init: function() {
+                    var self = this;
+
+                    $search = $(".search");
+                    $search.off("keyup drop").on("keyup drop", function(event) {
+                        clearTimeout(timeoutId);
+                        timeoutId = setTimeout(function() {
+                            self.search(_.trim($search.val()));
+                        }, 500);
+                    })
+
+                },
+                search: function(term) {
+                    var self = this;
+                    var param;
+
+                    if (_.isEmpty(term)) {
+                        param = `#/matrix/filesystem: | username=` + {{.SignedUser.Name}} + ` | ispublic=1 `;
+                    } else {
+                        param = `#/matrix/filesystem: | username=` + {{.SignedUser.Name}} + ` | ispublic=1  | ` + term;
+                    }
+                    console.log(param)
+                    jQuery.ajax({
+                        url: '/mxobject/search',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            cond: param,
+                            flag: false
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            var data = data.message;
+
+                            self.model = _.sortBy(data, "vtime").reverse();
+                            _.delay(self.refresh, 100);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    });
+                },
+                newModal: function() {
+                    var self = this;
+                    selectedTemplate = $(this).data("id");
+
+                    var modal = $("#addDashBoardModal");
+                    modal.modal("show");
+                    //modal.find('#name').val(selectedTemplate + "_" + Math.floor(_.now()/1000));
+                    modal.find('#title').val('');
+                    modal.find('#tags').selectpicker('val', selectedTemplate);
+
+                    $("#tags").tagsinput({
+                        tagClass: function(item) {
+
+                            if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                return 'label label-danger label-important';
+                            } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                return 'label label-warning';
+                            } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                return 'label label-primary';
+                            } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                return 'label label-success';
+                            } else if (item.indexOf("黑色") > -1) {
+                                return 'label label-default';
+                            } else {
+                                return 'label label-default';
+                            }
+                        },
+                    })
+                },
+                add: function() {
+                    var self = this;
+                    var modal = $("#addDashBoardModal");
+                    var name = "dashboard_" + _.now(); //modal.find('#name').val();
+                    var title = modal.find('#title').val();
+                    if (_.isEmpty(title)) {
+                        swal("地图标题不能空！", "", "warning");
+                        modal.find('#title').setFocus();
+                        return false;
+                    }
+                    var tags = modal.find("#tags").tagsinput('items');
+                    var ispublic = $("#ispublic input:radio:checked").val();
+                    var skin = $('input[name=radiooptions]:checked').val();
+                    var data = new Object();
+
+                    data.class = '/matrix/itmap';
+                    data.name = name;
+                    data.title = title;
+                    data.tag = {
+                        "_all": JSON.stringify(tags)
+                    };
+                    data.star = 0;
+                    data.username = '{{.SignedUser.Name}}';
+                    data.ispublic = ispublic;
+                    data.portlet = null;
+                    data.theme = new Array(JSON.stringify(theme[skin]));
+
+                    jQuery.ajax({
+                        url: '/mxobject/actiontoclass',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            data: JSON.stringify(data),
+                            ctype: "insert"
+                        },
+                        beforeSend: function(xhr) {
+                        },
+                        complete: function(xhr, textStatus) {
+                        },
+                        success: function(data, textStatus, xhr) {
+                            modal.modal("hide");
+                            _.delay(function() {
+                                self.load();
+                            }, 200);
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                        }
+                    })
+                },
+                remove: function(name) {
+                    var self = this;
+                    var param = `#/matrix/filesystem: | name=` + name + ` | delete`;
+
+                    swal({
+                        title: name,
+                        text: "确定要删除该地图吗?",
+                        type: "warning",
+                        showCancelButton: true,
+                        closeOnConfirm: false,
+                        cancelButtonText: "取消",
+                        confirmButtonText: "删除",
+                        confirmButtonColor: "#ff0000"
+                    }, function() {
+
+                        jQuery.ajax({
+                            url: '/mxobject/search',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                cond: param
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                                if (data.status == "ok") {
+                                    _.delay(function() {
+                                        self.load();
+                                    }, 200);
+                                    swal("删除成功！", "", "success");
+                                } else {
+                                    swal("删除失败！", data.message, "warning");
+                                }
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+
+                    })
+                },
+                refresh: function() {
+                    var self = this;
+
+                    $(".tagsLabel").tagsinput({
+                        tagClass: function(item) {
+
+                            if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
+                                return 'label label-danger label-important';
+                            } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
+                                return 'label label-warning';
+                            } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
+                                return 'label label-primary';
+                            } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
+                                return 'label label-success';
+                            } else if (item.indexOf("黑色") > -1) {
+                                return 'label label-default';
+                            } else {
+                                return 'label label-default';
+                            }
+                        },
+
+                    });
+                    $(".tagsLabel").on('itemAdded', function(event) {
+
+                        var index = $(this).data("index");
+
+                        self.model[index].tag._all.push(event.item);
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(self.model[index]),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+                    });
+
+                    $(".tagsLabel").on('itemRemoved', function(event) {
+
+                        var index = $(this).data("index");
+
+                        self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
+
+                        jQuery.ajax({
+                            url: '/mxobject/actiontoclass',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                data: JSON.stringify(self.model[index]),
+                                ctype: "insert"
+                            },
+                            beforeSend: function(xhr) {
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                            }
+                        });
+
+                    });
+                },
+                validate: function(event) {
+                    var self = this;
+                    var name = event.val();
+                    var retValue = {};
+
+                    if (name == "") {
+                        retValue.status = false;
+                        retValue.msg = "";
+                    } else {
+                        retValue.status = true;
+                    }
+
+                    return retValue;
+                },
+                toogleView: function() {
+                    var self = this;
+
+                    if(self.ifShowNav) {
+
+                        $("#nav").hide();
+
+                        $("#content").removeClass("col-md-10");
+                        $("#content").addClass("col-md-12");
+
+                        $(".navtoggle").removeClass("fa fa-caret-left");
+                        $(".navtoggle").addClass("fa fa-caret-right");
+
+                        self.ifShowNav = false;
+                      } else {
+                        $("#nav").slideDown(500);
+                        $("#nav").show();
+
+                        $("#content").removeClass("col-md-12");
+                        $("#content").addClass("col-md-10");
+
+                        $(".navtoggle").removeClass("fa fa-caret-right");
+                        $(".navtoggle").addClass("fa fa-caret-left");
+                        
+                        self.ifShowNav = true;
+                    }
+                }
+            }
+        })
+    })
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div class="row">
+        <div class="sidebar" id="nav">
+            <div class="panel" style="border-radius: 0px;min-height:100vh;">
+                <div class="panel-heading">
+                    <i class="fa fa-th-large toggle-nav"></i> 
+                    Files
+                </div>
+                <div class="panel-body" style="padding-top: 5px;">
+                    <tree-component></tree-component>
+                </div>
+            </div>
+        </div>
+        <div class="content content-full-width" id="content">
+            <div class="p-20">
+                <div class="row">
+                    <div class="input-group searchinput" style="width:100%;">
+                        <input class="form-control" type="text" placeholder="{{.i18n.Tr "mxevent_search"}}">
+                     </div>
+                    <div class="btn-group" style="margin: 15px 0px;">
+                        <a href="#" class="btn btn-sm btn-inverse"><i class="fa fa-reply m-r-5"></i> Up</a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-home m-r-5"></i> Root</a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-refresh m-r-5"></i> Refresh</a>
+                        <a href="#" class="btn btn-sm"></a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-table m-r-5"></i> Grid</a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-list m-r-5"></i> List</a>
+                        <a href="#" class="btn btn-sm"></a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-upload m-r-5"></i> Upload</a>
+                        <a href="#" class="btn btn-sm btn-default"><i class="fa fa-plus m-r-5"></i> New Folder</a>
+                    </div>
+                    <div class="email-content">
+                        <file-view-component></file-view-component>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="file-view-component-template">
+    <div class="panel" style="border-radius: 0px;">
+        <div class="panel-heading">
+            <span id="title-path" @click="toogleView">
+                <button class="btn btn-xs btn-default btn-noborder"><i class="fa fa-caret-right navtoggle"></i></button>
+            </span>
+            <div class="pull-right">
+                <div class="btn-group" role="group" aria-label="...">
+                    <a class="btn btn-xs btn-success btn-noborder fileinput-button" style="margin-right: 5px;">
+                        <i class="fa fa-upload"></i>
+                        <!-- The file input field used as target for the file upload widget -->
+                        <input id="fileupload" type="file" name="uploadfile" multiple>
+                    </a>
+                    <a type="button" class="btn btn-xs btn-default btn-noborder file-view-icon-component active" @click="view('file-view-icon-component')" style="margin-right: 5px;">
+                        <i class="fa fa-th" aria-hidden="true"></i>
+                    </a>
+                    <a type="button" class="btn btn-xs btn-default btn-noborder file-view-table-component" @click="view('file-view-table-component')" style="margin-right: 5px;">
+                        <i class="fa fa-list" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0px 15px;">
+            <div class="row" id="files-container">  
+                
+                <component v-bind:is="currentView" :model="model.list"></component>
+                
+            </div>
+            <div class="row parse-container" style="display:none;">
+                <div class="col-lg-12">
+                    <hr>
+                    <dl class="parse-view" style="background-color: #333333;padding:5px 5px;">
+                        <dt style="color: #efefef;"><h5>解析结果</h5></dt>
+                        <dd  v-for="(item,index) in model.parse.list" style="color: #5cf55e;">
+                            ${'[' + (index+1) +']\t'} <a href="#" style="color: #efefef;">
+                                <span>${item}</span>
+                            </a>
+                        </dd>
+                    </dl>
+                </div>
+            </div>  
+        </div>
+        <div class="panel-footer">
+            <span>
+                <small>files：${model.list.length}</small>
+            </span>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="file-view-icon-component-template">
+    <div style="padding:10px;">
+        <div :class="item.type=='dir'?'col-lg-1 dir':'col-lg-1 file'" :id="'file_'+item.id" v-for="item in model" @mouseover="mouseOver(item)"  @mouseout="mouseOut(item)" @click="click(item)" @dblclick="dblClick(item)" @oncontextmenu="rightClick(item)">
+            <div class="text-center">
+                <div>
+                    <img :src="'/web/assets/images/files/'+item.type+'.svg'" class="img-responsive" alt="Image" style="width:48px;height:48px;">
+                </div>
+                <div>${item.title.substring(0,12)}</div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="file-view-table-component-template">
+    <div class="file-view-table table-responsive">
+        <bootstrap-table :columns="columns" :options="options" :data="model"></bootstrap-table>
+    </div>
+</script>
+
+{{template "base/footer" .}}

@@ -1,0 +1,1247 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		#tab-history > div > .vue-search-preset-component > .dropdown-menu-right {
+			position: inherit;
+		}
+
+		.baseline > .btn-default {
+			/*background-color: transparent!important;*/
+		}
+		
+		.table-panel-tab-ul> li.active {
+			border-bottom: 3px solid rgb(218, 224, 232);
+		}
+
+		.table-panel-tab-ul> li.active > a:hover,a:active,a:focus,a:visited {
+			background-color: transparent!important;
+		}
+
+		.table-panel-tab-content {
+			border-top: 1px solid rgb(204, 204, 204);
+		}
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-bootstrap-table"  ----------*/
+	<template>
+		<table></table>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-bootstrap-table">
+	{
+	   	delimiters: ['${', '}'],
+	    props:{
+	        columns: Array,
+	        dataset: Array,
+	        options: Object,
+	        filter: Array,
+	        contextMenu: String,
+			ldap: Object
+	    },
+	    data: function(){
+	        return {
+	            defaultOptions: {
+	                showToggle: false,
+	                showColumns: true,
+	                pagination: false,
+	                toolbar: "#custom-toolbar1",
+	                showExport: true,
+	                exportTypes: "['json', 'csv', 'excel']",
+	                reorderableColumns: true
+	            },
+	            templates: {
+	            	event: `<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+                                <li class=""><a href="#tab-journal" data-toggle="tab">Journal</a></li>
+                                <li class=""><a href="#tab-rawcaputer" data-toggle="tab">RawCaputer</a></li>
+                                <li class=""><a href="#tab-eventkey" data-toggle="tab">EventKey</a></li>
+                                <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+                            </ul>
+                            <div class="tab-content table-panel-tab-content">
+                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-journal">
+                                    <div id="panel-journal"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-rawcaputer">
+                                    <div id="panel-rawcaputer"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-eventkey">
+                                    <div id="panel-eventkey"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-history">
+                                    <div id="panel-history"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-timeline">
+                                    <div id="panel-timeline"></div>
+                                </div>
+                            </div>`,
+                    performance: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+		                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+		                                <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+		                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+		                            </ul>
+		                            <div class="tab-content table-panel-tab-content">
+		                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+		                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+		                                </div>
+		                                <div class="tab-pane fade" id="tab-history">
+		                                    <div id="panel-history"></div>
+		                                </div>
+		                                <div class="tab-pane fade" id="tab-timeline">
+		                                    <div id="panel-timeline"></div>
+		                                </div>
+		                            </div>`,
+
+                    log: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	                            <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+	                            <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+	                            <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+	                        </ul>
+	                        <div class="tab-content table-panel-tab-content">
+	                            <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+	                                <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+	                            </div>
+	                            <div class="tab-pane fade" id="tab-history">
+	                                <div id="panel-history"></div>
+	                            </div>
+	                            <div class="tab-pane fade" id="tab-timeline">
+	                                <div id="panel-timeline"></div>
+	                            </div>
+	                        </div>`,
+	                default: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+	                            </ul>
+	                            <div class="tab-content table-panel-tab-content">
+	                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+	                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+	                                </div>
+	                            </div>`
+	            }
+	        }
+	    },
+	    created: function(){
+	        let self = this;
+
+	    },
+	    mounted: function () {
+	        var self =  this;
+
+	        self.$nextTick(function () {
+	            
+	            $(self.$el).bootstrapTable(_.extend({
+	                                            data: self.dataset,
+	                                            columns: self.columns,
+	                                            contextMenu: '#'+self.contextMenu,
+	                                            onContextMenuItem: self.onContextMenu,
+	                                        }, self.defaultOptions, self.options));
+
+	            $(self.$el).on('click-row.bs.table', function (e, row, $element) {
+	                 $('.info').removeClass('info');
+                     $($element).addClass('info');
+	            });
+
+	            /*
+	            $(self.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
+	                //self.openDetailPanel(row);
+	            });*/
+
+                /*$(self.$el).on('click-cell.bs.table', function (e, value, row, index) {
+	                $('.success').removeClass('success');
+	                $(e).addClass('success');
+	            });*/
+
+                /*$(self.$el).on('dbl-click-cell.bs.table', function (e, value, row, index) {
+                    new Clipboard(e.target, {
+                        text: function (trigger) {
+                            return row;
+                        }
+                    });
+                });*/
+
+                $(self.$el).on('dblclick', 'td' , function (e) {
+                    //$(".cell-style-selected").removeClass();
+	                //$(e.target).addClass("cell-style-selected");
+	            });
+
+                $(self.$el).on('column-switch.bs.table', function (field, checked) {
+                    self.toggleColumns({field:checked});
+                });
+
+	        })
+	    },
+	    watch: {
+	        dataset: {
+	            handler: function (val,oldVal) {
+	                let self = this;
+	                
+	                var cols= $(self.$el).bootstrapTable('getVisibleColumns');
+	                
+	                //if(_.isEmpty(cols)){ // table null
+	                    $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
+	                                            data: val,
+	                                            columns: self.columns,
+	                                            contextMenu: '#'+self.contextMenu,
+	                                            onContextMenuItem: self.onContextMenu,
+	                                        }, self.defaultOptions, self.options));
+	                //} else {
+	                //    $(self.$el).bootstrapTable('load',val);
+	                //    $(self.$el).bootstrapTable('refreshOptions', _.extend(self.defaultOptions, val));
+	                //}
+	            },
+	            deep: true
+	        },
+	        filter: {
+	            handler: function(val,oldVal) {
+	                let self = this;
+	                
+	                self.filterHandler(val);
+	            },
+	            deep: true
+	        }
+	    },
+	    methods: {
+	        onContextMenu: function(row, $el){
+	            let self = this;
+	            let _menu =  $el.data("item");
+	            let _items = $el.parent().children();
+
+	            console.log(JSON.stringify(self.dataset),JSON.stringify(row))
+
+	            if(_menu.show == 'widget'){
+	            	self.openDiagnosisPanel(row);
+	            } else if(_menu.show == 'kpi') {
+                    self.openKpiPanel(row);
+                } else if(_menu.show == 'command'){
+
+	            } else {
+	            	self.openDetailsPanel(row, _menu, _menu.num);	
+	            }
+	        },
+	        openDetailsPanel: function(row, menu, tabnum){
+	            let self = this;
+	            var win;
+	            var w = $( window ).width();//document.body.clientWidth;
+	            var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+	            var wW = $( window ).width()*2/3;
+	            var hH = $( window ).height()*2.2/3;
+	            var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+	            var tb = document.createElement('div');
+	            
+	            $(tb).append(self.templates[menu.app] || self.templates.default);
+	            win = new mxWindow(row.node || row.host || row.premark || row.name, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+	            win.setMaximizable(true);
+	            win.setResizable(true);
+	            win.setClosable(true);
+	            win.setVisible(true);
+	            
+	            win.addListener(mxEvent.MAXIMIZE, function(event){
+	            	_.delay(function(){
+	            		eventHub.$emit("win-resize-event",null);
+	            	},100);
+	            });
+
+	            win.addListener(mxEvent.MINIMIZE, function(event){
+	                _.delay(function(){
+	            		eventHub.$emit("win-resize-event",null);
+	            	},100);
+	            });
+
+	            win.addListener(mxEvent.NORMALIZE, function(event){
+	            	_.delay(function(){
+	            		eventHub.$emit("win-resize-event",null);
+	            	},100);
+	            });
+
+	            _.delay(function(){
+	            	
+	            	var detailVue = new Vue({
+	                    delimiters: ['$', '$'],
+	                    el: '#table-dblclick-show-panel',
+	                    template: ` <div>
+	                                    <div class="panel-body" style="padding:0px;">
+	                                        <div class="input-group input-group-sm" style="width:100%;" v-for="(item,index) in _.sortBy(model,'name')">
+	                                            <div class="input-group-addon" :id="'label_'+item.name" style="width:200px;text-align: right;border:0px;border-bottom: 1px solid rgb(238, 238, 238);border-radius: 0px;background-color:#f9f9f9;font-weight:900;">$item.title$</div>
+	                                            <textarea class="form-control" :id="item.name" :placeholder="item.title" style="border:0px;border-left: 1px solid rgb(238, 238, 238);border-bottom: 1px solid rgb(238, 238, 238);">$item.value$</textarea>
+	                                        </div>
+	                                    </div>
+	                                    <div class="panel-footer">
+	                                    	<div class="btn-group pull-right">
+	                                    	  <a href="javascript:void(0)" type="button" class="btn btn-xs btn-success" @click="onSave">
+	                                    	  	Save
+	                                    	  </a>
+	                                    	</div>
+	                                    </div>
+	                                </div>`,
+	                    data:{
+	                        model:[],
+	                    },
+	                    mounted: function(){
+	                        let self = this;
+
+	                        self.$nextTick(function(){
+
+	                            _.forEach(row, function(v,k){
+	                                if(_.isObject(v) && v!=null){
+	                                    self.model.push({
+															name:k,
+															title: _.upperFirst(k),
+															value: JSON.stringify(v, null, 2)
+														})
+	                                } else {
+	                                	self.model.push({
+	                                    					name:k, 
+	                                    					title: _.upperFirst(k), 
+	                                    					value:v});
+	                                }
+	                            })
+
+                                $(self.$el).on('click key keydown', 'textarea', function () {
+                                    $(this).height(0).height(this.scrollHeight);
+
+							    }).find('textarea').change();
+
+
+                            })
+
+	                    },
+	                    methods: {
+	                        autosize: function () {
+	                        	$("textarea").each(function(textarea) {
+								    $this.height( $this[0].scrollHeight );
+								});
+							},
+                            onSave: function(){
+                                let self = this;
+
+                                _.forEach(row, function(v,k){
+									if(_.includes(['contain','depend','runon','mshare','vshare','owner','refer','connect','tag'],k)){
+                                        row[k] = null;
+									} else {
+                                        if (row[k] != $("#"+k).val()){
+                                            row[k] = $("#"+k).val();
+										}
+									}
+								});
+
+                                let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
+								console.log(_mql);
+								jQuery.ajax({
+                                        url: "/mxobject/list/sql",
+                                        dataType: 'json',
+                                        type: 'POST',
+                                        data: {
+                                            ctype:"obj",
+                                            sql: _mql
+                                        },
+                                        beforeSend:function(xhr){
+                                        },
+                                        complete: function(xhr, textStatus) {
+                                        },
+                                        success: function (data, status) {
+                                            if(data.status == 'ok'){
+                                                swal('success',row.id,'success');
+											}
+                                        },
+                                        error: function(xhr, textStatus, errorThrown){
+                                            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                                        }
+                                    });
+
+                            }
+	                    }
+	                });
+
+	                self.openJourna(row, 'journal');
+
+	                self.openRawCaputer(row, 'raw');
+
+	                self.openEventKey(row, 'event');
+
+	                if(menu.show == "table"){
+	                    self.openHisPanelByTable(row,menu.app);
+	                } else if(menu.show == "chart"){
+	                    self.openHisPanelByChart(row,menu.app);
+	                } 
+
+	                var timelineVue = new Vue({
+	                	delimiters: ['$', '$'],
+	                    el: '#panel-timeline',
+	                	template:`<vue-timeline-component id="event-timeline" :model="all"></vue-timeline-component>`,
+	                	data:{
+	                        all:{
+	                        	list: []
+	                        },
+	                    },
+	                    mounted: function(){
+	                        let self = this;
+
+	                        self.$nextTick(function(){
+	                           self.init();
+	                        })
+
+	                    },
+	                    methods: {
+	                        init: function(){
+					        	let self = this;
+
+					        	//var param = "#/matrix/devops/: | entity=" + row.entity + "| nearest 1day" ;
+					        	var param = "#/matrix/devops/event/: | biz=" + row.biz + ";entity=" + row.entity + "| sort severity desc nearest 1month" ;
+
+				                console.log(param)
+				                jQuery.ajax({
+				                    url: '/mxobject/search',
+				                    type: 'POST',
+				                    dataType: 'json',
+				                    data: { 
+				                        cond: param, 
+				                        flag: false 
+				                    },
+				                    beforeSend:function(xhr){ 
+				                    },
+				                    complete: function(xhr, textStatus) {
+				                        //func.call();
+				                    },
+				                    success: function(data, textStatus, xhr) {
+				                        
+				                        if(_.isEmpty(data.message)){
+				                            return false;
+				                        } else {
+				                            self.all.list = data.message;
+				                        }
+				                    },
+				                    error: function(xhr, textStatus, errorThrown) {
+				                    }
+				                });
+					        },
+	                    }
+	                })
+
+		            self.toggleTab(tabnum);
+	            },500);
+	        },
+	        openDiagnosisPanel: function(row){
+	            let self = this;
+
+	            window.open(
+	                            "/janesware/diagnosis",
+	                            "_blank"
+	                        );
+	            localStorage.setItem("diagnosis-object", JSON.stringify(row));
+	        },
+            openKpiPanel: function(row){
+                let self = this;
+
+                window.open(
+                    "/janesware/kpi",
+                    "_blank"
+                );
+                localStorage.setItem("kpi-object", JSON.stringify(row));
+			},
+	        filterHandler: function(param){
+	            let self = this;
+	            
+	            if(!_.isEmpty(param)){
+	                let _groupByParam = _.groupBy(param,'name');
+	                let tmp = {};
+	                let _filter = '';
+	                let _data = [];
+	                
+	                _.forEach(_groupByParam, function(v,k){
+	                    var or = [];
+	                    var _or = [];
+	                    
+	                    or.push("("); 
+	                    _.forEach(v,function(val,key){
+	                        if(val.type === "match"){
+	                            _or.push(k + '="' + val.value + '"');
+	                        } else {
+	                            _or.push('contains('+k+',"'+val.value+'")');
+	                        }
+	                    })
+	                    or.push(_or.join(" or "));
+	                    or.push(")");
+	                    
+	                    tmp[k] = or.join(" ");
+	                    
+	                })
+	                
+	                _filter = `//*[`+ _.values(tmp).join( " and ") +`]`;                
+	                console.log(123,_filter);
+	                _data = JSON.search(self.dataset, _filter);
+	                
+	                $(self.$el).bootstrapTable('load',_data);
+	            } else {
+	                $(self.$el).bootstrapTable('load', self.dataset);
+	            }
+	        },
+	        openJourna: function(row,app){
+	        	let self = this;
+	            
+	            let _appVue = new Vue({
+	                delimiters: ['$', '$'],
+	                el: '#panel-journal',
+	                template: ` <div>
+	                				<vue-bootstrap-table :columns="model.columns" 
+	                                             :options="model.options" 
+	                                             :dataset="model.data" 
+	                                             contextMenu=""></vue-bootstrap-table>
+	                            </div>`,
+	                data:{
+	                    model:{
+	                        columns: [],
+	                        options: {
+	                        	classes: "table table-no-bordered",
+	                            resizable: true,
+	                            showToggle: false,
+	                            showColumns: true,
+	                            pagination: false,
+	                            toolbar: "",
+	                            showExport: true,
+	                            exportTypes: "['json', 'csv', 'excel']",
+	                        },
+	                        data: []
+	                    },
+	                    search: {
+		        			fortime: " for vtime",
+		        			default: {value: " | nearest 1day"}
+                        }
+	                },
+                    created: function(){
+                        let self = this;
+
+                    },
+                    watch: {
+                    	search:{
+                    		handler: function(val,oldVal){
+                    			let self = this;
+                    			
+                    			self.init();
+                    		},
+                    		deep:true
+                    	}
+                    },
+	                mounted: function(){
+	                    let self = this;
+
+	                    self.$nextTick(function(){
+	                        self.init();
+	                    })
+
+	                },
+	                methods: {
+	                	init: function(){
+	                        let self = this;
+	                        var param = "serial=" + row.serial;
+	                        
+	                        console.log(_.now(),param)
+
+	                        jQuery.ajax({
+	                            url: '/mxobject/search',
+	                            type: 'POST',
+	                            dataType: 'json',
+	                            data: { 
+	                                cond: param, 
+	                                flag: false 
+	                            },
+	                            beforeSend:function(xhr){ 
+	                            },
+	                            complete: function(xhr, textStatus) {
+	                                //func.call();
+	                            },
+	                            success: function(data, textStatus, xhr) {
+	                                
+	                                var list = data.message;
+	                                var cols = [];
+	                                var columns = [];
+
+	                                cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
+	                                self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
+
+	                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
+	                                if(!_.isEmpty(tmp)) {
+	                                    _.forEach(tmp,function(v){
+	                                        var fIndex = _.findIndex(cols,{field:v});
+	                                        if(fIndex == -1){
+	                                            cols.push( {field:v,title:_.upperFirst(v),visible: false} );
+	                                        }
+	                                    });
+	                                }
+	                                
+	                                self.model.columns = cols;
+	                                self.model.data = _.orderBy(list,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
+	                            },
+	                            error: function(xhr, textStatus, errorThrown) {
+	                            }
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        openRawCaputer: function(row,app){
+	        	let self = this;
+	            
+	            let _appVue = new Vue({
+	                delimiters: ['$', '$'],
+	                el: '#panel-rawcaputer',
+	                template: ` <div>
+	                				<vue-bootstrap-table :columns="model.columns" 
+	                                             :options="model.options" 
+	                                             :dataset="model.data" 
+	                                             contextMenu=""></vue-bootstrap-table>
+	                            </div>`,
+	                data:{
+	                    model:{
+	                        columns: [],
+	                        options: {
+	                        	classes: "table table-no-bordered",
+	                            resizable: true,
+	                            showToggle: false,
+	                            showColumns: true,
+	                            pagination: false,
+	                            toolbar: "",
+	                            showExport: true,
+	                            exportTypes: "['json', 'csv', 'excel']",
+	                        },
+	                        data: []
+	                    },
+	                    search: {
+		        			fortime: " for vtime",
+		        			default: {value: " | nearest 1day"}
+                        }
+	                },
+                    created: function(){
+                        let self = this;
+
+                    },
+                    watch: {
+                    	search:{
+                    		handler: function(val,oldVal){
+                    			let self = this;
+                    			
+                    			self.init();
+                    		},
+                    		deep:true
+                    	}
+                    },
+	                mounted: function(){
+	                    let self = this;
+
+	                    self.$nextTick(function(){
+	                        self.init();
+	                    })
+
+	                },
+	                methods: {
+	                	init: function(){
+	                        let self = this;
+	                        var param = "id=" + row.id;
+	                        
+	                        console.log(_.now(),param)
+
+	                        jQuery.ajax({
+	                            url: '/mxobject/search',
+	                            type: 'POST',
+	                            dataType: 'json',
+	                            data: { 
+	                                cond: param, 
+	                                flag: false 
+	                            },
+	                            beforeSend:function(xhr){ 
+	                            },
+	                            complete: function(xhr, textStatus) {
+	                                //func.call();
+	                            },
+	                            success: function(data, textStatus, xhr) {
+	                                
+	                                var list = data.message;
+	                                var cols = [];
+	                                var columns = [];
+
+	                                cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
+	                                self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
+
+	                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
+	                                if(!_.isEmpty(tmp)) {
+	                                    _.forEach(tmp,function(v){
+	                                        var fIndex = _.findIndex(cols,{field:v});
+	                                        if(fIndex == -1){
+	                                            cols.push( {field:v,title:_.upperFirst(v),visible: false} );
+	                                        }
+	                                    });
+	                                }
+	                                
+	                                self.model.columns = cols;
+	                                self.model.data = _.orderBy(list,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
+	                            },
+	                            error: function(xhr, textStatus, errorThrown) {
+	                            }
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        openEventKey: function(row,app){
+	        	let self = this;
+	            
+	            let _applVue = new Vue({
+	                delimiters: ['$', '$'],
+	                el: '#panel-eventkey',
+	                template: ` <div>
+	                				<vue-bootstrap-table :columns="model.columns" 
+	                                             :options="model.options" 
+	                                             :dataset="model.data" 
+	                                             contextMenu=""></vue-bootstrap-table>
+	                            </div>`,
+	                data:{
+	                    model:{
+	                        columns: [],
+	                        options: {
+	                        	classes: "table table-no-bordered",
+	                            resizable: true,
+	                            showToggle: false,
+	                            showColumns: true,
+	                            pagination: false,
+	                            toolbar: "",
+	                            showExport: true,
+	                            exportTypes: "['json', 'csv', 'excel']",
+	                        },
+	                        data: []
+	                    },
+	                    search: {
+		        			fortime: " for vtime",
+		        			default: {value: " | nearest 1day"}
+                        }
+	                },
+                    created: function(){
+                        let self = this;
+
+                    },
+                    watch: {
+                    	search:{
+                    		handler: function(val,oldVal){
+                    			let self = this;
+                    			
+                    			self.init();
+                    		},
+                    		deep:true
+                    	}
+                    },
+	                mounted: function(){
+	                    let self = this;
+
+	                    self.$nextTick(function(){
+	                        self.init();
+	                    })
+
+	                },
+	                methods: {
+	                	init: function(){
+	                        let self = this;
+	                        var param = "id=" + row.id;
+	                        
+	                        console.log(_.now(),param)
+
+	                        jQuery.ajax({
+	                            url: '/mxobject/search',
+	                            type: 'POST',
+	                            dataType: 'json',
+	                            data: { 
+	                                cond: param, 
+	                                flag: false 
+	                            },
+	                            beforeSend:function(xhr){ 
+	                            },
+	                            complete: function(xhr, textStatus) {
+	                                //func.call();
+	                            },
+	                            success: function(data, textStatus, xhr) {
+	                                
+	                                var list = data.message;
+	                                var cols = [];
+	                                var columns = [];
+
+	                                cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
+	                                self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
+
+	                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
+	                                if(!_.isEmpty(tmp)) {
+	                                    _.forEach(tmp,function(v){
+	                                        var fIndex = _.findIndex(cols,{field:v});
+	                                        if(fIndex == -1){
+	                                            cols.push( {field:v,title:_.upperFirst(v),visible: false} );
+	                                        }
+	                                    });
+	                                }
+	                                
+	                                self.model.columns = cols;
+	                                self.model.data = _.orderBy(list,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
+	                            },
+	                            error: function(xhr, textStatus, errorThrown) {
+	                            }
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        openHisPanelByTable: function(row,app){
+	            let self = this;
+	            
+	            let _appVue = new Vue({
+	                delimiters: ['$', '$'],
+	                el: '#panel-history',
+	                template: ` <div>
+	                				<vue-search-preset-component></vue-search-preset-component>
+	                                <vue-bootstrap-table :columns="model.columns" 
+	                                             :options="model.options" 
+	                                             :dataset="model.data" 
+	                                             contextMenu=""></vue-bootstrap-table>
+	                                <!-- context menu -->
+	                                <ul id="context-menu-history" class="dropdown-menu">
+	                                    <li data-item="action-details"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
+	                                </ul>  
+	                            </div>`,
+	                data:{
+	                    model:{
+	                        columns: [],
+	                        options: {
+	                        	classes: "table table-no-bordered",
+	                            resizable: true,
+	                            showToggle: false,
+	                            showColumns: true,
+	                            pagination: false,
+	                            toolbar: "",
+	                            showExport: true,
+	                            exportTypes: "['json', 'csv', 'excel']",
+	                        },
+	                        data: []
+	                    },
+	                    search: {
+		        			fortime: " for vtime",
+		        			default: {value: " | nearest 1day"}
+                        }
+	                },
+                    created: function(){
+                        let self = this;
+
+                    },
+                    watch: {
+                    	search:{
+                    		handler: function(val,oldVal){
+                    			let self = this;
+                    			
+                    			self.init();
+                    		},
+                    		deep:true
+                    	}
+                    },
+	                mounted: function(){
+	                    let self = this;
+
+	                    self.$nextTick(function(){
+	                        
+	                        eventHub.$on('preset-selected-event', self.setPresetDefault);
+                        	eventHub.$on('preset-others-event', self.setPresetOthers);
+
+	                        self.init();
+	                    })
+
+	                },
+	                methods: {
+	                	setPresetDefault: function(event){
+		                    let self = this;
+		                    
+		                    self.search.default = event;
+		                },
+                        setPresetOthers: function(event){
+		                    let self = this;
+
+		                    self.search.fortime = event.forTime;
+		                },
+	                    init: function(){
+	                        let self = this;
+	                        var param = "id=" + row.id + self.search.default.value + " | " + self.search.fortime;
+	                        param = param.replace(/\|  for vtime/g, "  for vtime");
+	                        console.log(_.now(),param)
+
+	                        jQuery.ajax({
+	                            url: '/mxobject/search',
+	                            type: 'POST',
+	                            dataType: 'json',
+	                            data: { 
+	                                cond: param, 
+	                                flag: false 
+	                            },
+	                            beforeSend:function(xhr){ 
+	                            },
+	                            complete: function(xhr, textStatus) {
+	                                //func.call();
+	                            },
+	                            success: function(data, textStatus, xhr) {
+	                                
+	                                var list = data.message;
+	                                var cols = [];
+	                                var columns = [];
+
+	                                cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
+	                                self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
+
+	                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
+	                                if(!_.isEmpty(tmp)) {
+	                                    _.forEach(tmp,function(v){
+	                                        var fIndex = _.findIndex(cols,{field:v});
+	                                        if(fIndex == -1){
+	                                            cols.push( {field:v,title:_.upperFirst(v),visible: false} );
+	                                        }
+	                                    });
+	                                }
+	                                
+	                                self.model.columns = cols;
+	                                self.model.data = _.orderBy(list,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
+	                            },
+	                            error: function(xhr, textStatus, errorThrown) {
+	                            }
+	                        });
+	                    }
+	                }
+	            });
+	        },
+	        openHisPanelByChart: function(row,app){
+	            //let self = this;
+
+	            let _appVue = new Vue({
+	                    delimiters: ['$', '$'],
+	                    el: '#panel-history',
+	                    template: ` <div class="row">
+	                    				<vue-search-preset-component></vue-search-preset-component>
+	                    				<div class="col-lg-3 col-offset-3">
+	                    					<select class="selectpicker baseline" data-width="fit" multiple>
+												<optgroup label="week">
+												    <option value="week_max_#ea4235">Max</option>
+												    <option value="week_min_#4285f4">Min</option>
+												    <option value="week_avg_#fbbc08">Avg</option>
+												</optgroup>
+											</select>
+										</div>
+	                    				<div id="table-chart-history" class="col-lg-12" style="width:100%;height:400px;"></div>
+	                    			</div>`,
+	                    data:{
+	                        chart: Object,
+	                        options:  {
+	                        	animation: true,
+	                            title: {
+	                                text: row.host,
+	                                subtext: row.app + " " + row.inst + " " + row.param,
+	                                x: 'center',
+	                                align: 'right'
+	                            },
+	                            grid: {
+	                            	top: 80,
+	                            	bottom:60
+
+	                            },
+	                            tooltip: {
+	                                trigger: 'axis',
+	                                axisPointer: {
+	                                    animation: false
+	                                }
+	                            },
+	                            toolbox: {
+	                                show: true,
+	                                feature: {
+	                                    magicType: {
+	                                        show: true,
+	                                        type: ['line', 'bar']
+	                                    },
+	                                    saveAsImage: {
+	                                        show: true
+	                                    }
+	                                }
+	                            },
+	                            xAxis: {
+	                                data: []
+	                            },
+	                            yAxis: [{
+	                                name: row.param,
+	                                type: 'value',
+	                                max: 'dataMax',
+	                                min: 0
+	                            }, ],
+	                            series: []
+	                        },
+	                        dataset: {
+	                        	series: []
+	                        },
+	                        search: {
+			        			fortime: " for vtime",
+			        			default: {value: " | nearest 1day"}
+	                        },
+	                        baseline: {
+	                        	window: ""
+	                        }
+	                    },
+	                    created: function(){
+	                        let self = this;
+
+	                        eventHub.$on("win-resize-event", self.resize);
+	                    },
+	                    watch: {
+	                    	search:{
+	                    		handler: function(val,oldVal){
+	                    			let self = this;
+	                    			
+	                    			//self.init();
+	                    		},
+	                    		deep:true
+	                    	},
+	                    	'dataset.series': {
+	                    		handler: function(val,oldVal){
+	                    			let self = this;
+	                    			let _intersection = _.differenceWith( val, 
+																		  _.xorWith(val, oldVal, _.isEqual), 
+																		  _.isEqual
+																		);
+	                    			self.options.series = val;
+	                    			
+	                    			if(self.chart !=null ) {
+								        self.chart.dispose();
+								    }
+								    self.chart = echarts.init(document.getElementById("table-chart-history"));
+	                    			self.chart.setOption(self.options);
+	                                self.resize();
+	                    		},
+	                    		deep:true	
+	                    	}
+
+	                    },
+	                    mounted: function(){
+	                        let self = this;
+
+	                        self.$nextTick(function(){
+	                        	
+	                        	eventHub.$on('preset-selected-event', self.setPresetDefault);
+	                        	eventHub.$on('preset-others-event', self.setPresetOthers);
+	                            
+	                            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+	                                self.resize();
+	                            });
+	                            
+	                            self.chart = echarts.init(document.getElementById("table-chart-history"));
+                            	self.chart.setOption(self.options);
+
+                            	$(".selectpicker.baseline").selectpicker();
+
+                            	$('.baseline').on('hidden.bs.select', function (e) {
+									let _selected = $(this).val();
+									
+									if(_.isEmpty(_selected)){
+										self.dataset.series = _.slice(self.dataset.series,0,1);
+									} else {
+										self.loadBaseline(_selected);
+									}
+								});
+								self.initData();
+								
+	                        })
+
+	                    },
+	                    methods: {
+	                    	setPresetDefault: function(event){
+			                    let self = this;
+			                    
+			                    self.search.default = event;
+			                },
+                            setPresetOthers: function(event){
+			                    let self = this;
+
+			                    self.search.fortime = event.forTime;
+			                },
+	                        initData: function(){
+	                            let self = this;
+	                            var param = "id=" + row.id + " | sort vtime desc " + self.search.default.value + " | " + self.search.fortime;
+
+	                            param = param.replace(/\|  for vtime/g,"  for vtime ");
+	                            console.log(param)
+	                            jQuery.ajax({
+	                                url: '/mxobject/search',
+	                                type: 'POST',
+	                                dataType: 'json',
+	                                data: { 
+	                                    cond: param, 
+	                                    flag: false 
+	                                },
+	                                beforeSend:function(xhr){ 
+	                                },
+	                                complete: function(xhr, textStatus) {
+	                                    //func.call();
+	                                },
+	                                success: function(data, textStatus, xhr) {
+	                                    console.log(_.size(data.message))
+	                                    if(_.isEmpty(data.message)){
+	                                        return false;
+	                                    } else {
+	                                        let _time = window.GLOBAL_OBJECT.company.object[app].preconfig.time[0];
+	                                        let _data = _.orderBy(data.message, _time);
+	                                        let _minTime = _.minBy(_data,_time)[_time];
+	                                        let _maxTime = _.maxBy(_data,_time)[_time];
+	                                        self.baseline.window =  " | window " + _minTime + " to " + _maxTime;
+	                                        
+	                                        self.options.xAxis.data = _.map(_data, function(v){
+	                                                                                    return moment(v[_time]).format("YY/MM/DD HH:mm");
+	                                                                                }
+	                                                                    );
+	                                        let _series = 	{
+								                                name: row.inst + " " + row.param,
+								                                type: 'line',
+								                                smooth: true,
+								                                lineStyle: {
+								                                    normal: {
+								                                        color: '#66CC33',
+								                                        width: 1,
+								                                        shadowColor: 'rgba(0,0,0,0.4)',
+								                                        shadowBlur: 10,
+								                                        shadowOffsetY: 10
+								                                    }
+								                                },
+								                                data: _.map(_data, 'value')
+								                            };
+	                                        self.dataset.series.push(_series);
+	                                    }
+	                                },
+	                                error: function(xhr, textStatus, errorThrown) {
+	                                }
+	                            });
+	                        },
+	                        loadBaseline: function(event) {
+	                        	let self = this;
+		                        
+	                        	_.forEach(event, function(v){
+	                        		var _name = v.split("_");
+	                        		var _param = "/matrix/devops/performance/baseline/"+_name[1]+": | sort vtime desc | src=" + row.id;// + self.baseline.window + " | " + self.search.fortime;
+									_param = _param.replace(/\|  for vtime/g,"  for vtime ");
+									var _series = {
+					                                name: _name[1],
+					                                type: 'line',
+					                                smooth: true,
+					                                lineStyle: {
+					                                    normal: {
+					                                        color: _name[2],
+					                                        width: 1,
+					                                        shadowColor: 'rgba(0,0,0,0.4)',
+					                                        shadowBlur: 5,
+					                                        shadowOffsetY: 5
+					                                    }
+					                                },
+					                                data: [],
+					                            };
+									console.log(_param)
+		                            jQuery.ajax({
+		                                url: '/mxobject/search',
+		                                type: 'POST',
+		                                dataType: 'json',
+		                                data: { 
+		                                    cond: _param, 
+		                                    flag: false 
+		                                },
+		                                beforeSend:function(xhr){ 
+		                                },
+		                                complete: function(xhr, textStatus) {
+		                                    //func.call();
+		                                },
+		                                success: function(data, textStatus, xhr) {
+		                                    console.log(_.size(data.message))
+		                                    if(_.isEmpty(data.message)){
+		                                        return false;
+		                                    } else {
+		                                        var _time = window.GLOBAL_OBJECT.company.object[app].preconfig.time[0];
+		                                        var _data = _.orderBy(data.message, _time);
+		                                        
+		                                        /*
+		                                        self.options.xAxis.data = _.map(_data, function(v){
+		                                                                                    return moment(v[_time]).format("YY/MM/DD HH:mm");
+		                                                                                }
+		                                                                    );
+		                                        */
+		                                        _series.data =  _.map(_data, 'value');
+		                                        
+		                                        self.dataset.series.push(_series);
+		                                    }
+		                                },
+		                                error: function(xhr, textStatus, errorThrown) {
+		                                }
+		                            });
+	                        	})
+	                        },
+	                        resize: function(){
+	                            let self = this;
+
+                                if(self.chart.id){
+                                    self.chart.resize();
+                                }
+	                        }
+	                    }
+	                });
+	        },
+	        toggleTab: function(tabnum){
+	        	let self = this;
+
+	        	$(".table-panel-tab-ul").find(".active").removeClass('active');
+	            $(".table-panel-tab-ul").find("li:eq("+tabnum+")").addClass('active');
+
+	            $(".table-panel-tab-content").find(".active").removeClass('fade in active');
+	            $(".table-panel-tab-content").find(".tab-pane:eq("+tabnum+")").addClass('fade in active');
+	        },
+            toggleColumns: function(col){
+	            let self = this;
+				let _object = "";
+				let _tmp = {};
+
+				console.log(self.ldap.class, JSON.parse(self.ldap.config).event)
+                _tmp.class = "/matrix/ldap";
+                _tmp.fullname = self.ldap.fullname;
+                let _config = [];
+                _config.push({name:'biz'});
+                _config.push({name:'host'});
+                _tmp.config = {wewe: JSON.stringify(_config)};
+
+                _object = JSON.stringify(_tmp);
+
+                console.log(12,_object)
+
+                jQuery.ajax({
+                    url: '/mxobject/actiontoclass',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        data: _object,
+                        ctype: "insert"
+                    },
+                    beforeSend: function(xhr) {
+                    },
+                    complete: function(xhr, textStatus) {
+                    },
+                    success: function(data, textStatus, xhr) {
+
+                        if(data.status=="ok"){
+							console.log("success")
+                        } else {
+                            console.log("failed")
+                        }
+                    },
+                    error: function(xhr, textStatus, errorThrown) {
+                        console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                    }
+                })
+			}
+	    }
+	
+	}
+	</script>
+
+</code>
+

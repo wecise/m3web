@@ -1,0 +1,372 @@
+<code>
+
+	<style>
+		
+		/* For Search Dropdown Panel */
+	    .dropdown-menu {
+	        padding: 0;
+	        font-size: 12px;
+	        background-color: #fff;
+	        border: 0px solid #ccc;
+	        border: 0px solid rgba(0,0,0,.15);
+	        border-radius: 0px;
+	    }
+	    .dropdown-menu > .panel-group {
+	        margin-bottom: 0px;
+	    }
+
+	    .dropdown-menu > .panel-group .panel {
+	        margin-bottom: 0px;
+	        background-color: #fff;
+	        border: 0px solid transparent;
+	        border-radius: 0px;
+	    }
+	    .dropdown-menu > .panel-group .panel+.panel {
+	        margin-top: 0px;
+	    }
+
+	    .btn.dropdown-toggle {
+	        padding: 8px 12px;
+	        border-radius: 0px;
+	    }
+
+	    .panel-default>.panel-heading{
+	        padding-top: 5px;
+	        padding-bottom: 5px;
+
+	        border: 1px solid #ccc;
+	        border-bottom: 0px;
+	        border-radius: 0px;
+
+	        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f9f9f9+0,e5e5e5+100 */
+	        background: #f9f9f9; /* Old browsers */
+	        background: -moz-linear-gradient(top, #f9f9f9 0%, #e5e5e5 100%); /* FF3.6-15 */
+	        background: -webkit-linear-gradient(top, #f9f9f9 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+	        background: linear-gradient(to bottom, #f9f9f9 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+	    }
+
+	    .panel-default>.panel-heading.active {
+	        color: #333;
+	        background-color: #def1fb;
+	        border: 1px solid #ccc;
+	        border-bottom: 0px;
+	        background: #def1fb;
+	        
+	    }
+
+	    .panel-group .panel-heading+.panel-collapse>.list-group, .panel-group .panel-heading+.panel-collapse>.panel-body {
+	        border-top: 0px;
+	    }
+	    
+	    .panel-default>.collapse {
+	        border-left: 1px solid #ccc;
+	        border-right: 1px solid #ccc;
+	    }
+
+	    code {
+	        cursor: pointer;
+	        font-size: 14px;
+	        font-weight: bold;
+	    }
+
+	    dl > dd > a:hover {
+	        cursor: pointer;
+	    }
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-search-preset-component"  ----------*/
+	<template>
+		<div>
+		    <button type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-left:none;">${model.preset.default.name} <span class="caret"></span></button>
+		    <div class="dropdown-menu dropdown-menu-right" style="width: 40vw;">
+		  
+		    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+		      	<div class="panel panel-default">
+			        <div class="panel-heading active" role="tab" id="headingOne">
+			          <span>
+			            <i class="fa fa-angle-down"></i>
+			            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+			              Presets
+			            </a>
+			          </span>
+			        </div>
+			        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+			            <div class="panel-body">
+			                <div class="row">
+			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+			                        <dl>
+			                            <dt>Nearest</dt>
+			                            <dd v-for="item in model.preset.nearest"><a @click="setByWindow(item)">${item.name}</a></dd>
+			                        </dl>
+			                    </div>
+			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
+			                        <dl>
+			                            <dt>Real-time</dt>
+			                            <dd v-for="item in model.preset.realtime"><a @click="setByWindow(item)">${item.name}</a></dd>
+			                        </dl>
+			                    </div>
+			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
+			                        <dl>
+			                            <dt>Relative</dt>
+			                            <dd v-for="item in model.preset.relative"><a @click="setByWindow(item)">${item.name}</a></dd>
+			                        </dl>
+			                    </div>
+			                </div>
+			            </div>
+			        </div>
+		      	</div>
+			    <div class="panel panel-default">
+			        <div class="panel-heading" role="tab" id="headingTwo">
+			          <span>
+			            <i class="fa fa-angle-right"></i>
+			            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+			              Date Range
+			            </a>
+			          </span>
+			        </div>
+			        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+			            <div class="panel-body">
+			                <span style="display: -webkit-box;">
+			                    <input class="range_from" type="text" placeholder="Date time.."></p>
+			                    <i class="fa fa-cogs" style="padding: 0px 10px;"></i>
+			                    <input class="range_to" type="text" placeholder="Date time.."></p>
+			                    <a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">Apply</a>
+			                </span>
+			            </div>
+			        </div>
+			    </div>
+		      	<div class="panel panel-default">
+			        <div class="panel-heading" role="tab" id="headingThree">
+			          <span>
+			            <i class="fa fa-angle-right"></i>
+			            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+			              Advanced
+			            </a>
+			          </span>
+			        </div>
+			        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+			          <div class="panel-body">
+			              <div class="row">
+			                  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+			                      <dl>
+			                          <dt>Search For Time</dt>
+			                          <dd>
+			                              <div class="radio">
+			                                  <label>
+			                                      <input type="radio" id="input-systime" value=" for vtime " v-model="model.preset.others.forTime" checked> System Time(vtime)
+			                                  </label>
+			                              </div>
+			                              <div class="radio">
+			                                  <label>
+			                                      <input type="radio" id="input-usertime" value=" for ctime " v-model="model.preset.others.forTime" checked> User Time(ctime)
+			                                  </label>
+			                              </div>
+			                              <div class="radio">
+			                                  <label>
+			                                      <input type="radio" id="input-biztime" value=" for firstoccurrence " v-model="model.preset.others.forTime" > Firstoccurrence
+			                                  </label>
+			                              </div>
+			                              <div class="radio">
+			                                  <label>
+			                                      <input type="radio" id="input-biztime" value=" for lastoccurrence " v-model="model.preset.others.forTime" > Lastoccurrence
+			                                  </label>
+			                              </div>
+			                              <div class="radio">
+			                                  <label>
+			                                      <input type="radio" id="input-nonetime" value="" v-model="model.preset.others.forTime" checked> None Time
+			                                  </label>
+			                              </div>
+			                          </dd>
+			                      </dl>
+			                  </div>
+			                  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
+			                        <dl>
+			                            <dt>Other</dt>
+			                            <dd>
+			                                <div class="checkbox">
+			                                  <label>
+			                                    <input type="checkbox" id="input-hisdata" v-model="model.preset.others.ifHistory" checked> Contains history data
+			                                  </label>
+			                                </div>
+											<div class="checkbox">
+												<label>
+													<input type="checkbox" id="input-debug" v-model="model.preset.others.ifDebug"> Debug
+												</label>
+											</div>
+			                            </dd>
+			                        </dl>
+			                  </div>
+			              </div>
+			          </div>
+			        </div>
+		      	</div>
+		    </div>
+		    </div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-search-preset-component">
+	{
+	   
+	    delimiters: ['${', '}'],
+		props:{
+			preset: Object,
+		},
+	    data: function(){
+	        return {
+	            model: {
+	                preset: {
+	                            default: {"name":"Nearest 1 day", value: " | nearest 1 day ", scale: {'scale':'day', 'step': 4, 'title':'Day', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                            nearest: [
+	                                 {"name":"Nearest 30 second", value: " | nearest 30 seconds ", scale: {'scale':'second', 'step': 7, 'title':'Second', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm:ss'}},
+	                                 {"name":"Nearest 1 minute", value: " | nearest 1 minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 5 minute", value: " | nearest 5 minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 10 minute", value: " | nearest 10 minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 15 minute", value: " | nearest 15 minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 30 minute", value: " | nearest 30 minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 1 hour", value: " | nearest 1 hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"Nearest 2 hour", value: " | nearest 2 hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"Nearest 8 hour", value: " | nearest 8 hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"Nearest 1 day", value: " | nearest 1 day ", scale: {'scale':'day', 'step': 4, 'title':'Day', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}}
+	                            ],
+	                            realtime: [
+	                                 {"name":"30 second window", value: " | within 30seconds ", scale: {'scale':'second', 'step': 7, 'title':'Second', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm:ss'}},
+	                                 {"name":"1 minute window", value: " | within 1minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"5 minute window", value: " | within 5minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"10 minute window", value: " | within 10minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"15 minute window", value: " | within 15minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"30 minute window", value: " | within 30minutes ", scale: {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'LTS', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"1 hour window", value: " | within 1hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH:mm'}},
+	                                 {"name":"2 hour window", value: " | within 2hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"8 hour window", value: " | within 8hour ", scale: {'scale':'hour', 'step': 5, 'title':'Hour', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"1 day", value: " | within 1day ", scale: {'scale':'day', 'step': 4, 'title':'Day', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"1 month", value: " | within 1month ", scale: {'scale':'month', 'step': 2, 'title':'Month', 'pattern':'L', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"All Time", value: "", scale: {'scale':'year', 'step': 1, 'title':'Year', 'pattern':'L', 'filter':'YYYY/MM/DD HH'}}
+	                            ],
+	                            relative: [
+	                                 {"name":"Today", value: " | today ", scale: {'scale':'day', 'step': 4, 'title':'Day', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"Yesterday", value: " | yesterday ", scale: {'scale':'day', 'step': 4, 'title':'Day', 'pattern':'LT', 'filter':'YYYY/MM/DD HH'}},
+	                                 {"name":"Week", value: " | week ", scale: {'scale':'week', 'step': 3, 'title':'Week', 'pattern':'L', 'filter':'YYYY/MM/DD'}},
+	                                 {"name":"Last Week", value: " | last week ", scale: {'scale':'week', 'step': 3, 'title':'Week', 'pattern':'L', 'filter':'YYYY/MM/DD'}},
+	                                 {"name":"Month", value: " | month ", scale: {'scale':'month', 'step': 2, 'title':'Month', 'pattern':'L', 'filter':'YYYY/MM/DD'}},
+	                                 {"name":"Last month", value: " | last month ", scale: {'scale':'month', 'step': 2, 'title':'Month', 'pattern':'L', 'filter':'YYYY/MM/DD'}},
+	                                 {"name":"Year", value: " | year ", scale: {'scale':'year', 'step': 1, 'title':'Year', 'pattern':'L', 'filter':'YYYY/MM'}},
+	                                 {"name":"Last Year", value: " | last year ", scale: {'scale':'year', 'step': 1, 'title':'Year', 'pattern':'L', 'filter':'YYYY/MM'}},
+	                            ],
+	                            range: {
+	                                from: "",
+	                                to: ""
+	                            },
+	                            others: {
+	                                ifHistory: true,
+                                    ifDebug: false,
+	                                forTime:  ' for vtime ',
+	                            }
+	                        }
+	            }
+	        }
+	    },
+	    watch: {
+            'model.preset': {
+                handler:function(val,oldVal){
+                    let self = this;
+
+                    if (val.default.name === 'All Time'){
+                        self.model.preset.others.forTime = "";
+					}
+
+                    eventHub.$emit('preset-selected-event',val);
+
+                },
+                deep:true
+            }
+
+	    },
+	    created:function(){
+	        let self = this;
+
+	        eventHub.$emit('preset-selected-event', self.model.preset);
+	    },
+	    mounted: function() {
+	        let self = this;
+
+	        self.$nextTick(function(){
+
+	            // 搜索预定义
+	            if(!_.isEmpty(self.preset)){
+                    self.model.preset.default = self.preset.default;
+				}
+
+	            $(self.$el).find("a[data-toggle='collapse']").click(
+	                function(event) {
+
+	                    var href = event.target.href.split("#")[1];
+	                    
+	                    event.stopPropagation();
+	                    event.preventDefault();
+	                    $(self.$el).find(".in").removeClass("in");
+	                    $(self.$el).find("#"+href).collapse("toggle");
+	                    $(self.$el).find("in").collapse("toggle");
+
+	                    $(self.$el).find(".panel-heading").removeClass('active');
+	                    $(this).parent().parent().toggleClass('active');
+	                    
+	                    $(self.$el).find("i").removeClass('fa-angle-down');
+	                    $(self.$el).find("i").addClass(' fa-angle-right');
+
+	                    $(this).parent().parent().find("i").removeClass(' fa-angle-right');
+	                    $(this).parent().parent().find("i").addClass(' fa-angle-down');
+	                }
+	            );
+
+	            self.initRange();
+	        })
+	    },
+	    methods: {
+	        initRange: function(){
+	            let self = this;
+
+	            $(".range_from").flatpickr({
+	                locale: "en",
+	                enableTime: true,
+	                time_24hr: true,
+	                onChange: function(selectedDates, dateStr, instance) {
+	                    self.model.preset.range.from = dateStr;
+	                }
+	            });
+	            $(".range_to").flatpickr({
+	                locale: "en",
+	                enableTime: true,
+	                time_24hr: true,
+	                onChange: function(selectedDates, dateStr, instance) {
+	                    self.model.preset.range.to = dateStr;
+	                }
+	            });
+	        },
+	        setByWindow: function(event){
+	            let self = this;
+	            
+	            self.model.preset.default = event;
+	        },
+	        setByRange: function(){
+	            let self = this;
+
+	            if(!_.isEmpty(self.model.preset.range.from) && !_.isEmpty(self.model.preset.range.to)){
+	                var range = {
+	                                name: self.model.preset.range.from + "-" + self.model.preset.range.to, 
+	                                value: " | window " + self.model.preset.range.from + " to " + self.model.preset.range.to, 
+	                                scale: {'scale':'year', 'step': 1, 'title':'年', 'pattern':'YY/MM/DD'}
+	                            };
+	                self.model.preset.default = range;
+	            }
+	        }
+	    }
+	
+	}
+	</script>
+
+</code>

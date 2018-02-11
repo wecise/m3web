@@ -1,0 +1,81 @@
+{{/*
+<html>
+
+<body>
+
+	<div>
+*/}}
+	</div>
+	
+	<div class="navbar navbar-default navbar-fixed-bottom" 
+		 style="max-height: 30px;min-height: 30px;background-color:#f0f3f4;-webkit-box-shadow: none;box-shadow: none;">
+		<div class="container-fluid" style="margin:0px 10px 0px 10px;padding:0px 15px 0px 15px;">
+			<div class="navbar-header">
+				<span class="navbar-brand" style="font-size: 12px;height: 30px;padding: 0px 15px;">© 2016 {{.i18n.Tr "app_name"}} {{if (or .ShowFooterVersion .PageIsAdmin)}}{{.i18n.Tr "version"}}: {{AppVer}}{{end}} {{.i18n.Tr "page"}}: <strong>{{LoadTimes .PageStartTime}}</strong> {{.i18n.Tr "template"}}: <strong>{{call .TmplLoadTimes}}</strong></span>
+			</div>
+			<ul class="nav navbar-nav navbar-right" style="padding:5px;">
+		        <li><a target="_blank" href="/help/REST_API.html"  style="padding-top: 0px;padding-bottom: 0px;font-size:12px;">API</a></li>
+		        <li class="dropdown">
+		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding-top: 0px;padding-bottom: 0px;font-size:12px;"><span class="icon-globe"></span> {{.LangName}}</a>
+		          <ul class="dropdown-menu">
+		          	{{range .AllLangs}}
+		            <li  style="padding: 5px 0px;"><a class="item {{if eq $.Lang .Lang}}active selected{{end}}" href="#" onclick="window.location.href='{{if eq $.Lang .Lang}}#{{else}}{{$.Link}}?lang={{.Lang}}{{end}}'" style="padding-top: 0px;padding-bottom: 0px;font-size:12px;">{{.Name}}</a></li>
+		            {{end}}
+		          </ul>
+		        </li>
+		        <li><a target="_blank" href="http://{{.website}}"  style="padding-top: 0px;padding-bottom: 0px;font-size:12px;">{{.company_fullname}}</a></li>
+		    </ul>
+		</div>
+		
+	</div>
+
+	<script type="text/javascript">
+		const COMPANY_OBJECT = {
+									tghd: {
+										bgColor: ""
+									},
+									rtyj: {
+										logoCss: { "width": "120px", "left": "5%"} 
+									},
+									rxhy: {
+										logoCss: {"height": "50px"}//{ "width": "auto", "height": "50px", "paddingLeft": "150px"} 
+									},
+									telus: {
+									},
+									wecise: {
+									}
+								};
+
+		$(function() {
+			let _company = {{.company}};
+			let _logo = {{.logo}};
+			
+			$("#company_logo").attr("src",_logo);
+			$("#favicon").attr("href", _logo);
+
+			if(_company == "telus"){
+				$("#company_logo").css("width","140px");
+			} else if(_company == "rtyj"){
+				$("#company_logo").css("width","120px");
+			} else if(_company == "rxhy"){
+				$("#company_logo").css("height","50px");
+			} else {
+				$("#company_logo").css("height","45px");
+				$("#company_logo").css("margin-top","-7px");
+			}
+
+			let _isSigned = {{.IsSigned}};
+			let _cname = {{.SignedUser.Company.Name}};
+			if(_isSigned){
+				localStorage.setItem("uname",_cname);
+			}
+		});
+	</script>
+
+	<!-- begin scroll to top btn -->
+	<a href="javascript:;" class="btn btn-icon btn-circle btn-success btn-scroll-to-top fade" data-click="scroll-top"><i class="fa fa-angle-up"></i></a>
+	<!-- end scroll to top btn -->
+</div>
+</body>
+	
+</html>

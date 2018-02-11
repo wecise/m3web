@@ -1,0 +1,237 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-entity-tree-component"  ----------*/
+	<template>
+		<ul class="ztree" id="vue-entity-tree" style="overflow:auto;"></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-entity-tree-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+	        model: Array,
+	        dimension: Object,
+	    },
+	    data: function(){
+	        return {
+	            zTree: Object,
+	            setting: Object,
+	            nodes: Array,
+	            expandNodes: Array
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	        self.init();
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+	            
+	            self.setting = {
+	                            view: {
+	                                showLine: true,
+	                                selectedMulti: false,
+	                                dblClickExpand: false
+	                            },
+	                            check: {
+									enable: true,
+									nocheckInherit: true
+								},
+	                            edit: {
+	                                enable: true,
+	                            },
+	                            data: {
+	                                simpleData: {
+	                                    enable: true,
+	                                    idKey: "cid",
+	                                    pIdKey: "pid",
+	                                },
+	                                key: {
+	                                    name: 'name',
+	                                    title: "title"
+	                                }
+	                            },
+	                            callback: {
+	                                onClick: self.onClick,
+	                                onCheck: self.onCheck,
+	                            },
+	                            view: {
+									showTitle: true
+								}
+	                        };
+
+	        })
+
+	    },
+	    watch: {
+	        setting: {
+	            handler:function(val, oldVal){
+	                var self = this;
+
+	                self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
+	            },
+	            deep: true
+	        },
+	        model: {
+	            handler:function(val,oldVal){
+	                var self = this;
+
+	                if(!_.isEmpty(self.zTree)){
+	                	self.zTree.destroy();
+	                }
+
+	                self.init();
+
+	            },
+	            deep: true
+	        }
+	    },
+	    methods: {
+	        init: function() {
+	            var self = this;
+	            
+	            jQuery.ajax({
+	                url: '/mxobject/search',
+	                type: 'POST',
+	                dataType: 'json',
+	                data: {
+	                    cond: `call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name"]}`//top 1000`
+	                },
+	                beforeSend: function(xhr) {
+	                },
+	                complete: function(xhr, textStatus) {
+	                },
+	                success: function(data, textStatus, xhr) {
+	                    
+	                    if(_.isEmpty(data.message)) return false;
+	                    
+	                    let _data = data.message[0].tree;
+	                    let _nodes = _.map(self.model,function(v){
+	                    				_.forEach(_data,function(val){
+	                    					
+	                    					val = _.merge(val,{title:_.last(val.name.split("/"))});
+
+	                    					if(_.includes(v.class,val.name)){
+	                    						val = _.merge(val,{checked: true, open:true});
+	                    					}
+	                    				})
+
+	                    				let _pid = _.filter(_data,{name:v.class});
+
+	                    				return {
+            										cid: objectHash.sha1(v),
+	            									pid: _.isEmpty(_pid)?66:_pid[0].pid,
+	            									name: v.class + "/" + v.name, 
+	            									title:v.name,//+ "[" + v.summary.event + "]", 
+	            									checked: true, 
+	            									open:true
+	            								};
+			            			 })
+	                    
+            			self.nodes = [];
+            			self.nodes = _.concat(_data,_nodes);
+	                    self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
+
+	                    //self.zTree.expandAll(true);
+	                    //console.log(JSON.stringify(self.nodes))
+	                    
+	                },
+	                error: function(xhr, textStatus, errorThrown) {
+	                    console.log(errorThrown);
+	                }
+	            });
+	        },
+	        onClick: function(event, treeId, treeNode) {
+	            let self = this;
+	            
+	            // entity object data false
+	            if(treeNode.name.indexOf("/") < 0){
+	                eventHub.$emit('treenode-selected-event', treeNode.name);
+	                return false;
+	            }
+
+	            jQuery.ajax({
+	                url: '/mxobject/search',
+	                type: 'POST',
+	                dataType: 'json',
+	                data: {
+	                    cond: `#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`
+	                },
+	                beforeSend: function(xhr) {
+	                },
+	                complete: function(xhr, textStatus) {
+	                },
+	                success: function(data, textStatus, xhr) {
+	                    
+	                    if(!_.isEmpty(data.message)) {
+	                        var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
+	                        var nodes = tree.getSelectedNodes();
+	                        if (nodes && nodes.length>0) {
+	                            tree.removeChildNodes(nodes[0]);
+	                        }
+
+	                        // append sub nodes
+	                        tree.addNodes(treeNode, data.message);
+
+	                        if(!_.isEmpty(self.dimension)){
+	                        	let _byDimension = self.getNodesByDimension()
+	                        }
+	                    }
+	                    
+	                },
+	                error: function(xhr, textStatus, errorThrown) {
+	                    console.log(errorThrown);
+	                }
+	            })
+	        },
+	        onCheck: function(event, treeId, treeNode) {
+			  	let self = this;
+
+			  	let zTree = $.fn.zTree.getZTreeObj("vue-entity-tree");
+			  	let nodes = zTree.getCheckedNodes(true);
+			  	eventHub.$emit('entity-select-event', _.filter(nodes,{isParent:false}));
+	        },
+	        getNodesByDimension: function(){
+	        	let self = this;
+	        	let _param = `#` + self.dimension.node + `: | print ` + self.dimension.dimension + ` | top 1`;
+	        	let rtn = [];
+	        	console.log(_param)
+	        	jQuery.ajax({
+	                url: '/mxobject/search',
+	                type: 'POST',
+	                dataType: 'json',
+	                data: {
+	                    cond: _param
+	                },
+	                async:false,
+	                beforeSend: function(xhr) {
+	                },
+	                complete: function(xhr, textStatus) {
+	                },
+	                success: function(data, textStatus, xhr) {
+	                    
+	                    rtn = data.message;
+	                    
+	                },
+	                error: function(xhr, textStatus, errorThrown) {
+	                    console.log(errorThrown);
+	                }
+	            })
+	            return rtn;
+	        }
+	    }
+	
+	}
+	</script>
+
+</code>

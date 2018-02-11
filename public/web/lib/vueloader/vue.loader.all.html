@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>vue loader sample</title>
+<script>
+// set debug function for Vue Component Loader
+VueLoaderDebug = function(s) {
+	console.log(s);
+};
+</script>
+<!-- 依赖的组件 jquery -->
+<script src="../vendor/jquery/jquery.js"></script>
+<!-- 依赖的组件 vue -->
+<script src="../vendor/vue/vue.js"></script>
+<!-- link加载方式,在document interactive之后,同步加载,可以保证在document completed之前加载完成 -->
+<link rel="vc" href="vue.sample.1.htm"></link>
+<!-- Vue Component Loader -->
+<script src="vue.loader.js"></script>
+<!-- link加载方式,在document interactive之后,同步加载,可以保证在document completed之前加载完成 -->
+<link rel="vc" href="vue.sample.4-5.htm" type="async"></link>
+<!-- 应用脚本 -->
+<script>
+// Vue的错误信息会输出到console，不会抛出异常
+Vue.config.errorHandler = function (err, vm) {
+	console.log("error " + err.message + "\r\n" + err.stack);
+}
+//测试加载时间比较长的情况，通过API调用加载方式，异步加载
+setTimeout(function() {
+	//API调用加载方式，异步加载
+	//必须参数1 要加载组件的 url, 可以是一个url字符串,也可以是多个url字符串数组
+	//可选参数2 加载完成后的回调函数, 可选
+	//返回加载对象自身, 即VueLoader, 可以连续调用加载完成回调函数,
+	VueLoader.loadVC(["vue.sample.2-3.htm"],function(){
+			console.log("组件加载完成回调方式1");
+		})
+		.done(function() {
+			console.log("组件加载完成回调方式2");
+		});
+}, 1000);
+//简单API调用加载方式，同步加载
+console.log("load sample 6 start");
+VueLoader.loadVC("vue.sample.6.htm");
+console.log("load sample 6 end");
+//$(function() { ////不能保证所有组件在document load completed之前加载完成
+//window.onload = (function() { //不能保证所有组件在window.onload之前加载完成
+VueLoader.onloaded(["vue-sample-3", "vue-sample-5"],function(){ //确保指定组件加载完成后再执行的操作
+	console.log("组件加载完成回调方式3");
+	var vm = new Vue({el:"#vue"});
+});
+</script>
+</head>
+<body>
+<div id="vue">
+<vue-sample-1>正在加载......</vue-sample-1><br/>
+<vue-sample-2 skin="test"></vue-sample-2><br/>
+<vue-sample-3 info="测试参数"></vue-sample-3><br/>
+<vue-sample-4></vue-sample-4><br/>
+<vue-sample-5></vue-sample-5><br/>
+<vue-sample-6></vue-sample-6><br/>
+</div>
+</body>
+</html>
