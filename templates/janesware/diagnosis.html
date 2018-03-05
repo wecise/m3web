@@ -119,6 +119,9 @@
 	.fixed-table-container {
 	    border: none;
 	}
+	.fixed-table-body{
+		height:auto!important;
+	}
 	.th-inner,td{
 		font-size:12px;
 	}
@@ -166,10 +169,7 @@
 						"vue-search-preset-component",
 						"vue-search-input-component",
 						"vue-bootstrap-table"],function() {
-		/**
-		* @author cnwangzd
-		* @todo 初始化搜索历史
-		*/
+
 		$(function(){
 
 			$(".current-active-item").html(`<a class="active item" href="/janesware/diagnosis"><i class="fa fa-wrench"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
@@ -177,9 +177,6 @@
 			$.fn.editable.defaults.mode = 'inline';
 			
 			moment().format('LLL');
-
-			var current_class_path = "/matrix/devops/performance";
-			
 
 			Vue.component('search-graph', {
 				delimiters: ['${', '}'],
@@ -682,7 +679,8 @@
 						
 						_params.push(self.diagnosis.devops.object.host);
 
-			    		eventHub.$emit("input-set-event", _params.join(";"));
+						console.log(11111,_params)
+			    		// eventHub.$emit("input-set-event", _params.join(";"));
 			    		eventHub.$emit("input-term-event", _params.join(";"));
 
 			    		//let _window = {"name":"All Time", value: "", scale: {'scale':'year', 'step': 1, 'title':'Year', 'pattern':'L', 'filter':'YYYY/MM/DD HH'}};
@@ -692,7 +690,7 @@
 
 						self.onSearch();
 
-						$(".ui-sortable" ).sortable();
+						//$(".ui-sortable" ).sortable();
 						//$(".ui-sortable" ).disableSelection();
 
 						App.init();
@@ -833,6 +831,19 @@
 	                },
 				    setSearchReset: function(){
 				    	let self = this;
+
+                        self.event.data = [];
+                        self.journal.data = [];
+                        self.performance.data = [];
+                        self.log.data = [];
+                        self.raw.data = [];
+                        self.tickets.data = [];
+                        self.change.data = [];
+                        //self.dashboard
+                        self.diagnosis.devops.result = [];
+                        self.diagnosis.graph.graphData = [];
+                        self.diagnosis.entity.nodes = [];
+
 				    	
 				        self.setSearchTerm(self.diagnosis.devops.object.entity);
 				        self.onSearch();
@@ -840,71 +851,20 @@
 				    setSearchTerm: function (term){
 				    	let self = this;
 
-				    	self.diagnosis.graph.param[1] = 'id=' + _.trim(term.replace(/\|/g,"")).split("#")[0];
+				    	self.diagnosis.graph.param[1] = 'id=' + term.split("|")[0];//_.trim(term.replace(/\|/g,"")).split("#")[0];
                         self.diagnosis.devops.term = term;
-				    },
-				    getResultByCond: function(event){
-			        	let self = this;
-			        	let _param = `#/matrix/devops/element_translations_join/: | ` + event;
-			        	let rtn = [];
-			        	
-			        	console.log(_param)
-			        	jQuery.ajax({
-			                url: '/mxobject/search',
-			                type: 'POST',
-			                dataType: 'json',
-			                data: {
-			                    cond: _param
-			                },
-			                async:false,
-			                beforeSend: function(xhr) {
-			                },
-			                complete: function(xhr, textStatus) {
-			                },
-			                success: function(data, textStatus, xhr) {
-			                	rtn = data.message;
-			                },
-			                error: function(xhr, textStatus, errorThrown) {
-			                    console.log(errorThrown);
-			                }
-			            })
-			            return rtn;
-				    },
-				    getCountByCond: function(event){
-			        	let self = this;
-			        	let _param = `#/matrix/devops/event/: | ` + event ;
-			        	let rtn = 0;
-			        	
-			        	console.log(_param)
-			        	jQuery.ajax({
-			                url: '/mxobject/search',
-			                type: 'POST',
-			                dataType: 'json',
-			                data: {
-			                    cond: _param
-			                },
-			                async:false,
-			                beforeSend: function(xhr) {
-			                },
-			                complete: function(xhr, textStatus) {
-			                },
-			                success: function(data, textStatus, xhr) {
-			                	rtn = _.size(data.message);
-			                },
-			                error: function(xhr, textStatus, errorThrown) {
-			                    console.log(errorThrown);
-			                }
-			            })
-			            return rtn;
+                        self.search.input.term = term;
 				    },
 					onSearch: function(){
 						let self = this;
 
+						console.log(23232323-1,self.diagnosis.graph.param[1])
+                        console.log(23232323-2,self.diagnosis.devops.term)
+                        console.log(23232323-3,self.search.input.term)
+
 						self.searchGraph();
 
-						_.delay(function(){
-							self.searchEntity();
-						},500)
+						self.searchEntity();
 					},
 					initResultBar: function(){
 						let self = this;
@@ -926,19 +886,20 @@
 
 						if(window.GLOBAL_OBJECT.company.name=="telus"){
 	                    	// get siteid by tuid=element_id
-				    		let _tmp = self.getResultByCond(`element_id=`+self.diagnosis.devops.object.tuid);
-				    		// get all element by siteid
-				    		let _element = self.getResultByCond(`siteid=` + _tmp[0].siteid);
-				    		
+				    		let _tmp = fetchData(`#/matrix/devops/element_translations_join/: | element_id=` + self.search.input.term.split("|")[0]);
+                            // get all element by siteid
+							let _element = fetchData(`#/matrix/devops/element_translations_join/: | siteid=` + _tmp.message[0].siteid);
+
 				    		self.diagnosis.entity.nodes = [];
 				    		
-				    		_.forEach(_element, function(v){
-				    			let _event = self.getCountByCond(self.diagnosis.devops.object.tuid);
+				    		_.forEach(_element.message, function(v){
+				    			let _data = fetchData(`#/matrix/devops/event/: | ` + self.diagnosis.devops.object.tuid);
+
 				    			self.diagnosis.entity.nodes.push({
 								    								name: v.element_id,
 					            									title:v.element_id, 
 					            									class: "/matrix/entity/hardware/network/device",
-					            									summary: {event:_event}
+					            									summary: {event:_.size(_data.message)}
 					            								})
 				    		})
 
@@ -967,7 +928,7 @@
 			                complete: function(xhr, textStatus) {
 			                },
 			                success: function(data, textStatus, xhr) {
-			                    //console.log(1111,JSON.stringify(data))
+			                    console.log(1111,_.size(data.message))
 			                    if(_.isEmpty(data.message)) {
 			                    	self.diagnosis.graph.selectedNodes = [];
 			                    	return false;
@@ -996,55 +957,11 @@
 			                }
 			            });
 					},
-					searchByParam: function(param){
-						let self = this;
-						let _preParam = [
-											"#/matrix/devops/event/omnibus/:",
-											"#/matrix/devops/event/omnibus/journal/:",
-											"#/matrix/devops/event/omnibus/histroy/:",
-											"#/matrix/devops/event/syslog/:",
-											"#/matrix/devops/log/raw/:",
-											"#/matrix/devops/performance/tnpm/:",
-											"#/matrix/devops/tickets/:",
-											"#/matrix/devops/change/:",
-											"#/matrix/devops/eventkey/:",
-											"#/matrix/devops/element_translations_join/:"
-										];
-						let rtn = [];
-
-						_.forEach(_preParam,function(v) {
-							let _param = v + " | " + param + " | top 10 ";// | " + self.diagnosis.devops.timeWindow ;
-							
-							jQuery.ajax({
-							  	url: '/mxobject/search',
-							  	type: 'POST',
-							  	dataType: 'json',
-							  	async:false,
-							  	data: {
-							  		cond: _param, 
-							  		flag: true 
-							  	},
-							  	beforeSend:function(xhr){ 
-						      	},
-							  	complete: function(xhr, textStatus) {
-							  	},
-							  	success: function(data, textStatus, xhr) {
-							  		console.log(_param,data.message)
-							  		if(!_.isEmpty(data.message)){
-							  			rtn = _.concat(rtn,data.message);
-							  		}
-							  	},
-							  	error: function(xhr, textStatus, errorThrown) {
-							  	}
-							})	
-						})
-
-						return rtn;
-					},
 					searchDevops: function () {
 						let self = this;
 						let _param = "";
 						let _tmp = [];
+						let _term = self.search.input.term.split("|");
 
 						_.forEach(self.diagnosis.devops.selectedNodes,function(v){
                             _tmp.push(v);
@@ -1054,8 +971,14 @@
 							_tmp.push("node=" + v);
 						})
 
-						_param = self.diagnosis.devops.class + " | " + _tmp.join(";") + self.diagnosis.devops.timewindow.value;
+						if (_.size(_term)>0){
+                            _term.shift();
+                            _param = self.diagnosis.devops.class + " | " + _tmp.join(";") + self.diagnosis.devops.timewindow.value + " | " + _term.join(" | ");
+						} else {
+                            _param = self.diagnosis.devops.class + " | " + _tmp.join(";") + self.diagnosis.devops.timewindow.value;
+						}
 
+						_param = _param.replace(/undefined/g,"");
 						console.log(222,_param)
 						jQuery.ajax({
 						  	url: '/mxobject/search',
@@ -1070,7 +993,7 @@
 						  	complete: function(xhr, textStatus) {
 						  	},
 						  	success: function(data, textStatus, xhr) {
-						  		
+                                console.log(2222,_.size(data.message))
 							  	let event = new Array();
 							  	let journal = new Array();
 								let performance = new Array();
@@ -1265,13 +1188,6 @@
 			    }
 			})
 
-			function formaterDate(value, row, index) {
-				return moment(value).format('YYYY-MM-DD HH:mm:ss');
-			}
-
-			function formaterDate(value) {
-				return moment(value).format('YYYY-MM-DD HH:mm:ss');	
-			}
 		})
 	})
 
@@ -1377,14 +1293,14 @@
             <div class="panel-body">
                 <div id="search-event">
 					<div class="table-responsive">
-				  		<vue-bootstrap-table id="dat-table-event"
+				  		<vue-bootstrap-table id="dataTable-event"
 											 :columns="model.columns"
 											 :options="model.options"
 											 :dataset="model.data"
 											 :filter="[]"
-											 contextMenu="context-menu"></vue-bootstrap-table>
+											 contextMenu="context-menu-event"></vue-bootstrap-table>
 						<!-- context menu -->
-						<ul id="context-menu" class="dropdown-menu">
+						<ul id="context-menu-event" class="dropdown-menu">
 							<li data-item='{"num": "0", "app":"event","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
 							<li class="context-menu-item context-menu-separator context-menu-not-selectable"></li>
 							<li data-item='{"num": "1", "app":"event","item":"journal","show":"table"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-link fa-fw"></i> Journal</a></li>
@@ -1444,11 +1360,30 @@
             <div class="panel-body">
                 <div id="search-log">
 					<div class="table-responsive">
-						<bootstrap-table :columns="model.columns" 
-				  							 :options="model.options" 
-				  							 :data="model.data"
-				  							 forward="log">
-				  		</bootstrap-table>
+						<vue-bootstrap-table id="dataTable-log"
+											 :columns="model.columns"
+											 :options="model.options"
+											 :dataset="model.data"
+											 :filter="[]"
+											 contextMenu="context-menu-log"></vue-bootstrap-table>
+						<!-- context menu -->
+						<ul id="context-menu-log" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"log","item":"detail", "show":"list"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i>
+								Details</a></li>
+							<li data-item='{"num": "1", "app":"log","item":"history","show":"table"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i
+									class="fa fa-history fa-fw"></i> History</a></li>
+							<li data-item='{"num": "2", "app":"log","item":"timeline","show":"timeline"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i
+									class="fa fa-clock-o fa-fw"></i> Timeline</a></li>
+							<li data-item='{"num": "3", "app":"log","item":"diagnosis","show":"widget"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i
+									class="fa fa-wrench fa-fw"></i> Diagnosis</a></li>
+							<li data-item='{"num": "4", "app":"log","item":"add","show":"command"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i>
+								New Action</a></li>
+						</ul>
 					</div>
 				</div>
             </div>
@@ -1472,11 +1407,21 @@
             <div class="panel-body">
                 <div id="search-raw">
 					<div class="table-responsive">
-						<bootstrap-table :columns="model.columns" 
-				  							 :options="model.options" 
-				  							 :data="model.data"
-				  							 forward="">
-				  		</bootstrap-table>
+						<vue-bootstrap-table id="dataTable-raw"
+											 :columns="model.columns"
+											 :options="model.options"
+											 :dataset="model.data"
+											 :filter="[]"
+											 contextMenu="context-menu-raw"></vue-bootstrap-table>
+						<!-- context menu -->
+						<ul id="context-menu-raw" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"log","item":"detail", "show":"list"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i>
+								Details</a></li>
+							<li data-item='{"num": "4", "app":"log","item":"add","show":"command"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i>
+								New Action</a></li>
+						</ul>
 					</div>
 				</div>
             </div>
@@ -1500,11 +1445,21 @@
             <div class="panel-body">
                 <div id="search-tickets">  
 					<div class="table-responsive">
-						<bootstrap-table :columns="model.columns" 
-				  							 :options="model.options" 
-				  							 :data="model.data"
-				  							 forward="">
-				  		</bootstrap-table>
+						<vue-bootstrap-table id="dataTable-tickets"
+											 :columns="model.columns"
+											 :options="model.options"
+											 :dataset="model.data"
+											 :filter="[]"
+											 contextMenu="context-menu-tickets"></vue-bootstrap-table>
+						<!-- context menu -->
+						<ul id="context-menu-tickets" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"log","item":"detail", "show":"list"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i>
+								Details</a></li>
+							<li data-item='{"num": "4", "app":"log","item":"add","show":"command"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i>
+								New Action</a></li>
+						</ul>
 				  	</div>
 				</div>
             </div>
@@ -1528,12 +1483,21 @@
             <div class="panel-body">
                 <div id="search-change">  
 					<div class="table-responsive">
-						<bootstrap-table :columns="model.columns" 
-				  							 :options="model.options" 
-				  							 :data="model.data"
-				  							 forward="change"
-				  							 forward="">
-				  		</bootstrap-table>
+						<vue-bootstrap-table id="dataTable-change"
+											 :columns="model.columns"
+											 :options="model.options"
+											 :dataset="model.data"
+											 :filter="[]"
+											 contextMenu="context-menu-change"></vue-bootstrap-table>
+						<!-- context menu -->
+						<ul id="context-menu-change" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"log","item":"detail", "show":"list"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i>
+								Details</a></li>
+							<li data-item='{"num": "4", "app":"log","item":"add","show":"command"}'><a
+									href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i>
+								New Action</a></li>
+						</ul>
 				  	</div>
 				</div>
             </div>
@@ -1557,11 +1521,27 @@
             <div class="panel-body">
                 <div id="search-performance">  
 					<div class="table-responsive">
-						<bootstrap-table :columns="model.columns" 
-				  							 :options="model.options" 
-				  							 :data="model.data"
-				  							 forward="performance">
-				  		</bootstrap-table>
+						<vue-bootstrap-table id="dataTable-performance"
+											 :columns="model.columns"
+											 :options="model.options"
+											 :dataset="model.data"
+											 contextMenu="context-menu-performance">
+						</vue-bootstrap-table>
+						<!-- context menu -->
+						<ul id="context-menu-performance" class="dropdown-menu">
+							<li data-item='{"num": "0", "app":"performance","item":"detail", "show":"list"}'>
+								<a href="javascript:void(0)" style="cursor:hand;"><i
+										class="fa fa-list fa-fw"></i> Details</a></li>
+							<li data-item='{"num": "1", "app":"performance","item":"history","show":"chart"}'>
+								<a href="javascript:void(0)" style="cursor:hand;"><i
+										class="fa fa-history fa-fw"></i> History</a></li>
+							<li data-item='{"num": "2", "app":"performance","item":"kpi","show":"kpi"}'>
+								<a href="javascript:void(0)" style="cursor:hand;"><i
+										class="fa fa-wrench fa-fw"></i> Threshold</a></li>
+							<li data-item='{"num": "3", "app":"performance","item":"add","show":"command"}'>
+								<a href="javascript:void(0)" style="cursor:hand;"><i
+										class="fa fa-plus fa-fw"></i> New Action</a></li>
+						</ul>
 					</div>
 				</div>
             </div>
@@ -1618,7 +1598,7 @@
             <h4 class="panel-title">Entity</h4>
         </div>
         <div class="panel-body" id="search-entity" style="min-height:100vh;">
-            <vue-entity-tree-component :model="model" :dimension="dimension"></vue-entity-tree-component>
+            <vue-entity-tree-component id="diagnosis-entity-tree" :model="model" :dimension="dimension"></vue-entity-tree-component>
         </div>
     </div>
 </script>

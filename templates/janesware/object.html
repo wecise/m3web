@@ -354,7 +354,7 @@
 
 </style>
 
-<div id="app"></div>
+<!--<div id="app"></div>-->
 
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
@@ -977,7 +977,36 @@
                       }
                   }
               }
-        })
+        });
+
+
+        var config = {
+            content: [{
+                type: 'row',
+                content:[
+                    {
+                        type: 'component',
+                        id: 'app',
+                        name: 'app',
+                        componentName: 'example',
+                        componentState: { id: 'app', label: 'A' },
+                        isClosable: false
+                    }
+                ]
+            }],
+            settings:{
+                hasHeaders: false
+                }
+        };
+
+            var myLayout = new GoldenLayout( config);
+
+            myLayout.registerComponent( 'example', function( container, componentState ){
+                container.getElement().html( `<div id="` + componentState.id + `"></div>`);
+            });
+
+        myLayout.init();
+
 
         appVue = new Vue({
             delimiters: ['${', '}'],
@@ -3114,7 +3143,7 @@
 
 <script type="text/x-template" id="app-template">
     <div>
-        <div id="sidebar" class="sidebar __web-inspector-hide-shortcut__" style="background-color:transparent;overflow:auto;">
+        <div id="sidebar" class="sidebar __web-inspector-hide-shortcut__" style="background-color:transparent;overflow:auto;padding-top:0px;">
 
             <div class="panel panel-grey" style="border-radius: 0px;border-right: 1px solid #f0f3f5;">
 

@@ -76,12 +76,13 @@
         padding: 7px 12px;
         border-radius: 0px;
     }
+
 </style>
 
-<div id="app"></div>
+<!--<div id="app"></div>-->
 
 <!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.all-3.5.min.js"></script>
+<script src="{{AppSubUrl}}/web/lib/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!--File Parse JS-->
 <script src="{{AppSubUrl}}/web/lib/papaparse/papaparse.min.js"></script>
@@ -101,6 +102,7 @@
 <script src="{{AppSubUrl}}/web/lib/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
@@ -109,7 +111,8 @@
 
     var eventHub = new Vue();
 
-    VueLoader.onloaded(["vue-entity-graph-component",
+    VueLoader.onloaded(["vue-entity-tree-component",
+                        "vue-entity-graph-component",
                         "vue-search-preset-component",
                         "vue-search-input-component"
                         ],function() {
@@ -1804,6 +1807,38 @@ console.log(22,data)
                 }
             })
 
+            var config = {
+                content: [{
+                    type: 'row',
+                    content:[{
+                        type: 'component',
+                        name: 'app',
+                        componentName: 'App',
+                        componentState: { id: 'app', label: 'A' }
+                    }]
+                }],
+                settings:{
+                    hasHeaders: false,
+                    constrainDragToContainer: true,
+                    reorderEnabled: true,
+                    selectionEnabled: false,
+                    popoutWholeStack: false,
+                    blockedPopoutsThrowError: true,
+                    closePopoutsOnUnload: true,
+                    showPopoutIcon: false,
+                    showMaximiseIcon: true,
+                    showCloseIcon: true
+                }
+            };
+
+            var myLayout = new GoldenLayout( config);
+
+            myLayout.registerComponent( 'App', function( container, componentState ){
+                container.getElement().html( `<div id="` + componentState.id + `"></div>`);
+            });
+
+            myLayout.init();
+
             var appVue = new Vue({
                 delimiters: ['${', '}'],
                 el: '#app',
@@ -2267,7 +2302,8 @@ console.log(22,data)
                                 <div class="col-lg-2" id="nav">
                                     <div class="panel" style="border-radius: 0px;min-height:60vh;">
                                         <div class="panel-body">
-                                            <tree-component></tree-component>
+                                            <vue-entity-tree-component id="ciview-entity-tree"></vue-entity-tree-component>
+                                            <!--<tree-component></tree-component>-->
                                         </div>
                                     </div>
                                 </div>

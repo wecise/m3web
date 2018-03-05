@@ -2,7 +2,235 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-timeline-component.vue" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock.html" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/app.613b164b6951148bc000.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/bc836261fbb654dda6b653e428014279.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/common.613b164b6951148bc000.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/easy-mock.png" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/hm.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/manifest.18f07e791329cb081e2f.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/saved_resource.html" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/Easy Mock_files/vendor.623d43ff058da62ca4c3.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司.html" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/ace.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/app.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/apps.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-editable(1).css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-editable.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-editable.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-select.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-select.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-contextmenu.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-editable.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-en-US.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-export.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-fixed-columns.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-fixed-columns.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table-reorder-columns.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-table.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-tagsinput.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap-tagsinput.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap.less" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/bootstrap.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/cfg.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/clipboard.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/color_style.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/color_style_responsive.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/common.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/defiant.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/dragtable.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/dragtable.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/ext-language_tools.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/ext-settings_menu.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/ext-split.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/ext-statusbar.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/flatpickr.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/flatpickr.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/font-awesome.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/gauge.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/grapheditor.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/init.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/iscroll.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery-3.2.1.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery-migrate-1.1.0.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery-ui.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery.contextMenu.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery.contextMenu.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery.mark.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/jquery.ui.position.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/later.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/less.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/localforage.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/lodash.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/moment-with-locales.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/moment.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxAbstractCanvas2D.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxActor.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxAnimation.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxArrow.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxArrowConnector.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxAutoSaveManager.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCell.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellEditor.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellHighlight.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellMarker.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellOverlay.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellPath.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellRenderer.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellState.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellStatePreview.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCellTracker.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxChildChangeCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCircleLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxClient.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxClipboard.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCloud.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCodecRegistry.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCompactTreeLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCompositeLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxConnectionConstraint.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxConnectionHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxConnector.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxConstants.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxConstraintHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCoordinateAssignment.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxCylinder.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultKeyHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultKeyHandlerCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultPopupMenu.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultPopupMenuCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultToolbar.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDefaultToolbarCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDictionary.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDivResizer.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDoubleEllipse.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxDragSource.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEdgeHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEdgeLabelLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEdgeSegmentHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEdgeStyle.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEditor.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEditorCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEffects.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxElbowEdgeHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEllipse.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEvent.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEventObject.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxEventSource.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxFastOrganicLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxForm.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGenericChangeCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGeometry.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraph.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphAbstractHierarchyCell.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphHierarchyEdge.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphHierarchyModel.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphHierarchyNode.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphModel.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphSelectionModel.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphView.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGraphViewCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxGuide.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxHandle.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxHexagon.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxHierarchicalLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxHierarchicalLayoutStage.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxImage.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxImageBundle.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxImageExport.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxImageShape.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxKeyHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxLabel.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxLayoutManager.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxLine.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxLog.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMarker.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMedianHybridCrossingReduction.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMinimumCycleRemover.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxModelCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMorphing.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMouseEvent.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxMultiplicity.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxObjectCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxObjectIdentity.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxOutline.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPanningHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPanningManager.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxParallelEdgeLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPartitionLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPerimeter.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPoint.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPolyline.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPopupMenu.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPopupMenuHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxPrintPreview.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRadialTreeLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRectangle.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRectangleShape.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxResources.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRhombus.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRootChangeCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxRubberband.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSelectionCellsHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxShape.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStackLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStencil.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStencilRegistry.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStyleRegistry.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStylesheet.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxStylesheetCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSvgCanvas2D.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSwimlane.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSwimlaneLayout.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSwimlaneManager.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSwimlaneModel.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxSwimlaneOrdering.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxTemporaryCellStates.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxTerminalChangeCodec.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxText.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxToolbar.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxTooltipHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxTriangle.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxUndoManager.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxUndoableEdit.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxUrlConverter.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxUtils.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxVertexHandler.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxVmlCanvas2D.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxWindow.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxXmlCanvas2D.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/mxXmlRequest.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/object_hash.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/pace.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/split.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/style.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/sweetalert2.min.css" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/sweetalert2.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/tableExport.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/tippy.all.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/util.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/vue.loader.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/vue.min.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司_files/zh.js" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" afterPath="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" afterPath="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-timeline-component.html" afterPath="$PROJECT_DIR$/public/web/component/vue-timeline-component.html" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/cfg.js" afterPath="$PROJECT_DIR$/public/web/js/cfg.js" />
+      <change beforePath="$PROJECT_DIR$/templates/base/head.html" afterPath="$PROJECT_DIR$/templates/base/head.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/ciview.html" afterPath="$PROJECT_DIR$/templates/janesware/ciview.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/diagnosis.html" afterPath="$PROJECT_DIR$/templates/janesware/diagnosis.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/event.html" afterPath="$PROJECT_DIR$/templates/janesware/event.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/job.html" afterPath="$PROJECT_DIR$/templates/janesware/job.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/log.html" afterPath="$PROJECT_DIR$/templates/janesware/log.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/object.html" afterPath="$PROJECT_DIR$/templates/janesware/object.html" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/performance.html" afterPath="$PROJECT_DIR$/templates/janesware/performance.html" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -15,41 +243,193 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="job.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1057">
-              <caret line="1417" column="14" lean-forward="false" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
-              <folding>
-                <marker date="1518328255000" expanded="true" signature="4761:4767" ph=" " />
-                <marker date="1518328255000" expanded="true" signature="38738:38752" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="search.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/search.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
-              <caret line="123" column="76" lean-forward="false" selection-start-line="123" selection-start-column="72" selection-end-line="123" selection-end-column="76" />
-              <folding>
-                <marker date="1518330792000" expanded="true" signature="3520:3526" ph=" " />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="event.html" pinned="false" current-in-tab="true">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="event.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="217">
-              <caret line="238" column="76" lean-forward="false" selection-start-line="238" selection-start-column="76" selection-end-line="238" selection-end-column="76" />
+            <state relative-caret-position="264">
+              <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="26" />
               <folding>
-                <marker date="1518330798000" expanded="true" signature="7060:7066" ph=" " />
-                <marker date="1518330798000" expanded="true" signature="9960:10323" ph="..." />
-                <marker date="1518330798000" expanded="true" signature="10122:10182" ph="..." />
+                <marker date="1520236735000" expanded="true" signature="7060:7066" ph=" " />
+                <marker date="1520236735000" expanded="true" signature="9960:10323" ph="..." />
+                <marker date="1520236735000" expanded="true" signature="10122:10182" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ciview.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-4136">
+              <caret line="38" column="23" lean-forward="true" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
+              <folding>
+                <element signature="e#4889#15623#0" expanded="false" />
+                <element signature="e#15671#17946#0" expanded="false" />
+                <element signature="e#18002#22015#0" expanded="false" />
+                <element signature="e#22067#59717#0" expanded="false" />
+                <element signature="e#59774#60884#0" expanded="false" />
+                <element signature="e#60942#68166#0" expanded="false" />
+                <element signature="e#68219#84950#0" expanded="false" />
+                <marker date="1520237258000" expanded="true" signature="4414:4420" ph=" " />
+                <marker date="1520237258000" expanded="true" signature="27450:27611" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="51806:53066" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="51890:52885" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52047:52830" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52175:52769" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52434:52444" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52445:52706" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52603:52615" ph="..." />
+                <marker date="1520237258000" expanded="true" signature="52960:53015" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-entity-cure-component.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-cure-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="468">
+              <caret line="39" column="17" lean-forward="true" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-entity-tree-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="420">
+              <caret line="35" column="57" lean-forward="false" selection-start-line="35" selection-start-column="57" selection-end-line="35" selection-end-column="57" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-bootstrap-table.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1530">
+              <caret line="1070" column="76" lean-forward="false" selection-start-line="1070" selection-start-column="76" selection-end-line="1070" selection-end-column="76" />
+              <folding>
+                <element signature="e#16736#18882#0" expanded="false" />
+                <element signature="e#20976#25342#0" expanded="false" />
+                <element signature="e#25386#29747#0" expanded="false" />
+                <element signature="e#29789#36260#0" expanded="false" />
+                <element signature="e#36309#41792#0" expanded="false" />
+                <marker date="1519821853000" expanded="true" signature="1441:2107" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2185:3401" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2279:2293" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2294:2441" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2518:2624" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2704:2813" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="2891:2998" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="3075:3181" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="3259:3366" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="3498:3855" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="3935:4614" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="4031:4045" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="4046:4197" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="4276:4386" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="4466:4577" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="4704:5041" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5116:5745" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5207:5221" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5222:5363" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5437:5537" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5612:5713" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="5835:5978" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="6057:6352" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="6152:6166" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="6167:6316" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="11686:13020" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="11756:11768" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="11769:12532" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="11859:11870" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="11918:12488" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="12028:12173" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="12319:12416" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="12596:12980" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="12669:12936" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="12800:12891" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="42050:43625" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="42191:43481" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="42275:43121" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="42506:42776" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="43197:43464" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="43233:43443" ph="..." />
+                <marker date="1519821853000" expanded="true" signature="43563:43587" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cfg.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="578">
+              <caret line="2290" column="33" lean-forward="false" selection-start-line="2290" selection-start-column="33" selection-end-line="2290" selection-end-column="33" />
+              <folding>
+                <element signature="e#2782#25527#0" expanded="false" />
+                <element signature="e#25543#48019#0" expanded="false" />
+                <element signature="e#48038#70493#0" expanded="false" />
+                <element signature="e#70508#92963#0" expanded="false" />
+                <element signature="e#92981#115457#0" expanded="false" />
+                <element signature="e#115499#118356#0" expanded="false" />
+                <element signature="e#118377#122796#0" expanded="false" />
+                <element signature="e#122818#126212#0" expanded="false" />
+                <marker date="1519798142000" expanded="true" signature="2472:2660" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="2532:2543" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="2584:2609" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="127455:127469" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="127681:127695" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="127932:127946" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="128148:128162" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="128366:128380" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="128550:128564" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="129055:129075" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="129452:129472" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="130727:130747" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="133826:133846" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="137194:137214" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="137603:137623" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="138354:138374" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="138759:138779" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="139178:139198" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="139549:139569" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="141126:141146" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="141768:141788" ph="..." />
+                <marker date="1519798142000" expanded="true" signature="142177:142197" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-319">
+              <caret line="95" column="78" lean-forward="false" selection-start-line="95" selection-start-column="78" selection-end-line="95" selection-end-column="78" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="log.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/log.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="946" column="82" lean-forward="false" selection-start-line="946" selection-start-column="82" selection-end-line="946" selection-end-column="82" />
+              <folding>
+                <marker date="1520236714000" expanded="true" signature="7365:7686" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="7490:7501" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="7542:7567" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="7730:8052" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="7856:7867" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="7908:7933" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="8274:8280" ph=" " />
+                <marker date="1520236714000" expanded="true" signature="12605:12992" ph="..." />
+                <marker date="1520236714000" expanded="true" signature="12779:12839" ph="..." />
               </folding>
             </state>
           </provider>
@@ -66,7 +446,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>vue-timeline-component.html</find>
+      <find>initCopyToSearch</find>
+      <find>searchDevops</find>
+      <find>onSearch</find>
+      <find>console.log(JSON.string</find>
+      <find>diagnosis.entity.nodes</find>
+      <find>current_class_path</find>
+      <find>input-term-event</find>
+      <find>input-set-event</find>
+      <find>getCountByCond</find>
+      <find>getResultByCond</find>
+      <find>formaterDate</find>
+      <find>searchByParam</find>
+      <find>searchEntity</find>
+      <find>self.diagnosis.graph.param[1]</find>
+      <find>.fixed-table-body</find>
+      <find>openEventKey</find>
+      <find>panel-history</find>
+      <find>_appVue</find>
+      <find>timewindow</find>
+      <find>loadBaseline</find>
+      <find>openHisPanelByChart</find>
+      <find>App.init()</find>
+      <find>setSearchTerm</find>
+      <find>result.data</find>
+      <find>self.search.result.data</find>
+      <find>sco.js</find>
+      <find>id</find>
+      <find>vue-entity-tree</find>
+      <find>&lt;vue-entity-tree-component</find>
+      <find>contextMenu</find>
     </findStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
@@ -84,10 +493,20 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/public/web/component/vue-base-table-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/job.html" />
         <option value="$PROJECT_DIR$/templates/janesware/we.vue" />
         <option value="$PROJECT_DIR$/templates/janesware/search.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/diagnosis.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-timeline-component.html" />
+        <option value="$PROJECT_DIR$/public/web/js/cfg.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/performance.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" />
+        <option value="$PROJECT_DIR$/templates/base/head.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/job.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/log.html" />
         <option value="$PROJECT_DIR$/templates/janesware/event.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/ciview.html" />
       </list>
     </option>
   </component>
@@ -139,7 +558,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -168,7 +586,20 @@
             <path>
               <item name="web" type="b2602c69:ProjectViewProjectNode" />
               <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="base" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="web" type="b2602c69:ProjectViewProjectNode" />
@@ -181,6 +612,7 @@
         </subPane>
       </pane>
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -221,7 +653,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1518319222660</updated>
-      <workItem from="1518319223805" duration="3652000" />
+      <workItem from="1518319223805" duration="59311000" />
+      <workItem from="1519823843033" duration="363000" />
+      <workItem from="1519950938730" duration="9559000" />
     </task>
     <task id="LOCAL-00001" summary="update table fomat">
       <created>1518319506068</created>
@@ -241,29 +675,29 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3652000" />
+    <option name="totallyTimeSpent" value="69233000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="773" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31328124" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" x="480" y="67" width="320" height="685" />
+      <window_info id="Remote Host" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29296875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" x="480" y="67" width="320" height="685" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -315,15 +749,382 @@
     <option name="LAST_COMMIT_MESSAGE" value="remove vue-timeinlie-component.html" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager />
+    <breakpoint-manager>
+      <option name="time" value="1" />
+    </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1520236735000" expanded="true" signature="7060:7066" ph=" " />
+            <marker date="1520236735000" expanded="true" signature="9960:10323" ph="..." />
+            <marker date="1520236735000" expanded="true" signature="10122:10182" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6528">
+          <caret line="1070" column="76" lean-forward="false" selection-start-line="1070" selection-start-column="76" selection-end-line="1070" selection-end-column="76" />
+          <folding>
+            <element signature="e#16736#18882#0" expanded="false" />
+            <element signature="e#20976#25342#0" expanded="false" />
+            <element signature="e#25386#29747#0" expanded="false" />
+            <element signature="e#29789#36260#0" expanded="false" />
+            <element signature="e#36309#41792#0" expanded="false" />
+            <marker date="1519821853000" expanded="true" signature="1441:2107" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2185:3401" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2279:2293" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2294:2441" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2518:2624" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2704:2813" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2891:2998" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3075:3181" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3259:3366" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3498:3855" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3935:4614" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4031:4045" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4046:4197" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4276:4386" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4466:4577" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4704:5041" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5116:5745" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5207:5221" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5222:5363" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5437:5537" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5612:5713" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5835:5978" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6057:6352" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6152:6166" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6167:6316" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11686:13020" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11756:11768" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11769:12532" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11859:11870" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11918:12488" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12028:12173" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12319:12416" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12596:12980" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12669:12936" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12800:12891" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42050:43625" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42191:43481" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42275:43121" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42506:42776" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43197:43464" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43233:43443" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43563:43587" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="732">
+          <caret line="2290" column="33" lean-forward="false" selection-start-line="2290" selection-start-column="33" selection-end-line="2290" selection-end-column="33" />
+          <folding>
+            <element signature="e#2782#25527#0" expanded="false" />
+            <element signature="e#25543#48019#0" expanded="false" />
+            <element signature="e#48038#70493#0" expanded="false" />
+            <element signature="e#70508#92963#0" expanded="false" />
+            <element signature="e#92981#115457#0" expanded="false" />
+            <element signature="e#115499#118356#0" expanded="false" />
+            <element signature="e#118377#122796#0" expanded="false" />
+            <element signature="e#122818#126212#0" expanded="false" />
+            <marker date="1519798142000" expanded="true" signature="2472:2660" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2532:2543" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2584:2609" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127455:127469" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127681:127695" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127932:127946" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128148:128162" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128366:128380" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128550:128564" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129055:129075" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129452:129472" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="130727:130747" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="133826:133846" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137194:137214" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137603:137623" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138354:138374" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138759:138779" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139178:139198" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139549:139569" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141126:141146" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141768:141788" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="142177:142197" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/performance.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3468">
+          <caret line="289" column="35" lean-forward="false" selection-start-line="289" selection-start-column="35" selection-end-line="289" selection-end-column="35" />
+          <folding>
+            <marker date="1520236642000" expanded="true" signature="7630:7636" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26831:26859" ph="..." />
+            <marker date="1520236642000" expanded="true" signature="26906:26912" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26930:26945" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/diagnosis.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4584">
+          <caret line="695" column="24" lean-forward="false" selection-start-line="695" selection-start-column="24" selection-end-line="695" selection-end-column="35" />
+          <folding>
+            <element signature="e#5289#5803#0" expanded="false" />
+            <element signature="e#5841#6680#0" expanded="false" />
+            <element signature="e#6720#7561#0" expanded="false" />
+            <element signature="e#7603#8126#0" expanded="false" />
+            <element signature="e#9014#9541#0" expanded="false" />
+            <element signature="e#9586#10112#0" expanded="false" />
+            <element signature="e#10162#10693#0" expanded="false" />
+            <element signature="e#10741#11259#0" expanded="false" />
+            <element signature="e#11304#12848#0" expanded="false" />
+            <element signature="e#12897#15065#0" expanded="false" />
+            <element signature="e#19458#20761#0" expanded="false" />
+            <marker date="1520236672000" expanded="true" signature="5141:5147" ph=" " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="39" column="53" lean-forward="false" selection-start-line="39" selection-start-column="53" selection-end-line="39" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="36" column="42" lean-forward="false" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/log.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11964">
+          <caret line="997" column="33" lean-forward="false" selection-start-line="980" selection-start-column="28" selection-end-line="997" selection-end-column="33" />
+          <folding>
+            <marker date="1520236714000" expanded="true" signature="7365:7686" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7490:7501" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7542:7567" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7730:8052" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7856:7867" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7908:7933" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="8274:8280" ph=" " />
+            <marker date="1520236714000" expanded="true" signature="12605:12992" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="12779:12839" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1884">
+          <caret line="157" column="13" lean-forward="false" selection-start-line="157" selection-start-column="4" selection-end-line="157" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1520236735000" expanded="true" signature="7060:7066" ph=" " />
+            <marker date="1520236735000" expanded="true" signature="9960:10323" ph="..." />
+            <marker date="1520236735000" expanded="true" signature="10122:10182" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12840">
+          <caret line="1070" column="76" lean-forward="false" selection-start-line="1070" selection-start-column="76" selection-end-line="1070" selection-end-column="76" />
+          <folding>
+            <element signature="e#16736#18882#0" expanded="false" />
+            <element signature="e#20976#25342#0" expanded="false" />
+            <element signature="e#25386#29747#0" expanded="false" />
+            <element signature="e#29789#36260#0" expanded="false" />
+            <element signature="e#36309#41792#0" expanded="false" />
+            <marker date="1519821853000" expanded="true" signature="1441:2107" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2185:3401" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2279:2293" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2294:2441" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2518:2624" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2704:2813" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2891:2998" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3075:3181" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3259:3366" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3498:3855" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3935:4614" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4031:4045" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4046:4197" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4276:4386" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4466:4577" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4704:5041" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5116:5745" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5207:5221" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5222:5363" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5437:5537" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5612:5713" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5835:5978" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6057:6352" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6152:6166" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6167:6316" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11686:13020" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11756:11768" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11769:12532" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11859:11870" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11918:12488" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12028:12173" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12319:12416" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12596:12980" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12669:12936" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12800:12891" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42050:43625" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42191:43481" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42275:43121" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42506:42776" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43197:43464" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43233:43443" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43563:43587" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27480">
+          <caret line="2290" column="33" lean-forward="true" selection-start-line="2290" selection-start-column="33" selection-end-line="2290" selection-end-column="33" />
+          <folding>
+            <element signature="e#2782#25527#0" expanded="false" />
+            <element signature="e#25543#48019#0" expanded="false" />
+            <element signature="e#48038#70493#0" expanded="false" />
+            <element signature="e#70508#92963#0" expanded="false" />
+            <element signature="e#92981#115457#0" expanded="false" />
+            <element signature="e#115499#118356#0" expanded="false" />
+            <element signature="e#118377#122796#0" expanded="false" />
+            <element signature="e#122818#126212#0" expanded="false" />
+            <marker date="1519798142000" expanded="true" signature="2472:2660" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2532:2543" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2584:2609" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127455:127469" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127681:127695" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127932:127946" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128148:128162" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128366:128380" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128550:128564" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129055:129075" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129452:129472" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="130727:130747" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="133826:133846" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137194:137214" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137603:137623" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138354:138374" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138759:138779" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139178:139198" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139549:139569" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141126:141146" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141768:141788" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="142177:142197" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/performance.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3468">
+          <caret line="289" column="35" lean-forward="false" selection-start-line="289" selection-start-column="35" selection-end-line="289" selection-end-column="35" />
+          <folding>
+            <marker date="1520236642000" expanded="true" signature="7630:7636" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26831:26859" ph="..." />
+            <marker date="1520236642000" expanded="true" signature="26906:26912" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26930:26945" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/diagnosis.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8340">
+          <caret line="695" column="24" lean-forward="false" selection-start-line="695" selection-start-column="24" selection-end-line="695" selection-end-column="35" />
+          <folding>
+            <element signature="e#5289#5803#0" expanded="false" />
+            <element signature="e#5841#6680#0" expanded="false" />
+            <element signature="e#6720#7561#0" expanded="false" />
+            <element signature="e#7603#8126#0" expanded="false" />
+            <element signature="e#9014#9541#0" expanded="false" />
+            <element signature="e#9586#10112#0" expanded="false" />
+            <element signature="e#10162#10693#0" expanded="false" />
+            <element signature="e#10741#11259#0" expanded="false" />
+            <element signature="e#11304#12848#0" expanded="false" />
+            <element signature="e#12897#15065#0" expanded="false" />
+            <element signature="e#19458#20761#0" expanded="false" />
+            <marker date="1520236672000" expanded="true" signature="5141:5147" ph=" " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="39" column="53" lean-forward="true" selection-start-line="39" selection-start-column="53" selection-end-line="39" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="36" column="42" lean-forward="true" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/log.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11964">
+          <caret line="997" column="33" lean-forward="true" selection-start-line="980" selection-start-column="28" selection-end-line="997" selection-end-column="33" />
+          <folding>
+            <marker date="1520236714000" expanded="true" signature="7365:7686" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7490:7501" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7542:7567" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7730:8052" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7856:7867" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7908:7933" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="8274:8280" ph=" " />
+            <marker date="1520236714000" expanded="true" signature="12605:12992" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="12779:12839" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1884">
+          <caret line="157" column="13" lean-forward="false" selection-start-line="157" selection-start-column="4" selection-end-line="157" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/public/.idea/workspace.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -331,7 +1132,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -339,72 +1139,305 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="48">
           <caret line="4" column="0" lean-forward="true" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/we.vue">
+    <entry file="file://$PROJECT_DIR$/templates/janesware/we.vue" />
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-table-component.vue.html" />
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue.html" />
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue" />
+    <entry file="file://$PROJECT_DIR$/templates/janesware/search.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="12">
-          <caret line="1" column="4" lean-forward="false" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
-          <folding />
+        <state relative-caret-position="217">
+          <caret line="123" column="76" lean-forward="false" selection-start-line="123" selection-start-column="72" selection-end-line="123" selection-end-column="76" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-table-component.vue.html">
+    <entry file="file://$PROJECT_DIR$/public/web/lib/vue/2.0.5/examples/firebase/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="96">
+          <caret line="8" column="28" lean-forward="false" selection-start-line="8" selection-start-column="28" selection-end-line="8" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/assets/唯简科技（北京）有限公司.html" />
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-search-preset-component_en-US.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2514">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="157" column="13" lean-forward="false" selection-start-line="157" selection-start-column="4" selection-end-line="157" selection-end-column="13" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="36" column="42" lean-forward="false" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="29434">
+          <caret line="3145" column="140" lean-forward="false" selection-start-line="3145" selection-start-column="140" selection-end-line="3145" selection-end-column="140" />
+          <folding>
+            <marker date="1520235554000" expanded="true" signature="9081:9699" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="9133:9699" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="9183:9611" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="9243:9572" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="9307:9529" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="9661:9699" ph="..." />
+            <marker date="1520235554000" expanded="false" signature="43602:43608" ph=" " />
+            <marker date="1520235554000" expanded="true" signature="88099:88295" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="88456:88663" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="89283:89481" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="89642:89853" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="95770:97416" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="95873:95885" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="95886:97168" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="96009:96020" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="96068:97091" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="96202:96317" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="96446:97010" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="96768:96889" ph="..." />
+            <marker date="1520235554000" expanded="true" signature="97265:97343" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/diagnosis.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="553">
+          <caret line="1600" column="12" lean-forward="false" selection-start-line="1600" selection-start-column="12" selection-end-line="1600" selection-end-column="12" />
+          <folding>
+            <element signature="e#5289#5803#0" expanded="false" />
+            <element signature="e#5841#6680#0" expanded="false" />
+            <element signature="e#6720#7561#0" expanded="false" />
+            <element signature="e#7603#8126#0" expanded="false" />
+            <element signature="e#9014#9541#0" expanded="false" />
+            <element signature="e#9586#10112#0" expanded="false" />
+            <element signature="e#10162#10693#0" expanded="false" />
+            <element signature="e#10741#11259#0" expanded="false" />
+            <element signature="e#11304#12848#0" expanded="false" />
+            <element signature="e#12897#15065#0" expanded="false" />
+            <element signature="e#19458#20761#0" expanded="false" />
+            <marker date="1520236672000" expanded="true" signature="5141:5147" ph=" " />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/log.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="946" column="82" lean-forward="false" selection-start-line="946" selection-start-column="82" selection-end-line="946" selection-end-column="82" />
+          <folding>
+            <marker date="1520236714000" expanded="true" signature="7365:7686" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7490:7501" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7542:7567" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7730:8052" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7856:7867" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="7908:7933" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="8274:8280" ph=" " />
+            <marker date="1520236714000" expanded="true" signature="12605:12992" ph="..." />
+            <marker date="1520236714000" expanded="true" signature="12779:12839" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1057">
-          <caret line="1417" column="14" lean-forward="false" selection-start-line="1417" selection-start-column="14" selection-end-line="1417" selection-end-column="14" />
+        <state relative-caret-position="501">
+          <caret line="1355" column="147" lean-forward="false" selection-start-line="1355" selection-start-column="136" selection-end-line="1355" selection-end-column="147" />
           <folding>
-            <marker date="1518328255000" expanded="true" signature="4761:4767" ph=" " />
-            <marker date="1518328255000" expanded="true" signature="38738:38752" ph="..." />
+            <marker date="1520235851000" expanded="true" signature="4590:4596" ph=" " />
+            <marker date="1520235851000" expanded="true" signature="38567:38581" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue.html">
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-timeline-component.vue">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-65">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/search.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="123" column="76" lean-forward="false" selection-start-line="123" selection-start-column="72" selection-end-line="123" selection-end-column="76" />
+        <state relative-caret-position="-1530">
+          <caret line="1070" column="76" lean-forward="false" selection-start-line="1070" selection-start-column="76" selection-end-line="1070" selection-end-column="76" />
           <folding>
-            <marker date="1518330792000" expanded="true" signature="3520:3526" ph=" " />
+            <element signature="e#16736#18882#0" expanded="false" />
+            <element signature="e#20976#25342#0" expanded="false" />
+            <element signature="e#25386#29747#0" expanded="false" />
+            <element signature="e#29789#36260#0" expanded="false" />
+            <element signature="e#36309#41792#0" expanded="false" />
+            <marker date="1519821853000" expanded="true" signature="1441:2107" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2185:3401" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2279:2293" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2294:2441" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2518:2624" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2704:2813" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="2891:2998" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3075:3181" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3259:3366" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3498:3855" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="3935:4614" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4031:4045" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4046:4197" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4276:4386" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4466:4577" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="4704:5041" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5116:5745" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5207:5221" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5222:5363" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5437:5537" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5612:5713" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="5835:5978" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6057:6352" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6152:6166" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="6167:6316" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11686:13020" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11756:11768" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11769:12532" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11859:11870" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="11918:12488" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12028:12173" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12319:12416" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12596:12980" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12669:12936" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="12800:12891" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42050:43625" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42191:43481" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42275:43121" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="42506:42776" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43197:43464" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43233:43443" ph="..." />
+            <marker date="1519821853000" expanded="true" signature="43563:43587" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="238" column="76" lean-forward="false" selection-start-line="238" selection-start-column="76" selection-end-line="238" selection-end-column="76" />
+        <state relative-caret-position="264">
+          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="26" />
           <folding>
-            <marker date="1518330798000" expanded="true" signature="7060:7066" ph=" " />
-            <marker date="1518330798000" expanded="true" signature="9960:10323" ph="..." />
-            <marker date="1518330798000" expanded="true" signature="10122:10182" ph="..." />
+            <marker date="1520236735000" expanded="true" signature="7060:7066" ph=" " />
+            <marker date="1520236735000" expanded="true" signature="9960:10323" ph="..." />
+            <marker date="1520236735000" expanded="true" signature="10122:10182" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="35" column="57" lean-forward="false" selection-start-line="35" selection-start-column="57" selection-end-line="35" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/performance.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="922" column="44" lean-forward="false" selection-start-line="922" selection-start-column="44" selection-end-line="922" selection-end-column="44" />
+          <folding>
+            <marker date="1520236642000" expanded="true" signature="7630:7636" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26831:26859" ph="..." />
+            <marker date="1520236642000" expanded="true" signature="26906:26912" ph=" " />
+            <marker date="1520236642000" expanded="true" signature="26930:26945" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="578">
+          <caret line="2290" column="33" lean-forward="false" selection-start-line="2290" selection-start-column="33" selection-end-line="2290" selection-end-column="33" />
+          <folding>
+            <element signature="e#2782#25527#0" expanded="false" />
+            <element signature="e#25543#48019#0" expanded="false" />
+            <element signature="e#48038#70493#0" expanded="false" />
+            <element signature="e#70508#92963#0" expanded="false" />
+            <element signature="e#92981#115457#0" expanded="false" />
+            <element signature="e#115499#118356#0" expanded="false" />
+            <element signature="e#118377#122796#0" expanded="false" />
+            <element signature="e#122818#126212#0" expanded="false" />
+            <marker date="1519798142000" expanded="true" signature="2472:2660" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2532:2543" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="2584:2609" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127455:127469" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127681:127695" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="127932:127946" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128148:128162" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128366:128380" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="128550:128564" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129055:129075" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="129452:129472" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="130727:130747" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="133826:133846" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137194:137214" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="137603:137623" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138354:138374" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="138759:138779" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139178:139198" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="139549:139569" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141126:141146" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="141768:141788" ph="..." />
+            <marker date="1519798142000" expanded="true" signature="142177:142197" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-319">
+          <caret line="95" column="78" lean-forward="false" selection-start-line="95" selection-start-column="78" selection-end-line="95" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="54" column="36" lean-forward="true" selection-start-line="0" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-4136">
+          <caret line="38" column="23" lean-forward="true" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="23" />
+          <folding>
+            <element signature="e#4889#15623#0" expanded="false" />
+            <element signature="e#15671#17946#0" expanded="false" />
+            <element signature="e#18002#22015#0" expanded="false" />
+            <element signature="e#22067#59717#0" expanded="false" />
+            <element signature="e#59774#60884#0" expanded="false" />
+            <element signature="e#60942#68166#0" expanded="false" />
+            <element signature="e#68219#84950#0" expanded="false" />
+            <marker date="1520237258000" expanded="true" signature="4414:4420" ph=" " />
+            <marker date="1520237258000" expanded="true" signature="27450:27611" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="51806:53066" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="51890:52885" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52047:52830" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52175:52769" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52434:52444" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52445:52706" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52603:52615" ph="..." />
+            <marker date="1520237258000" expanded="true" signature="52960:53015" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-cure-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="39" column="17" lean-forward="true" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>

@@ -43,9 +43,9 @@
     }
 
     .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-body {
-        height: -moz-calc(100vh - 330px);
-        height: -webkit-calc(100vh - 330px);
-        height: calc(100vh - 330px);
+        height: -moz-calc(100vh - 305px);
+        height: -webkit-calc(100vh - 305px);
+        height: calc(100vh - 305px);
     }
 
     .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-pagination {
@@ -141,6 +141,9 @@
 
 <!-- Bootstrap Select JS -->
 <script src='{{AppSubUrl}}/web/lib/bootstrap-select/dist/js/bootstrap-select.js'></script>
+
+<script src="{{AppSubUrl}}/web/lib/jquery/jquery-migrate-1.1.0.min.js"></script>
+<script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
@@ -281,6 +284,11 @@
 
                         self.onSearch();
 
+                        /* copy selected word to search */
+                        self.copyWordToSearch();
+
+                        App.init();
+
                     })
                 },
                 watch: {
@@ -365,6 +373,7 @@
                         let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
                         let _preset = self.search.preset.default;
 
+                        self.search.params.top = 'top 200';
                         _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
 
                         self.setSearchTerm("");
@@ -568,9 +577,9 @@
                             $("#page-container").css({"padding-top": "0px"});
 
                             $(".fixed-table-body").css({
-                                "height": "-moz-calc(100vh - 275px)",
-                                "height": "-webkit-calc(100vh - 275px)",
-                                "height": "calc(100vh - 275px)"
+                                "height": "-moz-calc(100vh - 250px)",
+                                "height": "-webkit-calc(100vh - 250px)",
+                                "height": "calc(100vh - 250px)"
                             });
 
                         } else if (_default.name == 'o') {
@@ -578,9 +587,9 @@
                             $(".performance-search").css({"display": "none"});
 
                             $(".fixed-table-body").css({
-                                "height": "-moz-calc(100vh - 200px)",
-                                "height": "-webkit-calc(100vh - 200px)",
-                                "height": "calc(100vh - 200px)"
+                                "height": "-moz-calc(100vh - 175px)",
+                                "height": "-webkit-calc(100vh - 175px)",
+                                "height": "calc(100vh - 175px)"
                             });
 
                         } else {
@@ -589,9 +598,9 @@
                             $(".performance-search").css({"display": ""});
 
                             $(".fixed-table-body").css({
-                                "height": "-moz-calc(100vh - 330px)",
-                                "height": "-webkit-calc(100vh - 330px)",
-                                "height": "calc(100vh - 330px)"
+                                "height": "-moz-calc(100vh - 305px)",
+                                "height": "-webkit-calc(100vh - 305px)",
+                                "height": "calc(100vh - 305px)"
                             });
                         }
 
@@ -680,7 +689,7 @@
                                 }
                             };
                             o.col = 6;
-                            o.param = "id=" + row.id + " | nearest 1day " + window.GLOBAL_OBJECT.company.object.performance.preconfig.time[0];
+                            o.param = "id=" + row.id + " | top 14440 ";//nearest 1day " + window.GLOBAL_OBJECT.company.object.performance.preconfig.time[0];
                             o.id = _.random(_.now()) + "";
                             return JSON.stringify(o);
                         });
@@ -751,6 +760,28 @@
                                 self.search.result.gauge.selected["gauge_" + k] = $(this).selectpicker('val');
                                 self.onSearch();
                             });
+                        })
+                    },
+                    getSelectionText: function(){
+                        let selectedText = "";
+
+                        if (window.getSelection){ // all modern browsers and IE9+
+                            selectedText = window.getSelection().toString();
+                        }
+                        return selectedText;
+                    },
+                    copyWordToSearch: function (argument) {
+                        let self = this;
+
+                        $("table").mouseup(function(){
+                            var selected = self.getSelectionText();
+                            if (selected.length > 0){
+                                if (_.isEmpty(self.search.input.term)){
+                                    self.search.input.term = selected;
+                                } else {
+                                    self.search.input.term += selected;
+                                }
+                            }
                         })
                     }
                 }
@@ -872,8 +903,8 @@
                         <li role="presentation" class="pull-right" style="display: -webkit-box;">
                             <a href="javascript:void(0)" @click="toggleMode"><i
                                     class="fa fa-desktop fa-fw toggle-mode"></i></a>
-                            <a href="javascript:void(0)" @click="toggleTop"><i
-                                    class="fa fa-caret-down fa-fw toggle-top"></i></a>
+                            <!--<a href="javascript:void(0)" @click="toggleTop"><i
+                                    class="fa fa-caret-down fa-fw toggle-top"></i></a>-->
                         </li>
                     </ul>
 
@@ -889,7 +920,7 @@
                                             Entity
                                         </div>
                                         <div class="panel-body" style="padding-left:5px;padding-top: 5px;">
-                                            <vue-entity-tree-component :model="search.result.data"></vue-entity-tree-component>
+                                            <vue-entity-tree-component id="performance-entity-tree" :model="search.result.data"></vue-entity-tree-component>
                                         </div>
                                     </div>
                                 </div>

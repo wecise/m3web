@@ -428,10 +428,13 @@
                         })
 
                         self.initFilter();
-                        self.initCopyToSearch();
+
                         _.delay(function () {
                             $("a").tooltip("enable");
                         }, 3000)
+
+                        /* copy selected word to search */
+                        self.copyWordToSearch();
 
                     })
                 },
@@ -613,7 +616,7 @@
                                     });
                                 }
 
-                                self.search.result.columns = cols;
+                                self.search.result.columns = window.GLOBAL_OBJECT.company.object.log.columns;//cols;
                                 self.search.result.data = list;
 
                                 self.summary.data.list = self.search.result.data;
@@ -830,15 +833,27 @@
                         }
                         return selectedText;
                     },
-                    initCopyToSearch: function (argument) {
+                    getSelectionText: function(){
+                        let selectedText = "";
+
+                        if (window.getSelection){ // all modern browsers and IE9+
+                            selectedText = window.getSelection().toString();
+                        }
+                        return selectedText;
+                    },
+                    copyWordToSearch: function (argument) {
                         let self = this;
 
-                        document.addEventListener('mouseup', function () {
+                        $("table").mouseup(function(){
                             var selected = self.getSelectionText();
-                            if (selected.length > 0) {
-                                eventHub.$emit("input-set-event", selected);
+                            if (selected.length > 0){
+                                if (_.isEmpty(self.search.input.term)){
+                                    self.search.input.term = selected;
+                                } else {
+                                    self.search.input.term += selected;
+                                }
                             }
-                        }, false)
+                        })
                     }
                 }
             })
@@ -929,7 +944,7 @@
                                     Entity
                                 </div>
                                 <div class="panel-body" style="padding-top: 5px;">
-                                    <vue-entity-tree-component></vue-entity-tree-component>
+                                    <vue-entity-tree-component id="log-entity-tree"></vue-entity-tree-component>
                                 </div>
                             </div>
                         </div>

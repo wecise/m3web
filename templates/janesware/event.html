@@ -440,6 +440,8 @@
                         let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
                         let _preset = self.search.preset.default;
 
+                        self.search.params.top = 'top 200';
+
                         _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
 
                         self.setSearchTerm("");
@@ -448,6 +450,7 @@
                     setSearchTerm: function (term){
                         let self = this;
 
+                        self.search.params.top = 'top 200';
                         self.search.input.term = term;
 
                     },
@@ -503,7 +506,6 @@
                             complete: function(xhr, textStatus) {
                             },
                             success: function(data, textStatus, xhr) {
-                                console.log(JSON.stringify(data, null, 2))
 
                                 let _list = data;
                                 let _columns = [];
@@ -572,7 +574,15 @@
                                 })
 
                                 self.preconfig = window.GLOBAL_OBJECT.company.object.event.preconfig;
-                                self.search.result.columns = _columns;
+
+                                /*_.forEach(_columns,function (v,k){
+									let _inx = _.find(window.GLOBAL_OBJECT.company.object.event.columns,{field:v.field});
+									if (_.isEmpty(_inx)){
+									    v.visible = false;
+									}
+                                })*/
+
+                                self.search.result.columns = window.GLOBAL_OBJECT.company.object.event.columns;//_columns;
                                 self.search.result.data = _list.message;
 
                                 _.delay(function () {
@@ -907,12 +917,16 @@
 					copyWordToSearch: function (argument) {
 						let self = this;
 
-						document.addEventListener('mouseup', function(){
+						$("table").mouseup(function(){
 							var selected = self.getSelectionText();
 							if (selected.length > 0){
-								self.search.input.term = selected;
+                                if (_.isEmpty(self.search.input.term)){
+                                    self.search.input.term = selected;
+                                } else {
+                                    self.search.input.term += selected;
+                                }
 							}
-						}, false)
+						})
 					}
 
 				}
@@ -1002,7 +1016,7 @@
 				                    Entity
 				                </div>
 				                <div class="panel-body" style="padding: 5px 0px;min-height:300px;max-height:500px;overflow:auto;">
-				                    <vue-entity-tree-component></vue-entity-tree-component>
+				                    <vue-entity-tree-component id="event-entity-tree"></vue-entity-tree-component>
 				                </div>
 							</div>
 				  		</div>

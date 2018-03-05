@@ -8,7 +8,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-entity-tree-component"  ----------*/
 	<template>
-		<ul class="ztree" id="vue-entity-tree" style="overflow:auto;"></ul>
+		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -16,15 +16,25 @@
 	{
 	    delimiters: ['${', '}'],
 	    props: {
+	        id: String,
 	        model: Array,
-	        dimension: Object,
+	        dimension: Object
 	    },
 	    data: function(){
 	        return {
 	            zTree: Object,
 	            setting: Object,
 	            nodes: Array,
-	            expandNodes: Array
+	            expandNodes: Array,
+				contextMenu: {
+					"new": {name: "New", icon: "fa-plus",
+						callback: function (itemKey, opt, rootMenu, originalEvent) {
+						let _item = $(this).attr("id");
+						console.log(_item)
+					}},
+					"remove": {name: "Remove", icon: "fa-trash"},
+					"edit": {name: "Edit", icon: "fa-edit"},
+				}
 	        }
 	    },
 	    created:function(){
@@ -70,6 +80,8 @@
 								}
 	                        };
 
+                self.initPlugIn();
+
 	        })
 
 	    },
@@ -91,7 +103,7 @@
 	                }
 
 	                self.init();
-
+                    self.initPlugIn();
 	            },
 	            deep: true
 	        }
@@ -151,6 +163,16 @@
 	                }
 	            });
 	        },
+            initPlugIn: function(){
+                let self = this;
+
+                if (!_.isEmpty(self.contextMenu)){
+                    $.contextMenu({
+                        selector: "#"+self.id,//$(self.$el),
+                        items: self.contextMenu
+                    });
+                }
+            },
 	        onClick: function(event, treeId, treeNode) {
 	            let self = this;
 	            
@@ -197,7 +219,7 @@
 	        onCheck: function(event, treeId, treeNode) {
 			  	let self = this;
 
-			  	let zTree = $.fn.zTree.getZTreeObj("vue-entity-tree");
+			  	let zTree = $.fn.zTree.getZTreeObj(self.id);
 			  	let nodes = zTree.getCheckedNodes(true);
 			  	eventHub.$emit('entity-select-event', _.filter(nodes,{isParent:false}));
 	        },
