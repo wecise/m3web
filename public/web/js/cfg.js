@@ -2599,4 +2599,4 @@ var GLOBAL_CONFIG = {
             }
         }
     }
-}; 
+};

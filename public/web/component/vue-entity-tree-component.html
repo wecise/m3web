@@ -37,15 +37,6 @@
 							eventHub.$emit("vue-entity-tree-panel-event", _item);
 						}
 					},
-                    "update": {name: "Update", icon: "fa-update",
-                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
-                            let nodes = treeObj.getSelectedNodes();
-                            let _item = {id:$(this).attr("id"),action:"update",node: nodes[0]};
-
-                            eventHub.$emit("vue-entity-tree-panel-event", _item);
-                        }
-                    },
 					"remove": {name: "Remove", icon: "fa-trash",
                         callback: function (itemKey, opt, rootMenu, originalEvent) {
                             let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));

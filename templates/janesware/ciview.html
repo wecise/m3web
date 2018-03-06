@@ -97,8 +97,6 @@
 
 <script src="{{AppSubUrl}}/web/vendor/layer/layer.js" ></script>
 
-<script src="{{AppSubUrl}}/web/js/{{.Lang}}/app.js" type="text/javascript"></script>
-
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
@@ -119,18 +117,7 @@
 
         $(function(){
 
-            var timeoutId = 0;
-
             $(".current-active-item").html(`<a class="active item" href="/janesware/ciview" ><i class="fa fa-th-list"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
-            const ENTITIES_OBJECT = {
-                '/matrix/entities/biz': {name: '业务'},
-                '/matrix/entities/app': {name: '应用'},
-                '/matrix/entities/host': {name: '服务器'},
-                '/matrix/entities/network': {name: '网络'},
-                '/matrix/entities/cluster': {name: '集群'},
-                '/matrix/entities/storage': {name: '存储'}
-            };
 
             Vue.component('tree-component', {
                 template: '<ul class="ztree"></ul>',
@@ -194,7 +181,7 @@
 
                             self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
 
-                            eventHub.$emit('file-view-event', _.filter(val, function (v) {
+                            eventHub.$emit('ci-view-event', _.filter(val, function (v) {
                                 if (v.id > 1) return v;
                             }));
                         },
@@ -360,7 +347,7 @@
                                             type: 'parent'
                                         }];
                                         subNodes.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', _.filter(subNodes, function (v) {
+                                        eventHub.$emit('ci-view-event', _.filter(subNodes, function (v) {
                                             if (v.id > 1) return v;
                                         }));
                                     }
@@ -526,12 +513,15 @@
                 }
             })
 
-            Vue.component('file-view-component', {
+            Vue.component('ci-view-component', {
                 delimiters: ['${', '}'],
-                template: `#file-view-component-template`,
+                template: `#ci-view-component-template`,
+                props: {
+                    model: Object,
+                },
                 data: function () {
                     return {
-                        model: {
+                        item: {
                             list: [],
                             theme: "",
                             parse: {
@@ -583,13 +573,18 @@
                             },
                             swal: {}
                         },
-                        currentView: 'file-view-table-component',
+                        currentView: 'ci-view-table-component',
                     }
                 },
                 mounted: function () {
                     let self = this;
 
                     self.$nextTick(function () {
+
+                        _.delay(function(){
+                            console.log(88,self.model)
+                        },5000)
+
                         self.init();
 
                         $(self.$el).dblclick(function () {
@@ -603,13 +598,13 @@
                 created: function () {
                     let self = this;
 
-                    eventHub.$on('file-view-event', self.setData);
+                    eventHub.$on('ci-view-event', self.setData);
 
-                    eventHub.$on("file-mouseover-event", self.mouseOver);
-                    eventHub.$on("file-mouseout-event", self.mouseOut);
-                    eventHub.$on("file-click-event", self.click);
-                    eventHub.$on("file-dblclick-event", self.dblClick);
-                    eventHub.$on("file-rightclick-event", self.rightClick);
+                    eventHub.$on("ci-mouseover-event", self.mouseOver);
+                    eventHub.$on("ci-mouseout-event", self.mouseOut);
+                    eventHub.$on("ci-click-event", self.click);
+                    eventHub.$on("ci-dblclick-event", self.dblClick);
+                    eventHub.$on("ci-rightclick-event", self.rightClick);
 
                     eventHub.$on("view-toggle-event", self.view);
 
@@ -911,9 +906,9 @@
                                             return _.merge(v, {title: v.name});
                                         });
                                         rtn.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', rtn);
+                                        eventHub.$emit('ci-view-event', rtn);
                                     } else {
-                                        eventHub.$emit('file-view-event', parentObj);
+                                        eventHub.$emit('ci-view-event', parentObj);
                                     }
                                 },
                                 error: function (xhr, textStatus, errorThrown) {
@@ -943,9 +938,9 @@
                                             return _.merge(v, {title: v.name});
                                         });
                                         rtn.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', rtn);
+                                        eventHub.$emit('ci-view-event', rtn);
                                     } else {
-                                        eventHub.$emit('file-view-event', parentObj);
+                                        eventHub.$emit('ci-view-event', parentObj);
                                     }
                                 },
                                 error: function (xhr, textStatus, errorThrown) {
@@ -1080,12 +1075,12 @@
                         Papa.parse("/web/data/" + event, {
                             download: true,
                             complete: function (results, file) {
-                                //self.model.list = results.data;
+                                //self.item.list = results.data;
                                 //console.log("Parsing complete:", JSON.stringify(results), file);
                             },
                             step: function (results, parser) {
                                 //console.log("Row data:", JSON.stringify(results.data));
-                                self.model.parse.list.push(results.data[0].join(" "));
+                                self.item.parse.list.push(results.data[0].join(" "));
                             }
                         })
 
@@ -1249,12 +1244,12 @@
                 }
             })
 
-            Vue.component('file-view-icon-component', {
+            Vue.component('ci-view-icon-component', {
                 delimiters: ['${', '}'],
                 props: {
-                    model: Array
+                    model: Object
                 },
-                template: `#file-view-icon-component-template`,
+                template: `#ci-view-icon-component-template`,
                 mounted: function () {
                     let self = this;
 
@@ -1264,52 +1259,31 @@
                 },
                 methods: {
                     mouseOver: function (item) {
-                        eventHub.$emit("file-mouseover-event", item);
+                        eventHub.$emit("ci-mouseover-event", item);
                     },
                     mouseOut: function (item) {
-                        eventHub.$emit("file-mouseout-event", item);
+                        eventHub.$emit("ci-mouseout-event", item);
                     },
                     click: function (item) {
-                        eventHub.$emit("file-click-event", item);
+                        eventHub.$emit("ci-click-event", item);
                     },
                     dblClick: function (item) {
-                        eventHub.$emit("file-dblclick-event", item);
+                        eventHub.$emit("ci-dblclick-event", item);
                     },
                     rightClick: function (item) {
-                        eventHub.$emit("file-rightclick-event", item);
+                        eventHub.$emit("ci-rightclick-event", item);
                     }
                 }
             })
 
-            Vue.component('file-view-table-component', {
+            Vue.component('ci-view-table-component', {
                 delimiters: ['${', '}'],
                 props: {
-                    model: Array
+                    model: Object
                 },
-                template: `#file-view-table-component-template`,
+                template: `#ci-view-table-component-template`,
                 data: function () {
                     return {
-                        columns: [
-                            {field: "state", title: "", checkbox: true},
-                            {field: "title", title: "Name"},
-                            {field: "type", title: "Type"},
-                            {
-                                field: "modtime", title: "Create Time", formatter: function (value, row, index) {
-                                    return moment(value).format("LLL");
-                                }
-                            },
-                        ],
-                        data: [],
-                        options: {
-                            class: "table table-no-bordered",
-                            showColumns: false,
-                            search: false,
-                            clickToSelect: true,
-                            pageList: [15, 30, 60, 80, 100],
-                            pageSize: 15,
-                            rowStyle: "tableRowStyle",
-                            height: 400,
-                        },
                     }
                 },
                 watch: {
@@ -1425,7 +1399,7 @@
                         };
 
                         $.contextMenu({
-                            selector: '#file-list-table td',
+                            selector: '#ci-list-table td',
                             callback: function (key, options) {
                                 var m = "clicked: " + key;
                                 console.log(m);
@@ -1575,7 +1549,7 @@
                             complete: function(xhr, textStatus) {
                             },
                             success: function(data, textStatus, xhr) {
-console.log(22,data)
+
                                 var data = data.message;
 
                                 self.model = _.map(data,function(v,k){
@@ -1848,7 +1822,7 @@ console.log(22,data)
                     search:{
                         params: {
                             at: '#',
-                            class: `/matrix/filesystem/: | username={{.SignedUser.Name}}; ispublic=1`,
+                            class: `/matrix/entity/: `,
                             subclass: '',
                             top: ' top 200 ',
                             lua: ''
@@ -1969,40 +1943,19 @@ console.log(22,data)
                         self.searchHandler(_param, null);
                     },
                     searchHandler: function(param,func){
-                        let self = this;
-
                         console.log(param);
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: param,
-                                flag: false
-                            },
-                            beforeSend:function(xhr){
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                console.log(JSON.stringify(data, null, 2))
+                        let self = this;
+                        let _list = fetchData(param);
 
-                                let _list = data;
+                        if(_.isEmpty(_list.message)){
+                            self.search.result.data = [];
+                            self.search.result.columns = [];
+                            return false;
+                        }
 
-                                if(_.isEmpty(_list.message)){
-                                    self.search.result.data = [];
-                                    return false;
-                                }
-
-                                self.search.result = _.sortBy(_list, "vtime").reverse();
-                                self.refresh();
-
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                            }
-                        });
+                        self.search.result = _list;
+                        self.refresh();
                     },
                     newModal: function () {
                         let self = this;
@@ -2327,12 +2280,12 @@ console.log(22,data)
                                             <div class="btn-group-action btn-group-action pull-right">
                                                 <a href="#" class="btn btn-xs btn-default"><i class="fa fa-reply m-r-5"></i> Up</a>
                                                 <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="home"><i class="fa fa-home m-r-5"></i>Root</a>
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('file-view-icon-component')"><i class="fa fa-table m-r-5"></i>Grid</a>
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('file-view-table-component')"><i class="fa fa-list m-r-5"></i>List</a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('ci-view-icon-component')"><i class="fa fa-table m-r-5"></i>Grid</a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('ci-view-table-component')"><i class="fa fa-list m-r-5"></i>List</a>
                                             </div>
                                         </div>
                                         <div>
-                                            <file-view-component></file-view-component>
+                                            <ci-view-component :model="search.result"></ci-view-component>
                                         </div>
                                     </div>
                                     <div class="panel-footer">
@@ -2352,15 +2305,15 @@ console.log(22,data)
     </div>    
 </script>
 
-<script type="text/x-template" id="file-view-component-template">
+<script type="text/x-template" id="ci-view-component-template">
     <div>
         <p style="margin:10px -10px;">
-            <component v-bind:is="currentView" :model="model.list"></component>
+            <component v-bind:is="currentView" :model="model"></component>
         </p>
     </div>
 </script>
 
-<script type="text/x-template" id="file-view-icon-component-template">
+<script type="text/x-template" id="ci-view-icon-component-template">
     <div>
         <div :class="item.type=='dir'?'dir col-md-2 col-sm-4 context-menu-file':'file col-md-2 col-sm-4 context-menu-file'" 
              :id="'file_'+item.id" 
@@ -2389,9 +2342,9 @@ console.log(22,data)
     </div>
 </script>
 
-<script type="text/x-template" id="file-view-table-component-template">
-    <div class="file-view-table table-responsive">
-        <bootstrap-table id="file-list-table" :columns="columns" :options="options" :dataset="model" classes="files-list-table"></bootstrap-table>
+<script type="text/x-template" id="ci-view-table-component-template">
+    <div class="ci-view-table table-responsive">
+        <bootstrap-table id="ci-list-table" :columns="model.columns" :options="model.options" :dataset="model.data" classes="ci-list-table"></bootstrap-table>
     </div>
 </script>
 
