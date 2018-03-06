@@ -6,38 +6,21 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="vue-base-tree-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="vue-entity-cure-component"  ----------*/
 	<template>
-		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+		<div></div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="vue-base-tree-component">
+	<script id="vue-entity-cure-component">
 	{
         delimiters: ['${', '}'],
 		props: {
-			zNodes: Array,
-			id: String,
-			contextMenu: Object
+
 		},
 		data: function () {
 			return {
-                zTree: Object,
-				setting: {
-                    view: {
-                        showLine: true,
-                        selectedMulti: false,
-                        dblClickExpand: false
-                    },
-                    edit: {
-                        enable: false,
-                    },
-                    data: {
-                        simpleData: {
-                            enable: true
-                        }
-                    }
-                }
+
 			}
 		},
 		mounted: function () {
@@ -51,32 +34,52 @@
 
 			})
 		},
-		watch: {
-			zNodes: function (val) {
-			    let self = this;
-
-                if(!_.isEmpty(self.zTree)){
-                    self.zTree.destroy();
-                }
-			    self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
-			}
-		},
 		methods: {
 			init: function(){
                 let self = this;
 
-			    self.zTree = $.fn.zTree.init($(this.$el), self.setting, self.zNodes);
+				self.newPanel();
 			},
 			initPlugIn: function(){
 			    let self = this;
 
-			    if (!_.isEmpty(self.contextMenu)){
-                    $.contextMenu({
-                        selector: "#"+self.id,//$(self.$el),
-                        items: self.contextMenu
-                    });
-				}
-			}
+
+			},
+            openPanel: function(row, menu, tabnum) {
+                let self = this;
+                var win;
+                var w = $(window).width();
+                var h = $(window).height();
+                var wW = $(window).width() * 2 / 3;
+                var hH = $(window).height() * 2.5 / 3;
+                var lrwh = [(w - wW) / 2, (h - hH) / 2, wW, hH];
+                var tb = document.createElement('div');
+
+                $(tb).append(self.templates[menu.app] || self.templates.default);
+                win = new mxWindow("", tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+                win.setMaximizable(true);
+                win.setResizable(true);
+                win.setClosable(true);
+                win.setVisible(true);
+
+                win.addListener(mxEvent.MAXIMIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+
+                win.addListener(mxEvent.MINIMIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+
+                win.addListener(mxEvent.NORMALIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+            }
 		}
 	
 	}

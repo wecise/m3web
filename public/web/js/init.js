@@ -171,7 +171,7 @@ var fetchData = function (param) {
         complete: function(xhr, textStatus) {
         },
         success: function(data, textStatus, xhr) {
-
+            console.log(data, textStatus, xhr)
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {

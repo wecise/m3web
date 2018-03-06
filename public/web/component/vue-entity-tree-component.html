@@ -26,24 +26,64 @@
 	            setting: Object,
 	            nodes: Array,
 	            expandNodes: Array,
+				selected: Object,
 				contextMenu: {
-					"new": {name: "New", icon: "fa-plus",
+					"create": {name: "Create", icon: "fa-plus",
 						callback: function (itemKey, opt, rootMenu, originalEvent) {
-						let _item = $(this).attr("id");
-						console.log(_item)
-					}},
-					"remove": {name: "Remove", icon: "fa-trash"},
-					"edit": {name: "Edit", icon: "fa-edit"},
+							let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
+
+							eventHub.$emit("vue-entity-tree-panel-event", _item);
+						}
+					},
+                    "update": {name: "Update", icon: "fa-update",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"update",node: nodes[0]};
+
+                            eventHub.$emit("vue-entity-tree-panel-event", _item);
+                        }
+                    },
+					"remove": {name: "Remove", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+                            eventHub.$emit("vue-entity-tree-panel-event", _item);
+						}
+					},
+					"edit": {name: "Edit", icon: "fa-edit",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"edit",node: nodes[0]};
+
+
+                            eventHub.$emit("vue-entity-tree-panel-event", _item);
+                        }
+					},
+				},
+				cure:{
+	                create: {
+	                    template: `<div id="entity-create-template"></div>`
+					}
 				}
 	        }
 	    },
 	    created:function(){
-	        var self = this;
+	        let self = this;
 
 	        self.init();
+
+            eventHub.$on("vue-entity-tree-panel-event", self.openPanel);
 	    },
 	    mounted: function() {
-	        var self = this;
+	        let self = this;
 
 	        self.$nextTick(function(){
 	            
@@ -88,7 +128,7 @@
 	    watch: {
 	        setting: {
 	            handler:function(val, oldVal){
-	                var self = this;
+	                let self = this;
 
 	                self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
 	            },
@@ -96,7 +136,7 @@
 	        },
 	        model: {
 	            handler:function(val,oldVal){
-	                var self = this;
+	                let self = this;
 
 	                if(!_.isEmpty(self.zTree)){
 	                	self.zTree.destroy();
@@ -110,7 +150,7 @@
 	    },
 	    methods: {
 	        init: function() {
-	            var self = this;
+	            let self = this;
 	            
 	            jQuery.ajax({
 	                url: '/mxobject/search',
@@ -175,6 +215,8 @@
             },
 	        onClick: function(event, treeId, treeNode) {
 	            let self = this;
+
+	            self.selected = treeNode;
 	            
 	            // entity object data false
 	            if(treeNode.name.indexOf("/") < 0){
@@ -250,7 +292,101 @@
 	                }
 	            })
 	            return rtn;
-	        }
+	        },
+            openPanel: function(item) {
+                let self = this;
+                var win;
+                var w = $(window).width();
+                var h = $(window).height();
+                var wW = $(window).width() * 2 / 3;
+                var hH = $(window).height() * 2.5 / 3;
+                var lrwh = [(w - wW) / 2, (h - hH) / 2, wW, hH];
+                var tb = document.createElement('div');
+
+                $(tb).append(self.cure[item.action].template);
+                win = new mxWindow(_.startCase(item.action)+" "+item.node.name, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+                win.setMaximizable(true);
+                win.setResizable(true);
+                win.setClosable(true);
+                win.setVisible(true);
+
+                win.addListener(mxEvent.MAXIMIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+
+                win.addListener(mxEvent.MINIMIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+
+                win.addListener(mxEvent.NORMALIZE, function (event) {
+                    _.delay(function () {
+                        eventHub.$emit("win-resize-event", null);
+                    }, 100);
+                });
+
+                self.genCurePanel(item);
+            },
+            genCurePanel: function(item){
+	            let self = this;
+
+	            let cVue = new Vue({
+                    delimiters: ['$', '$'],
+					el: '#entity-create-template',
+					template: `	<div class="panel"><div class="panel-body">
+									<form>
+									  <div class="form-group" v-for="item in model.columns">
+										<label :for="item.name">$item.name$</label>
+										<input :type="item.type" class="form-control" :id="item.name" :placeholder="item.name">
+									  </div>
+									  <a type="button" class="btn btn-success">Submit</a>
+									</form>
+								</div></div>`,
+                    data: function(){
+                        return {
+							model: {
+							    columns:  Array,
+								list: Array
+							}
+                        }
+                    },
+                    created:function(){
+                        let self = this;
+
+                        self.init();
+
+                    },
+                    mounted: function() {
+                        let self = this;
+
+                        self.$nextTick(function(){
+
+                            self.initPlugIn();
+
+                        })
+
+                    },
+					methods: {
+                        init: function(){
+                            let self = this;
+							let _list = fetchData("#"+item.node.name+": | top 1");
+                            let _classKeys = _.keys(_list.meta.classes);
+
+							self.model.columns = _.map(_list.meta.columns[_classKeys[0]],function (v) {
+													return v;
+												 });
+
+							self.model.list = _list.message;
+
+						}
+					}
+				});
+
+
+			}
 	    }
 	
 	}
