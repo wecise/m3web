@@ -263,29 +263,61 @@
 	                    delimiters: ['$', '$'],
 	                    el: '#table-dblclick-show-panel',
 	                    template: ` <div>
-	                                    <div class="panel-body" style="padding:0px;">
-	                                        <div class="input-group input-group-sm" style="width:100%;" v-for="(item,index) in _.sortBy(model,'name')">
+	                                    <div class="panel-body">
+	                                        <!--<div class="input-group input-group-sm" style="width:100%;" v-for="(item,index) in _.sortBy(model,'name')">
 	                                            <div class="input-group-addon" :id="'label_'+item.name" style="width:200px;text-align: right;border:0px;border-bottom: 1px solid rgb(238, 238, 238);border-radius: 0px;background-color:#f9f9f9;font-weight:900;">$item.title$</div>
 	                                            <textarea class="form-control" :id="item.name" :placeholder="item.title" style="border:0px;border-left: 1px solid rgb(238, 238, 238);border-bottom: 1px solid rgb(238, 238, 238);">$item.value$</textarea>
-	                                        </div>
+	                                        </div>-->
+	                                        <vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
 	                                    </div>
 	                                    <div class="panel-footer">
-	                                    	<div class="btn-group pull-right">
+	                                    	<!--<div class="btn-group pull-right">
 	                                    	  <a href="javascript:void(0)" type="button" class="btn btn-xs btn-success" @click="onSave">
 	                                    	  	Save
 	                                    	  </a>
-	                                    	</div>
+	                                    	</div>-->
 	                                    </div>
 	                                </div>`,
 	                    data:{
-	                        model:[],
+	                        //model:[],
+							model: {
+                                form: {
+                                    view: "",
+                                    data: {},
+                                    schema: {
+                                        title:"",
+                                        type: "object",
+                                        properties: []
+                                    },
+                                    options: {
+                                        form: {
+                                            buttons: {
+                                                submit: {
+                                                    title: "Save",
+                                                    click: function() {
+                                                        let val = this.getValue();
+
+                                                        if (this.isValid(true)) {
+                                                            alert("Valid value: " + JSON.stringify(val, null, "  "));
+                                                        } else {
+                                                            alert("Invalid value: " + JSON.stringify(val, null, "  "));
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        fields: {}
+                                    }
+
+                                }
+							}
 	                    },
 	                    mounted: function(){
 	                        let self = this;
 
 	                        self.$nextTick(function(){
 
-	                            _.forEach(row, function(v,k){
+	                            /*_.forEach(row, function(v,k){
 	                                if(_.isObject(v) && v!=null){
 	                                    self.model.push({
 															name:k,
@@ -303,13 +335,44 @@
                                 $(self.$el).on('click key keydown', 'textarea', function () {
                                     $(this).height(0).height(this.scrollHeight);
 
-							    }).find('textarea').change();
+							    }).find('textarea').change();*/
 
-
+	                            self.init();
                             })
 
 	                    },
 	                    methods: {
+	                        init: function(){
+	                          	let self = this;
+                                let _list = fetchClass(row.class);
+                                let _properties = {};
+                                let _fields = {};
+                                let _data = {};
+
+                                _.forEach(_list.message.fields,function (v) {
+                                    let _name = v.name;
+                                    let _type = v.ftype=='varchar'?'string':'string';
+                                    let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
+                                    let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
+
+                                    _.merge(_properties, {[_name]: {type: _type,required: _required, hidden: _hidden}});
+                                    _.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
+                                });
+
+                                _.forEach(row,function (v,k) {
+                                    let _name = k;
+
+                                    _.merge(_data, {[_name]: v});
+                                });
+
+
+                                self.model.form.data = _data;
+                                //self.model.form.schema.title = row.name;
+                                self.model.form.schema.properties = _properties;
+                                self.model.form.options.fields = _fields;
+                                console.log(JSON.stringify(self.model.form))
+
+							},
 	                        autosize: function () {
 	                        	$("textarea").each(function(textarea) {
 								    $this.height( $this[0].scrollHeight );

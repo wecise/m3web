@@ -18,7 +18,8 @@
 	    props: {
 	        id: String,
 	        model: Array,
-	        dimension: Object
+	        dimension: Object,
+			showSubNodes: Boolean
 	    },
 	    data: function(){
 	        return {
@@ -28,7 +29,7 @@
 	            expandNodes: Array,
 				selected: Object,
 				contextMenu: {
-					"create": {name: "Create", icon: "fa-plus",
+                    "create": {name: "Create CI", icon: "fa-plus",
 						callback: function (itemKey, opt, rootMenu, originalEvent) {
 							let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
                             let nodes = treeObj.getSelectedNodes();
@@ -37,7 +38,8 @@
 							eventHub.$emit("vue-entity-tree-panel-event", _item);
 						}
 					},
-					"remove": {name: "Remove", icon: "fa-trash",
+                    "sep1": "---------",
+					"remove": {name: "Remove All CI", icon: "fa-trash",
                         callback: function (itemKey, opt, rootMenu, originalEvent) {
                             let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
                             let nodes = treeObj.getSelectedNodes();
@@ -46,18 +48,7 @@
 
                             eventHub.$emit("vue-entity-tree-panel-event", _item);
 						}
-					},
-					"edit": {name: "Edit", icon: "fa-edit",
-                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-
-                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
-                            let nodes = treeObj.getSelectedNodes();
-                            let _item = {id:$(this).attr("id"),action:"edit",node: nodes[0]};
-
-
-                            eventHub.$emit("vue-entity-tree-panel-event", _item);
-                        }
-					},
+					}
 				},
 				cure:{
 	                create: {
@@ -110,6 +101,8 @@
 									showTitle: true
 								}
 	                        };
+
+	            self.showSubNodes = false;
 
                 self.initPlugIn();
 
@@ -215,39 +208,26 @@
 	                return false;
 	            }
 
-	            jQuery.ajax({
-	                url: '/mxobject/search',
-	                type: 'POST',
-	                dataType: 'json',
-	                data: {
-	                    cond: `#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`
-	                },
-	                beforeSend: function(xhr) {
-	                },
-	                complete: function(xhr, textStatus) {
-	                },
-	                success: function(data, textStatus, xhr) {
-	                    
-	                    if(!_.isEmpty(data.message)) {
-	                        var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
-	                        var nodes = tree.getSelectedNodes();
-	                        if (nodes && nodes.length>0) {
-	                            tree.removeChildNodes(nodes[0]);
-	                        }
+	            let _list = fetchData(`#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`);
 
-	                        // append sub nodes
-	                        tree.addNodes(treeNode, data.message);
+                if(!_.isEmpty(_list.message)) {
 
-	                        if(!_.isEmpty(self.dimension)){
-	                        	let _byDimension = self.getNodesByDimension()
-	                        }
-	                    }
-	                    
-	                },
-	                error: function(xhr, textStatus, errorThrown) {
-	                    console.log(errorThrown);
-	                }
-	            })
+                    if (!self.showSubNodes) return false;
+
+                    var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
+                    var nodes = tree.getSelectedNodes();
+                    if (nodes && nodes.length>0) {
+                        tree.removeChildNodes(nodes[0]);
+                    }
+
+                    // append sub nodes
+                    tree.addNodes(treeNode, data.message);
+
+                    if(!_.isEmpty(self.dimension)){
+                        let _byDimension = self.getNodesByDimension()
+                    }
+                }
+
 	        },
 	        onCheck: function(event, treeId, treeNode) {
 			  	let self = this;
@@ -328,20 +308,44 @@
                     delimiters: ['$', '$'],
 					el: '#entity-create-template',
 					template: `	<div class="panel"><div class="panel-body">
-									<form>
-									  <div class="form-group" v-for="item in model.columns">
-										<label :for="item.name">$item.name$</label>
-										<input :type="item.type" class="form-control" :id="item.name" :placeholder="item.name">
-									  </div>
-									  <a type="button" class="btn btn-success">Submit</a>
-									</form>
+									<vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
 								</div></div>`,
                     data: function(){
                         return {
 							model: {
-							    columns:  Array,
+							    form: {
+                                    view: "",
+                                    data: {},
+                                    schema: {
+                                        title:"",
+                                        type: "object",
+                                        properties: []
+									},
+                                    options: {
+                                        form: {
+                                            buttons: {
+                                                save: {
+                                                    title: "Save",
+													click: function() {
+                                                        let val = this.getValue();
+
+                                                        if (this.isValid(true)) {
+                                                            cVue.save(val);
+                                                            /*alert("Valid value: " + JSON.stringify(val, null, "  "));*/
+                                                        } else {
+                                                            /*alert("Invalid value: " + JSON.stringify(val, null, "  "));*/
+                                                        }
+                                                    }
+												}
+                                            }
+										},
+                                        fields: {}
+									}
+
+								},
 								list: Array
-							}
+							},
+							selected: self.selected
                         }
                     },
                     created:function(){
@@ -363,15 +367,39 @@
 					methods: {
                         init: function(){
                             let self = this;
-							let _list = fetchData("#"+item.node.name+": | top 1");
-                            let _classKeys = _.keys(_list.meta.classes);
+							let _list = fetchClass(item.node.name);
+							let _properties = {};
+                            let _fields = {};
+                            let _data = {"class":item.node.name};
 
-							self.model.columns = _.map(_list.meta.columns[_classKeys[0]],function (v) {
-													return v;
-												 });
+                            _.forEach(_list.message.fields,function (v) {
+                                let _name = v.name;
+                                let _type = v.ftype=='varchar'?'string':'string';
+                                let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
+                                let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
 
-							self.model.list = _list.message;
+                                _.merge(_properties, {[_name]: {type: _type,required: _required, hidden: _hidden}});
+                            	_.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
+                            });
 
+                            self.model.form.data = _data;
+                            self.model.form.schema.title = item.node.name;
+                            self.model.form.schema.properties = _properties;
+							self.model.form.options.fields = _fields;
+
+							self.model.list = _.map(_list.message.fields,function(v){
+							    					return v;
+							                  });
+
+
+						},
+                        initPlugIn: function(){
+							let self = this;
+
+						},
+						save: function(event){
+                            let self = this;
+                            let rtn = putDataByMql(event);
 						}
 					}
 				});

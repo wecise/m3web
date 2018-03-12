@@ -23,7 +23,7 @@
 {{template "base/head" .}}
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/tree/zTree/css/mxobjectTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <style type="text/css">
 
@@ -65,7 +65,7 @@
     .item li {
       padding: 0;
       margin: 0;
-      list-style: none;/*square inside url('{{AppSubUrl}}/web/vendor/tree/zTree/css/metroStyle/img/line_conn.png');*/
+      list-style: none;/*square inside url('{{AppSubUrl}}/web/vendor/zTree/css/metroStyle/img/line_conn.png');*/
       line-height: 24px;
       text-align: left;
       white-space: nowrap;
@@ -357,7 +357,7 @@
 <!--<div id="app"></div>-->
 
 <!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!-- Jquery Format JS/JSON/SQL JS -->
 <script src="{{AppSubUrl}}/web/vendor/jquery-format/jquery.format.js"></script>
@@ -378,11 +378,11 @@
     <!--
     var loading,
         curTreeNodeField,
-        objRelationContent = ``,
-        triggerContent = ``,
-        queryContent = ``,
-        dataContent = ``,
-        tableContent = ``;
+        objRelationContent = "",
+        triggerContent = "",
+        queryContent = "",
+        dataContent = "",
+        tableContent = "";
 
     var jumbotronStr = `<div id="panel_jumbotron" class="panel panel-jumbotron">
                            <div class="panel-body">
@@ -818,7 +818,7 @@
                     appVue.class.tree.cid = treeNode.cid;
                     appVue.class.tree.name = treeNode.name;
 
-                    var loading;
+                    var loading = null;
 
                     // append sub nodes
                     jQuery.ajax({
@@ -841,18 +841,24 @@
 
                             mxLog.debug("[" + moment().format("LLL") + "] [200] " + appVue.class.tree.cid + " " + JSON.stringify(data,null,2));
 
-                            var zTree = $.fn.zTree.getZTreeObj("tree");
-
-                            var nodes = zTree.getSelectedNodes();
-                            if (nodes && nodes.length>0) {
-                                zTree.removeChildNodes(nodes[0]);
-                            }
-
-                            // append sub nodes
-                            zTree.addNodes(treeNode, JSON.parse(data.message));
-
                             // append sub tree content
                             eventHub.$emit("tree-selected-event",{id: treeNode.cid, title: treeNode.name, obj: treeNode});
+
+                            if(_.isEmpty(data.message) || data.message == "[]"){
+                                return false;
+                            } else {
+
+                                var zTree = $.fn.zTree.getZTreeObj("tree");
+
+                                var nodes = zTree.getSelectedNodes();
+                                if (nodes && nodes.length>0) {
+                                zTree.removeChildNodes(nodes[0]);
+                                }
+
+                                // append sub nodes
+                                zTree.addNodes(treeNode, JSON.parse(data.message));
+
+                            }
                         },
                         error: function(xhr, textStatus, errorThrown) {
                             mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
@@ -979,7 +985,6 @@
               }
         });
 
-
         var config = {
             content: [{
                 type: 'row',
@@ -999,14 +1004,13 @@
                 }
         };
 
-            var myLayout = new GoldenLayout( config);
+        var myLayout = new GoldenLayout( config);
 
-            myLayout.registerComponent( 'example', function( container, componentState ){
-                container.getElement().html( `<div id="` + componentState.id + `"></div>`);
-            });
+        myLayout.registerComponent( 'example', function( container, componentState ){
+            container.getElement().html(`<div id="` + componentState.id + `"></div>`);
+        });
 
         myLayout.init();
-
 
         appVue = new Vue({
             delimiters: ['${', '}'],

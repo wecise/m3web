@@ -1,7 +1,7 @@
 {{template "base/head" .}}
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/tree/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 <!-- Bootstrap Select CSS -->
 <link href='{{AppSubUrl}}/web/vendor/bootstrap-select/dist/css/bootstrap-select.css' rel='stylesheet'>
 <link href="{{AppSubUrl}}/web/vendor/table/export/bootstrap-editable.css" rel="stylesheet">
@@ -134,7 +134,7 @@
 <div id="app"></div>
 
 <!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!-- ECharts单文件引入 -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
@@ -152,6 +152,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-radial-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-linear-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 
 <script>
 
@@ -180,7 +181,8 @@
         "vue-search-input-component",
         "vue-bootstrap-table",
         "vue-gauge-radial-component",
-        "vue-gauge-linear-component"], function () {
+        "vue-gauge-linear-component",
+        "vue-common-form-component"], function () {
 
         var current_class_path = "/matrix/devops/performance";
 
@@ -232,12 +234,19 @@
                                 list: [],
                                 selected: {}
                             }
-                        }
+                        },
+                        currentTimer: null
                     },
                     target: "#dataTable",
-                    timer: {
-                        sched: Object,
-                        timer: Object
+                    crontab: {
+                        main: {
+                            sched: Object,
+                            timer: Object
+                        },
+                        currentTimer: {
+                            sched: Object,
+                            timer: Object
+                        }
                     },
                     toggle: {
                         left: false,
@@ -263,31 +272,9 @@
 
                     self.$nextTick(function () {
 
-                        $("a[data-toggle='tab']").on("shown.bs.tab", function () {
-                            eventHub.$emit("chart-resize-event", null);
-                        })
-
-                        $(document).keypress(function (event) {
-                            var keycode = (event.keyCode ? event.keyCode : event.which);
-                            if (keycode == 13) {
-                                self.onSearch();
-                            } else if (keycode == 27) {
-                                self.setSearchReset();
-                                self.onSearch();
-                            }
-                        })
-
-                        self.sched = later.parse.text('every 5 min');
-                        self.timer = later.setInterval(self.onSearch, self.sched);
-
-                        self.initFilter();
-
                         self.onSearch();
 
-                        /* copy selected word to search */
-                        self.copyWordToSearch();
-
-                        App.init();
+                        self.initPlugin();
 
                     })
                 },
@@ -314,6 +301,39 @@
                     }
                 },
                 methods: {
+                    initPlugin: function () {
+                        let self = this;
+
+                        $("a[data-toggle='tab']").on("shown.bs.tab", function () {
+                            eventHub.$emit("chart-resize-event", null);
+                        })
+
+                        $(document).keypress(function (event) {
+                            var keycode = (event.keyCode ? event.keyCode : event.which);
+                            if (keycode == 13) {
+                                self.onSearch();
+                            } else if (keycode == 27) {
+                                self.setSearchReset();
+                                self.onSearch();
+                            }
+                        })
+
+                        /* cron to refresh */
+                        self.crontab.main.sched = later.parse.text('every 30 min');
+                        self.crontab.main.timer = later.setInterval(self.onSearch, self.crontab.main.sched);
+
+                        self.crontab.currentTimer.sched = later.parse.text('every 1 sec');
+                        self.crontab.currentTimer.timer = later.setInterval(self.refreshCurrentTimer, self.crontab.currentTimer.sched);
+
+
+                        self.initFilter();
+
+                        /* copy selected word to search */
+                        self.copyWordToSearch();
+
+                        App.init();
+
+                    },
                     defaultSearch: function () {
                         let self = this;
                         let _tmp = localStorage.getItem("search-open-performance");
@@ -783,6 +803,11 @@
                                 }
                             }
                         })
+                    },
+                    refreshCurrentTimer: function () {
+                        let self = this;
+
+                        self.search.currentTimer = moment().format("LL") + " " + moment().format("LTS");
                     }
                 }
             })
@@ -961,7 +986,7 @@
                                         <div class="panel-footer">
                                             <i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
                                             <i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
-                                            <i class="fa fa-clock-o"></i> Time: ${moment().format("LLL")} &nbsp;&nbsp;
+                                            <i class="fa fa-clock-o"></i> Time: ${search.currentTimer} &nbsp;&nbsp;
                                         </div>
                                     </div>
                                 </div>

@@ -42,7 +42,8 @@ var GLOBAL_CONFIG = {
 			    end
 			</lua>\n`,
             `call: \n\tcall tree {"ftype":"class","parent":"/"}\n`,
-        ]
+        ],
+        unshow_columns:['id','_tokens','day','vtime','class']
     },
     keyspace:{
         wecise: {

@@ -1,7 +1,7 @@
 <script src="../../public/web/js/cfg.js"></script>{{template "base/head" .}}
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/tree/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <!-- sweetalert core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
@@ -131,8 +131,8 @@
 <div id="app"></div>
 
 <!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/tree/zTree/js/jquery.ztree.excheck-3.5.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.min.js"></script>
 
 <!-- ECharts单文件引入 -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
@@ -154,6 +154,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
@@ -168,7 +169,8 @@
 						"vue-echart-timeline-component",
 						"vue-search-preset-component",
 						"vue-search-input-component",
-						"vue-bootstrap-table"],function() {
+						"vue-bootstrap-table",
+						"vue-common-form-component"],function() {
 
 		$(function(){
 

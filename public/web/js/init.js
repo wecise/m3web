@@ -127,6 +127,13 @@ var urlParams = (function(url)
     return result;
 })(window.location.href);
 
+var ifSignIn = function (event) {
+    if (event.status == 'signin'){
+        window.location.href = event.message;
+        return false;
+    }
+};
+
 
 var fetchFileFromFS = function(parent,name){
     let rtn = null;
@@ -144,6 +151,9 @@ var fetchFileFromFS = function(parent,name){
         complete: function (xhr, textStatus) {
         },
         success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
             if (_.isEmpty(data.message)) return false;
 
             rtn = data.message;
@@ -152,6 +162,35 @@ var fetchFileFromFS = function(parent,name){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+    return rtn;
+};
+
+var fetchClass = function (param) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/mxobject/schema/class',
+        type: 'GET',
+        dataType: 'json',
+        async:false,
+        data: {
+            class: param
+        },
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            rtn = data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
     return rtn;
 };
 
@@ -171,7 +210,9 @@ var fetchData = function (param) {
         complete: function(xhr, textStatus) {
         },
         success: function(data, textStatus, xhr) {
-            console.log(data, textStatus, xhr)
+
+            ifSignIn(data);
+
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -180,7 +221,7 @@ var fetchData = function (param) {
     });
 
     return rtn;
-}
+};
 
 var fetchFile = function (url) {
 
@@ -194,6 +235,9 @@ var fetchFile = function (url) {
         complete: function(xhr, textStatus) {
         },
         success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
             rtn = data.data;
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -203,7 +247,40 @@ var fetchFile = function (url) {
 
     return rtn;
 
-}
+};
+
+var putDataByMql = function (event) {
+
+    let _mql = `INSERT JSON '` + JSON.stringify(event) + `'`;
+
+    console.log(_mql)
+
+    jQuery.ajax({
+        url: "/mxobject/list/sql",
+        dataType: 'json',
+        type: 'POST',
+        data: {
+            ctype:"obj",
+            sql: _mql
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                swal("Success!","","success");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+};
 
 
 /*

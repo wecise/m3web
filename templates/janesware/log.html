@@ -7,7 +7,7 @@
 <link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/tree/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <style type="text/css" media="screen">
 
@@ -207,7 +207,7 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery-ui/1.11.4/jquery-ui.min.js"></script>
 
 <!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/tree/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!-- ECharts JS -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
@@ -225,6 +225,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 
 <SCRIPT type="text/javascript">
 
@@ -236,7 +237,8 @@
         "vue-echart-timeline-component",
         "vue-search-preset-component",
         "vue-search-input-component",
-        "vue-bootstrap-table"], function () {
+        "vue-bootstrap-table",
+        "vue-common-form-component"], function () {
 
         var RENDER_BY_LUA = `| lua msg=<lua>
                                         if "shell"==src then
@@ -303,7 +305,8 @@
                                 search: true,
                                 toolbar: "#custom-toolbar1",
                             },
-                        }
+                        },
+                        currentTimer: null
                     },
                     summary: {
                         bySeverity: [],
@@ -317,6 +320,16 @@
                     },
                     target: "#dataTable",
                     preconfig: {},
+                    crontab: {
+                        main: {
+                            sched: Object,
+                            timer: Object
+                        },
+                        currentTimer: {
+                            sched: Object,
+                            timer: Object
+                        }
+                    },
                     toggle: {
                         left: false,
                         top: true,
@@ -408,6 +421,14 @@
 
                         self.onSearch();
 
+                        self.initPlugin();
+
+                    })
+                },
+                methods: {
+                    initPlugin: function () {
+                        let self = this;
+
                         $(self.target).on('click-row.bs.table', function (e, row, $element) {
                             $('.info').removeClass('info');
                             $($element).addClass('info');
@@ -436,9 +457,14 @@
                         /* copy selected word to search */
                         self.copyWordToSearch();
 
-                    })
-                },
-                methods: {
+                        /* cron to refresh */
+                        self.crontab.main.sched = later.parse.text('every 30 min');
+                        self.crontab.main.timer = later.setInterval(self.onSearch, self.crontab.main.sched);
+
+                        self.crontab.currentTimer.sched = later.parse.text('every 1 sec');
+                        self.crontab.currentTimer.timer = later.setInterval(self.refreshCurrentTimer, self.crontab.currentTimer.sched);
+
+                    },
                     defaultSearch: function () {
                         let self = this;
                         let _tmp = localStorage.getItem("search-open-log");
@@ -854,6 +880,11 @@
                                 }
                             }
                         })
+                    },
+                    refreshCurrentTimer: function () {
+                        let self = this;
+
+                        self.search.currentTimer = moment().format("LL") + " " + moment().format("LTS");
                     }
                 }
             })
@@ -976,7 +1007,7 @@
                             <div class="panel-footer">
                                 <i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
                                 <i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
-                                <i class="fa fa-clock-o"></i> Time: ${moment().format("LLL")} &nbsp;&nbsp;
+                                <i class="fa fa-clock-o"></i> Time: ${search.currentTimer} &nbsp;&nbsp;
                             </div>
                             <!-- context menu -->
                             <ul id="context-menu" class="dropdown-menu">

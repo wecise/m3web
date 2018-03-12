@@ -1,0 +1,74 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-common-form-component"  ----------*/
+	<template>
+		<div :id="id"></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-common-form-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+	        id: String,
+			form: Object
+	    },
+	    data: function(){
+	        return {
+
+	        }
+	    },
+	    created:function(){
+	        let self = this;
+
+	    },
+	    mounted: function() {
+	        let self = this;
+
+	        self.$nextTick(function(){
+
+                self.init();
+	            self.initPlugIn();
+
+	        })
+
+	    },
+	    watch: {
+	        form: {
+	            handler:function(val,oldVal){
+	                let self = this;
+
+                    let exists = $(self.$el).alpaca("exists");
+
+                    if (exists) {
+                        $(self.$el).alpaca("destroy");
+                    }
+
+	                self.init();
+	            },
+	            deep: true
+	        }
+	    },
+	    methods: {
+	        init: function() {
+	            let self = this;
+
+                $(self.$el).alpaca(self.form);
+
+	        },
+            initPlugIn: function(){
+                let self = this;
+
+            }
+	    }
+	
+	}
+	</script>
+
+</code>
