@@ -282,6 +282,41 @@ var putDataByMql = function (event) {
     });
 };
 
+var newWindow = function (title, template) {
+    var win;
+    var w = $( window ).width();//document.body.clientWidth;
+    var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+    var wW = $( window ).width()*2.2/3;
+    var hH = $( window ).height()*2.5/3;
+    var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+    var tb = document.createElement('div');
+
+    $(tb).append(template);
+    win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+    win.setMaximizable(true);
+    win.setResizable(true);
+    win.setClosable(true);
+    win.setVisible(true);
+
+    win.addListener(mxEvent.MAXIMIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    win.addListener(mxEvent.MINIMIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    win.addListener(mxEvent.NORMALIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+}
+
 
 /*
  *  For: Wait Function  

@@ -238,6 +238,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 
 <script type="text/javascript">
 	
@@ -249,7 +250,8 @@
 						"vue-search-preset-component",
 						"vue-search-input-component",
 						"vue-bootstrap-table",
-		                "vue-common-form-component"],function() {
+		                "vue-common-form-component",
+        				"vue-object-detail-component"],function() {
 
 		moment.locale({{.Lang}});
 
@@ -502,128 +504,106 @@
 				    },
                     searchHandler: function(param,func){
                         let self = this;
+                        let _list = fetchData(param);
+                        let _columns = [];
 
-                        console.log(param);
+                        if(_.isEmpty(_list.message)){
+                            self.search.result.data = [];
+                            self.summary.data.list = self.search.result.data;
+                            return false;
+                        }
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: param,
-                                flag: false
-                            },
-                            beforeSend:function(xhr){
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
+                        let _classKeys = _.keys(_list.meta.classes);
 
-                                let _list = data;
-                                let _columns = [];
+                        _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
+                            let _sortable = false;
 
-                                if(_.isEmpty(_list.message)){
-                                    self.search.result.data = [];
-                                    self.summary.data.list = self.search.result.data;
-                                    return false;
-                                }
-
-                                let _classKeys = _.keys(_list.meta.classes);
-
-                                _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
-                                    let _sortable = false;
-
-                                    if (v.type === 'timestamp'){
-                                        _columns.push({
-                                            field: v.name,
-                                            title: _.startCase(v.name),
-                                            sortable: true,
-                                            formatter: function(value, row, index) {
-                                                return moment(value).format("LLL");
-                                            }
-                                        });
-                                    } else if (v.type === 'smallint'){
-                                        _columns.push({
-                                            field: v.name,
-                                            title: _.startCase(v.name),
-                                            sortable: true,
-                                            formatter: function(value, row, index) {
-
-                                                if(!v.enum) return false;
-
-                                                let _enum = v.enum[value];
-
-                                                if (!_.isEmpty(_enum)) {
-                                                    return _enum[0];
-                                                } else {
-                                                    return 'Unknown';
-                                                }
-
-                                            },
-                                            cellStyle: function(value,row,index){
-
-                                                if(!v.enum) return false;
-
-                                                let _enum = v.enum[value];
-
-                                                if (!_.isEmpty(_enum)) {
-                                                    return {classes: v.name+value};
-                                                } else {
-                                                    return {classes: v.name+'_1'};
-                                                }
-
-                                            }
-                                        });
-
-                                    } else {
-                                        _columns.push({
-                                            field: v.name,
-                                            title: _.startCase(v.name),
-                                            sortable: _sortable
-                                        });
+                            if (v.type === 'timestamp'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: true,
+                                    formatter: function(value, row, index) {
+                                        return moment(value).format("LLL");
                                     }
-
-                                })
-
-                                self.preconfig = window.GLOBAL_OBJECT.company.object.event.preconfig;
-
-                                /*_.forEach(_columns,function (v,k){
-									let _inx = _.find(window.GLOBAL_OBJECT.company.object.event.columns,{field:v.field});
-									if (_.isEmpty(_inx)){
-									    v.visible = false;
-									}
-                                })*/
-
-                                self.search.result.columns = window.GLOBAL_OBJECT.company.object.event.columns;//_columns;
-                                self.search.result.data = _list.message;
-
-                                _.delay(function () {
-                                    self.summary.data.list = self.search.result.data;
-                                    self.summary.data.scale = self.search.preset.default.scale;
-                                },300)
-
-                                // set filter data
-								let _filter = _.map(_list.meta.classes,function(v,k){
-                                    let _name = _.last(k.split("/"));
-                                    if (_name === '*'){
-                                        _name = (k.split("/").reverse())[1];
-                                    }
-                                    return {name: _.startCase(_name), value: 'class=' + k};
-
                                 });
-                                self.search.filter = _.uniqWith(_.concat(self.search.filter,_filter),_.isEqual);
+                            } else if (v.type === 'smallint'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: true,
+                                    formatter: function(value, row, index) {
 
-                                // set filter data
-                                self.toggle.top = false;
-                                self.toggleTop();
-                                _.delay(function(){
-                                    self.toggleDefault();
-                                },100);
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                                        if(!v.enum) return false;
+
+                                        let _enum = v.enum[value];
+
+                                        if (!_.isEmpty(_enum)) {
+                                            return _enum[0];
+                                        } else {
+                                            return 'Unknown';
+                                        }
+
+                                    },
+                                    cellStyle: function(value,row,index){
+
+                                        if(!v.enum) return false;
+
+                                        let _enum = v.enum[value];
+
+                                        if (!_.isEmpty(_enum)) {
+                                            return {classes: v.name+value};
+                                        } else {
+                                            return {classes: v.name+'_1'};
+                                        }
+
+                                    }
+                                });
+
+                            } else {
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.name),
+                                    sortable: _sortable
+                                });
                             }
+
+                        })
+
+                        self.preconfig = window.GLOBAL_OBJECT.company.object.event.preconfig;
+
+                        /*_.forEach(_columns,function (v,k){
+                            let _inx = _.find(window.GLOBAL_OBJECT.company.object.event.columns,{field:v.field});
+                            if (_.isEmpty(_inx)){
+                                v.visible = false;
+                            }
+                        })*/
+
+                        self.search.result.columns = window.GLOBAL_OBJECT.company.object.event.columns;//_columns;
+                        self.search.result.data = _list.message;
+
+                        _.delay(function () {
+                            self.summary.data.list = self.search.result.data;
+                            self.summary.data.scale = self.search.preset.default.scale;
+                        },300)
+
+                        // set filter data
+                        let _filter = _.map(_list.meta.classes,function(v,k){
+                            let _name = _.last(k.split("/"));
+                            if (_name === '*'){
+                                _name = (k.split("/").reverse())[1];
+                            }
+                            return {name: _.startCase(_name), value: 'class=' + k};
+
                         });
+                        self.search.filter = _.uniqWith(_.concat(self.search.filter,_filter),_.isEqual);
+
+                        // set filter data
+                        self.toggle.top = false;
+                        self.toggleTop();
+                        _.delay(function(){
+                            self.toggleDefault();
+                        },100);
                     },
 					summaryEvent: function(event){
                         let self = this;

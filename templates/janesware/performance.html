@@ -153,6 +153,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-radial-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-gauge-linear-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 
 <script>
 
@@ -182,7 +183,8 @@
         "vue-bootstrap-table",
         "vue-gauge-radial-component",
         "vue-gauge-linear-component",
-        "vue-common-form-component"], function () {
+        "vue-common-form-component",
+        "vue-object-detail-component"], function () {
 
         var current_class_path = "/matrix/devops/performance";
 
@@ -420,103 +422,67 @@
                         let self = this;
                         let param = editor.getValue();
                         let cols = [];
+                        let _list = fetchData(param);
+                        let _data = _list.message;
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {cond: param, flag: false},
-                            beforeSend: function (xhr) {
-                            },
-                            complete: function (xhr, textStatus) {
-                            },
-                            success: function (data, textStatus, xhr) {
+                        $("#tempDataTable").bootstrapTable('destroy');
 
-                                var data = data.message;
+                        $.map(_data[0], function (k, v) {
 
-                                $("#tempDataTable").bootstrapTable('destroy');
+                            var col = v;
 
-                                $.map(data[0], function (k, v) {
+                            cols.push({
+                                field: col,
+                                title: col,
+                                sortable: true
+                            })
 
-                                    var col = v;
-
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true
-                                    })
-
-                                });
-
-                                $("#tempDataTable").bootstrapTable({columns: cols});
-
-                                $("#tempDataTable").bootstrapTable('load', data);
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                            }
                         });
+
+                        $("#tempDataTable").bootstrapTable({columns: cols});
+
+                        $("#tempDataTable").bootstrapTable('load', _data);
                     },
                     searchHandler: function (param, func) {
                         let self = this;
+                        let _list = fetchData(param);
 
-                        console.log(param)
+                        if (_.isEmpty(_list.message)) {
+                            self.search.result.columns = [];
+                            self.search.result.data = [];
+                            _.delay(self.setGauge, 500);
+                            return false;
+                        }
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: param,
-                                flag: false
-                            },
-                            complete: function (xhr, textStatus) {
-                                //called when complete
-                            },
-                            success: function (data, textStatus, xhr) {
+                        let cols = [];
 
-                                if (_.isEmpty(data.message)) {
-                                    self.search.result.columns = [];
-                                    self.search.result.data = [];
-                                    _.delay(self.setGauge, 500);
-                                    return false;
+                        cols = window.GLOBAL_OBJECT.company.object.performance.columns;
+                        self.preconfig = window.GLOBAL_OBJECT.company.object.performance.preconfig;
+
+                        let tmp = _list.meta.columns[_.keys(_list.meta.classes)[0]];
+
+                        if (!_.isEmpty(tmp)) {
+                            _.forEach(tmp, function (v) {
+                                var fIndex = _.findIndex(cols, {field: v});
+                                if (fIndex == -1) {
+                                    cols.push({field: v, title: _.upperFirst(v), visible: false});
                                 }
+                            });
+                        }
 
-                                var list = data.message;
-                                var cols = [];
+                        if (_.isEmpty(_.find(cols, {
+                                field: "state",
+                                checkbox: "true"
+                            }))) {
+                            cols.unshift({
+                                field: "state",
+                                checkbox: "true"
+                            });
+                        }
 
-                                cols = window.GLOBAL_OBJECT.company.object.performance.columns;
-                                self.preconfig = window.GLOBAL_OBJECT.company.object.performance.preconfig;
-
-                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
-
-                                if (!_.isEmpty(tmp)) {
-                                    _.forEach(tmp, function (v) {
-                                        var fIndex = _.findIndex(cols, {field: v});
-                                        if (fIndex == -1) {
-                                            cols.push({field: v, title: _.upperFirst(v), visible: false});
-                                        }
-                                    });
-                                }
-
-                                if (_.isEmpty(_.find(cols, {
-                                        field: "state",
-                                        checkbox: "true"
-                                    }))) {
-                                    cols.unshift({
-                                        field: "state",
-                                        checkbox: "true"
-                                    });
-                                }
-
-                                self.search.result.columns = cols;
-                                self.search.result.data = list;
-                                _.delay(self.setGauge, 500);
-
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                            }
-                        });
+                        self.search.result.columns = cols;
+                        self.search.result.data = _list.message;
+                        _.delay(self.setGauge, 500);
                     },
                     toggleTop: function () {
                         let self = this;
@@ -812,55 +778,6 @@
                 }
             })
         });
-
-        function initTempTable() {
-
-            var param = editor.getValue();
-
-            var cols = [];
-
-            jQuery.ajax({
-                url: '/mxobject/search',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    cond: param,
-                    flag: false
-                },
-                beforeSend: function (xhr) {
-                },
-                complete: function (xhr, textStatus) {
-                },
-                success: function (data, textStatus, xhr) {
-
-                    var data = data.message;
-
-                    $("#tempDataTable").bootstrapTable('destroy');
-
-                    $.map(data[0], function (k, v) {
-
-                        var col = v;
-
-                        cols.push({
-                            field: col,
-                            title: col,
-                            sortable: true
-                        })
-
-                    });
-
-                    $("#tempDataTable").bootstrapTable({
-                        columns: cols
-                    });
-
-                    $("#tempDataTable").bootstrapTable('load', data);
-
-
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                }
-            });
-        }
 
         /**
          * @author cnwangzd

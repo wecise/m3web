@@ -43,7 +43,153 @@ var GLOBAL_CONFIG = {
 			</lua>\n`,
             `call: \n\tcall tree {"ftype":"class","parent":"/"}\n`,
         ],
-        unshow_columns:['id','_tokens','day','vtime','class']
+        unshow_columns:['id','_tokens','day','vtime','class'],
+        /*ci_right_menu:  {
+                            "open": {
+                                name: "打开", icon: "fa-folder-o",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.open(_item);
+                                }
+                            },
+                            "download": {
+                                name: "下载", icon: "fa-cloud-download",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.download(_item);
+                                }
+                            },
+                            "-": "-",
+                            "new-folder": {
+                                name: "新建配置组", icon: "fa-copy",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    console.log($(this).data("item"))
+                                    self.mkdir(_item);
+                                }
+                            },
+                            "new-ci": {
+                                name: "新建配置项", icon: "fa-paste",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    //self.mkfile(_item);
+                                }
+                            },
+                            "delete": {
+                                name: "删除", icon: "fa-trash",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.delete(_item);
+                                }
+                            },
+                            "--": "--",
+                            "history": {
+                                name: "配置历史", icon: "fa-clock-o",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.open(_item);
+                                }
+                            },
+                            "detail": {
+                                name: "配置卡片", icon: "fa-tasks",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('config', '');
+                                }
+                            },
+                            "compare": {
+                                name: "配置比对", icon: "fa-list-alt",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('config', '');
+                                }
+                            },
+                            "connect": {
+                                name: "配置关联", icon: "fa-sitemap",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.open(_item);
+                                }
+                            },
+                            "---": "---",
+                            "event": {
+                                name: "事件", icon: "fa-warning",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('itsm', '/janesware/event');
+                                }
+                            },
+                            "performance": {
+                                name: "性能", icon: "fa-line-chart",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('itsm', '/janesware/performance');
+                                }
+                            },
+                            "log": {
+                                name: "日志", icon: "fa-file-code-o",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('itsm', '/janesware/log');
+                                }
+                            },
+                            "----": "----",
+                            "new-content": {
+                                name: "新增", icon: "fa-plus",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    swal("新增", "新增配置相关内容", "info");
+                                }
+                            }
+                        },*/
+        ci_right_menu:  {
+                            "detail": {
+                                name: "配置卡片", icon: "fa-tasks",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    self.look('config', '');
+                                }
+                            },
+                            "-": "-",
+                            "new-ci": {
+                                name: "新建", icon: "fa-paste",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    //self.mkfile(_item);
+                                }
+                            },
+                            "delete": {
+                                name: "删除", icon: "fa-trash",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let _item = $(this).data("item");
+                                    self.delete(_item);
+                                }
+                            },
+                            "--": "--",
+                            "new-content": {
+                                name: "新增", icon: "fa-plus",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    swal("新增", "新增配置相关内容", "info");
+                                }
+                            }
+                        },
+        ci_card: [
+                    {name: 'model', title: '型号', stype: 'string', otype: 'any'},
+                    {name: 'type', title: '类型', stype: 'string', otype: 'any'},
+                    {name: 'company', title: '厂商', stype: 'string', otype: 'any'},
+                    {name: 'ctel', title: '厂商联系电话', stype: 'string', otype: 'any'},
+                    {name: 'sn', title: '序列号', stype: 'string', otype: 'any'},
+                    {name: 'host', title: 'Host', stype: 'string', otype: 'any'},
+                    {name: 'ip', title: 'IP', stype: 'string', otype: 'any'},
+                    {name: 'dc', title: '数据中心', stype: 'string', otype: 'any'},
+                    {name: 'room', title: '房间', stype: 'string', otype: 'any'},
+                    {name: 'rack', title: '机柜', stype: 'string', otype: 'any'},
+                    {name: 'unit', title: '机架', stype: 'string', otype: 'any'},
+                    {name: 'location', title: '地点', stype: 'string', otype: 'any'},
+                    {name: 'region', title: '所属地点', stype: 'string', otype: 'any'},
+                    {name: 'biz ', title: '所属业务', stype: 'string', otype: 'any'},
+                    {name: 'department', title: '负责部门', stype: 'string', otype: 'any'},
+                    {name: 'contact', title: '联系人', stype: 'string', otype: 'any'},
+                    {name: 'tel', title: '联系人电话', stype: 'string', otype: 'number'},
+                    {name: 'assetid', title: '资产编号', stype: 'string', otype: 'any'},
+                    {name: 'period', title: '保修期', stype: 'string', otype: 'any'},
+                    {name: 'config', title: '详细配置', stype: 'string', otype: 'textarea'},
+                    {name: 'files', title: '配置文件列表', stype: 'string', otype: 'any'},
+                    {name: 'element', title: '组成实体的元素', stype: 'string', otype: 'any'}
+                ]
     },
     keyspace:{
         wecise: {

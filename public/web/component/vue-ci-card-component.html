@@ -1,0 +1,256 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-ci-card-component"  ----------*/
+	<template>
+		<div class="row"><div class="col-lg-12">
+			<div class="panel panel-grey"><div class="panel-body" style="padding: 5px;">
+				<vue-common-form-component id="ci-card-form"
+										   :form="model.form">
+				</vue-common-form-component>
+			</div></div>
+		</div></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-ci-card-component">
+	{
+        delimiters: ['$', '$'],
+		props: {
+			row: Object
+		},
+		data:function(){
+			return {
+                model: {
+                    form: {
+                        view: {
+                            parent: "bootstrap-edit",
+                            layout: {
+                                template: `<div class='row'>
+												<div class='col-md-3' id='column-0' style="padding: 5px 0px;">
+													<!-- TAB NAVIGATION -->
+													<ul class="nav nav-tabs" role="tablist" style="background:none!important;">
+													  <li class="active" style="width:100%;">
+															<a href="#tab1" role="tab" data-toggle="tab">
+																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																	<div class="stats-icon stats-icon-lg"><i class="fa fa-desktop fa-fw"></i></div>
+																	<div class="stats-title"></div>
+																	<div class="stats-number">配置</div>
+																	<div class="stats-progress progress" style="height: 1px;">
+																		<div class="progress-bar" style="width: 100%;"></div>
+																	</div>
+																	<div class="stats-desc" style="color:#999;">
+																		事件 <i class="badge badge-danger">33</i>
+																		性能 <i class="fa fa-line-chart" style="color:#09ef9f;"></i>
+																		日志 <i class="badge badge-warning">3</i>
+																	</div>
+																</div>
+															</a>
+													  </li>
+													  <li style="width:100%;">
+															<a href="#tab2" role="tab" data-toggle="tab">
+																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																	<div class="stats-icon stats-icon-lg"><i class="fa fa-tags fa-fw"></i></div>
+																	<div class="stats-title"></div>
+																	<div class="stats-number">比对</div>
+																	<div class="stats-progress progress" style="height: 1px;">
+																		<div class="progress-bar" style="width: 100%;"></div>
+																	</div>
+																	<div class="stats-desc" style="color:#999;"></div>
+																</div>
+															</a>
+													  </li>
+													  <li style="width:100%;">
+															<a href="#tab3" role="tab" data-toggle="tab">
+																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																	<div class="stats-icon stats-icon-lg"><i class="fa fa-globe fa-fw"></i></div>
+																	<div class="stats-title"></div>
+																	<div class="stats-number">关联</div>
+																	<div class="stats-progress progress" style="height: 1px;">
+																		<div class="progress-bar" style="width: 100%;"></div>
+																	</div>
+																	<div class="stats-desc" style="color:#999;">
+																	</div>
+																</div>
+															</a>
+													   </li>
+													</ul>
+												</div>
+												<div class="col-md-9" style="padding:0px;">
+													<div class="tab-content" style="padding:0px;">
+													  <div class="active tab-pane fade in" id="tab1">
+														<div class='col-md-4' id='column-1' style="line-height:5px;"></div>
+														<div class='col-md-4' id='column-2' style="line-height:5px;"></div>
+														<div class='col-md-4' id='column-3' style="line-height:5px;"></div>
+													  </div>
+													  <div class="tab-pane fade" id="tab2">
+														<div class="panel panel-grey">
+															<div class="panel-body">
+																<span style="display: -webkit-box;">
+																	<input class="ci_range_from" type="text" placeholder="选择时间.."></p>
+																	<i class="fa fa-cogs" style="padding: 0px 10px;"></i>
+																	<input class="ci_range_to" type="text" placeholder="选择时间.."></p>
+																	<a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">应用</a>
+																</span>
+															</div>
+															</div>
+													  </div>
+													  <div class="tab-pane fade" id="tab3">
+														<h2>link</h2>
+													  </div>
+													</div>
+												</div>
+										   </div>`,
+                                bindings: {
+                                    assetid: "column-1",
+                                    config: "column-1",
+                                    host: "column-1",
+                                    ip: "column-1",
+                                    model: "column-1",
+                                    type: "column-1",
+                                    company: "column-1",
+                                    ctel: "column-1",
+                                    sn: "column-2",
+                                    dc: "column-2",
+                                    room: "column-2",
+                                    rack: "column-2",
+                                    unit: "column-2",
+                                    location: "column-2",
+                                    region: "column-2",
+                                    biz: "column-2",
+                                    department: "column-3",
+                                    contact: "column-3",
+                                    tel: "column-3",
+                                    period: "column-3",
+                                    files: "column-3",
+                                    element: "column-3"
+                                }
+                            }
+                        },
+                        data: {},
+                        schema: {
+                            title: "",
+                            type: "object",
+                            properties: []
+                        },
+                        options: {
+                            form: {
+                                buttons: {
+                                    save: {
+                                        title: "Save",
+                                        click: function () {
+                                            let val = this.getValue();
+
+                                            if (this.isValid(true)) {
+                                                cardVue.save(val);
+                                            } else {
+                                                /*alert("Invalid value: " + JSON.stringify(val, null, "  "));*/
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            fields: {}
+                        }
+
+                    }
+                },
+                search: {
+                    fortime: " for vtime",
+                    default: {value: " | nearest 1year"}
+                }
+            }
+		},
+        created: function(){
+            let self = this;
+
+        },
+        watch: {
+            search:{
+                handler: function(val,oldVal){
+                    let self = this;
+
+                    self.init();
+                },
+                deep:true
+            }
+        },
+        mounted: function(){
+            let self = this;
+
+            self.$nextTick(function(){
+                self.init();
+
+                _.delay(self.initPlugin,1000);
+            })
+
+        },
+        methods: {
+            init: function(){
+                let self = this;
+                let _list = fetchClass(self.row.class);
+                let _properties = {};
+                let _fields = {};
+                let _data = {};
+
+                _.forEach(GLOBAL_CONFIG.global.ci_card,function (v) {
+                    let _name = v.name;
+                    let _stype = v.stype=='varchar'?'string':v.stype;
+                    let _otype = v.otype;
+                    let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
+                    let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
+
+                    _.merge(_properties, {[_name]: {title: v.title, type: _stype,required: _required, hidden: _hidden}});
+                    _.merge(_fields, {[_name]: {type: _otype}});
+                });
+
+                _.forEach(self.row,function (v,k) {
+                    let _name = k;
+                    _.merge(_data, {[_name]: v});
+
+                })
+
+                self.model.form.data = _data;
+                self.model.form.schema.title = self.row.name;
+                self.model.form.schema.properties = _properties;
+                self.model.form.options.fields = _fields;
+                self.model.list = _.map(_list.message.fields,function(v){
+                    return v;
+                });
+
+            },
+            initPlugin: function(){
+                let self = this;
+
+                $(".ci_range_from").flatpickr({
+                    locale: "en",
+                    enableTime: true,
+                    time_24hr: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+
+                    }
+                });
+
+                $(".ci_range_to").flatpickr({
+                    locale: "en",
+                    enableTime: true,
+                    time_24hr: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+
+                    }
+                });
+
+            }
+        }
+	
+	}
+	</script>
+
+</code>

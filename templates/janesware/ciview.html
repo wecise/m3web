@@ -103,6 +103,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-card-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 
 <script type="text/javascript">
 
@@ -113,7 +115,9 @@
                         "vue-search-preset-component",
                         "vue-search-input-component",
                         "vue-bootstrap-table",
-                        "vue-common-form-component"
+                        "vue-common-form-component",
+                        "vue-ci-card-component",
+                        "vue-object-detail-component"
                         ],function() {
 
         $(function(){
@@ -610,8 +614,9 @@
                     init: function () {
                         let self = this;
 
-                        self.initContentMenu();
                         self.initFileUpload();
+
+                        self.initContentMenu();
 
                     },
                     initFileUpload: function () {
@@ -720,98 +725,6 @@
                     },
                     initContentMenu: function () {
                         let self = this;
-                        let _menu = {
-                            "open": {
-                                name: "打开", icon: "fa-folder-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.open(_item);
-                                }
-                            },
-                            "download": {
-                                name: "下载", icon: "fa-cloud-download",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.download(_item);
-                                }
-                            },
-                            "-": "-",
-                            "new-folder": {
-                                name: "新建配置组", icon: "fa-copy",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    console.log($(this).data("item"))
-                                    self.mkdir(_item);
-                                }
-                            },
-                            "new-ci": {
-                                name: "新建配置项", icon: "fa-paste",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    //self.mkfile(_item);
-                                }
-                            },
-                            "delete": {
-                                name: "删除", icon: "fa-trash",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.delete(_item);
-                                }
-                            },
-                            "--": "--",
-                            "history": {
-                                name: "配置历史", icon: "fa-clock-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.open(_item);
-                                }
-                            },
-                            "detail": {
-                                name: "配置卡片", icon: "fa-tasks",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('config', '');
-                                }
-                            },
-                            "compare": {
-                                name: "配置比对", icon: "fa-list-alt",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('config', '');
-                                }
-                            },
-                            "connect": {
-                                name: "配置关联", icon: "fa-sitemap",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.open(_item);
-                                }
-                            },
-                            "---": "---",
-                            "event": {
-                                name: "事件", icon: "fa-warning",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/event');
-                                }
-                            },
-                            "performance": {
-                                name: "性能", icon: "fa-line-chart",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/performance');
-                                }
-                            },
-                            "log": {
-                                name: "日志", icon: "fa-file-code-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/log');
-                                }
-                            },
-                            "----": "----",
-                            "new-content": {
-                                name: "新增", icon: "fa-plus",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    swal("新增", "新增配置相关内容", "info");
-                                }
-                            }
-                        };
 
                         $.contextMenu({
                             selector: '.context-menu-file',
@@ -819,7 +732,7 @@
                                 var m = "clicked: " + key;
                                 console.log(m);
                             },
-                            items: _menu
+                            items: GLOBAL_CONFIG.global.ci_right_menu
                         });
 
                         $.contextMenu({
@@ -1281,6 +1194,7 @@
                 template: `#ci-view-table-component-template`,
                 data: function () {
                     return {
+                        contextMenu:[]
                     }
                 },
                 watch: {
@@ -1297,8 +1211,9 @@
                     let self = this;
 
                     self.$nextTick(function () {
+
                         _.delay(function () {
-                            self.initContentMenu();
+                            //self.initContentMenu();
                         }, 1000)
                     })
                 },
@@ -1309,99 +1224,13 @@
                     initContentMenu: function () {
                         let self = this;
 
-                        let _menu = {
-                            "open": {
-                                name: "打开", icon: "fa-folder-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.open(_item);
-                                }
-                            },
-                            "download": {
-                                name: "下载", icon: "fa-cloud-download",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.download(_item);
-                                }
-                            },
-                            "-": "-",
-                            "new-folder": {
-                                name: "新建配置组", icon: "fa-copy",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    console.log($(this).data("item"))
-                                    self.mkdir(_item);
-                                }
-                            },
-                            "new-ci": {
-                                name: "新建配置项", icon: "fa-paste",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    //self.mkfile(_item);
-                                }
-                            },
-                            "delete": {
-                                name: "删除", icon: "fa-trash",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.delete(_item);
-                                }
-                            },
-                            "--": "--",
-                            "history": {
-                                name: "历史", icon: "fa-clock-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    let _item = $(this).data("item");
-                                    self.open(_item);
-                                }
-                            },
-                            "detail": {
-                                name: "配置卡片", icon: "fa-tasks",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('config', '');
-                                }
-                            },
-                            "compare": {
-                                name: "配置比对", icon: "fa-list-alt",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('config', '');
-                                }
-                            },
-                            "---": "---",
-                            "event": {
-                                name: "事件", icon: "fa-warning",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/event');
-                                }
-                            },
-                            "performance": {
-                                name: "性能", icon: "fa-line-chart",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/performance');
-                                }
-                            },
-                            "log": {
-                                name: "日志", icon: "fa-file-code-o",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    self.look('itsm', '/janesware/log');
-                                }
-                            },
-                            "----": "----",
-                            "new-content": {
-                                name: "新增", icon: "fa-plus",
-                                callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    swal("新增", "新增配置相关内容", "info");
-                                }
-                            }
-                        };
-
                         $.contextMenu({
                             selector: '#ci-list-table td',
                             callback: function (key, options) {
                                 var m = "clicked: " + key;
                                 console.log(m);
                             },
-                            items: _menu
+                            items: GLOBAL_CONFIG.global.ci_right_menu
                         });
                     }
                 }
@@ -2435,9 +2264,12 @@
                              contextMenu="context-menu-ciview"></vue-bootstrap-table>
         <!-- context menu -->
         <ul id="context-menu-ciview" class="dropdown-menu">
-            <li data-item='{"num": "0", "app":"ciview","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
+            <li data-item='{"num": "2", "app":"ciview","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-tasks fa-fw"></i> 配置卡片</a></li>
             <li class="context-menu-item context-menu-separator context-menu-not-selectable"></li>
-            <li data-item='{"num": "7", "app":"ciview","item":"add","show":"command"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i> New Action</a></li>
+            <li data-item='{"num": "", "app":"ciview","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-paste fa-fw"></i> 新建</a></li>
+            <li data-item='{"num": "", "app":"ciview","item":"detail", "show":"list"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-trash fa-fw"></i> 删除</a></li>
+            <li class="context-menu-item context-menu-separator context-menu-not-selectable"></li>
+            <li data-item='{"num": "8", "app":"ciview","item":"add","show":"command"}'><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i> New Action</a></li>
         </ul>
     </div>
 </script>

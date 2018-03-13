@@ -127,6 +127,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 
 <script>
 	
@@ -137,7 +138,8 @@
 						"vue-editor-component",
 						"vue-search-preset-component",
 						"vue-search-input-component",
-						"vue-common-form-component"],function() {
+						"vue-common-form-component",
+						"vue-object-detail-component"],function() {
 
 		$(function(){
 
@@ -648,237 +650,203 @@
 
                         _param = _ifDebug + _ifHistory + _param;
 
-						console.log(_param)
+						let _list = fetchData(_param);
 
-						jQuery.ajax({
-						  	url: '/mxobject/search',
-						  	type: 'POST',
-						  	dataType: 'json',
-						  	data: {
-						  		cond: _param,
-						  		flag: true
-						  	},
-						  	beforeSend:function(xhr){
-					      	},
-						  	complete: function(xhr, textStatus) {
-						  	},
-						  	success: function(data, textStatus, xhr) {
-						  		//console.log(JSON.stringify(data))
-							  	let event = new Array();
-							  	let syslog = new Array();
-								let performance = new Array();
-								let log = new Array();
-								let raw = new Array();
-								let journal = new Array();
-								let tickets = new Array();
-								let change = new Array();
-								let graph = new Array();
 
-								if(_.isEmpty(data.message)) {
-							  		event = [];
-							  		syslog = [];
-									performance = [];
-									log = [];
-									raw = [];
-									journal = [];
-									tickets = [];
-									change = [];
-									graph = [];
-							  	} else {
-							  		_.filter(data.message, function(d){
-								  		if( _.includes(d.class, '/matrix/devops/event/omnibus/journal') ){
-								  			journal.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.journal.columns = window.GLOBAL_OBJECT.company.object.journal.columns;
-											self.journal.options =  {
-											                        toggle: "table",
-																	classes: "table table-no-bordered",
-																    pagination: false,
-																    showFooter: false,
-																    pageSize: "15",
-											         				pageList: "[15,30,45,60]",
-											         				detailView: false,
-													                showColumns: false,
-													                showExport: false,
-													            };
-										} else if( _.includes(d.class, '/matrix/devops/event/syslog') ){
-								  			syslog.push( _.merge(d, { preset: encodeURI(JSON.stringify(self.search.default)) } ));
-								  			self.syslog.columns = window.GLOBAL_OBJECT.company.object.syslog.columns;
-								  			self.syslog.options =  {
-											                        classes: "table table-no-bordered",
-											                        pageSize: "30",
-													                pageList: "[15,30,45,60]",
-													                detailView: false,
-													                buttonsAlign: "right",
-													                search: false,
-													                showColumns: false,
-													                showExport: false,
-											                        locale: '{{.Lang}}',
-											                        rowStyle: 	function rowStyle(row, index) {
-																				  	return {
-																				    	classes: 'text-nowrap'
-																				  	};
-																				}
-													            };
+                        let event = new Array();
+                        let syslog = new Array();
+                        let performance = new Array();
+                        let log = new Array();
+                        let raw = new Array();
+                        let journal = new Array();
+                        let tickets = new Array();
+                        let change = new Array();
+                        let graph = new Array();
 
-								  		} else if( _.includes(d.class, '/matrix/devops/event') ){
-								  			event.push( _.merge(d, { preset: encodeURI(JSON.stringify(self.search.default)) } ));
-								  			self.event.columns = window.GLOBAL_OBJECT.company.object.event.columns;
-								  			self.event.options =  {
-											                        classes: "table table-no-bordered",
-											                        pageSize: "30",
-													                pageList: "[15,30,45,60]",
-													                detailView: false,
-													                buttonsAlign: "right",
-													                search: false,
-													                showColumns: false,
-													                showExport: false,
-											                        locale: '{{.Lang}}',
-											                        rowStyle: 	function rowStyle(row, index) {
-																				  	return {
-																				    	classes: 'text-nowrap'
-																				  	};
-																				}
-													            };
+                        if(_.isEmpty(_list.message)) {
+                            event = [];
+                            syslog = [];
+                            performance = [];
+                            log = [];
+                            raw = [];
+                            journal = [];
+                            tickets = [];
+                            change = [];
+                            graph = [];
+                        } else {
+                            _.filter(_list.message, function(d){
+                                if( _.includes(d.class, '/matrix/devops/event/omnibus/journal') ){
+                                    journal.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.journal.columns = window.GLOBAL_OBJECT.company.object.journal.columns;
+                                    self.journal.options =  {
+                                        toggle: "table",
+                                        classes: "table table-no-bordered",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                } else if( _.includes(d.class, '/matrix/devops/event/syslog') ){
+                                    syslog.push( _.merge(d, { preset: encodeURI(JSON.stringify(self.search.default)) } ));
+                                    self.syslog.columns = window.GLOBAL_OBJECT.company.object.syslog.columns;
+                                    self.syslog.options =  {
+                                        classes: "table table-no-bordered",
+                                        pageSize: "30",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        buttonsAlign: "right",
+                                        search: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                        locale: '{{.Lang}}',
+                                        rowStyle: 	function rowStyle(row, index) {
+                                            return {
+                                                classes: 'text-nowrap'
+                                            };
+                                        }
+                                    };
 
-								  		} else if( _.includes(d.class, '/matrix/devops/log/raw') ){
-								  			raw.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.raw.columns = window.GLOBAL_OBJECT.company.object.raw.columns;
-											self.raw.options =  {
-											                        toggle: "table",
-																	classes: "table table-no-bordered",
-																    pagination: false,
-																    showFooter: false,
-																    pageSize: "15",
-											         				pageList: "[15,30,45,60]",
-											         				detailView: false,
-													                showColumns: false,
-													                showExport: false,
-													            };
-								  		} else if( _.includes(d.class, '/matrix/devops/log') ){
-								  			log.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.log.columns = window.GLOBAL_OBJECT.company.object.log.columns;
-											self.log.options =  {
-											                        toggle: "table",
-																	classes: "table table-no-bordered",
-																    pagination: false,
-																    showFooter: false,
-																    pageSize: "15",
-											         				pageList: "[15,30,45,60]",
-											         				detailView: false,
-													                showColumns: false,
-													                showExport: false,
-													            };
-								  		} else if( _.includes(d.class, '/matrix/devops/performance') ){
-								  			performance.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.performance.columns = window.GLOBAL_OBJECT.company.object.performance.columns;
-											self.performance.options =  {
-													                        toggle: "table",
-																			classes: "table table-striped",
-																		    pagination: false,
-																		    showFooter: false,
-																		    pageSize: "15",
-													         				pageList: "[15,30,45,60]",
-													         				detailView: false,
-															                showColumns: false,
-															                showExport: false,
-															            };
-								  		} else if( _.includes(d.class, '/matrix/filesystem') ){
-								  			if( _.includes(d.type, 'imap') ) {
-								  				var href="/web/lib/mxgraph/graph/index.html?lang=eg&chrome=2&name="+d.name+"&parent="+d.parent.substring(11,d.parent.length);
+                                } else if( _.includes(d.class, '/matrix/devops/event') ){
+                                    event.push( _.merge(d, { preset: encodeURI(JSON.stringify(self.search.default)) } ));
+                                    self.event.columns = window.GLOBAL_OBJECT.company.object.event.columns;
+                                    self.event.options =  {
+                                        classes: "table table-no-bordered",
+                                        pageSize: "30",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        buttonsAlign: "right",
+                                        search: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                        locale: '{{.Lang}}',
+                                        rowStyle: 	function rowStyle(row, index) {
+                                            return {
+                                                classes: 'text-nowrap'
+                                            };
+                                        }
+                                    };
 
-								  				graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
-								  			} else if( _.includes(d.type, 'idas') ) {
-								  				var href="/janesware/dashboard?name="+d.name;
+                                } else if( _.includes(d.class, '/matrix/devops/log/raw') ){
+                                    raw.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.raw.columns = window.GLOBAL_OBJECT.company.object.raw.columns;
+                                    self.raw.options =  {
+                                        toggle: "table",
+                                        classes: "table table-no-bordered",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                } else if( _.includes(d.class, '/matrix/devops/log') ){
+                                    log.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.log.columns = window.GLOBAL_OBJECT.company.object.log.columns;
+                                    self.log.options =  {
+                                        toggle: "table",
+                                        classes: "table table-no-bordered",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                } else if( _.includes(d.class, '/matrix/devops/performance') ){
+                                    performance.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.performance.columns = window.GLOBAL_OBJECT.company.object.performance.columns;
+                                    self.performance.options =  {
+                                        toggle: "table",
+                                        classes: "table table-striped",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                } else if( _.includes(d.class, '/matrix/filesystem') ){
+                                    if( _.includes(d.type, 'imap') ) {
+                                        var href="/web/lib/mxgraph/graph/index.html?lang=eg&chrome=2&name="+d.name+"&parent="+d.parent.substring(11,d.parent.length);
 
-								  				graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
-								  			}
-								  		} else if( _.includes(d.class, '/matrix/devops/tickets') ){
-								  			tickets.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.tickets.columns = window.GLOBAL_OBJECT.company.object.tickets.columns;
-											self.tickets.options =  {
-													                        toggle: "table",
-																			classes: "table table-no-bordered",
-																		    pagination: false,
-																		    showFooter: false,
-																		    pageSize: "15",
-													         				pageList: "[15,30,45,60]",
-													         				detailView: false,
-													         				showColumns: false,
-															                showExport: false,
-															            };
-								  		} else if( _.includes(d.class, '/matrix/devops/change') ){
-								  			change.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
-								  			self.change.columns = window.GLOBAL_OBJECT.company.object.change.columns;
-											self.change.options =  {
-													                        toggle: "table",
-																			classes: "table table-no-bordered",
-																		    pagination: false,
-																		    showFooter: false,
-																		    pageSize: "15",
-													         				pageList: "[15,30,45,60]",
-													         				detailView: false,
-															                showColumns: false,
-															                showExport: false,
-															            };
-								  		}
-								  	})
-							  	}
+                                        graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
+                                    } else if( _.includes(d.type, 'idas') ) {
+                                        var href="/janesware/dashboard?name="+d.name;
 
-							  	self.search.words = data.meta.words;
+                                        graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
+                                    }
+                                } else if( _.includes(d.class, '/matrix/devops/tickets') ){
+                                    tickets.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.tickets.columns = window.GLOBAL_OBJECT.company.object.tickets.columns;
+                                    self.tickets.options =  {
+                                        toggle: "table",
+                                        classes: "table table-no-bordered",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                } else if( _.includes(d.class, '/matrix/devops/change') ){
+                                    change.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
+                                    self.change.columns = window.GLOBAL_OBJECT.company.object.change.columns;
+                                    self.change.options =  {
+                                        toggle: "table",
+                                        classes: "table table-no-bordered",
+                                        pagination: false,
+                                        showFooter: false,
+                                        pageSize: "15",
+                                        pageList: "[15,30,45,60]",
+                                        detailView: false,
+                                        showColumns: false,
+                                        showExport: false,
+                                    };
+                                }
+                            })
+                        }
 
-							  	self.event.data = event;
-							  	self.syslog.data = syslog;
-								self.performance.data = performance;
-								self.log.data = log;
-								self.raw.data = raw;
-								self.journal.data = journal;//self.filterByCond(journal,'serial');
-								self.tickets.data = tickets;
-								self.change.data = change;
-								self.graph = graph;
+                        self.search.words = _list.meta.words;
 
-								self.all.list = _.cloneDeep(data.message);
+                        self.event.data = event;
+                        self.syslog.data = syslog;
+                        self.performance.data = performance;
+                        self.log.data = log;
+                        self.raw.data = raw;
+                        self.journal.data = journal;//self.filterByCond(journal,'serial');
+                        self.tickets.data = tickets;
+                        self.change.data = change;
+                        self.graph = graph;
 
-								self.search.result = [];
-						  		self.search.result.push({name:'Event', count:self.event.data.length, href:"#search-event"});
-						  		self.search.result.push({name:'Syslog', count:self.syslog.data.length, href:"#search-syslog"});
-						  		self.search.result.push({name:'Log', count:self.log.data.length, href:"#search-log"});
-						  		self.search.result.push({name:'Raw', count:self.raw.data.length, href:"#search-raw"});
-						  		self.search.result.push({name:'Journal', count:self.journal.data.length, href:"#search-journal"});
-						  		self.search.result.push({name:'Performance', count:self.performance.data.length, href:"#search-performance"});
-						  		self.search.result.push({name:'ITMap', count:self.graph.length, href:"#search-graph"});
-						  		self.search.result.push({name:'Tickets', count:self.tickets.data.length, href:"#search-tickets"});
-						  		self.search.result.push({name:'Change', count:self.change.data.length, href:"#search-change"});
+                        self.all.list = _.cloneDeep(_list.message);
 
-						  	},
-						  	error: function(xhr, textStatus, errorThrown) {
-						  	}
-						});
-					},
+                        self.search.result = [];
+                        self.search.result.push({name:'Event', count:self.event.data.length, href:"#search-event"});
+                        self.search.result.push({name:'Syslog', count:self.syslog.data.length, href:"#search-syslog"});
+                        self.search.result.push({name:'Log', count:self.log.data.length, href:"#search-log"});
+                        self.search.result.push({name:'Raw', count:self.raw.data.length, href:"#search-raw"});
+                        self.search.result.push({name:'Journal', count:self.journal.data.length, href:"#search-journal"});
+                        self.search.result.push({name:'Performance', count:self.performance.data.length, href:"#search-performance"});
+                        self.search.result.push({name:'ITMap', count:self.graph.length, href:"#search-graph"});
+                        self.search.result.push({name:'Tickets', count:self.tickets.data.length, href:"#search-tickets"});
+                        self.search.result.push({name:'Change', count:self.change.data.length, href:"#search-change"});
+
+                    },
 					filterByCond: function(data,cond){
 						let self = this;
-						var rtn = [];
-						var param = "serial=" + _.map(data,cond).join(";serial=");
-						
-						jQuery.ajax({
-						  	url: '/mxobject/search',
-						  	type: 'POST',
-						  	dataType: 'json',
-						  	async: true,
-						  	data: {
-						  		cond: "#/matrix/devops/event/omnibus/journal/: | " + param, 
-						  		flag: true 
-						  	},
-						  	complete: function(xhr, textStatus) {
-						    	//called when complete
-						  	},
-						  	success: function(data, textStatus, xhr) {
-						    	rtn = data.message;
-						  	},
-						  	error: function(xhr, textStatus, errorThrown) {
-						    	//called when there is an error
-						  	}
-						});
-						
+						let rtn = [];
+						let param = "serial=" + _.map(data,cond).join(";serial=");
+						let _list = fetchData("#/matrix/devops/event/omnibus/journal/: | " + param);
+
+						rtn = _list.message;
+
 						return rtn;
 					},
 					toggleView: function(){

@@ -153,6 +153,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-table-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 
 
 <SCRIPT type="text/javascript">
@@ -162,7 +163,8 @@
     VueLoader.onloaded(["vue-search-preset-component",
                         "vue-search-input-component",
                         "vue-base-tree-component",
-                        "vue-base-table-component"],function() {
+                        "vue-base-table-component",
+                        "vue-object-detail-component"],function() {
 
         moment.locale(`{{.Lang}}`);
 
@@ -528,93 +530,76 @@
 
                             $("#table-" + index).bootstrapTable('destroy');
 
-                            jQuery.ajax({
-                                url: "/mxobject/search",
-                                dataType: 'json',
-                                type: 'POST',
-                                data: {
-                                    cond: "#/matrix/jobs/cmdrun/ : runid=" + row.runid + " | top 1000",
-                                    flag: false
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, status) {
+                            let _list = fetchData("#/matrix/jobs/cmdrun/ : runid=" + row.runid + " | top 1000");
 
-                                    var data = data.message;
+                            let _data = _list.message;
+
+                            cols.push({
+                                field: "state",
+                                checkbox: "true"
+                            })
+
+                            $.map(_data[0], function (k, v) {
+                                var col = v;
+
+                                if (col == 'jobstatus') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: operateJobstatusFormatter
+                                    })
+                                } else if (col == 'out' || col == 'err') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        wrap: true,
+                                        formatter: operateOutputFormatter
+                                    })
+                                } else if (col == 'jobtype') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: operateJobTypeFormatter
+                                    })
+                                } else if (col == 'tokens') {
 
                                     cols.push({
-                                        field: "state",
-                                        checkbox: "true"
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        visible: false
                                     })
-
-                                    $.map(data[0], function (k, v) {
-                                        var col = v;
-
-                                        if (col == 'jobstatus') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: operateJobstatusFormatter
-                                            })
-                                        } else if (col == 'out' || col == 'err') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                wrap: true,
-                                                formatter: operateOutputFormatter
-                                            })
-                                        } else if (col == 'jobtype') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: operateJobTypeFormatter
-                                            })
-                                        } else if (col == 'tokens') {
-
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                visible: false
-                                            })
-                                        } else if (col == "vtime" || col == "stime" || col == "etime") {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: formaterDate
-                                            })
-                                        } else if (col == "vtime" || col == "class" || col == "id") {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                visible: false,
-                                            })
-                                        } else {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true
-                                            })
-                                        }
-                                    });
-
-                                    $("#table-" + index).bootstrapTable({
-                                        columns: cols
-                                    });
-
-                                    $("#table-" + index).bootstrapTable('removeAll');
-                                    $("#table-" + index).bootstrapTable('load', data);
-
-                                },
-                                error: function (err) {
+                                } else if (col == "vtime" || col == "stime" || col == "etime") {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: formaterDate
+                                    })
+                                } else if (col == "vtime" || col == "class" || col == "id") {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        visible: false,
+                                    })
+                                } else {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true
+                                    })
                                 }
                             });
+
+                            $("#table-" + index).bootstrapTable({
+                                columns: cols
+                            });
+
+                            $("#table-" + index).bootstrapTable('removeAll');
+                            $("#table-" + index).bootstrapTable('load', _data);
 
                             $detail.html(table).ready(function () {
                                 console.log($(".wzd").html());
@@ -654,33 +639,16 @@
                     },
                     onSearch: function (term) {
                         let self = this;
-
-                        var params;
+                        let params;
 
                         if (term.length > 0) {
                             params = self.searchParams + term;
                         } else {
                             params = self.searchParams;
                         }
-                        console.log(params)
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: params,
-                                flag: false
-                            },
-                            complete: function (xhr, textStatus) {
-                                //called when complete
-                            },
-                            success: function (data, textStatus, xhr) {
-                                $(self.target).bootstrapTable('load', data.message);
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                //called when there is an error
-                            }
-                        });
+                        let _list = fetchData(params);
+
+                        $(self.target).bootstrapTable('load', _list.message);
                     },
                     initSearchBar: function () {
                         let self = this;

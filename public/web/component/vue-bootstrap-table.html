@@ -63,7 +63,7 @@
                             </ul>
                             <div class="tab-content table-panel-tab-content">
                                 <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
-                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+                                    <div class="panel" id="panel-detail" :model="model"></div>
                                 </div>
                                 <div class="tab-pane fade" id="tab-journal">
                                     <div id="panel-journal"></div>
@@ -87,8 +87,8 @@
 		                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
 		                            </ul>
 		                            <div class="tab-content table-panel-tab-content">
-		                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
-		                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+		                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;padding-top:0px;">
+		                                    <div class="panel" id="panel-detail" :model="model"></div>
 		                                </div>
 		                                <div class="tab-pane fade" id="tab-history">
 		                                    <div id="panel-history"></div>
@@ -105,7 +105,7 @@
 	                        </ul>
 	                        <div class="tab-content table-panel-tab-content">
 	                            <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
-	                                <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+	                                <div class="panel" id="panel-detail" :model="model"></div>
 	                            </div>
 	                            <div class="tab-pane fade" id="tab-history">
 	                                <div id="panel-history"></div>
@@ -114,12 +114,13 @@
 	                                <div id="panel-timeline"></div>
 	                            </div>
 	                        </div>`,
+                    ciview: `	<div id="panel-card"></div>`,
 	                default: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
 	                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
 	                            </ul>
 	                            <div class="tab-content table-panel-tab-content">
 	                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
-	                                    <div class="panel" id="table-dblclick-show-panel" :model="model"></div>
+	                                    <div class="panel" id="panel-detail" :model="model"></div>
 	                                </div>
 	                            </div>`
 	            }
@@ -212,6 +213,11 @@
 	            let _menu =  $el.data("item");
 	            let _items = $el.parent().children();
 
+	            if (_menu.app == 'ciview'){
+                    self.openPanel(row, _menu, _menu.num);
+                    return false;
+				}
+
 	            if(_menu.show == 'widget'){
 	            	self.openDiagnosisPanel(row);
 	            } else if(_menu.show == 'kpi') {
@@ -222,201 +228,43 @@
 	            	self.openDetailsPanel(row, _menu, _menu.num);	
 	            }
 	        },
+            openPanel: function(row, menu, tabnum){
+                let self = this;
+
+                newWindow("配置卡片 " + row.name, self.templates[menu.app] || self.templates.default);
+
+                _.delay(function(){
+
+                    let cardVue = new Vue({
+                        el: '#panel-card',
+						data: function(){
+                            return {
+                                model: row
+							}
+						},
+                        template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
+                    });
+
+
+                },100);
+            },
 	        openDetailsPanel: function(row, menu, tabnum){
 	            let self = this;
-	            var win;
-	            var w = $( window ).width();//document.body.clientWidth;
-	            var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
-	            var wW = $( window ).width()*2/3;
-	            var hH = $( window ).height()*2.5/3;
-	            var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
-	            var tb = document.createElement('div');
-	            
-	            $(tb).append(self.templates[menu.app] || self.templates.default);
-	            win = new mxWindow(row.node || row.host || row.premark || row.name, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
-	            win.setMaximizable(true);
-	            win.setResizable(true);
-	            win.setClosable(true);
-	            win.setVisible(true);
-	            
-	            win.addListener(mxEvent.MAXIMIZE, function(event){
-	            	_.delay(function(){
-	            		eventHub.$emit("win-resize-event",null);
-	            	},100);
-	            });
 
-	            win.addListener(mxEvent.MINIMIZE, function(event){
-	                _.delay(function(){
-	            		eventHub.$emit("win-resize-event",null);
-	            	},100);
-	            });
-
-	            win.addListener(mxEvent.NORMALIZE, function(event){
-	            	_.delay(function(){
-	            		eventHub.$emit("win-resize-event",null);
-	            	},100);
-	            });
+                newWindow(row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default);
 
 	            _.delay(function(){
 	            	
 	            	var detailVue = new Vue({
 	                    delimiters: ['$', '$'],
-	                    el: '#table-dblclick-show-panel',
-	                    template: ` <div>
-	                                    <div class="panel-body">
-	                                        <!--<div class="input-group input-group-sm" style="width:100%;" v-for="(item,index) in _.sortBy(model,'name')">
-	                                            <div class="input-group-addon" :id="'label_'+item.name" style="width:200px;text-align: right;border:0px;border-bottom: 1px solid rgb(238, 238, 238);border-radius: 0px;background-color:#f9f9f9;font-weight:900;">$item.title$</div>
-	                                            <textarea class="form-control" :id="item.name" :placeholder="item.title" style="border:0px;border-left: 1px solid rgb(238, 238, 238);border-bottom: 1px solid rgb(238, 238, 238);">$item.value$</textarea>
-	                                        </div>-->
-	                                        <vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
-	                                    </div>
-	                                    <div class="panel-footer">
-	                                    	<!--<div class="btn-group pull-right">
-	                                    	  <a href="javascript:void(0)" type="button" class="btn btn-xs btn-success" @click="onSave">
-	                                    	  	Save
-	                                    	  </a>
-	                                    	</div>-->
-	                                    </div>
-	                                </div>`,
-	                    data:{
-	                        //model:[],
-							model: {
-                                form: {
-                                    view: "",
-                                    data: {},
-                                    schema: {
-                                        title:"",
-                                        type: "object",
-                                        properties: []
-                                    },
-                                    options: {
-                                        form: {
-                                            buttons: {
-                                                submit: {
-                                                    title: "Save",
-                                                    click: function() {
-                                                        let val = this.getValue();
-
-                                                        if (this.isValid(true)) {
-                                                            alert("Valid value: " + JSON.stringify(val, null, "  "));
-                                                        } else {
-                                                            alert("Invalid value: " + JSON.stringify(val, null, "  "));
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        fields: {}
-                                    }
-
-                                }
-							}
-	                    },
-	                    mounted: function(){
-	                        let self = this;
-
-	                        self.$nextTick(function(){
-
-	                            /*_.forEach(row, function(v,k){
-	                                if(_.isObject(v) && v!=null){
-	                                    self.model.push({
-															name:k,
-															title: _.upperFirst(k),
-															value: JSON.stringify(v, null, 2)
-														})
-	                                } else {
-	                                	self.model.push({
-	                                    					name:k, 
-	                                    					title: _.upperFirst(k), 
-	                                    					value:v});
-	                                }
-	                            })
-
-                                $(self.$el).on('click key keydown', 'textarea', function () {
-                                    $(this).height(0).height(this.scrollHeight);
-
-							    }).find('textarea').change();*/
-
-	                            self.init();
-                            })
-
-	                    },
-	                    methods: {
-	                        init: function(){
-	                          	let self = this;
-                                let _list = fetchClass(row.class);
-                                let _properties = {};
-                                let _fields = {};
-                                let _data = {};
-
-                                _.forEach(_list.message.fields,function (v) {
-                                    let _name = v.name;
-                                    let _type = v.ftype=='varchar'?'string':'string';
-                                    let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
-                                    let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
-
-                                    _.merge(_properties, {[_name]: {type: _type,required: _required, hidden: _hidden}});
-                                    _.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
-                                });
-
-                                _.forEach(row,function (v,k) {
-                                    let _name = k;
-
-                                    _.merge(_data, {[_name]: v});
-                                });
-
-
-                                self.model.form.data = _data;
-                                //self.model.form.schema.title = row.name;
-                                self.model.form.schema.properties = _properties;
-                                self.model.form.options.fields = _fields;
-                                console.log(JSON.stringify(self.model.form))
-
-							},
-	                        autosize: function () {
-	                        	$("textarea").each(function(textarea) {
-								    $this.height( $this[0].scrollHeight );
-								});
-							},
-                            onSave: function(){
-                                let self = this;
-
-                                _.forEach(row, function(v,k){
-									if(_.includes(['contain','depend','runon','mshare','vshare','owner','refer','connect','tag'],k)){
-                                        row[k] = null;
-									} else {
-                                        if (row[k] != $("#"+k).val()){
-                                            row[k] = $("#"+k).val();
-										}
-									}
-								});
-
-                                let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
-								console.log(_mql);
-								jQuery.ajax({
-                                        url: "/mxobject/list/sql",
-                                        dataType: 'json',
-                                        type: 'POST',
-                                        data: {
-                                            ctype:"obj",
-                                            sql: _mql
-                                        },
-                                        beforeSend:function(xhr){
-                                        },
-                                        complete: function(xhr, textStatus) {
-                                        },
-                                        success: function (data, status) {
-                                            if(data.status == 'ok'){
-                                                swal('success',row.id,'success');
-											}
-                                        },
-                                        error: function(xhr, textStatus, errorThrown){
-                                            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                        }
-                                    });
-
+	                    el: '#panel-detail',
+                        data: function(){
+                            return {
+                                model: row
                             }
-	                    }
+                        },
+	                    template: `<vue-object-detail-component :row="model"></vue-object-detail-component>`,
+
 	                });
 
 	                self.openJourna(row, 'journal');
