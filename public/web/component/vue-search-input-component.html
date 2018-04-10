@@ -92,7 +92,7 @@
 
                 self.newInputValue = self.model.term;
 
-	            $(self.$el).find("a").on("click",function(event) {
+	            $(self.$el).find("a.btn-cancel").on("click",function(event) {
 	                self.deleteParam();
 	            })
 	        },
@@ -212,7 +212,7 @@
                         self.$nextTick(function () {
                         	_.delay(function(){
                         		self.model.newInput = GLOBAL_CONFIG.global.help.join("\n");
-                        	},500)
+                        	},200)
                         })
                     }
 	            });

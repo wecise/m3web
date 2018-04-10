@@ -1,0 +1,127 @@
+<code>
+
+    <style>
+        /*----------  style  ----------*/
+
+
+    </style>
+
+
+    /*----------  最外层element会自动增加组件同名 class="vue-echart-chinamap-component"  ----------*/
+    <template>
+        <div :id="id" style='width:60vw;height:450px;'></div>
+    </template>
+
+    /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+    <script id="vue-echart-chinamap-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                id: String,
+                row: Object
+            },
+            data: function(){
+                return {
+                    chart: Object,
+                    rltData: [{
+                        name: '',
+                        value: 850.43
+                    }, {
+                        name: '北京',
+                        value: 54.30
+                    }, {
+                        name: '新疆',
+                        value: 50.63
+                    }, {
+                        name: '广西',
+                        value: 74.46
+                    }, {
+                        name: '黑龙江',
+                        value: 138.39
+                    }],
+                    option: {
+                        title: {
+                            x: 'center',
+                            text: rltData[curIndx].name + '的数据为' + rltData[curIndx].value,
+                            textStyle: {
+                                color: '#fff',
+                                fontSize: 16
+                            }
+                        },
+                        series: [{
+                            type: 'map',
+                            mapType: 'china',
+                            itemStyle: {
+                                normal: {
+                                    areaColor: '#404a59',
+                                    borderColor: 'rgba(100,149,237,1)',
+                                    borderWidth: 0.5
+                                },
+                                emphasis: {
+                                    borderWidth: 3,
+                                    borderColor: '#fff',
+                                    areaColor: '#32cd32',
+                                    label: {
+                                        shadowColor: '#fff', //默认透明
+                                        shadowBlur: 10,
+                                        show: true
+                                    }
+                                }
+                            },
+                            data: (function() {
+                                var res = [];
+                                var len = -1;
+                                while (len++ < rltData.length - 1) {
+                                    res.push({
+                                        name: rltData[len].name,
+                                        value: rltData[len].value,
+                                        selected: ifSelecte(len)
+                                    });
+                                }
+                                return res;
+                            })()
+                        }]
+                    }
+                }
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    _.delay(function(){
+                        self.init();
+                    },500);
+                })
+            },
+            watch: {
+
+            },
+            created: function () {
+                let self = this;
+
+                eventHub.$on("chart-resize-event", self.resize);
+
+            },
+            methods: {
+                init: function() {
+                    let self = this;
+
+                    self.chart = echarts.init(self.$el);
+                    self.chart.setOption(self.option);
+
+                    self.chart.resize();
+                },
+                resize: function(){
+                    var self = this;
+
+                    if(self.chart.id){
+                        self.chart.resize();
+                    }
+                }
+            }
+
+
+        }
+    </script>
+
+</code>

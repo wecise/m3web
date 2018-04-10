@@ -41,6 +41,33 @@ var init =  function(){
                 //console.log(23, GLOBAL_OBJECT.company.dimension)
             };
 
+/*
+*  FullScreen Util
+* */
+var toggleFullScreen = function () {
+    if (!document.fullscreenElement &&    // alternative standard method
+        !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+}
 
 /*
  * 
@@ -135,6 +162,42 @@ var ifSignIn = function (event) {
 };
 
 
+/*
+* 提交到文件系统
+* 参数：
+*   文件名称
+*   扩展名
+* */
+var putToFS = function(type, name){
+    let rtn = null;
+
+    jQuery.ajax({
+        url: "/fs/home/creative/" + name,
+        type: "PUT",
+        contentType: "application/text; charset=utf-8",
+        data: {
+            type: "file"
+        },
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+            rtn = data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+/*
+* 获取文件
+* 参数：
+*   父目录
+*   文件名称
+* */
 var fetchFileFromFS = function(parent,name){
     let rtn = null;
 
@@ -143,6 +206,7 @@ var fetchFileFromFS = function(parent,name){
         type: 'GET',
         contentType: "application/text; charset=utf-8",
         dataType: 'text json',
+        async:false,
         data: {
             type: 'file'
         },
@@ -157,6 +221,7 @@ var fetchFileFromFS = function(parent,name){
             if (_.isEmpty(data.message)) return false;
 
             rtn = data.message;
+
         },
         error: function (xhr, textStatus, errorThrown) {
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
@@ -165,6 +230,12 @@ var fetchFileFromFS = function(parent,name){
     return rtn;
 };
 
+
+/*
+*  获取当前class属性
+*  参数：
+*   class
+* */
 var fetchClass = function (param) {
     let rtn = null;
 
@@ -194,6 +265,12 @@ var fetchClass = function (param) {
     return rtn;
 };
 
+
+/*
+*  一键搜索
+*  参数：
+*       cond：一键搜索语法及搜索关键字
+* */
 var fetchData = function (param) {
     let rtn = null;
 
@@ -201,7 +278,7 @@ var fetchData = function (param) {
         url: '/mxobject/search',
         type: 'POST',
         dataType: 'json',
-        async:false,
+        async: false,
         data: {
             cond: param
         },
@@ -213,6 +290,8 @@ var fetchData = function (param) {
 
             ifSignIn(data);
 
+            console.log(param, data)
+
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -223,6 +302,56 @@ var fetchData = function (param) {
     return rtn;
 };
 
+/*
+* 执行MQL
+* 参数：
+*   mql
+* */
+var fetchDataByMql = function (param) {
+
+    let rtn = null;
+
+    jQuery.ajax({
+        url: "/mxobject/list/sql",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+            ctype:"obj",
+            sql: param
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            console.log(param, data)
+
+            // MQL for CRUD
+            if(data.message == "OK"){
+                swal("Success!","","success");
+            }
+
+            rtn = data;
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+};
+
+
+/*
+* 获取一个文件内容
+* 参数：
+*   url
+* */
 var fetchFile = function (url) {
 
     let rtn = null;
@@ -248,6 +377,46 @@ var fetchFile = function (url) {
     return rtn;
 
 };
+
+/*
+* 执行作业
+*
+* 参数：
+*   receive_output： false【等待执行】 true【立即执行】 default：false
+ *  param：cmd
+ *  timeout： default：5 second
+* */
+var callJob = function () {
+
+    let event = '{"cmd":"df -h","HOST!":"wecise"}';
+
+    jQuery.ajax({
+        url: '/job/remote_command@system/common',
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            receive_output: true,
+            param: event,
+            timeout: 5
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            console.log(data)
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+};
+
+
 
 var putDataByMql = function (event) {
 
@@ -277,7 +446,7 @@ var putDataByMql = function (event) {
 
         },
         error: function(xhr, textStatus, errorThrown){
-            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
 };

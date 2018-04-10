@@ -88,12 +88,13 @@
 
                 _.forEach(_list.message.fields,function (v) {
                     let _name = v.name;
-                    let _type = v.ftype=='varchar'?'string':'string';
+                    let _stype = v.ftype=='varchar'?'string':'string';
+                    let _otype = _.indexOf(['msg','config'],v.name)>-1?'textarea':'any';
                     let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
                     let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
 
-                    _.merge(_properties, {[_name]: {type: _type,required: _required, hidden: _hidden}});
-                    _.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
+                    _.merge(_properties, {[_name]: {type: _stype,required: _required, hidden: _hidden}});
+                    _.merge(_fields, {[_name]: {label: _.startCase(v.name), type:_otype}});
                 });
 
                 _.forEach(self.row,function (v,k) {

@@ -7,28 +7,32 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" type="text/css" href="styles/grapheditor.css">
 
+	<script src="/web/vendor/jquery/jquery-3.3.1.min.js"></script>
+
 	<!-- Bootstrap core CSS -->
-	<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
-	<script src="{{AppSubUrl}}/web/vendor/less/dist/less.min.js"></script>
+	<link href="/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
+	<script src="/web/vendor/less/dist/less.min.js"></script>
+
 	<!-- Less core JavaScript-->
 	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">-->
-	<script src="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+	<script src="/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
 
 	<!-- Color Theme core CSS -->
-	<link href="/web/css/color_style.min.css" rel="stylesheet">
-	<link href="/web/css/color_style_responsive.min.css" rel="stylesheet">
+	<link href="/web/css/color/color_style.min.css" rel="stylesheet">
+	<link href="/web/css/color/color_style_responsive.min.css" rel="stylesheet">
+	<link href="/web/css/color/style.min.css" rel="stylesheet">
 
 	<!-- Bootstrap ICON  CSS -->
-	<link href="/web/lib/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" >
+	<link href="/web/vendor/font-awesome/4.7.1/css/font-awesome.min.css" rel="stylesheet" >
 
 	<!-- Bootstrap Table CSS -->
-	<link href="/web/lib/table/bootstrap/bootstrap-table.css" rel="stylesheet">
+	<link href="/web/vendor/table/bootstrap/bootstrap-table.css" rel="stylesheet">
 	<!-- Sweetalert core CSS -->
-	<link href="/web/lib/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+	<link href="/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
 	<!-- jquery-file-upload core CSS -->
-	<link href="/web/lib/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
+	<link href="/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 	<!-- animate core CSS -->
-	<link href="/web/lib/animate/animate.css" rel="stylesheet" >
+	<link href="/web/vendor/animate/animate.css" rel="stylesheet" >
 	
 	<style>
 		* {
@@ -226,7 +230,7 @@
 	</style>
 
     <script type="text/javascript">
- 		mxBasePath = '/web/lib/mxgraph/src';
+ 		mxBasePath = '/web/vendor/mxgraph/src';
  	</script>
  	
 	<script type="text/javascript">
@@ -261,69 +265,67 @@
 		// Default resources are included in grapheditor resources
 		mxLoadResources = false;
 	</script>
-	
-	
-	<script type="text/javascript" src="/web/lib/jquery/jquery-3.3.1.min.js"></script>
 
-	<script type="text/javascript" src="/web/lib/lodash/dist/lodash.min.js"></script>
-	<script type="text/javascript" src="/web/lib/xml2json/xml2json.js"></script>
+
+	<script type="text/javascript" src="/web/vendor/lodash/dist/lodash.min.js"></script>
+	<script type="text/javascript" src="/web/vendor/xml2json/xml2json.js"></script>
 	<!-- Bootstrap Table JS -->
-	<script src="/web/lib/table/bootstrap/bootstrap-table.js"></script>
-	<script src="/web/lib/table/bootstrap/locale/bootstrap-table-zh-CN.js"></script>
+	<script src="/web/vendor/table/bootstrap/bootstrap-table.js"></script>
+	<script src="/web/vendor/table/bootstrap/locale/bootstrap-table-zh-CN.js"></script>
 	<!-- Less JS -->
-	<!--link href="/web/lib/css/style_steroids.less" rel="stylesheet/less" type="text/css">
-	<link href="/web/lib/css/style_inspinia.less" rel="stylesheet/less" type="text/css">
-	<script src="/web/lib/less.js/dist/less.min.js"></script-->
+	<!--link href="/web/vendor/css/style_steroids.less" rel="stylesheet/less" type="text/css">
+	<link href="/web/vendor/css/style_inspinia.less" rel="stylesheet/less" type="text/css">
+	<script src="/web/vendor/less.js/dist/less.min.js"></script-->
 
 	<!-- sweetalert core JS -->
-	<script src="/web/lib/sweetalert2/dist/sweetalert2.min.js"></script>
+	<script src="/web/vendor/sweetalert2/dist/sweetalert2.min.js"></script>
 	<!--Mark JS-->
-	<script src="/web/lib/mark/dist/jquery.mark.min.js"></script>
+	<script src="/web/vendor/mark/dist/jquery.mark.min.js"></script>
 	<!--Moment JS-->
-	<script src="/web/lib/util/moment.min.js"></script>
-	<script src="/web/lib/util/moment-with-locales.min.js"></script>
+	<script src="/web/vendor/moment/min/moment.min.js"></script>
+	<script src="/web/vendor/moment/min/moment-with-locales.min.js"></script>
 	<!--Layer JS-->
-	<script src="/web/lib/layer/layer.js"></script>
+	<script src="/web/vendor/layer/layer.js"></script>
 	<!--VUE Core JS-->
-	<script src="/web/lib/vue/2.3.3/dist/vue.js"></script>
+	<script src="/web/vendor/vue/2.3.3/dist/vue.js"></script>
 
 	<!--Jquery File Upload JS-->
-	<script src="/web/lib/jquery-file-upload/js/load-image.all.min.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/canvas-to-blob.min.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/jquery.iframe-transport.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/jquery.fileupload.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/jquery.fileupload-process.js"></script>
-	<script src="/web/lib/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+	<script src="/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+	<script src="/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 	
     <!-- ECharts单文件引入 -->
-	<script src="/web/lib/echart/echarts.min.js"></script>
+	<script src="/web/vendor/echart/echarts.min.js"></script>
 	<!-- ACE JS-->
-	<script src="/web/lib/ace/src-noconflict/ace.js"></script>
-	<script src="/web/lib/ace/src-noconflict/ext-statusbar.js"></script>
-	<script src="/web/lib/ace/src-noconflict/snippets/lua.js"></script>
-	<!--script src="/web/lib/ace/src-noconflict/worker-lua.js"></script-->
-	<script src="/web/lib/ace/src-noconflict/mode-lua.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/ace.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/ext-statusbar.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/snippets/lua.js"></script>
+	<!--script src="/web/vendor/ace/src-noconflict/worker-lua.js"></script-->
+	<script src="/web/vendor/ace/src-noconflict/mode-lua.js"></script>
 
-	<script src="/web/lib/ace/src-noconflict/snippets/json.js"></script>
-	<script src="/web/lib/ace/src-noconflict/worker-json.js"></script>
-	<script src="/web/lib/ace/src-noconflict/mode-json.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/snippets/json.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/worker-json.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/mode-json.js"></script>
 
-	<script src="/web/lib/ace/src-noconflict/theme-clouds.js"></script>
-	<script src="/web/lib/ace/src-noconflict/theme-terminal.js"></script>
-	<script src="/web/lib/ace/src-noconflict/theme-xcode.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/theme-clouds.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/theme-terminal.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/theme-xcode.js"></script>
 
-	<script src="/web/lib/ace/src-noconflict/snippets/sql.js"></script>
-	<script src="/web/lib/ace/src-noconflict/mode-sql.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/snippets/sql.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/mode-sql.js"></script>
 
-	<script src="/web/lib/ace/src-noconflict/ext-language_tools.js"></script>
-	<!--dom-to-image Core JS-->
-	<script src="/web/lib/dom-to-image/dist/dom-to-image.min.js"></script>
-	<script src="/web/lib/html2canvas/dist/html2canvas.min.js"></script>
+	<script src="/web/vendor/ace/src-noconflict/ext-language_tools.js"></script>
+
 	<!--localforage Core JS -->
-	<script src="/web/lib/localForage/dist/localforage.min.js"></script>
+	<script src="/web/vendor/localForage/dist/localforage.min.js"></script>
 
 	<script src="/web/js/util.js"></script>
+	<script src="/web/js/cfg.js"></script>
+	<script src="/web/js/init.js"></script>
 	
 	<script type="text/javascript" src="js/Init.js"></script>
 	<script type="text/javascript" src="jscolor/jscolor.js"></script>
@@ -998,7 +1000,7 @@
 				if (this.state != null && this.domNode != null)
 				{
 					var dy = (mxClient.IS_VML && document.compatMode == 'CSS1Compat') ? 20 : 4;
-					if(graphObject.type == '2'){
+					if(graphObject.action == 'show'){
 						dy = 50;
 					}
 					this.domNode.style.left = (this.state.x + this.state.width - 56) + 'px';
@@ -1035,6 +1037,7 @@
 						this.actions.get('export').setEnabled(enabled);
 					}));
 				}
+
 			};
 			
 			// Adds required resources (disables loading of fallback properties, this can only
@@ -1055,7 +1058,7 @@
 				themes[Graph.prototype.defaultThemeName] = xhr[1].getDocumentElement(); 
 				
 				// Main
-				var editorUi = new EditorUi(new Editor(graphObject.type == '0', themes));
+				var editorUi = new EditorUi(new Editor(graphObject.action == 'show', themes));
 				
 				editorUi.toggleFormatPanel();
 				
@@ -1074,69 +1077,48 @@
 				});
 				*/
 
-				
-				jQuery.ajax({
-				  	url: '/fs' + graphObject.parent + "/" + graphObject.name,
-                    type: 'GET',
-                    contentType: "application/text; charset=utf-8",
-                    dataType: 'text json',
-                    data: {
-                    	type: 'file'
-                    },
-                    complete: function(xhr, textStatus) {
-				    	//called when complete
-				  	},
-				  	success: function(data, textStatus, xhr) {
-				  		
-				  		if(_.isEmpty(data.message)) return false;
-				  		
-				  		editorUi.editor.graph.model.beginUpdate();
-						try
-						{
-							editorUi.editor.setGraphXml(mxUtils.parseXml(data.message).documentElement);
+				let _list = fetchFileFromFS(graphObject.parent, graphObject.name);
 
-							// LATER: Why is hideDialog between begin-/endUpdate faster?
-							editorUi.hideDialog();
-							if(graphObject.type == '2'){
-								
-								editorUi.editor.graph.createHandler = function(state)
-								{
-									if (state != null &&
-										this.model.isVertex(state.cell))
-									{
-										return new mxVertexToolHandler(state);
-									}
+                editorUi.editor.graph.model.beginUpdate();
+                try
+                {
+                    editorUi.editor.setGraphXml(mxUtils.parseXml(_list).documentElement);
 
-									return mxGraph.prototype.createHandler.apply(this, arguments);
-								};
+                    // LATER: Why is hideDialog between begin-/endUpdate faster?
+                    editorUi.hideDialog();
+                    if(graphObject.action == 'show') {
 
-								let _encoder = new mxCodec();
-								let _node = _encoder.encode(editorUi.editor.graph.getModel());
-								let _xml = mxUtils.getPrettyXml(_node);
-								
-								chromeless(editorUi.editor.graph);
-								refreshStatus(editorUi.editor.graph, _xml);
+                        editorUi.editor.graph.createHandler = function (state) {
+                            if (state != null &&
+                                this.model.isVertex(state.cell)) {
+                                return new mxVertexToolHandler(state);
+                            }
 
-								setInterval(function(){
-									chromeless(editorUi.editor.graph);
-									refreshStatus(editorUi.editor.graph, _xml);
-								},30*1000);	
-							}
+                            return mxGraph.prototype.createHandler.apply(this, arguments);
+                        };
 
-						}
-						catch (e)
-						{
-							error = e;
-						}
-						finally
-						{
-							editorUi.editor.graph.model.endUpdate();
-						}
-				  	},
-				  	error: function(xhr, textStatus, errorThrown) {
-				    	//called when there is an error
-				  	}
-				});
+                        let _encoder = new mxCodec();
+                        let _node = _encoder.encode(editorUi.editor.graph.getModel());
+                        let _xml = mxUtils.getPrettyXml(_node);
+
+                        chromeless(editorUi.editor.graph);
+                        refreshStatus(editorUi.editor.graph, _xml);
+
+                        setInterval(function () {
+                            chromeless(editorUi.editor.graph);
+                            refreshStatus(editorUi.editor.graph, _xml);
+                        }, 30 * 1000);
+                    }
+
+                }
+                catch (e)
+                {
+                    error = e;
+                }
+                finally
+                {
+                    editorUi.editor.graph.model.endUpdate();
+                }
 
 				
 				$(".geSprite-mx-save").removeClass('geSprite');
@@ -1162,14 +1144,14 @@
 					
                     let obj = {};
                     obj.lang = graphObject.lang;
-                    obj.type = 2;
+                    obj.type = 'show';
                     obj.name = graphObject.name;
                     obj.parent = graphObject.parent;
                     
                     localStorage.setItem("graph-object",JSON.stringify(obj));
 
                     window.open(
-                            "/web/lib/mxgraph/graph/index.html",
+                            "/janesware/creative",
                             "_blank"
                         );
 				});
@@ -1187,46 +1169,6 @@
 					editorUi.refresh();
 				});
 
-				/*
-				var exportImage = function(editor)
-				{
-				    var graph = editor.graph;
-				    var scale = graph.view.scale;
-				    var bounds = graph.getGraphBounds();
-
-				        // New image export
-				    var xmlDoc = mxUtils.createXmlDocument();
-				    var root = xmlDoc.createElement('output');
-				    xmlDoc.appendChild(root);
-
-				    // Renders graph. Offset will be multiplied with state's scale when painting state.
-				    var xmlCanvas = new mxXmlCanvas2D(root);
-				    xmlCanvas.translate(Math.floor(1 / scale - bounds.x), Math.floor(1 / scale - bounds.y));
-				    xmlCanvas.scale(scale);
-
-				    var imgExport = new mxImageExport();
-				    imgExport.drawState(graph.getView().getState(graph.model.root), xmlCanvas);
-
-				    console.log(xmlCanvas,imgExport)
-
-				    // Puts request data together
-				    var w = Math.ceil(bounds.width * scale + 2);
-				    var h = Math.ceil(bounds.height * scale + 2);
-				    var xml = mxUtils.getXml(root);
-
-				    // Requests image if request is valid
-				    if (w > 0 && h > 0)
-				    {
-				        var name = 'export.png';
-				        var format = 'png';
-				        var bg = '&bg=#FFFFFF';
-
-				        new mxXmlRequest(editor.urlImage, 'filename=' + name + '&format=' + format +
-				                bg + '&w=' + w + '&h=' + h + '&xml=' + encodeURIComponent(xml)).
-				                simulate(document, '_blank');
-				    }
-				};
-				*/
 				
 				var chromeless = function(graph){
 					//graph.setEnabled(false);
@@ -1301,19 +1243,19 @@
 												if ( state == 3)
 												{
 													graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ff0000', [cell]);
-													graph.addCellOverlay(cell, createOverlay({src: "/web/lib/mxgraph/src/images/status/progress/red.svg", width: 60, height: 35}, 'Status: Critical'));
+													graph.addCellOverlay(cell, createOverlay({src: "/web/vendor/mxgraph/src/images/status/progress/red.svg", width: 60, height: 35}, 'Status: Critical'));
 												} else if ( state == 2 )
 												{
 													graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffff00', [cell]);
-													graph.addCellOverlay(cell, createOverlay({src: "/web/lib/mxgraph/src/images/status/progress/yellow.svg", width: 60, height: 35}, 'Status: Warning'));
+													graph.addCellOverlay(cell, createOverlay({src: "/web/vendor/mxgraph/src/images/status/progress/yellow.svg", width: 60, height: 35}, 'Status: Warning'));
 												} else if ( state == 0 )
 												{
 													graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#dddddd', [cell]);
-													graph.addCellOverlay(cell, createOverlay({src: "/web/lib/mxgraph/src/images/status/progress/grey.svg", width: 60, height: 30}, 'Status: Unknown'));
+													graph.addCellOverlay(cell, createOverlay({src: "/web/vendor/mxgraph/src/images/status/progress/grey.svg", width: 60, height: 30}, 'Status: Unknown'));
 												} else
 												{ 
 													graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#0ad615', [cell]);
-													graph.addCellOverlay(cell, createOverlay({src: "/web/lib/mxgraph/src/images/status/progress/normal.svg", width: 60, height: 30}, 'Status: Normal'));
+													graph.addCellOverlay(cell, createOverlay({src: "/web/vendor/mxgraph/src/images/status/progress/normal.svg", width: 60, height: 30}, 'Status: Normal'));
 												}
 												
 											}

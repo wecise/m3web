@@ -168,7 +168,7 @@ var GLOBAL_CONFIG = {
                         },
         ci_card: [
                     {name: 'model', title: '型号', stype: 'string', otype: 'any'},
-                    {name: 'type', title: '类型', stype: 'string', otype: 'any'},
+                    {name: 'type', title: '类型', stype: 'string', otype: 'number'},
                     {name: 'company', title: '厂商', stype: 'string', otype: 'any'},
                     {name: 'ctel', title: '厂商联系电话', stype: 'string', otype: 'any'},
                     {name: 'sn', title: '序列号', stype: 'string', otype: 'any'},
@@ -186,9 +186,9 @@ var GLOBAL_CONFIG = {
                     {name: 'tel', title: '联系人电话', stype: 'string', otype: 'number'},
                     {name: 'assetid', title: '资产编号', stype: 'string', otype: 'any'},
                     {name: 'period', title: '保修期', stype: 'string', otype: 'any'},
-                    {name: 'config', title: '详细配置', stype: 'string', otype: 'textarea'},
-                    {name: 'files', title: '配置文件列表', stype: 'string', otype: 'any'},
-                    {name: 'element', title: '组成实体的元素', stype: 'string', otype: 'any'}
+                    {name: 'config', title: '详细配置', stype: 'string', otype: 'json'},
+                    {name: 'files', title: '配置文件列表', stype: 'string', otype: 'json'},
+                    {name: 'element', title: '组成实体的元素', stype: 'string', otype: 'json'}
                 ]
     },
     keyspace:{

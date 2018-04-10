@@ -23,52 +23,28 @@
 					<vue-script-manager-component></vue-script-manager-component>
 				</div>
 				<div class="tab-pane fade" id="tab22">
-					<div id="wizard" class="bwizard clearfix">
-						<ol class="bwizard-steps clearfix">
-							<li class="active">
-								<span class="label badge-inverse">1</span>
-								<a href="#step1">
+					<form>
+						<div id="wizard">
+							<ol>
+								<li>
 									全局设置
-								</a>
-								<a href="#step1">
 									<small>运行策略，环境变量设置。</small>
-								</a>
-								<a href="#step1"></a>
-							</li>
-							<li>
-								<span class="label">2</span>
-								<a href="#step2">
+								</li>
+								<li>
 									部署对象
-								</a>
-								<a href="#step2">
 									<small>选择部署对象。</small>
-								</a>
-								<a href="#step2"></a>
-							</li>
-							<li>
-								<span class="label">3</span>
-								<a href="#step3">
+								</li>
+								<li>
 									处理规则
-								</a>
-								<a href="#step3">
 									<small>数据处理规则，KPI选择。</small>
-								</a>
-								<a href="#step3"></a>
-							</li>
-							<li>
-								<span class="label">4</span>
-								<a href="#step4">
+								</li>
+								<li>
 									开始下发
-								</a>
-								<a href="#step4">
 									<small>下发开始，状态监控。</small>
-								</a>
-								<a href="#step4"></a>
-							</li>
-						</ol>
+								</li>
+							</ol>
 
-						<div class="tab-content">
-							<div id="step1" class="bwizard-activated">
+							<div>
 								<fieldset>
 									<h5 class="pull-left width-full">运行策略</h5>
 									<!-- begin row -->
@@ -100,7 +76,7 @@
 									<!-- end row -->
 								</fieldset>
 							</div>
-							<div id="step2" class="tab-pane">
+							<div>
 								<fieldset>
 									<h5 class="pull-left width-full">部署对象</h5>
 									<!-- begin row -->
@@ -175,7 +151,7 @@
 									<!-- end row -->
 								</fieldset>
 							</div>
-							<div id="step3" class="tab-pane">
+							<div>
 								<fieldset>
 									<h5 class="pull-left width-full">处理规则</h5>
 									<!-- begin row -->
@@ -208,7 +184,7 @@
 									<!-- end row -->
 								</fieldset>
 							</div>
-							<div id="step4" class="tab-pane">
+							<div>
 								<fieldset>
 									<a href="javascript:void(0)" class="btn btn-success">开始下发</a>
 									<!-- begin row -->
@@ -220,12 +196,9 @@
 									<!-- end row -->
 								</fieldset>
 							</div>
+
 						</div>
-						<ul class="pager bwizard-buttons">
-							<li class="previous disabled" role="button" aria-disabled="true"><a href="#">← 前一步</a></li>
-							<li class="next" role="button" aria-disabled="false"><a href="#">下一步 →</a></li>
-						</ul>
-					</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -467,6 +440,10 @@
             var self = this;
 
             self.$nextTick(function () {
+
+                _.delay(function(){
+                    FormWizard.init();
+                },1500);
 
             })
         },

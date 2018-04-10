@@ -13,7 +13,7 @@
 
 		.alpaca-control.form-control{
 			border:none;
-			background-color: rgba(207, 229, 236, 0.6);
+			background-color: rgb(251, 251, 251);
 		}
 
 		.alpaca-control.form-control input{
@@ -81,6 +81,11 @@
 	            deep: true
 	        }
 	    },
+		destroyed: function(){
+            let self = this;
+
+	        $(self.$el).alpaca("destroy");
+		},
 	    methods: {
 	        init: function() {
 	            let self = this;

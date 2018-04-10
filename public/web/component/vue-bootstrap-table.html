@@ -131,7 +131,7 @@
 
 	    },
 	    mounted: function () {
-	        var self =  this;
+	        let self =  this;
 
 	        self.$nextTick(function () {
 
@@ -255,7 +255,7 @@
 
 	            _.delay(function(){
 	            	
-	            	var detailVue = new Vue({
+	            	let detailVue = new Vue({
 	                    delimiters: ['$', '$'],
 	                    el: '#panel-detail',
                         data: function(){
@@ -448,48 +448,26 @@
 	                methods: {
 	                	init: function(){
 	                        let self = this;
-	                        var param = "serial=" + row.serial;
-	                        
-	                        console.log(_.now(),param)
+	                        let param = "serial=" + row.serial;
+	                        let _list = fetchData(param);
+                            let cols = [];
+                            let columns = [];
 
-	                        jQuery.ajax({
-	                            url: '/mxobject/search',
-	                            type: 'POST',
-	                            dataType: 'json',
-	                            data: { 
-	                                cond: param, 
-	                                flag: false 
-	                            },
-	                            beforeSend:function(xhr){ 
-	                            },
-	                            complete: function(xhr, textStatus) {
-	                                //func.call();
-	                            },
-	                            success: function(data, textStatus, xhr) {
-	                                
-	                                var list = data.message;
-	                                var cols = [];
-	                                var columns = [];
+                            cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
+                            self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
 
-	                                cols = _.concat(window.GLOBAL_OBJECT.company.object[app].columns, columns);
-	                                self.preconfig = window.GLOBAL_OBJECT.company.object[app].preconfig;
+                            let tmp = _list.meta.columns[_.keys(_list.meta.classes)[0]];
+                            if(!_.isEmpty(tmp)) {
+                                _.forEach(tmp,function(v){
+                                    var fIndex = _.findIndex(cols,{field:v});
+                                    if(fIndex == -1){
+                                        cols.push( {field:v,title:_.upperFirst(v),visible: false} );
+                                    }
+                                });
+                            }
 
-	                                let tmp = data.meta.columns[_.keys(data.meta.classes)[0]];
-	                                if(!_.isEmpty(tmp)) {
-	                                    _.forEach(tmp,function(v){
-	                                        var fIndex = _.findIndex(cols,{field:v});
-	                                        if(fIndex == -1){
-	                                            cols.push( {field:v,title:_.upperFirst(v),visible: false} );
-	                                        }
-	                                    });
-	                                }
-	                                
-	                                self.model.columns = cols;
-	                                self.model.data = _.orderBy(list,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
-	                            },
-	                            error: function(xhr, textStatus, errorThrown) {
-	                            }
-	                        });
+                            self.model.columns = cols;
+                            self.model.data = _.orderBy(_list.message,[window.GLOBAL_OBJECT.company.object[app].preconfig.severity.name[0],window.GLOBAL_OBJECT.company.object[app].preconfig.time[0]],['asc','desc']);
 	                    }
 	                }
 	            });

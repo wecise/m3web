@@ -1170,44 +1170,37 @@ Actions.prototype.init = function()
 	this.addAction('mx-save', function() {
 		let tmp = localStorage.getItem("graph-object");
 		let graphObject = _.attempt(JSON.parse.bind(null, tmp));
-			
-		html2canvas(document.body, {
-			onrendered: function(canvas) {
-				_.delay(function(){
-					var url = canvas.toDataURL();
-				    var encoder = new mxCodec();
-					var node = encoder.encode(graph.getModel());
-					var fm = new FormData();
-					
-					fm.append("data", mxUtils.getPrettyXml(node));
-			        fm.append("attr", JSON.stringify({	
-			        							'content': mxUtils.getPrettyXml(node), 'pic': url
-											 }));
-					fm.append("type", "file");
-					
-					//console.log( JSON.stringify({'content': mxUtils.getPrettyXml(node)}) )
-					jQuery.ajax({
-			            url: '/fs'+ graphObject.parent + "/" + graphObject.name,
-			            type: 'PUT',
-			            processData: false,
-			            contentType: false,
-			            mimeType: 'multipart/form-data',
-			            dataType: "json",
-			            data: fm,
-			            beforeSend: function(xhr) {
-			            },
-			            complete: function(xhr, textStatus) {
-			            },
-			            success: function(data, textStatus, xhr) {
-			            	swal("Success",'/fs'+ urlParams['parent'] + "/" + urlParams['name'],"success");
-			            },
-			            error: function(xhr, textStatus, errorThrown) {
-			                console.log(xhr,textStatus,errorThrown);
-			            }
-			        })
-				},500)
-			}
-		});
+
+        var encoder = new mxCodec();
+        var node = encoder.encode(graph.getModel());
+        var fm = new FormData();
+
+        fm.append("data", mxUtils.getPrettyXml(node));
+        fm.append("attr", JSON.stringify({
+            'content': mxUtils.getPrettyXml(node), 'pic': ''
+        }));
+        fm.append("type", "file");
+
+        //console.log( JSON.stringify({'content': mxUtils.getPrettyXml(node)}) )
+        jQuery.ajax({
+            url: '/fs'+ graphObject.parent + "/" + graphObject.name,
+            type: 'PUT',
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            dataType: "json",
+            data: fm,
+            beforeSend: function(xhr) {
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+                swal("Success",'/fs'+ graphObject.parent + "/" + graphObject.name,"success");
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.log(xhr,textStatus,errorThrown);
+            }
+        })
 
 	}, null, 'null', 'Ctrl+Shift+S');
 

@@ -272,7 +272,7 @@
                                 at: '#',
                                 class: '/matrix/devops/event/',
                                 subclass: ':',
-                                top: 'top 200',
+                                top: 'top 100',
                                 lua: renderDataLua
                         },
 						filter:[],
@@ -454,7 +454,7 @@
                         let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
                         let _preset = self.search.preset.default;
 
-                        self.search.params.top = 'top 200';
+                        self.search.params.top = 'top 100';
 
                         _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
 
@@ -464,7 +464,7 @@
                     setSearchTerm: function (term){
                         let self = this;
 
-                        self.search.params.top = 'top 200';
+                        self.search.params.top = 'top 100';
                         self.search.input.term = term;
 
                     },

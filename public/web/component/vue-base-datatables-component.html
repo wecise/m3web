@@ -1,0 +1,364 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.vue-base-datatables-component tbody tr td{
+			line-height: 10px;
+			white-space: nowrap;
+		}
+
+		.vue-base-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
+			background: rgb(196, 235, 253)!important;
+		}
+
+		td.highlight {
+			background-color: whitesmoke !important;
+		}
+
+		table.vue-base-datatables-component tbody tr:nth-child(even):hover td{
+			background-color: rgba(227, 239, 244, 0.5) !important;
+		}
+
+		.context-menu-list {
+			padding:5px;
+		}
+
+		.context-menu-list>li>a{
+			padding: 5px 5px;
+		}
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-base-datatables-component"  ----------*/
+	<template>
+		<table :id="id" class="table table-striped table-bordered" width="100%">
+		</table>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-base-datatables-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+        	id: String,
+			columns: Array,
+			dataset: Array,
+			options: Object,
+		},
+		data: function(){
+          	return {
+                datatable: Object,
+				selectedRow: null,
+				selectedCell: null,
+                templates: {
+                    event: `<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+                                <li class=""><a href="#tab-journal" data-toggle="tab">Journal</a></li>
+                                <li class=""><a href="#tab-rawcaputer" data-toggle="tab">RawCaputer</a></li>
+                                <li class=""><a href="#tab-eventkey" data-toggle="tab">EventKey</a></li>
+                                <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+                            </ul>
+                            <div class="tab-content table-panel-tab-content">
+                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+                                    <div class="panel" id="panel-detail" :model="model"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-journal">
+                                    <div id="panel-journal"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-rawcaputer">
+                                    <div id="panel-rawcaputer"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-eventkey">
+                                    <div id="panel-eventkey"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-history">
+                                    <div id="panel-history"></div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-timeline">
+                                    <div id="panel-timeline"></div>
+                                </div>
+                            </div>`,
+                    performance: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+		                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+		                                <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+		                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+		                            </ul>
+		                            <div class="tab-content table-panel-tab-content">
+		                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;padding-top:0px;">
+		                                    <div class="panel" id="panel-detail" :model="model"></div>
+		                                </div>
+		                                <div class="tab-pane fade" id="tab-history">
+		                                    <div id="panel-history"></div>
+		                                </div>
+		                                <div class="tab-pane fade" id="tab-timeline">
+		                                    <div id="panel-timeline"></div>
+		                                </div>
+		                            </div>`,
+
+                    log: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	                            <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+	                            <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
+	                            <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
+	                        </ul>
+	                        <div class="tab-content table-panel-tab-content">
+	                            <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+	                                <div class="panel" id="panel-detail" :model="model"></div>
+	                            </div>
+	                            <div class="tab-pane fade" id="tab-history">
+	                                <div id="panel-history"></div>
+	                            </div>
+	                            <div class="tab-pane fade" id="tab-timeline">
+	                                <div id="panel-timeline"></div>
+	                            </div>
+	                        </div>`,
+                    ciview: `	<div id="panel-card"></div>`,
+                    default: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
+	                            </ul>
+	                            <div class="tab-content table-panel-tab-content">
+	                                <div class="tab-pane fade in active" id="tab-detail" style="margin: -15px;">
+	                                    <div class="panel" id="panel-detail" :model="model"></div>
+	                                </div>
+	                            </div>`
+                }
+			}
+		},
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                _.delay(function() {
+                    self.init();
+                },200);
+
+            })
+        },
+		computed: {
+            _columns: function(){
+                let self = this;
+
+                return _.map(self.columns,function(v,k){
+                    		return { "data": v.field, "title": v.title };
+						});
+			}
+		},
+		watch: {
+          	dataset: function(val,oldVal){
+          	    let self = this;
+
+                self.datatable.clear().draw();
+				self.datatable.rows.add(val); // Add new data
+				self.datatable.columns.adjust().draw(); // Redraw the DataTable
+
+			}
+		},
+		methods: {
+            init: function(){
+                let self = this;
+
+                self.datatable = $(self.$el).DataTable( {
+                    			data: self.dataset,
+                                columns: self._columns,
+								bAutoWidth: true,
+								searching: false,
+								bSort: true,
+								paging: false,
+								info: false,
+                    			scrollX: true,
+								scrollY: '54vh',
+								scrollCollapse: true,
+
+                } );
+
+
+				self.initPlugin();
+
+			},
+			initPlugin: function(){
+                let self = this;
+
+                // init selected row's status
+                $(self.$el).find("tbody").on("click", "tr", function () {
+                    if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }
+                } );
+
+                $(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
+					var colIdx = self.datatable.cell(this).index().column;
+
+					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
+					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
+				} );
+
+                // selected row
+                $(self.$el).on( 'click', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                // selected cell
+                $(self.$el).on( 'click', 'td', function () {
+                    self.selectedCell = self.datatable.cell( this ).data();
+                } );
+
+                // init context menu
+                $.contextMenu({
+                    selector: "#"+self.id,
+                    build: function ($trigger, e) {
+                        return {
+                            callback: function (key, options) {
+                                //self.initModules(key, options.items[key]);
+                            },
+                            items: {
+                                "card": { app:"ciview", name: "配置卡片", icon: "fa-tasks", callback: function(key, opt) {
+
+																										newWindow(opt.items[key].name + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
+
+																										_.delay(function(){
+
+																											let cardVue = new Vue({
+																												el: '#panel-card',
+																												data: function(){
+																													return {
+																														model: self.selectedRow
+																													}
+																												},
+																												template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
+																											});
+
+
+																										},100);
+																									}
+                                },
+                                "sep1": "---------",
+                                "new": { app:"ciview", name: "新建", icon: "fa-paste", callback: function(key, opt) {
+
+                                        																newWindow(opt.items[key].name + " " + self.selectedRow.name, `<div id="ci-create-template"></div>`);
+
+																										_.delay(function() {
+
+																										    let _item = self.selectedRow;
+
+                                                                                                            let cVue = new Vue({
+                                                                                                                delimiters: ['$', '$'],
+                                                                                                                el: '#ci-create-template',
+                                                                                                                template: `	<div class="panel"><div class="panel-body">
+																																<vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
+																															</div></div>`,
+                                                                                                                data: function(){
+                                                                                                                    return {
+                                                                                                                        model: {
+                                                                                                                            form: {
+                                                                                                                                view: "",
+                                                                                                                                data: {},
+                                                                                                                                schema: {
+                                                                                                                                    title:"",
+                                                                                                                                    type: "object",
+                                                                                                                                    properties: []
+                                                                                                                                },
+                                                                                                                                options: {
+                                                                                                                                    form: {
+                                                                                                                                        buttons: {
+                                                                                                                                            save: {
+                                                                                                                                                title: "Save",
+                                                                                                                                                click: function() {
+                                                                                                                                                    let val = this.getValue();
+
+                                                                                                                                                    if (this.isValid(true)) {
+                                                                                                                                                        cVue.save(val);
+                                                                                                                                                        /*alert("Valid value: " + JSON.stringify(val, null, "  "));*/
+                                                                                                                                                    } else {
+                                                                                                                                                        /*alert("Invalid value: " + JSON.stringify(val, null, "  "));*/
+                                                                                                                                                    }
+                                                                                                                                                }
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                    },
+                                                                                                                                    fields: {}
+                                                                                                                                }
+
+                                                                                                                            },
+                                                                                                                            list: Array
+                                                                                                                        },
+                                                                                                                        selected: _item
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                created:function(){
+                                                                                                                    let self = this;
+
+                                                                                                                    self.init();
+
+                                                                                                                },
+                                                                                                                mounted: function() {
+                                                                                                                    let self = this;
+
+                                                                                                                    self.$nextTick(function(){
+
+                                                                                                                        self.initPlugIn();
+
+                                                                                                                    })
+
+                                                                                                                },
+                                                                                                                methods: {
+                                                                                                                    init: function(){
+                                                                                                                        let self = this;
+                                                                                                                        let _list = fetchClass(_item.class);
+                                                                                                                        let _properties = {};
+                                                                                                                        let _fields = {};
+                                                                                                                        let _data = {"class":_item.class};
+
+                                                                                                                        _.forEach(_list.message.fields,function (v) {
+                                                                                                                            let _name = v.name;
+                                                                                                                            let _type = v.ftype=='varchar'?'string':'string';
+                                                                                                                            let _required = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?false:false;
+                                                                                                                            let _hidden = _.indexOf(GLOBAL_CONFIG.global.unshow_columns,v.name)>-1?true:false;
+
+                                                                                                                            _.merge(_properties, {[_name]: {type: _type,required: _required, hidden: _hidden}});
+                                                                                                                            _.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
+                                                                                                                        });
+
+                                                                                                                        self.model.form.data = _data;
+                                                                                                                        self.model.form.schema.title = _item.class;
+                                                                                                                        self.model.form.schema.properties = _properties;
+                                                                                                                        self.model.form.options.fields = _fields;
+
+                                                                                                                        self.model.list = _.map(_list.message.fields,function(v){
+                                                                                                                            return v;
+                                                                                                                        });
+
+
+                                                                                                                    },
+                                                                                                                    initPlugIn: function(){
+                                                                                                                        let self = this;
+
+                                                                                                                    },
+                                                                                                                    save: function(event){
+                                                                                                                        let self = this;
+                                                                                                                        let rtn = putDataByMql(event);
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            });
+                                                                                                        },500);
+																								}
+								},
+                                "sep2": "---------",
+								"delete": { app:"ciview", name: "删除", icon: "fa-trash", callback: function(key, opt) {} },
+                                "sep3": "---------",
+                                "action": { app:"ciview", name: "新建命令", icon: "fa-plus", callback: function(key, opt) {} }
+                            }
+                        };
+                    }
+                });
+			}
+		}
+	
+	}
+	</script>
+
+</code>

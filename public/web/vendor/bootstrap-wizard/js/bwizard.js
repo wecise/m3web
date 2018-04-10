@@ -446,7 +446,8 @@ $.widget("bootstrap.bwizard", {
 	// and prevent IE's ClearType bug...
 	_resetStyle: function ($el) {
 		$el.css({ display: '' });
-		if (!$.support.opacity) {
+		//if (!$.support.opacity) {
+        if ($.support.opacity === false){
 			$el[0].style.removeAttribute('filter');
 		}
 	},
