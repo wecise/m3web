@@ -1,0 +1,221 @@
+<code>
+
+    <style>
+        /*----------  style  ----------*/
+
+
+    </style>
+
+
+    /*----------  最外层element会自动增加组件同名 class="vue-echart-chinamap-2-component"  ----------*/
+    <template>
+        <div :id="id" style='width:100%;height:100%;'></div>
+    </template>
+
+    /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+    <script id="vue-echart-chinamap-2-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                id: String,
+                row: Object
+            },
+            data: function(){
+                return {
+                    chart: Object,
+                    years: [
+                                '2018-01',
+                                '2018-02',
+                                '2018-03',
+                                '2018-04',
+                                '2018-05',
+                                '2018-06'
+                    ],
+                    value: [
+                                [{name:'上海',coord:[121.48,31.22]}],
+                                [{name:'上海',coord:[121.48,31.22]},{name:'香港',coord:[114.25,22.25]}],
+                                [{name:'上海',coord:[121.48,31.22]},{name:'香港',coord:[114.25,22.25]},{name:'澳门',coord:[113.5,22.2]}],
+                                [{name:'上海',coord:[121.48,31.22]},{name:'香港',coord:[114.25,22.25]},{name:'澳门',coord:[113.5,22.2]},{name:'北京',coord:[116.46,39.92]}],
+                                [{name:'上海',coord:[121.48,31.22]},{name:'香港',coord:[114.25,22.25]},{name:'澳门',coord:[113.5,22.2]},{name:'北京',coord:[116.46,39.92]},{name:'大连',coord:[121.62,38.92]}],
+                                [{name:'上海',coord:[121.48,31.22]},{name:'香港',coord:[114.25,22.25]},{name:'澳门',coord:[113.5,22.2]},{name:'北京',coord:[116.46,39.92]},{name:'大连',coord:[121.62,38.92]},{name:'广州',coord:[113.23,23.16]}]
+                    ],
+                    itemStyle: {
+                        normal: {
+                            opacity: 0.8,
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowOffsetY: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    option: {
+                                baseOption: {
+                                    timeline: {
+                                        show: false,
+                                        axisType: 'category',
+                                        orient: 'vertical',
+                                        autoPlay: true,
+                                        inverse: true,
+                                        playInterval: 1000,
+                                        left: null,
+                                        right: 10,
+                                        top: 20,
+                                        bottom: 20,
+                                        width: 55,
+                                        height: null,
+                                        label: {
+                                            normal: {
+                                                textStyle: {
+                                                    color: '#ddd'
+                                                }
+                                            },
+                                            emphasis: {
+                                                textStyle: {
+                                                    color: '#fff'
+                                                }
+                                            }
+                                        },
+                                        symbol: 'none',
+                                        lineStyle: {
+                                            color: '#555'
+                                        },
+                                        checkpointStyle: {
+                                            color: '#bbb',
+                                            borderColor: '#777',
+                                            borderWidth: 2
+                                        },
+                                        controlStyle: {
+                                            showNextBtn: false,
+                                            showPrevBtn: false,
+                                            normal: {
+                                                color: '#666',
+                                                borderColor: '#666'
+                                            },
+                                            emphasis: {
+                                                color: '#aaa',
+                                                borderColor: '#aaa'
+                                            }
+                                        },
+                                        data: []
+                                    },
+                                    title: {
+                                        text: '',
+                                        textAlign: 'left',
+                                        left: 0,
+                                        bottom: 10,
+                                        textStyle: {
+                                            fontSize: 32,
+                                            color: 'rgba(255, 255, 255, 0.5)'
+                                        }
+                                    },
+                                    backgroundColor: '#ffffff',
+
+                                    series: [{
+                                        name: '中国',
+                                        type: 'map',
+                                        mapType: 'china',
+                                        selectedMode: 'multiple',
+                                        label: {
+                                            normal: {
+                                                show: false
+                                            },
+                                            emphasis: {
+                                                show: false
+                                            }
+                                        },
+
+                                        markPoint: {
+                                            symbol: 'pin',
+                                            symbolSize: 60,
+                                            label: {
+                                                normal: {
+                                                    show: true,
+                                                    formatter: function(d) {
+                                                        return d.name
+                                                    }
+                                                }
+                                            },
+                                            effect:{
+                                                show: true,
+                                                showBlur: 10,
+                                                color:'rgba(255, 255, 255, 0.5)'
+                                            },
+                                            data: [{
+                                                name: '重庆',
+                                                coord: [106.54, 29.59]
+                                            }]
+                                        }
+                                    }],
+                                    //animationDurationUpdate: 1000,
+                                    //animationEasingUpdate: 'quinticInOut'
+                                },
+                                options: []
+                    }
+                }
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    _.delay(function(){
+                        self.init();
+                    },500);
+                })
+            },
+            watch: {
+
+            },
+            created: function () {
+                let self = this;
+
+                eventHub.$on("chart-resize-event", self.resize);
+
+            },
+            methods: {
+                init: function() {
+                    let self = this;
+
+                    self.option.baseOption.timeline.data = self.years;
+                    
+                    for (var n = 0; n < self.years.length; n++) {
+                        self.option.options.push({
+                            title: {
+                                text: self.years[n],
+                                textAlign: 'left',
+                                left: 0,
+                                bottom: 10,
+                                textStyle: {
+                                    fontSize: 32,
+                                    color: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            },
+                            series: {
+                                markPoint: {
+                                    data: self.value[n]
+                                }
+                            }
+                        });
+                    }
+                    
+                    self.chart = echarts.init(self.$el);
+                    
+                    if (self.option && typeof self.option === "object") {
+                          self.chart.setOption(self.option, true);
+                    }
+
+                    self.chart.resize();
+                },
+                resize: function(){
+                    var self = this;
+
+                    if(self.chart.id){
+                        self.chart.resize();
+                    }
+                }
+            }
+
+
+        }
+    </script>
+
+</code>

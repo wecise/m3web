@@ -20,12 +20,17 @@
 		}
 
 		.context-menu-list {
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
 			padding:5px;
+            border: none;
 		}
-
-		.context-menu-list>li>a{
-			padding: 5px 5px;
-		}
+            
+        .context-menu-list>li>a{
+            padding: 5px 5px;
+            color:rgb(102, 102, 102)!important;
+        }
+		
+        
 	</style>
 
 	
@@ -124,6 +129,11 @@
                 }
 			}
 		},
+        created: function(){
+            let self = this;
+
+            eventHub.$on("datatable-resize-event", self.redraw);
+        },
 		mounted: function () {
             let self = this;
 
@@ -131,7 +141,7 @@
 
                 _.delay(function() {
                     self.init();
-                },200);
+                },500);
 
             })
         },
@@ -148,6 +158,7 @@
           	dataset: function(val,oldVal){
           	    let self = this;
 
+                wait(500);
                 self.datatable.clear().draw();
 				self.datatable.rows.add(val); // Add new data
 				self.datatable.columns.adjust().draw(); // Redraw the DataTable
@@ -161,9 +172,10 @@
                 self.datatable = $(self.$el).DataTable( {
                     			data: self.dataset,
                                 columns: self._columns,
-								bAutoWidth: true,
+								responsive: true,
+                                //bAutoWidth: true,
 								searching: false,
-								bSort: true,
+								//bSort: true,
 								paging: false,
 								info: false,
                     			scrollX: true,
@@ -171,7 +183,6 @@
 								scrollCollapse: true,
 
                 } );
-
 
 				self.initPlugin();
 
@@ -218,7 +229,7 @@
                             items: {
                                 "card": { app:"ciview", name: "配置卡片", icon: "fa-tasks", callback: function(key, opt) {
 
-																										newWindow(opt.items[key].name + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
+																										newWindow('large', opt.items[key].name + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
 
 																										_.delay(function(){
 
@@ -239,7 +250,7 @@
                                 "sep1": "---------",
                                 "new": { app:"ciview", name: "新建", icon: "fa-paste", callback: function(key, opt) {
 
-                                        																newWindow(opt.items[key].name + " " + self.selectedRow.name, `<div id="ci-create-template"></div>`);
+                                        																newWindow('large', opt.items[key].name + " " + self.selectedRow.name, `<div id="ci-create-template"></div>`);
 
 																										_.delay(function() {
 
@@ -355,7 +366,12 @@
                         };
                     }
                 });
-			}
+			},
+            redraw: function(){
+                let self = this;
+
+                self.datatable.columns.adjust().draw(); // Redraw the DataTable
+            }
 		}
 	
 	}

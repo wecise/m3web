@@ -97,7 +97,8 @@
 	<script src="{{AppSubUrl}}/web/vendor/golden-layout/dist/goldenlayout.min.js" type="text/javascript"></script>
 	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-base.css" type="text/css" rel="stylesheet" />
 	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" type="text/css" rel="stylesheet" />
-
+	
+	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/util.js"></script>
 	<script src="{{AppSubUrl}}/web/js/cfg.js"></script>
 	<script src="{{AppSubUrl}}/web/js/init.js"></script>
@@ -405,6 +406,13 @@
 									<a target="_blank" href="/janesware/files">
 										<i class="fa fa-files-o"></i>
 										{{.i18n.Tr "files"}}
+									</a>
+								</li>
+								<li role="separator" class="divider"></li>
+								<li>
+									<a target="_blank" href="javascript:setDefaultHome('home','{{.CsrfToken}}')">
+										<i class="fa fa-home"></i>
+										{{.i18n.Tr "defaulthome"}}
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>

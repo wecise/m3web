@@ -301,14 +301,14 @@
                         appList: []
                     },
                     path: {
-                        view: {}
+                        view: "event.html",
+                        _csrf: "{{.CsrfToken}}"
                     }
                 },
                 created: function(){
                     let self = this;
                     let _appsId = `{{.SignedUser.Remark}}`;
-                    console.log(123, _appsId)
-
+                    
                     eventHub.$on('preset-selected-event', self.setPresetDefault);
 
                     if(!_.isEmpty(_appsId)){
@@ -323,6 +323,14 @@
                         self.init();
                         App.init();
                     })
+                },
+                watch: {
+                    'path.view':function(val,oldVal){
+                        let self = this;
+
+                        setDefaultHome('janesware/' + val.split("/")[2],self.path._csrf);
+                    },
+                    deep:true
                 },
                 methods: {
                     init: function() {
@@ -346,12 +354,6 @@
                         let self = this;
                         
                         self.search.preset = event;
-                    },
-                    setDefaultView: function(){
-                        let self = this;
-
-                        localStorage.setItem("default-view", JSON.stringify({name:self.path.view.name,url:self.path.view.url}));
-
                     },
                     nowSearch: function(term) {
                         let self = this;
@@ -508,7 +510,6 @@
                             },
                             success: function(data, textStatus, xhr) {
 
-                                console.log(JSON.stringify(data, null, 2))
                                 let _data = data.message;
 
                                 self.user.appList = _.orderBy(_data,["seat"],["asc"]);
@@ -701,6 +702,7 @@
 
 <script type="text/x-template" id="app-template">
     <div class="container-fluid">
+        {{.CsrfTokenHtml}}
         <div class="pace  pace-inactive">
             <div class="pace-progress" data-progress-text="100%" data-progress="99" style="transform: translate3d(100%, 0px, 0px);">
                 <div class="pace-progress-inner"></div>
@@ -754,9 +756,9 @@
                                 <a href="#" class="email-header-link" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down m-l-5"></i></a>
                                 <ul class="dropdown-menu">
                                     <li class="">
-                                        <a href="javascript:void">
+                                        <a href="javascript:void(0)">
                                             <label>
-                                                <input type="radio" :id="item.name" :value="{name:item.name,url:item.url}"  @click="setDefaultView" v-model="path.view"> Default View
+                                                <input type="radio" :id="item.name" :value="item.url" v-model="path.view"> {{.i18n.Tr "home_defaulthome"}}
                                             </label>
                                         </a>
                                     </li>

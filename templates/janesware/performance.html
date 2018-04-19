@@ -253,10 +253,14 @@
                     toggle: {
                         left: false,
                         top: true,
-                        mode: [{name: 'd', title: 'Diagnosis Mode', icon: 'fa fa-desktop'},
-                            {name: 'o', title: 'Operation Mode', icon: 'fa fa-laptop'},
-                            {name: 'm', title: 'Monitoring Mode', icon: 'fa fa-tachometer'},
-                        ]
+                        mode: {
+                                default: {name:'m', title:'Monitoring Mode', icon: 'fa fa-tachometer'},
+                                list:[
+                                        {name:'d', title:'Diagnosis Mode', icon: 'fa fa-desktop'},
+                                        {name:'o', title:'Operation Mode', icon: 'fa fa-laptop'},
+                                        {name:'m', title:'Monitoring Mode', icon: 'fa fa-tachometer'},
+                                      ]
+                        }
                     }
                 },
                 created: function () {
@@ -555,8 +559,8 @@
                     },
                     toggleMode: function () {
                         let self = this;
-                        let _default = _.head(self.toggle.mode);
-                        let _head = _.nth(self.toggle.mode, 1);
+                        let _default = _.head(self.toggle.mode.list);
+                        let _head = _.nth(self.toggle.mode.list, 1);
 
                         if (_default.name == 'd') {
                             $(".navbar-fixed-top").css({"display": "none"});
@@ -578,6 +582,8 @@
                                 "height": "calc(100vh - 175px)"
                             });
 
+                            toggleFullScreen();
+
                         } else {
                             $(".navbar-fixed-top").css({"display": ""});
                             $("#page-container").css({"padding-top": "54px"});
@@ -594,7 +600,7 @@
                         $(".toggle-mode").addClass(_head.icon);
                         $(".toggle-mode").attr("title", _head.title);
 
-                        self.toggle.mode.push(self.toggle.mode.shift());
+                        self.toggle.mode.list.push(self.toggle.mode.list.shift());
                     },
                     toggleFilter: function (filter) {
                         let self = this;

@@ -42,6 +42,7 @@ var GLOBAL_CONFIG = {
 			    end
 			</lua>\n`,
             `call: \n\tcall tree {"ftype":"class","parent":"/"}\n`,
+            `\n\tcall graph {"level":3, "rels":["contain","depend","connect"], "element":true, "entity":true}`
         ],
         unshow_columns:['id','_tokens','day','vtime','class'],
         /*ci_right_menu:  {

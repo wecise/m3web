@@ -29,6 +29,12 @@
 	            expandNodes: Array,
 				selected: Object,
 				contextMenu: {
+					"alias": {name: "Toggle View", icon: "fa-eye",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            eventHub.$emit("vue-entity-tree-toggle-name-event", null);
+						}
+					},
+                    "sep1": "---------",
                     "create": {name: "Create CI", icon: "fa-plus",
 						callback: function (itemKey, opt, rootMenu, originalEvent) {
 							let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
@@ -38,7 +44,7 @@
 							eventHub.$emit("vue-entity-tree-panel-event", _item);
 						}
 					},
-                    "sep1": "---------",
+                    "sep2": "---------",
 					"remove": {name: "Remove All CI", icon: "fa-trash",
                         callback: function (itemKey, opt, rootMenu, originalEvent) {
                             let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
@@ -63,6 +69,7 @@
 	        self.init();
 
             eventHub.$on("vue-entity-tree-panel-event", self.openPanel);
+            eventHub.$on("vue-entity-tree-toggle-name-event",self.toggleName);
 	    },
 	    mounted: function() {
 	        let self = this;
@@ -89,7 +96,7 @@
 	                                    pIdKey: "pid",
 	                                },
 	                                key: {
-	                                    name: 'name',
+	                                    name: localStorage.getItem('entity-tree-display-name') || 'alias',
 	                                    title: "title"
 	                                }
 	                            },
@@ -98,7 +105,8 @@
 	                                onCheck: self.onCheck,
 	                            },
 	                            view: {
-									showTitle: true
+									showTitle: true,
+									addDiyDom: self.addDiyDom
 								}
 	                        };
 
@@ -135,13 +143,13 @@
 	    methods: {
 	        init: function() {
 	            let self = this;
-	            
+
 	            jQuery.ajax({
 	                url: '/mxobject/search',
 	                type: 'POST',
 	                dataType: 'json',
 	                data: {
-	                    cond: `call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name"]}`//top 1000`
+	                    cond: `call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`//top 1000`
 	                },
 	                beforeSend: function(xhr) {
 	                },
@@ -168,7 +176,7 @@
             										cid: objectHash.sha1(v),
 	            									pid: _.isEmpty(_pid)?66:_pid[0].pid,
 	            									name: v.class + "/" + v.name, 
-	            									title:v.name,//+ "[" + v.summary.event + "]", 
+	            									title:v.name + " " + _.random(0,10),//+ "[" + v.summary.event + "]", 
 	            									checked: true, 
 	            									open:true
 	            								};
@@ -196,6 +204,7 @@
                         items: self.contextMenu
                     });
                 }
+
             },
 	        onClick: function(event, treeId, treeNode) {
 	            let self = this;
@@ -403,9 +412,31 @@
 						}
 					}
 				});
+			},
+			toggleName: function(){
+				let self = this;
 
+				if(self.setting.data.key.name == "name"){
+                	self.setting.data.key.name = "alias";
+                  	self.init();
+                  	localStorage.setItem('entity-tree-display-name','alias');
+                } else {
+                  	self.setting.data.key.name = "name";
+                  	self.init();
+                  	localStorage.setItem('entity-tree-display-name','name');
+                }
+			},
+			addDiyDom: function (treeId, treeNode) {
+				let self = this;
+				let aObj = $("#" + treeNode.tId + "_a");
 
+				if (treeNode.isParent){
+					let str = "<span> ["+treeNode.children.length+"]</span>";
+					aObj.append(str);
+				} 
 			}
+
+
 	    }
 	
 	}

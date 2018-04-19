@@ -1171,9 +1171,9 @@ Actions.prototype.init = function()
 		let tmp = localStorage.getItem("graph-object");
 		let graphObject = _.attempt(JSON.parse.bind(null, tmp));
 
-        var encoder = new mxCodec();
-        var node = encoder.encode(graph.getModel());
-        var fm = new FormData();
+        let encoder = new mxCodec();
+        let node = encoder.encode(graph.getModel());
+        let fm = new FormData();
 
         fm.append("data", mxUtils.getPrettyXml(node));
         fm.append("attr", JSON.stringify({

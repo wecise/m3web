@@ -410,6 +410,9 @@
                             key: {
                                 name: "username",
                             }
+                        },
+                        view: {
+
                         }
                     },
                 }
@@ -425,6 +428,7 @@
                 self.$nextTick(function(){
                     
                     self.setting.callback.onClick = self.zTreeOnClick;
+                    self.setting.view.addDiyDom = self.addDiyDom;
                 })
             },
             watch: {
@@ -467,6 +471,15 @@
                             }  
                         }
                     }
+                },
+                addDiyDom: function (treeId, treeNode) {
+                    let self = this;
+                    let aObj = $("#" + treeNode.tId + "_a");
+
+                    if (treeNode.isParent){
+                        let str = "<span> ["+treeNode.children.length+"]</span>";
+                        aObj.append(str);
+                    } 
                 }
             }
         })
@@ -496,6 +509,9 @@
                                 name: "key",
                                 children: "nodes"
                             }
+                        },
+                        view: {
+                            showTitle: true,
                         }
                     },
                     selectedNodeName: ""
@@ -512,6 +528,7 @@
                 self.$nextTick(function(){
                     self.setting.callback.onClick = self.zTreeOnClick;
                     self.setting.callback.onExpand = self.zTreeOnExpand;
+                    self.setting.view.addDiyDom = self.addDiyDom;
                 })
             },
             watch: {
@@ -612,6 +629,15 @@
                             error: function(xhr, textStatus, errorThrown) {
                             }
                         })
+                    } 
+                },
+                addDiyDom: function (treeId, treeNode) {
+                    let self = this;
+                    let aObj = $("#" + treeNode.tId + "_a");
+                    
+                    if (treeNode.isParent){
+                        let str = "<span>["+treeNode.nodes.length+"]</span>";
+                        aObj.append(str);
                     } 
                 }
             }
@@ -1122,7 +1148,7 @@
                         options: {},  
                     },
                     byObjectTreeNodes: [],
-                    byPropertyTreeNodes: [],
+                    byPropertyTreeNodes: []
                 }
             },
             created: function(){
@@ -1174,7 +1200,6 @@
                         treeShowField: 'name'
                     };
 
-                    
                     self.byObjectTreeModel.columns = self.byPropertyTreeModel.columns = [
                                                     {"field":"name",title:"Name"},
                                                     {"field":"add",title:"Add", align: 'center',
@@ -1211,69 +1236,80 @@
                 newUser: function(){
                     let self = this;
 
-                    swal({
-                        title: '添加用户',
-                        showConfirmButton: false,
-                        html: `<form class="form-horizontal" action="/user/sign_up" method="post">
-                                    {{.CsrfTokenHtml}}
+                    let win = newWindow('small', `{{.i18n.Tr "creative_list-new"}}`,`<div id="ldap-new"></div>`);
+                    win.setResizable(false);
+                    win.setMaximizable(false);
 
-                                    {{template "base/alert" .}}
-                                    {{if .DisableRegistration}}
-                                        <p>{{.i18n.Tr "auth.disable_register_prompt"}}</p>
-                                    {{else}}
-                                        
-                                        <div class="form-group {{if .Err_UserName}}error{{end}}">
-                                            <label for="user_name" class="col-lg-3 control-label">{{.i18n.Tr "username"}}</label>
-                                            <div class="col-lg-8">
-                                                <input id="user_name" name="user_name" class="form-control" value="{{.user_name}}" autofocus required>
-                                            </div>
-                                        </div>
+                    let _vue  = new Vue({
+                        delimiters: ['#{', '}#'],
+                        el: "#ldap-new",
+                        template: "#ldap-new-template",
+                        data: {
+                            ldap: {
+                                fullname: "",
+                                password: "",
+                                passwords: "",
+                                email: "",
+                                active: true,
+                                admin: false
+                            }
+                        },
+                        mounted:function(){
+                            let me = this;
 
-                                        <div class="form-group {{if .Err_Email}}error{{end}}">
-                                            <label for="email" class="col-lg-3 control-label">{{.i18n.Tr "email"}}</label>
-                                            <div class="col-lg-8">
-                                                <input id="email" name="email" class="form-control" type="email" value="{{.email}}" required>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="form-group {{if .Err_Password}}error{{end}}">
-                                            <label for="password" class="col-lg-3 control-label">{{.i18n.Tr "password"}}</label>
-                                            <div class="col-lg-8">
-                                                <input id="password" name="password" class="form-control" type="password" value="{{.password}}" required>
-                                            </div>
-                                        </div>
+                            me.$nextTick(function() {
+                                me.init();
+                            })
+                        },
+                        watch: {
+                            /*'model.type': function(val,oldVal){
+                                let me = this;
+                                
+                                me.initTemplates(me.type);
 
-                                        <div class="form-group {{if .Err_Password}}error{{end}}">
-                                            <label for="retype" class="col-lg-3 control-label">{{.i18n.Tr "re_type"}}</label>
-                                            <div class="col-lg-8">
-                                                <input id="retype" name="retype" class="form-control" type="password" value="{{.retype}}" required>
-                                            </div>
-                                        </div>
+                            },
+                            deep:true*/
+                        },
+                        methods: {
+                            init: function(){
+                                let me = this;
 
+                            },
+                            save: function(){
+                                let me = this;
+                                
+                                if (_.isEmpty(me.ldap.fullname)) {
+                                    swal("名称不能为空！", "", "warning");
+                                    return false;
+                                }
 
-                                        <div class="form-group">
-                                            <div class="col-lg-offset-3 col-lg-9">
-                                                {{.Captcha.CreateHtml}}
-                                            </div>
-                                        </div>
-                                        <div class="form-group {{if .Err_Captcha}}error{{end}}">
-                                            <label for="captcha" class="col-lg-3 control-label">{{.i18n.Tr "captcha"}}</label>
-                                            <div class="col-lg-offset-3 col-lg-9">
-                                                <input id="captcha" name="captcha" class="form-control" value="{{.captcha}}" autocomplete="off">
-                                            </div>
-                                        </div>
-                                    
+                                if (_.isEmpty(me.ldap.email)) {
+                                    swal("邮件不能为空！", "", "warning");
+                                    return false;
+                                }
 
-                                        <div class="form-group">
-                                            <label></label>
-                                            <div class="col-lg-offset-3 col-lg-9">
-                                                <button class="btn btn-success">{{.i18n.Tr "auth.create_new_account"}}</button>
-                                            </div>
-                                        </div>
-                                        
-                                    {{end}}
+                                if (_.isEmpty(me.ldap.password)) {
+                                    swal("密码不能为空！", "", "warning");
+                                    return false;
+                                }
 
-                                </form>`
+                                if (_.isEmpty(me.ldap.passwords)) {
+                                    swal("确认密码不能为空！", "", "warning");
+                                    return false;
+                                }
+
+                                if ( me.ldap.password !== me.ldap.passwords) {
+                                    swal("确认密码不一致！", "", "warning");
+                                    return false;
+                                }
+
+                                ldapAdd(_.omit(me.ldap, 'passwords'));
+
+                                swal(`{{.i18n.Tr "creative_list-new"}}`,me.ldap.fullname + " " + me.ldap.email,"success");
+
+                                _.delay(self.loadUserData,500);
+                            }
+                        }
                     })
                 },
                 loadUserData: function(event) {
@@ -3134,6 +3170,71 @@
                     </div>
                 </div>
             </div>
+</script>
+
+<script type="text/x-template" id="ldap-new-template">
+    <div>
+        <div class="panel panel-grey">
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="user_name" class="col-lg-3 control-label">{{.i18n.Tr "username"}}</label>
+                        <div class="col-lg-8">
+                            <input class="form-control" v-model="ldap.fullname" autofocus required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="col-lg-3 control-label">{{.i18n.Tr "email"}}</label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="email" v-model="ldap.email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="col-lg-3 control-label">{{.i18n.Tr "password"}}</label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="password" v-model="ldap.password" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="retype" class="col-lg-3 control-label">{{.i18n.Tr "re_type"}}</label>
+                        <div class="col-lg-8">
+                            <input class="form-control" type="password" v-model="ldap.passwords" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-8">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox"  v-model="ldap.active" true-value="true" false-value="false"> 激活
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                                
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-8">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox"  v-model="ldap.admin" true-value="true" false-value="false"> 管理员
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label></label>
+                        <div class="col-lg-offset-3 col-lg-9">
+                            <a href="javascript:void" class="btn btn-success" @click="save">{{.i18n.Tr "auth.create_new_account"}}</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </script>
 
 {{template "base/footer" .}}

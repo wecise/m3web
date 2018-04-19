@@ -163,20 +163,20 @@ var ifSignIn = function (event) {
 
 
 /*
-* 提交到文件系统
+* 设置Home
 * 参数：
-*   文件名称
-*   扩展名
-* */
-var putToFS = function(type, name){
+*   home.html
+*/
+var setDefaultHome = function(name,token){
     let rtn = null;
 
     jQuery.ajax({
-        url: "/fs/home/creative/" + name,
-        type: "PUT",
-        contentType: "application/text; charset=utf-8",
+        url: "/user/settings/home",
+        type: "POST",
+        dataType: "json",
         data: {
-            type: "file"
+            home: name,
+            _csrf: token
         },
         beforeSend: function(xhr) {
         },
@@ -193,7 +193,88 @@ var putToFS = function(type, name){
 };
 
 /*
-* 获取文件
+* 提交到文件系统
+* 参数：
+*   文件名称
+*   扩展名
+* */
+var putToFS = function(type, name, content){
+    let rtn = null;
+
+    let fm = new FormData();
+
+    fm.append("data", content);
+    fm.append("attr", JSON.stringify({
+                'content': content, 'pic': ''
+            }));
+    fm.append("type", "file");
+
+    console.log(content, JSON.stringify(fm))
+
+    jQuery.ajax({
+        url: "/fs/home/creative/" + name,
+        type: 'PUT',
+        processData: false,
+        contentType: false,
+        mimeType: 'multipart/form-data',
+        dataType: "json",
+        data: fm,
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+            console.log(JSON.stringify(data))
+            rtn = data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+
+/*
+* 获取文件列表
+* 参数：
+*   父目录
+*   文件名称
+* */
+var fetchListFromFS = function(parent){
+    let rtn = null;
+    
+    jQuery.ajax({
+        url: '/fs/home/' + parent,
+        type: 'GET',
+        dataType: 'text json',
+        contentType: "application/text; charset=utf-8",
+        async:false,
+        data: {
+            type: 'dir'
+        },
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+            
+            ifSignIn(data);
+
+            if (_.isEmpty(data.message)) return false;
+
+            rtn = data.message;
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+* 获取文件内容从文件系统
 * 参数：
 *   父目录
 *   文件名称
@@ -215,7 +296,7 @@ var fetchFileFromFS = function(parent,name){
         complete: function (xhr, textStatus) {
         },
         success: function (data, textStatus, xhr) {
-
+console.log('/fs' + parent + "/" + name, JSON.stringify(data))
             ifSignIn(data);
 
             if (_.isEmpty(data.message)) return false;
@@ -451,12 +532,50 @@ var putDataByMql = function (event) {
     });
 };
 
-var newWindow = function (title, template) {
+/*
+*  用户管理
+*
+*/
+var ldapAdd = function (event) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: "/admin/users",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                swal("Success!","","success");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+}
+
+var newWindow = function (size, title, template) {
     var win;
     var w = $( window ).width();//document.body.clientWidth;
     var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
     var wW = $( window ).width()*2.2/3;
     var hH = $( window ).height()*2.5/3;
+
+    if(size=='small'){
+        wW = $( window ).width()*1.5/3;
+        hH = $( window ).height()*1.8/3;
+    }
+
     var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
     var tb = document.createElement('div');
 
@@ -484,6 +603,8 @@ var newWindow = function (title, template) {
             eventHub.$emit("win-resize-event",null);
         },100);
     });
+
+    return win;
 }
 
 

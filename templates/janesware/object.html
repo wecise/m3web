@@ -578,9 +578,10 @@
                 return {
                     setting: {
                         view: {
-                            addHoverDom: this.addHoverDom,
-                            removeHoverDom: this.removeHoverDom,
-                            dblClickExpand: this.onDblClickExpand
+                            //addHoverDom: this.addHoverDom,
+                            //removeHoverDom: this.removeHoverDom,
+                            dblClickExpand: this.onDblClickExpand,
+                            addDiyDom: this.addDiyDom
                         },
                         edit: {
                             enable: false
@@ -899,6 +900,15 @@
                     } else {
                         return treeNode.name + "/";
                     }
+                },
+                addDiyDom: function (treeId, treeNode) {
+                    let self = this;
+                    let aObj = $("#" + treeNode.tId + "_a");
+                    console.log(treeId, treeNode.fieldsObj.length, JSON.stringify(treeNode))
+                    if (treeNode.fieldsObj.length > 0){
+                        let str = "<span> ["+treeNode.fieldsObj.length+"]</span>";
+                        aObj.append(str);
+                    } 
                 }
             }
         });
@@ -3026,6 +3036,7 @@
                                     var name = $("#realAddModal_name").val();
                                     var remedy = $("#realAddModal_remedy").val();
                                     var sql = `insert into matrix.rels json '{"name": "`+ name + `", "remedy": "` + remedy + `", "mtime": "` +  _.now() + `"}'`;
+                                    
                                     jQuery.ajax({
                                         url: '/mxobject/action',
                                         type: 'POST',

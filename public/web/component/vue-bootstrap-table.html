@@ -251,7 +251,7 @@
 	        openDetailsPanel: function(row, menu, tabnum){
 	            let self = this;
 
-                newWindow(row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default);
+                newWindow('large', row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default);
 
 	            _.delay(function(){
 	            	

@@ -1,0 +1,1153 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"gra",
+				"graphData"
+			],
+			[
+				"javas",
+				"javascript:void"
+			],
+			[
+				"sourc",
+				"sourceData"
+			],
+			[
+				"boot",
+				"bootstrapTable"
+			],
+			[
+				"panel",
+				"panel-footer"
+			],
+			[
+				"_sli",
+				"_sliced"
+			],
+			[
+				"java",
+				"javascript:void"
+			],
+			[
+				"mx",
+				"mxWindowTitle"
+			],
+			[
+				"back",
+				"background"
+			],
+			[
+				"stat",
+				"stats-link"
+			],
+			[
+				"vis",
+				"visited"
+			],
+			[
+				"panel-",
+				"panel-jumbotron"
+			],
+			[
+				"di",
+				"dimension"
+			],
+			[
+				"sele",
+				"selectpicker-entity"
+			],
+			[
+				"se",
+				"selectpicker"
+			],
+			[
+				"local",
+				"localStorage"
+			],
+			[
+				"rel",
+				"relative〔value〕"
+			],
+			[
+				"met",
+				"methods"
+			],
+			[
+				"colu",
+				"columns"
+			],
+			[
+				"old",
+				"oldSelected"
+			],
+			[
+				"ol",
+				"oldSelected"
+			],
+			[
+				"fields",
+				"fieldsObj"
+			],
+			[
+				"j",
+				"jumbotron"
+			],
+			[
+				"con",
+				"contents\t.contents()"
+			],
+			[
+				"query",
+				"query_result"
+			],
+			[
+				"btn-",
+				"btn-default"
+			],
+			[
+				"cursor",
+				"cursor:pointer"
+			],
+			[
+				"opt",
+				"options"
+			],
+			[
+				"set",
+				"setSearchTerm"
+			],
+			[
+				"doc",
+				"document〔variable〕"
+			],
+			[
+				"da",
+				"dashboard"
+			],
+			[
+				"load",
+				"loadBaseline"
+			],
+			[
+				"modal-t",
+				"modal-trigger-add"
+			],
+			[
+				"input_",
+				"input_response"
+			],
+			[
+				"v",
+				"v\tv"
+			],
+			[
+				"br",
+				"breadcrumb"
+			],
+			[
+				"initTr",
+				"initTreeInfo"
+			],
+			[
+				"tr",
+				"transparent〔value〕"
+			],
+			[
+				"time",
+				"timelineData"
+			],
+			[
+				"form",
+				"formValues"
+			],
+			[
+				"toggle",
+				"toggleTop"
+			],
+			[
+				"CO",
+				"company"
+			],
+			[
+				"init",
+				"initQuick"
+			],
+			[
+				"po",
+				"position"
+			],
+			[
+				"reset",
+				"resetDevops"
+			],
+			[
+				"selec",
+				"selectedNodes"
+			],
+			[
+				"ex",
+				"expandNodes"
+			],
+			[
+				"z",
+				"zTree"
+			],
+			[
+				"unde",
+				"undefined"
+			],
+			[
+				"sub",
+				"substring"
+			],
+			[
+				"data",
+				"dataZoom"
+			],
+			[
+				"search",
+				"searchinfo"
+			],
+			[
+				"ti",
+				"tickets"
+			],
+			[
+				"obj",
+				"object\t<object>"
+			],
+			[
+				"btn-s",
+				"btn-success \tBootstrap 3 Class"
+			],
+			[
+				"main",
+				"main-container"
+			],
+			[
+				"ove",
+				"overflow-x"
+			],
+			[
+				"err",
+				"error\t.error()"
+			],
+			[
+				"filter",
+				"filterByCond"
+			],
+			[
+				"clone",
+				"cloneDeep"
+			],
+			[
+				"server",
+				"serverserial"
+			],
+			[
+				"table",
+				"table-responsive \tBootstrap 3 Class"
+			],
+			[
+				"_",
+				"_groupByClass"
+			],
+			[
+				"searc",
+				"search-result-content-template"
+			],
+			[
+				"sear",
+				"search-result-panel"
+			],
+			[
+				"key",
+				"keywords"
+			],
+			[
+				"new",
+				"newInput"
+			],
+			[
+				"pull-",
+				"pull-right \tBootstrap 3 Class"
+			],
+			[
+				"del",
+				"delay\t.delay()"
+			],
+			[
+				"line",
+				"lineHeight"
+			],
+			[
+				"tab-",
+				"tab-history"
+			],
+			[
+				"remo",
+				"removeClass\t.removeClass()"
+			],
+			[
+				"tab",
+				"table-panel-tab-ul"
+			],
+			[
+				"ha",
+				"handler"
+			],
+			[
+				"lo",
+				"log"
+			],
+			[
+				"text",
+				"text-align"
+			],
+			[
+				"agent",
+				"agentFilterEditor"
+			],
+			[
+				"qu",
+				"queryInputEditor"
+			],
+			[
+				"query-",
+				"query-table"
+			],
+			[
+				"error",
+				"errorThrown"
+			],
+			[
+				"Dat",
+				"data"
+			],
+			[
+				"MX",
+				"mxLog"
+			],
+			[
+				"WA",
+				"warn"
+			],
+			[
+				"btn_query",
+				"btn_query_help"
+			],
+			[
+				"open",
+				"openHisPanelByChart"
+			],
+			[
+				"gr",
+				"graphData"
+			],
+			[
+				"cos",
+				"comm-subsection\tComment - Subsection comment"
+			],
+			[
+				"g",
+				"graphData"
+			],
+			[
+				"by",
+				"byHost"
+			],
+			[
+				"bootstrapTable",
+				"bootstrap-table"
+			],
+			[
+				"ini",
+				"initContextMenu"
+			],
+			[
+				"font",
+				"font-size"
+			],
+			[
+				"group",
+				"groupBy"
+			],
+			[
+				"per",
+				"performance"
+			],
+			[
+				"com",
+				"company"
+			],
+			[
+				"firs",
+				"firstoccurrence"
+			],
+			[
+				"mous",
+				"mousemove\t.mousemove()"
+			],
+			[
+				"for",
+				"forEach"
+			],
+			[
+				"pa",
+				"Paste"
+			],
+			[
+				"min",
+				"minute"
+			],
+			[
+				"Se",
+				"second"
+			],
+			[
+				"max",
+				"dataMax"
+			],
+			[
+				"dr",
+				"dropdown-menu"
+			],
+			[
+				"node",
+				"nodealias"
+			],
+			[
+				"string",
+				"stringify"
+			],
+			[
+				"sta",
+				"stats-info"
+			],
+			[
+				"ba",
+				"background-color"
+			],
+			[
+				"wid",
+				"performance-widget"
+			],
+			[
+				"en",
+				"entity"
+			],
+			[
+				"add",
+				"addEntityHardware"
+			],
+			[
+				"call",
+				"Callback"
+			],
+			[
+				"event",
+				"eventHub"
+			],
+			[
+				"dataM",
+				"dataMin"
+			],
+			[
+				"deta",
+				"details\t<details>"
+			],
+			[
+				"even",
+				"eventHub"
+			],
+			[
+				"next",
+				"nextTick"
+			],
+			[
+				"auto",
+				"autosize"
+			],
+			[
+				"mouse",
+				"mousedown\t.mousedown()"
+			],
+			[
+				"pull",
+				"pull-right \tBootstrap 3 Class"
+			],
+			[
+				"panel-d",
+				"panel-default \tBootstrap 3 Class"
+			],
+			[
+				"col",
+				"columns"
+			],
+			[
+				"elem",
+				"elements"
+			],
+			[
+				"sign",
+				"IsSigned"
+			],
+			[
+				"El",
+				"element"
+			],
+			[
+				"len",
+				"length"
+			],
+			[
+				"panel-de",
+				"panel-heading"
+			],
+			[
+				"na",
+				"nav-main"
+			],
+			[
+				"dig",
+				"diagnosis"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "bs3-i",
+		"selected_items":
+		[
+			[
+				"bs3-i",
+				"Snippet: bs3-input-checkbox"
+			],
+			[
+				"bs3-j",
+				"Snippet: bs3-jumbotron"
+			],
+			[
+				"j",
+				"Snippet: jQuery.ajax"
+			],
+			[
+				"bs3-t",
+				"Snippet: bs3-tabs"
+			],
+			[
+				"hmtl",
+				"Set Syntax: HTML"
+			],
+			[
+				"script",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"bs3-m",
+				"Snippet: bs3-modal"
+			],
+			[
+				"bs3-te",
+				"Snippet: bs3-textarea-h"
+			],
+			[
+				"jq",
+				"Snippet: jQuery.ajax"
+			],
+			[
+				"bs3-br",
+				"Snippet: bs3-breadcrumbs"
+			],
+			[
+				"c",
+				"Snippet: Comment - Subsection comment"
+			],
+			[
+				"",
+				"Project: Add Folder"
+			],
+			[
+				"vue",
+				"Set Syntax: Vue Component"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"snippet:vu",
+				"Snippet: #!/usr/bin/env groovy -w"
+			],
+			[
+				"snippet:",
+				"Snippet: <div v-for=\"item in items\">"
+			],
+			[
+				"i",
+				"Snippet: bs3-input-month"
+			],
+			[
+				"v",
+				"Snippet: bs3-link-button-group-vertical"
+			],
+			[
+				"boo",
+				"Snippet: bs3-button-toolbar"
+			],
+			[
+				"vu",
+				"Convert Case: Upper Case"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"bs3-p",
+				"Snippet: bs3-panel-info"
+			],
+			[
+				"bs3-ca",
+				"Snippet: bs3-carousel"
+			],
+			[
+				"bs3-r",
+				"Snippet: bs3-row-col"
+			],
+			[
+				"bs3-ta",
+				"Snippet: bs3-table"
+			],
+			[
+				"bs3-",
+				"Snippet: bs3-label"
+			],
+			[
+				"cs",
+				"Snippet: Comment - Subsection comment"
+			],
+			[
+				"cos",
+				"Snippet: Comment - Subsection comment"
+			],
+			[
+				"bs3-s",
+				"Snippet: bs3-select"
+			],
+			[
+				"bs3-c",
+				"Snippet: bs3-container"
+			],
+			[
+				"bs3-row",
+				"Snippet: bs3-row-col"
+			],
+			[
+				"md",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"javas",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"bs3-form",
+				"Snippet: bs3-navbar-form"
+			],
+			[
+				"bs3-for",
+				"Snippet: bs3-form-label"
+			],
+			[
+				"jqer",
+				"Snippet: jQuery.ajax"
+			],
+			[
+				"bs3-bu",
+				"Snippet: bs3-button-default"
+			],
+			[
+				"bs3-panel",
+				"Snippet: bs3-panel-success"
+			],
+			[
+				"bs3-input-n",
+				"Snippet: bs3-input-number"
+			],
+			[
+				"bs3-tab",
+				"Snippet: bs3-tabs"
+			],
+			[
+				"bs3-im",
+				"Snippet: bs3-image"
+			],
+			[
+				"bs3-in",
+				"Snippet: bs3-input-radio"
+			],
+			[
+				"div",
+				"Package Control: Discover Packages"
+			],
+			[
+				"$f",
+				"Snippet: document.ready - $(function(){})"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"mar",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"bs3-col",
+				"Snippet: bs3-col"
+			],
+			[
+				"ma",
+				"Markdown Preview: Preview in Browser"
+			],
+			[
+				"bs3-b",
+				"Snippet: bs3-button-info"
+			],
+			[
+				"emm",
+				"Emmet: Toggle Comment"
+			],
+			[
+				"co",
+				"Snippet: bs3-col-4"
+			],
+			[
+				"bs3-f",
+				"Snippet: bs3-form"
+			],
+			[
+				"bs3-img",
+				"Snippet: bs3-image"
+			],
+			[
+				"bs3-con",
+				"Snippet: bs3-container"
+			],
+			[
+				"bs3-inp",
+				"Snippet: bs3-input-text"
+			],
+			[
+				"jquery",
+				"Snippet: jQuery.each"
+			],
+			[
+				"bs3-we",
+				"Snippet: bs3-well-sm"
+			],
+			[
+				"bs3-pan",
+				"Snippet: bs3-panel-heading"
+			],
+			[
+				"jqe",
+				"Snippet: jQuery.ajax"
+			],
+			[
+				"json",
+				"Set Syntax: JSON"
+			],
+			[
+				"bs3-pa",
+				"Snippet: bs3-panel-primary"
+			],
+			[
+				"bs3",
+				"Snippet: bs3-button"
+			],
+			[
+				"tab",
+				"View: Toggle Tabs"
+			],
+			[
+				"panel",
+				"Snippet: bs3-panel-info"
+			],
+			[
+				"html",
+				"Set Syntax: HTML"
+			],
+			[
+				"rea",
+				"Snippet: document.ready - $(function(){})"
+			],
+			[
+				"bs3-he",
+				"Snippet: bs3-panel-heading"
+			],
+			[
+				"input",
+				"Snippet: bs3-input-text"
+			],
+			[
+				"im",
+				"Snippet: bs3-image"
+			],
+			[
+				"image",
+				"Snippet: bs3-image"
+			],
+			[
+				"col-",
+				"Snippet: bs3-col-1"
+			],
+			[
+				"bs3-ac",
+				"Snippet: bs3-carousel"
+			],
+			[
+				"row",
+				"Snippet: bs3-row-col"
+			],
+			[
+				"conta",
+				"Snippet: bs3-container"
+			],
+			[
+				"pan",
+				"Snippet: bs3-panel"
+			],
+			[
+				"pac",
+				"Package Control: Install Package"
+			],
+			[
+				"bs3-th",
+				"Snippet: bs3-thumbnail"
+			],
+			[
+				"bs3-ul",
+				"Snippet: bs3-list-group"
+			],
+			[
+				"bu",
+				"Snippet: bs3-button-success"
+			],
+			[
+				"bs3-h",
+				"Snippet: bs3-panel-heading"
+			],
+			[
+				"do",
+				"Snippet: document.ready - $(function(){})"
+			],
+			[
+				"butt",
+				"Snippet: bs3-button-group"
+			],
+			[
+				"ea",
+				"Snippet: $.each()"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"pci",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 540.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/cnwangzd/Documents/Admin/Color/seantheme.com/color-admin-v1.7/admin/html/assets/js/dashboard.min.js",
+		"/Users/cnwangzd/Documents/Admin/Color/seantheme.com/color-admin-v1.7/admin/html/ui_widget_boxes.html",
+		"/Users/cnwangzd/Desktop/dmesg.log",
+		"/opt/go/workspace/bin/templates/user/auth/signin.tmpl",
+		"/opt/go/workspace/bin/templates/janesware/job.html",
+		"/opt/go/workspace/bin/templates/janesware/untitled.html",
+		"/opt/go/workspace/bin/templates/janesware/dashboard.html",
+		"/opt/go/workspace/bin/templates/janesware/kpi.html",
+		"/opt/go/workspace/bin/templates/janesware/system.html",
+		"/opt/go/workspace/bin/templates/janesware/graph_list.html",
+		"/opt/go/workspace/bin/templates/janesware/dashboard_list.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/src/js/util/mxLog.js",
+		"/opt/go/workspace/bin/templates/janesware/obj.html",
+		"/opt/go/workspace/bin/templates/base/footer.html",
+		"/opt/go/workspace/bin/public/web/js/cfg.js",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Init.js",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/test/testmql.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/test/testjson.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/test/testjson2.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/test/testinsert.go",
+		"/opt/go/workspace/src/janesware.com/web/routers/modb/modb.go",
+		"/opt/go/workspace/bin/templates/base/head.html",
+		"/opt/go/workspace/bin/public/web/lib/split/split.js",
+		"/opt/go/workspace/bin/public/web/lib/split/split.min.js",
+		"/opt/go/workspace/bin/templates/janesware/object.html",
+		"/opt/go/workspace/bin/public/web/lib/object-hash/dist/object_hash.js.map",
+		"/Users/cnwangzd/Downloads/object-hash-master/dist/object_hash.js",
+		"/Users/cnwangzd/Library/Application Support/Sublime Text 3/Packages/GoSublime/CHANGELOG.md",
+		"/opt/go/workspace/janesware.repo/web/templates/backup/mxconfig/console.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/mxClient.js",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Graph.js",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/src/js/view/mxGraph.js",
+		"/opt/go/workspace/bin/public/web/js/init.js",
+		"/Users/cnwangzd/Downloads/logo.txt",
+		"/opt/go/workspace/bin/public/web/component/vue-gauge-linear-component.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/src/images/status/progress/grey.svg",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/src/images/status/progress/normal.svg",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/modules/setting/setting.go",
+		"/opt/go/workspace/bin/public/web/component/vue-timeline-component.html",
+		"/opt/go/workspace/bin/public/web/component/vue-timeline-componen.html",
+		"/opt/go/workspace/bin/public/web/js/en-US/common.js",
+		"/opt/go/workspace/bin/public/web/component/vue-entity-graph-component.html",
+		"/opt/go/workspace/bin/public/web/component/vue-search-input-component.html",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/mshell/msGrammar.txt",
+		"/opt/go/workspace/bin/public/web/component/vue-editor-component.html",
+		"/opt/go/workspace/bin/public/web/component/vue-echart-timeline-component.html",
+		"/opt/go/workspace/bin/templates/janesware/object.html.20171202",
+		"/opt/go/workspace/bin/public/web/component/vue-entity-tree-component.html",
+		"/opt/go/workspace/bin/public/web/lib/tree/zTree/css/mxobjectTreeStyle/zTreeStyle.css",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/cmd/web.go",
+		"/opt/go/workspace/src/janesware.com/web/routers/view/view.go",
+		"/opt/go/workspace/bin/pbc/pbc2/product/data/chinaHigh.svg",
+		"/opt/go/workspace/bin/public/web/js/component/vue-component.html",
+		"/opt/go/workspace/bin/templates/janesware/diagnosis.html",
+		"/opt/go/workspace/bin/templates_20170531/home.html",
+		"/opt/go/workspace/bin/templates/home.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Sidebar.js",
+		"/opt/go/workspace/bin/public/web/lib/global.js",
+		"/opt/go/workspace/bin/public/web/component/vue-search-preset-component_en-US.html",
+		"/opt/go/workspace/bin/pbc/pbc2/product/js/app.js",
+		"/opt/go/workspace/bin/pbc/pbc2/product/pages/vm_blue.html",
+		"/opt/go/workspace/bin/public/web/js/en-US/init.js",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Actions.js",
+		"/opt/go/workspace/bin/public/web/css/style.min.css",
+		"/opt/go/workspace/bin/public/web/component/vue-search-preset-component.html",
+		"/opt/go/workspace/bin/public/web/component/vue-bootstrap-table.html",
+		"/Users/cnwangzd/Downloads/alerts.status",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/mshell/MsParser.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/peg/peg.txt",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/peg/c.bat",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/peg/PegSemantics.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/peg/peg/PegParser.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/sed/cmd.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/sed/q_cmd.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/sed/sed.go",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/index的副本.html",
+		"/opt/go/workspace/bin/public/web/js/util.js",
+		"/Users/cnwangzd/Downloads/omibus_columns_csv 2.txt",
+		"/opt/go/workspace/bin/public/web/comp/vue-component.html",
+		"/opt/go/workspace/bin/public/web/js/zh-CN/template/search-preset-component.html",
+		"/opt/go/workspace/bin/public/web/js/zh-CN/common.js",
+		"/opt/go/workspace/bin/public/web/lib/css/index.css",
+		"/opt/go/workspace/bin/public/web/lib/css/global.css",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/src/js/mxClient.js",
+		"/opt/go/workspace/bin/public/web/js/en-US/template/search-preset-component.html",
+		"/opt/go/workspace/bin/public/web/css/clolr_style.min.css",
+		"/opt/go/workspace/bin/templates/janesware/files.html",
+		"/opt/go/workspace/bin/public/web/js/zh-CN/app.js",
+		"/opt/go/workspace/bin/public/web/js/en-US/app.js",
+		"/opt/go/workspace/bin/conf/locale/locale_en-US.ini",
+		"/opt/go/workspace/bin/conf/locale/locale_zh-CN.ini",
+		"/opt/go/workspace/bin/custom/conf/locale/locale_en-US.ini",
+		"/opt/go/workspace/bin/public/web/lib/table/bootstrap/locale/bootstrap-table-en-US.js",
+		"/opt/go/workspace/bin/public/web/lib/table/bootstrap/locale/bootstrap-table-zh-CN.js",
+		"/opt/go/workspace/bin/public/web/lib/defiantjs/deflant.min.js",
+		"/Volumes/TOSHIBA/CPU_LIST",
+		"/opt/go/workspace/bin/public/web/lib/tree/zTree/js/jquery.ztree.core-3.5.js",
+		"/opt/go/workspace/src/janesware.com/web/cmd/web.go",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Toolbar.js",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/test/testsearch.go",
+		"/opt/go/workspace/bin/pbc/pbc2/product/pages/hd_sh_blue.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/index.html",
+		"/opt/go/workspace/bin/public/web/lib/mxgraph/graph/js/Menus.js",
+		"/opt/go/workspace/bin/public/js/en-US/app.js",
+		"/opt/go/workspace/bin/public/js/en-US/common.js",
+		"/Users/cnwangzd/.Trash/js 18.02.07/en-US/common.js",
+		"/opt/go/workspace/bin/public/js/en-US/template/search-preset-component.html",
+		"/opt/go/workspace/bin/templates/janesware/itmap_list.html",
+		"/opt/go/workspace/bin/public/js/zh-CN/template/search-preset-component.html",
+		"/opt/go/workspace/bin/public/web/js/en-US/template/timeline-component.html",
+		"/opt/go/workspace/bin/public/web/lib/table/bootstrap/bootstrap-table.js",
+		"/Users/cnwangzd/Downloads/bootstrap-table/dist/bootstrap-table.js",
+		"/opt/go/workspace/bin/templates/user/auth/signup.tmpl",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/routers/config/config.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/routers/modb/modb.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/macaron/i18n/i18n.go",
+		"/opt/go/workspace/bin/public/web/css/clolr_style_responsive.min.css",
+		"/opt/go/workspace/bin/public/web/css/color_default.css",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/common/common.go",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/routers/user/setting.go",
+		"/opt/go/workspace/bin/templates/2016/janesware/dashboard.html",
+		"/Users/cnwangzd/Downloads/localForage/examples/websql-foo.html",
+		"/Users/cnwangzd/Downloads/localForage/examples/no-driver.html",
+		"/Users/cnwangzd/Downloads/localForage/examples/main.js",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/modules/middleware/context.go",
+		"/opt/go/workspace/bin/templates/janesware/user.html",
+		"/opt/go/workspace/janesware.repo/server/janesware.com/web/routers/dev/template.go",
+		"/opt/go/workspace/bin/pbc/pbc2/product/pages/npc_blue_ext.html"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 101.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 35.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.GoSublime-main-output":
+	{
+		"height": 100.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.sftp":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "home.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 328.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

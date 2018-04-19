@@ -801,6 +801,8 @@
                                 "height": "calc(100vh - 175px)"
                             });
 
+                            toggleFullScreen();
+
                         } else {
                             $(".navbar-fixed-top").css({"display": ""});
                             $("#page-container").css({"padding-top": "54px"});
@@ -817,7 +819,7 @@
                         $(".toggle-mode").addClass(_head.icon);
                         $(".toggle-mode").attr("title", _head.title);
 
-                        self.toggle.mode.push(self.toggle.mode.shift());
+                        self.toggle.mode.list.push(self.toggle.mode.list.shift());
                     },
                     toggleFilter: function (filter) {
                         let self = this;
