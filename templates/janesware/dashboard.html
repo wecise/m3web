@@ -846,6 +846,7 @@
             var self = this;
 
             self.loadView();
+            self.plugIn();
         },
         mounted: function(){
             var self = this;
@@ -855,6 +856,12 @@
             })
         },
         methods: {
+            plugIn: function(){
+                let self = this;
+
+                $(".navbar.navbar-default.navbar-fixed-top").remove();
+                $(".page-header-fixed").css("padding-top","0px");
+            },
             loadView: function(){
                 var self = this;
                 let _tmp = localStorage.getItem("dashboard-object");

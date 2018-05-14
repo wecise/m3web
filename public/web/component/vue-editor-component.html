@@ -21,8 +21,8 @@
         },
         data: function(){
             return {
-                editor: Object,
-                inputText: String,
+                editor: null,
+                inputText: "",
             }
         },
         mounted: function(){
@@ -35,20 +35,20 @@
         watch: {
             'model.newInput': {
             	handler:function(val,oldVal){
-                    var self = this;
-
+                    let self = this;
+                    
                     self.editor.setValue(val);
                 },
                 deep:true
             }
         },
         created: function () {
-            var self = this;
+            let self = this;
 
         },
         methods: {
             init: function() {
-                var self = this;
+                let self = this;
 
                 self.editor = ace.edit(self.id);
                 
@@ -63,7 +63,15 @@
 
                 self.setTheme();
                 self.setMode();
+                self.setOptions();
                 
+            },
+            setOptions: function(){
+                let self = this;
+
+                if(!_.isEmpty(self.model.options)){
+                    self.editor.setOptions(self.model.options);
+                } 
             },
             setTheme: function(){
                 var self = this;

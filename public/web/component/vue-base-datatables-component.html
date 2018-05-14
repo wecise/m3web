@@ -2,7 +2,7 @@
 
 	<style>
 		/*----------  style  ----------*/
-		.vue-base-datatables-component tbody tr td{
+		.vue-base-datatables-component thead tr th, .vue-base-datatables-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
 		}
@@ -49,10 +49,11 @@
 			columns: Array,
 			dataset: Array,
 			options: Object,
+            contextmenu: String
 		},
 		data: function(){
           	return {
-                datatable: Object,
+                datatable: null,
 				selectedRow: null,
 				selectedCell: null,
                 templates: {
@@ -126,142 +127,51 @@
 	                                    <div class="panel" id="panel-detail" :model="model"></div>
 	                                </div>
 	                            </div>`
-                }
-			}
-		},
-        created: function(){
-            let self = this;
-
-            eventHub.$on("datatable-resize-event", self.redraw);
-        },
-		mounted: function () {
-            let self = this;
-
-            self.$nextTick(function () {
-
-                _.delay(function() {
-                    self.init();
-                },500);
-
-            })
-        },
-		computed: {
-            _columns: function(){
-                let self = this;
-
-                return _.map(self.columns,function(v,k){
-                    		return { "data": v.field, "title": v.title };
-						});
-			}
-		},
-		watch: {
-          	dataset: function(val,oldVal){
-          	    let self = this;
-
-                wait(500);
-                self.datatable.clear().draw();
-				self.datatable.rows.add(val); // Add new data
-				self.datatable.columns.adjust().draw(); // Redraw the DataTable
-
-			}
-		},
-		methods: {
-            init: function(){
-                let self = this;
-
-                self.datatable = $(self.$el).DataTable( {
-                    			data: self.dataset,
-                                columns: self._columns,
-								responsive: true,
-                                //bAutoWidth: true,
-								searching: false,
-								//bSort: true,
-								paging: false,
-								info: false,
-                    			scrollX: true,
-								scrollY: '54vh',
-								scrollCollapse: true,
-
-                } );
-
-				self.initPlugin();
-
-			},
-			initPlugin: function(){
-                let self = this;
-
-                // init selected row's status
-                $(self.$el).find("tbody").on("click", "tr", function () {
-                    if ( $(this).hasClass('selected') ) {
-                        $(this).removeClass('selected');
-                    }
-                    else {
-                        self.datatable.$("tr.selected").removeClass("selected");
-                        $(this).addClass("selected");
-                    }
-                } );
-
-                $(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
-					var colIdx = self.datatable.cell(this).index().column;
-
-					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
-					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
-				} );
-
-                // selected row
-                $(self.$el).on( 'click', 'tr', function () {
-                    self.selectedRow = self.datatable.row( this ).data();
-                } );
-
-                // selected cell
-                $(self.$el).on( 'click', 'td', function () {
-                    self.selectedCell = self.datatable.cell( this ).data();
-                } );
-
-                // init context menu
-                $.contextMenu({
-                    selector: "#"+self.id,
-                    build: function ($trigger, e) {
-                        return {
-                            callback: function (key, options) {
-                                //self.initModules(key, options.items[key]);
-                            },
-                            items: {
+                },
+                items: {
+                    ciview: {
                                 "card": { app:"ciview", name: "配置卡片", icon: "fa-tasks", callback: function(key, opt) {
 
-																										newWindow('large', opt.items[key].name + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
+                                                                                                        let _table = $('#'+opt.$trigger.attr("id")).DataTable();
+                                                                                                        let _selectedRow = _table.row('.selected').data();
+                                                                                                        
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`);
 
-																										_.delay(function(){
+                                                                                                        _.delay(function(){
 
-																											let cardVue = new Vue({
-																												el: '#panel-card',
-																												data: function(){
-																													return {
-																														model: self.selectedRow
-																													}
-																												},
-																												template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
-																											});
+                                                                                                            let cardVue = new Vue({
+                                                                                                                el: '#panel-card',
+                                                                                                                data: function(){
+                                                                                                                    return {
+                                                                                                                        model: _selectedRow
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
+                                                                                                            });
 
 
-																										},100);
-																									}
+                                                                                                        },100);
+                                                                                                    }
                                 },
                                 "sep1": "---------",
                                 "new": { app:"ciview", name: "新建", icon: "fa-paste", callback: function(key, opt) {
 
-                                        																newWindow('large', opt.items[key].name + " " + self.selectedRow.name, `<div id="ci-create-template"></div>`);
+                                                                                                        let _table = $('#'+opt.$trigger.attr("id")).DataTable();
+                                                                                                        let _selectedRow = _table.row('.selected').data();
+                                                                                                        
 
-																										_.delay(function() {
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`);
 
-																										    let _item = self.selectedRow;
+                                                                                                        _.delay(function() {
+
+                                                                                                            let _item = _selectedRow.selectedRow;
 
                                                                                                             let cVue = new Vue({
                                                                                                                 delimiters: ['$', '$'],
                                                                                                                 el: '#ci-create-template',
-                                                                                                                template: `	<div class="panel"><div class="panel-body">
-																																<vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
-																															</div></div>`,
+                                                                                                                template: ` <div class="panel"><div class="panel-body">
+                                                                                                                                <vue-common-form-component id="form" :form="model.form"></vue-common-form-component>
+                                                                                                                            </div></div>`,
                                                                                                                 data: function(){
                                                                                                                     return {
                                                                                                                         model: {
@@ -301,24 +211,24 @@
                                                                                                                     }
                                                                                                                 },
                                                                                                                 created:function(){
-                                                                                                                    let self = this;
+                                                                                                                    let me = this;
 
-                                                                                                                    self.init();
+                                                                                                                    me.init();
 
                                                                                                                 },
                                                                                                                 mounted: function() {
-                                                                                                                    let self = this;
+                                                                                                                    let me = this;
 
-                                                                                                                    self.$nextTick(function(){
+                                                                                                                    me.$nextTick(function(){
 
-                                                                                                                        self.initPlugIn();
+                                                                                                                        me.initPlugIn();
 
                                                                                                                     })
 
                                                                                                                 },
                                                                                                                 methods: {
                                                                                                                     init: function(){
-                                                                                                                        let self = this;
+                                                                                                                        let me = this;
                                                                                                                         let _list = fetchClass(_item.class);
                                                                                                                         let _properties = {};
                                                                                                                         let _fields = {};
@@ -334,38 +244,467 @@
                                                                                                                             _.merge(_fields, {[_name]: {label: _.startCase(v.name)}});
                                                                                                                         });
 
-                                                                                                                        self.model.form.data = _data;
-                                                                                                                        self.model.form.schema.title = _item.class;
-                                                                                                                        self.model.form.schema.properties = _properties;
-                                                                                                                        self.model.form.options.fields = _fields;
+                                                                                                                        me.model.form.data = _data;
+                                                                                                                        me.model.form.schema.title = _item.class;
+                                                                                                                        me.model.form.schema.properties = _properties;
+                                                                                                                        me.model.form.options.fields = _fields;
 
-                                                                                                                        self.model.list = _.map(_list.message.fields,function(v){
+                                                                                                                        me.model.list = _.map(_list.message.fields,function(v){
                                                                                                                             return v;
                                                                                                                         });
 
 
                                                                                                                     },
                                                                                                                     initPlugIn: function(){
-                                                                                                                        let self = this;
+                                                                                                                        let me = this;
 
                                                                                                                     },
                                                                                                                     save: function(event){
-                                                                                                                        let self = this;
+                                                                                                                        let me = this;
                                                                                                                         let rtn = putDataByMql(event);
                                                                                                                     }
                                                                                                                 }
                                                                                                             });
                                                                                                         },500);
-																								}
-								},
+                                                                                                }
+                                },
                                 "sep2": "---------",
-								"delete": { app:"ciview", name: "删除", icon: "fa-trash", callback: function(key, opt) {} },
+                                "delete": { app:"ciview", name: "删除", icon: "fa-trash", callback: function(key, opt) {} },
                                 "sep3": "---------",
                                 "action": { app:"ciview", name: "新建命令", icon: "fa-plus", callback: function(key, opt) {} }
+                            },
+                    grok: {
+                                "new": { app:"grok", name: "新建", icon: "fa-paste", callback: function(key, opt) {
+
+                                                                                                        newWindow('small', '新建', `<div id="grok-new-template"></div>`);
+
+                                                                                                        _.delay(function() {
+
+                                                                                                            let cVue = new Vue({
+                                                                                                                delimiters: ['$', '$'],
+                                                                                                                el: '#grok-new-template',
+                                                                                                                template: ` <div class="panel">
+                                                                                                                                <div class="panel-body" style="padding:15px 35px;">
+                                                                                                                                    <form class="form-horizontal" role="form">
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>名称</label>
+                                                                                                                                            <input type="text" class="form-control" v-model="model.name" placeholder="名称">
+                                                                                                                                        </div>
+
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>解析规则</label>
+                                                                                                                                            <vue-editor-component id="editor-pattern" :model="model.pattern"></vue-editor-component>
+                                                                                                                                        </div>
+                                                                                                                                            
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>示例</label>
+                                                                                                                                            <vue-editor-component id="editor-eg" :model="model.eg"></vue-editor-component>
+                                                                                                                                        </div>
+
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <div class="pull-right">
+                                                                                                                                                <a class="btn btn-xs btn-primary" @click="save">提交</a>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                    </form>
+                                                                                                                                </div>
+                                                                                                                            </div>`,
+                                                                                                                data: function(){
+                                                                                                                    return {
+                                                                                                                        model: {
+                                                                                                                            name: "",
+                                                                                                                            pattern: {
+                                                                                                                                oldInput: "",
+                                                                                                                                newInput: "",
+                                                                                                                                mode: "toml",
+                                                                                                                                theme: "tomorrow",
+                                                                                                                                printMargin: false,
+                                                                                                                                readOnly: false,
+                                                                                                                                options: {
+                                                                                                                                    minLines: 5
+                                                                                                                                }
+                                                                                                                            },
+                                                                                                                            eg: {
+                                                                                                                                oldInput: "",
+                                                                                                                                newInput: "",
+                                                                                                                                mode: "toml",
+                                                                                                                                theme: "tomorrow",
+                                                                                                                                printMargin: false,
+                                                                                                                                readOnly: false,
+                                                                                                                                options: {
+                                                                                                                                    minLines: 5
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                created:function(){
+                                                                                                                    let me = this;
+
+                                                                                                                    
+                                                                                                                },
+                                                                                                                mounted: function() {
+                                                                                                                    let me = this;
+
+                                                                                                                    me.$nextTick(function(){
+                                                                                                                        me.init();                                                        
+                                                                                                                        me.initPlugIn();
+                                                                                                                    })
+
+                                                                                                                },
+                                                                                                                methods: {
+                                                                                                                    init: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                    },
+                                                                                                                    initPlugIn: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                    },
+                                                                                                                    save: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                        if (_.isEmpty(me.model.name)) {
+                                                                                                                            swal("名称不能为空！", "", "warning");
+                                                                                                                            return false;
+                                                                                                                        }
+
+                                                                                                                        let _pattern = ace.edit("editor-pattern");
+                                                                                                                        let _eg = ace.edit("editor-eg");
+
+                                                                                                                        let _data = {name:me.model.name,pattern:_pattern.getValue(), eg: _eg.getValue()};
+                                                                                                                        
+                                                                                                                        let rtn = grokNew(_data);
+
+                                                                                                                        if(rtn == 1){
+                                                                                                                            eventHub.$emit("grok-list-refresh-event", null);    
+                                                                                                                        }
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            });
+                                                                                                        },500);
+                                                                                                }
+                                },
+                                "sep1": "---------",
+                                "edit": { app:"grok", name: "修改", icon: "fa-edit", callback: function(key, opt) {
+
+                                                                                                        let _table = $('#'+opt.$trigger.attr("id")).DataTable();
+                                                                                                        let _selectedRow = _table.row('.selected').data();
+                                                                                                        
+
+                                                                                                        newWindow('small', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`);
+
+                                                                                                        _.delay(function() {
+
+                                                                                                            let _item = _selectedRow;
+
+                                                                                                            let cVue = new Vue({
+                                                                                                                delimiters: ['$', '$'],
+                                                                                                                el: '#grok-edit-template',
+                                                                                                                template: ` <div class="panel">
+                                                                                                                                <div class="panel-body" style="padding:15px 35px;">
+                                                                                                                                    <form class="form-horizontal" role="form">
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>名称</label>
+                                                                                                                                            <input type="text" class="form-control" v-model="model.name" placeholder="名称" disabled>
+                                                                                                                                        </div>
+
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>解析规则</label>
+                                                                                                                                            <vue-editor-component :id="'editor-pattern-'+selected.name" :model="model.pattern"></vue-editor-component>
+                                                                                                                                        </div>
+                                                                                                                                            
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <label>示例</label>
+                                                                                                                                            <vue-editor-component :id="'editor-eg-'+selected.name" name="eg" :model="model.eg"></vue-editor-component>
+                                                                                                                                        </div>
+
+                                                                                                                                        <div class="form-group">
+                                                                                                                                            <div class="pull-right">
+                                                                                                                                                <a class="btn btn-xs btn-primary" @click="save">提交</a>
+                                                                                                                                            </div>
+                                                                                                                                        </div>
+                                                                                                                                    </form>
+                                                                                                                                </div>
+                                                                                                                            </div>`,
+                                                                                                                data: function(){
+                                                                                                                    return {
+                                                                                                                        model: {
+                                                                                                                            name: _item.name,
+                                                                                                                            pattern: {
+                                                                                                                                oldInput: "",
+                                                                                                                                newInput: _item.pattern,
+                                                                                                                                mode: "toml",
+                                                                                                                                theme: "tomorrow",
+                                                                                                                                printMargin: false,
+                                                                                                                                readOnly: false,
+                                                                                                                                options: {
+                                                                                                                                    minLines: 5
+                                                                                                                                }
+                                                                                                                            },
+                                                                                                                            eg: {
+                                                                                                                                oldInput: "",
+                                                                                                                                newInput: _item.eg,
+                                                                                                                                mode: "toml",
+                                                                                                                                theme: "tomorrow",
+                                                                                                                                printMargin: false,
+                                                                                                                                readOnly: false,
+                                                                                                                                options: {
+                                                                                                                                    minLines: 5
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        selected: _item
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                created:function(){
+                                                                                                                    let me = this;
+
+                                                                                                                    
+                                                                                                                },
+                                                                                                                mounted: function() {
+                                                                                                                    let me = this;
+
+                                                                                                                    me.$nextTick(function(){
+                                                                                                                        me.init();                                                        
+                                                                                                                        me.initPlugIn();
+                                                                                                                    })
+
+                                                                                                                },
+                                                                                                                methods: {
+                                                                                                                    init: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                        let _pattern = ace.edit("editor-pattern-"+_item.name);
+                                                                                                                        _pattern.setValue(_item.pattern);
+                                                                                                                        let _eg = ace.edit("editor-eg-"+_item.name);
+                                                                                                                        _eg.setValue(_item.eg);
+                                                                                                                        
+                                                                                                                    },
+                                                                                                                    initPlugIn: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                    },
+                                                                                                                    save: function(){
+                                                                                                                        let me = this;
+
+                                                                                                                        let _pattern = ace.edit("editor-pattern-"+_item.name);
+                                                                                                                        let _eg = ace.edit("editor-eg-"+_item.name);
+
+                                                                                                                        let _data = {name:me.model.name,pattern:_pattern.getValue(), eg: _eg.getValue()};
+                                                                                                                        
+                                                                                                                        let rtn = grokNew(_data);
+                                                                                                                        
+                                                                                                                        if(rtn == 1){
+                                                                                                                            eventHub.$emit("grok-list-refresh-event", null);    
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            });
+                                                                                                        },500);
+                                                                                                }
+                                },
+                                "sep2": "---------",
+                                "delete": { app:"grok", name: "删除", icon: "fa-trash", callback: function(key, opt) {
+
+                                                                                                        let _table = $('#'+opt.$trigger.attr("id")).DataTable();
+                                                                                                        let _selectedRow = _table.row('.selected').data();
+                                                                                                        
+                                                                                                        swal({
+                                                                                                                title: _selectedRow.name,
+                                                                                                                text: '确定要删除?',
+                                                                                                                type: 'warning',
+                                                                                                                showCancelButton: true,
+                                                                                                                confirmButtonColor: '#3085d6',
+                                                                                                                cancelButtonColor: '#d33',
+                                                                                                                confirmButtonText: '删除',
+                                                                                                                cancelButtonText: '取消'
+                                                                                                            }).then((result) => {
+                                                                                                                if (result.value) {
+                                                                                                                    let rtn = grokDelete(_selectedRow);
+                                                                                                                        
+                                                                                                                    if(rtn == 1){
+                                                                                                                        eventHub.$emit("grok-list-refresh-event", null);    
+                                                                                                                    }
+                                                                                                                }
+                                                                                                            })
+
+                                                                                                    } 
+                                },
+                                "sep3": "---------",
+                                "action": { app:"grok", name: "新建命令", icon: "fa-plus", callback: function(key, opt) {} }
+                          },
+                    objectData: {
+                                "detail": { app:"object", name: "详细", icon: "fa-tasks", callback: function(key, opt) {
+                                                                                                }
+                                },
+                                "sep1": "---------",
+                                "new": { app:"object", name: "新建", icon: "fa-plus", callback: function(key, opt) {
+                                                                                                }
+                                },
+                                "sep2": "---------",
+                                "delete": { app:"object", name: "删除", icon: "fa-trash", callback: function(key, opt) {
+                                                                                                }
+                                }
+                    }
+                }
+			}
+		},
+        created: function(){
+            let self = this;
+
+            eventHub.$on("datatable-resize-event", self.redraw);
+        },
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                _.delay(function() {
+                    self.init();
+                },500);
+                
+                _.delay(function() {
+                    self.redraw();
+                },3000);
+
+            })
+        },
+		computed: {
+            _columns: function(){
+                let self = this;
+
+                return _.map(self.columns,function(v,k){
+                    		return { "data": v.field, "title": v.title, render: v.render };
+						});
+			}
+		},
+		watch: {
+          	dataset: {
+                handler: function(val,oldVal){
+                      	    let self = this;
+                            
+                            if( !_.isEmpty(self.datatable) ) {
+                                self.datatable.destroy(); 
+                                self.init();
                             }
+
+                            self.datatable.clear();
+                            self.datatable.draw();
+                            self.datatable.rows.add(val); // Add new data
+                            self.datatable.columns.adjust().draw(); // Redraw the DataTable*/
+
+                },
+                deep:true
+			}/*,
+            columns: function(val,oldVal){
+                let self = this;
+
+                if(self.datatable){
+                    self.datatable.clear().draw();
+                    self.datatable.draw();
+                    //self.datatable.rows.add(val); // Add new data
+                    self.datatable.columns.adjust().draw(); // Redraw the DataTable
+                }
+
+            }*/
+		},
+		methods: {
+            init: function(){
+                let self = this;
+
+                self.datatable = $(self.$el).DataTable( _.extend({
+                    			data: self.dataset,
+                                columns: self._columns,
+                                responsive: true,
+                                aDataSort: true,
+                                bAutoWidth: true,
+								searching: true,
+								bSort: true,
+								paging: false,
+								info: false,
+                    			scrollX: true,
+								scrollY: '54vh',
+								scrollCollapse: true,
+                                "language" : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    }
+                                }
+                    },self.options)).columns.adjust().draw();
+
+				self.initPlugin();
+
+			},
+			initPlugin: function(){
+                let self = this;
+
+                // init selected row's status
+                $(self.$el).find("tbody").on("mouseenter", "tr", function () {
+
+                    if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                /*$(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
+					var colIdx = self.datatable.cell(this).index().column;
+
+					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
+					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
+				} );*/
+
+                // selected row
+                $(self.$el).on( 'click', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                // selected cell
+                $(self.$el).on( 'click', 'td', function () {
+                    self.selectedCell = self.datatable.cell( this ).data();
+                } );
+
+                // init context menu
+                $.contextMenu({
+                    selector: "#"+self.id,
+                    trigger: "right",
+                    delay: 300,
+                    autoHide: true,
+                    build: function ($trigger, e) {
+                        return {
+                            callback: function (key, options) {
+                                //self.initModules(key, options.items[key]);
+                            },
+                            items: self.items[self.contextmenu]
                         };
                     }
                 });
+
 			},
             redraw: function(){
                 let self = this;

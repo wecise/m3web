@@ -1,3 +1,16 @@
+/*
+*
+*      __  __   ____
+*    |  \/  | |__ /
+*    | \  / |  |_ \
+*    | |\/| | |___/
+*    | |  | |
+*    |_|  |_|
+*
+*
+*/
+
+
 var eventHub = new Vue();
 
 var GLOBAL_OBJECT=  {
@@ -37,13 +50,12 @@ var init =  function(){
                         GLOBAL_OBJECT.company.object[v] = [];
                     }
                 })
-               
-                //console.log(23, GLOBAL_OBJECT.company.dimension)
-            };
+};
 
 /*
 *  FullScreen Util
-* */
+*
+*/
 var toggleFullScreen = function () {
     if (!document.fullscreenElement &&    // alternative standard method
         !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
@@ -70,9 +82,10 @@ var toggleFullScreen = function () {
 }
 
 /*
- * 
- */
-
+*
+*
+*
+*/
 var loadLogo = function () {
     let _logo = '{{.logo}}';
     
@@ -101,7 +114,8 @@ var loadLogo = function () {
 }
 
 /*
- *  For: Load Function  
+ *  Load Function
+ *
  */
 var loadResource = function(filename, filetype, id){
 
@@ -129,7 +143,8 @@ var loadResource = function(filename, filetype, id){
 }
 
 /*
- *  For: Get Url Params 
+ *  Get Url Params
+ *
  */
 var urlParams = (function(url)
 {
@@ -163,9 +178,11 @@ var ifSignIn = function (event) {
 
 
 /*
-* 设置Home
-* 参数：
-*   home.html
+*   设置Home
+*
+*   参数：
+*       home.html
+*
 */
 var setDefaultHome = function(name,token){
     let rtn = null;
@@ -183,6 +200,9 @@ var setDefaultHome = function(name,token){
         complete: function(xhr, textStatus) {
         },
         success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -193,11 +213,13 @@ var setDefaultHome = function(name,token){
 };
 
 /*
-* 提交到文件系统
-* 参数：
-*   文件名称
-*   扩展名
-* */
+*   提交到文件系统
+*
+*   参数：
+*       文件名称
+*       扩展名
+*
+*/
 var putToFS = function(type, name, content){
     let rtn = null;
 
@@ -208,8 +230,6 @@ var putToFS = function(type, name, content){
                 'content': content, 'pic': ''
             }));
     fm.append("type", "file");
-
-    console.log(content, JSON.stringify(fm))
 
     jQuery.ajax({
         url: "/fs/home/creative/" + name,
@@ -236,11 +256,12 @@ var putToFS = function(type, name, content){
 
 
 /*
-* 获取文件列表
-* 参数：
-*   父目录
-*   文件名称
-* */
+*   获取文件列表
+*
+*   参数：
+*       父目录
+*       文件名称
+*/
 var fetchListFromFS = function(parent){
     let rtn = null;
     
@@ -274,11 +295,12 @@ var fetchListFromFS = function(parent){
 };
 
 /*
-* 获取文件内容从文件系统
-* 参数：
-*   父目录
-*   文件名称
-* */
+*   获取文件内容从文件系统
+*
+*      参数：
+*           父目录
+*           文件名称
+*/
 var fetchFileFromFS = function(parent,name){
     let rtn = null;
 
@@ -296,7 +318,7 @@ var fetchFileFromFS = function(parent,name){
         complete: function (xhr, textStatus) {
         },
         success: function (data, textStatus, xhr) {
-console.log('/fs' + parent + "/" + name, JSON.stringify(data))
+            
             ifSignIn(data);
 
             if (_.isEmpty(data.message)) return false;
@@ -313,10 +335,56 @@ console.log('/fs' + parent + "/" + name, JSON.stringify(data))
 
 
 /*
-*  获取当前class属性
-*  参数：
-*   class
-* */
+*   获取类的信息并生成tree
+*
+*       参数：
+*           ftype
+*           parent
+*           field
+*/
+var fetchSubClass = function(parent){
+    let rtn = null;
+
+    let _cond = {   
+                    ftype: "class",
+                    parent: parent
+                };
+
+    jQuery.ajax({
+        url: "/mxobject/search",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+          cond: `call tree ` + JSON.stringify(_cond)
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if (_.isEmpty(data.message)) return false;
+
+            rtn = data.message[0].tree;
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+}
+
+/*
+*   获取当前class属性
+*
+*       参数：
+*           class
+*/
 var fetchClass = function (param) {
     let rtn = null;
 
@@ -324,7 +392,7 @@ var fetchClass = function (param) {
         url: '/mxobject/schema/class',
         type: 'GET',
         dataType: 'json',
-        async:false,
+        async: false,
         data: {
             class: param
         },
@@ -348,10 +416,11 @@ var fetchClass = function (param) {
 
 
 /*
-*  一键搜索
-*  参数：
-*       cond：一键搜索语法及搜索关键字
-* */
+*   一键搜索
+*
+*       参数：
+*           cond：一键搜索语法及搜索关键字
+*/
 var fetchData = function (param) {
     let rtn = null;
 
@@ -371,7 +440,7 @@ var fetchData = function (param) {
 
             ifSignIn(data);
 
-            console.log(param, data)
+            if (_.isEmpty(data.message)) return rtn;
 
             rtn = data;
         },
@@ -384,10 +453,56 @@ var fetchData = function (param) {
 };
 
 /*
-* 执行MQL
-* 参数：
-*   mql
-* */
+*   对象数据管理
+*
+*       参数：
+*           data：更新JSON
+*           ctype: insert/update
+*/
+var putDataToClass = function (param) {
+    let rtn = 0;
+
+
+    jQuery.ajax({
+        url: '/mxobject/actiontoclass',
+        type: 'POST',
+        dataType: 'json',
+        async: false,
+        data: {
+            data: JSON.stringify(param),
+            ctype: "insert"
+        },
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+             
+            ifSignIn(data);
+
+            if(data.message == "OK"){
+                rnt = 1;
+                swal("Success!","","success");
+            } else {
+                rnt = 0;
+                swal("Failed!","","warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+/*
+*   执行MQL
+*
+*       参数：
+*           mql
+*/
 var fetchDataByMql = function (param) {
 
     let rtn = null;
@@ -427,12 +542,56 @@ var fetchDataByMql = function (param) {
     return rtn;
 };
 
+/*
+*  调用MQL，不建议使用！！！
+*
+*    参数：
+*      mql
+*/
+var putDataByMql = function (event) {
+    let rtn = null;
+    let _mql = `INSERT JSON '` + JSON.stringify(event) + `'`;
+
+    console.log(_mql)
+
+    jQuery.ajax({
+        url: "/mxobject/list/sql",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+            ctype:"obj",
+            sql: _mql
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                swal("Success!","","success");
+            }
+
+            rtn = data.status;
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+};
 
 /*
-* 获取一个文件内容
-* 参数：
-*   url
-* */
+*   获取一个文件内容
+*
+*       参数：
+*          url
+*/
 var fetchFile = function (url) {
 
     let rtn = null;
@@ -460,26 +619,26 @@ var fetchFile = function (url) {
 };
 
 /*
-* 执行作业
+*   执行作业
 *
-* 参数：
-*   receive_output： false【等待执行】 true【立即执行】 default：false
- *  param：cmd
- *  timeout： default：5 second
-* */
-var callJob = function () {
-
-    let event = '{"cmd":"df -h","HOST!":"wecise"}';
-
+*       参数：
+*           receive_output： false【等待执行】 true【立即执行】 default：false
+*           param：cmd
+*/
+var callJob = function (cmd,host) {
+    let rtn = null;
+    let event = '{"cmd": "' + cmd + '","HOST!": "'+host+'", "timeout": 5}';
+    
     jQuery.ajax({
         url: '/job/remote_command@system/common',
         dataType: 'json',
         type: 'GET',
+        async:false,
         data: {
             receive_output: true,
-            param: event,
-            timeout: 5
+            param: event
         },
+        timeout: 3000,
         beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
@@ -488,30 +647,35 @@ var callJob = function () {
 
             ifSignIn(data);
 
-            console.log(data)
+            if (_.isEmpty(data.message)) return rtn;
+
+            rtn = data;
 
         },
         error: function(xhr, textStatus, errorThrown){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
+    return rtn;
 };
 
 
 
-var putDataByMql = function (event) {
 
-    let _mql = `INSERT JSON '` + JSON.stringify(event) + `'`;
-
-    console.log(_mql)
-
+/*
+*  用户管理
+*
+*/
+var ldapMaintain = function (event) {
+    let rtn = 1;
+    
     jQuery.ajax({
-        url: "/mxobject/list/sql",
+        url: "/mxobject/search",
         dataType: 'json',
         type: 'POST',
+        async: false,
         data: {
-            ctype:"obj",
-            sql: _mql
+            cond: `call user ` + JSON.stringify(event)
         },
         beforeSend:function(xhr){
         },
@@ -522,25 +686,155 @@ var putDataByMql = function (event) {
             ifSignIn(data);
 
             if (data.status == "ok"){
+                rtn = 1;
                 swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            return 0;
         }
     });
+    return rtn;
+}
+
+/*
+*  Grok解析规则列表
+*
+*/
+var grokList = function (event) {
+    let rtn = null;
+    
+    jQuery.ajax({
+        url: "/pattern",
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+            
+            if (data.status == "ok"){
+                rtn = data;
+            }
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
 };
 
 /*
-*  用户管理
+*  Grok解析规则列表
 *
 */
-var ldapAdd = function (event) {
+var grokNew = function (event) {
+    let rtn = 1;
+
+    var form = new FormData();
+    form.append("eg", event.eg);
+    form.append("pattern", event.pattern);
+    
+    jQuery.ajax({
+        url: "/pattern/" + event.name,
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+            
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            return 0;
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  调度器组管理
+*
+*  group list
+*
+*
+*/
+var serverGroupList = function () {
     let rtn = null;
 
     jQuery.ajax({
-        url: "/admin/users",
+        url: '/group',
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok") {
+                rtn = data;
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  调度器组管理
+*  add group
+*   data: {
+*          "name": "string",
+*          "gtype": "string", // group | proxy
+*          "hosts": [
+*            {
+*             "host": "string",
+*              "proxy": "string",
+*              "port": "string",
+*              "username":"string",
+*              "password":"string"
+*            }
+*          ]
+*        }
+*
+*/
+var serverGroupNew = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/group',
         dataType: 'json',
         type: 'POST',
         async: false,
@@ -554,16 +848,432 @@ var ldapAdd = function (event) {
             ifSignIn(data);
 
             if (data.status == "ok"){
+                rtn = 1;
                 swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*  调度器组管理
+*  delete group
+*
+* */
+var serverGroupDelete = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/group/group/test',
+        dataType: 'json',
+        type: 'DELETE',
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  探针管理
+*  Agent list
+*
+*
+*/
+var agentList = function () {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/monitoring',
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok") {
+                rtn = data;
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  探针管理
+*
+*  Agent New
+*
+*    var form = new FormData();
+*    form.append("uploadbin", "test.sh");
+*    form.append("uploadconf", "test.conf");
+*
+*/
+var agentNew = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/monitoring/test',
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*  规则管理
+*
+*  Rule List
+*
+* */
+var ruleList = function() {
+
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/mxobject/rule?class=' + encodeURIComponent('/matrix/devops/event'),
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok") {
+                rtn = data;
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  规则管理
+*
+*  Rule New
+*
+*  data: {key:'/matrix/rules/event', script:'...'}
+*
+*/
+var ruleNew = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/mxobject/rule',
+        dataType: 'json',
+        type: 'PUT',
+        data: event,
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*  规则管理
+*
+*  Rule Delete
+*
+* */
+var ruleDelete = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/mxobject/rule?key=' + encodeURIComponent('/matrix/rules/event'),
+        dataType: 'json',
+        type: 'DELETE',
+        data: event,
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  探针管理
+*
+*  Agent list
+*
+*/
+var agentList = function () {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/monitoring',
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok") {
+                rtn = data;
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  探针管理
+*
+*  Agent New
+*
+*    var form = new FormData();
+*    form.append("uploadbin", "test.sh");
+*    form.append("uploadconf", "test.conf");
+*
+*/
+var agentNew = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/monitoring/test',
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*  探针管理
+*
+*  Agent Dispatch
+*
+*    var form2 = new FormData();
+*    form2.append("command", "./test.sh test");
+*    form2.append("cron", "0/30 * * * * * *");
+*    form2.append("hosts", "mxsvr201");
+*    form2.append("hosts", "mxsvr221");
+*    form2.append("rule", "/matrix/rules/performance");
+*    form2.append("env", "TESTENV=testenv");
+*    form2.append("env", "TESTENV=testenv2");
+* */
+var agentDispatch = function(event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/monitoring/release/test',
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*  Grok解析规则列表
+*
+*/
+var grokDelete = function (event) {
+    let rtn = 1;
+    
+    jQuery.ajax({
+        url: "/pattern/" + event.name,
+        dataType: 'json',
+        type: 'DELETE',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+            
+            if (data.status == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            return 0;
         }
     });
-}
+    return rtn;
+};
 
+
+/*
+*  新建一个窗体
+*  参数：
+*   size: 大小 [mini,small,large]
+*   title: 标题
+*   template: 模板（Vue渲染用）
+*/
 var newWindow = function (size, title, template) {
     var win;
     var w = $( window ).width();//document.body.clientWidth;
@@ -571,16 +1281,29 @@ var newWindow = function (size, title, template) {
     var wW = $( window ).width()*2.2/3;
     var hH = $( window ).height()*2.5/3;
 
-    if(size=='small'){
+    if(size === 'mini'){
+        wW = $( window ).width()*0.7/3;
+        hH = $( window ).height()*0.8/3;
+    }
+
+    if(size === 'small'){
         wW = $( window ).width()*1.5/3;
         hH = $( window ).height()*1.8/3;
+    } 
+
+    if(size === 'middle'){
+        wW = $( window ).width()*1.8/3;
+        hH = $( window ).height()*2.0/3;
     }
 
     var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
     var tb = document.createElement('div');
-
+    
     $(tb).append(template);
     win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+    win.hide();
+    $("div.mxWindow").addClass("animated fadeInRight");
+    win.show();
     win.setMaximizable(true);
     win.setResizable(true);
     win.setClosable(true);
@@ -605,11 +1328,13 @@ var newWindow = function (size, title, template) {
     });
 
     return win;
-}
+};
 
 
 /*
- *  For: Wait Function  
+ *  Wait Function  
+ *  参数：
+ *    ms
  */
 var wait = function wait(ms){
     var start = new Date().getTime();
@@ -630,7 +1355,7 @@ function createtooltip(){ // call this function ONCE at the end of page to creat
         + 'opacity:0;transition:opacity 0.3s'
     tooltip.innerHTML = 'Copied...'
     document.body.appendChild(tooltip)
-}
+};
 
 function showtooltip(e){
     var evt = e || event
@@ -641,7 +1366,7 @@ function showtooltip(e){
     hidetooltiptimer = setTimeout(function(){
         tooltip.style.opacity = 0
     }, 50)
-}
+};
 
 function copySelectionText(){
     var copysuccess // var to check whether execCommand successfully executed
@@ -659,7 +1384,7 @@ function getSelectionText(){
         selectedText = window.getSelection().toString()
     }
     return selectedText
-}
+};
 
 var copyBoard = function () {
     createtooltip() // create tooltip by calling it ONCE per page. See "Note" below
@@ -671,7 +1396,7 @@ var copyBoard = function () {
             showtooltip(e)
         }
     }, false)
-}
+};
 
 var handleBootstrapWizards = function() {
     "use strict";

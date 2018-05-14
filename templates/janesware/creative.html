@@ -51,6 +51,33 @@
         border: 1px solid rgb(195, 195, 195);
     }
 
+    .mxWindow{
+        height:68px!important;
+    }
+
+    .theme-white {
+        background: #ffffff;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #ffffff, #f9f9f9);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #ffffff, #f9f9f9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+
+    .theme-grey {
+        background: #f9f9f9;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #f9f9f9, #dddddd);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #f9f9f9, #dddddd); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+
+    .theme-dark {
+        background: #f9f9f9;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #f9f9f9, #e5e5e5);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #f9f9f9, #e5e5e5); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+
+
+
 
 </style>
 
@@ -65,6 +92,7 @@
                         ],function() {
 
         moment.locale({{.Lang}});
+
 
         $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative_list"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
 
@@ -87,13 +115,21 @@
                         layoutMgr: null
 
                     },
-
+                    theme: "",
+                    crontab: {
+                        main: {
+                            sched: Object,
+                            timer: Object
+                        }
+                    },
+                    count: 1
                 },
                 mounted: function() {
                     let self = this;
 
                     self.$nextTick(function() {
                         self.init();
+                        self.initPlugIn();
                     })
                 },
                 watch: {
@@ -114,6 +150,9 @@
                     init: function() {
                         let self = this;
 
+                        self.theme = localStorage.getItem("creative-theme");
+                        $("body").addClass(self.theme);
+
                         if (!mxClient.isBrowserSupported())
                         {
                             // Displays an error message if the browser is
@@ -122,6 +161,12 @@
                         }
                         else
                         {
+
+                            mxConstants.SHADOWCOLOR = "#C0C0C0";
+                            mxConstants.SHADOW_OFFSET_X = 2;
+                            mxConstants.SHADOW_OFFSET_Y = 3;
+                            mxConstants.SHADOW_OPACITY = 0.5;
+
                             self.model.container = document.getElementById('graph');
                             self.model.container.style.position = 'absolute';
                             self.model.container.style.overflow = 'hidden';
@@ -161,6 +206,27 @@
                                     return 'pointer';
                                 }
                             }
+
+                            // Creates the default style for vertices
+                            var style = [];
+                            style[mxConstants.STYLE_SHADOW] = true;
+
+                            //style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+                            //style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_STROKECOLOR] = '#ffffff';
+                            style[mxConstants.STYLE_STROKEWIDTH] = 1;
+                            style[mxConstants.STYLE_STROKE_OPACITY] = 80;
+                            style[mxConstants.STYLE_ROUNDED] = true;
+                            //style[mxConstants.STYLE_FILLCOLOR] = 'none';
+                            //style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+                            //style[mxConstants.STYLE_FONTCOLOR] = '#774400';
+                            //style[mxConstants.STYLE_GLASS] = 1;
+                            //style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_NORTH;
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+                            style[mxConstants.STYLE_FONTSIZE] = '12';
+                            style[mxConstants.STYLE_FONTSTYLE] = 1;
+                            self.model.graph.getStylesheet().putDefaultVertexStyle(style);
 
                             // Displays a popupmenu when the user clicks
                             // on a cell (using the left mouse button) but
@@ -204,10 +270,10 @@
                                 self.model.graph.zoomOut();
                             },null,'tools-item');
 
-                            tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/web/assets/images/iflow/actual_size.png',function(evt)
+                            /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/web/assets/images/iflow/actual_size.png',function(evt)
                             {
                                 self.model.graph.zoomActual();
-                            },null,'tools-item');
+                            },null,'tools-item');*/
 
                             tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
                             {
@@ -243,6 +309,24 @@
 
                             },null,'tools-item');
 
+                            tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
+                            {
+
+                                let _theme = _.sample(['theme-grey','theme-white', 'theme-dark']);
+
+                                $("body").removeClass(self.theme);
+
+                                $('body').addClass(_theme);
+
+                                console.log(_theme)
+
+                                self.theme = _theme;
+                                localStorage.setItem("creative-theme",_theme);
+
+
+
+                            },null,'tools-item');
+
 
 
 
@@ -258,7 +342,7 @@
 
                                 var cell = evt.getProperty('cell');
 
-                                if (cell.getId() == 'starting'){
+                                if (cell.getValue() == '开始'){
                                     swal("任务即将开始！",cell.getValue()+cell.getId(),"info");
                                     swal({
                                         title: '确定要开始任务?',
@@ -288,9 +372,98 @@
                                     })
                                 }
 
+                                self.tip(cell.getValue());
+
                             });
 
                         }
+                    },
+                    initPlugIn: function(){
+                        let self = this;
+
+                        self.crontab.main.sched = later.parse.text('every 1 sec');
+                        self.crontab.main.timer = later.setInterval(self.update, self.crontab.main.sched);
+                    },
+                    update: function () {
+
+                        let self = this;
+                        var model = self.model.graph.getModel();
+
+                        model.beginUpdate();
+
+                        try {
+
+                            let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent());
+
+                            _.forEach(_cells,function (cell,k) {
+
+                                let _cell = cell.getId();
+
+                                if (_cell == 'starting'){
+                                    // Resets the fillcolor and the overlay
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                    self.model.graph.removeCellOverlays(cell);
+
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#90c42c', [cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#dddddd', [cell]);
+                                } else if (_cell == 'processing') {
+                                    // Resets the fillcolor and the overlay
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                    self.model.graph.removeCellOverlays(cell);
+
+                                    if( self.count == 1 ){
+                                        self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#22a8fa', [cell]);
+                                        self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [cell]);
+
+                                        self.count = 0;
+                                    } else {
+                                        self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#C0C0C0', [cell]);
+                                        self.model.graph.setCellStyles(mxConstants.STYLE_STROKE_OPACITY, 80, [cell]);
+                                        self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, 2, [cell]);
+                                        self.count = 1;
+                                    }
+
+
+                                } else if (_cell == 'time'){
+                                    // Resets the fillcolor and the overlay
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'none', [cell]);
+                                    self.model.graph.removeCellOverlays(cell);
+
+                                    cell.setValue("任务开始时间：" +  moment().format("LLL"));
+
+                                    // Resets the fillcolor and the overlay
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'none', [cell]);
+                                    self.model.graph.removeCellOverlays(cell);
+
+                                }
+                            })
+
+
+
+                        }
+                        finally {
+                            model.endUpdate();
+                        }
+
+                    },
+                    tip: function(event){
+                        let self = this;
+
+                        swal({
+                            title: '',
+                            text: event + ' ' + moment().format("LLL"),
+                            timer: 3000,
+                            position: 'bottom-right',
+                            onOpen: () => {
+                                swal.showLoading()
+                            }
+                        }).then((result) => {
+                            if (
+                                result.dismiss === swal.DismissReason.timer
+                            ) {
+                                console.log('')
+                            }
+                        })
                     }
                 }
             })

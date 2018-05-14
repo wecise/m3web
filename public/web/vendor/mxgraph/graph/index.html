@@ -35,6 +35,11 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 	<link href="/web/vendor/animate/animate.css" rel="stylesheet" >
 	
 	<style>
+
+		span{
+			font-size: 12px;
+		}
+
 		* {
 			/* -webkit-box-sizing: border-box; */
 	    	/* -moz-box-sizing: border-box; */
@@ -1121,25 +1126,30 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
                 }
 
 				
+				$(".geSprite-editdiagram").removeClass('geSprite');
+				$(".geSprite-editdiagram").addClass('fa fa-code');
+				$(".geSprite-editdiagram").css("border","none").css("padding","3px").css("font-size","16px");
+				
 				$(".geSprite-mx-save").removeClass('geSprite');
-				$(".geSprite-mx-save").addClass('mx-save');
-				$(".geSprite-mx-save").css('color',"#333333").css("fontSize","12px");
-				$(".geSprite-mx-save").parent().css("border","none").css("padding","4px 5px 5px 5px");
-				$(".geSprite-mx-save").attr("alt",mxResources.get("mx-save"));
-				//$(".geSprite-mx-save").text(" " + mxResources.get("mx-save"));
-
+				$(".geSprite-mx-save").addClass('fa fa-save');
+				$(".geSprite-mx-save").css("border","none").css("padding","3px").css("font-size","16px");
+				$(".geSprite-mx-save").attr("alt",mxResources.get("fa-save"));
+				
 				$(".geSprite-mx-close").removeClass('geSprite');
-				$(".geSprite-mx-close").addClass('mx-close');
-				$(".geSprite-mx-close").css('color',"#333333").css("fontSize","12px");
-				$(".geSprite-mx-close").parent().css("border","none").css("padding","4px 5px 5px 5px");
-				$(".geSprite-mx-close").attr("alt",mxResources.get("mx-close"));
-				//$(".geSprite-mx-close").text(" " + mxResources.get("mx-close"));
+				$(".geSprite-mx-close").addClass('fa fa-sign-out');
+				$(".geSprite-mx-close").css("border","none").css("padding","3px").css("font-size","16px");
+				$(".geSprite-mx-close").attr("alt",mxResources.get("fa-sign-out"));
 				
 			
-				$(".geToolbarContainer").append(`<a href="javascript:void(0);" title="Preview Panel" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 50px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T+2SsQ0CMQxF/aX0MAJlpLhgBBiBDW4jGIER2AAxQxwp5Y3AAJGMfLqLRAEEhZJfJbL/K/w/qFPo9NMECCFcAKy+hN1F5DABmFmJaN8KUNUtgKOIoALs0wpg5h0RXf+AX98AgF22SRYjEZ1qCnOR1k3ueUlVx5TS8JS95QvASvVWMcbbslAB3vuNc+78yWzzUsqQcx7t3dy+V+BuwANX7VoRrx4R3gAAAABJRU5ErkJggg==');"></a>&nbsp;&nbsp;
+				$(".geToolbarContainer").append(`<a href="javascript:void(0);" title="Fullscreen" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 73px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABS0lEQVQ4T62TwVECQRBFf0MAYgRiBoSAGWgELrPcJQMxA7wz7RCBZqBGIBlICHBn61uf2qEGpLzgXHZrpvtN9+8/hjOXKb+u6zWAi5LVNM11Smmlvaqq+p1O58vMejmG5NrdLzOAOtAmgGf9u/u0BIYQJgB6Zqbv7rIYo5WAjQ5IJncfneqsrusE4B7ALvYAQPIJwMrMXk5BiuQFScU9loA1yZnKDiFUggC4izG+qZLxeDwk+Q5gEWOsQgjTA4BEyoK1og1UTUpJmkhEiaeYZW4t5+w0OGf9D+C4BfW83W6Xf7WQq96PUVOQiFltM7uZz+cfrdFuAbySHLl7kogAHg6MJICZ9ds579QutclgQSTo8RgpF7ZW/ZWcQYUXNI3BsROzlWetlWWs/WrLluUn+U2UAD2aqyJ+0zTNoHxM3W73uwSS/HT34dlj/AH7KNIRGLhsnwAAAABJRU5ErkJggg==');"></a>&nbsp;&nbsp;
+												 <a href="javascript:void(0);" title="Preview Panel" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 50px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T+2SsQ0CMQxF/aX0MAJlpLhgBBiBDW4jGIER2AAxQxwp5Y3AAJGMfLqLRAEEhZJfJbL/K/w/qFPo9NMECCFcAKy+hN1F5DABmFmJaN8KUNUtgKOIoALs0wpg5h0RXf+AX98AgF22SRYjEZ1qCnOR1k3ueUlVx5TS8JS95QvASvVWMcbbslAB3vuNc+78yWzzUsqQcx7t3dy+V+BuwANX7VoRrx4R3gAAAABJRU5ErkJggg==');"></a>&nbsp;&nbsp;
 												 <a href="javascript:void(0);" title="Format Panel (Ctrl+Shift+P)" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 6px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAfklEQVQ4T+3TwQ2CQBCF4Y8O7EBKsAOxA0ugBEqwJSsQKoBS6AAzYTWaeGDOMpedw3t/Npt/K+vUOJY9cwxVSfc4Z5ole/kEBOSWgCxIAU4YcccVaUCDBwbEvgP+8w0OCJlmTL88CDFC560T2r9V7oqeW8uRi5u0r8+UKX5ln0MMP2FDItXQAAAAAElFTkSuQmCC');"></a>&nbsp;&nbsp;
-												 <a href="javascript:void(0);" title="Fullscreen" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 28px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgElEQVQ4T2NkgAAFBgYGeSibFOogI1T1AQYGBntSdELVOiIbADKkgQRD/jMwMGAYsIGBgeE8AwPDRgYGhgAChmE1AOSK/QwMDAcZGBgcRg0YsWEwgYGBwYCBgeEDAwPDBVLTAShlgRISsQCU7OFJuYCIpItuMMiVCbDMRKytGOoAcyo/YeP/2LEAAAAASUVORK5CYII=');"></a>`);
+												 <a href="javascript:void(0);" title="Property Panel" class="geButton" style="position: absolute; display: inline-block; top: 5px; right: 28px; padding: 2px; font-size: 14px; width: 16px; height: 16px; background-position: 50% 50%; background-repeat: no-repeat; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAgElEQVQ4T2NkgAAFBgYGeSibFOogI1T1AQYGBntSdELVOiIbADKkgQRD/jMwMGAYsIGBgeE8AwPDRgYGhgAChmE1AOSK/QwMDAcZGBgcRg0YsWEwgYGBwYCBgeEDAwPDBVLTAShlgRISsQCU7OFJuYCIpItuMMiVCbDMRKytGOoAcyo/YeP/2LEAAAAASUVORK5CYII=');"></a>`);
 				
+				$("a[title='Fullscreen']").click(function(event){
+					toggleFullScreen();
+				});
+
 				$("a[title='Preview Panel']").click(function(event){
 					
                     let obj = {};
@@ -1160,7 +1170,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 					editorUi.toggleFormatPanel();
 				});
 
-				$("a[title='Fullscreen']").click(function(event){
+				$("a[title='Property Panel']").click(function(event){
 					if(editorUi.hsplitPosition === 0){
 						editorUi.hsplitPosition = 208;
 					} else{

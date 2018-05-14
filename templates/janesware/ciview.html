@@ -88,10 +88,8 @@
 
 </style>
 
-<!--<div id="app"></div>-->
+<div id="app"></div>
 
-<!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!--File Parse JS-->
 <script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
@@ -114,6 +112,8 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
@@ -121,6 +121,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-card-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-tags-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-timeline-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-graph-component.html"></link>
@@ -131,13 +132,16 @@
 
     var eventHub = new Vue();
 
-    VueLoader.onloaded(["vue-entity-tree-component",
+    VueLoader.onloaded(["vue-editor-component",
+                        "vue-base-tree-component",
+                        "vue-entity-tree-component",
                         "vue-entity-graph-component",
                         "vue-search-preset-component",
                         "vue-search-input-component",
                         "vue-bootstrap-table",
                         "vue-common-form-component",
                         "vue-ci-card-component",
+                        "vue-ci-tags-component",
                         "vue-object-detail-component",
                         "vue-base-timeline-component",
                         "vue-echart-graph-component",
@@ -757,7 +761,36 @@
                                 var m = "clicked: " + key;
                                 console.log(m);
                             },
-                            items: GLOBAL_CONFIG.global.ci_right_menu
+                            items: {
+                                        "detail": {
+                                            name: "配置卡片", icon: "fa-tasks",
+                                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                                self.look('config', '');
+                                            }
+                                        },
+                                        "-": "-",
+                                        "new-ci": {
+                                            name: "新建", icon: "fa-paste",
+                                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                                let _item = $(this).data("item");
+                                                //self.mkfile(_item);
+                                            }
+                                        },
+                                        "delete": {
+                                            name: "删除", icon: "fa-trash",
+                                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                                let _item = $(this).data("item");
+                                                self.delete(_item);
+                                            }
+                                        },
+                                        "--": "--",
+                                        "new-content": {
+                                            name: "新增", icon: "fa-plus",
+                                            callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                                swal("新增", "新增配置相关内容", "info");
+                                            }
+                                        }
+                                    }
                         });
 
                         /*$.contextMenu({
@@ -1762,7 +1795,7 @@
                         self.crontab.currentTimer.sched = later.parse.text('every 1 sec');
                         self.crontab.currentTimer.timer = later.setInterval(self.refreshCurrentTimer, self.crontab.currentTimer.sched);
 
-                        self.crontab.common.sched = later.parse.text('every 5 sec');
+                        self.crontab.common.sched = later.parse.text('every 15 sec');
                         self.crontab.common.timer = later.setInterval(self.refreshCommon, self.crontab.common.sched);
 
 
@@ -1770,11 +1803,17 @@
 
                         self.initSummary();
 
+                        /* toggle tab trigger DATATABLES resize */
+                        $("a[data-toggle='tab']").on("shown.bs.tab",function(){
+                            eventHub.$emit("datatable-resize-event", null);
+                        })
+
                     },
                     initSummary: function(){
                         let self = this;
 
                         $.getJSON( "https://easy-mock.com/mock/5a3c6a010df23b51b3615692/wecise/ciview", function( data ) {
+                            console.log(data)
                             self.summary = data.data;
                         });
                     },
@@ -1833,38 +1872,61 @@
                         self.searchHandler(_param, null);
                     },
                     searchHandler: function(param,func){
-                        console.log(param);
-
                         let self = this;
                         let _list = fetchData(param);
-
+                        
                         if(_.isEmpty(_list.message)){
                             self.search.result.data = [];
                             self.search.result.columns = [];
                             return false;
                         }
-
+                        console.log(JSON.stringify(_list))
                         self.search.result.data = _list.message;
 
                         let _classKeys = _.keys(_list.meta.classes);
                         let _columns = [];
-
+                        
                         _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
                             let _sortable = false;
 
                             if (v.type === 'timestamp'){
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
+                                    title: _.startCase(v.title),
                                     sortable: true,
-                                    formatter: function(value, row, index) {
-                                        return moment(value).format("LLL");
+                                    render: function(data, type, row) {
+                                        return moment(data).format("LLL");
                                     }
+                                });
+                            } else if (v.type === 'date'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: _.startCase(v.title),
+                                    sortable: true,
+                                    render: function(data, type, row) {
+                                        return moment(data).format("L");
+                                    }
+                                });
+                            } else if (v.type === 'map'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: v.title,
+                                    render: function(data, type, row) {
+                                              return JSON.stringify(data);
+                                          }
+                                });
+                            } else if (v.type === 'set' || v.type === 'list'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: v.title,
+                                    render: function(data, type, row) {
+                                              return data.join(",");
+                                          }
                                 });
                             } else if (v.type === 'smallint'){
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
+                                    title: _.startCase(v.title),
                                     sortable: true,
                                     formatter: function(value, row, index) {
 
@@ -1886,9 +1948,9 @@
                                         let _enum = v.enum[value];
 
                                         if (!_.isEmpty(_enum)) {
-                                            return {classes: v.name+value};
+                                            return {classes: v.name + value};
                                         } else {
-                                            return {classes: v.name+'_1'};
+                                            return {classes: v.name + '_1'};
                                         }
 
                                     }
@@ -1897,12 +1959,12 @@
                             } else {
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
-                                    sortable: _sortable
+                                    title: _.startCase(v.title),
+                                    sortable: _.sortable
                                 });
                             }
-
                         })
+
                         self.search.result.columns = _columns;
                         self.refresh();
                     },
@@ -2142,6 +2204,8 @@
 
                             self.ifShowNav = true;
                         }
+
+                        eventHub.$emit("datatable-resize-event", null);
                     },
                     view: function (event) {
                         eventHub.$emit("view-toggle-event", event);
@@ -2202,9 +2266,9 @@
                         <li role="presentation">
                             <a href="#cmdb" aria-controls="cmdb" role="tab" data-toggle="tab" title="CMDB Support">配置管理</a>
                         </li>
-                        <li role="presentation">
+                        <!-- <li role="presentation">
                             <a href="#topology" aria-controls="topology" role="tab" data-toggle="tab" title="Business Gauge">看板管理</a>
-                        </li>
+                        </li> -->
                     </ul>
                     <!-- Tab panes -->
                     <div class="tab-content tab-main" style="padding:0px;">
@@ -2363,7 +2427,8 @@
     <div class="ci-view-table table-responsive">
         <vue-base-datatables-component id="ci-list-datatable"
                                        :columns="model.columns"
-                                       :dataset="model.data"></vue-base-datatables-component>
+                                       :dataset="model.data"
+                                       contextmenu="ciview"></vue-base-datatables-component>
     </div>
 </script>
 

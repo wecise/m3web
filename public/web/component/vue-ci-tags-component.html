@@ -1,0 +1,70 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-ci-tags-component"  ----------*/
+	<template>
+		<ul :id="id"><li v-for="item in model.message.tags"><span class="label label-info">${item}</span></li></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-ci-tags-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+			model: Object
+		},
+		data:function(){
+			return {
+                tags: []
+            }
+		},
+        created: function(){
+            let self = this;
+
+        },
+        watch: {
+            
+        },
+        mounted: function(){
+            let self = this;
+
+            self.$nextTick(function(){
+
+                _.delay(function(){
+					self.init();
+                },500);
+                
+	            self.initPlugin();
+            })
+        },
+        methods: {
+            init: function() {
+                let self = this;
+
+				console.log(123,JSON.stringify(self.model.message))
+                let _tmp = _.map(self.model.message, function (v) {
+			                    if (!_.isEmpty(v.tags)){
+			                        _.forEach(v, function(val,key){
+			                            self.tags.push(val);
+			                        })
+			                    };
+			                });
+				console.log(234,JSON.stringify(self.tags))
+            },
+            initPlugin: function(){
+            	let self = this;
+
+            }
+        }
+	
+	}
+	</script>
+
+</code>

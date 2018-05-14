@@ -1,3 +1,15 @@
+/*
+*
+*      __  __   ____
+*    |  \/  | |__ /
+*    | \  / |  |_ \
+*    | |\/| | |___/
+*    | |  | |
+*    |_|  |_|
+*
+*
+*/
+
 var urlParams = (function(url)
 				{
 					var result = new Object();

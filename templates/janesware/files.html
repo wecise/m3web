@@ -684,7 +684,9 @@
                     mouseOver: function(event){
                         let self = this;
                         
-                        self.click(event);
+                        $(self.$el).find('.item-selected').removeClass('item-selected');
+                        $('#file_'+event.id).find('.widget').addClass('item-selected');
+
                     },
                     mouseOut: function(event){
                         let self = this;
@@ -699,6 +701,47 @@
 
 
                         self.contextmenu.selected = event;
+
+                        if(event.type === 'dir') {
+                            jQuery.ajax({
+                                url: '/fs/home/' + event.name,
+                                type: 'GET',
+                                dataType: 'text json',
+                                contentType: "application/text; charset=utf-8",
+                                data: {
+                                    type: 'dir'
+                                },
+                                beforeSend: function(xhr) {
+                                    oneLevelLoading = layer.load(3, {
+                                        shade: [0.1, '#ccc'],
+                                        time: 30 * 1000
+                                    });
+                                },
+                                complete: function(xhr, textStatus) {
+                                    layer.close(oneLevelLoading);
+                                },
+                                success: function(data, textStatus, xhr) {
+                                    
+                                    var rtn = data.message;
+
+                                    if(!_.isEmpty(rtn)){
+                                        rtn = _.map(rtn, function(v,k){
+                                                    return _.merge(v,{title:v.name});
+                                                });
+                                        //rtn.unshift(parentObj[0]);
+                                        eventHub.$emit('file-view-event', rtn);
+                                    } else {
+                                        eventHub.$emit('file-view-event', parentObj);
+                                    }
+                                },
+                                error: function(xhr, textStatus, errorThrown) {
+                                    layer.close(oneLevelLoading);
+                                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                                }
+                            });
+                        } else {
+                            self.open();
+                        }
                     },
                     dblClick: function(event){
                         let self = this;
@@ -1435,7 +1478,6 @@
              @mouseover="mouseOver(item)"
              @mouseout="mouseOut(item)"
              @click="click(item)"
-             @dblclick="dblClick(item)"
              @oncontextmenu="rightClick(item)"
              style="cursor: pointer;"
              :title="item.title">

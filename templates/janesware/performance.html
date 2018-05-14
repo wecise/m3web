@@ -646,7 +646,7 @@
                     saveDashboard: function (ifOpen) {
                         let self = this;
                         var modal = $("#addDashBoardModal");
-                        var name = modal.find('#title').val() + ".idas";//"dashboard_" + Math.floor(_.now() / 1000);
+                        var name = modal.find('#title').val() + ".ishow";//"dashboard_" + Math.floor(_.now() / 1000);
                         //var title = modal.find('#title').val();
                         if (_.isEmpty(name)) {
                             swal("视图标题不能空！", "", "warning");
@@ -863,10 +863,6 @@
                                 <div class="col-lg-2" id="nav"
                                      style="display: none;padding-left:10px;padding-right:5px;">
                                     <div class="panel" style="border-radius: 0px;">
-                                        <div class="panel-heading">
-                                            <i class="fa fa-th-large toggle-nav"></i>
-                                            Entity
-                                        </div>
                                         <div class="panel-body" style="padding-left:5px;padding-top: 5px;">
                                             <vue-entity-tree-component id="performance-entity-tree" :model="search.result.data"></vue-entity-tree-component>
                                         </div>

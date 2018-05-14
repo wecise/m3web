@@ -6,5 +6,10 @@
       <option name="HTML_ATTRIBUTE_WRAP" value="0" />
       <option name="HTML_TEXT_WRAP" value="0" />
     </HTMLCodeStyleSettings>
+    <codeStyleSettings language="HTML">
+      <indentOptions>
+        <option name="SMART_TABS" value="true" />
+      </indentOptions>
+    </codeStyleSettings>
   </code_scheme>
 </component>

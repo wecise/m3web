@@ -14,7 +14,7 @@ function Sidebar(editorUi, container)
 	this.graph = editorUi.createTemporaryGraph(this.editorUi.editor.graph.getStylesheet());
 	this.graph.cellRenderer.antiAlias = false;
 	this.graph.foldingEnabled = false;
-	this.imapConfig = ["业务", "应用","服务器", "网络", "硬件", "软件", "集群", "虚拟机", "Biz", "App", "Host", "Network", "HardWare", "SoftWare", "Cluster", "Vm"];
+	this.imapConfig = [];
 
 	// Workaround for blank output in IE11-
 	if (!mxClient.IS_IE && !mxClient.IS_IE11)
@@ -84,189 +84,96 @@ function Sidebar(editorUi, container)
 	}
 };
 
-
-/**
- * Call Ajax
- */
-Sidebar.prototype.callAjax = function(entity,top) 
-{
-	var rtn = [];
-	
-	jQuery.ajax({
-	  	url: '/mxobject/search',
-	  	type: 'POST',
-	  	dataType: 'json',
-	  	async: false,
-	  	data: {
-	  		cond: `#/matrix/entity/`+entity+`/: | print assetid,
-											biz,
-											class,
-											company,
-											config,
-											contact,
-											ctel,
-											day,
-											dc,
-											department,
-											files,
-											host,
-											id,
-											ip,
-											location,
-											model,
-											name,
-											period,
-											rack,
-											region,
-											room,
-											sn,
-											status,
-											tel,
-											type,
-											unit,
-											vtime | top ` + top,
-	  		flag: false
-	  	},
-	  	complete: function(xhr, textStatus) {
-	    	//called when complete
-	  	},
-	  	success: function(data, textStatus, xhr) {
-	  		
-	  		if(!_.isEmpty(data.message)){
-	  			_.forEach(data.message, function(v,k){
-	  				rtn.push(v);
-				})
-	  		} 
-
-	  	},
-	  	error: function(xhr, textStatus, errorThrown) {
-	    	console.log(textStatus)
-	    	if(textStatus === 'timeout')
-	        {     
-	            console.log('Failed from timeout');
-	        }
-	  	}
-	});
-
-	return rtn;
-};
-
 /**
  * Adds all palettes to the sidebar.
  */
 Sidebar.prototype.init = function()
 {
 	var dir = STENCIL_PATH;
-	var biz = [];
-	var host = [];
-	var vm = [];
-	var hardware = new Array();
-	var software = [];
-	var network = [];
-	var cluster = [];
-	var self = this;
-	
-	self.addSearchPalette(true);
-	
-	// biz
-	biz = self.callAjax("biz",500);
-	if(!_.isEmpty(biz)){
-		_.delay(function(){
-			var tags = {};
-			_.forEach(biz,function(v,k){
-				tags[v.id] = _.values(v).join(" ");
-			})
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-biz'), dir + '/matrix/17/', 'biz', '.svg', biz, biz, tags, false);
-		},500);
-	}
+	let entity = null;
+	let self = this;
+	let conds = `#&className/: | top &top`;
+	let uname = localStorage.getItem("uname");
 
-	// vm
-	vm = self.callAjax("vm",500);
-	if(!_.isEmpty(vm)){
-		_.delay(function(){
-			var tags = {};
-			_.forEach(vm,function(v,k){
-				tags[v.id] = _.values(v).join(" ");
-			})
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-vm'), dir + '/matrix/17/', 'vm', '.svg', vm, vm, tags, false);
-		},500);
-	}	
-	
-	// hardware
-	hardware = self.callAjax("hardware",500);
-	if(!_.isEmpty(hardware)){
-		_.delay(function(){
-			var tags = {};
-			_.forEach(hardware,function(v,k){
-				tags[v.id] = _.values(v).join(" ");
-			})
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-hardware'), dir + '/matrix/17/', 'hardware', '.svg', hardware, hardware,
-						 tags,false);
-		},500);
-	}
-	
-	
-	// software
-	software = self.callAjax("software",500);
-	software = _.map(software, function(v,k){
-	  				if(k < 500) {
-	  					return v;
-	  				}
-				});
-	if(!_.isEmpty(software)){
-		_.delay(function(){
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-software'), dir + '/matrix/17/', 'software', '.svg', software, software,
-			 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-			  'Router_Icon': 'router switch'},false);
-		},500);
-	}
+	if(uname === 'wecise'){
 
-	// network
-	network = self.callAjax("network",500);
-	if(!_.isEmpty(network)){
+		self.addSearchPalette(true);
+
+		// entity
+		entity = fetchSubClass("/matrix/entity");
+		this.imapConfig = _.map(entity,'alias')
+
 		_.delay(function(){
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-network'), dir + '/matrix/17/', 'link', '.svg', network, network,
+
+			if(!_.isEmpty(entity)){
+			
+				let _data = null;
+				_.forEach(entity,function(v,k){
+					let _tmp = fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
+					
+					if(_.isNull(_tmp)) {
+						return;
+					}
+					_data = _tmp.message;
+
+					let tags = {};
+					_.forEach(_data,function(val,key){
+						tags[val.name] = _.values(val).join(" ");
+					})
+
+					self.addEntitiesMatrixPalette('clipart', v.alias, dir + '/matrix/12/', 'icon_laptop', '.svg', _data, _data, tags, false);
+				})
+			
+			}
+
+			self.addSvgPalette('clipart', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
+						['China', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'Singapore', 'UnitedKingdom', 'Usa'],
+						 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+						  'Router_Icon': 'router switch'});
+
+			self.addGeneralPalette(false);
+			self.addMiscPalette(false);
+			self.addAdvancedPalette(false);
+			self.addBasicPalette(dir);
+			self.addStencilPalette('arrows', mxResources.get('arrows'), dir + '/arrows.xml',
+				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
+			self.addUmlPalette(false);
+			self.addBpmnPalette(dir, false);
+			self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/flowchart.xml',
+				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1');
+			self.addImagePalette('clipart', mxResources.get('clipart'), dir + '/clipart/', '_128x128.png',
+				['Earth_globe', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
+				 'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
+				 'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
+				 'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
+				 'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'], null,
 				 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-				  'Router_Icon': 'router switch'},false);
-		},500);
-	}
+				  'Router_Icon': 'router switch'});
+		},500)
+	} else {
 
-	// cluster
-	cluster = self.callAjax("cluster",500);
-	if(!_.isEmpty(cluster)){
+		self.addSearchPalette(false);
+		
 		_.delay(function(){
-			self.addEntitiesMatrixPalette('clipart', mxResources.get('mx-menu-config-cluster'), dir + '/matrix/17/', 'cluster', '.svg', cluster, cluster,
-				 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-				  'Router_Icon': 'router switch'},false);
+			$("#imap-tabs ul").remove();
+
+			$("#imap-config").removeClass("active");
+			$("#imap-shape").addClass("active");
+
+			self.addBobPalette(true);
+            /*self.addImagePalette('clipart', '状态', dir + '/clipart/', '_128x74.svg',
+                ['Skip'], ['跳过不执行', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
+                    'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
+                    'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
+                    'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
+                    'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'],
+                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+                    'Router_Icon': 'router switch'});*/
+			self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/bankofchina_flowchart.xml',
+				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2');
 		},500)
 	}
 	
-	_.delay(function(){
-		// Map
-		self.addSvgPalette('clipart', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
-							['China', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'Singapore', 'UnitedKingdom', 'Usa'],
-							 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-							  'Router_Icon': 'router switch'});
-		
-		self.addGeneralPalette(false);
-		self.addMiscPalette(false);
-		self.addAdvancedPalette(false);
-		self.addBasicPalette(dir);
-		self.addStencilPalette('arrows', mxResources.get('arrows'), dir + '/arrows.xml',
-			';whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2');
-		//this.addUmlPalette(false);
-		//this.addBpmnPalette(dir, false);
-		self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/flowchart.xml',
-			';whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2');
-		self.addImagePalette('clipart', mxResources.get('clipart'), dir + '/clipart/', '_128x128.png',
-			['Earth_globe', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
-			 'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
-			 'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
-			 'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
-			 'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'], null,
-			 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-			  'Router_Icon': 'router switch'});
-	},1000);
 
 
 	$(".geTitle").insertAfter($("#imap-config"));
@@ -684,7 +591,7 @@ Sidebar.prototype.searchEntries = function(searchTerms, count, page, success, er
 				index++;
 			}
 		}
-		console.log(111,results)
+
 		var len = results.length;
 		success(results.slice(page * count, (page + 1) * count), len, false, tmp);
 	}
@@ -1082,7 +989,7 @@ Sidebar.prototype.addEntitiesMatrixPalette = function(id, title, prefix, type, p
 
 			fns.push(this.createVertexTemplateEntry('image;html=1;labelBackgroundColor=#ffffff;image=' + prefix + name + postfix,
 				this.defaultImageWidth, this.defaultImageHeight, title, title, title != null, null, this.filterTags(tmpTags)));
-		}))(items[i].id, (titles != null) ? titles[i].name : null, (tags != null) ? tags[items[i].id] : null);
+		}))(items[i].name, (titles != null) ? titles[i].name : null, (tags != null) ? tags[items[i].name] : null);
 	}
 
 	this.addPaletteFunctions(id, title, (expand != null) ? expand : true, fns);
@@ -1338,6 +1245,70 @@ Sidebar.prototype.createAdvancedShapes = function()
 			return sb.createVertexTemplateFromCells([sb.cloneCell(field, 'List Item')], field.geometry.width, field.geometry.height, 'List Item');
 		})
 	];
+};
+
+/**
+ * Adds the general palette to the sidebar.
+ */
+Sidebar.prototype.addBobPalette = function(expand)
+{
+	// Avoids having to bind all functions to "this"
+	var sb = this;
+
+	// Reusable cells
+	var field = new mxCell('+ field: type', new mxGeometry(0, 0, 100, 26), 'text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;');
+	field.vertex = true;
+
+	var divider = new mxCell('', new mxGeometry(0, 0, 40, 8), 'line;html=1;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;');
+	divider.vertex = true;
+	
+	// Default tags
+	var dt = 'uml static class ';
+	
+	var fns = [
+   		this.addEntry('uml activity state', function()
+		{
+			var cell = new mxCell('未执行', new mxGeometry(0, 0, 120, 74),
+				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#dddddd;strokeColor=#ffffff;');
+			cell.vertex = true;
+			
+			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '未执行');
+		}),
+		this.addEntry('uml activity state', function()
+		{
+			var cell = new mxCell('成功', new mxGeometry(0, 0, 120, 74),
+				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#8bc34a;strokeColor=#ffffff;');
+			cell.vertex = true;
+			
+			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '成功');
+		}),
+		this.addEntry('uml activity state', function()
+		{
+			var cell = new mxCell('失败', new mxGeometry(0, 0, 120, 74),
+				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ff0000;strokeColor=#ffffff;');
+			cell.vertex = true;
+			
+			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '失败');
+		}),
+		this.addEntry('uml activity state', function()
+		{
+			var cell = new mxCell('跳过不执行', new mxGeometry(0, 0, 120, 74),
+				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ffc107;strokeColor=#ffffff;');
+			cell.vertex = true;
+			
+			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '跳过不执行');
+		}),
+		this.addEntry('uml activity state', function()
+		{
+			var cell = new mxCell('正在执行', new mxGeometry(0, 0, 120, 74),
+				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#03a9f4;strokeColor=#ffffff;');
+			cell.vertex = true;
+			
+			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '正在执行');
+		})
+	];
+	
+	this.addPaletteFunctions('状态', '状态', expand || false, fns);
 };
 
 /**

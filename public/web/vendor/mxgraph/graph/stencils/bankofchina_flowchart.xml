@@ -1,0 +1,154 @@
+<shapes name="mxGraph.flowchart">
+    <shape name="Circle" h="33" w="33" aspect="variable" strokewidth="inherit">
+        <connections>
+            <constraint x="0.5" y="0" perimeter="0" name="N" />
+            <constraint x="0.5" y="1" perimeter="0" name="S" />
+            <constraint x="0" y="0.5" perimeter="0" name="W" />
+            <constraint x="1" y="0.5" perimeter="0" name="E" />
+            <constraint x="0.145" y="0.145" perimeter="0" name="NW" />
+            <constraint x="0.145" y="0.855" perimeter="0" name="SW" />
+            <constraint x="0.855" y="0.145" perimeter="0" name="NE" />
+            <constraint x="0.855" y="0.855" perimeter="0" name="SE" />
+        </connections>
+        <background>
+            <ellipse x="0" y="0" w="33" h="33" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape name="Oval" h="60" w="98" aspect="variable" strokewidth="inherit">
+        <connections>
+            <constraint x="0.5" y="0" perimeter="0" name="N" />
+            <constraint x="0.5" y="1" perimeter="0" name="S" />
+            <constraint x="0" y="0.5" perimeter="0" name="W" />
+            <constraint x="1" y="0.5" perimeter="0" name="E" />
+            <constraint x="0.11" y="0.11" perimeter="0" name="NW" />
+            <constraint x="0.11" y="0.89" perimeter="0" name="SW" />
+            <constraint x="0.89" y="0.11" perimeter="0" name="NE" />
+            <constraint x="0.89" y="0.89" perimeter="0" name="SE" />
+        </connections>
+        <background>
+            <path>
+                <move x="30" y="0" />
+                <line x="68" y="0" />
+                <arc rx="30" ry="30" x-axis-rotation="0" large-arc-flag="0" sweep-flag="1" x="68" y="60" />
+                <line x="30" y="60" />
+                <arc rx="30" ry="30" x-axis-rotation="0" large-arc-flag="0" sweep-flag="1" x="30" y="0" />
+                <close/>
+            </path>
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape name="Parallelepiped" h="60" w="97" aspect="variable" strokewidth="inherit">
+        <connections>
+            <constraint x="0.5" y="0" perimeter="0" name="N" />
+            <constraint x="0.5" y="1" perimeter="0" name="S" />
+            <constraint x="0.12" y="0.5" perimeter="0" name="W" />
+            <constraint x="0.88" y="0.5" perimeter="0" name="E" />
+            <constraint x="0.24" y="0" perimeter="0" name="NW" />
+            <constraint x="1" y="0" perimeter="0" name="NE" />
+            <constraint x="0.76" y="1" perimeter="0" name="SE" />
+            <constraint x="0" y="1" perimeter="0" name="SW" />
+        </connections>
+        <background>
+            <path>
+                <move x="0" y="60" />
+                <line x="23.5" y="0" />
+                <line x="97" y="0" />
+                <line x="73.5" y="60" />
+                <close/>
+            </path>
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="Gateway" strokewidth="inherit" h="99" w="99">
+        <connections>
+            <constraint name="N" perimeter="0" x="0.5" y="0" />
+            <constraint name="S" perimeter="0" x="0.5" y="1" />
+            <constraint name="W" perimeter="0" x="0" y="0.5" />
+            <constraint name="E" perimeter="0" x="1" y="0.5" />
+        </connections>
+        <background>
+            <path>
+                <move x="49.5" y="0" />
+                <line x="99" y="49.5" />
+                <line x="49.5" y="99" />
+                <line x="0" y="49.5" />
+                <close/>
+            </path>
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="Rectangle" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <rect h="74" w="120" x="0" y="0" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="Round Rectangle" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <!--shape aspect="variable" name="未执行" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="成功" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="失败" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="跳过不执行" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+            <text str="跳过不执行" x="32" y="32"/>
+        </foreground>
+    </shape>
+    <shape aspect="variable" name="正在执行" strokewidth="inherit" h="74" w="120">
+        <connections/>
+        <background>
+            <roundrect x="0" y="0" w="120" h="74" arcsize="15" />
+        </background>
+        <foreground>
+            <fillstroke/>
+            <text str="正在执行" x="40" y="32"></text>
+        </foreground>
+    </shape-->
+</shapes>

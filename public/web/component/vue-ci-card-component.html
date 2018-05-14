@@ -2,6 +2,32 @@
 
 	<style>
 		/*----------  style  ----------*/
+		
+		.widget-ext {
+			padding: 15px;
+		    border-radius: 3px;
+		    margin: 0px 0px 10px 0px;
+		}
+
+		.arrow_box {
+			position: relative;
+			background: #e4eff5;
+		}
+		.arrow_box:after {
+			left: 100%;
+			top: 50%;
+			border: solid transparent;
+			content: " ";
+			height: 0;
+			width: 0;
+			position: absolute;
+			pointer-events: none;
+			border-color: rgba(228, 239, 245, 0);
+			border-left-color: #e4eff5;
+			border-width: 15px;
+			margin-top: -15px;
+		}
+
 		.ci-card-button > a{
 			right: 25px;
 			width: 55px;
@@ -10,6 +36,10 @@
 			font-size: 12px;
 			background-color: rgb(0, 172, 172)!important;
 			color:#ffffff;
+		}
+
+		.bwizard-steps {
+		    border-radius: 0px!important;
 		}
 
 		.bwizard-steps li a {
@@ -53,6 +83,11 @@
 			background-color: #efefef;
 			overflow: hidden;
 		}
+
+		.ace_editor {
+		    border: none;
+		}
+
 		#acediff-gutter svg {
 			background-color: #efefef;
 		}
@@ -115,14 +150,45 @@
 		.acediff-copy-left div:hover {
 			color: #c98100;
 		}
+
+		.nav.nav-tabs>li.active > a > .widget {
+		    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
+		}
+
+		a,h5 {
+			color: rgb(153, 153, 153);
+		}
+
+		#form-wizard {
+			border: 1px solid #ddd;
+		}
+		
+		#form-wizard .vis-timeline{
+			border: none;
+			border-bottom: 1px solid #ddd;
+		}
+
+		#form-wizard .vis-panel.vis-center, .vis-panel.vis-top, .vis-panel.vis-bottom {
+			border-left-style: none;
+		    border-right-style: none;
+		}
+
+		#form-wizard .bwizard .well {
+		    margin: 0px 0 -10px 0;
+		}
+
+		#ci-info-accordion a > i,#ci-prob-accordion a > i {
+			color: rgb(255, 255, 255);
+		}
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-ci-card-component"  ----------*/
 	<template>
 		<div class="row"><div class="col-lg-12">
-			<div class="panel panel-grey"><div class="panel-body" style="padding: 5px 10px 5px 0px;">
-				<vue-common-form-component id="ci-card-form"
+			<div class="panel panel-grey"><div class="panel-body" style="padding: 15px 10px 5px 0px;">
+				<vue-common-form-component :id="'ci-card-form-'+row.id"
 										   :form="model.form">
 				</vue-common-form-component>
 			</div></div>
@@ -144,98 +210,99 @@
                             parent: "bootstrap-edit",
                             layout: {
                                 template: `<div class='row'>
-												<div class='col-md-2' id='column-0' style="padding: 5px 0px;">
+												<div class='col-md-1' id='column-0' style="padding: 25px 0px;">
 													<!-- TAB NAVIGATION -->
 													<ul class="nav nav-tabs" role="tablist" style="background:none!important;">
 													  <li class="active" style="width:100%;">
 															<a href="#tab1" role="tab" data-toggle="tab">
-																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																<div class="widget-ext widget-stats bg-blue arrow_box" style="color:#999;background: rgb(227, 239, 244)!important;">
 																	<div class="stats-icon stats-icon-lg"><i class="fa fa-desktop fa-fw"></i></div>
 																	<div class="stats-title"></div>
-																	<div class="stats-number">配置</div>
-																	<div class="stats-progress progress" style="height: 1px;">
-																		<div class="progress-bar" style="width: 100%;"></div>
-																	</div>
+																	<h5>配置</h5>
 																</div>
 															</a>
 													  </li>
 													  <li style="width:100%;">
 															<a href="#tab2" role="tab" data-toggle="tab">
-																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																<div class="widget-ext widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
 																	<div class="stats-icon stats-icon-lg"><i class="fa fa-tags fa-fw"></i></div>
 																	<div class="stats-title"></div>
-																	<div class="stats-number">比对</div>
-																	<div class="stats-progress progress" style="height: 1px;">
-																		<div class="progress-bar" style="width: 100%;"></div>
-																	</div>
+																	<h5>比对</h5>
 																</div>
 															</a>
 													  </li>
 													  <li style="width:100%;">
 															<a href="#tab3" role="tab" data-toggle="tab">
-																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																<div class="widget-ext widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
 																	<div class="stats-icon stats-icon-lg"><i class="fa fa-globe fa-fw"></i></div>
 																	<div class="stats-title"></div>
-																	<div class="stats-number">关联</div>
-																	<div class="stats-progress progress" style="height: 1px;">
-																		<div class="progress-bar" style="width: 100%;"></div>
-																	</div>
+																	<h5>关联</h5>
 																</div>
 															</a>
 													   </li>
 
 													  <li style="width:100%;">
 															<a href="#tab4" role="tab" data-toggle="tab">
-																<div class="widget widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
+																<div class="widget-ext widget-stats bg-blue" style="color:#999;background: rgb(227, 239, 244)!important;">
 																	<div class="stats-icon stats-icon-lg"><i class="fa fa-globe fa-fw"></i></div>
 																	<div class="stats-title"></div>
-																	<div class="stats-number">配置发现</div>
-																	<div class="stats-progress progress" style="height: 1px;">
-																		<div class="progress-bar" style="width: 100%;"></div>
-																	</div>
+																	<h5>发现</h5>
 																</div>
 															</a>
 													   </li>
 													</ul>
 												</div>
-												<div class="col-md-9" style="padding:0px;">
-													<div class="tab-content" style="padding:0px;">
+												<div class="col-md-10" style="padding:0px;">
+													<div class="tab-content" style="padding:15px 0px;">
 													  	<div class="active tab-pane fade in" id="tab1">
-															<!-- TAB NAVIGATION -->
-															<ul class="nav nav-tabs" role="tablist" style="background-image: none!important;background-color: rgba(0, 0, 0, 0)!important;">
-															  <li class="active"><a href="#ci-info" role="tab" data-toggle="tab">资产信息</a></li>
-															  <li><a href="#ci-manager" role="tab" data-toggle="tab">管理信息</a></li>
-															  <li><a href="#ci-config" role="tab" data-toggle="tab">配置信息</a></li>
-															  <li class="ci-card-button pull-right">
-																	<a class="btn btn-md btn-success" href="javascript:eventHub.$emit('ci-card-update-event',null);">保存</a>
-															  </li>
-															</ul>
-															<!-- TAB CONTENT -->
-															<div class="tab-content" style="padding: 0px 10px;">
-															  	<div class="active tab-pane fade in" id="ci-info">
-																	<div class="panel panel-grey">
-																		<div class="panel-body" style="border: 1px solid rgb(227, 239, 244);border-radius: 5px;padding: 10px 0px;height: 70vh;overflow: auto;box-shadow:5px 5px 5px #e3eff4;background: rgb(228, 239, 245);">
-																			<div class='col-md-6' id='column-1-1' style="line-height:5px;"></div>
-																			<div class='col-md-6' id='column-1-2' style="line-height:5px;"></div>
-																		</div>
-																	</div>
-															  	</div>
-															  	<div class="tab-pane fade" id="ci-manager">
-																	<div class="panel panel-grey">
-																		<div class="panel-body" style="border: 1px solid rgb(227, 239, 244);border-radius: 5px;padding: 10px 0px;height: 70vh;overflow: auto;box-shadow:5px 5px 5px #e3eff4;background: rgb(228, 239, 245);">
-
-																			<div class='col-md-12' id='column-2' style="line-height:5px;"></div>
-
-																		</div>
-																	</div>
+															<div class="panel-group" id="ci-info-accordion" role="tablist" aria-multiselectable="true">
+															  <div class="panel" style="background-color: rgb(228, 239, 245);">
+															    <div class="panel-heading" role="tab" id="ci-info-base">
+															      	<h4 class="panel-title">
+																        <a class="accordion-toggle accordion-toggle-styled" role="button" data-toggle="collapse" data-parent="#ci-info-accordion" href="#ci-collapseOne" aria-expanded="true" aria-controls="ci-collapseOne">
+																          	<i class="fa fa-plus-circle pull-right"></i> 基本信息
+																        </a>
+																        
+																		<a class="btn btn-xs btn-success" href="javascript:eventHub.$emit('ci-card-update-event',null);" style="position: absolute;right: 0px;top: -10px;cursor:pointer;">
+																          	<i class="fa fa-save"></i> 保存
+																        </a>
+															      	</h4>
 															    </div>
-															  	<div class="tab-pane fade" id="ci-config">
-																	<div class="panel panel-grey">
-																		<div class="panel-body" style="border: 1px solid rgb(227, 239, 244);border-radius: 5px;padding: 10px 0px;height: 70vh;overflow: auto;box-shadow:5px 5px 5px #e3eff4;background: rgb(228, 239, 245);">
-																			<div class='col-md-12' id='column-3' style="line-height:5px;"></div>
-																		</div>
-																	</div>
-															  	</div>
+															    <div id="ci-collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="ci-info-base">
+															      	<div class="panel-body">
+															        	<div class='col-md-6' id='column-1-1' style="line-height:5px;"></div>
+																		<div class='col-md-6' id='column-1-2' style="line-height:5px;"></div>
+															      	</div>
+															    </div>
+															  </div>
+															  <div class="panel" style="background-color: rgb(228, 239, 245);">
+															    <div class="panel-heading" role="tab" id="ci-info-manager">
+															      	<h4 class="panel-title">
+															        	<a class="accordion-toggle accordion-toggle-styled collapsed" role="button" data-toggle="collapse" data-parent="#ci-info-accordion" href="#ci-collapseTwo" aria-expanded="false" aria-controls="ci-collapseTwo">
+															          		<i class="fa fa-plus-circle pull-right"></i> 管理信息
+															        	</a>
+															      	</h4>
+															    </div>
+															    <div id="ci-collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="ci-info-manager">
+															      	<div class="panel-body">
+															        	<div class='col-md-12' id='column-2' style="line-height:5px;"></div>
+															      	</div>
+															    </div>
+															  </div>
+															  <div class="panel" style="background-color: rgb(228, 239, 245);">
+															    <div class="panel-heading" role="tab" id="ci-info-config">
+															      	<h4 class="panel-title">
+															        	<a class="accordion-toggle accordion-toggle-styled collapsed" role="button" data-toggle="collapse" data-parent="#ci-info-accordion" href="#ci-collapseThree" aria-expanded="false" aria-controls="ci-collapseThree">
+															          		<i class="fa fa-plus-circle pull-right"></i> 配置信息
+															        	</a>
+															      	</h4>
+															    </div>
+															    <div id="ci-collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="ci-info-config">
+															      	<div class="panel-body">
+															        	<div class='col-md-12' id='column-3' style="line-height:5px;"></div>
+															      	</div>
+															    </div>
+															  </div>
 															</div>
 													  	</div>
 														<div class="tab-pane fade" id="tab2">
@@ -355,14 +422,14 @@
             self.$nextTick(function(){
 
                 self.init();
-
                 _.delay(function() {
+                    self.initPlugin();
                     self.initRelationButton();
                     self.initCompare();
                     self.initLink();
+                    self.initProb();
                 },1000);
             })
-
         },
         methods: {
             init: function(){
@@ -404,6 +471,14 @@
                 });
 
             },
+            initPlugin: function(){
+            	let self = this;
+
+            	$("a[data-toggle='tab']").on("shown.bs.tab",function(event){
+            		$(".widget-ext.arrow_box").removeClass("arrow_box");
+            		$(this).find("div:nth(0)").addClass("arrow_box");
+                })
+            },
 			initRelationButton: function(){
               	let self = this;
 
@@ -414,6 +489,7 @@
 										<p><a href="javascript:void(0);" @click="forward('event')">事件 <i class="btn btn-xs btn-danger" style="min-width: 40px;max-width: 50px;">3</i></a></p>
 										<p><a href="javascript:void(0);" @click="forward('performance')">性能 <i class="btn btn-xs btn-default" style="min-width: 40px;max-width: 50px;">10</i></a></p>
 										<p><a href="javascript:void(0);" @click="forward('log')">日志 <i class="btn btn-xs btn-warning" style="min-width: 40px;max-width: 50px;">30</i></a></p>
+										<p><a href="javascript:void(0);" @click="forward('log')">资产 <i class="btn btn-xs btn-success fa fa-sitemap" style="min-width: 40px;max-width: 50px;"></i></a></p>
 									</div>`,
 						methods: {
                             forward: function(event){
@@ -426,8 +502,6 @@
                             },
 						}
                     });
-
-
 			},
             initCompare: function(){
                 let self = this;
@@ -437,7 +511,7 @@
                 let _compareVue = new Vue({
                     delimiters: ['#{', '}#'],
 					el: '#ci-form-compare-timeline',
-					template: `<form>
+					template: `<form id="form-wizard">
 									<div id="wizard">
 										<ol>
 											<li>
@@ -469,7 +543,7 @@
 										<div>
 												<fieldset>
 													<!-- begin row -->
-													<div class="row">
+													<div class="row" style="padding:10px;">
 														<!-- begin col-3 -->
 														<div class="col-md-3" v-for="v,k in model.row" style="padding:2px 15px;">
 															<div class="form-group btn btn-xs btn-default" style="min-width: 120px;max-width: 120px; background: rgb(240, 243, 244); text-align: left;">
@@ -485,7 +559,7 @@
 										<div>
 												<fieldset>
 													<!-- begin row -->
-													<div class="row">
+													<div class="row" style="padding:10px 0px;">
 
 														<!-- begin col-6 -->
 														<div class="col-md-6">
@@ -624,7 +698,6 @@
 					}
 
 				})
-
             },
 			initLink: function(){
                 let self = this;
@@ -663,20 +736,284 @@
 					}
 
 				})
+			},
+			initProb: function(){
+				let self = this;
 
+				let _vue = new Vue({
+					delimiters: ['#{', '}#'],
+					el: "#panel-prob",
+					template: `<div class="panel-group" id="ci-prob-accordion" role="tablist" aria-multiselectable="true">
+								  <div class="panel" style="background-color: rgb(228, 239, 245);" v-for="(item,key) in model.cmds">
+								    <div class="panel-heading" role="tab" :id="'ci-prob-'+item.id">
+								      	<div class="panel-heading-btn">
+			                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle" @click="reload(item)"><i class="fa fa-refresh"></i></a>
+			                                <a href="javascript:;" class="btn btn-xs btn-icon btn-circle" @click="remove(item)"><i class="fa fa-trash"></i></a>
+			                            </div>
+								      	<h4 class="panel-title">
+									        <a class="accordion-toggle accordion-toggle-styled" role="button" data-toggle="collapse" data-parent="#ci-prob-accordion" :href="'#ci-prob-collapseOne-'+item.id" :aria-expanded="key==0?true:false" :aria-controls="'ci-prob-collapseOne-'+item.id">
+									          	<i class="fa fa-plus-circle pull-right"></i> 
+									          	#{item.name + " " + item.params}# 
+									        </a>
+								      	</h4>
+								    </div>
+								    <div :id="'ci-prob-collapseOne-'+item.id" :class="key==0?'panel-collapse collapse in':'panel-collapse collapse'" role="tabpanel" :aria-labelledby="'ci-prob-'+item.id">
+								      	<div class="panel-body">
+							      			<div class="col-sm-12">
+							      				<vue-editor-component :id="'editor-'+item.result.data.runid" :model="item.result.model" style="margin:0px -30px;"></vue-editor-component>
+							      				<BR/>
+							      				#{item.result.data.runid}#  &nbsp;&nbsp; SID: #{item.result.data.sid}#
+							      			</div>
+								      	</div>
+								    </div>
+								  </div>
+								  <a class="btn btn-xs btn-success" href="javascript:;" style="position: absolute;right: 15px;top: 0px;cursor:pointer;" @click="newCmd">
+							          <i class="fa fa-plus"></i> 新建
+							      </a>
+								</div>`,
+					data: {
+						model: {
+							cmds: [
+									{ name:'ls', params:'-lsa', result: null, id: objectHash.sha1('ls -lsa'), host: 'wecise'},
+									{name:'df', params:'-h', result: null, id: objectHash.sha1('df -h'), host: 'wecise'},
+									{name:'vmstat', params:'', result: null, id: objectHash.sha1('vmstat'), host: 'wecise'},
+									{name:'/opt/matrix/cassandra/bin/nodetool status', params:'', result: null, id: objectHash.sha1('/opt/matrix/cassandra/bin/nodetool status'), host: 'wecise'}
+								  ]
+						}
+					},
+					created: function(){
+						let me = this;
+
+						me.init();
+					},
+					mounted: function(){
+						let me = this;
+
+						me.$nextTick(function(){
+			                _.delay(function(){
+			                	me.init()
+			                },500);
+			            })
+					},
+					methods: {
+                        init: function(){
+                        	let me = this;
+
+                        	_.forEach(me.model.cmds, function(v,k){
+                        		let _data = {message: {outputs:[],runid:null,sid:null}};
+
+                        		let _tmp = callJob(v.name + " " + v.params, v.host);
+
+                        		if(!_.isEmpty(_tmp)){
+                        			_data = _.cloneDeep(_tmp);
+                        			let _preRunid = _data.message.runid.toString().slice(0,13);
+                        			let _lasRunid = _tmp.message.runid.toString().slice(-6);
+                        			
+                        			_data.message.runid = moment(Number(_preRunid)).format("LLL") + ":" + _lasRunid;
+                        		}
+
+                        		v.result = {
+                        						model: {
+						                        	oldInput: "",
+						                        	newInput: _data.message.outputs.join(""),
+						                        	mode: "toml",
+						                        	theme: "tomorrow_night_blue",
+						                        	printMargin: false,
+						                        	readOnly: true,
+						                        	options: {
+						                        		maxLines: Infinity,
+                                                        minLines: 15
+                                                    }
+                        						},
+                        						data: _data.message
+					                        };
+                        	})
+
+                        },
+                        reload: function(item){
+                        	let me = this;
+
+                        	let _data = callJob(item.name + " " + item.params, item.host);
+                        	let _tmp = _.find(me.model.cmds, {name: item.name});
+                        	
+
+				            let _ace = ace.edit("editor-"+_tmp.runid);
+                        	_ace.setValue(_tmp.message.outputs.join(""));
+
+                        	_tmp.result = {
+				                        	model: {
+					                        	oldInput: "",
+					                        	newInput: _data.message.outputs.join(""),
+					                        	mode: "toml",
+					                        	theme: "tomorrow_night_blue",
+					                        	printMargin: false,
+					                        	readOnly: true,
+					                        	options: {
+					                        		maxLines: Infinity,
+                                                    minLines: 15
+                                                }
+                    						},
+                    						data: _data.message
+				                        };
+                        },
+                        remove: function(item){
+                        	let me = this;
+
+
+                        },
+                        newCmd: function(){
+                        	let me  = this;
+
+                        	newWindow('large', '新建配置发现', `<div id="ci-cmd-new-template"></div>`);
+
+                            _.delay(function() {
+
+                                let cVue = new Vue({
+                                    delimiters: ['$', '$'],
+                                    el: '#ci-cmd-new-template',
+                                    template: ` <div class="panel"><div class="panel-body">
+                                    				<div class="row">
+                                    					<div class="col-lg-2">
+															<!--<img src="/web/assets/images/server_01.svg" class="img-responsive" alt="Image">$model.host$-->
+															<vue-base-tree-component id="server-group-tree" :zNodes="model.server.list" :contextMenu="[]"></vue-base-tree-component>
+                                    					</div>
+                                    					<div class="col-lg-10">
+		                                                    <form>
+		                                                    	<div class="form-group">
+		                                                    		<label>命令</label>
+		                                                    		<input type="text" class="form-control" v-model="model.config.cmd" placeholder="命令">
+		                                                    	</div>
+
+		                                                    	<div class="form-group">
+		                                                    		<label>参数</label>
+		                                                    		<input type="text" class="form-control" v-model="model.config.params" placeholder="参数">
+		                                                    	</div>
+
+		                                                    	<div class="form-group">
+		                                                    		<label>执行计划(Cron)</label>
+		                                                    		<input type="text" class="form-control" v-model="model.config.cron" placeholder="执行计划">
+		                                                    	</div>
+
+		                                                    	<div class="form-group">
+	                                                                <label>处理规则</label>
+	                                                                <select class="form-control">
+                                                                        <option value="" v-for="model.config.rule"></option>
+                                                                    </select>
+	                                                            </div>
+
+		                                                    	<div class="form-group">
+		                                                    		<label>返回结果</label>
+		                                                    		<!--<textarea class="form-control" rows="8" v-model="model.config.result"></textarea>-->
+		                                                    		<vue-editor-component :id="'editor-'+model.config.cmd" :model="model.config.result"></vue-editor-component>
+		                                                    	</div>
+
+		                                                        <div class="form-group pull-right">
+		                                                    	    <a class="btn btn-xs btn-primary pull-right" @click="save">提交</a>&nbsp;&nbsp;&nbsp;&nbsp;
+		                                                    	    <a class="btn btn-xs btn-success pull-right" @click="call">执行</a>&nbsp;&nbsp;&nbsp;&nbsp;
+		                                                    	</div>
+		                                                    </form>
+		                                                </div>
+		                                            </div>
+                                                </div></div>`,
+                                    data: function(){
+                                        return {
+                                            model: {
+                                            	host: "",
+                                            	config: {
+	                                            	cmd: "",
+	                                            	params: "",
+	                                            	cron: "",
+	                                            	result: {
+                                                        oldInput: "",
+                                                        newInput: "",
+                                                        mode: "toml",
+                                                        theme: "tomorrow_night_blue",
+                                                        printMargin: false,
+                                                        readOnly: true,
+                                                        options: {
+                                                            maxLines: Infinity,
+                                                            minLines: 10
+                                                        }
+		                                            }
+	                                            },
+	                                            rule: {
+                                            	    list: []
+	                                            },
+                                                server: {
+                                            	    list: []
+                                                }
+                                            }
+                                        }
+                                    },
+                                    created:function(){
+                                        let iam = this;
+
+                                        iam.init();
+                                    },
+                                    mounted: function() {
+                                        let iam = this;
+
+                                        iam.$nextTick(function(){
+                                            iam.initPlugIn();
+                                        })
+                                    },
+                                    methods: {
+                                        init: function(){
+                                            let iam = this;
+
+                                            iam.model.host = self.row.host;
+
+                                            let _tmp = serverGroupList();
+
+                                            iam.model.server.list = _.map(_tmp.message,function(v,k){
+																		return { name:v.name, children: _.map(v.hosts,function(o,n){ if (o.host == iam.model.host){ return {name:o.host,children:[],open:true,checked:true};} return {name:o.host, children: []};}), open:true };
+						                                            });
+
+                                        },
+                                        initPlugIn: function(){
+                                            let iam = this;
+
+                                        },
+                                        call: function(){
+                                        	let iam = this;
+
+                                        	let _rtn = callJob(iam.model.config.cmd+' '+iam.model.config.params, self.row.host);
+
+                                        	iam.model.config.result.newInput = _rtn.message.outputs.join("");
+
+                                        },
+                                        save: function(event){
+                                            let iam = this;
+                                            let _config = {};
+                                            let k = iam.model.config.cmd+''+iam.model.config.params;
+                                            let v = iam.model.config.result;
+                                            _config[k] = v;
+
+
+                                            let treeObj = $.fn.zTree.getZTreeObj("server-group-tree");
+                                            let nodes = treeObj.getCheckedNodes(true);
+                                            console.log(nodes)
+	                                        return false;
+                                            let _rtn = putDataToClass({ class:self.row.class, id:self.row.id, config: _config})
+                                        }
+                                    }
+                                });
+                            },500);
+                        }
+                    }
+				});
 			},
 			save: function(){
                 let self = this;
-                let _form = $("#ci-card-form").alpaca("get").getValue();
+                let _form = $("#ci-card-form-"+self.row.id).alpaca("get").getValue();
 
                 _.merge(_form, {id: self.row.id, class: self.row.class});
 
-                let tmp = callJob();
-                $("#alpaca26").val(tmp);
+                let rtn = putDataByMql(_form);
 
-                putDataByMql(_form);
-
-                eventHub.$emit("ci-save-event",null);
+                if(rtn === "ok"){
+                	eventHub.$emit("ci-save-event",null)
+                };
 			}
         }
 	

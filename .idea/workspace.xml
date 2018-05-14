@@ -2,10 +2,243 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-echart-chinamap-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-echart-chinamap-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-editor-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-editor-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-search-preset-component_en-US.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-search-preset-component_en-US.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/browser-bugs.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/browser-features.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/core-team.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/glyphicons.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/sass-team.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/showcase.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_data/translations.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/ads.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/alerts.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/badges.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/breadcrumbs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/button-dropdowns.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/button-groups.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/dropdowns.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/glyphicons.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/input-groups.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/jumbotron.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/labels.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/list-group.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/media.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/navbar.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/navs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/page-header.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/pagination.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/panels.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/progress-bars.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/responsive-embed.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/thumbnails.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/components/wells.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/buttons.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/code.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/forms.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/grid.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/helpers.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/images.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/less.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/overview.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/responsive-utilities.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/sass.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/tables.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/css/type.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/customizer-variables.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/footer.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/accessibility.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/browser-device-support.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/community.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/disabling-responsiveness.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/download.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/examples.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/grunt.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/license.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/template.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/third-party-support.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/tools.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/translations.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/getting-started/whats-included.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/header.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/affix.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/alerts.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/buttons.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/carousel.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/collapse.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/dropdowns.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/modal.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/overview.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/popovers.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/scrollspy.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/tabs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/tooltips.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/js/transitions.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/about.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/components.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/css.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/customize.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/getting-started.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/javascript.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/main.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_includes/nav/migration.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_layouts/default.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_layouts/home.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_plugins/bridge.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_plugins/bugify.rb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_pug/customizer-nav.pug" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/_pug/customizer-variables.pug" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/about.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/apple-touch-icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/brand/bootstrap-outline.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/brand/bootstrap-punchout.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/brand/bootstrap-solid.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/css/docs.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/css/docs.min.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/css/ie10-viewport-bug-workaround.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/css/src/docs.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/css/src/pygments-manni.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/flash/ZeroClipboard.swf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/components.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/devices.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/expo-lyft.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/expo-newsweek.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/expo-riot.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/expo-vogue.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/img/sass-less.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/customize.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/docs.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/ie-emulation-modes-warning.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/ie10-viewport-bug-workaround.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/ie8-responsive-file-warning.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/raw-files.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/src/application.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/src/customizer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/Blob.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/FileSaver.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/ZeroClipboard.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/anchor.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/autoprefixer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/holder.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/jquery.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/jszip.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/less.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/assets/js/vendor/uglify.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/browser-bugs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/components.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/css.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/customize.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap-theme.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap-theme.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap-theme.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap-theme.min.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/css/bootstrap.min.css.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/fonts/glyphicons-halflings-regular.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/fonts/glyphicons-halflings-regular.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/fonts/glyphicons-halflings-regular.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/fonts/glyphicons-halflings-regular.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/fonts/glyphicons-halflings-regular.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/js/bootstrap.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/js/bootstrap.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/dist/js/npm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/blog/blog.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/blog/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/carousel/carousel.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/carousel/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/cover/cover.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/cover/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/dashboard/dashboard.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/dashboard/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/grid/grid.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/grid/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/jumbotron-narrow/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/jumbotron-narrow/jumbotron-narrow.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/jumbotron/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/jumbotron/jumbotron.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/justified-nav/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/justified-nav/justified-nav.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar-fixed-top/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar-fixed-top/navbar-fixed-top.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar-static-top/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar-static-top/navbar-static-top.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/navbar/navbar.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/non-responsive/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/non-responsive/non-responsive.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/offcanvas/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/offcanvas/offcanvas.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/offcanvas/offcanvas.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/blog.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/carousel.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/cover.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/dashboard.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/equal-height-columns.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/grid.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/jumbotron-narrow.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/jumbotron.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/justified-nav.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/navbar-fixed.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/navbar-static.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/navbar.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/non-responsive.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/offcanvas.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/sign-in.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/starter-template.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/sticky-footer-navbar.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/sticky-footer.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/screenshots/theme.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/signin/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/signin/signin.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/starter-template/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/starter-template/starter-template.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/sticky-footer-navbar/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/sticky-footer-navbar/sticky-footer-navbar.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/sticky-footer/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/sticky-footer/sticky-footer.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/theme/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/theme/theme.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/tooltip-viewport/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/tooltip-viewport/tooltip-viewport.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/examples/tooltip-viewport/tooltip-viewport.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/getting-started.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/javascript.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/migration.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/docs/robots.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/Find Results" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/cfg.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/cfg.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/util.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base/head.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base/head.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/ciview.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/ciview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/creative.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/creative.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/creative_list.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/creative_list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/event.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/event.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/files.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/files.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/log.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/log.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/object.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/object.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/performance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/performance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/system.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/system.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/user.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/user.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -22,20 +255,137 @@
       <file leaf-file-name="ciview.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="26868">
-              <caret line="2239" column="85" selection-start-line="2239" selection-start-column="85" selection-end-line="2239" selection-end-column="85" />
+            <state relative-caret-position="651">
+              <caret line="143" column="24" selection-start-line="143" selection-start-column="24" selection-end-line="143" selection-end-column="24" />
               <folding>
-                <marker date="1523345102000" expanded="true" signature="5502:5508" ph=" " />
+                <element signature="e#79#85#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vue-ci-card-component.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="vue-entity-tree-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="34" column="54" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="54" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Sidebar.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15024">
+              <caret line="1252" column="31" selection-start-line="1252" selection-start-column="18" selection-end-line="1252" selection-end-column="31" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-ci-card-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="395" column="41" lean-forward="true" selection-start-line="395" selection-start-column="41" selection-end-line="395" selection-end-column="41" />
+            <state relative-caret-position="830">
+              <caret line="270" column="74" selection-start-line="270" selection-start-column="74" selection-end-line="270" selection-end-column="74" />
+              <folding>
+                <element signature="e#2941#2947#0" expanded="true" />
+                <element signature="e#2947#2953#0" expanded="true" />
+                <element signature="e#2953#2959#0" expanded="true" />
+                <element signature="e#2959#2965#0" expanded="true" />
+                <element signature="e#3086#3092#0" expanded="true" />
+                <element signature="e#3092#3098#0" expanded="true" />
+                <element signature="e#3098#3104#0" expanded="true" />
+                <element signature="e#3104#3110#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="22" column="44" selection-start-line="22" selection-start-column="44" selection-end-line="22" selection-end-column="44" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="creative.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="12">
+              <caret line="387" selection-start-line="387" selection-end-line="387" />
+              <folding>
+                <element signature="e#97#103#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="untitled.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/untitled.html">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="monitoring.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/monitoring.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-10895">
+              <caret line="380" column="27" lean-forward="true" selection-start-line="378" selection-start-column="24" selection-end-line="380" selection-end-column="27" />
+              <folding>
+                <element signature="e#43499#47370#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-dispatch-manager-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="431">
+              <caret line="207" column="110" selection-start-line="207" selection-start-column="110" selection-end-line="207" selection-end-column="110" />
+              <folding>
+                <element signature="e#8546#9719#0" />
+                <element signature="e#9744#12185#0" />
+                <element signature="e#12209#14647#0" />
+                <element signature="e#14674#17115#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="creative_list.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/creative_list.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="12">
+              <caret line="667" column="6" selection-start-line="667" selection-start-column="6" selection-end-line="667" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="init.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="835">
+              <caret line="1196" column="17" selection-start-line="1196" selection-start-column="4" selection-end-line="1196" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-ci-tags-component.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="504">
+              <caret line="42" column="16" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-base-tree-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="12">
+              <caret line="33" column="22" selection-start-line="33" selection-start-column="22" selection-end-line="33" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -51,36 +401,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>selected</find>
-      <find>openPanel</find>
-      <find>openGraphPanel</find>
-      <find>/web/lib/</find>
-      <find>addDashBoardModal</find>
-      <find>radioTheme</find>
-      <find>title</find>
-      <find>ciview</find>
-      <find>creative</find>
-      <find>vue-entity-tree-panel-event</find>
-      <find>createPopupMenu</find>
-      <find>addOverlays</find>
-      <find>addChild</find>
-      <find>deleteSubtree</find>
-      <find>layoutMgr</find>
-      <find>layout</find>
-      <find>self.model.self.model.</find>
-      <find>png</find>
-      <find>Org</find>
-      <find>工具</find>
-      <find>tools</find>
-      <find>html2</find>
-      <find>graphObject</find>
-      <find>graph</find>
-      <find>container</find>
-      <find>a</find>
-      <find>event</find>
-      <find>newWindow</find>
       <find>graphObject.</find>
       <find>chromeless</find>
+      <find>addBoB</find>
+      <find>mxGeometry</find>
+      <find>prototype.mxCell</find>
+      <find>mxCell</find>
+      <find>mxCell.prototype.style</find>
+      <find>addImagePalette</find>
+      <find>SHADOW</find>
+      <find>uml</find>
+      <find>createAdvancedShapes</find>
+      <find>addUmlPalette</find>
+      <find>addBpmnPalette</find>
+      <find>addGeneralPalette</find>
+      <find>hexagon</find>
+      <find>addBob</find>
+      <find>addStencilPalette</find>
+      <find>Cron</find>
+      <find>cell</find>
+      <find>addBobPalette</find>
+      <find>&quot;vue-base-tree-component</find>
+      <find>vue-base-tree-component</find>
+      <find>job.folder.list</find>
+      <find>checked</find>
+      <find>jsPanel3</find>
+      <find>jsoneditor</find>
+      <find>j</find>
+      <find>var self = this;</find>
+      <find>loadTreeData</find>
+      <find>vue-ci-tags-component</find>
     </findStrings>
     <replaceStrings>
       <replace>}}/web/vendor/</replace>
@@ -88,7 +438,6 @@
       <replace>ci-list</replace>
       <replace>ci-</replace>
       <replace>/vendor/zTree/</replace>
-      <replace>let self = this;</replace>
       <replace>GLOBAL_CONFIG.config.</replace>
       <replace>GLOBAL_CONFIG.config.ci_right_menu</replace>
       <replace>panel-detail</replace>
@@ -108,6 +457,7 @@
       <replace>self.model.layoutMgr</replace>
       <replace>self.model.layout</replace>
       <replace>self.model.graph</replace>
+      <replace>let self = this;</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
@@ -129,7 +479,6 @@
         <option value="$PROJECT_DIR$/templates/janesware/we.vue" />
         <option value="$PROJECT_DIR$/public/web/component/vue-entity-cure-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/temp" />
-        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-search-preset-component_zh-CN.html" />
         <option value="$PROJECT_DIR$/templates/janesware/diagnosis.html" />
         <option value="$PROJECT_DIR$/templates/janesware/search.html" />
@@ -138,15 +487,12 @@
         <option value="$PROJECT_DIR$/templates/janesware/log.html" />
         <option value="$PROJECT_DIR$/templates/janesware/job.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-object-detail-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-common-form-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-timeline-component.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/bootstrap-wizard/js/bwizard.js" />
         <option value="$PROJECT_DIR$/templates/janesware/monitoring.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/dispatch.html" />
-        <option value="$PROJECT_DIR$/public/web/js/util.js" />
         <option value="$PROJECT_DIR$/public/web/component/vue-base-timeline-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-echart-graph-component.html" />
         <option value="$USER_HOME$/Downloads/material-dashboard-pro-html-v1.2.1/web/dashboard.html" />
@@ -158,18 +504,26 @@
         <option value="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/mxshow.html" />
         <option value="$PROJECT_DIR$/templates/janesware/files.html" />
-        <option value="$PROJECT_DIR$/public/web/js/cfg.js" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" />
         <option value="$PROJECT_DIR$/conf/locale/locale_en-US.ini" />
         <option value="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/creative_list.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
-        <option value="$PROJECT_DIR$/public/web/js/init.js" />
         <option value="$PROJECT_DIR$/public/web/component/vue-echart-chinamap-component.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/creative_list.html" />
+        <option value="$PROJECT_DIR$/public/web/js/cfg.js" />
+        <option value="$PROJECT_DIR$/public/web/js/util.js" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/system.html" />
         <option value="$PROJECT_DIR$/templates/base/head.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" />
+        <option value="$PROJECT_DIR$/public/web/js/init.js" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/ciview.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html" />
       </list>
     </option>
   </component>
@@ -186,25 +540,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
-    <option name="width" value="1280" />
-    <option name="height" value="773" />
-  </component>
-  <component name="ProjectInspectionProfilesVisibleTreeState">
-    <entry key="Project Default">
-      <profile-state>
-        <expanded-state>
-          <State>
-            <id />
-          </State>
-        </expanded-state>
-        <selected-state>
-          <State>
-            <id>CoffeeScript</id>
-          </State>
-        </selected-state>
-      </profile-state>
-    </entry>
+    <option name="x" value="-1920" />
+    <option name="y" value="-170" />
+    <option name="width" value="1720" />
+    <option name="height" value="969" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -214,7 +553,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -243,7 +581,50 @@
             <path>
               <item name="web" type="b2602c69:ProjectViewProjectNode" />
               <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="bootstrap-3.3.7" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="color" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="base" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="web" type="b2602c69:ProjectViewProjectNode" />
@@ -255,6 +636,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -266,7 +648,8 @@
     <property name="node.js.path.for.package.prettier" value="project" />
     <property name="node.js.selected.package.prettier" value="" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.HTML" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Color Scheme Font" />
   </component>
   <component name="RecentsManager">
     <key name="OPEN_URL_DIALOG">
@@ -327,22 +710,25 @@
       <updated>1523343287754</updated>
       <workItem from="1523343287964" duration="1442000" />
       <workItem from="1523346017907" duration="905000" />
+      <workItem from="1525929318139" duration="35539000" />
+      <workItem from="1526036899508" duration="15196000" />
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="282122000" />
+    <option name="totallyTimeSpent" value="332857000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="773" extended-state="6" />
+    <frame x="-1920" y="-257" width="1920" height="1057" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Remote Host" order="3" />
-      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.225" />
+      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.2125" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.329927" />
+      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32904148" />
+      <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.329927" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -353,9 +739,8 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -406,120 +791,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="remove vue-timeinlie-component.html" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26868">
-          <caret line="2239" column="85" selection-start-line="2239" selection-start-column="85" selection-end-line="2239" selection-end-column="85" />
-          <folding>
-            <marker date="1523345102000" expanded="true" signature="5502:5508" ph=" " />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4752">
-          <caret line="396" column="115" selection-start-line="396" selection-start-column="115" selection-end-line="396" selection-end-column="115" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Documents/Admin/Color/seantheme.com/color-admin-v1.7/admin/html/assets/plugins/jquery-ui/ui/minified/jquery-ui.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="7" column="582" selection-start-line="7" selection-start-column="582" selection-end-line="7" selection-end-column="582" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-123">
-          <caret line="33" column="22" lean-forward="true" selection-start-line="33" selection-start-column="22" selection-end-line="33" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Documents/Admin/Color/seantheme.com/color-admin-v1.7/admin/html/form_wizards.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="498">
-          <caret line="230" column="62" selection-start-line="230" selection-start-column="4" selection-end-line="230" selection-end-column="62" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="282">
-          <caret line="453" column="57" selection-start-line="453" selection-start-column="40" selection-end-line="453" selection-end-column="57" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/dispatch.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="401">
-          <caret line="384" column="46" selection-start-line="384" selection-start-column="46" selection-end-line="384" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/bootstrap-wizard/js/bwizard.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="449" column="41" selection-start-line="449" selection-start-column="41" selection-end-line="449" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-object-detail-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="605">
-          <caret line="96" column="81" selection-start-line="96" selection-start-column="81" selection-end-line="96" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-kpi-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1139" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/util.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="565">
-          <caret line="316" lean-forward="true" selection-start-line="316" selection-end-line="316" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/search.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="229">
-          <caret line="871" column="41" selection-start-line="871" selection-start-column="33" selection-end-line="871" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-echart-timeline-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="10" column="103" lean-forward="true" selection-start-line="10" selection-start-column="8" selection-end-line="10" selection-end-column="103" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="454">
-          <caret line="888" column="60" lean-forward="true" selection-start-line="888" selection-start-column="42" selection-end-line="888" selection-end-column="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/new/web/dashboard.html" />
-    <entry file="file://$USER_HOME$/Downloads/material-dashboard-pro-html-v1.2.1/web/dashboard.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="87">
-          <caret line="25" column="29" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-search-input-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="92" column="53" lean-forward="true" selection-start-line="92" selection-start-column="53" selection-end-line="92" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/new/web/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="619">
@@ -531,13 +802,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="6084">
           <caret line="507" column="29" lean-forward="true" selection-start-line="491" selection-start-column="23" selection-end-line="507" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="2504" column="49" selection-start-line="2332" selection-start-column="46" selection-end-line="2504" selection-end-column="49" />
         </state>
       </provider>
     </entry>
@@ -588,27 +852,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="767">
-          <caret line="255" column="8" selection-start-line="255" selection-start-column="8" selection-end-line="255" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1188">
-          <caret line="189" column="82" selection-start-line="189" selection-start-column="82" selection-end-line="189" selection-end-column="82" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-141">
-          <caret line="30" column="30" selection-start-line="30" selection-start-column="30" selection-end-line="30" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4632">
@@ -654,34 +897,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8376">
-          <caret line="1173" column="46" selection-start-line="1173" selection-start-column="22" selection-end-line="1173" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/creative_list.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="612" column="21" selection-start-line="612" selection-start-column="21" selection-end-line="612" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="44" column="18" selection-start-line="44" selection-start-column="18" selection-end-line="44" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/monitoring.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="297">
-          <caret line="380" column="27" lean-forward="true" selection-start-line="378" selection-start-column="24" selection-end-line="380" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="226">
@@ -689,20 +904,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3576">
-          <caret line="293" column="21" selection-start-line="293" selection-start-column="21" selection-end-line="293" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-echart-chinamap-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="26" column="31" selection-start-line="26" selection-start-column="31" selection-end-line="26" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-echart-chinamap-component.html" />
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-echart-graph-component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1020">
@@ -710,34 +912,225 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxPerimeter.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="792">
-          <caret line="66" column="61" selection-start-line="66" selection-start-column="61" selection-end-line="66" selection-end-column="61" />
+        <state relative-caret-position="-73">
+          <caret line="75" column="17" selection-start-line="75" selection-start-column="17" selection-end-line="75" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxCellEditor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="393">
+          <caret line="244" column="22" selection-start-line="244" selection-start-column="13" selection-end-line="244" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/model/mxCell.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7981">
+          <caret line="105" selection-start-line="105" selection-end-line="105" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15024">
+          <caret line="1252" column="31" selection-start-line="1252" selection-start-column="18" selection-end-line="1252" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="427">
+          <caret line="431" column="108" selection-start-line="429" selection-start-column="24" selection-end-line="431" selection-end-column="108" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="48">
+          <caret line="4" column="13" lean-forward="true" selection-start-line="4" selection-start-column="11" selection-end-line="4" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="25" selection-start-line="25" selection-end-line="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="716">
-          <caret line="1509" column="35" selection-start-line="1509" selection-start-column="35" selection-end-line="1509" selection-end-column="35" />
+        <state relative-caret-position="350">
+          <caret line="1195" column="64" selection-start-line="1195" selection-start-column="55" selection-end-line="1195" selection-end-column="64" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="85" lean-forward="true" selection-start-line="85" selection-end-line="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12">
+          <caret line="33" column="22" selection-start-line="33" selection-start-column="22" selection-end-line="33" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/creative_list.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12">
+          <caret line="667" column="6" selection-start-line="667" selection-start-column="6" selection-end-line="667" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/color/style.min.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-6056" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/color/color_default.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-250" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/.csscomb.json">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/.csslintrc">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/mixins/alerts.less">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/dist/css/bootstrap.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-80504" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/dist/js/bootstrap.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-27930" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/dist/js/npm.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/js/alert.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-614" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="22" column="44" selection-start-line="22" selection-start-column="44" selection-end-line="22" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12">
+          <caret line="387" selection-start-line="387" selection-end-line="387" />
+          <folding>
+            <element signature="e#97#103#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/untitled.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/monitoring.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-10895">
+          <caret line="380" column="27" lean-forward="true" selection-start-line="378" selection-start-column="24" selection-end-line="380" selection-end-column="27" />
+          <folding>
+            <element signature="e#43499#47370#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="431">
+          <caret line="207" column="110" selection-start-line="207" selection-start-column="110" selection-end-line="207" selection-end-column="110" />
+          <folding>
+            <element signature="e#8546#9719#0" />
+            <element signature="e#9744#12185#0" />
+            <element signature="e#12209#14647#0" />
+            <element signature="e#14674#17115#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="562">
+          <caret line="2551" column="58" selection-start-line="2551" selection-start-column="58" selection-end-line="2551" selection-end-column="58" />
+          <folding>
+            <element signature="e#75#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="835">
+          <caret line="1196" column="17" selection-start-line="1196" selection-start-column="4" selection-end-line="1196" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26868">
-          <caret line="2239" column="85" selection-start-line="2239" selection-start-column="85" selection-end-line="2239" selection-end-column="85" />
+        <state relative-caret-position="651">
+          <caret line="143" column="24" selection-start-line="143" selection-start-column="24" selection-end-line="143" selection-end-column="24" />
           <folding>
-            <marker date="1523345102000" expanded="true" signature="5502:5508" ph=" " />
+            <element signature="e#79#85#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="34" column="54" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="54" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="395" column="41" lean-forward="true" selection-start-line="395" selection-start-column="41" selection-end-line="395" selection-end-column="41" />
+        <state relative-caret-position="830">
+          <caret line="270" column="74" selection-start-line="270" selection-start-column="74" selection-end-line="270" selection-end-column="74" />
+          <folding>
+            <element signature="e#2941#2947#0" expanded="true" />
+            <element signature="e#2947#2953#0" expanded="true" />
+            <element signature="e#2953#2959#0" expanded="true" />
+            <element signature="e#2959#2965#0" expanded="true" />
+            <element signature="e#3086#3092#0" expanded="true" />
+            <element signature="e#3092#3098#0" expanded="true" />
+            <element signature="e#3098#3104#0" expanded="true" />
+            <element signature="e#3104#3110#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="42" column="16" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
         </state>
       </provider>
     </entry>

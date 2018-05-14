@@ -46,13 +46,25 @@
 
 							<div>
 								<fieldset>
+									<h5 class="pull-left width-full">运行命令</h5>
+									<!-- begin row -->
+									<div class="row">
+										<!-- begin col-4 -->
+										<div class="col-md-12">
+											<div class="form-group">
+												<input type="text" placeholder="运行命令" class="form-control" v-model="model.dispatch.command">
+											</div>
+										</div>
+										<!-- end col-4 -->
+									</div>
+									<!-- end row -->
 									<h5 class="pull-left width-full">运行策略</h5>
 									<!-- begin row -->
 									<div class="row">
 										<!-- begin col-4 -->
 										<div class="col-md-12">
 											<div class="form-group">
-												<input type="text" name="firstname" placeholder="John" class="form-control" value="cron 5 0 * * *">
+												<input type="text" placeholder="运行策略" class="form-control" v-model="model.dispatch.cron">
 											</div>
 										</div>
 										<!-- end col-4 -->
@@ -66,8 +78,15 @@
 											<div class="form-group">
 												<div class="input-group">
 													<input type="text" class="form-control"
-														   placeholder="输入环境变量" value="ETCDPATH=localhost:2380">
-													<div class="input-group-addon btn btn-default">+</div>
+													       placeholder="输入环境变量" v-model="model.dispatch.env.term">
+													<div class="input-group-addon btn btn-success" @click="envNew">+</div>
+												</div>
+											</div>
+											<div class="form-group" v-for="item in model.dispatch.env.list">
+												<div class="input-group">
+													<input type="text" class="form-control"
+														   placeholder="输入环境变量" :value="item">
+													<div class="input-group-addon btn btn-default" @click="envDelete(item)">-</div>
 												</div>
 											</div>
 										</div>
@@ -160,15 +179,15 @@
 										<div class="col-md-12">
 											<div class="btn-group">
 
-												<button type="button" class="btn btn-sm btn-grey">引用规则：cpu_linux</button>
+												<button type="button" class="btn btn-sm btn-grey">引用规则：${model.dispatch.rule.selected || _.head(model.dispatch.rule.list)} </button>
 												<button type="button" class="btn btn-sm btn-grey dropdown-toggle"
 														data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 													<span class="caret"></span>
 												</button>
 												<ul class="dropdown-menu">
-													<li><a href="#">cpu_linux</a></li>
-													<li><a href="#">performance_linux</a></li>
-													<li><a href="#">log_apache</a></li>
+													<li v-for="item in model.dispatch.rule.list">
+														<a href="javascript:void(0);" @click="ruleSelect(item)">${item}</a>
+													</li>
 													<li role="separator" class="divider"></li>
 													<li><a href="#">新建规则</a></li>
 												</ul>
@@ -186,7 +205,7 @@
 							</div>
 							<div>
 								<fieldset>
-									<a href="javascript:void(0)" class="btn btn-success">开始下发</a>
+									<a href="javascript:void(0)" class="btn btn-success" @click="dispatchStart">开始下发</a>
 									<!-- begin row -->
 									<div class="row">
 										<!-- begin col-12 -->
@@ -210,6 +229,21 @@
 		delimiters: ['${', '}'],
 		data: function () {
 			return {
+			    model: {
+                    dispatch: {
+                        command: "",
+                        cron: "",
+                        hosts: ['wecise'],
+                        rule: {
+                            list: ["/matrix/rules/performance","CPU_RULE","MEMORY_RULE"],
+                            selected: ""
+                        },
+                        env: {
+                            list:['TESTENV=testenv','TESTENV=testenv2'],
+	                        term: ""
+                        }
+                    }
+			    },
 				dispatchTreeNodes: {},
 				agentModel: [
 					{name: "bin", type: "isFolder"},
@@ -437,7 +471,7 @@
 			}
 		},
         mounted: function () {
-            var self = this;
+            let self = this;
 
             self.$nextTick(function () {
 
@@ -482,6 +516,46 @@
 					}
 				});
 			},
+            envNew: function(){
+			    let self = this;
+
+			    if(_.isEmpty(self.model.dispatch.env.term)){
+					swal("不能为空","","warning");
+					return false;
+			    }
+
+                if(_.indexOf(self.model.dispatch.env.list,self.model.dispatch.env.term) > -1){
+                    swal("已设置该环境变量",self.model.dispatch.env.term,"info");
+                    return false;
+                }
+
+			    self.model.dispatch.env.list.push(self.model.dispatch.env.term);
+                self.model.dispatch.env.term = "";
+            },
+            envDelete: function(event){
+                let self = this;
+
+                self.model.dispatch.env.list.splice(_.indexOf(self.model.dispatch.env.list,event),1);
+            },
+            ruleSelect: function(event){
+			    let self = this;
+
+                self.model.dispatch.rule.selected = event;
+            },
+            dispatchStart: function(){
+				let self = this;
+
+				let _form = new FormData();
+				_form.append("command", self.model.dispatch.command);
+                _form.append("cron", self.model.dispatch.cron);
+                _form.append("hosts", self.model.dispatch.hosts);
+                _form.append("rule", self.model.dispatch.rule.selected);
+                _form.append("env", self.model.dispatch.env.list);
+
+                let _rtn = agentDispatch(_form);
+
+                console.log(_rnt)
+            },
 			newGroup: function () {
 
 			},

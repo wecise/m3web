@@ -2,13 +2,40 @@
 
 	<style>
 		/*----------  style  ----------*/
+		ul.nav-tabs-no-bg {
+    		background-color: rgba(0, 0, 0, 0)!important;
+		}
+
+		ul.nav-tabs-no-bg > li.active {
+			border-bottom: 2px solid rgb(231, 231, 231);
+		}
 		
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-entity-tree-component"  ----------*/
 	<template>
-		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+		<div role="tabpanel" style="margin: -10px;">
+			<!-- Nav tabs -->
+			<ul class="nav nav-tabs nav-tabs-no-bg" role="tablist">
+				<li role="presentation" class="active">
+					<a href="#home" aria-controls="home" role="tab" data-toggle="tab">分类</a>
+				</li>
+				<li role="presentation">
+					<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">标签</a>
+				</li>
+			</ul>
+		
+			<!-- Tab panes -->
+			<div class="tab-content" style="padding:0px;">
+				<div role="tabpanel" class="tab-pane active" id="home">
+					<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+				</div>
+				<div role="tabpanel" class="tab-pane" id="tab">
+					<vue-ci-tags-component :id="'tags_'+id" :model="model"></vue-ci-tags-component>
+				</div>
+			</div>
+		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -29,13 +56,7 @@
 	            expandNodes: Array,
 				selected: Object,
 				contextMenu: {
-					"alias": {name: "Toggle View", icon: "fa-eye",
-                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-                            eventHub.$emit("vue-entity-tree-toggle-name-event", null);
-						}
-					},
-                    "sep1": "---------",
-                    "create": {name: "Create CI", icon: "fa-plus",
+					"create": {name: "Create CI", icon: "fa-plus",
 						callback: function (itemKey, opt, rootMenu, originalEvent) {
 							let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
                             let nodes = treeObj.getSelectedNodes();
@@ -44,7 +65,7 @@
 							eventHub.$emit("vue-entity-tree-panel-event", _item);
 						}
 					},
-                    "sep2": "---------",
+                    "sep1": "---------",
 					"remove": {name: "Remove All CI", icon: "fa-trash",
                         callback: function (itemKey, opt, rootMenu, originalEvent) {
                             let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
@@ -53,6 +74,12 @@
 
 
                             eventHub.$emit("vue-entity-tree-panel-event", _item);
+						}
+					},
+					"sep2": "---------",
+					"alias": {name: "Toggle View", icon: "fa-eye",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            eventHub.$emit("vue-entity-tree-toggle-name-event", null);
 						}
 					}
 				},
@@ -83,11 +110,11 @@
 	                                dblClickExpand: false
 	                            },
 	                            check: {
-									enable: true,
+									enable: false,
 									nocheckInherit: true
 								},
 	                            edit: {
-	                                enable: true,
+	                                enable: false,
 	                            },
 	                            data: {
 	                                simpleData: {
@@ -122,7 +149,7 @@
 	            handler:function(val, oldVal){
 	                let self = this;
 
-	                self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
+	                self.zTree = $.fn.zTree.init($(self.$el).find("#"+self.id), val, self.nodes);
 	            },
 	            deep: true
 	        },
@@ -143,8 +170,44 @@
 	    methods: {
 	        init: function() {
 	            let self = this;
+	            let _list = fetchData(`call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`);
+	            let _data = _.map(_list.message[0].tree,function(v,k){
+	            				let _name = _.last(v.name.split("/"));
+	            				v.icon = "/web/vendor/zTree/css/entitieszTreeStyle/img/diy/" + _name + ".svg";
+				            	return v;
+				            });
 
-	            jQuery.ajax({
+                let _nodes = _.map(self.model,function(v){
+                				_.forEach(_data,function(val){
+                					
+                					val = _.merge(val,{title:_.last(val.name.split("/"))});
+
+                					if(_.includes(v.class,val.name)){
+                						val = _.merge(val,{checked: true, open:true});
+                					}
+                				})
+
+                				let _pid = _.filter(_data,{name:v.class});
+                				let _name = _.last(v.name.split("/"));
+
+                				return {
+    										cid: objectHash.sha1(v),
+        									pid: _.isEmpty(_pid)?66:_pid[0].pid,
+        									name: v.class + "/" + v.name, 
+        									title:v.name + " " + _.random(0,10),//+ "[" + v.summary.event + "]", 
+        									checked: true, 
+        									open:true,
+        									icon: "/web/vendor/zTree/css/entitieszTreeStyle/img/diy/" + _name + ".svg"
+        								};
+	            			 })
+                
+    			self.nodes = [];
+    			self.nodes = _.concat(_data,_nodes);
+                self.zTree = $.fn.zTree.init($(self.$el).find("#"+self.id), self.setting, self.nodes);
+
+                //self.zTree.expandAll(true);
+                //console.log(JSON.stringify(self.nodes))
+	            /*jQuery.ajax({
 	                url: '/mxobject/search',
 	                type: 'POST',
 	                dataType: 'json',
@@ -159,41 +222,13 @@
 	                    
 	                    if(_.isEmpty(data.message)) return false;
 	                    
-	                    let _data = data.message[0].tree;
-	                    let _nodes = _.map(self.model,function(v){
-	                    				_.forEach(_data,function(val){
-	                    					
-	                    					val = _.merge(val,{title:_.last(val.name.split("/"))});
-
-	                    					if(_.includes(v.class,val.name)){
-	                    						val = _.merge(val,{checked: true, open:true});
-	                    					}
-	                    				})
-
-	                    				let _pid = _.filter(_data,{name:v.class});
-
-	                    				return {
-            										cid: objectHash.sha1(v),
-	            									pid: _.isEmpty(_pid)?66:_pid[0].pid,
-	            									name: v.class + "/" + v.name, 
-	            									title:v.name + " " + _.random(0,10),//+ "[" + v.summary.event + "]", 
-	            									checked: true, 
-	            									open:true
-	            								};
-			            			 })
 	                    
-            			self.nodes = [];
-            			self.nodes = _.concat(_data,_nodes);
-	                    self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
-
-	                    //self.zTree.expandAll(true);
-	                    //console.log(JSON.stringify(self.nodes))
 	                    
 	                },
 	                error: function(xhr, textStatus, errorThrown) {
 	                    console.log(errorThrown);
 	                }
-	            });
+	            });*/
 	        },
             initPlugIn: function(){
                 let self = this;
