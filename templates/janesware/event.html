@@ -239,6 +239,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-tags-component.html"></link>
 
 <script type="text/javascript">
 	
@@ -251,7 +252,8 @@
 						"vue-search-input-component",
 						"vue-bootstrap-table",
 		                "vue-common-form-component",
-        				"vue-object-detail-component"],function() {
+        				"vue-object-detail-component",
+						"vue-ci-tags-component"],function() {
 
 		moment.locale({{.Lang}});
 
@@ -1011,7 +1013,7 @@
 						<div class="col-lg-2" id="nav" style="display: none;padding: 10px 5px 5px 0px;">
 							<div class="panel panel-default" style="border-radius: 0px;border:none;box-shadow:none;">
 				                <div class="panel-body" style="padding: 5px 0px;min-height:300px;max-height:500px;overflow:auto;">
-				                    <vue-entity-tree-component id="event-entity-tree"></vue-entity-tree-component>
+				                    <vue-entity-tree-component id="event-entity-tree" :model="search.result.data"></vue-entity-tree-component>
 				                </div>
 							</div>
 				  		</div>

@@ -346,7 +346,7 @@
 
                         self.model = _.map(_list.message,function(v,k){
                                         v.parent = v.parent.replace(/\/home\/admin/,"");
-                                        return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                        return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
                                     });
 
                         _.delay(self.refresh,100);
@@ -358,7 +358,7 @@
                         
                         self.model = _.pickBy(_.map(_data,function(v,k){
                                         if(_.includes(["iflow","ishow","imap"],v.ftype)) {
-                                            return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                            return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
                                         }
                                     }),_.identity);
 
@@ -492,7 +492,7 @@
                                     
                                     me.model.templates = _.map(_list.message,function(v,k){
                                                         v.parent = v.parent.replace(/\/home\/admin/,"");
-                                                        return _.merge(v, {"username": `{{.SignedUser.Name}}`, "star": "", "tag": {"_all": ""}});
+                                                        return _.merge(v, {"username": `{{.SignedUser.Name}}`, "star": ""});
                                                     });
 
                                     _.delay(self.refresh,100);

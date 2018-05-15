@@ -15,23 +15,23 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-entity-tree-component"  ----------*/
 	<template>
-		<div role="tabpanel" style="margin: -10px;">
+		<div role="tabpanel">
 			<!-- Nav tabs -->
 			<ul class="nav nav-tabs nav-tabs-no-bg" role="tablist">
 				<li role="presentation" class="active">
-					<a href="#home" aria-controls="home" role="tab" data-toggle="tab">分类</a>
+					<a href="#entity-tree" aria-controls="entity-tree" role="tab" data-toggle="tab">分类</a>
 				</li>
 				<li role="presentation">
-					<a href="#tab" aria-controls="tab" role="tab" data-toggle="tab">标签</a>
+					<a href="#entity-tags" aria-controls="entity-tags" role="tab" data-toggle="tab">标签</a>
 				</li>
 			</ul>
 		
 			<!-- Tab panes -->
 			<div class="tab-content" style="padding:0px;">
-				<div role="tabpanel" class="tab-pane active" id="home">
+				<div role="tabpanel" class="tab-pane active" id="entity-tree">
 					<ul class="ztree" :id="id" style="overflow:auto;"></ul>
 				</div>
-				<div role="tabpanel" class="tab-pane" id="tab">
+				<div role="tabpanel" class="tab-pane" id="entity-tags">
 					<vue-ci-tags-component :id="'tags_'+id" :model="model"></vue-ci-tags-component>
 				</div>
 			</div>
@@ -204,31 +204,8 @@
     			self.nodes = [];
     			self.nodes = _.concat(_data,_nodes);
                 self.zTree = $.fn.zTree.init($(self.$el).find("#"+self.id), self.setting, self.nodes);
+                console.log(123, JSON.stringify(self.nodes),self.zTree)
 
-                //self.zTree.expandAll(true);
-                //console.log(JSON.stringify(self.nodes))
-	            /*jQuery.ajax({
-	                url: '/mxobject/search',
-	                type: 'POST',
-	                dataType: 'json',
-	                data: {
-	                    cond: `call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`//top 1000`
-	                },
-	                beforeSend: function(xhr) {
-	                },
-	                complete: function(xhr, textStatus) {
-	                },
-	                success: function(data, textStatus, xhr) {
-	                    
-	                    if(_.isEmpty(data.message)) return false;
-	                    
-	                    
-	                    
-	                },
-	                error: function(xhr, textStatus, errorThrown) {
-	                    console.log(errorThrown);
-	                }
-	            });*/
 	        },
             initPlugIn: function(){
                 let self = this;

@@ -2391,180 +2391,155 @@
                                                       _sql = self.query.editor.getSelectedText();
                                                   }
 
-                                                  jQuery.ajax({
-                                                      url: "/mxobject/list/sql",
-                                                      dataType: 'json',
-                                                      type: 'POST',
-                                                      data: {
-                                                          ctype:"obj",
-                                                          sql:_sql
-                                                      },
-                                                      beforeSend:function(xhr){
-                                                            oneLevelLoading = layer.load(2, {
-                                                                    shade: [0.1,'#ccc'],
-                                                                    time: 30*1000
-                                                                  });
-                                                      },
-                                                      complete: function(xhr, textStatus) {
-                                                          layer.close(oneLevelLoading);
-                                                      },
-                                                      success: function (data, status) {
+                                                  let _list = fetchDataByMql(_sql);
 
-                                                          mxLog.debug("[" + moment().format("LLL") + "] [200] " + JSON.stringify(data,null,2))
+                                                  // MQL for  CRUD
+                                                  if(_list.message == "OK"){
+                                                      eventHub.$emit("class-tree-refresh-event",null);
+                                                      swal("Success!","","success");
+                                                      layer.close(oneLevelLoading);
+                                                  }
 
-                                                          // MQL for  CRUD
-                                                          if(data.message == "OK"){
-                                                              eventHub.$emit("class-tree-refresh-event",null);
-                                                              swal("Success!","","success");
-                                                              layer.close(oneLevelLoading);
+                                                  let _data = _.attempt(JSON.parse.bind(null,_list.message));
+                                                  _.forEach(_data,function (v,k) {
+                                                      _.forEach(v,function(val,key){
+                                                          if(_.isObject(val)){
+                                                              //_data[k][key] = JSON.stringify(val).replace(/\n\t/g,"");
+                                                              console.log(_data[k][key])
                                                           }
-
-                                                          let _data = _.attempt(JSON.parse.bind(null,data.message));
-                                                          _.forEach(_data,function (v,k) {
-                                                              _.forEach(v,function(val,key){
-                                                                  if(_.isObject(val)){
-                                                                      //_data[k][key] = JSON.stringify(val).replace(/\n\t/g,"");
-                                                                      console.log(_data[k][key])
-                                                                  }
-                                                              })
-                                                          });
-
-                                                          _columns.push({
-                                                              field: "num",
-                                                              formatter: asNumFormatter,
-                                                          });
-
-                                                          let _tmp = _.upperCase(_sql).split("FROM")[0].replace(/SELECT/g,"");
-
-                                                          if(_tmp.indexOf("*") > -1 || _.trim(_tmp).length < 1){
-                                                              _.map(_data[0], function(v,k) {
-
-                                                                let tmp = {};
-
-                                                                if(k.indexOf("time") > -1){
-                                                                    tmp = {
-                                                                             field: k,
-                                                                             title: _.upperFirst(k),
-                                                                             sortable: true,
-                                                                             formatter: function(val){
-                                                                                            return moment(val).format("LLL");
-                                                                                        }
-                                                                          };
-                                                                } else {
-                                                                    if(_.indexOf(_objAttrList,k) > -1){
-
-                                                                        tmp = {
-                                                                                field: k,
-                                                                                title: _.upperFirst(k),
-                                                                                sortable: true,
-                                                                                formatter: function(value,row,index){
-                                                                                    console.log(555,value,row,index)
-                                                                                    return JSON.stringify(value);
-                                                                                },
-                                                                                editable: {
-                                                                                      emptytext: "-",
-                                                                                      title: k,
-                                                                                      container: 'body',
-                                                                                      inputclass: 'query-table-text',
-                                                                                      type: 'textarea'
-                                                                                }
-                                                                              };
-                                                                    } else {
-                                                                        tmp = {
-                                                                                 field: k,
-                                                                                 title: _.upperFirst(k),
-                                                                                 sortable: true,
-                                                                                 editable: {
-                                                                                      emptytext: "-",
-                                                                                      title: k,
-                                                                                      container: 'body',
-                                                                                      inputclass: 'query-table-text'
-                                                                                  }
-                                                                              };
-                                                                    }
-
-                                                                }
-                                                                _columns.push(tmp);
-                                                              });
-                                                          } else {
-                                                             let _cols = _tmp.split(" ");
-                                                             _.forEach(_cols,function(k){
-                                                                if(!_.isEmpty(k)){
-                                                                    if(_.indexOf(_objAttrList,k) > -1){
-                                                                        _columns.push({
-                                                                                  field: _.lowerCase(k),
-                                                                                  title: _.upperFirst(k),
-                                                                                  sortable: true,
-                                                                                  editable: {
-                                                                                      emptytext: "-",
-                                                                                      title: k,
-                                                                                      container: 'body',
-                                                                                      inputclass: 'query-table-text'
-                                                                                  }
-                                                                                });
-                                                                    } else {
-                                                                        _columns.push({
-                                                                                  field: _.lowerCase(k),
-                                                                                  title: _.upperFirst(k),
-                                                                                  sortable: true,
-                                                                                  editable: {
-                                                                                      emptytext: "-",
-                                                                                      title: k,
-                                                                                      container: 'body',
-                                                                                      inputclass: 'query-table-text'
-                                                                                  }
-                                                                                });
-                                                                    }
-                                                                }
-                                                             })
-                                                          }
-
-                                                          let _hash = objectHash.sha1(_.trim(_sql));
-                                                          let _index = _.findIndex(self.result.list, {id: _hash});
-                                                          let _obj = {
-                                                                        id: _hash,
-                                                                        name: "query_" + _.size(self.result.list)+1,
-                                                                        model:{
-                                                                                options:{
-                                                                                    showColumns: false,
-                                                                                    pagination: false,
-                                                                                    showExport: false,
-                                                                                    contextMenu: '#context-menu',
-                                                                                    onContextMenuItem: onContextMenu,
-                                                                                    onEditableShown: function(editable, field, row, $el){
-                                                                                        console.log(12,field[editable])
-                                                                                    },
-                                                                                    onEditableSave: function (field, row, oldValue, $el) {
-                                                                                        self.onSave(row);
-                                                                                    }
-                                                                                },
-                                                                                columns: _columns,
-                                                                                dataset: _data
-                                                                              }
-                                                                      };
-
-                                                          if(_index > -1){
-                                                              _obj.name = self.result.list[_index].name;
-                                                              self.result.list.splice(_index,1,_obj);
-                                                          } else {
-                                                              self.result.list.push(_obj);
-                                                          }
-
-                                                          $(".ul-query>li").removeClass("active");
-                                                          $(".ul-query").find("#"+_hash).addClass("active");
-
-                                                          $(".tab-query>li").removeClass("active");
-                                                          $(".tab-query").find("#"+_hash).addClass("active");
-
-                                                          self.result.summary.count = _.size(_data);
-                                                          self.result.summary.time = moment().diff(moment(_stime), 'seond');
-
-                                                      },
-                                                      error: function(xhr, textStatus, errorThrown){
-                                                           mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                                           layer.close(oneLevelLoading);
-                                                      }
+                                                      })
                                                   });
+
+                                                  _columns.push({
+                                                      field: "num",
+                                                      formatter: asNumFormatter,
+                                                  });
+
+                                                  let _tmp = _.upperCase(_sql).split("FROM")[0].replace(/SELECT/g,"");
+
+                                                  if(_tmp.indexOf("*") > -1 || _.trim(_tmp).length < 1){
+                                                      _.map(_data[0], function(v,k) {
+
+                                                          let tmp = {};
+
+                                                          if(k.indexOf("time") > -1){
+                                                              tmp = {
+                                                                  field: k,
+                                                                  title: _.upperFirst(k),
+                                                                  sortable: true,
+                                                                  formatter: function(val){
+                                                                      return moment(val).format("LLL");
+                                                                  }
+                                                              };
+                                                          } else {
+                                                              if(_.indexOf(_objAttrList,k) > -1){
+
+                                                                  tmp = {
+                                                                      field: k,
+                                                                      title: _.upperFirst(k),
+                                                                      sortable: true,
+                                                                      formatter: function(value,row,index){
+                                                                          console.log(555,value,row,index)
+                                                                          return JSON.stringify(value);
+                                                                      },
+                                                                      editable: {
+                                                                          emptytext: "-",
+                                                                          title: k,
+                                                                          container: 'body',
+                                                                          inputclass: 'query-table-text',
+                                                                          type: 'textarea'
+                                                                      }
+                                                                  };
+                                                              } else {
+                                                                  tmp = {
+                                                                      field: k,
+                                                                      title: _.upperFirst(k),
+                                                                      sortable: true,
+                                                                      editable: {
+                                                                          emptytext: "-",
+                                                                          title: k,
+                                                                          container: 'body',
+                                                                          inputclass: 'query-table-text'
+                                                                      }
+                                                                  };
+                                                              }
+
+                                                          }
+                                                          _columns.push(tmp);
+                                                      });
+                                                  } else {
+                                                      let _cols = _tmp.split(" ");
+                                                      _.forEach(_cols,function(k){
+                                                          if(!_.isEmpty(k)){
+                                                              if(_.indexOf(_objAttrList,k) > -1){
+                                                                  _columns.push({
+                                                                      field: _.lowerCase(k),
+                                                                      title: _.upperFirst(k),
+                                                                      sortable: true,
+                                                                      editable: {
+                                                                          emptytext: "-",
+                                                                          title: k,
+                                                                          container: 'body',
+                                                                          inputclass: 'query-table-text'
+                                                                      }
+                                                                  });
+                                                              } else {
+                                                                  _columns.push({
+                                                                      field: _.lowerCase(k),
+                                                                      title: _.upperFirst(k),
+                                                                      sortable: true,
+                                                                      editable: {
+                                                                          emptytext: "-",
+                                                                          title: k,
+                                                                          container: 'body',
+                                                                          inputclass: 'query-table-text'
+                                                                      }
+                                                                  });
+                                                              }
+                                                          }
+                                                      })
+                                                  }
+
+                                                  let _hash = objectHash.sha1(_.trim(_sql));
+                                                  let _index = _.findIndex(self.result.list, {id: _hash});
+                                                  let _obj = {
+                                                      id: _hash,
+                                                      name: "query_" + _.size(self.result.list)+1,
+                                                      model:{
+                                                          options:{
+                                                              showColumns: false,
+                                                              pagination: false,
+                                                              showExport: false,
+                                                              contextMenu: '#context-menu',
+                                                              onContextMenuItem: onContextMenu,
+                                                              onEditableShown: function(editable, field, row, $el){
+                                                                  console.log(12,field[editable])
+                                                              },
+                                                              onEditableSave: function (field, row, oldValue, $el) {
+                                                                  self.onSave(row);
+                                                              }
+                                                          },
+                                                          columns: _columns,
+                                                          dataset: _data
+                                                      }
+                                                  };
+
+                                                  if(_index > -1){
+                                                      _obj.name = self.result.list[_index].name;
+                                                      self.result.list.splice(_index,1,_obj);
+                                                  } else {
+                                                      self.result.list.push(_obj);
+                                                  }
+
+                                                  $(".ul-query>li").removeClass("active");
+                                                  $(".ul-query").find("#"+_hash).addClass("active");
+
+                                                  $(".tab-query>li").removeClass("active");
+                                                  $(".tab-query").find("#"+_hash).addClass("active");
+
+                                                  self.result.summary.count = _.size(_data);
+                                                  self.result.summary.time = moment().diff(moment(_stime), 'seond');
+
                                               },
                                               onRemove: function(item){
                                                   let self = this;

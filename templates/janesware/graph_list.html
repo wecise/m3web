@@ -375,7 +375,7 @@
                                 var data = data.message;
 
                                 self.model = _.map(data,function(v,k){
-                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
                                             });
                                 _.delay(self.refresh,100);
                             },
@@ -403,7 +403,7 @@
                                 var data = data.message;
 
                                 self.model = _.map(data,function(v,k){
-                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": "", "tag": {"_all": ""}});
+                                                return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
                                             });
 
                                 _.delay(self.refresh, 500);

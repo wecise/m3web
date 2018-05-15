@@ -2,14 +2,19 @@
 
 	<style>
 		/*----------  style  ----------*/
-		
+		.list-group-item {
+			border:none;
+			padding: 5px;
+		}
 		
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-ci-tags-component"  ----------*/
 	<template>
-		<ul :id="id"><li v-for="item in model.message.tags"><span class="label label-info">${item}</span></li></ul>
+		<ul :id="id" class="list-group"><li v-for="item in tags" class="list-group-item">
+			<span :class="'btn btn-xs '+_.sample(['btn-info','btn-success','btn-default','btn-danger','btn-warning'])">${item}</span>
+		</li></ul>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -18,11 +23,11 @@
         delimiters: ['${', '}'],
 		props: {
             id: String,
-			model: Object
+			model: Array
 		},
 		data:function(){
 			return {
-                tags: []
+                tags: null
             }
 		},
         created: function(){
@@ -30,6 +35,11 @@
 
         },
         watch: {
+            model:function(val,oldVal){
+                let slef = this;
+
+				self.init(val);
+            }
             
         },
         mounted: function(){
@@ -38,25 +48,25 @@
             self.$nextTick(function(){
 
                 _.delay(function(){
-					self.init();
+					self.init(null);
                 },500);
-                
+
 	            self.initPlugin();
             })
         },
         methods: {
-            init: function() {
+            init: function(event) {
                 let self = this;
 
-				console.log(123,JSON.stringify(self.model.message))
-                let _tmp = _.map(self.model.message, function (v) {
-			                    if (!_.isEmpty(v.tags)){
-			                        _.forEach(v, function(val,key){
-			                            self.tags.push(val);
-			                        })
-			                    };
-			                });
-				console.log(234,JSON.stringify(self.tags))
+                if (!_.isEmpty(event)){
+                    self.tags =  _.chain(_.map(event, 'tags')).reject(_.isEmpty).join().split(",").uniq();
+                    self.tags = JSON.parse(JSON.stringify(self.tags));
+                    return false;
+                }
+
+                self.tags =  _.chain(_.map(self.model, 'tags')).reject(_.isEmpty).join().split(",").uniq();
+				self.tags = JSON.parse(JSON.stringify(self.tags));
+
             },
             initPlugin: function(){
             	let self = this;

@@ -153,313 +153,6 @@
 
             $(".current-active-item").html(`<a class="active item" href="/janesware/ciview" ><i class="fa fa-th-list"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
 
-            Vue.component('tree-component', {
-                template: '<ul class="ztree"></ul>',
-                data: function () {
-                    return {
-                        zTree: Object,
-                        setting: Object,
-                        nodes: Array,
-                    }
-                },
-                created: function () {
-                    let self = this;
-
-                    eventHub.$on('tree-init-event', self.init);
-                    eventHub.$on('tree-refresh-event', self.refresh);
-
-                    self.init();
-                },
-                mounted: function () {
-                    let self = this;
-
-                    self.$nextTick(function () {
-
-                        self.setting = {
-                            view: {
-                                showLine: true,
-                                selectedMulti: false,
-                                dblClickExpand: false
-                            },
-                            edit: {
-                                enable: false,
-                            },
-                            data: {
-                                simpleData: {
-                                    enable: true
-                                },
-                                key: {
-                                    name: 'title',
-                                    title: "title"
-                                }
-                            },
-                            callback: {
-                                onClick: self.onClick,
-                            }
-                        };
-
-                    })
-                },
-                watch: {
-                    setting: {
-                        handler: function (val, oldVal) {
-                            let self = this;
-
-                            self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
-                        },
-                        deep: true
-                    },
-                    nodes: {
-                        handler: function (val, oldVal) {
-                            let self = this;
-
-                            self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
-
-                            eventHub.$emit('ci-view-event', _.filter(val, function (v) {
-                                if (v.id > 1) return v;
-                            }));
-                        },
-                        deep: true
-                    }
-                },
-                methods: {
-                    init: function () {
-                        let self = this;
-
-                        if (!_.isEmpty(self.zTree)) {
-                            self.zTree.destroy();
-                        }
-
-                        jQuery.ajax({
-                            url: '/fs/home',
-                            type: 'GET',
-                            data: {
-                                type: 'dir'
-                            },
-                            dataType: 'text json',
-                            contentType: "application/text; charset=utf-8",
-                            beforeSend: function (xhr) {
-                            },
-                            complete: function (xhr, textStatus) {
-                            },
-                            success: function (data, textStatus, xhr) {
-
-                                if (_.isEmpty(data.message)) {
-                                    self.nodes = [];
-                                } else {
-                                    self.nodes = _.map(data.message, function (v, k) {
-                                        var type = "dir";
-
-                                        if (!_.isEmpty(v.type)) {
-                                            type = v.type;
-                                        }
-
-                                        return _.merge(v, {pId: 1, isParent: v.isdir, title: v.name, type: type});
-                                    });
-                                }
-                                let _root = {
-                                    id: 1,
-                                    pId: -1,
-                                    isParent: true,
-                                    name: 'home',
-                                    title: '我的所有配置',
-                                    type: 'dir',
-                                    open: true
-                                };
-
-                                self.nodes.push(_root);
-
-                                self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
-                    },
-                    refresh: function (event) {
-                        let self = this;
-                        var url = "/fs/home";
-
-                        if (!_.isEmpty(event)) {
-                            url = url + '/' + event.name
-                        }
-                        console.log(111, url)
-                        jQuery.ajax({
-                            url: url,
-                            type: 'GET',
-                            data: {
-                                type: 'dir'
-                            },
-                            dataType: 'text json',
-                            contentType: "application/text; charset=utf-8",
-                            beforeSend: function (xhr) {
-                            },
-                            complete: function (xhr, textStatus) {
-                            },
-                            success: function (data, textStatus, xhr) {
-
-                                if (_.isEmpty(data.message)) {
-                                    self.nodes = [];
-                                } else {
-                                    self.nodes = _.map(data.message, function (v, k) {
-                                        var type = "dir";
-
-                                        if (!_.isEmpty(v.type)) {
-                                            type = v.type;
-                                        }
-                                        return _.merge(v, {pId: 1, isParent: v.isdir, title: v.name, type: type});
-                                    });
-                                }
-
-                                self.nodes.push({
-                                    id: 1,
-                                    pId: -1,
-                                    isParent: true,
-                                    name: 'home',
-                                    title: '我的所有配置',
-                                    type: 'dir',
-                                    open: true
-                                });
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
-                    },
-                    onClick: function (event, treeId, treeNode) {
-                        let self = this;
-
-                        if (!treeNode.isParent) return false;
-
-                        if (treeNode.type === 'dir' && treeNode.id === 1) {
-                            self.refresh(null);
-                            return false;
-                        } else if (treeNode.type === 'dir') {
-                            jQuery.ajax({
-                                url: url = '/fs/home/' + treeNode.name,
-                                type: 'GET',
-                                dataType: 'text json',
-                                data: {
-                                    type: 'dir'
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-
-                                    if (!_.isEmpty(data.message)) {
-
-                                        var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
-                                        var nodes = tree.getSelectedNodes();
-                                        if (nodes && nodes.length > 0) {
-                                            tree.removeChildNodes(nodes[0]);
-                                        }
-
-                                        // append sub nodes
-                                        var subNodes = _.map(data.message, function (v, k) {
-                                            var type = "dir";
-
-                                            if (!_.isEmpty(v.type)) {
-                                                type = v.type;
-                                            }
-                                            return _.merge(v, {
-                                                pId: treeNode.id,
-                                                isParent: v.isdir,
-                                                title: v.name,
-                                                type: type
-                                            })
-                                        });
-
-                                        tree.addNodes(treeNode, subNodes);
-
-                                        var parentObj = [{
-                                            id: treeNode.id,
-                                            name: treeNode.parent,
-                                            title: "..",
-                                            parent: treeNode.name,
-                                            type: 'parent'
-                                        }];
-                                        subNodes.unshift(parentObj[0]);
-                                        eventHub.$emit('ci-view-event', _.filter(subNodes, function (v) {
-                                            if (v.id > 1) return v;
-                                        }));
-                                    }
-
-                                    //if(!treeNode.isParent) {
-                                    //console.log(222,treeNode.name)
-                                    //eventHub.$emit('node-selected-event', treeNode.name);
-                                    //}
-
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                    console.log(errorThrown);
-                                }
-                            });
-                        }
-                    }
-                }
-            })
-
-            Vue.component('bootstrap-table', {
-                template: `<table :id="id" :class="classes"></table>`,
-                props: {
-                    columns: Array,
-                    dataset: Array,
-                    options: Object,
-                    classes: String,
-                    id: String
-                },
-                data: function () {
-                    return {
-                        defaultOptions: {
-                            classes: "table table-no-bordered",
-                            //resizable: true,
-                            //showToggle: false,
-                            //showColumns: true,
-                            //pagination: true,
-                            //toolbar: "#custom-toolbar1",
-                            //showExport: true,
-                            //exportTypes: "['json', 'csv', 'excel']",
-                        }
-                    }
-                },
-                watch: {
-                    dataset: function (val, oldVal) {
-                        let self = this;
-
-                        var cols = $(self.$el).bootstrapTable('getVisibleColumns');
-
-                        if (_.isEmpty(cols)) { // table null
-                            $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                data: val,
-                                columns: self.columns
-                            }, self.options));
-                        } else {
-                            /*$(self.$el).bootstrapTable('load',val);
-                        $(self.$el).bootstrapTable('refreshOptions', val);*/
-                            $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                data: val,
-                                columns: self.columns
-                            }, self.options));
-                        }
-                    }
-                },
-                mounted: function () {
-                    let self = this;
-
-                    self.$nextTick(function () {
-
-                        $(self.$el).bootstrapTable(_.extend({
-                            data: self.dataset,
-                            columns: self.columns
-                        }, self.options));
-
-
-                    })
-                }
-            });
-
             Vue.component('bootstraptag-component', {
                 delimiters: ['${', '}'],
                 template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
@@ -1403,7 +1096,7 @@
 
                         self.model = _.map(_list.message,function(v,k){
                                         v.parent = v.parent.replace(/\/home\/admin/,"");
-                                        return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": "", "tag": {"_all": ""}});
+                                        return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": ""});
                                     });
                         _.delay(self.refresh,100);
                     },
@@ -1427,7 +1120,7 @@
                                 var data = data.message;
 
                                 self.model = _.map(data,function(v,k){
-                                    return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": "", "tag": {"_all": ""}});
+                                    return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": ""});
                                 });
 
                                 _.delay(self.refresh, 500);
@@ -1880,7 +1573,7 @@
                             self.search.result.columns = [];
                             return false;
                         }
-                        console.log(JSON.stringify(_list))
+
                         self.search.result.data = _list.message;
 
                         let _classKeys = _.keys(_list.meta.classes);
@@ -2341,8 +2034,7 @@
                                 <div class="col-lg-2" id="nav">
                                     <div class="panel" style="border-radius: 0px;min-height:60vh;">
                                         <div class="panel-body">
-                                            <vue-entity-tree-component id="ciview-entity-tree"></vue-entity-tree-component>
-                                            <!--<tree-component></tree-component>-->
+                                            <vue-entity-tree-component id="ciview-entity-tree" :model="search.result.data"></vue-entity-tree-component>
                                         </div>
                                     </div>
                                 </div>
