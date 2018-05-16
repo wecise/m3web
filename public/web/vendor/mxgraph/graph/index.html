@@ -33,6 +33,10 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 	<link href="/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 	<!-- animate core CSS -->
 	<link href="/web/vendor/animate/animate.css" rel="stylesheet" >
+	<!--Alertify CSS-->
+	<link href="/web/vendor/alertifyjs/themes/alertify.core.css" type="text/css" rel="stylesheet" />
+	<link href="/web/vendor/alertifyjs/themes/alertify.bootstrap.css" type="text/css" rel="stylesheet" />
+
 	
 	<style>
 
@@ -328,6 +332,9 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 	<!--localforage Core JS -->
 	<script src="/web/vendor/localForage/dist/localforage.min.js"></script>
 
+	<!--Alertify JS -->
+	<script src="/web/vendor/alertifyjs/lib/alertify.min.js" type="text/javascript"></script>
+
 	<script src="/web/js/util.js"></script>
 	<script src="/web/js/cfg.js"></script>
 	<script src="/web/js/init.js"></script>
@@ -452,12 +459,11 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 	                    self.getSelected();
 
 	                    jQuery.ajax({
-	                         url: "/mxobject/list/sql",
+	                         url: "/mxobject/mql",
 	                         dataType: 'json',
 	                         type: 'POST',
 	                         data: {
-	                         	ctype:"obj",
-	                         	sql: self.inputText
+	                         	mql: self.inputText
 	                         },
 	                         beforeSend:function(xhr){ 
 	                            oneLevelLoading = layer.load(2, {
@@ -1066,6 +1072,17 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 				var editorUi = new EditorUi(new Editor(graphObject.action == 'show', themes));
 				
 				editorUi.toggleFormatPanel();
+
+                var mgr = new mxAutoSaveManager(editorUi.editor.graph);
+                mgr.autoSaveDelay = 2;
+                mgr.save = function()
+                {
+                    let encoder = new mxCodec();
+                    let node = encoder.encode(editorUi.editor.graph.getModel());
+
+                    let _rtn = fsNew('file',graphObject.name, mxUtils.getPrettyXml(node));
+
+                };
 				
 				/*
 				editorUi.editor.graph.addListener(mxEvent.CLICK, function(sender, evt)
@@ -1082,7 +1099,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 				});
 				*/
 
-				let _list = fetchFileFromFS(graphObject.parent, graphObject.name);
+				let _list = fsContent(graphObject.parent, graphObject.name);
 
                 editorUi.editor.graph.model.beginUpdate();
                 try

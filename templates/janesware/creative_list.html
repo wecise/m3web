@@ -301,6 +301,11 @@
                         self.search.input.term = term;
 
                     },
+                    setSubClass: function(event){
+                        let self = this;
+
+                        self.search.params.subclass = ': | ' + event;
+                    },
                     onSearch: function() {
                         let self = this;
                         let _param = "";
@@ -354,7 +359,7 @@
                     load: function() {
                         let self = this;
                         
-                        let _data = fetchListFromFS("creative");
+                        let _data = fsList("creative");
                         
                         self.model = _.pickBy(_.map(_data,function(v,k){
                                         if(_.includes(["iflow","ishow","imap"],v.ftype)) {
@@ -413,7 +418,7 @@
                                     
                                     let tmp = _.attempt(JSON.parse.bind(null, event.attr));
                                     
-                                    putToFS(_type, _name, tmp.content);
+                                    fsNew(_type, _name, tmp.content);
 
                                     swal("",_name,"success");
 
@@ -515,7 +520,7 @@
                                     
                                     let tmp = _.attempt(JSON.parse.bind(null, me.model.item.attr));
                                     
-                                    putToFS(_type, _name, tmp.content);
+                                    fsNew(_type, _name, tmp.content);
 
                                     swal("",_name,"success");
 
@@ -549,31 +554,11 @@
                             confirmButtonColor: "#ff0000"
                         }).then(function () {
 
-                            jQuery.ajax({
-                                url: '/fs' + event.parent + '/' + event.name,
-                                type: 'DELETE',
-                                dataType: 'text json',
-                                contentType: "application/text; charset=utf-8",
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    
-                                    if (data.status == "ok") {
-                                        _.delay(function() {
-                                            swal("Success Deleted！", "", "success");
-                                            self.load();
-                                        }, 300);
-                                    } else {
-                                        swal("Delete Failed", data.message, "warning");
-                                    }
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    console.log(errorThrown)
-                                    self.load();
-                                }
-                            });
+                            let _rtn = fsDelete(event.parent,event.name);
+
+                            if (_rtn == 1){
+                                self.load();
+                            }
 
                         })
                     },
@@ -712,7 +697,7 @@
                                     <a href="#" class="btn btn-xs btn-danger" @click="setSearchTerm('ftype=imap');onSearch();">
                                         IT地图
                                     </a>
-                                    <a href="#" class="btn btn-xs btn-success" @click="setSearchTerm('ftype=iflowt;ftype=ishowt;ftype=imapt');onSearch();">
+                                    <a href="#" class="btn btn-xs btn-success" @click="setSubClass('ftype=iflowt;ftype=ishowt;ftype=imapt');onSearch();">
                                         模板
                                     </a>
                                 </div>    
@@ -788,7 +773,7 @@
 
 <script type="text/x-template" id="creative-list-template">
     <div>
-        <div class="row">
+        <div class="row" style="border-bottom:1px solid #ddd;">
             <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
                 <div style="padding:5px;">
                     <input type="text" class="form-control" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:none;">

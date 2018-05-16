@@ -23,9 +23,12 @@
 	<link href="{{AppSubUrl}}/web/vendor/animate/animate.css" rel="stylesheet" >
 
 	<!-- Bootstrap core CSS -->
+	<!-- Dev Mode -->
 	<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
 	<script src="{{AppSubUrl}}/web/vendor/less/dist/less.min.js"></script>
-	<!-- Less core JavaScript-->
+
+	<!-- Pro Mode -->
+	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/css/wecise_enterprise.css" rel="stylesheet">-->
 	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">-->
 	<script src="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
 
@@ -102,6 +105,11 @@
 	<script src="{{AppSubUrl}}/web/vendor/golden-layout/dist/goldenlayout.min.js" type="text/javascript"></script>
 	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-base.css" type="text/css" rel="stylesheet" />
 	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" type="text/css" rel="stylesheet" />
+
+	<!--Alertify JS & CSS -->
+	<script src="{{AppSubUrl}}/web/vendor/alertifyjs/lib/alertify.min.js" type="text/javascript"></script>
+	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.core.css" type="text/css" rel="stylesheet" />
+	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.bootstrap.css" type="text/css" rel="stylesheet" />
 	
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/util.js"></script>
@@ -346,7 +354,7 @@
 		}
 	</style>
 </head>
-<body>
+<body onload="initPlugIn()">
 	
 	<noscript>Please enable JavaScript in your browser!</noscript>
 	<div id="page-container" class="page-sidebar-fixed page-header-fixed">
@@ -425,6 +433,15 @@
 									<a target="_blank" href="/janesware/api">
 										<i class="fa fa-gear"></i>
 										REST API
+									</a>
+								</li>
+								<li role="separator" class="divider"></li>
+								<li style="display: -webkit-inline-flex;">
+									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('LIGHT')">
+										亮色
+									</a>
+									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('DARK')">
+										深色
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>

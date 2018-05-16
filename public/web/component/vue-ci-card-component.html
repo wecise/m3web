@@ -181,6 +181,10 @@
 			color: rgb(255, 255, 255);
 		}
 
+		.cron-input{
+			width:13%!important;
+		}
+
 	</style>
 
 	
@@ -889,9 +893,17 @@
 		                                                    		<input type="text" class="form-control" v-model="model.config.params" placeholder="参数">
 		                                                    	</div>
 
-		                                                    	<div class="form-group">
+		                                                    	<div class="form-group form-inline">
 		                                                    		<label>执行计划(Cron)</label>
-		                                                    		<input type="text" class="form-control" v-model="model.config.cron" placeholder="执行计划">
+		                                                    		<p>
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.second" placeholder="秒">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.minute" placeholder="分">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.hour" placeholder="小时">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.day" placeholder="日">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.month" placeholder="月">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.week" placeholder="星期">
+			                                                            <input type="text" class="form-control cron-input" v-model="model.config.cron.year" placeholder="年">
+			                                                        </p>
 		                                                    	</div>
 
 		                                                    	<div class="form-group">
@@ -922,7 +934,15 @@
                                             	config: {
 	                                            	cmd: "",
 	                                            	params: "",
-	                                            	cron: "",
+	                                            	cron: {
+                                                        second: null,
+		                                                minute: null,
+	                                                    hour: null,
+		                                                day: null,
+		                                                month: null,
+		                                                week: null,
+		                                                year: null
+		                                            },
 	                                            	result: {
                                                         oldInput: "",
                                                         newInput: "",
@@ -957,6 +977,13 @@
                                             iam.initPlugIn();
                                         })
                                     },
+	                                computed: {
+                                        cronSchedule: function(){
+                                            let iam = this;
+
+                                            return later.parse.text(iam.model.config.cron.term);
+                                        }
+	                                },
                                     methods: {
                                         init: function(){
                                             let iam = this;
@@ -992,9 +1019,15 @@
 
                                             let treeObj = $.fn.zTree.getZTreeObj("server-group-tree");
                                             let nodes = treeObj.getCheckedNodes(true);
-                                            console.log(nodes)
+
+	                                        let _form = new FormData();
+                                            _form.append("command", iam.model.config.cmd+' '+iam.model.config.params);
+                                            _form.append("cron", iam.cronSchedule);
+                                            _form.append("hosts", nodes);
+                                            _form.append("rule", "/matrix/rules/ciview_config_rule");
+                                            console.log(_form)
 	                                        return false;
-                                            let _rtn = putDataToClass({ class:self.row.class, id:self.row.id, config: _config})
+                                            let _rtn = agentDispatch(_form);
                                         }
                                     }
                                 });

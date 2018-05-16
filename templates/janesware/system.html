@@ -1492,10 +1492,12 @@
                         console.log("sql------>",sql.join(" "));
                         
                         jQuery.ajax({
-                            url: "/mxobject/list/sql",
+                            url: "/mxobject/mql",
                             dataType: 'json',
                             type: 'POST',
-                            data: {ctype:"obj",sql:sql.join(" ")},
+                            data: {
+                                mql:sql.join(" ")
+                            },
                             beforeSend: function(xhr) {
                             },
                             complete: function(xhr, textStatus) {

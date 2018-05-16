@@ -628,7 +628,6 @@
 
                         _.delay(function () {
                             self.init();
-                            self.initTreeInfo();
                         },500)
 
                         $("#acc_btn_class_remove").on("click",function() {
@@ -759,9 +758,9 @@
                         }
 
                         jQuery.ajax({
-                            url: "/mxobject/get",
+                            url: "/mxobject/schema/class/list",
                             dataType: 'json',
-                            type: 'POST',
+                            type: 'GET',
                             data: {
                               id:"-1"
                             },
@@ -779,9 +778,9 @@
                                 self.zTree = $.fn.zTree.init($("#tree"), self.setting, JSON.parse(data.message))
 
                                 jQuery.ajax({
-                                    url: "/mxobject/get",
+                                    url: "/mxobject/schema/class/list",
                                     dataType: 'json',
-                                    type: 'POST',
+                                    type: 'GET',
                                     data: {
                                       id:"1"
                                     },
@@ -811,26 +810,6 @@
                             }
                         });
                     },
-                    initTreeInfo: function () {
-                        let self = this;
-
-                        jQuery.ajax({
-                          url: '/mxobject/count',
-                          type: 'POST',
-                          dataType: 'json',
-                          data: {table: 'class'},
-                          complete: function(xhr, textStatus) {
-                            //called when complete
-                          },
-                          success: function(data, textStatus, xhr) {
-                            //called when successful
-                            $("#classInfo").html(JSON.parse(data.message)[0].count);
-                          },
-                          error: function(xhr, textStatus, errorThrown) {
-                            //called when there is an error
-                          }
-                        });
-                    },
                     onClick: function (event, treeId, treeNode, clickFlisParentag) {
                         let self = this;
 
@@ -848,9 +827,9 @@
 
                         // append sub nodes
                         jQuery.ajax({
-                            url: "/mxobject/get",
+                            url: "/mxobject/schema/class/list",
                             dataType: 'json',
-                            type: 'POST',
+                            type: 'GET',
                             data: {id: appVue.class.tree.cid},
                             beforeSend:function(xhr){
                                 loading = layer.load(2, {
@@ -947,9 +926,9 @@
                             var pNode = sNodes[0].getParentNode() || sNodes[0];
                             
                             jQuery.ajax({
-                                url: "/mxobject/get",
+                                url: "/mxobject/schema/class/list",
                                 dataType: 'json',
-                                type: 'POST',
+                                type: 'GET',
                                 data: {
                                   id: pNode.cid
                                 },
@@ -1196,10 +1175,9 @@
                         let self = this;
 
                         jQuery.ajax({
-                            url: '/mxobject/list/column',
+                            url: '/mxobject/system/schema/ftype',
                             dataType: 'json',
-                            type: 'POST',
-                            data: {ctype:'all',colm:'name,remedy',table:'ftype'},
+                            type: 'GET',
                             success: function (data, status) {
 
                                 jQuery.each(JSON.parse(data.message),function(key,value){
@@ -1220,10 +1198,9 @@
                         let self = this;
 
                         jQuery.ajax({
-                           url: '/mxobject/list/column',
+                           url: '/mxobject/system/schema/field',
                            dataType: 'json',
-                           type: 'POST',
-                           data: {ctype:'all',colm:'name',table:'field'},
+                           type: 'GET',
                            success: function (data, status) {
 
                                obj = JSON.parse(data.message);
@@ -1243,10 +1220,9 @@
                         let self = this;
 
                         jQuery.ajax({
-                           url: '/mxobject/list/column',
+                           url: '/mxobject/system/schema/field',
                            dataType: 'json',
-                           type: 'POST',
-                           data: {ctype:'all',colm:'*',table:'field'},
+                           type: 'GET',
                            success: function (data, status) {
                                self.class.nameObjData = JSON.parse(data.message);
                            },
@@ -1261,9 +1237,9 @@
                         let _name = name.split("/").slice(0,-1);
 
                         jQuery.ajax({
-                            url: "/mxobject/get",
+                            url: "/mxobject/schema/class/list",
                             dataType: 'json',
-                            type: 'POST',
+                            type: 'GET',
                             async: false,
                             data: {
                               id: _name.join("/") || "/"
@@ -2186,12 +2162,11 @@
                                                                   console.log(_mql)
 
                                                                   jQuery.ajax({
-                                                                      url: "/mxobject/list/sql",
+                                                                      url: "/mxobject/mql",
                                                                       dataType: 'json',
                                                                       type: 'POST',
                                                                       data: {
-                                                                          ctype:"obj",
-                                                                          sql: _mql
+                                                                          mql: _mql
                                                                       },
                                                                       beforeSend:function(xhr){
                                                                       },
@@ -2557,12 +2532,11 @@
                                                   console.log(_mql)
 
                                                   jQuery.ajax({
-                                                      url: "/mxobject/list/sql",
+                                                      url: "/mxobject/mql",
                                                       dataType: 'json',
                                                       type: 'POST',
                                                       data: {
-                                                          ctype:"obj",
-                                                          sql: _mql
+                                                          mql: _mql
                                                       },
                                                       beforeSend:function(xhr){
                                                       },
@@ -3137,27 +3111,6 @@
         function asNumFormatter(value, row, index) {
           return index+1;
         }
-
-        function getIfLive(field){
-
-          jQuery.ajax({
-            url: '/mxobject/count',
-            type: 'POST',
-            dataType: 'json',
-            data: {table: "field where name='" + field + "'"},
-            complete: function(xhr, textStatus) {
-              //called when complete
-            },
-            success: function(data, textStatus, xhr) {
-              //called when successful
-              return JSON.parse(data.message)[0].count;
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-            }
-          });
-        }
-
 
         function rowStyle(row, index) {
             var classes = ['active', 'info'];

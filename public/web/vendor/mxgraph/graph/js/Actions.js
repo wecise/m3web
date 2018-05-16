@@ -1173,34 +1173,8 @@ Actions.prototype.init = function()
 
         let encoder = new mxCodec();
         let node = encoder.encode(graph.getModel());
-        let fm = new FormData();
 
-        fm.append("data", mxUtils.getPrettyXml(node));
-        fm.append("attr", JSON.stringify({
-            'content': mxUtils.getPrettyXml(node), 'pic': ''
-        }));
-        fm.append("type", "file");
-
-        //console.log( JSON.stringify({'content': mxUtils.getPrettyXml(node)}) )
-        jQuery.ajax({
-            url: '/fs'+ graphObject.parent + "/" + graphObject.name,
-            type: 'PUT',
-            processData: false,
-            contentType: false,
-            mimeType: 'multipart/form-data',
-            dataType: "json",
-            data: fm,
-            beforeSend: function(xhr) {
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function(data, textStatus, xhr) {
-                swal("Success",'/fs'+ graphObject.parent + "/" + graphObject.name,"success");
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                console.log(xhr,textStatus,errorThrown);
-            }
-        })
+        let _rtn = fsNew('file',graphObject.name, mxUtils.getPrettyXml(node));
 
 	}, null, 'null', 'Ctrl+Shift+S');
 

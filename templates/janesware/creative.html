@@ -56,10 +56,7 @@
     }
 
     .theme-white {
-        background: #ffffff;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to bottom, #ffffff, #f9f9f9);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to bottom, #ffffff, #f9f9f9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
+        background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
     }
 
     .theme-grey {
@@ -70,14 +67,8 @@
     }
 
     .theme-dark {
-        background-color:black;
-        background-image:
-                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
-                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
-                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
-                radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
-        background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
-        background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.35) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.70) 120%) #989898;
+        background-blend-mode: multiply,multiply;
     }
 
 
@@ -147,7 +138,7 @@
                     let _tmp = localStorage.getItem("graph-object");
                     self.model.object.param = _.attempt(JSON.parse.bind(null, _tmp));
 
-                    self.model.object.data = fetchFileFromFS(self.model.object.param.parent, self.model.object.param.name);
+                    self.model.object.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
 
                 },
                 methods: {
@@ -167,7 +158,7 @@
                         {
 
                             mxConstants.SHADOWCOLOR = "#C0C0C0";
-                            mxConstants.SHADOW_OFFSET_X = 2;
+                            mxConstants.SHADOW_OFFSET_X = 3;
                             mxConstants.SHADOW_OFFSET_Y = 3;
                             mxConstants.SHADOW_OPACITY = 0.5;
 
@@ -316,7 +307,7 @@
                             tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
                             {
 
-                                let _theme = _.sample(['theme-grey','theme-white', 'theme-dark']);
+                                let _theme = _.sample(['theme-white', 'theme-dark']);
 
                                 $("body").removeClass(self.theme);
 

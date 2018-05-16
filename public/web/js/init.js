@@ -33,23 +33,31 @@ var GLOBAL_OBJECT=  {
 
 var init =  function(){
                 
-                GLOBAL_OBJECT.company.global = GLOBAL_CONFIG.global.timeline_scale;
-                GLOBAL_OBJECT.company.name = localStorage.getItem("uname");// `{{.SignedUser.Company.OSpace}}`;
-                if (_.isEmpty(GLOBAL_OBJECT.company.name )){
-                    GLOBAL_OBJECT.company.name = 'wecise';
-                }
+    GLOBAL_OBJECT.company.global = GLOBAL_CONFIG.global.timeline_scale;
+    GLOBAL_OBJECT.company.name = localStorage.getItem("uname");// `{{.SignedUser.Company.OSpace}}`;
+    if (_.isEmpty(GLOBAL_OBJECT.company.name )){
+        GLOBAL_OBJECT.company.name = 'wecise';
+    }
 
-                GLOBAL_OBJECT.company.name = GLOBAL_OBJECT.company.name.replace(/"/g,"");
-                let _name = GLOBAL_OBJECT.company.name;
-                GLOBAL_OBJECT.company.dimension = GLOBAL_CONFIG.keyspace[_name].dimension;
-                
-                _.forEach(_.keys(GLOBAL_OBJECT.company.object),function(v){
-                    if(!_.isEmpty(GLOBAL_CONFIG.keyspace[_name])){
-                        GLOBAL_OBJECT.company.object[v] = GLOBAL_CONFIG.keyspace[_name][v][GLOBAL_CONFIG.keyspace[_name][v].name];
-                    } else {
-                        GLOBAL_OBJECT.company.object[v] = [];
-                    }
-                })
+    GLOBAL_OBJECT.company.name = GLOBAL_OBJECT.company.name.replace(/"/g,"");
+    let _name = GLOBAL_OBJECT.company.name;
+    GLOBAL_OBJECT.company.dimension = GLOBAL_CONFIG.keyspace[_name].dimension;
+
+    _.forEach(_.keys(GLOBAL_OBJECT.company.object),function(v){
+        if(!_.isEmpty(GLOBAL_CONFIG.keyspace[_name])){
+            GLOBAL_OBJECT.company.object[v] = GLOBAL_CONFIG.keyspace[_name][v][GLOBAL_CONFIG.keyspace[_name][v].name];
+        } else {
+            GLOBAL_OBJECT.company.object[v] = [];
+        }
+    })
+
+};
+
+var initPlugIn = function () {
+
+    let _theme = localStorage.getItem("MATRIX_THEME");
+
+    toggleTheme(_theme);
 };
 
 /*
@@ -79,7 +87,34 @@ var toggleFullScreen = function () {
             document.webkitExitFullscreen();
         }
     }
-}
+};
+
+/*
+*  皮肤切换
+*
+* */
+
+var MATRIX_THEME = "LIGHT";
+
+var toggleTheme = function(event){
+
+    if(event == 'LIGHT'){
+        $(".navbar.navbar-default.navbar-fixed-top").css({
+                                                            "backgroundColor": "rgb(33, 149, 244)",
+            
+                                                        });
+        $(".navbar.navbar-default.navbar-fixed-bottom").show(500);
+    } else if (event == 'DARK'){
+        $(".navbar.navbar-default.navbar-fixed-top").css({
+                                                            "backgroundColor": "rgb(90, 90, 90)",
+
+                                                        });
+        $(".navbar.navbar-default.navbar-fixed-bottom").hide(500);
+    }
+
+    localStorage.setItem("MATRIX_THEME",event);
+
+};
 
 /*
 *
@@ -111,7 +146,7 @@ var loadLogo = function () {
         error: function(xhr, textStatus, errorThrown) {
         }
     });
-}
+};
 
 /*
  *  Load Function
@@ -213,15 +248,17 @@ var setDefaultHome = function(name,token){
 };
 
 /*
-*   提交到文件系统
+*   文件系统
+*
+*   提交到
 *
 *   参数：
 *       文件名称
 *       扩展名
 *
 */
-var putToFS = function(type, name, content){
-    let rtn = null;
+var fsNew = function(type, name, content){
+    let rtn = 0;
 
     let fm = new FormData();
 
@@ -244,11 +281,24 @@ var putToFS = function(type, name, content){
         complete: function(xhr, textStatus) {
         },
         success: function(data, textStatus, xhr) {
-            console.log(JSON.stringify(data))
-            rtn = data;
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("Success" + " " + name + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("Failed" + " " + name + " " + moment().format("LLL"));
+            }
+
         },
         error: function(xhr, textStatus, errorThrown) {
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            rtn = 0;
+
+            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
+            alertify.error(_tmp);
+            console.log(_tmp);
         }
     })
     return rtn;
@@ -256,13 +306,15 @@ var putToFS = function(type, name, content){
 
 
 /*
+*   文件系统
+*
 *   获取文件列表
 *
 *   参数：
 *       父目录
 *       文件名称
 */
-var fetchListFromFS = function(parent){
+var fsList = function(parent){
     let rtn = null;
     
     jQuery.ajax({
@@ -295,13 +347,64 @@ var fetchListFromFS = function(parent){
 };
 
 /*
-*   获取文件内容从文件系统
+*   文件系统
+*
+*   删除
+*
+*   参数：
+*       文件名称
+*       扩展名
+*
+*/
+var fsDelete = function(parent,name){
+    let rtn = 0;
+
+    jQuery.ajax({
+
+        url: '/fs' + parent + '/' + name,
+        type: 'DELETE',
+        dataType: 'text json',
+        contentType: "application/text; charset=utf-8",
+        async: false,
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("删除成功" + " " + name);
+            } else {
+                rtn = 0;
+                alertify.error("删除失败" + " " + name);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+
+            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
+            alertify.error(_tmp);
+            console.log(_tmp);
+        }
+    })
+    return rtn;
+};
+
+
+/*
+*   文件系统
+*
+*   获取文件内容
 *
 *      参数：
 *           父目录
 *           文件名称
 */
-var fetchFileFromFS = function(parent,name){
+var fsContent = function(parent,name){
     let rtn = null;
 
     jQuery.ajax({
@@ -480,18 +583,21 @@ var putDataToClass = function (param) {
              
             ifSignIn(data);
 
-            if(data.message == "OK"){
-                rnt = 1;
-                swal("Success!","","success");
+            if( _.lowerCase(data.status) === "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + moment().format("LLL"));
             } else {
-                rnt = 0;
-                swal("Failed!","","warning");
+                rtn = 0;
+                alertify.error("失败" + " " + moment().format("LLL"));
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+
+            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
+            alertify.error(_tmp);
+            console.log(_tmp);
         }
     })
     return rtn;
@@ -508,13 +614,12 @@ var fetchDataByMql = function (param) {
     let rtn = null;
 
     jQuery.ajax({
-        url: "/mxobject/list/sql",
+        url: "/mxobject/mql",
         dataType: 'json',
         type: 'POST',
         async: false,
         data: {
-            ctype:"obj",
-            sql: param
+           mql: param
         },
         beforeSend:function(xhr){
         },
@@ -527,8 +632,8 @@ var fetchDataByMql = function (param) {
             console.log(param, data)
 
             // MQL for CRUD
-            if(data.message == "OK"){
-                swal("Success!","","success");
+            if(_.lowerCase(data.message) == "ok"){
+                alertify.success("成功" + " ");
             }
 
             rtn = data;
@@ -555,13 +660,12 @@ var putDataByMql = function (event) {
     console.log(_mql)
 
     jQuery.ajax({
-        url: "/mxobject/list/sql",
+        url: "/mxobject/mql",
         dataType: 'json',
         type: 'POST',
         async: false,
         data: {
-            ctype:"obj",
-            sql: _mql
+            mql: _mql
         },
         beforeSend:function(xhr){
         },
@@ -571,8 +675,8 @@ var putDataByMql = function (event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
-                swal("Success!","","success");
+            if( _.lowerCase(data.status) == "ok"){
+                alertify.success("成功" + " " + moment().format("LLL"));
             }
 
             rtn = data.status;
@@ -685,18 +789,21 @@ var ldapMaintain = function (event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + moment().format("LLL"));
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + moment().format("LLL"));
             }
 
         },
-        error: function(xhr, textStatus, errorThrown){
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            return 0;
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+
+            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
+            alertify.error(_tmp);
+            console.log(_tmp);
         }
     });
     return rtn;
@@ -757,8 +864,8 @@ var grokNew = function (event) {
         success: function (data, status) {
 
             ifSignIn(data);
-            
-            if (data.status == "ok"){
+
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 swal("Success!","","success");
             } else {
@@ -799,7 +906,7 @@ var serverGroupList = function () {
 
             ifSignIn(data);
 
-            if (data.status == "ok") {
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = data;
             }
 
@@ -847,18 +954,21 @@ var serverGroupNew = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + moment().format("LLL"));
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + moment().format("LLL"));
             }
 
         },
-        error: function(xhr, textStatus, errorThrown){
+        error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+
+            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
+            alertify.error(_tmp);
+            console.log(_tmp);
         }
     });
     return rtn;
@@ -885,12 +995,12 @@ var serverGroupDelete = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) === "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -925,7 +1035,7 @@ var agentList = function () {
 
             ifSignIn(data);
 
-            if (data.status == "ok") {
+            if( _.lowerCase(data.status) === "ok"){
                 rtn = data;
             }
 
@@ -965,12 +1075,12 @@ var agentNew = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -1005,7 +1115,7 @@ var ruleList = function() {
 
             ifSignIn(data);
 
-            if (data.status == "ok") {
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = data;
             }
 
@@ -1043,12 +1153,12 @@ var ruleNew = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -1083,12 +1193,12 @@ var ruleDelete = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -1123,7 +1233,7 @@ var agentList = function () {
 
             ifSignIn(data);
 
-            if (data.status == "ok") {
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = data;
             }
 
@@ -1163,12 +1273,12 @@ var agentNew = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -1211,12 +1321,12 @@ var agentDispatch = function(event) {
 
             ifSignIn(data);
 
-            if (data.status == "ok"){
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
             }
 
         },
@@ -1248,19 +1358,91 @@ var grokDelete = function (event) {
         success: function (data, status) {
 
             ifSignIn(data);
-            
-            if (data.status == "ok"){
+
+            if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                swal("Success!","","success");
+                alertify.success("成功" + " " + data.message);
             } else {
                 rtn = 0;
-                swal("Failed!",data.message,"warning");
+                alertify.error("失败" + " " + data.message);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*   全局缓存
+*
+*   WebContext Get
+*
+*
+* */
+var webContextGet = function (event) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/appcontext/'   + event,
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = data;
+                alertify.success("成功" + " " + data.message);
+            } else {
+                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            return 0;
+        }
+    });
+    return rtn;
+};
+
+var webContextSet = function (event) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/appcontext/'   + event,
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + data.message);
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + data.message);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
     return rtn;
@@ -1412,6 +1594,8 @@ var FormWizard = function() {
 }();
 
 init();
+
+initPlguIn();
 
 _.delay(function () {
     //copyBoard();

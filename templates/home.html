@@ -235,6 +235,17 @@
     .layer > .dropdown > a {
         color: #6eb4ec;
     }
+
+    .swal2-container{
+        top:0px;
+        height:55px;
+    }
+    .swal2-container.swal2-shown{
+        background-color: transparent;
+    }
+    .swal2-popup .swal2-title{
+        font-size:14px;
+    }
 </style>
 
 <div id="app"></div>
@@ -305,13 +316,17 @@
                 },
                 created: function(){
                     let self = this;
-                    let _appsId = `{{.SignedUser.Remark}}`;
-                    
+                    let _appsId = "{{.SignedUser.Remark}}";
+
+                    console.log(133, _appsId, _appsId.split(","), self.user.appsId)
                     eventHub.$on('preset-selected-event', self.setPresetDefault);
 
                     if(!_.isEmpty(_appsId)){
-                        self.user.appsId = _appsId.split(",");
+                        self.user.appsId = _appsId.replace(/\"/g,"").split(",");
+                        //self.user.appsId = _.chain(_.omitBy(_appsId.split(","),_.isEmpty)).values();
                     }
+
+                    console.log(233, _appsId, self.user.appsId)
                 },
                 mounted: function(){
                     let self = this;
@@ -371,36 +386,18 @@
 
                         console.log(_param);
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: _param,
-                                flag: false
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                
-                                if(_.isEmpty(data.message)){
-                                    $("#search-result-panel").fadeOut(500);
-                                    $("#search-result-panel").hide();
-                                    return false;
-                                }
+                        let _list = fetchData(_param);
+                        if(_.isEmpty(_list.message)){
+                            $("#search-result-panel").fadeOut(500);
+                            $("#search-result-panel").hide();
+                            return false;
+                        }
 
-                                self.searchResult(data);
+                        self.searchResult(_list);
 
-                                $("#search-result-panel").fadeIn(500);
-                                $("#search-result-panel").show();
+                        $("#search-result-panel").fadeIn(500);
+                        $("#search-result-panel").show();
 
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                            }
-                        })
                     },
                     searchResult: function(result){
                         var self = this;
@@ -495,50 +492,27 @@
                     loadApps: function() {
                         let self = this;
                         
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: `#/matrix/portal/tools/: | sort by seat asc`
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
+                        let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
 
-                                let _data = data.message;
+                        self.user.appList = _.orderBy(_list.message,["seat"],["asc"]);
+                        self.user.apps = [];
 
-                                self.user.appList = _.orderBy(_data,["seat"],["asc"]);
-                                self.user.apps = [];
-
-                                _.forEach(self.user.appsId,function(v){
-                                    _.find(self.user.appList,function(val){
-                                        if( val.id === v ){
-                                            self.user.apps.push(val);
-                                        }
-                                    })
-                                });
-                                
-                                self.user.appList = _.map(self.user.appList,function(v){
-                                                        let _idx =  _.find(self.user.apps,function(val){ 
-                                                                        return v.id === val.id
-                                                                    });
-                                                        
-                                                        if(!_.isEmpty(_idx)){
-                                                            v.selected = 1;
-                                                        }else{
-                                                            v.selected = 0;
-                                                        }
-                                                        return v;
-                                                    });
-
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                            }
+                        _.forEach(self.user.appsId,function(v){
+                            self.user.apps.push (_.find(self.user.appList,{id:v}));
                         });
+
+                        self.user.appList = _.map(self.user.appList,function(v){
+
+                                                let _idx =  _.find(self.user.apps,{id:v.id});
+
+                                                if(!_.isEmpty(_idx)){
+                                                    v.selected = 1;
+                                                }else{
+                                                    v.selected = 0;
+                                                }
+                                                return v;
+                                            });
+
                     },
                     toogle: function(item) {
                         let self = this;
@@ -547,8 +521,8 @@
                         ldap.class = "/matrix/ldap";
                         ldap.fullname = `{{.SignedUser.FullName}}`;
                         ldap.fullname = ldap.fullname.replace(/"/g,"");
-                        console.log(2323,self.user.appsId, JSON.stringify(item))
-                        if(_.indexOf(self.user.appsId, item.id) != -1){
+
+                        if(_.indexOf(self.user.appsId, item.id) > -1){
                             _.pull(self.user.appsId,item.id);
                         } else {
                             self.user.appsId.push(item.id);
@@ -556,61 +530,12 @@
 
                         ldap.remark = self.user.appsId.join(",");
 
-                        let _ldap = JSON.stringify(ldap);
+                        let _rtn = putDataToClass(ldap);
 
-                        console.log(_ldap)
-                        jQuery.ajax({
-                            url: '/mxobject/actiontoclass',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                data: _ldap,
-                                ctype: "insert"
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                
-                                if(data.status!="ok"){
-                                    console.log(data.message);
-                                } else {
-                                    self.loadApps();    
-                                }
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                            }
-                        })
-                    },
-                    add: function(event){
-                        let self = this;
-                        var obj = _.assign({
-                                        class: '/matrix/portal/tools',
-                                        name: "tools_"+_.now()},
-                                    self.toJsonString(event));
+                        if(_rtn == 1){
+                            self.loadApps();
+                        }
 
-                        jQuery.ajax({
-                            url: '/mxobject/actiontoclass',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                data: JSON.stringify(obj),
-                                ctype: "insert"
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                $("#collapseAddApp").removeClass('active');
-                                self.load();
-                                self.resetForm();
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                            }
-                        })
                     },
                     resetForm: function(){
                         let self = this;
@@ -743,7 +668,7 @@
             <div class="col-lg-offset-3 col-lg-6">
                 <div>
                     <div id="multi" style="margin-left: 30px">
-                        <div class="layer btn btn-primary" v-for="item in user.apps">
+                        <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
                             <a :href="item.url" :target="item.target" style="color:#ffffff;">
                                 <div class="tile_name">
                                     <i :class="item.icon" style="font-size:22px;"></i>

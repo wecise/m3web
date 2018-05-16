@@ -127,12 +127,11 @@
                 let _mql = `INSERT JSON '` + JSON.stringify(self.row) + `'`;
                 console.log(_mql);
                 jQuery.ajax({
-                    url: "/mxobject/list/sql",
+                    url: "/mxobject/mql",
                     dataType: 'json',
                     type: 'POST',
                     data: {
-                        ctype:"obj",
-                        sql: _mql
+                        mql: _mql
                     },
                     beforeSend:function(xhr){
                     },

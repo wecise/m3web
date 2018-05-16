@@ -160,15 +160,8 @@ Sidebar.prototype.init = function()
 			$("#imap-config").removeClass("active");
 			$("#imap-shape").addClass("active");
 
-			self.addBobPalette(true);
-            /*self.addImagePalette('clipart', '状态', dir + '/clipart/', '_128x74.svg',
-                ['Skip'], ['跳过不执行', 'Empty_Folder', 'Full_Folder', 'Gear', 'Lock', 'Software', 'Virus', 'Email',
-                    'Database', 'Router_Icon', 'iPad', 'iMac', 'Laptop', 'MacBook', 'Monitor_Tower', 'Printer',
-                    'Server_Tower', 'Workstation', 'Firewall_02', 'Wireless_Router_N', 'Credit_Card',
-                    'Piggy_Bank', 'Graph', 'Safe', 'Shopping_Cart', 'Suit1', 'Suit2', 'Suit3', 'Pilot1',
-                    'Worker1', 'Soldier1', 'Doctor1', 'Tech1', 'Security1', 'Telesales1'],
-                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
-                    'Router_Icon': 'router switch'});*/
+			//self.addBobPalette(true);
+
 			self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/bankofchina_flowchart.xml',
 				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2');
 		},500)
