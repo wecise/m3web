@@ -684,6 +684,28 @@
                     self.selectedRow = self.datatable.row( this ).data();
                 } );
 
+                // selected row
+                $(self.$el).on( 'dblclick', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
+
+                    _.delay(function(){
+
+                        let cardVue = new Vue({
+                            el: '#panel-card',
+                            data: function(){
+                                return {
+                                    model: self.selectedRow
+                                }
+                            },
+                            template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
+                        });
+
+
+                    },100);
+                } );
+
                 // selected cell
                 $(self.$el).on( 'click', 'td', function () {
                     self.selectedCell = self.datatable.cell( this ).data();

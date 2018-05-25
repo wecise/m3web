@@ -715,10 +715,12 @@
 
                                         _obj.name = name;
                                         _obj.parent = "/home/dashboard";
+                                        _obj.fsExtension = name.split(".")[1] || "ishow";
+
                                         localStorage.setItem("dashboard-object", JSON.stringify(_obj));
 
                                         window.open(
-                                            "/janesware/dashboard",
+                                            "/janesware/" + _obj.fsExtension,
                                             "_blank"
                                         );
                                     }
@@ -814,7 +816,7 @@
                 <div class="input-group searchinput">
                     <vue-search-input-component :model="search.input"></vue-search-input-component>
                     <div class="input-group-btn">
-                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                        <vue-search-preset-component id="performance-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                     </div>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search"
@@ -866,7 +868,7 @@
                                      style="display: none;padding-left:10px;padding-right:5px;">
                                     <div class="panel" style="border-radius: 0px;">
                                         <div class="panel-body" style="padding-left:5px;padding-top: 5px;">
-                                            <vue-entity-tree-component id="performance-entity-tree" :model="search.result.data"></vue-entity-tree-component>
+                                            <vue-entity-tree-component id="performance-entity-tree" :list="search.result.data"></vue-entity-tree-component>
                                         </div>
                                     </div>
                                 </div>

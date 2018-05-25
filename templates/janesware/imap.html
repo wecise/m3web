@@ -1,0 +1,499 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.default.css" type="text/css" rel="stylesheet" />
+
+
+<style>
+
+    .tools-item {
+        width: 28px;
+        height: 28px;
+    }
+
+    html td.mxWindowTitle {
+        background-color: rgb(33, 148, 245);
+        background-image: linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245));
+        background-repeat: repeat-x;
+        color: #ffffff;
+    }
+
+    #outlineContainer {
+        z-index:1;
+        position:absolute;
+        overflow:hidden;
+        top:60px;
+        right:5px;
+        width:160px;
+        height:120px;
+        background:transparent;
+        box-shadow: 3px 3px 12px #C0C0C0;
+        background: url(../images/window.gif);
+        border: 1px solid rgb(195, 195, 195);
+    }
+
+    .mxWindow{
+        height:68px!important;
+    }
+
+    .theme-white {
+        background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+    }
+
+    .theme-grey {
+        background: #f9f9f9;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #f9f9f9, #dddddd);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #f9f9f9, #dddddd); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+
+    .theme-dark {
+        background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.35) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.70) 120%) #989898;
+        background-blend-mode: multiply,multiply;
+    }
+
+
+    .flow {
+        stroke-dasharray: 8;
+        animation: dash 0.5s linear;
+        animation-iteration-count: infinite;
+    }
+    @keyframes dash {
+        to {
+            stroke-dashoffset: -16;
+        }
+    }
+
+</style>
+
+<div id="app"></div>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
+
+
+<script type="text/javascript">
+    
+    VueLoader.onloaded(["vue-base-datatables-component"
+                        ],function() {
+
+        moment.locale({{.Lang}});
+
+
+        $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
+
+        $(function() {
+            
+            var appVue = new Vue({
+                delimiters: ['${', '}'],
+                el: '#app',
+                template: '#app-template',
+                data: {
+                    model: {
+                        object: {
+                            data: null,
+                            param: null,
+                            nodes: {}
+                        },
+                        container: null,
+                        model: null,
+                        graph:null,
+                        layout: null,
+                        layoutMgr: null
+
+                    },
+                    theme: "",
+                    crontab: {
+                        load: {
+                            sched: Object,
+                            timer: Object
+                        },
+                        update:{
+                            sched: Object,
+                            timer: Object
+                        }
+                    },
+                    count: 1
+                },
+                mounted: function() {
+                    let self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                        self.initPlugIn();
+                    })
+                },
+                watch: {
+                    model: function(newValue, oldValue) {
+
+                    }
+                },
+                created: function() {
+                    let self = this;
+
+                    let _tmp = localStorage.getItem("graph-object");
+
+                    self.model.object.param = _.attempt(JSON.parse.bind(null, _tmp));
+
+                    self.model.object.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+
+                },
+                methods: {
+                    init: function() {
+                        let self = this;
+
+                        self.theme = localStorage.getItem("creative-theme");
+                        $("body").addClass(self.theme);
+
+                        if (!mxClient.isBrowserSupported())
+                        {
+                            // Displays an error message if the browser is
+                            // not supported.
+                            mxUtils.error('Browser is not supported!', 200, false);
+                        }
+                        else
+                        {
+
+                            self.model.container = document.getElementById('graph');
+                            self.model.container.style.position = 'absolute';
+                            self.model.container.style.overflow = 'hidden';
+                            self.model.container.style.left = '0px';
+                            self.model.container.style.top = '55px';
+                            self.model.container.style.right = '0px';
+                            self.model.container.style.bottom = '0px';
+                            document.body.appendChild(self.model.container);
+
+                            // Creates the graph inside the given container
+                            self.model.model = new mxGraphModel();
+                            self.model.graph = new mxGraph(self.model.container, self.model.model);
+
+                            // Enables automatic sizing for vertices after editing and
+                            self.model.graph.setEnabled(false);
+                            self.model.graph.setPanning(true);
+                            self.model.graph.setTooltips(true);
+                            self.model.graph.panningHandler.useLeftButtonForPanning = true;
+
+                            // Load cells and layouts the graph
+                            self.model.graph.getModel().beginUpdate();
+                            try
+                            {
+                                let doc = mxUtils.parseXml(self.model.object.data);
+                                let codec = new mxCodec(doc);
+
+                                codec.decode(doc.documentElement, self.model.graph.getModel());
+                            }
+                            finally
+                            {
+                                // Updates the display
+                                self.model.graph.getModel().endUpdate();
+                            }
+
+
+                            self.model.graph.addListener(mxEvent.CLICK, function(sender, evt)
+                            {
+
+                                var cell = evt.getProperty('cell');
+
+
+
+                                self.tip(cell.getValue());
+
+                            });
+
+                        }
+                    },
+                    initPlugIn: function(){
+                        let self = this;
+
+                        self.crontab.load.sched = later.parse.text('every 5 sec');
+                        //self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+
+                        self.crontab.update.sched = later.parse.text('every 2 sec');
+                        //self.crontab.update.timer = later.setInterval(self.update, self.crontab.update.sched);
+
+                        self.initOutline();
+                        self.initTools();
+
+                    },
+                    initData: function(){
+                        let self = this;
+
+
+                        let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent());
+
+                        /*_.forEach(_cells,function (cell,k) {
+
+                            let _cell = cell.getId();
+                            let o = "BOB.iflow#BOB.iflow#"+_cell;
+                            let _tmp = {[o]: { "status": _.random(1,5), "ctl": _.random(0,2) }};
+
+                            self.model.object.nodes = _.extend(self.model.object.nodes,_tmp);
+                        })*/
+
+                        let _key = self.model.object.param.name.split(".")[0];
+                        let _rtn = appContextGet(_key);
+
+                        if (!_.isEmpty(_rtn)) {
+                            self.model.object.nodes = _.attempt(JSON.parse.bind(null, _rtn.message));
+                        }
+
+                    },
+                    update: function () {
+
+                        let self = this;
+
+                        self.model.graph.getModel().beginUpdate();
+
+                        try {
+
+                            /*  for (var k in self.model.object.nodes) {
+                                if (self.model.object.nodes.hasOwnProperty(k)) {
+                                    let val = self.model.object.nodes[k];
+                                    console.log(val, k)
+                                }
+                            }*/
+                            let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
+
+                            _.forEach(_cells, function (cell, k) {
+                                // Resets the fillcolor and the overlay
+                                self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                self.model.graph.removeCellOverlays(cell);
+                            })
+                        }
+                        finally {
+                            self.model.graph.getModel().endUpdate();
+                        }
+
+                        self.model.graph.getModel().beginUpdate();
+
+                        try {
+
+                            _.forEach(self.model.object.nodes,function (v,k) {
+
+                                let _id = _.last(k.split("#"));
+                                let _cell = self.model.graph.getModel().getCell(_id);
+
+                                // Adds animation to edge shape and makes "pipe" visible
+                                if (!_.isEmpty(_cell.edges)){
+                                    let state = self.model.graph.view.getState(_cell.edges[0]);
+                                    state.shape.node.getElementsByTagName('path')[1].removeAttribute('visibility');
+                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke-width', '6');
+                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke', 'lightBlue');
+                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
+                                }
+
+
+                                if(v.status == 1){
+                                    self.model.graph.setCellWarning(_cell, '<b>未开始:</b>: '+_id);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b9b9b9', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+
+                                    self.tip(_id + " 未开始",1);
+                                } else if(v.status == 2){
+                                    self.model.graph.setCellWarning(_cell, '<b>成功:</b>: '+_id);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#0eef84', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+
+                                    self.tip(_id + " 成功",2);
+                                } else if(v.status == 3){
+                                    self.model.graph.setCellWarning(_cell, '<b>失败:</b>: '+_id);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ec1f2b', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+
+                                    self.tip(_id + " 失败",3);
+                                } else if(v.status == 4){
+                                    self.model.graph.setCellWarning(_cell, '<b>正在进行:</b>: '+_id);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#22a8fa', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+
+                                    self.tip(_id + " 正在进行",4);
+                                } else if(v.status == 5){
+                                    self.model.graph.setCellWarning(_cell, '<b>跳过不执行:</b>: '+_id);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffbb49', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+
+                                    self.tip(_id + " 跳过不执行",5);
+                                }
+                            })
+
+
+                        }
+                        finally {
+                            self.model.graph.getModel().endUpdate();
+                        }
+
+                    },
+                    tip: function(event,severity){
+                        let self = this;
+
+                        if (severity<4){
+                            alertify.success(event + ' ' + moment().format("LLL"));
+                        } else if (severity == 4){
+                            alertify.error(event + ' ' + moment().format("LLL"));
+                        } else {
+                            alertify.log(event + ' ' + moment().format("LLL"));
+                        }
+                    },
+                    initOutline: function(){
+                        let self = this;
+
+                        let outline = document.getElementById('outlineContainer');
+                        outline.style.top = '60px';
+                        outline.style.left = '5px'
+
+                        // Creates the outline (navigator, overview) for moving
+                        // around the graph in the top, right corner of the window.
+                        let outln = new mxOutline(self.model.graph, outline);
+                    },
+                    initTools: function () {
+                        let self = this;
+
+                        let content = document.getElementById('tools');
+                        content.style.padding = '4px';
+
+                        let tb = new mxToolbar(content);
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/iflow/zoom_in.png',function(evt)
+                        {
+                            self.model.graph.zoomIn();
+                        },null,'tools-item');
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/iflow/zoom_out.png',function(evt)
+                        {
+                            self.model.graph.zoomOut();
+                        },null,'tools-item');
+
+                        /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/web/assets/images/iflow/actual_size.png',function(evt)
+                        {
+                            self.model.graph.zoomActual();
+                        },null,'tools-item');*/
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
+                        {
+                            var preview = new mxPrintPreview(self.model.graph, 1);
+                            preview.open();
+                        },null,'tools-item');
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
+                        {
+                            if ($(".navbar.navbar-default.navbar-fixed-top").css("display") == "none"){
+
+                                $(".navbar.navbar-default.navbar-fixed-top").fadeIn();
+                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeIn();
+
+                                evt.target.src = "/web/assets/images/iflow/exit-fullscreen.png";
+
+                                self.model.container.style.top = "55px";
+
+
+                            } else {
+
+                                $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
+                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
+
+                                evt.target.src = "/web/assets/images/iflow/fullscreen.png";
+
+                                self.model.container.style.top = "0px";
+
+                            }
+
+                            toggleFullScreen();
+
+
+                        },null,'tools-item');
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
+                        {
+
+                            let _theme = _.sample(['theme-white', 'theme-dark']);
+
+                            $("body").removeClass(self.theme);
+                            $('body').addClass(_theme);
+
+                            if(_theme == 'theme-dark'){
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(90, 90, 90)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(90, 90, 90),rgb(90, 90, 90))"
+                                });
+                            } else {
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(33, 148, 245)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245))"
+                                });
+                            }
+
+                            self.theme = _theme;
+                            localStorage.setItem("creative-theme",_theme);
+
+
+
+                        },null,'tools-item');
+
+
+                        wnd = new mxWindow('{{.i18n.Tr "creative-tools"}}', content, 5, 190, 160, 86, false);//$( window ).width() - 165, 190, 160, 86, false);
+                        wnd.setMaximizable(false);
+                        wnd.setScrollable(false);
+                        wnd.setResizable(false);
+                        wnd.setVisible(true);
+                    },
+                    delOverlay: function(id){
+                        let self = this;
+                        let cell = self.model.graph.getModel().getCell(id);
+
+                        self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#CCCCCC", [cell]);
+                        self.model.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#000000", [cell]);
+
+                        self.model.graph.removeCellOverlays(cell);
+                    },
+                    addOverlay: function(id, state){
+                        let self = this;
+                        let cell = self.model.graph.getModel().getCell(id);
+
+                        self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#FF0000", [cell]);
+                        self.model.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#FFFFFF", [cell]);
+
+                        self.model.graph.addCellOverlay(cell, createOverlay(graph.warningImage, '状态: '+state));
+                    },
+                    createOverlay: function(image, tooltip){
+                        let self = this;
+                        let overlay = new mxCellOverlay(image, tooltip);
+
+                        overlay.addListener(mxEvent.CLICK, function(sender, evt){
+                            mxUtils.alert(tooltip);
+                        });
+                        return overlay;
+                    }
+                }
+            })
+        })
+    })
+</script>
+
+{{template "base/footer" .}}
+<script type="text/x-template" id="app-template">
+    <div>
+        <div id="graph"></div>
+        <div id="tools"></div>
+        <div id="outlineContainer"></div>
+    </div>
+</script>

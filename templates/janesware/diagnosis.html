@@ -912,54 +912,39 @@
 					},
 					searchGraph: function(){
 						let self = this;
-						let param = "";
+						let _param = "";
 
 			            if(!_.isEmpty(self.diagnosis.graph.param[1])) {
-			                param = self.diagnosis.graph.param[0] + ' | ' + self.diagnosis.graph.param[1] + ' | ' + self.diagnosis.graph.param[2] + self.diagnosis.graph.param[3];
+                            _param = self.diagnosis.graph.param[0] + ' | ' + self.diagnosis.graph.param[1] + ' | ' + self.diagnosis.graph.param[2] + self.diagnosis.graph.param[3];
 			            } else {
 			                return false;
 			            }
-			            console.log(111,param)
-			            jQuery.ajax({
-			                url: '/mxobject/search',
-			                type: 'POST',
-			                dataType: 'json',
-			                data: {
-			                    cond: param
-			                },
-			                beforeSend: function(xhr) {
-			                },
-			                complete: function(xhr, textStatus) {
-			                },
-			                success: function(data, textStatus, xhr) {
-			                    console.log(1111,_.size(data.message))
-			                    if(_.isEmpty(data.message)) {
-			                    	self.diagnosis.graph.selectedNodes = [];
-			                    	return false;
-			                    }
 
-			                    self.diagnosis.graph.graphData = data.message[0].graph;
-			                    self.diagnosis.graph.nodes = [];
-			                    self.diagnosis.graph.selectedNodes = [];
-			                    
-			                    let _tmp = [];
-			                    _.forEach(data.message[0].graph.nodes,function(v){
-			                    	let n = {};
-			                    	n.name = v.data.id;
-			                    	n.title = v.data.name;
-			                    	n.class = v.classes;
-			                    	n.summary = {event:0};
-									
-									self.diagnosis.graph.nodes.push(n);
-			                    	self.diagnosis.graph.selectedNodes.push(v.data.name);
-			                    });
+			            let _list = fetchData(_param);
 
-			                    self.diagnosis.entity.nodes = _.difference(self.diagnosis.graph.nodes, self.diagnosis.entity.nodes);
-			                    
-			                },
-			                error: function(xhr, textStatus, errorThrown) {
-			                }
-			            });
+                        if(_.isEmpty(_list.message)) {
+                            self.diagnosis.graph.selectedNodes = [];
+                            return false;
+                        }
+
+                        self.diagnosis.graph.graphData = _list.message[0].graph;
+                        self.diagnosis.graph.nodes = [];
+                        self.diagnosis.graph.selectedNodes = [];
+
+                        let _tmp = [];
+                        _.forEach(_list.message[0].graph.nodes,function(v){
+                            let n = {};
+                            n.name = v.data.id;
+                            n.title = v.data.name;
+                            n.class = v.classes;
+                            n.summary = {event:0};
+
+                            self.diagnosis.graph.nodes.push(n);
+                            self.diagnosis.graph.selectedNodes.push(v.data.name);
+                        });
+
+                        self.diagnosis.entity.nodes = _.difference(self.diagnosis.graph.nodes, self.diagnosis.entity.nodes);
+
 					},
 					searchDevops: function () {
 						let self = this;
@@ -1088,7 +1073,7 @@
 
 								  				dashboard.push( _.merge(d,{tag: {"_all":[] }, href: href }) );
 								  			} else if( _.includes(d.type, 'idas') ) {
-								  				var href="/janesware/dashboard?name="+d.name;
+								  				var href="/janesware/ishow?name="+d.name;
 
 								  				dashboard.push( _.merge(d,{tag: {"_all":[] }, href: href }) );
 								  			}
@@ -1214,7 +1199,7 @@
 				<div class="input-group searchinput">
 	                <vue-search-input-component :model="search.input"></vue-search-input-component>
 	                <div class="input-group-btn">
-			            <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+			            <vue-search-preset-component id="diagnosis-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
 			        </div>
 			        <div class="input-group-btn">
 		         	  	<button type="button" class="btn btn-success btn_search" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>

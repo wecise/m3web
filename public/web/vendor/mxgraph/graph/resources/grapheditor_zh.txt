@@ -345,6 +345,7 @@ mx-event=事件
 mx-performance=性能
 mx-log=日志
 mx-config=配置
+mx-properties=属性
 mx-script=脚本
 mx-menu-config=配置
 mx-menu-shape=图型

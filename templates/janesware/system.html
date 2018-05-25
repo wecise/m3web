@@ -1243,7 +1243,7 @@
                     newUser: function(){
                         let self = this;
 
-                        let win = newWindow('small', `{{.i18n.Tr "creative_list-new"}}`,`<div id="ldap-new"></div>`);
+                        let win = newWindow('small', `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1336,7 +1336,7 @@
                                     let _result = ldapMaintain(me.ldap);
 
                                     if(_result===1){
-                                        swal(`{{.i18n.Tr "creative_list-new"}}`,me.ldap.object.username + " " + me.email,"success");    
+                                        swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.username + " " + me.email,"success");
                                         
                                         _.delay(function(){
                                             eventHub.$emit('user-tree-refresh-event', null);
@@ -1353,7 +1353,7 @@
                     newGroup: function(){
                         let self = this;
 
-                        let win = newWindow('small', `{{.i18n.Tr "creative_list-new"}}`,`<div id="ldap-new"></div>`);
+                        let win = newWindow('small', `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1409,7 +1409,7 @@
                                     let _result = ldapMaintain(me.ldap);
 
                                     if(_result===1){
-                                        swal(`{{.i18n.Tr "creative_list-new"}}`,me.ldap.object.fullname,"success");    
+                                        swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.fullname,"success");
                                         
                                         _.delay(function(){
                                             eventHub.$emit('user-tree-refresh-event', null);

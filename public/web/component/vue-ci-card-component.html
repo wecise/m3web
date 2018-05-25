@@ -516,7 +516,7 @@
                     delimiters: ['#{', '}#'],
 					el: '#ci-form-compare-timeline',
 					template: `<form id="form-wizard">
-									<div id="wizard">
+									<div id="ci-compare-wizard">
 										<ol>
 											<li>
 												选择配置
@@ -637,7 +637,7 @@
                         me.$nextTick(function(){
 
                             me.init();
-                            FormWizard.init();
+                            FormWizard.init("ci-compare-wizard");
                         })
 					},
 					methods:{
@@ -875,7 +875,8 @@
                                 let cVue = new Vue({
                                     delimiters: ['$', '$'],
                                     el: '#ci-cmd-new-template',
-                                    template: ` <div class="panel"><div class="panel-body">
+                                    template: ` <vue-dispatch-manager-component></vue-dispatch-manager-component>
+                                                <!--div class="panel"><div class="panel-body">
                                     				<div class="row">
                                     					<div class="col-lg-2">
 															<!--<img src="/web/assets/images/server_01.svg" class="img-responsive" alt="Image">$model.host$-->
@@ -920,13 +921,13 @@
 		                                                    	</div>
 
 		                                                        <div class="form-group pull-right">
-		                                                    	    <a class="btn btn-xs btn-primary pull-right" @click="save">提交</a>&nbsp;&nbsp;&nbsp;&nbsp;
-		                                                    	    <a class="btn btn-xs btn-success pull-right" @click="call">执行</a>&nbsp;&nbsp;&nbsp;&nbsp;
+		                                                    	    <a href="javascript:void(0);" class="btn btn-xs btn-primary pull-right" @click="save">提交</a>&nbsp;&nbsp;&nbsp;&nbsp;
+		                                                    	    <a href="javascript:void(0);" class="btn btn-xs btn-success pull-right" @click="call">执行</a>&nbsp;&nbsp;&nbsp;&nbsp;
 		                                                    	</div>
 		                                                    </form>
 		                                                </div>
 		                                            </div>
-                                                </div></div>`,
+                                                </div></div-->`,
                                     data: function(){
                                         return {
                                             model: {
@@ -935,13 +936,13 @@
 	                                            	cmd: "",
 	                                            	params: "",
 	                                            	cron: {
-                                                        second: null,
-		                                                minute: null,
-	                                                    hour: null,
-		                                                day: null,
-		                                                month: null,
-		                                                week: null,
-		                                                year: null
+                                                        second: 0,
+		                                                minute: 0,
+	                                                    hour: 0,
+		                                                day: 0,
+		                                                month: 0,
+		                                                week: 0,
+		                                                year: 0
 		                                            },
 	                                            	result: {
                                                         oldInput: "",
@@ -981,7 +982,7 @@
                                         cronSchedule: function(){
                                             let iam = this;
 
-                                            return later.parse.text(iam.model.config.cron.term);
+                                            return "*/5 * * * *";//_.values(iam.model.config.cron).join(" "));
                                         }
 	                                },
                                     methods: {
@@ -1011,21 +1012,27 @@
                                         },
                                         save: function(event){
                                             let iam = this;
-                                            let _config = {};
-                                            let k = iam.model.config.cmd+''+iam.model.config.params;
-                                            let v = iam.model.config.result;
-                                            _config[k] = v;
-
 
                                             let treeObj = $.fn.zTree.getZTreeObj("server-group-tree");
-                                            let nodes = treeObj.getCheckedNodes(true);
 
-	                                        let _form = new FormData();
-                                            _form.append("command", iam.model.config.cmd+' '+iam.model.config.params);
-                                            _form.append("cron", iam.cronSchedule);
-                                            _form.append("hosts", nodes);
-                                            _form.append("rule", "/matrix/rules/ciview_config_rule");
-                                            console.log(_form)
+                                            let filteredNodes = _.filter(treeObj.getCheckedNodes(true),function(v,k) {
+                                                return !v.isParent;
+                                            });
+
+                                            let nodes = _.map(filteredNodes, function(v,k) {
+                                                return {name: v.name, cron: "", env: []};
+                                            });
+
+
+	                                        let _form = {};
+                                            _form.command = iam.model.config.cmd+' '+iam.model.config.params;
+                                            _form.args = [iam.model.config.params];
+                                            _form.cron = iam.cronSchedule;
+                                            _form.hosts = nodes;
+                                            _form.rule = "/matrix/rules/ciview_config_rule";
+                                            _form.attrs = {"class": self.row.class, "id": self.row.id};
+                                            _form.env = [];
+                                            console.log(JSON.stringify(_form))
 	                                        return false;
                                             let _rtn = agentDispatch(_form);
                                         }

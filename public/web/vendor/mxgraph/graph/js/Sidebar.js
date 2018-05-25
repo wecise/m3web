@@ -111,7 +111,7 @@ Sidebar.prototype.init = function()
 				_.forEach(entity,function(v,k){
 					let _tmp = fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
 					
-					if(_.isNull(_tmp)) {
+					if(_.isNull(_tmp.message)) {
 						return;
 					}
 					_data = _tmp.message;
@@ -121,6 +121,7 @@ Sidebar.prototype.init = function()
 						tags[val.name] = _.values(val).join(" ");
 					})
 
+					console.log(JSON.stringify(_data),JSON.stringify(tags))
 					self.addEntitiesMatrixPalette('clipart', v.alias, dir + '/matrix/12/', 'icon_laptop', '.svg', _data, _data, tags, false);
 				})
 			
@@ -160,10 +161,10 @@ Sidebar.prototype.init = function()
 			$("#imap-config").removeClass("active");
 			$("#imap-shape").addClass("active");
 
-			//self.addBobPalette(true);
+			self.addBobPalette(true);
 
-			self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/bankofchina_flowchart.xml',
-				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2');
+			/*self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/bankofchina_flowchart.xml',
+				';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2');*/
 		},500)
 	}
 	
@@ -984,7 +985,6 @@ Sidebar.prototype.addEntitiesMatrixPalette = function(id, title, prefix, type, p
 				this.defaultImageWidth, this.defaultImageHeight, title, title, title != null, null, this.filterTags(tmpTags)));
 		}))(items[i].name, (titles != null) ? titles[i].name : null, (tags != null) ? tags[items[i].name] : null);
 	}
-
 	this.addPaletteFunctions(id, title, (expand != null) ? expand : true, fns);
 };
 
@@ -1013,6 +1013,88 @@ Sidebar.prototype.addSvgPalette = function(id, title, prefix, postfix, items, ti
 	}
 
 	this.addPaletteFunctions(id, title, false, fns);
+};
+
+/**
+ * Adds the BOB palette to the sidebar.
+ */
+Sidebar.prototype.addBobPalette = function(expand)
+{
+    var fns = [
+        this.createVertexTemplateEntry('rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Rounded Rectangle', null, null, 'rounded rect rectangle box'),
+        this.createVertexTemplateEntry('ellipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Ellipse', null, null, 'oval ellipse state'),
+        // Explicit strokecolor/fillcolor=none is a workaround to maintain transparent background regardless of current style
+        this.createVertexTemplateEntry('text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;',
+            40, 20, 'Text', 'Text', null, null, 'text textbox textarea label'),
+        this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rectangle', null, null, 'rect rectangle box double'),
+        this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rounded Rectangle', null, null, 'rounded rect rectangle box double'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Double Ellipse', null, null, 'oval ellipse start end state double'),
+        this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Parallelogram'),
+        this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Hexagon', null, null, 'hexagon preparation'),
+        this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Process', null, null, 'process task'),
+        this.createEdgeTemplateEntry('endArrow=classic;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 50, 50, '', 'Connection'),
+        this.createEdgeTemplateEntry('endArrow=classic;startArrow=classic;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 50, 50, '', 'Connection')
+    ];
+
+    this.addPaletteFunctions('general', mxResources.get('general'), (expand != null) ? expand : true, fns);
+	/*
+    // Avoids having to bind all functions to "this"
+    var sb = this;
+
+    // Reusable cells
+    var field = new mxCell('+ field: type', new mxGeometry(0, 0, 100, 26), 'text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;');
+    field.vertex = true;
+
+    var divider = new mxCell('', new mxGeometry(0, 0, 40, 8), 'line;html=1;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;');
+    divider.vertex = true;
+
+    // Default tags
+    var dt = 'uml static class ';
+
+    var fns = [
+        this.addEntry('uml activity state', function()
+        {
+            var cell = new mxCell('未执行', new mxGeometry(0, 0, 120, 74),
+                'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#dddddd;strokeColor=#ffffff;');
+            cell.vertex = true;
+
+            return sb.createVertexTemplateFromCells([cell, null], 120, 100, '未执行');
+        }),
+        this.addEntry('uml activity state', function()
+        {
+            var cell = new mxCell('成功', new mxGeometry(0, 0, 120, 74),
+                'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#8bc34a;strokeColor=#ffffff;');
+            cell.vertex = true;
+
+            return sb.createVertexTemplateFromCells([cell, null], 120, 100, '成功');
+        }),
+        this.addEntry('uml activity state', function()
+        {
+            var cell = new mxCell('失败', new mxGeometry(0, 0, 120, 74),
+                'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ff0000;strokeColor=#ffffff;');
+            cell.vertex = true;
+
+            return sb.createVertexTemplateFromCells([cell, null], 120, 100, '失败');
+        }),
+        this.addEntry('uml activity state', function()
+        {
+            var cell = new mxCell('跳过不执行', new mxGeometry(0, 0, 120, 74),
+                'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ffc107;strokeColor=#ffffff;');
+            cell.vertex = true;
+
+            return sb.createVertexTemplateFromCells([cell, null], 120, 100, '跳过不执行');
+        }),
+        this.addEntry('uml activity state', function()
+        {
+            var cell = new mxCell('正在执行', new mxGeometry(0, 0, 120, 74),
+                'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#03a9f4;strokeColor=#ffffff;');
+            cell.vertex = true;
+
+            return sb.createVertexTemplateFromCells([cell, null], 120, 100, '正在执行');
+        })
+    ];
+
+    this.addPaletteFunctions('状态', '状态', expand || false, fns);*/
 };
 
 /**
@@ -1240,69 +1322,6 @@ Sidebar.prototype.createAdvancedShapes = function()
 	];
 };
 
-/**
- * Adds the general palette to the sidebar.
- */
-Sidebar.prototype.addBobPalette = function(expand)
-{
-	// Avoids having to bind all functions to "this"
-	var sb = this;
-
-	// Reusable cells
-	var field = new mxCell('+ field: type', new mxGeometry(0, 0, 100, 26), 'text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;whiteSpace=wrap;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;');
-	field.vertex = true;
-
-	var divider = new mxCell('', new mxGeometry(0, 0, 40, 8), 'line;html=1;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;');
-	divider.vertex = true;
-	
-	// Default tags
-	var dt = 'uml static class ';
-	
-	var fns = [
-   		this.addEntry('uml activity state', function()
-		{
-			var cell = new mxCell('未执行', new mxGeometry(0, 0, 120, 74),
-				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#dddddd;strokeColor=#ffffff;');
-			cell.vertex = true;
-			
-			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '未执行');
-		}),
-		this.addEntry('uml activity state', function()
-		{
-			var cell = new mxCell('成功', new mxGeometry(0, 0, 120, 74),
-				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#8bc34a;strokeColor=#ffffff;');
-			cell.vertex = true;
-			
-			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '成功');
-		}),
-		this.addEntry('uml activity state', function()
-		{
-			var cell = new mxCell('失败', new mxGeometry(0, 0, 120, 74),
-				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ff0000;strokeColor=#ffffff;');
-			cell.vertex = true;
-			
-			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '失败');
-		}),
-		this.addEntry('uml activity state', function()
-		{
-			var cell = new mxCell('跳过不执行', new mxGeometry(0, 0, 120, 74),
-				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#ffc107;strokeColor=#ffffff;');
-			cell.vertex = true;
-			
-			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '跳过不执行');
-		}),
-		this.addEntry('uml activity state', function()
-		{
-			var cell = new mxCell('正在执行', new mxGeometry(0, 0, 120, 74),
-				'rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#03a9f4;strokeColor=#ffffff;');
-			cell.vertex = true;
-			
-			return sb.createVertexTemplateFromCells([cell, null], 120, 100, '正在执行');
-		})
-	];
-	
-	this.addPaletteFunctions('状态', '状态', expand || false, fns);
-};
 
 /**
  * Adds the general palette to the sidebar.
@@ -3315,6 +3334,7 @@ Sidebar.prototype.createVertexTemplateEntry = function(style, width, height, val
 	
 	return this.addEntry(tags, mxUtils.bind(this, function()
  	{
+ 		console.log(style, width, height, value, title, showLabel, showTitle)
  		return this.createVertexTemplate(style, width, height, value, title, showLabel, showTitle);
  	}));
 }

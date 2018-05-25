@@ -109,7 +109,9 @@
 
 <script src="{{AppSubUrl}}/web/vendor/layer/layer.js" ></script>
 
+
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
+
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
@@ -127,6 +129,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-chinamap-2-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-script-manager-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-dispatch-manager-component.html"></link>
 
 <script type="text/javascript">
 
@@ -146,99 +150,14 @@
                         "vue-base-timeline-component",
                         "vue-echart-graph-component",
                         "vue-echart-chinamap-2-component",
-                        "vue-base-datatables-component"
+                        "vue-base-datatables-component",
+                        "vue-script-manager-component",
+                        "vue-dispatch-manager-component"
                         ],function() {
 
         $(function(){
 
             $(".current-active-item").html(`<a class="active item" href="/janesware/ciview" ><i class="fa fa-th-list"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
-            Vue.component('bootstraptag-component', {
-                delimiters: ['${', '}'],
-                template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
-                mounted: function () {
-                    let self = this;
-
-                    self.$nextTick(function () {
-                        self.init();
-                    })
-                },
-                methods: {
-                    init: function () {
-                        let self = this;
-
-                        $(self.$el).tagsinput({
-                            tagClass: function (item) {
-
-                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
-                                    return 'label label-danger label-important';
-                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
-                                    return 'label label-warning';
-                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
-                                    return 'label label-primary';
-                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
-                                    return 'label label-success';
-                                } else if (item.indexOf("黑色") > -1) {
-                                    return 'label label-default';
-                                } else {
-                                    return 'label label-default';
-                                }
-                            },
-                        })
-
-                        $(self.$el).on('itemAdded', function (event) {
-
-                            var index = $(this).data("index");
-
-                            self.search.result.data[index].tag._all.push(event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.search.result.data[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                }
-                            });
-                        })
-
-                        $(self.$el).on('itemRemoved', function (event) {
-
-                            var index = $(this).data("index");
-
-                            self.search.result.data[index].tag._all = _.pull(self.search.result.data[index].tag._all, event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.search.result.data[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                }
-                            });
-                        })
-                    }
-                }
-            })
 
             Vue.component('ci-view-component', {
                 delimiters: ['${', '}'],
@@ -1239,73 +1158,24 @@
                         $(".tagsLabel").tagsinput({
                             tagClass: function(item) {
 
-                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
-                                    return 'label label-danger label-important';
-                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
-                                    return 'label label-warning';
-                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
-                                    return 'label label-primary';
-                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
-                                    return 'label label-success';
-                                } else if (item.indexOf("黑色") > -1) {
-                                    return 'label label-default';
-                                } else {
-                                    return 'label label-default';
-                                }
+                                return _.sample(['label label-success']);
                             },
 
                         });
                         $(".tagsLabel").on('itemAdded', function(event) {
 
-                            var index = $(this).data("index");
-                            var arr = [];
-                            arr.push(event.item);
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model,{id:_id});
 
-                            self.model[index].tag._all = arr;
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.model[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    console.log(JSON.stringify(data))
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                }
-                            });
+                            fetchData(_item.id + ' | tags +' + event.item);
                         });
 
                         $(".tagsLabel").on('itemRemoved', function(event) {
 
-                            var index = $(this).data("index");
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model,{id:_id});
 
-                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.search.result.data[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                }
-                            });
+                            fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     },
@@ -1339,6 +1209,7 @@
                         obj.type = item.ftype;
                         obj.name = item.name;
                         obj.parent = item.parent;
+                        obj.fsExtension = item.name.split(".")[1] || "ishow";
 
                         localStorage.setItem("graph-object",JSON.stringify(obj));
 
@@ -1349,7 +1220,7 @@
                             );
                         } else {
                             window.open(
-                                "/janesware/creative",
+                                "/janesware/" + obj.fsExtension,
                                 "_blank"
                             );
                         }
@@ -1585,7 +1456,7 @@
                             if (v.type === 'timestamp'){
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.title),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: true,
                                     render: function(data, type, row) {
                                         return moment(data).format("LLL");
@@ -1594,7 +1465,7 @@
                             } else if (v.type === 'date'){
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.title),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: true,
                                     render: function(data, type, row) {
                                         return moment(data).format("L");
@@ -1603,7 +1474,7 @@
                             } else if (v.type === 'map'){
                                 _columns.push({
                                     field: v.name,
-                                    title: v.title,
+                                    title: v.title || _.startCase(v.name),
                                     render: function(data, type, row) {
                                               return JSON.stringify(data);
                                           }
@@ -1611,7 +1482,7 @@
                             } else if (v.type === 'set' || v.type === 'list'){
                                 _columns.push({
                                     field: v.name,
-                                    title: v.title,
+                                    title: v.title || _.startCase(v.name),
                                     render: function(data, type, row) {
                                               return data.join(",");
                                           }
@@ -1619,7 +1490,7 @@
                             } else if (v.type === 'smallint'){
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.title),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: true,
                                     formatter: function(value, row, index) {
 
@@ -1652,7 +1523,7 @@
                             } else {
                                 _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.title),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: _.sortable
                                 });
                             }
@@ -1788,72 +1659,24 @@
                         $(".tagsLabel").tagsinput({
                             tagClass: function (item) {
 
-                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
-                                    return 'label label-danger label-important';
-                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
-                                    return 'label label-warning';
-                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
-                                    return 'label label-primary';
-                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
-                                    return 'label label-success';
-                                } else if (item.indexOf("黑色") > -1) {
-                                    return 'label label-default';
-                                } else {
-                                    return 'label label-default';
-                                }
+                                return _.sample(['label label-success']);
                             },
 
                         });
                         $(".tagsLabel").on('itemAdded', function (event) {
 
-                            var index = $(this).data("index");
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model,{id:_id});
 
-                            self.search.result.data[index].tag._all.push(event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.search.result.data[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                }
-                            });
+                            fetchData(_item.id + ' | tags +' + event.item);
                         });
 
                         $(".tagsLabel").on('itemRemoved', function (event) {
 
-                            var index = $(this).data("index");
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model,{id:_id});
 
-                            self.search.result.data[index].tag._all = _.pull(self.search.result.data[index].tag._all, event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.search.result.data[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                }
-                            });
+                            fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     },
@@ -1939,7 +1762,7 @@
                 <div class="input-group searchinput">
                     <vue-search-input-component :model="search.input"></vue-search-input-component>
                     <div class="input-group-btn">
-                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                        <vue-search-preset-component id="ciview-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                     </div>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
@@ -2034,7 +1857,7 @@
                                 <div class="col-lg-2" id="nav">
                                     <div class="panel" style="border-radius: 0px;min-height:60vh;">
                                         <div class="panel-body">
-                                            <vue-entity-tree-component id="ciview-entity-tree" :model="search.result.data"></vue-entity-tree-component>
+                                            <vue-entity-tree-component id="ciview-entity-tree" :list="search.result.data"></vue-entity-tree-component>
                                         </div>
                                     </div>
                                 </div>
@@ -2143,7 +1966,7 @@
                                     <img :src="'/web/assets/images/'+item.ftype+'.png'" style="width:75%;height:80px; margin: 0px 20px;">
                                 </a>
                             </span>
-                            <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tag._all" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                            <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tag" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
                         </div>
                         <div class="stats-desc">
                             <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username} &nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-clock-o' style='color:#337ab7;'></i> ${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;

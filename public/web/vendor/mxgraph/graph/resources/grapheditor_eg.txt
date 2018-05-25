@@ -345,6 +345,7 @@ mx-event=Event
 mx-performance=Performance
 mx-log=Log
 mx-config=Config
+mx-properties=Properties
 mx-script=Script
 mx-menu-config=Config
 mx-menu-shape=Shape

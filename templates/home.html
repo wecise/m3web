@@ -236,16 +236,6 @@
         color: #6eb4ec;
     }
 
-    .swal2-container{
-        top:0px;
-        height:55px;
-    }
-    .swal2-container.swal2-shown{
-        background-color: transparent;
-    }
-    .swal2-popup .swal2-title{
-        font-size:14px;
-    }
 </style>
 
 <div id="app"></div>
@@ -278,12 +268,7 @@
             $('[data-toggle="tooltip"]').tooltip();
 
             $("#robot").html(`<div style="position: absolute;right:0px;top: -38px;cursor: pointer;"><img src="/web/assets/images/robot.svg" style="width:120px;height:120px;transform: scale(0.5);"></div>`).click(function(){
-                swal({
-                  title: "Save it, Find it, Enjoy it.",
-                  text: "This is M³ System.",
-                  timer: 2000,
-                  showConfirmButton: false
-                });
+                alertify.log("Save it, Find it, Enjoy it.");
             });
 
             var appVue = new Vue({
@@ -451,16 +436,11 @@
                                                     });
 
                                     clipboard.on('success', function(e) {
-                                        swal({ 
-                                              title: "Tip", 
-                                              text: "Copyed it.", 
-                                              timer: 1000, 
-                                              showConfirmButton: false 
-                                            });
+                                        alertify.log("已复制 " + e);
                                     });
 
                                     clipboard.on('error', function(e) {
-                                        console.log(e);
+                                        alertify.log(e);
                                     });
                                 }
                             }
@@ -474,7 +454,7 @@
                         let _term = _.trim($(".search").val());
 
                         if (_term.length < 1) {
-                            swal("Enter the search words！", "", "info");
+                            alertify.log("请输入搜索关键字");
                             $(".search").focus();
                             return false;
                         }
@@ -647,7 +627,7 @@
                     </div>
                     <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;border-left:none;">
                     <div class="input-group-btn">
-                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                        <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                      </div>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
@@ -688,7 +668,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="layer btn btn-primary" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 1px;min-width: 110px;">
+                        <div class="layer btn btn-primary" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;">
                             <a href="#addAppModal" data-toggle="modal"><span class="fa fa-plus" style="font-size: 20px;"></span>
                             </a>
                         </div>

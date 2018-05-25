@@ -990,7 +990,7 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 	else
 	{
 		//this.addMenuItems(menu, ['mx-event','mx-performance', 'mx-log', 'mx-config', '-', 'mx-script', '-'], null, evt);
-		this.addMenuItems(menu, ['mx-script', '-'], null, evt);
+		this.addMenuItems(menu, ['mx-properties','mx-script', '-'], null, evt);
 		this.addMenuItems(menu, ['delete', '-', 'cut', 'copy', '-', 'duplicate'], null, evt);
 
 	}

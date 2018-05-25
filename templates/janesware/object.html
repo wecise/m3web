@@ -356,8 +356,6 @@
 
 <!--<div id="app"></div>-->
 
-<!--zTree Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 
 <!-- Jquery Format JS/JSON/SQL JS -->
 <script src="{{AppSubUrl}}/web/vendor/jquery-format/jquery.format.js"></script>
@@ -647,32 +645,16 @@
                                 confirmButtonColor: "#ff0000"
                             }).then((result) => {
                                 if (result.value) {
-                                    jQuery.ajax({
-                                        url: "/mxobject/del",
-                                        dataType: 'json',
-                                        type: 'POST',
-                                        data: {
-                                          id: appVue.class.tree.cid
-                                        },
-                                        success: function (data, status) {
-                                            if(data.status == "ok") {
-                                                swal("Success！", "", "success");
-                                                eventHub.$emit("class-tree-refresh-event",null);
-                                            } else {
-                                                swal("Failed！", data.message, "warning");
-                                            }
-                                        },
-                                        error: function(xhr, textStatus, errorThrown) {
-                                            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                                        }
-                                    })
+
+                                    let _rtn = classDelete(appVue.class.tree.cid);
+
+                                    if(_rtn == 1){
+                                        eventHub.$emit("class-tree-refresh-event",null);
+                                    }
+
 
                                 } else if (result.dismiss === 'cancel') {
-                                    swal(
-                                      'Cancelled',
-                                      appVue.class.tree.curTreeNodeCid,
-                                      'info'
-                                    )
+                                    alertify.log('已取消 ' + appVue.class.tree.curTreeNodeCid);
                                 }
                             })
                         });
@@ -695,8 +677,7 @@
                                 swal("Please Confirm!", _class, "info");
                                 return false;
                             } else {
-                                var json = '',
-                                    jsonObj = new Object();
+                                let jsonObj = new Object();
 
                                     jsonObj.pid = _treeNode.cid;
                                     jsonObj.name = _class;
@@ -711,28 +692,13 @@
                                     jsonObj.mtime = _treeNode.mtime;
                                     jsonObj.fieldsObj = _treeNode.fieldsObj;
 
-                                    json = JSON.stringify(jsonObj);
 
-                                jQuery.ajax({
-                                    url: "/mxobject/iau",
-                                    dataType: 'json',
-                                    type: 'POST',
-                                    data: {
-                                        json
-                                    },
-                                    success: function (data, status) {
+                                let _rtn = classNew(jsonObj);
 
-                                        if(data.status == "ok") {
-                                            swal("Success!", _class, "success");
-                                            eventHub.$emit("class-tree-refresh-event",null);
-                                        } else {
-                                            swal("Failed!", _class, "warning");
-                                        }
-                                    },
-                                    error: function(xhr, textStatus, errorThrown) {
-                                        mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                    }
-                                });
+                                if(_rtn == 1) {
+                                    eventHub.$emit("class-tree-refresh-event",null);
+                                }
+
                             }
                         })
 
@@ -757,58 +723,29 @@
                             self.zTree.destroy();
                         }
 
-                        jQuery.ajax({
-                            url: "/mxobject/schema/class/list",
-                            dataType: 'json',
-                            type: 'GET',
-                            data: {
-                              id:"-1"
-                            },
-                            beforeSend:function(xhr){
-                              loading = layer.load(2, {
-                                          shade: [0.1,'#ccc'],
-                                          time: 30*1000
-                                        });
-                            },
-                            complete: function(xhr, textStatus) {
-                              layer.close(loading);
-                            },
-                            success: function(data, textStatus, xhr) {
-                                
-                                self.zTree = $.fn.zTree.init($("#tree"), self.setting, JSON.parse(data.message))
+                        let _rtn = classList(-1);
 
-                                jQuery.ajax({
-                                    url: "/mxobject/schema/class/list",
-                                    dataType: 'json',
-                                    type: 'GET',
-                                    data: {
-                                      id:"1"
-                                    },
-                                    complete: function(xhr, textStatus) {
-                                    },
-                                    success: function(data, textStatus, xhr) {
-                                        
-                                        var zTree = $.fn.zTree.getZTreeObj("tree");
+                        if (!_.isEmpty(_rtn)){
 
-                                        var nodes = zTree.getNodes();
-                                        if (nodes.length > 0) {
-                                            var tId = nodes[0].tId;
-                                            var node = zTree.getNodeByTId(tId);
+                            self.zTree = $.fn.zTree.init($("#tree"), self.setting, JSON.parse(_rtn));
 
-                                            // append sub nodes
-                                            zTree.addNodes(node, JSON.parse(data.message));
-                                        }
-                                    },
-                                    error: function(xhr, textStatus, errorThrown) {
-                                        console.log(errorThrown);
-                                    }
-                                });
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                layer.close(loading);
-                                console.log(errorThrown);
+                            let _rtnTwice = classList(1);
+
+                            if (!_.isEmpty(_rtnTwice)) {
+                                let zTree = $.fn.zTree.getZTreeObj("tree");
+                                let nodes = zTree.getNodes();
+
+                                if (nodes.length > 0) {
+                                    var tId = nodes[0].tId;
+                                    var node = zTree.getNodeByTId(tId);
+
+                                    // append sub nodes
+                                    zTree.addNodes(node, JSON.parse(_rtnTwice));
+                                }
                             }
-                        });
+                        }
+
+
                     },
                     onClick: function (event, treeId, treeNode, clickFlisParentag) {
                         let self = this;
@@ -1084,7 +1021,6 @@
                                         {'name':'fparam','title':'Fparam', visible:false},
                                         {'name':'isindex','title':'Index'},
                                         {'name':'iskey','title':'Primary Key'},
-                                        {'name':'isreadonly','title':'Readonly'},
                                         {'name':'note','title':'Note'},
                                         {'name':'mtime','title':'Mtime'},
                                         {'name':'class','title':'Class'},
@@ -1131,6 +1067,7 @@
 
                         $("#myTabContent").append(jumbotronStr);
 
+
                     },
                     initPlugin: function(){
                         let self = this;
@@ -1145,7 +1082,7 @@
                         mxLog.show();
                     },
                     initTabsHandle: function() {
-                      let self = this;
+                        let self = this;
 
                       /**
                        * @author  cnwangzd
@@ -1168,8 +1105,29 @@
                        * @todo Tab双击关闭操作定义
                        */
                       $(".nav-tabs.object").on("click", "a", function (e) {
-                          self.tab.selectedTabId = $(this).attr("tabcloser");
+                          let _tab = $(this).attr("tabcloser").split("_")[2];
+
+                          self.tab.selectedTabId = _tab;
+
+                          switch (_tab) {
+                              case "class":
+                                  self.initClass();
+                                  break;
+                              case "data":
+                                  self.initData();
+                                  break;
+                              case "query":
+                                  //self.initQuery();
+                                  break;
+                              case "trigger":
+                                  //self.initTrigger();
+                                  break;
+                              case "relation":
+                                  //self.initRelation();
+                                  break;
+                          }
                       });
+
                     },
                     initFtype: function () {
                         let self = this;
@@ -1264,26 +1222,26 @@
 
                         self.class.tree.selectedParent = self.getSelectedParentByName(self.class.tree.selected.name);
 
-                        id1 = "tab1_1";
-                        id2 = "tab2_2";
-                        id3 = "tab3_3";
-                        id4 = "tab4_4";
-                        id6 = "tab6_6";
+                        id1 = "class";
+                        id2 = "data";
+                        id3 = "query";
+                        id4 = "trigger";
+                        id6 = "relation";
 
 
                         //创建新TAB的title
-                        title1 = '<li id="tab_' + id1 + '"> <a href="#' + id1 + '" role="tab" data-toggle="tab" tabcloser="' +id1 + '"> <i class="icon-edit"></i> {{.i18n.Tr "mxobject_class_define_title"}} &nbsp;<i class="icon-remove btn btn-xs" tabclose="' + id1 + '"></i> </a></span> </li> ';
-                        title2 = '<li id="tab_' + id2 + '"> <a href="#' + id2 + '" role="tab" data-toggle="tab" tabcloser="' +id2 + '"> <i class="icon-table"></i>  {{.i18n.Tr "mxobject_class_data_title"}}</a></span></li> ';
-                        title3 = '<li id="tab_' + id3 + '"> <a href="#' + id3 + '" role="tab" data-toggle="tab" tabcloser="' +id3 + '"> <i class="icon-search"></i>  {{.i18n.Tr "mxobject_class_query_title"}}</a></span></li> ';
-                        title4 = '<li id="tab_' + id4 + '"> <a href="#' + id4 + '" role="tab" data-toggle="tab" tabcloser="' +id4 + '"> <i class="icon-exchange"></i>  {{.i18n.Tr "mxobject_class_trigger_title"}}</a></span></li> ';
-                        title6 = '<li id="tab_' + id6 + '"> <a href="#' + id6 + '" role="tab" data-toggle="tab" tabcloser="' +id6 + '"> <i class="icon-sitemap"></i>  {{.i18n.Tr "mxobject_class_relation_title"}}</a></span></li> ';
+                        title1 = '<li role="presentation" id="tab_li_' + id1 + '"> <a href="#tab_div_' + id1 + '" role="tab" data-toggle="tab" tabcloser="tab_li_' +id1 + '"> <i class="icon-edit"></i> {{.i18n.Tr "mxobject_class_define_title"}} &nbsp;<i class="icon-remove btn btn-xs" tabclose="tab_li_' + id1 + '"></i> </a></span> </li> ';
+                        title2 = '<li role="presentation" id="tab_li_' + id2 + '"> <a href="#tab_div_' + id2 + '" role="tab" data-toggle="tab" tabcloser="tab_li_' +id2 + '"> <i class="icon-table"></i>  {{.i18n.Tr "mxobject_class_data_title"}}</a></span></li> ';
+                        title3 = '<li role="presentation" id="tab_li_' + id3 + '"> <a href="#tab_div_' + id3 + '" role="tab" data-toggle="tab" tabcloser="tab_li_' +id3 + '"> <i class="icon-search"></i>  {{.i18n.Tr "mxobject_class_query_title"}}</a></span></li> ';
+                        title4 = '<li role="presentation" id="tab_li_' + id4 + '"> <a href="#tab_div_' + id4 + '" role="tab" data-toggle="tab" tabcloser="tab_li_' +id4 + '"> <i class="icon-exchange"></i>  {{.i18n.Tr "mxobject_class_trigger_title"}}</a></span></li> ';
+                        title6 = '<li role="presentation" id="tab_li_' + id6 + '"> <a href="#tab_div_' + id6 + '" role="tab" data-toggle="tab" tabcloser="tab_li_' +id6 + '"> <i class="icon-sitemap"></i>  {{.i18n.Tr "mxobject_class_relation_title"}}</a></span></li> ';
 
                         //是否指定TAB内容
-                        content1 = '<div role="tabpanel" class="tab-pane fade in" id="' + id1 + '"><div id="panel-class"></div></div>';
-                        content2 = '<div role="tabpanel" class="tab-pane fade in" id="' + id2 + '"><div id="panel-data"></div></div>';
-                        content3 = '<div role="tabpanel" class="tab-pane fade in" id="' + id3 + '"><div id="panel-query"></div></div>';
-                        content4 = '<div role="tabpanel" class="tab-pane fade in" id="' + id4 + '"><div id="panel-trigger"></div></div>';
-                        content6 = '<div role="tabpanel" class="tab-pane fade in" id="' + id6 + '"><div id="panel-relation"></div></div>';
+                        content1 = '<div role="tabpanel" class="tab-pane fade in" id="tab_div_' + id1 + '"><div id="panel-class"></div></div>';
+                        content2 = '<div role="tabpanel" class="tab-pane fade in" id="tab_div_' + id2 + '"><div id="panel-data"></div></div>';
+                        content3 = '<div role="tabpanel" class="tab-pane fade in" id="tab_div_' + id3 + '"><div id="panel-query"></div></div>';
+                        content4 = '<div role="tabpanel" class="tab-pane fade in" id="tab_div_' + id4 + '"><div id="panel-trigger"></div></div>';
+                        content6 = '<div role="tabpanel" class="tab-pane fade in" id="tab_div_' + id6 + '"><div id="panel-relation"></div></div>';
 
                         $("#myTabMenu").empty();
                         $("#myTabContent").empty();
@@ -1313,12 +1271,12 @@
                         });
 
                         //激活TAB
-                        if(appVue.tab.selectedTabId == null){
-                          $("#tab_" + id1).addClass('active');
-                          $("#" + id1).addClass("active");
+                        if(_.isNull(appVue.tab.selectedTabId)){
+                            $("#tab_li_" + id1).addClass("active");
+                            $("#tab_div_" + id1).addClass('active');
                         } else {
-                          $("#tab_" + appVue.tab.selectedTabId).addClass('active');
-                          $("#" + appVue.tab.selectedTabId).addClass("active");
+                          $("#tab_div_" + appVue.tab.selectedTabId).addClass('active');
+                          $("#tab_li_" + appVue.tab.selectedTabId).addClass("active");
                         }
                     },
                     closeTab: function () {
@@ -1392,7 +1350,6 @@
                                                                         fparam:  e['fparam'],
                                                                         isindex: e['isindex'],
                                                                         iskey:   e['iskey'],
-                                                                        isreadonly: e['isreadonly'],
                                                                         note: e['note'],
                                                                         mtime: e['mtime'],
                                                                         class: e['class'],
@@ -1594,20 +1551,6 @@
                                                     ]
                                                 }
                                             })
-                                        } else if( v.name=="isreadonly" ){
-                                            cols.push({
-                                                field: v.name,
-                                                title: v.title,
-                                                sortable: true,
-                                                editable: {
-                                                    title: "是否只读",
-                                                    type: 'select',
-                                                    source: [
-                                                        {value: 1, text: '是'},
-                                                        {value: 0, text: '否'}
-                                                    ]
-                                                }
-                                            })
                                         } else if( v.name=="class" || v.name=="dispname" || v.name=="remedy" ){
                                             cols.push({
                                                 field: v.name,
@@ -1677,7 +1620,6 @@
                                                         fparam: '',
                                                         isindex: 1,
                                                         iskey: 0,
-                                                        isreadonly: 0,
                                                         note: '',
                                                         class: [],
                                                         dispname: {},
@@ -1720,35 +1662,15 @@
 
                                                 val['iskey'] = eval(val['iskey']);
 
-                                                val['isreadonly'] = eval(val['isreadonly']);
-
                                             });
 
                                             appVue.class.table.dataset.fieldsObj = obj;
-                                            
-                                            jQuery.ajax({
-                                                url: "/mxobject/iau",
-                                                dataType: 'json',
-                                                type: 'POST',
-                                                data: {
-                                                    json: JSON.stringify(appVue.class.table.dataset)
-                                                },
-                                                success: function (data, status) {
 
-                                                    if(data.status == "ok"){
-                                                        eventHub.$emit("class-tree-refresh-event",null);
-                                                        swal("Success!",appVue.class.tree.name,"success");
-                                                        return false;
-                                                    } else {
-                                                        swal("Failed!",appVue.class.tree.name,"warning");
-                                                        return false;
-                                                    }
+                                            let _rtn = classNew(appVue.class.table.dataset);
 
-                                                },
-                                                error: function(xhr, textStatus, errorThrown){
-                                                    mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                                                }
-                                            });
+                                            if(_rtn == 1){
+                                                eventHub.$emit("class-tree-refresh-event",null);
+                                            }
                                         });
                                     },500)
                                 })
@@ -1879,33 +1801,13 @@
                                     methods: {
                                         init: function(){
                                             let self = this;
-                                            var param = "id=" + row.id + " | top 100";
+                                            let _param = "id=" + row.id + " | top 100";
 
-                                            jQuery.ajax({
-                                                url: '/mxobject/search',
-                                                type: 'POST',
-                                                dataType: 'json',
-                                                data: {
-                                                    cond: param,
-                                                    flag: false
-                                                },
-                                                beforeSend:function(xhr){
-                                                },
-                                                complete: function(xhr, textStatus) {
-                                                    //func.call();
-                                                },
-                                                success: function(data, textStatus, xhr) {
+                                            let _list = fetchData(_parm);
 
-                                                    var list = data.message;
-                                                    var columns = [];
+                                            self.model.columns = _list.meta.columns;
+                                            self.model.data = _.orderBy(_list.message,'vtime');
 
-                                                    self.model.columns = data.meta.columns;
-                                                    self.model.data = _.orderBy(list,'vtime');
-                                                },
-                                                error: function(xhr, textStatus, errorThrown) {
-                                                    mxLog.warn(errorThrown);
-                                                }
-                                            })
                                         }
                                     }
                                 });
@@ -2141,8 +2043,6 @@
                                                                       },500)
                                                                   })
 
-                                                                  console.log(666,JSON.stringify(row),self.model)
-
                                                                   $(self.$el).on('click keyup keydown', 'textarea', function () {
                                                                       $(this).height(0).height(this.scrollHeight);
                                                                   }).find('textarea').change();
@@ -2159,26 +2059,7 @@
                                                               onSave: function(){
                                                                   let self = this;
                                                                   let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
-                                                                  console.log(_mql)
-
-                                                                  jQuery.ajax({
-                                                                      url: "/mxobject/mql",
-                                                                      dataType: 'json',
-                                                                      type: 'POST',
-                                                                      data: {
-                                                                          mql: _mql
-                                                                      },
-                                                                      beforeSend:function(xhr){
-                                                                      },
-                                                                      complete: function(xhr, textStatus) {
-                                                                      },
-                                                                      success: function (data, status) {
-                                                                          console.log(JSON.stringify(data))
-                                                                      },
-                                                                      error: function(xhr, textStatus, errorThrown){
-                                                                           mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                                                      }
-                                                                  });
+                                                                  let _rtn = putDataByMql(_mql);
                                                               }
                                                           }
                                                       });
@@ -2369,7 +2250,7 @@
                                                   let _list = fetchDataByMql(_sql);
 
                                                   // MQL for  CRUD
-                                                  if(_list.message == "OK"){
+                                                  if( _.lowerCase(_list.message) == "ok"){
                                                       eventHub.$emit("class-tree-refresh-event",null);
                                                       swal("Success!","","success");
                                                       layer.close(oneLevelLoading);
@@ -2529,26 +2410,7 @@
                                               onSave: function(row){
                                                   let self = this;
                                                   let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
-                                                  console.log(_mql)
-
-                                                  jQuery.ajax({
-                                                      url: "/mxobject/mql",
-                                                      dataType: 'json',
-                                                      type: 'POST',
-                                                      data: {
-                                                          mql: _mql
-                                                      },
-                                                      beforeSend:function(xhr){
-                                                      },
-                                                      complete: function(xhr, textStatus) {
-                                                      },
-                                                      success: function (data, status) {
-                                                          console.log(JSON.stringify(data))
-                                                      },
-                                                      error: function(xhr, textStatus, errorThrown){
-                                                           mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                                      }
-                                                  });
+                                                  let _rtn = putDataByMql(_mql);
                                               }
                                           }
                                       });
@@ -3181,15 +3043,19 @@
 
         <div id="content" class="content content-full-width">
             <div class="vertical-box">
-                <ul id="myTabMenu" class="nav nav-tabs object"></ul>
-                <div id="myTabContent" class="tab-content object"></div>
-                <!-- context menu -->
-                <ul id="context-menu" class="dropdown-menu">
-                    <li data-item="action-details"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
-                    <li data-item="action-history"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-clock-o fa-fw"></i> History</a></li>
-                    <li data-item="action-add"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i> New Action</a></li>
+                <!-- TAB NAVIGATION -->
+                <ul class="nav nav-tabs object" id="myTabMenu" role="tablist">
                 </ul>
+                <!-- TAB CONTENT -->
+                <div class="tab-content object" id="myTabContent">
+                </div>
             </div>
+            <!-- context menu -->
+            <ul id="context-menu" class="dropdown-menu">
+                <li data-item="action-details"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i> Details</a></li>
+                <li data-item="action-history"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-clock-o fa-fw"></i> History</a></li>
+                <li data-item="action-add"><a href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i> New Action</a></li>
+            </ul>
         </div>
 
         <div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

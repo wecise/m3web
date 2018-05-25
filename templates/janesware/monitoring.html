@@ -368,7 +368,7 @@
                             self.outputEditor.getSession().setMode("ace/mode/toml");
 
                             App.init();
-                            $("#wizard").bootstrapWizard();
+
                         }, 2000)
                     })
                 },
@@ -394,67 +394,51 @@
                         let self = this;
                     },
                     initDataTable: function () {
-                        var self = this;
+                        let self = this;
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: self.searchParams,
-                                flag: false
-                            },
-                            beforeSend: function (xhr) {
-                            },
-                            complete: function (xhr, textStatus) {
-                            },
-                            success: function (data, textStatus, xhr) {
+                        let _list = fetchData(self.searchParams);
 
-                                var cols = [];
+                        var cols = [];
 
-                                cols[0] = {
-                                    field: "state",
-                                    checkbox: "true"
-                                }
+                        cols[0] = {
+                            field: "state",
+                            checkbox: "true"
+                        }
 
-                                $.map(data.meta.columns[_.keys(data.meta.columns)[0]], function (v,k) {
-                                    cols.push({
-                                        field: v.name,
-                                        title: v.name,
-                                    })
-                                });
-
-                                self.modelTable.columns = cols;
-                                self.modelTable.data = data.message || [];
-                                self.modelTable.options = {
-                                    toggle: "table",
-                                    classes: "table table-striped",
-                                    showToggle: false,
-                                    showColumns: true,
-                                    pagination: false,
-                                    toolbar: "#custom-toolbar1",
-                                    showExport: true,
-                                    exportTypes: "['json', 'xml', 'csv', 'txt', 'sql', 'excel']",
-                                    showFooter: false,
-                                    pageSize: "15",
-                                    pageList: "[15,30,45,60]",
-                                    detailView: true,
-                                    buttonsAlign: "right",
-                                    height: 400
-                                };
-
-
-                                //self.summaryEvent(data);
-
-                                _.delay(function (text) {
-                                    self.loadDetailData();
-                                    self.initSearchBar();
-                                }, 500, 'later');
-
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                            }
+                        $.map(_list.meta.columns[_.keys(_list.meta.columns)[0]], function (v,k) {
+                            cols.push({
+                                field: v.name,
+                                title: v.name,
+                            })
                         });
+
+                        self.modelTable.columns = cols;
+                        self.modelTable.data = _list.message || [];
+                        self.modelTable.options = {
+                            toggle: "table",
+                            classes: "table table-striped",
+                            showToggle: false,
+                            showColumns: true,
+                            pagination: false,
+                            toolbar: "#custom-toolbar1",
+                            showExport: true,
+                            exportTypes: "['json', 'xml', 'csv', 'txt', 'sql', 'excel']",
+                            showFooter: false,
+                            pageSize: "15",
+                            pageList: "[15,30,45,60]",
+                            detailView: true,
+                            buttonsAlign: "right",
+                            height: 400
+                        };
+
+
+                        //self.summaryEvent(data);
+
+                        _.delay(function (text) {
+                            self.loadDetailData();
+                            self.initSearchBar();
+                        }, 500, 'later');
+
                     },
                     loadDetailData: function () {
                         var self = this;
@@ -474,93 +458,75 @@
 
                             $("#table-" + index).bootstrapTable('destroy');
 
-                            jQuery.ajax({
-                                url: "/mxobject/search",
-                                dataType: 'json',
-                                type: 'POST',
-                                data: {
-                                    cond: "#/matrix/jobs/cmdrun/ : runid=" + row.runid + " | top 1000",
-                                    flag: false
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, status) {
+                            let _list = fetchData("#/matrix/jobs/cmdrun/ : runid=" + row.runid + " | top 1000");
+                            let _data = _list.message;
 
-                                    var data = data.message;
+                            cols.push({
+                                field: "state",
+                                checkbox: "true"
+                            })
+
+                            $.map(_data[0], function (k, v) {
+                                var col = v;
+
+                                if (col == 'jobstatus') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: operateJobstatusFormatter
+                                    })
+                                } else if (col == 'out' || col == 'err') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        wrap: true,
+                                        formatter: operateOutputFormatter
+                                    })
+                                } else if (col == 'jobtype') {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: operateJobTypeFormatter
+                                    })
+                                } else if (col == 'tokens') {
 
                                     cols.push({
-                                        field: "state",
-                                        checkbox: "true"
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        visible: false
                                     })
-
-                                    $.map(data[0], function (k, v) {
-                                        var col = v;
-
-                                        if (col == 'jobstatus') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: operateJobstatusFormatter
-                                            })
-                                        } else if (col == 'out' || col == 'err') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                wrap: true,
-                                                formatter: operateOutputFormatter
-                                            })
-                                        } else if (col == 'jobtype') {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: operateJobTypeFormatter
-                                            })
-                                        } else if (col == 'tokens') {
-
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                visible: false
-                                            })
-                                        } else if (col == "vtime" || col == "stime" || col == "etime") {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true,
-                                                formatter: formaterDate
-                                            })
-                                        } else if (col == "vtime" || col == "class" || col == "id") {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                visible: false,
-                                            })
-                                        } else {
-                                            cols.push({
-                                                field: col,
-                                                title: col,
-                                                sortable: true
-                                            })
-                                        }
-                                    });
-
-                                    $("#table-" + index).bootstrapTable({
-                                        columns: cols
-                                    });
-
-                                    $("#table-" + index).bootstrapTable('removeAll');
-                                    $("#table-" + index).bootstrapTable('load', data);
-
-                                },
-                                error: function (err) {
+                                } else if (col == "vtime" || col == "stime" || col == "etime") {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true,
+                                        formatter: formaterDate
+                                    })
+                                } else if (col == "vtime" || col == "class" || col == "id") {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        visible: false,
+                                    })
+                                } else {
+                                    cols.push({
+                                        field: col,
+                                        title: col,
+                                        sortable: true
+                                    })
                                 }
                             });
+
+                            $("#table-" + index).bootstrapTable({
+                                columns: cols
+                            });
+
+                            $("#table-" + index).bootstrapTable('removeAll');
+                            $("#table-" + index).bootstrapTable('load', _data);
 
                             $detail.html(table).ready(function () {
                                 console.log($(".wzd").html());
@@ -601,34 +567,19 @@
                         }
                     },
                     onSearch: function (term) {
-                        var self = this;
+                        let self = this;
 
-                        var params;
+                        let _params = null;
 
                         if (term.length > 0) {
-                            params = self.searchParams + term;
+                            _params = self.searchParams + term;
                         } else {
-                            params = self.searchParams;
+                            _params = self.searchParams;
                         }
-                        console.log(params)
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: params,
-                                flag: false
-                            },
-                            complete: function (xhr, textStatus) {
-                                //called when complete
-                            },
-                            success: function (data, textStatus, xhr) {
-                                $(self.target).bootstrapTable('load', data.message);
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                //called when there is an error
-                            }
-                        });
+
+                        let _list = fetchData(_params);
+
+                        $(self.target).bootstrapTable('load', _list.message);
                     },
                     initSearchBar: function () {
                         var self = this;
@@ -725,8 +676,6 @@
                     }
                 }
             })
-
-
 
             Vue.component('bootstrap-table', {
                 template: `<table class="table table-striped" data-locale="zh-CN"></table>`,
@@ -847,8 +796,6 @@
                 }
             })
 
-
-
             Vue.component('rules-tree-component', {
                 delimiters: ['${', '}'],
                 template: '<ul class="ztree" id="rulesTree" style="overflow:auto;"></ul>',
@@ -945,7 +892,6 @@
                     }
                 }
             })
-
 
             Vue.component('rules-manage', {
                 delimiters: ['${', '}'],
@@ -1279,8 +1225,6 @@ _ctime = MX_CTIME`);
 
         });
 
-
-
         function formaterDate(value, row, index) {
             return `<div style="white-space: nowrap;">` + moment(value).format('LLL') + `</div>`;
         }
@@ -1348,7 +1292,7 @@ _ctime = MX_CTIME`);
                 <div class="input-group searchinput">
                     <vue-search-input-component :model="search.input"></vue-search-input-component>
                     <div class="input-group-btn">
-                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                        <vue-search-preset-component id="monitoring-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                     </div>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>

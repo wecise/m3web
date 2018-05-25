@@ -120,10 +120,10 @@ var GLOBAL_CONFIG = {
                         {field:"app",title: "App", visible: true},
                         {field:"host",title: "Host", visible: true},
                         {field:"severity",title: "Severity", visible: true, formatter: function(value, row, index) {
-                                return row.severityalias;
+                                return window.GLOBAL_OBJECT.company.object.event.preconfig.severity.level[row.severity].name;
                             },
                             cellStyle: function(value,row,index){
-                                if(!_.isEmpty(value)){
+                                if(!_.isNull(value)){
                                     return {classes: 'severity'+value};
                                 } else {
                                     return {classes: 'severity_other'};

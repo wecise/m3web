@@ -32,7 +32,7 @@
 					<ul class="ztree" :id="id" style="overflow:auto;"></ul>
 				</div>
 				<div role="tabpanel" class="tab-pane" id="entity-tags">
-					<vue-ci-tags-component :id="'tags_'+id" :model="model"></vue-ci-tags-component>
+					<vue-ci-tags-component :id="'tags_'+id" :model="list"></vue-ci-tags-component>
 				</div>
 			</div>
 		</div>
@@ -45,6 +45,7 @@
 	    props: {
 	        id: String,
 	        model: Array,
+			list: Array,
 	        dimension: Object,
 			showSubNodes: Boolean
 	    },
@@ -204,7 +205,7 @@
     			self.nodes = [];
     			self.nodes = _.concat(_data,_nodes);
                 self.zTree = $.fn.zTree.init($(self.$el).find("#"+self.id), self.setting, self.nodes);
-                console.log(123, JSON.stringify(self.nodes),self.zTree)
+
 
 	        },
             initPlugIn: function(){

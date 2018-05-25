@@ -890,7 +890,7 @@
                 <div class="input-group searchinput">
                     <vue-search-input-component :model="search.input"></vue-search-input-component>
                     <div class="input-group-btn">
-                        <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+                        <vue-search-preset-component id="log-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                     </div>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search"
@@ -950,7 +950,7 @@
                         <div class="col-lg-2" id="nav" style="display: none;">
                             <div class="panel panel-default">
                                 <div class="panel-body" style="padding-top: 5px;">
-                                    <vue-entity-tree-component id="log-entity-tree" :model="search.result.data"></vue-entity-tree-component>
+                                    <vue-entity-tree-component id="log-entity-tree" :list="search.result.data"></vue-entity-tree-component>
                                 </div>
                             </div>
                         </div>

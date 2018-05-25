@@ -24,7 +24,7 @@
 				</div>
 				<div class="tab-pane fade" id="tab22">
 					<form>
-						<div id="wizard">
+						<div id="agent-wizard">
 							<ol>
 								<li>
 									全局设置
@@ -206,12 +206,15 @@
 							<div>
 								<fieldset>
 									<a href="javascript:void(0)" class="btn btn-success" @click="dispatchStart">开始下发</a>
-									<!-- begin row -->
-									<div class="row">
-										<!-- begin col-12 -->
 
+									<!-- begin row -->
+									<div class="row"><div class="col-lg-12">
+										<!-- begin col-12 -->
+										<div class="alert alert-success">
+											<strong>${model.dispatch.runid}!</strong> ${model.dispatch.sid}
+										</div>
 										<!-- end col-12 -->
-									</div>
+									</div></div>
 									<!-- end row -->
 								</fieldset>
 							</div>
@@ -231,11 +234,13 @@
 			return {
 			    model: {
                     dispatch: {
-                        command: "",
-                        cron: "",
-                        hosts: ['wecise'],
+                        runid: "",
+	                    sid: "",
+                        command: "./test.sh test",
+                        cron: "0/30 * * * * * *",
+                        hosts: [{name:'wecise',cron:'',env:[]}],
                         rule: {
-                            list: ["/matrix/rules/performance","CPU_RULE","MEMORY_RULE"],
+                            list: ["/matrix/rules/log/cassandra_status","CPU_RULE","MEMORY_RULE"],
                             selected: ""
                         },
                         env: {
@@ -476,12 +481,21 @@
             self.$nextTick(function () {
 
                 _.delay(function(){
-                    FormWizard.init();
-                },1500);
+                    FormWizard.init("agent-wizard");
+                    self.initPlugIn();
+                },500);
 
             })
         },
 		methods: {
+		    initPlugIn: function(){
+		        let self = this;
+
+                $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                    var target = $(e.target).attr("href");
+
+                });
+            },
 			toggleEvent: function (event) {
 			    let self = this;
 
@@ -545,16 +559,29 @@
             dispatchStart: function(){
 				let self = this;
 
-				let _form = new FormData();
-				_form.append("command", self.model.dispatch.command);
-                _form.append("cron", self.model.dispatch.cron);
-                _form.append("hosts", self.model.dispatch.hosts);
-                _form.append("rule", self.model.dispatch.rule.selected);
-                _form.append("env", self.model.dispatch.env.list);
+				let _script = "test";
 
-                let _rtn = agentDispatch(_form);
+				let _content = {};
+                _content.command = self.model.dispatch.command;
+                _content.cron = self.model.dispatch.cron;
+                _content.hosts = self.model.dispatch.hosts;
+                _content.rule = self.model.dispatch.rule.selected;
+                _content.env = self.model.dispatch.env.list;
 
-                console.log(_rnt)
+                let _rtn = agentDispatch(_script,_content);
+				if(_rtn.status == 'ok'){
+                    let _rtnCopy = _.cloneDeep(_rtn);
+                    let _preRunid = _rtn.message.runid.toString().slice(0,13);
+                    let _lasRunid = _rtnCopy.message.runid.toString().slice(-6);
+
+                    self.model.dispatch.runid = moment(Number(_preRunid)).format("LLL") + ":" + _lasRunid;
+                    self.model.dispatch.sid = _rtn.message.sid
+
+                    alertify.log("生成作业ID " + self.model.dispatch.runid);
+                    alertify.log("生成SID " + self.model.dispatch.sid);
+				}
+
+
             },
 			newGroup: function () {
 

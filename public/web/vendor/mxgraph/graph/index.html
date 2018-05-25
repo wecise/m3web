@@ -35,7 +35,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 	<link href="/web/vendor/animate/animate.css" rel="stylesheet" >
 	<!--Alertify CSS-->
 	<link href="/web/vendor/alertifyjs/themes/alertify.core.css" type="text/css" rel="stylesheet" />
-	<link href="/web/vendor/alertifyjs/themes/alertify.bootstrap.css" type="text/css" rel="stylesheet" />
+	<link href="/web/vendor/alertifyjs/themes/alertify.default.css" type="text/css" rel="stylesheet" />
 
 	
 	<style>
@@ -310,24 +310,24 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
     <!-- ECharts单文件引入 -->
 	<script src="/web/vendor/echart/echarts.min.js"></script>
 	<!-- ACE JS-->
-	<script src="/web/vendor/ace/src-noconflict/ace.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/ext-statusbar.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/snippets/lua.js"></script>
-	<!--script src="/web/vendor/ace/src-noconflict/worker-lua.js"></script-->
-	<script src="/web/vendor/ace/src-noconflict/mode-lua.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/ace.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/ext-statusbar.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/snippets/lua.js"></script>
+	<!--script src="/web/vendor/ace-builds/src-noconflict/worker-lua.js"></script-->
+	<script src="/web/vendor/ace-builds/src-noconflict/mode-lua.js"></script>
 
-	<script src="/web/vendor/ace/src-noconflict/snippets/json.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/worker-json.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/mode-json.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/snippets/json.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/worker-json.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/mode-json.js"></script>
 
-	<script src="/web/vendor/ace/src-noconflict/theme-clouds.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/theme-terminal.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/theme-xcode.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/theme-clouds.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/theme-terminal.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/theme-xcode.js"></script>
 
-	<script src="/web/vendor/ace/src-noconflict/snippets/sql.js"></script>
-	<script src="/web/vendor/ace/src-noconflict/mode-sql.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/snippets/sql.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/mode-sql.js"></script>
 
-	<script src="/web/vendor/ace/src-noconflict/ext-language_tools.js"></script>
+	<script src="/web/vendor/ace-builds/src-noconflict/ext-language_tools.js"></script>
 
 	<!--localforage Core JS -->
 	<script src="/web/vendor/localForage/dist/localforage.min.js"></script>
@@ -1069,7 +1069,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 				themes[Graph.prototype.defaultThemeName] = xhr[1].getDocumentElement(); 
 				
 				// Main
-				var editorUi = new EditorUi(new Editor(graphObject.action == 'show', themes));
+				var editorUi = new EditorUi();//new Editor(graphObject.action == 'show', themes));
 				
 				editorUi.toggleFormatPanel();
 
@@ -1077,10 +1077,9 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
                 mgr.autoSaveDelay = 2;
                 mgr.save = function()
                 {
-                    let encoder = new mxCodec();
-                    let node = encoder.encode(editorUi.editor.graph.getModel());
+                    let _xml = mxUtils.getXml(editorUi.editor.getGraphXml());
 
-                    let _rtn = fsNew('file',graphObject.name, mxUtils.getPrettyXml(node));
+                    let _rtn = fsNew('file',graphObject.name, _xml);
 
                 };
 				
@@ -1107,7 +1106,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
                     editorUi.editor.setGraphXml(mxUtils.parseXml(_list).documentElement);
 
                     // LATER: Why is hideDialog between begin-/endUpdate faster?
-                    editorUi.hideDialog();
+                    /*editorUi.hideDialog();
                     if(graphObject.action == 'show') {
 
                         editorUi.editor.graph.createHandler = function (state) {
@@ -1130,7 +1129,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
                             chromeless(editorUi.editor.graph);
                             refreshStatus(editorUi.editor.graph, _xml);
                         }, 30 * 1000);
-                    }
+                    }*/
 
                 }
                 catch (e)
@@ -1174,11 +1173,12 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
                     obj.type = 'show';
                     obj.name = graphObject.name;
                     obj.parent = graphObject.parent;
+                    obj.fsExtension = graphObject.name.split(".")[1] || "ishow";
                     
                     localStorage.setItem("graph-object",JSON.stringify(obj));
 
                     window.open(
-                            "/janesware/creative",
+                            "/janesware/" + obj.fsExtension,
                             "_blank"
                         );
 				});
@@ -1196,6 +1196,104 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 					editorUi.refresh();
 				});
 
+				var selectionChanged = function (graph) {
+
+				    let wnd = newWindow("mini","属性",'<div id="properties"></div>');
+
+				    let div = document.getElementById('properties');
+
+                    // Forces focusout in IE
+                    graph.container.focus();
+
+                    // Clears the DIV the non-DOM way
+                    div.innerHTML = '';
+
+                    // Gets the selection cell
+                    var cell = graph.getSelectionCell();
+
+                    if (cell == null)
+                    {
+                        mxUtils.writeln(div, 'Nothing selected.');
+                    }
+                    else
+                    {
+                        // Writes the title
+                        var center = document.createElement('center');
+                        mxUtils.writeln(center, cell.value.nodeName + ' (' + cell.id + ')');
+                        div.appendChild(center);
+                        mxUtils.br(div);
+
+                        // Creates the form from the attributes of the user object
+                        var form = new mxForm();
+
+                        var attrs = cell.value.attributes;
+
+                        for (var i = 0; i < attrs.length; i++)
+                        {
+                            createTextField(graph, form, cell, attrs[i]);
+                        }
+
+                        div.appendChild(form.getTable());
+                        mxUtils.br(div);
+                    }
+                };
+
+                /**
+                 * Creates the textfield for the given property.
+                 */
+                var createTextField = function (graph, form, cell, attribute) {
+
+                    var input = form.addText(attribute.nodeName + ':', attribute.nodeValue);
+
+                    var applyHandler = function()
+                    {
+                        var newValue = input.value || '';
+                        var oldValue = cell.getAttribute(attribute.nodeName, '');
+
+                        if (newValue != oldValue)
+                        {
+                            graph.getModel().beginUpdate();
+
+                            try
+                            {
+                                var edit = new mxCellAttributeChange(
+                                    cell, attribute.nodeName,
+                                    newValue);
+                                graph.getModel().execute(edit);
+                                graph.updateCellSize(cell);
+                            }
+                            finally
+                            {
+                                graph.getModel().endUpdate();
+                            }
+                        }
+                    };
+
+                    mxEvent.addListener(input, 'keypress', function (evt)
+                    {
+                        // Needs to take shift into account for textareas
+                        if (evt.keyCode == /*enter*/13 &&
+                            !mxEvent.isShiftDown(evt))
+                        {
+                            input.blur();
+                        }
+                    });
+
+                    if (mxClient.IS_IE)
+                    {
+                        mxEvent.addListener(input, 'focusout', applyHandler);
+                    }
+                    else
+                    {
+                        // Note: Known problem is the blurring of fields in
+                        // Firefox by changing the selection, in which case
+                        // no event is fired in FF and the change is lost.
+                        // As a workaround you should use a local variable
+                        // that stores the focused field and invoke blur
+                        // explicitely where we do the graph.focus above.
+                        mxEvent.addListener(input, 'blur', applyHandler);
+                    }
+                };
 				
 				var chromeless = function(graph){
 					//graph.setEnabled(false);
@@ -1227,7 +1325,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 					$(".geDiagramContainer.geDiagramBackdrop").css({right: "0px", left: "0px", top: "50px", bottom: "0px", overflow: "hidden", backgroundColor: "transparent", border: "0px"});
 					$(".geDiagramContainer.geDiagramBackdrop").find("svg").css({left: "-35px"});
 					$(".geDiagramContainer.geDiagramBackdrop").find(".geBackgroundPage").remove();
-				}
+				};
 
 				var refreshStatus = function (graph,xml){
 					
@@ -1296,7 +1394,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 							}
 						}
 					}
-				}
+				};
 
 				var loadStatus = function(event){
 					var rtn = 0;
@@ -1329,7 +1427,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 					});
 					
 					return rtn;
-				}
+				};
 
 				var createOverlay = function (image, tooltip)
 				{
@@ -1342,7 +1440,7 @@ l<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=5,IE=9" ><![endif]--
 					});
 					
 					return overlay;
-				}
+				};
 
 			}, function()
 			{

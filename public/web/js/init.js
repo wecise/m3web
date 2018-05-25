@@ -99,16 +99,64 @@ var MATRIX_THEME = "LIGHT";
 var toggleTheme = function(event){
 
     if(event == 'LIGHT'){
+
         $(".navbar.navbar-default.navbar-fixed-top").css({
                                                             "backgroundColor": "rgb(33, 149, 244)",
             
                                                         });
+
+        $(".layer.btn.btn-primary").css({
+                                            "backgroundColor": "rgb(33, 149, 244)"
+                                        });
+
+        $(".layer > .dropdown > a").css({
+                                            "color": "rgb(110, 180, 236)"
+                                        });
+
+        $(".layer > .dropdown > a i").css({
+            "color": "rgba(255,255,255,0.5)"
+        });
+
+        $(".layer a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".row-fluid .btn.btn-primary").css({
+                                        "backgroundColor": "rgb(33, 149, 244)",
+                                        "borderColor": "rgb(255, 255, 255)"
+                                });
+
+
         $(".navbar.navbar-default.navbar-fixed-bottom").show(500);
     } else if (event == 'DARK'){
+
         $(".navbar.navbar-default.navbar-fixed-top").css({
                                                             "backgroundColor": "rgb(90, 90, 90)",
 
                                                         });
+
+        $(".layer.btn.btn-primary").css({
+            "backgroundColor": "rgb(90, 90, 90)"
+        });
+
+        $(".layer > .dropdown > a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".layer > .dropdown > a i").css({
+            "color": "rgba(255,255,255,0.5)"
+        });
+
+        $(".layer a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".row-fluid .btn.btn-primary").css({
+            "backgroundColor": "rgb(90, 90, 90)",
+            "borderColor": "rgb(90,90,90)"
+        });
+
+
         $(".navbar.navbar-default.navbar-fixed-bottom").hide(500);
     }
 
@@ -147,6 +195,20 @@ var loadLogo = function () {
         }
     });
 };
+
+/*
+*
+*
+*
+* */
+var pathNameGet = function () {
+    let _rtn = null;
+
+    let path = window.location.pathname;
+    _rtn = path.split("/").pop();
+
+    return _rtn;
+}
 
 /*
  *  Load Function
@@ -248,6 +310,130 @@ var setDefaultHome = function(name,token){
 };
 
 /*
+*   类管理
+*
+*   树
+*
+*
+* */
+var classList = function(event){
+    let rtn = null;
+    let loading = null;
+
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class/list",
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            id: event
+        },
+        async: false,
+        beforeSend:function(xhr){
+            loading = layer.load(2, {
+                shade: [0.1,'#ccc'],
+                time: 30*1000
+            });
+        },
+        complete: function(xhr, textStatus) {
+            layer.close(loading);
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if (!_.isEmpty(data.message)){
+                rtn = data.message;
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            layer.close(loading);
+            console.log(errorThrown);
+        }
+    })
+    return rtn;
+};
+
+/*
+*   类管理
+*
+*   新建
+*
+*
+* */
+var classNew = function (event) {
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class",
+        dataType: 'json',
+        type: 'POST',
+        data: {
+            classinfo: JSON.stringify(event)
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("Success" + " " + event.class + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("Failed" + " " + event.class + " " + moment().format("LLL"));
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("Failed" + " " + event.class + " " + moment().format("LLL"));
+            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+}
+
+
+/*
+*   类管理
+*
+*   删除
+*
+*
+* */
+var classDelete = function(event){
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class?cid=" + event,
+        dataType: 'json',
+        type: 'DELETE',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("Success" + " " + event + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("Failed" + " " + event + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+/*
 *   文件系统
 *
 *   提交到
@@ -295,10 +481,7 @@ var fsNew = function(type, name, content){
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-
-            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
-            alertify.error(_tmp);
-            console.log(_tmp);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
     return rtn;
@@ -322,10 +505,10 @@ var fsList = function(parent){
         type: 'GET',
         dataType: 'text json',
         contentType: "application/text; charset=utf-8",
-        async:false,
         data: {
             type: 'dir'
         },
+        async:false,
         beforeSend: function(xhr) {
         },
         complete: function(xhr, textStatus) {
@@ -385,10 +568,7 @@ var fsDelete = function(parent,name){
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-
-            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
-            alertify.error(_tmp);
-            console.log(_tmp);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
     return rtn;
@@ -543,8 +723,6 @@ var fetchData = function (param) {
 
             ifSignIn(data);
 
-            if (_.isEmpty(data.message)) return rtn;
-
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -594,10 +772,7 @@ var putDataToClass = function (param) {
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-
-            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
-            alertify.error(_tmp);
-            console.log(_tmp);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
     return rtn;
@@ -629,11 +804,9 @@ var fetchDataByMql = function (param) {
 
             ifSignIn(data);
 
-            console.log(param, data)
-
             // MQL for CRUD
             if(_.lowerCase(data.message) == "ok"){
-                alertify.success("成功" + " ");
+                alertify.success("成功" + " " + moment().format("LLL"));
             }
 
             rtn = data;
@@ -654,10 +827,8 @@ var fetchDataByMql = function (param) {
 *      mql
 */
 var putDataByMql = function (event) {
-    let rtn = null;
+    let rtn = 1;
     let _mql = `INSERT JSON '` + JSON.stringify(event) + `'`;
-
-    console.log(_mql)
 
     jQuery.ajax({
         url: "/mxobject/mql",
@@ -676,13 +847,15 @@ var putDataByMql = function (event) {
             ifSignIn(data);
 
             if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
                 alertify.success("成功" + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
             }
-
-            rtn = data.status;
 
         },
         error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -800,10 +973,7 @@ var ldapMaintain = function (event) {
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-
-            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
-            alertify.error(_tmp);
-            console.log(_tmp);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
     return rtn;
@@ -965,10 +1135,7 @@ var serverGroupNew = function(event) {
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-
-            let _tmp = "["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error;
-            alertify.error(_tmp);
-            console.log(_tmp);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
     return rtn;
@@ -1042,51 +1209,6 @@ var agentList = function () {
         },
         error: function (xhr, textStatus, errorThrown) {
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    });
-    return rtn;
-};
-
-
-/*
-*  探针管理
-*
-*  Agent New
-*
-*    var form = new FormData();
-*    form.append("uploadbin", "test.sh");
-*    form.append("uploadconf", "test.conf");
-*
-*/
-var agentNew = function(event) {
-    let rtn = 1;
-
-    jQuery.ajax({
-        url: '/monitoring/test',
-        dataType: 'json',
-        type: 'POST',
-        async: false,
-        data: event,
-        beforeSend:function(xhr){
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-
-            if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
-            }
-
-        },
-        error: function(xhr, textStatus, errorThrown){
-            rtn = 0;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
     return rtn;
@@ -1210,7 +1332,6 @@ var ruleDelete = function(event) {
     return rtn;
 };
 
-
 /*
 *  探针管理
 *
@@ -1304,15 +1425,16 @@ var agentNew = function(event) {
 *    form2.append("env", "TESTENV=testenv");
 *    form2.append("env", "TESTENV=testenv2");
 * */
-var agentDispatch = function(event) {
-    let rtn = 1;
+var agentDispatch = function(key,content) {
+    let rtn = null;
 
     jQuery.ajax({
-        url: '/monitoring/release/test',
         dataType: 'json',
+        url: `/monitoring/release/${key}`,
         type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(content),
         async: false,
-        data: event,
         beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
@@ -1322,16 +1444,14 @@ var agentDispatch = function(event) {
             ifSignIn(data);
 
             if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                alertify.success("成功" + " " + data.message);
+                rtn = data;
+                alertify.success("成功" + " " + moment().format("LLL"));
             } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
+                alertify.error("失败" + " " + moment().format("LLL"));
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
-            rtn = 0;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -1347,7 +1467,7 @@ var grokDelete = function (event) {
     let rtn = 1;
     
     jQuery.ajax({
-        url: "/pattern/" + event.name,
+        url: `/pattern/${event.name}`,
         dataType: 'json',
         type: 'DELETE',
         async: false,
@@ -1380,15 +1500,15 @@ var grokDelete = function (event) {
 /*
 *   全局缓存
 *
-*   WebContext Get
+*   AppContext Get
 *
 *
 * */
-var webContextGet = function (event) {
+var appContextGet = function (event) {
     let rtn = null;
 
     jQuery.ajax({
-        url: '/appcontext/'   + event,
+        url: `/appcontext/${event}`,
         dataType: 'json',
         type: 'GET',
         async: false,
@@ -1409,20 +1529,30 @@ var webContextGet = function (event) {
 
         },
         error: function(xhr, textStatus, errorThrown){
+            rtn = null;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
     return rtn;
 };
 
-var webContextSet = function (event) {
+/*
+*   全局缓存
+*
+*   AppContext et
+*
+*
+* */
+var appContextSet = function (event,context) {
     let rtn = 1;
 
     jQuery.ajax({
-        url: '/appcontext/'   + event,
+        url: `/appcontext/${event}`,
         dataType: 'json',
+        contentType: false,
         type: 'POST',
         async: false,
+        data: JSON.stringify(context),
         beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
@@ -1481,6 +1611,68 @@ var newWindow = function (size, title, template) {
     var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
     var tb = document.createElement('div');
     
+    $(tb).append(template);
+    win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+    win.hide();
+    $("div.mxWindow").addClass("animated fadeInRight");
+    win.show();
+    win.setMaximizable(true);
+    win.setResizable(true);
+    win.setClosable(true);
+    win.setVisible(true);
+
+    win.addListener(mxEvent.MAXIMIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    win.addListener(mxEvent.MINIMIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    win.addListener(mxEvent.NORMALIZE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    return win;
+};
+
+var newWindow = function (size, title, template, position) {
+    var win;
+    var w = $( window ).width();//document.body.clientWidth;
+    var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+    var wW = $( window ).width()*2.2/3;
+    var hH = $( window ).height()*2.5/3;
+
+    if(size === 'mini'){
+        wW = $( window ).width()*0.7/3;
+        hH = $( window ).height()*0.8/3;
+    }
+
+    if(size === 'small'){
+        wW = $( window ).width()*1.5/3;
+        hH = $( window ).height()*1.8/3;
+    }
+
+    if(size === 'middle'){
+        wW = $( window ).width()*1.8/3;
+        hH = $( window ).height()*2.0/3;
+    }
+
+    var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+
+    if(!_.isEmpty(position)){
+        lrwh[0] = position.x;
+        lrwh[1] = position.y;
+    }
+
+    var tb = document.createElement('div');
+
     $(tb).append(template);
     win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
     win.hide();
@@ -1580,22 +1772,24 @@ var copyBoard = function () {
     }, false)
 };
 
-var handleBootstrapWizards = function() {
-    "use strict";
-    $("#wizard").bwizard()
-};
-var FormWizard = function() {
+var FormWizard = function(id) {
     "use strict";
     return {
-        init: function() {
-            handleBootstrapWizards()
+        init: function(id) {
+            handleBootstrapWizards(id)
         }
     }
 }();
 
+var handleBootstrapWizards = function(id) {
+    "use strict";
+    $("#" + id).bwizard()
+};
+
+
 init();
 
-initPlguIn();
+initPlugIn();
 
 _.delay(function () {
     //copyBoard();

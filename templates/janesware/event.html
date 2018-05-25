@@ -948,7 +948,7 @@
 				<div class="input-group searchinput">
 	                <vue-search-input-component :model="search.input"></vue-search-input-component>
 	                <div class="input-group-btn">
-			            <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
+			            <vue-search-preset-component id="event-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
 			        </div>
 			        <div class="input-group-btn">
 		         	  	<button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
@@ -964,16 +964,15 @@
 			<div role="tabpanel">
 				<!-- Nav tabs -->
 				<ul class="nav nav-tabs nav-main" role="tablist">
-					<li role="presentation" class="dropdown active">
-						<a id="dropdown-event"
-						   href="javascript:void(0)"
+					<li role="presentation" class="dropdown active" style="display:flex;">
+						<a href="#event" aria-controls="event" role="tab" data-toggle="tab" title="Event List">Event</a>
+						<a href="javascript:void(0)"
 						   class="dropdown-toggle"
 						   data-toggle="dropdown"
 						   role="button"
 						   aria-haspopup="true"
 						   aria-expanded="false"
 						   style="cursor:pointer;">
-							Event
 							<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu" aria-labelledby="dropdown-event">
@@ -1013,7 +1012,7 @@
 						<div class="col-lg-2" id="nav" style="display: none;padding: 10px 5px 5px 0px;">
 							<div class="panel panel-default" style="border-radius: 0px;border:none;box-shadow:none;">
 				                <div class="panel-body" style="padding: 5px 0px;min-height:300px;max-height:500px;overflow:auto;">
-				                    <vue-entity-tree-component id="event-entity-tree" :model="search.result.data"></vue-entity-tree-component>
+				                    <vue-entity-tree-component id="event-entity-tree" :list="search.result.data"></vue-entity-tree-component>
 				                </div>
 							</div>
 				  		</div>

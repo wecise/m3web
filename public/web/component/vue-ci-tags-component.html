@@ -12,9 +12,11 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-ci-tags-component"  ----------*/
 	<template>
-		<ul :id="id" class="list-group"><li v-for="item in tags" class="list-group-item">
-			<span :class="'btn btn-xs '+_.sample(['btn-info','btn-success','btn-default','btn-danger','btn-warning'])">${item}</span>
-		</li></ul>
+		<ul :id="id" class="list-group">
+			<li v-for="item in tags" class="list-group-item">
+				<span :class="'btn btn-xs '+_.sample(['btn-success'])">${item}</span>
+			</li>
+		</ul>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -35,12 +37,14 @@
 
         },
         watch: {
-            model:function(val,oldVal){
-                let slef = this;
+            model:{
+                handler: function (val, oldVal) {
+                    let self = this;
 
-				self.init(val);
+                    self.init(val);
+                },
+                deep:true
             }
-            
         },
         mounted: function(){
             let self = this;
@@ -61,7 +65,7 @@
                 if (!_.isEmpty(event)){
                     self.tags =  _.chain(_.map(event, 'tags')).reject(_.isEmpty).join().split(",").uniq();
                     self.tags = JSON.parse(JSON.stringify(self.tags));
-                    return false;
+                    return;
                 }
 
                 self.tags =  _.chain(_.map(self.model, 'tags')).reject(_.isEmpty).join().split(",").uniq();

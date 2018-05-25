@@ -1028,7 +1028,150 @@ Actions.prototype.init = function()
         });
 	}, null, null, 'Ctrl+Shift+C');
 
-	// Script actions
+
+    // Object Properties
+    this.addAction('mx-properties', function() {
+        let self = this;
+        let wnd = null;
+        let createIdTextField = function (graph, form, cell) {
+
+            var input = form.addText('ID:', cell.getId());
+
+            var applyHandler = function()
+            {
+                var newValue = input.value || '';
+                var oldValue = cell.getId();
+
+                if (newValue != oldValue)
+                {
+                    graph.getModel().beginUpdate();
+
+                    try
+                    {
+                        graph.model.setId(cell, newValue);
+                    }
+                    finally
+                    {
+                        graph.getModel().endUpdate();
+                    }
+                }
+            };
+
+            mxEvent.addListener(input, 'keypress', function (evt)
+            {
+                // Needs to take shift into account for textareas
+                if (evt.keyCode == /*enter*/13 &&
+                    !mxEvent.isShiftDown(evt))
+                {
+                    input.blur();
+                }
+            });
+
+            if (mxClient.IS_IE)
+            {
+                mxEvent.addListener(input, 'focusout', applyHandler);
+            }
+            else
+            {
+                // Note: Known problem is the blurring of fields in
+                // Firefox by changing the selection, in which case
+                // no event is fired in FF and the change is lost.
+                // As a workaround you should use a local variable
+                // that stores the focused field and invoke blur
+                // explicitely where we do the graph.focus above.
+                mxEvent.addListener(input, 'blur', applyHandler);
+            }
+        };
+        let createValueTextField = function (graph, form, cell) {
+
+            var input = form.addText('Value:', cell.getValue());
+
+            var applyHandler = function()
+            {
+                var newValue = input.value || '';
+                var oldValue = cell.getValue();
+
+                if (newValue != oldValue)
+                {
+                    graph.getModel().beginUpdate();
+
+                    try
+                    {
+                        graph.model.setValue(cell, newValue);
+                    }
+                    finally
+                    {
+                        graph.getModel().endUpdate();
+                    }
+                }
+            };
+
+            mxEvent.addListener(input, 'keypress', function (evt)
+            {
+                // Needs to take shift into account for textareas
+                if (evt.keyCode == /*enter*/13 &&
+                    !mxEvent.isShiftDown(evt))
+                {
+                    input.blur();
+                }
+            });
+
+            if (mxClient.IS_IE)
+            {
+                mxEvent.addListener(input, 'focusout', applyHandler);
+            }
+            else
+            {
+                // Note: Known problem is the blurring of fields in
+                // Firefox by changing the selection, in which case
+                // no event is fired in FF and the change is lost.
+                // As a workaround you should use a local variable
+                // that stores the focused field and invoke blur
+                // explicitely where we do the graph.focus above.
+                mxEvent.addListener(input, 'blur', applyHandler);
+            }
+        };
+
+        let cell = graph.getSelectionCell() || graph.getModel().getRoot();
+
+		let _wnd = localStorage.getItem("mx-window");
+        if(!_.isEmpty(_wnd)){
+            $(".mxWindow").remove();
+        }
+
+        if (cell != null)
+        {
+
+            wnd = newWindow("mini","",'<div id="properties"></div>');
+			wnd.setTitle("属性 " + cell.getId());
+			localStorage.setItem("mx-window", cell.getId());
+
+            let div = document.getElementById('properties');
+
+            // Forces focusout in IE
+            graph.container.focus();
+
+            // Clears the DIV the non-DOM way
+            div.innerHTML = '';
+
+            // Creates the form from the attributes of the user object
+            var form = new mxForm();
+
+            var attrs = cell.getAttribute();
+
+            createIdTextField(graph, form, cell);
+            createValueTextField(graph, form, cell);
+
+            div.appendChild(form.getTable());
+            mxUtils.br(div);
+
+            $("#properties table").addClass("table");
+
+        }
+        }, null, null, '');
+
+
+    // Script actions
 	this.addAction('mx-script', function() {
 		var self = this;
 		var oneLevelLoading;
