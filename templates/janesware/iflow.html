@@ -54,7 +54,7 @@
     }
 
     .mxWindow{
-        height:68px!important;
+        height:98px!important;
     }
 
     .theme-white {
@@ -73,6 +73,10 @@
         background-blend-mode: multiply,multiply;
     }
 
+    #tools > img:hover{
+        background-color:#dddddd;
+        cursor:pointer;
+    }
 
     .flow {
         stroke-dasharray: 8;
@@ -83,6 +87,36 @@
         to {
             stroke-dashoffset: -16;
         }
+    }
+
+    @-webkit-keyframes flash {
+        from, 50%, to {
+            stroke-width: 6;
+            stroke-opacity: 1;
+        }
+
+        25%, 75% {
+            stroke-width: 4;
+            stroke-opacity: 0.5;
+        }
+    }
+
+    @keyframes flash {
+        from, 50%, to {
+            stroke-width: 6;
+            stroke-opacity: 1;
+        }
+
+        25%, 75% {
+            stroke-width: 4;
+            stroke-opacity: 0.5;
+        }
+    }
+
+    .flash {
+        -webkit-animation-duration: 3s;
+        -webkit-animation-delay: 2s;
+        -webkit-animation-iteration-count: infinite;
     }
 
 </style>
@@ -103,7 +137,7 @@
         $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
 
         $(function() {
-            
+
             var appVue = new Vue({
                 delimiters: ['${', '}'],
                 el: '#app',
@@ -113,7 +147,8 @@
                         object: {
                             data: null,
                             param: null,
-                            nodes: {}
+                            nodes: {},
+                            tip: []
                         },
                         container: null,
                         model: null,
@@ -145,8 +180,15 @@
                     })
                 },
                 watch: {
-                    model: function(newValue, oldValue) {
+                    'model.object.data': {
+                        handler: function (val, oldValue) {
+                            let self = this;
 
+                            if(val != oldValue){
+                                //self.update();
+                            }
+                        },
+                        deep: true
                     }
                 },
                 created: function() {
@@ -163,9 +205,6 @@
                     init: function() {
                         let self = this;
 
-                        self.theme = localStorage.getItem("creative-theme");
-                        $("body").addClass(self.theme);
-
                         if (!mxClient.isBrowserSupported())
                         {
                             // Displays an error message if the browser is
@@ -176,7 +215,7 @@
                         {
 
                             mxConstants.SHADOWCOLOR = "#b9b9b9";
-                            mxConstants.SHADOW_OFFSET_X = -4;
+                            mxConstants.SHADOW_OFFSET_X = 4;
                             mxConstants.SHADOW_OFFSET_Y = 4;
                             mxConstants.SHADOW_OPACITY = 0.22;
 
@@ -251,106 +290,97 @@
                             // Disables tooltips on touch devices
                             self.model.graph.setTooltips(!mxClient.IS_TOUCH);
 
-                            // Load cells and layouts the graph
-                            self.model.graph.getModel().beginUpdate();
-                            try
-                            {
-                                var doc = mxUtils.parseXml(self.model.object.data);
-                                var codec = new mxCodec(doc);
-                                codec.decode(doc.documentElement, self.model.graph.getModel());
-                            }
-                            finally
-                            {
-                                // Updates the display
-                                self.model.graph.getModel().endUpdate();
-                            }
+                            self.initGraph();
 
+                            _.delay(function(){
+                                self.model.graph.addListener(mxEvent.CLICK, function(sender, evt)
+                                {
 
-                            self.model.graph.addListener(mxEvent.CLICK, function(sender, evt)
-                            {
+                                    let cell = evt.getProperty('cell');
 
-                                var cell = evt.getProperty('cell');
+                                    if(_.isEmpty(cell)) return;
 
-                                if (cell.getValue() == '开始'){
+                                    let _value = cell.getValue();
 
-                                    swal({
-                                        title: '确定要开始任务?',
-                                        text: moment().format("LLL"),
-                                        type: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#d33',
-                                        cancelButtonColor: '#3085d6',
-                                        confirmButtonText: '开始',
-                                        cancelButtonText: '取消'
-                                    }).then((result) => {
-                                        if (result.value) {
+                                    if (cell.getValue() == '开始'){
 
-                                            $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
-                                            $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
+                                        jobContextReset("BOB");
 
-                                            self.model.container.style.top = "0px";
+                                        swal({
+                                            title: '确定要开始任务?',
+                                            text: moment().format("LLL"),
+                                            type: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#d33',
+                                            cancelButtonColor: '#3085d6',
+                                            confirmButtonText: '开始',
+                                            cancelButtonText: '取消'
+                                        }).then((result) => {
+                                            if (result.value) {
 
-                                            self.toggleFullScreen();
+                                                $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
+                                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
 
-                                            alertify.log('任务运行中。。', 'success');
-                                        }
-                                    })
-                                }
+                                                self.model.container.style.top = "0px";
 
-                                self.tip(cell.getValue());
+                                                self.toggleFullScreen();
 
-                            });
+                                                alertify.log('任务运行中。。', 'success');
+                                            }
+                                        })
+                                    }
 
+                                    self.tip(cell.getValue());
+
+                                });
+                            },500)
+
+                        }
+                    },
+                    initGraph: function(){
+                        let self = this;
+
+                        // Load cells and layouts the graph
+                        self.model.graph.getModel().beginUpdate();
+                        try
+                        {
+                            var doc = mxUtils.parseXml(self.model.object.data);
+                            var codec = new mxCodec(doc);
+                            codec.decode(doc.documentElement, self.model.graph.getModel());
+                        }
+                        finally
+                        {
+                            // Updates the display
+                            self.model.graph.getModel().endUpdate();
+
+                            //$("g text").parent().parent().before("[transform='translate(0.5,0.5)']").remove();
                         }
                     },
                     initPlugIn: function(){
                         let self = this;
 
-                        self.crontab.load.sched = later.parse.text('every 5 sec');
+                        self.crontab.load.sched = later.parse.text('every 1 sec');
                         self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
 
-                        self.crontab.update.sched = later.parse.text('every 2 sec');
-                        self.crontab.update.timer = later.setInterval(self.update, self.crontab.update.sched);
+                        self.update();
+                        //self.crontab.update.sched = later.parse.text('every 2 sec');
+                        //self.crontab.update.timer = later.setInterval(self.update, self.crontab.update.sched);
 
                         self.initOutline();
                         self.initTools();
-
-                        $("#graph").on('dblclick',function(event){
-                            console.log(event)
-                            self.reset();
-                        })
-
                     },
                     initData: function(){
                         let self = this;
 
+                        let _key = self.model.object.param.name;
 
-                        let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent());
+                        let _rtn = jobContextGet("BOB", "BOB");
 
-                        _.forEach(_cells,function (cell,k) {
-
-                            let _cell = cell.getId();
-                            let o = self.model.object.param.name.split(".")[0] + "_" + self.model.object.param.name + "_" + _cell;
-
-                            console.log(_cell,o)
-                            let _rtn = appContextGet(o);
-
-                            if (_rtn == null) {
-                                return;
-                            }
-
-                            let _tmp = _.attempt(JSON.parse.bind(null, _rtn.message));
-                            self.model.object.nodes = _.extend(self.model.object.nodes, _tmp);
-
-                        })
-
-
-                        /*let _key = self.model.object.param.name.split(".")[0];
-                        let _rtn = appContextGet(_key);
-
+                        console.log(_key,_rtn)
                         if (!_.isEmpty(_rtn)) {
-                            self.model.object.nodes = _.attempt(JSON.parse.bind(null, _rtn.message));
-                        }*/
+                            self.model.object.nodes = _rtn.message;
+                            self.update();
+                        }
 
                     },
                     update: function () {
@@ -377,57 +407,93 @@
                         }
                         finally {
                             self.model.graph.getModel().endUpdate();
+                            //$("g").addClass("animated flash");
                         }
 
                         self.model.graph.getModel().beginUpdate();
 
                         try {
 
-                            _.forEach(self.model.object.nodes,function (v,k) {
-                                let _id = _.last(k.split("_"));
-                                let _cell = self.model.graph.getModel().getCell(_id);
-                                //console.log(v,k,_id,_cell)
-                                // Adds animation to edge shape and makes "pipe" visible
-                               /* if (!_.isEmpty(_cell.edges)){
-                                    let state = self.model.graph.view.getState(_cell.edges[0]);
-                                    state.shape.node.getElementsByTagName('path')[1].removeAttribute('visibility');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke-width', '6');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke', 'lightBlue');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
-                                }*/
+                            let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
 
+                            _.forEach(_cells, function (cell, k) {
+                                //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                self.model.graph.removeCellOverlays(cell);
+                            })
+
+                            if(_.isEmpty(self.model.object.nodes)) {
+                                _.forEach(_cells, function (cell, k) {
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                    self.model.graph.removeCellOverlays(cell);
+                                })
+                                return;
+                            }
+
+                            _.forEach(self.model.object.nodes,function (val,k) {
+                                let v = JSON.parse(val);
+                                let _id = _.last(k.split("/"));
+                                let _cell = self.model.graph.getModel().getCell(_id);
+
+                                let state = self.model.graph.view.getState(_cell);
 
                                 if(v.status == 1){
+                                    //$('.animated.flash').removeClass("animated infinite flash");
                                     //self.model.graph.setCellWarning(_cell, '<b>未执行:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b9b9b9', [_cell]);
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
 
                                     self.tip(_id + " 未执行",1);
+
+
                                 } else if(v.status == 2){
+                                    //$('.animated.flash').removeClass("animated infinite flash");
                                     //self.model.graph.setCellWarning(_cell, '<b>成功:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#0eef84', [_cell]);
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#fb831b', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#fb831b', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
 
-                                    self.tip(_id + " 成功",2);
+                                    self.tip(_id + " 正在运行",2);
+
+                                    if(state && state.shape.node){
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
+                                            state.shape.node.getElementsByTagName("rect")[1].setAttribute('class', 'animated infinite flash');
+                                        }
+
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
+                                            state.shape.node.getElementsByTagName("path")[1].setAttribute('class', 'animated infinite flash');
+                                        }
+                                    }
+
                                 } else if(v.status == 3){
+                                    //$('.animated.flash').removeClass("animated infinite flash");
                                     //self.model.graph.setCellWarning(_cell, '<b>失败:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ec1f2b', [_cell]);
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#29adbf', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#29adbf', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
 
-                                    self.tip(_id + " 失败",3);
+                                    self.tip(_id + " 运行完毕",3);
+
                                 } else if(v.status == 4){
+                                    //$('.animated.flash').removeClass("animated infinite flash");
                                     //self.model.graph.setCellWarning(_cell, '<b>跳过不执行:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#22a8fa', [_cell]);
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#e5494e', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#e5494e', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
 
-                                    self.tip(_id + " 跳过不执行",4);
+                                    self.tip(_id + " 报错",4);
+
                                 } else if(v.status == 5){
+                                    //$('.animated.flash').removeClass("animated infinite flash");
                                     //self.model.graph.setCellWarning(_cell, '<b>正在进行:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffbb49', [_cell]);
+                                    //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [_cell]);
+                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b8b8b8', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
 
-                                    self.tip(_id + " 正在进行",5);
+                                    self.tip(_id + " 跳过不执行",5);
                                 }
+
+
                             })
 
 
@@ -440,12 +506,12 @@
                     tip: function(event,severity){
                         let self = this;
 
-                        if (severity<4){
-                            alertify.success(event + ' ' + moment().format("LLL"));
-                        } else if (severity == 4){
+                        if (severity == 5) {
+                            alertify.log(event + ' ' + moment().format("LLL"));
+                        } else if (severity == 4) {
                             alertify.error(event + ' ' + moment().format("LLL"));
                         } else {
-                            alertify.log(event + ' ' + moment().format("LLL"));
+                            alertify.success(event + ' ' + moment().format("LLL"));
                         }
                     },
                     initOutline: function(){
@@ -458,16 +524,29 @@
                         // Creates the outline (navigator, overview) for moving
                         // around the graph in the top, right corner of the window.
                         let outln = new mxOutline(self.model.graph, outline);
+
+                        $("#page-container").on("dblclick",function() {
+                            jobContextReset("BOB");
+                        })
+
+                        $("body").on("dblclick",function(){
+                            jobContextReset("BOB");
+
+                            let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
+
+                            $('.animated.flash').removeClass("animated infinite flash");
+
+                            _.forEach(_cells, function (cell, k) {
+                                //self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                self.model.graph.removeCellOverlays(cell);
+                            })
+                        })
                     },
-                    reset: function(){
+                    reload: function(){
                         let self = this;
 
-                        let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
-
-                        _.forEach(_cells, function (cell, k) {
-                            self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b9b9b9', [cell]);
-                            self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [cell]);
-                        })
+                        self.model.object.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                        self.initGraph();
                     },
                     initTools: function () {
                         let self = this;
@@ -526,6 +605,11 @@
 
                         },null,'tools-item');
 
+                        tb.addItem('{{.i18n.Tr "creative-tools-reset"}}', '/web/assets/images/iflow/reset.png',function(evt)
+                        {
+                            self.reload();
+                        },null,'tools-item');
+
                         tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
                         {
 
@@ -547,7 +631,7 @@
                             }
 
                             self.theme = _theme;
-                            localStorage.setItem("creative-theme",_theme);
+                            localStorage.setItem("CREATIVE-THEME",_theme);
 
 
 
@@ -559,6 +643,169 @@
                         wnd.setScrollable(false);
                         wnd.setResizable(false);
                         wnd.setVisible(true);
+
+                        _.delay(function(){
+                            self.theme = localStorage.getItem("CREATIVE-THEME");
+
+                            $("body").addClass(self.theme);
+
+                            if(self.theme == 'theme-dark'){
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(90, 90, 90)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(90, 90, 90),rgb(90, 90, 90))"
+                                });
+                            } else {
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(33, 148, 245)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245))"
+                                });
+                            }
+                        },100)
+                    },
+                    initStyle: function(){
+                        let self = this;
+
+                        $("svg").append(`<defs>
+                                            <filter id="f1" x="0" y="0" width="200%" height="200%">
+                                              <feOffset result="offOut" in="SourceAlpha" dx="1" dy="1" />
+                                              <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
+                                              <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                                            </filter>
+                                          </defs>`);
+                        $("rect").attr("filter","url(#f1)");
+                    },
+                    initNodeTools: function(graph){
+                        let self = this;
+
+                        // Defines the tolerance before removing the icons
+                        let iconTolerance = 20;
+
+                        // Shows icons if the mouse is over a cell
+                        graph.addMouseListener(
+                            {
+                                currentState: null,
+                                currentIconSet: null,
+                                mouseDown: function(sender, me)
+                                {
+                                    // Hides icons on mouse down
+                                    if (this.currentState != null)
+                                    {
+                                        this.dragLeave(me.getEvent(), this.currentState);
+                                        this.currentState = null;
+                                    }
+                                },
+                                mouseMove: function(sender, me)
+                                {
+                                    if (this.currentState != null && (me.getState() == this.currentState ||
+                                        me.getState() == null))
+                                    {
+                                        var tol = iconTolerance;
+                                        var tmp = new mxRectangle(me.getGraphX() - tol,
+                                            me.getGraphY() - tol, 2 * tol, 2 * tol);
+
+                                        if (mxUtils.intersects(tmp, this.currentState))
+                                        {
+                                            return;
+                                        }
+                                    }
+
+                                    var tmp = graph.view.getState(me.getCell());
+
+                                    // Ignores everything but vertices
+                                    if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell)))
+                                    {
+                                        tmp = null;
+                                    }
+
+                                    if (tmp != this.currentState)
+                                    {
+                                        if (this.currentState != null)
+                                        {
+                                            this.dragLeave(me.getEvent(), this.currentState);
+                                        }
+
+                                        this.currentState = tmp;
+
+                                        if (this.currentState != null)
+                                        {
+                                            this.dragEnter(me.getEvent(), this.currentState);
+                                        }
+                                    }
+                                },
+                                mouseUp: function(sender, me) { },
+                                dragEnter: function(evt, state)
+                                {
+                                    if (this.currentIconSet == null)
+                                    {
+                                        this.currentIconSet = new self.mxIconSet(state);
+                                    }
+                                },
+                                dragLeave: function(evt, state)
+                                {
+                                    if (this.currentIconSet != null)
+                                    {
+                                        this.currentIconSet.destroy();
+                                        this.currentIconSet = null;
+                                    }
+                                }
+                            });
+                    },
+                    mxIconSet: function (state){
+                        this.images = [];
+                        var graph = state.view.graph;
+
+                        // Icon1
+                        var img = mxUtils.createImage('/web/assets/images/iflow/zoom_in.png');
+                        img.setAttribute('title', 'Duplicate');
+                        img.style.position = 'absolute';
+                        img.style.cursor = 'pointer';
+                        img.style.width = '16px';
+                        img.style.height = '16px';
+                        img.style.left = (state.x + state.width) + 'px';
+                        img.style.top = (state.y + state.height) + 'px';
+
+                        mxEvent.addGestureListeners(img,
+                            mxUtils.bind(this, function(evt)
+                            {
+                                var s = graph.gridSize;
+                                graph.setSelectionCells(graph.moveCells([state.cell], s, s, true));
+                                mxEvent.consume(evt);
+                                this.destroy();
+                            })
+                        );
+
+                        state.view.graph.container.appendChild(img);
+                        this.images.push(img);
+
+                        // Delete
+                        var img = mxUtils.createImage('/web/assets/images/iflow/zoom_out.png');
+                        img.setAttribute('title', 'Delete');
+                        img.style.position = 'absolute';
+                        img.style.cursor = 'pointer';
+                        img.style.width = '16px';
+                        img.style.height = '16px';
+                        img.style.left = (state.x + state.width) + 'px';
+                        img.style.top = (state.y - 16) + 'px';
+
+                        mxEvent.addGestureListeners(img,
+                            mxUtils.bind(this, function(evt)
+                            {
+                                // Disables dragging the image
+                                mxEvent.consume(evt);
+                            })
+                        );
+
+                        mxEvent.addListener(img, 'click',
+                            mxUtils.bind(this, function(evt)
+                            {
+                                graph.removeCells([state.cell]);
+                                mxEvent.consume(evt);
+                                this.destroy();
+                            })
+                        );
+
+                        state.view.graph.container.appendChild(img);
+                        this.images.push(img);
                     },
                     delOverlay: function(id){
                         let self = this;
@@ -588,7 +835,9 @@
                         return overlay;
                     }
                 }
-            })
+            });
+
+
         })
     })
 </script>

@@ -303,7 +303,6 @@
                     let self = this;
                     let _appsId = "{{.SignedUser.Remark}}";
 
-                    console.log(133, _appsId, _appsId.split(","), self.user.appsId)
                     eventHub.$on('preset-selected-event', self.setPresetDefault);
 
                     if(!_.isEmpty(_appsId)){
@@ -311,7 +310,6 @@
                         //self.user.appsId = _.chain(_.omitBy(_appsId.split(","),_.isEmpty)).values();
                     }
 
-                    console.log(233, _appsId, self.user.appsId)
                 },
                 mounted: function(){
                     let self = this;

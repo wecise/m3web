@@ -1033,103 +1033,103 @@ Actions.prototype.init = function()
     this.addAction('mx-properties', function() {
         let self = this;
         let wnd = null;
-        let createIdTextField = function (graph, form, cell) {
 
-            var input = form.addText('ID:', cell.getId());
+        let createPropertiesTextField = function (graph, form, cell, attributes) {
 
-            var applyHandler = function()
-            {
-                var newValue = input.value || '';
-                var oldValue = cell.getId();
+            _.forEach(attributes, function(k){
 
-                if (newValue != oldValue)
-                {
-                    graph.getModel().beginUpdate();
+                let input = '';
 
-                    try
-                    {
-                        graph.model.setId(cell, newValue);
-                    }
-                    finally
-                    {
-                        graph.getModel().endUpdate();
-                    }
+        		if(k == 'id') {
+                    input = form.addText(_.startCase(k), cell.getId());
+                    input.autofocus = true;
+                } else if(k == 'value'){
+                    input = form.addText(_.startCase(k), cell.getValue());
+                } else if(k == 'parent'){
+                    input = form.addText(_.startCase(k), cell.getParent().getValue());
+                } else if(k == 'terminal'){
+                    input = form.addText(_.startCase(k), cell.getTerminal(cell));
                 }
-            };
 
-            mxEvent.addListener(input, 'keypress', function (evt)
-            {
-                // Needs to take shift into account for textareas
-                if (evt.keyCode == /*enter*/13 &&
-                    !mxEvent.isShiftDown(evt))
+                let applyHandler = function()
                 {
-                    input.blur();
-                }
-            });
+                    let newValue = input.value || '';
+                    let oldValue = '';
 
-            if (mxClient.IS_IE)
-            {
-                mxEvent.addListener(input, 'focusout', applyHandler);
-            }
-            else
-            {
-                // Note: Known problem is the blurring of fields in
-                // Firefox by changing the selection, in which case
-                // no event is fired in FF and the change is lost.
-                // As a workaround you should use a local variable
-                // that stores the focused field and invoke blur
-                // explicitely where we do the graph.focus above.
-                mxEvent.addListener(input, 'blur', applyHandler);
-            }
-        };
-        let createValueTextField = function (graph, form, cell) {
-
-            var input = form.addText('Value:', cell.getValue());
-
-            var applyHandler = function()
-            {
-                var newValue = input.value || '';
-                var oldValue = cell.getValue();
-
-                if (newValue != oldValue)
-                {
-                    graph.getModel().beginUpdate();
-
-                    try
-                    {
-                        graph.model.setValue(cell, newValue);
+                    if(k == 'id') {
+                        oldValue = cell.getId();
+                    } else if(k == 'value'){
+                        oldValue = cell.getValue();
+                    } else if(k == 'parent'){
+                        oldValue = cell.getParent().getValue();
+                    } else if(k == 'terminal'){
+                        oldValue = cell.getTerminal(cell);
                     }
-                    finally
+
+
+                    if (newValue != oldValue)
                     {
-                        graph.getModel().endUpdate();
+                        graph.getModel().beginUpdate();
+
+                        try
+                        {
+                            if(k == 'id') {
+                                cell.setId(newValue);
+                            } else if(k == 'value'){
+                                graph.model.setValue(cell, newValue);
+							} else if(k == 'parent'){
+                                graph.model.setParent(cell, newValue);
+                            } else if(k == 'terminal'){
+                                graph.model.setTerminal(cell, newValue);
+                            }
+                        }
+                        finally
+                        {
+                            graph.getModel().endUpdate();
+                        }
                     }
-                }
-            };
+                };
 
-            mxEvent.addListener(input, 'keypress', function (evt)
-            {
-                // Needs to take shift into account for textareas
-                if (evt.keyCode == /*enter*/13 &&
-                    !mxEvent.isShiftDown(evt))
+                mxEvent.addListener(input, 'keypress', function (evt)
                 {
-                    input.blur();
-                }
-            });
+                    // Needs to take shift into account for textareas
+                    if (evt.keyCode == /*enter*/13 &&
+                        !mxEvent.isShiftDown(evt))
+                    {
+                        input.blur();
+                    }
+                });
 
-            if (mxClient.IS_IE)
-            {
-                mxEvent.addListener(input, 'focusout', applyHandler);
-            }
-            else
-            {
-                // Note: Known problem is the blurring of fields in
-                // Firefox by changing the selection, in which case
-                // no event is fired in FF and the change is lost.
-                // As a workaround you should use a local variable
-                // that stores the focused field and invoke blur
-                // explicitely where we do the graph.focus above.
-                mxEvent.addListener(input, 'blur', applyHandler);
-            }
+                if (mxClient.IS_IE)
+                {
+                    mxEvent.addListener(input, 'focusout', applyHandler);
+                }
+                else
+                {
+                    // Note: Known problem is the blurring of fields in
+                    // Firefox by changing the selection, in which case
+                    // no event is fired in FF and the change is lost.
+                    // As a workaround you should use a local variable
+                    // that stores the focused field and invoke blur
+                    // explicitely where we do the graph.focus above.
+                    mxEvent.addListener(input, 'blur', applyHandler);
+                }
+
+			})
+
+            let inputX = form.addText('X', cell.getGeometry().x);
+            let inputY = form.addText('Y', cell.getGeometry().y);
+            let inputW = form.addText('长', cell.getGeometry().width);
+            let inputH = form.addText('宽', cell.getGeometry().height);
+
+            inputX.disabled = true;
+            inputY.disabled = true;
+            inputW.disabled = true;
+            inputH.disabled = true;
+
+
+            let btn = form.addButtons(function(){},function(){this.remove();});
+
         };
 
         let cell = graph.getSelectionCell() || graph.getModel().getRoot();
@@ -1142,8 +1142,10 @@ Actions.prototype.init = function()
         if (cell != null)
         {
 
-            wnd = newWindow("mini","",'<div id="properties"></div>');
-			wnd.setTitle("属性 " + cell.getId());
+            wnd = newWindow("narrow","",'<div id="properties"></div>');
+            wnd.setMaximizable(false);
+            wnd.setTitle("属性 " + cell.getId());
+
 			localStorage.setItem("mx-window", cell.getId());
 
             let div = document.getElementById('properties');
@@ -1157,10 +1159,7 @@ Actions.prototype.init = function()
             // Creates the form from the attributes of the user object
             var form = new mxForm();
 
-            var attrs = cell.getAttribute();
-
-            createIdTextField(graph, form, cell);
-            createValueTextField(graph, form, cell);
+            createPropertiesTextField(graph, form, cell, ['id','value']);
 
             div.appendChild(form.getTable());
             mxUtils.br(div);

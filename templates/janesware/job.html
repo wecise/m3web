@@ -154,7 +154,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-table-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
-
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 
 <SCRIPT type="text/javascript">
 
@@ -164,7 +164,8 @@
                         "vue-search-input-component",
                         "vue-base-tree-component",
                         "vue-base-table-component",
-                        "vue-object-detail-component"],function() {
+                        "vue-object-detail-component",
+                        "vue-base-datatables-component"],function() {
 
         moment.locale(`{{.Lang}}`);
 
@@ -337,18 +338,13 @@
                     initJob: function () {
                         let self = this;
                         let _list = null;
-                        let _cols = [];
+                        let _columns = [];
 
                         _list = fetchData(self.job.folder.table.search);
 
-                        if (_.isEmpty(_list.message)){
+                        if(_.isEmpty(_list.message)){
                             self.job.table.dataset = [];
                             return false;
-                        }
-
-                        _cols[0] = {
-                            field: "state",
-                            checkbox: "true"
                         }
 
                         let _classKeys = _.keys(_list.meta.classes);
@@ -357,18 +353,43 @@
                             let _sortable = false;
 
                             if (v.type === 'timestamp'){
-                                _cols.push({
+                                _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: true,
-                                    formatter: function(value, row, index) {
-                                        return moment(value).format("LLL");
+                                    render: function(data, type, row) {
+                                        return moment(data).format("LLL");
+                                    }
+                                });
+                            } else if (v.type === 'date'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: v.title || _.startCase(v.name),
+                                    sortable: true,
+                                    render: function(data, type, row) {
+                                        return moment(data).format("L");
+                                    }
+                                });
+                            } else if (v.type === 'map'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: v.title || _.startCase(v.name),
+                                    render: function(data, type, row) {
+                                        return JSON.stringify(data);
+                                    }
+                                });
+                            } else if (v.type === 'set' || v.type === 'list'){
+                                _columns.push({
+                                    field: v.name,
+                                    title: v.title || _.startCase(v.name),
+                                    render: function(data, type, row) {
+                                        return data.join(",");
                                     }
                                 });
                             } else if (v.type === 'smallint'){
-                                _cols.push({
+                                _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
+                                    title: v.title || _.startCase(v.name),
                                     sortable: true,
                                     formatter: function(value, row, index) {
 
@@ -390,33 +411,24 @@
                                         let _enum = v.enum[value];
 
                                         if (!_.isEmpty(_enum)) {
-                                            return {classes: v.name+value};
+                                            return {classes: v.name + value};
                                         } else {
-                                            return {classes: v.name+'_1'};
+                                            return {classes: v.name + '_1'};
                                         }
 
                                     }
                                 });
 
                             } else {
-                                _cols.push({
+                                _columns.push({
                                     field: v.name,
-                                    title: _.startCase(v.name),
-                                    sortable: _sortable
+                                    title: v.title || _.startCase(v.name),
+                                    sortable: _.sortable
                                 });
                             }
-
                         })
 
-                        _cols.push({
-                            field: "period",
-                            title: "执行时间",
-                            formatter: function (value, row, index) {
-                                return moment(row.stime).from(moment(row.etime), 'hour');
-                            }
-                        })
-
-                        self.job.folder.table.columns = _cols;
+                        self.job.folder.table.columns = _columns;
                         self.job.folder.table.dataset = _list.message;
 
                         _.delay(function (text) {
@@ -1304,10 +1316,10 @@
                                                 </ul>
                                             </span>
                                         </div>
-                                        <vue-base-table-component id="job-table"
-                                                                  :columns="job.folder.table.columns"
-                                                                  :options="job.folder.table.options"
-                                                                  :dataset="job.folder.table.dataset"></vue-base-table-component>
+                                        <vue-base-datatables-component id="job-list-datatable"
+                                                                       :columns="job.folder.table.columns"
+                                                                       :dataset="job.folder.table.dataset"
+                                                                       contextmenu="ciview"></vue-base-datatables-component>
                                     </div>
                                     <div class="panel-footer">
                                         <small>Count: ${job.folder.table.dataset.length} | ${moment().format("LLL")} </small>

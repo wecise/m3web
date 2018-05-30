@@ -989,7 +989,6 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 	}
 	else
 	{
-		//this.addMenuItems(menu, ['mx-event','mx-performance', 'mx-log', 'mx-config', '-', 'mx-script', '-'], null, evt);
 		this.addMenuItems(menu, ['mx-properties','mx-script', '-'], null, evt);
 		this.addMenuItems(menu, ['delete', '-', 'cut', 'copy', '-', 'duplicate'], null, evt);
 
@@ -1059,7 +1058,7 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 			if (graph.getSelectionCount() == 1)
 			{
 				menu.addSeparator();
-				this.addMenuItems(menu, ['edit', '-', 'editData', 'editLink'], null, evt);
+				this.addMenuItems(menu, ['edit'], null, evt);//['edit', '-', 'editData', 'editLink'], null, evt);
 
 				// Shows edit image action if there is an image in the style
 				if (graph.getModel().isVertex(cell) && mxUtils.getValue(state.style, mxConstants.STYLE_IMAGE, null) != null)

@@ -895,7 +895,91 @@ var fetchFile = function (url) {
 
 };
 
+
+
+
 /*
+*   作业管理
+*
+*   获取作业
+*
+*
+*/
+var jobContextGet = function (key,prefix) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: `/job/context/${key}`,
+        dataType: 'json',
+        type: 'GET',
+        async:false,
+        data: {
+            prefix: prefix
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (_.isEmpty(data.message)) return rtn;
+
+            rtn = data;
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*   作业管理
+*
+*   重置作业
+*
+*
+*/
+var jobContextReset = function (key) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: `/job/context/${key}?clear=true`,
+        dataType: 'json',
+        type: 'DELETE',
+        async:false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+
+/*
+*   作业管理
+*
 *   执行作业
 *
 *       参数：
@@ -1587,11 +1671,16 @@ var appContextSet = function (event,context) {
 *   template: 模板（Vue渲染用）
 */
 var newWindow = function (size, title, template) {
-    var win;
-    var w = $( window ).width();//document.body.clientWidth;
-    var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
-    var wW = $( window ).width()*2.2/3;
-    var hH = $( window ).height()*2.5/3;
+    let win;
+    let w = $( window ).width();//document.body.clientWidth;
+    let h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+    let wW = $( window ).width()*2.2/3;
+    let hH = $( window ).height()*2.5/3;
+
+    if(size === 'narrow'){
+        wW = $( window ).width()*0.6/3;
+        hH = $( window ).height()*1.45/3;
+    }
 
     if(size === 'mini'){
         wW = $( window ).width()*0.7/3;
@@ -1608,13 +1697,21 @@ var newWindow = function (size, title, template) {
         hH = $( window ).height()*2.0/3;
     }
 
-    var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+    let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+    let _position = localStorage.getItem(_.upperCase(size+"_window_position"));
+
+    if(!_.isEmpty(_position)){
+        let _p = _.attempt(JSON.parse.bind(null, _position));
+        lrwh[0] = _p.x || (w-wW)/2;
+        lrwh[1] = _p.y || (h-hH)/2;
+    }
+
     var tb = document.createElement('div');
     
     $(tb).append(template);
     win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
     win.hide();
-    $("div.mxWindow").addClass("animated fadeInRight");
+    $("div.mxWindow").addClass("animated fadeIn");
     win.show();
     win.setMaximizable(true);
     win.setResizable(true);
@@ -1639,70 +1736,15 @@ var newWindow = function (size, title, template) {
         },100);
     });
 
-    return win;
-};
-
-var newWindow = function (size, title, template, position) {
-    var win;
-    var w = $( window ).width();//document.body.clientWidth;
-    var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
-    var wW = $( window ).width()*2.2/3;
-    var hH = $( window ).height()*2.5/3;
-
-    if(size === 'mini'){
-        wW = $( window ).width()*0.7/3;
-        hH = $( window ).height()*0.8/3;
-    }
-
-    if(size === 'small'){
-        wW = $( window ).width()*1.5/3;
-        hH = $( window ).height()*1.8/3;
-    }
-
-    if(size === 'middle'){
-        wW = $( window ).width()*1.8/3;
-        hH = $( window ).height()*2.0/3;
-    }
-
-    var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
-
-    if(!_.isEmpty(position)){
-        lrwh[0] = position.x;
-        lrwh[1] = position.y;
-    }
-
-    var tb = document.createElement('div');
-
-    $(tb).append(template);
-    win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
-    win.hide();
-    $("div.mxWindow").addClass("animated fadeInRight");
-    win.show();
-    win.setMaximizable(true);
-    win.setResizable(true);
-    win.setClosable(true);
-    win.setVisible(true);
-
-    win.addListener(mxEvent.MAXIMIZE, function(event){
-        _.delay(function(){
-            eventHub.$emit("win-resize-event",null);
-        },100);
-    });
-
-    win.addListener(mxEvent.MINIMIZE, function(event){
-        _.delay(function(){
-            eventHub.$emit("win-resize-event",null);
-        },100);
-    });
-
-    win.addListener(mxEvent.NORMALIZE, function(event){
-        _.delay(function(){
-            eventHub.$emit("win-resize-event",null);
-        },100);
+    win.addListener(mxEvent.MOVE_END, function(event){
+        console.log(win.getX(),win.getY())
+        localStorage.setItem(_.upperCase(size+"_window_position"),JSON.stringify({x: win.getX(),y:win.getY()}));
     });
 
     return win;
 };
+
+
 
 
 /*
