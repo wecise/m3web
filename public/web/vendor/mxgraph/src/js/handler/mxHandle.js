@@ -238,7 +238,6 @@ mxHandle.prototype.redraw = function()
 			this.shape.bounds.y = Math.floor((pt.y + tr.y) * scale - this.shape.bounds.height / 2);
 			
 			// Needed to force update of text bounds
-			this.state.unscaledWidth = null;
 			this.shape.redraw();
 		}
 	}

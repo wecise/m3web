@@ -42,6 +42,28 @@
                         chkStyle: "checkbox",
                         chkboxType: { "Y": "s", "N": "s" }
                     }
+                },
+                contextMenuItems: {
+                    "create": {name: "新增", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
+
+
+                        }
+                    },
+                    "sep1": "---------",
+                    "remove": {name: "删除", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    }
                 }
 			}
 		},
@@ -75,12 +97,13 @@
 			initPlugIn: function(){
 			    let self = this;
 
-			    if (!_.isEmpty(self.contextMenu)){
+			    if (!_.isEmpty(self.contextMenuItems)){
                     $.contextMenu({
                         selector: "#"+self.id,//$(self.$el),
-                        items: self.contextMenu
+                        items: self.contextMenuItems
                     });
 				}
+
 			}
 		}
 	

@@ -26,7 +26,7 @@ window.OPEN_FORM = window.OPEN_FORM || 'open.html';
 // each properties file since only one file is loaded.
 window.mxBasePath = window.mxBasePath || '../../../src';
 window.mxLanguage = window.mxLanguage || urlParams['lang'];
-//window.mxLanguages = window.mxLanguages || ['en'];
+//window.mxLanguages = window.mxLanguages || ['de'];
 
-// For Vue 
+// For Vue
 var eventHub = new Vue();

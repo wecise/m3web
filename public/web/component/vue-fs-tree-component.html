@@ -1,0 +1,207 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.ztree li {
+			padding:3px;
+		}
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-fs-tree-component"  ----------*/
+	<template>
+
+		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-fs-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+			root: String,
+			id: String,
+			checkEnable: Boolean,
+			contextMenu: Object
+		},
+		data: function () {
+			return {
+                treeObj: null,
+				treeNodes: null,
+				selectedNode: null,
+				setting: {
+                    view: {
+                        showLine: true,
+                        selectedMulti: false,
+                        dblClickExpand: false
+                    },
+                    edit: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: 'title',
+                            title: "title"
+                        }
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        }
+                    },
+                    check: {
+                        enable: self.checkEnable,
+                        chkStyle: "checkbox",
+                        chkboxType: { "Y": "s", "N": "s" }
+                    },
+                    callback: {
+                        onClick: this.onClick,
+                    }
+                },
+                contextMenuItems: {
+                    "projectNew": {name: "新增项目", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+
+                        }
+                    },
+                    "sep1": "---------",
+	                "fileNew": {name: "新增文件", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
+
+                            if(nodes[0].type !== 'dir'){
+                                return false;
+                            }
+
+                        }
+                    },
+	                "fileEdit": {name: "编辑文件", icon: "fa-edit",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+
+                        }
+                    },
+                    "sep2": "---------",
+                    "projectDelete": {name: "删除项目", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    },
+                    "sep3": "---------",
+                    "fileDelete": {name: "删除文件", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    }
+                }
+			}
+		},
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+				self.init();
+
+                self.initPlugIn();
+
+			})
+		},
+		watch: {
+			root: function (val,oldVal) {
+			    let self = this;
+
+				if(val !== '/home/creative') return false;
+
+                if(!_.isEmpty(self.treeObj)){
+                    self.treeObj.destroy();
+                }
+			    self.init();
+			}
+		},
+		methods: {
+			init: function(){
+                let self = this;
+
+                let _rtn = fsList(self.root);
+
+                if(_.isEmpty(_rtn)){
+                    self.treeNodes = [];
+                } else {
+                    self.treeNodes = _.map(_rtn,function(v,k){
+			                            let _type = "dir";
+
+			                            if(!_.isEmpty(v.ftype)){
+                                            _type = v.ftype;
+			                            }
+
+			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+			                        });
+                }
+				self.treeObj = $.fn.zTree.init($(self.$el), self.setting, self.treeNodes);
+
+
+			},
+			initPlugIn: function(){
+			    let self = this;
+
+			    if (!_.isEmpty(self.contextMenuItems)){
+                    $.contextMenu({
+                        selector: "#"+self.id,
+                        items: self.contextMenuItems
+                    });
+				}
+
+			},
+            onClick: function(event, treeId, treeNode) {
+                let self = this;
+
+                if(treeNode.ftype !=='dir') return false;
+
+                let _root = treeNode.parent + "/" + treeNode.name;
+                let _rtn = fsList(_root);
+
+                eventHub.$emit("FS-FORWARD-EVENT",_root);
+
+                self.treeObj.removeChildNodes(treeNode);
+
+                if(!_.isEmpty(_rtn)) {
+
+                    let _nodes = _.map(_rtn,function(v,k){
+					                        let _type = "dir";
+
+					                        if(!_.isEmpty(v.ftype)){
+					                            _type = v.ftype;
+					                        }
+
+					                        return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                });
+
+                    // append sub nodes
+                    self.treeObj.addNodes(treeNode, _nodes);
+
+                }
+
+            }
+		}
+	
+	}
+	</script>
+
+</code>

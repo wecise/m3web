@@ -20,7 +20,7 @@ Menus = function(editorUi)
 /**
  * Sets the default font family.
  */
-Menus.prototype.defaultFont = 'microsoft yahei';
+Menus.prototype.defaultFont = 'microsoft yahei';//'Helvetica';
 
 /**
  * Sets the default font size.
@@ -35,7 +35,7 @@ Menus.prototype.defaultMenuItems = ['edit', 'view', 'arrange', 'extras'];//['fil
 /**
  * Adds the label menu items to the given menu and parent.
  */
-Menus.prototype.defaultFonts = ['Microsoft YaHei', 'Helvetica', 'Verdana', 'Times New Roman', 'Garamond', 'Comic Sans MS',
+Menus.prototype.defaultFonts = ['Helvetica', 'Verdana', 'Times New Roman', 'Garamond', 'Comic Sans MS',
            		             'Courier New', 'Georgia', 'Lucida Console', 'Tahoma'];
 
 /**
@@ -56,6 +56,18 @@ Menus.prototype.init = function()
 			var tr = this.styleChange(menu, fontname, [mxConstants.STYLE_FONTFAMILY], [fontname], null, parent, function()
 			{
 				document.execCommand('fontname', false, fontname);
+			}, function()
+			{
+				graph.updateLabelElements(graph.getSelectionCells(), function(elt)
+				{
+					elt.removeAttribute('face');
+					elt.style.fontFamily = null;
+					
+					if (elt.nodeName == 'PRE')
+					{
+						graph.replaceElement(elt, 'div');
+					}
+				});
 			});
 			tr.firstChild.nextSibling.style.fontFamily = fontname;
 		});
@@ -431,8 +443,7 @@ Menus.prototype.init = function()
 	})));
 	// Two special dropdowns that are only used in the toolbar
 	this.put('viewPanels', new Menu(mxUtils.bind(this, function(menu, parent)
-	{	
-		console.log(menu,parent,this.editorUi.format)
+	{
 		if (this.editorUi.format != null)
 		{
 			this.addMenuItems(menu, ['formatPanel'], parent);
@@ -499,14 +510,19 @@ Menus.prototype.get = function(name)
 /**
  * Adds the given submenu.
  */
-Menus.prototype.addSubmenu = function(name, menu, parent)
+Menus.prototype.addSubmenu = function(name, menu, parent, label)
 {
-	var enabled = this.get(name).isEnabled();
+	var entry = this.get(name);
 	
-	if (menu.showDisabled || enabled)
+	if (entry != null)
 	{
-		var submenu = menu.addItem(mxResources.get(name), null, null, parent, null, enabled);
-		this.addMenu(name, menu, submenu);
+		var enabled = entry.isEnabled();
+	
+		if (menu.showDisabled || enabled)
+		{
+			var submenu = menu.addItem(label || mxResources.get(name), null, null, parent, null, enabled);
+			this.addMenu(name, menu, submenu);
+		}
 	}
 };
 
@@ -759,7 +775,7 @@ Menus.prototype.edgeStyleChange = function(menu, label, keys, values, sprite, pa
 /**
  * Adds a style change item to the given menu.
  */
-Menus.prototype.styleChange = function(menu, label, keys, values, sprite, parent, fn)
+Menus.prototype.styleChange = function(menu, label, keys, values, sprite, parent, fn, post)
 {
 	var apply = this.createStyleChangeFunction(keys, values);
 	
@@ -773,7 +789,7 @@ Menus.prototype.styleChange = function(menu, label, keys, values, sprite, parent
 		}
 		else
 		{
-			apply();
+			apply(post);
 		}
 	}), parent, sprite);
 };
@@ -783,7 +799,7 @@ Menus.prototype.styleChange = function(menu, label, keys, values, sprite, parent
  */
 Menus.prototype.createStyleChangeFunction = function(keys, values)
 {
-	return mxUtils.bind(this, function()
+	return mxUtils.bind(this, function(post)
 	{
 		var graph = this.editorUi.editor.graph;
 		graph.stopEditing(false);
@@ -794,6 +810,11 @@ Menus.prototype.createStyleChangeFunction = function(keys, values)
 			for (var i = 0; i < keys.length; i++)
 			{
 				graph.setCellStyles(keys[i], values[i]);
+			}
+			
+			if (post != null)
+			{
+				post();
 			}
 			
 			this.editorUi.fireEvent(new mxEventObject('styleChanged', 'keys', keys, 'values', values,
@@ -868,7 +889,7 @@ Menus.prototype.pickColor = function(key, cmd, defaultValue)
 		{
 			graph.cellEditor.restoreSelection(selState);
 		});
-		this.editorUi.showDialog(dlg.container, 220, 430, true, true);
+		this.editorUi.showDialog(dlg.container, 230, 430, true, true);
 		dlg.init();
 	}
 	else
@@ -898,7 +919,7 @@ Menus.prototype.pickColor = function(key, cmd, defaultValue)
 			this.colorDialog.picker.fromString(color);
 		}
 	
-		this.editorUi.showDialog(this.colorDialog.container, 220, 430, true, true);
+		this.editorUi.showDialog(this.colorDialog.container, 230, 430, true, true);
 		this.colorDialog.init();
 	}
 };
@@ -917,13 +938,13 @@ Menus.prototype.toggleStyle = function(key, defaultValue)
 /**
  * Creates the keyboard event handler for the current graph and history.
  */
-Menus.prototype.addMenuItem = function(menu, key, parent, trigger, sprite)
+Menus.prototype.addMenuItem = function(menu, key, parent, trigger, sprite, label)
 {
 	var action = this.editorUi.actions.get(key);
 
 	if (action != null && (menu.showDisabled || action.isEnabled()) && action.visible)
 	{
-		var item = menu.addItem(action.label, null, function()
+		var item = menu.addItem(label || action.label, null, function()
 		{
 			action.funct(trigger);
 		}, parent, sprite, action.isEnabled());
@@ -985,16 +1006,15 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 	
 	if (graph.isSelectionEmpty())
 	{
-		this.addMenuItems(menu, ['undo', 'redo', '-', 'pasteHere'], null, evt);
+		this.addMenuItems(menu, ['undo', 'redo', 'pasteHere'], null, evt);
 	}
 	else
 	{
-		this.addMenuItems(menu, ['mx-properties','mx-script', '-'], null, evt);
+        this.addMenuItems(menu, ['mx-properties','-'], null, evt);
 		this.addMenuItems(menu, ['delete', '-', 'cut', 'copy', '-', 'duplicate'], null, evt);
-
 	}
 
-	if (graph.getSelectionCount() > 0)
+	if (!graph.isSelectionEmpty())
 	{
 		if (graph.getSelectionCount() == 1)
 		{
@@ -1005,13 +1025,11 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 		
 		cell = graph.getSelectionCell();
 		var state = graph.view.getState(cell);
-		
+
 		if (state != null)
 		{
-			if (graph.getSelectionCount() == 1)
-			{
-				this.addMenuItems(menu, ['toFront', 'toBack', '-'], null, evt);
-			}
+			var hasWaypoints = false;
+			this.addMenuItems(menu, ['toFront', 'toBack', '-'], null, evt);
 
 			if (graph.getModel().isEdge(cell) && mxUtils.getValue(state.style, mxConstants.STYLE_EDGE, null) != 'entityRelationEdgeStyle' &&
 				mxUtils.getValue(state.style, mxConstants.STYLE_SHAPE, null) != 'arrow')
@@ -1032,17 +1050,21 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 					isWaypoint = index > 0 && index < handler.bends.length - 1;
 				}
 				
-				this.addMenuItems(menu, ['-', (isWaypoint) ? 'removeWaypoint' : 'addWaypoint'], null, evt);
-	
+				menu.addSeparator();
+				this.addMenuItem(menu, 'turn', null, evt, null, mxResources.get('reverse'));
+				this.addMenuItems(menu, [(isWaypoint) ? 'removeWaypoint' : 'addWaypoint'], null, evt);
+				
 				// Adds reset waypoints option if waypoints exist
 				var geo = graph.getModel().getGeometry(cell);
-				
-				if (geo != null && geo.points != null && geo.points.length > 0)
-				{
-					this.addMenuItems(menu, ['clearWaypoints'], null, evt);	
-				}
+				hasWaypoints = geo != null && geo.points != null && geo.points.length > 0;
 			}
 
+			if (graph.getSelectionCount() == 1 && (hasWaypoints || (graph.getModel().isVertex(cell) &&
+				graph.getModel().getEdgeCount(cell) > 0)))
+			{
+				this.addMenuItems(menu, ['clearWaypoints'], null, evt);
+			}
+			
 			if (graph.getSelectionCount() > 1)	
 			{
 				menu.addSeparator();
@@ -1058,7 +1080,7 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 			if (graph.getSelectionCount() == 1)
 			{
 				menu.addSeparator();
-				this.addMenuItems(menu, ['edit'], null, evt);//['edit', '-', 'editData', 'editLink'], null, evt);
+				this.addMenuItems(menu, ['editData', 'editLink'], null, evt);
 
 				// Shows edit image action if there is an image in the style
 				if (graph.getModel().isVertex(cell) && mxUtils.getValue(state.style, mxConstants.STYLE_IMAGE, null) != null)
@@ -1071,7 +1093,8 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 	}
 	else
 	{
-		this.addMenuItems(menu, ['-', 'selectVertices', 'selectEdges', '-', 'selectAll'], null, evt);
+		this.addMenuItems(menu, ['-', 'selectVertices', 'selectEdges',
+			'selectAll', '-', 'clearDefaultStyle'], null, evt);
 	}
 };
 
@@ -1093,36 +1116,46 @@ Menus.prototype.createMenubar = function(container)
 				menu.funct.apply(this, arguments);
 			}));
 			
-			if (elt != null)
-			{
-				menu.addListener('stateChanged', function()
-				{
-					elt.enabled = menu.enabled;
-					
-					if (!menu.enabled)
-					{
-						elt.className = 'geItem mxDisabled';
-						
-						if (document.documentMode == 8)
-						{
-							elt.style.color = '#c3c3c3';
-						}
-					}
-					else
-					{
-						elt.className = 'geItem';
-						
-						if (document.documentMode == 8)
-						{
-							elt.style.color = '';
-						}
-					}
-				});
-			}
+			this.menuCreated(menu, elt);
 		}))(this.get(menus[i]));
 	}
 
 	return menubar;
+};
+
+/**
+ * Creates the keyboard event handler for the current graph and history.
+ */
+Menus.prototype.menuCreated = function(menu, elt, className)
+{
+	if (elt != null)
+	{
+		className = (className != null) ? className : 'geItem';
+		
+		menu.addListener('stateChanged', function()
+		{
+			elt.enabled = menu.enabled;
+			
+			if (!menu.enabled)
+			{
+				elt.className = className + ' mxDisabled';
+				
+				if (document.documentMode == 8)
+				{
+					elt.style.color = '#c3c3c3';
+				}
+			}
+			else
+			{
+				elt.className = className;
+				
+				if (document.documentMode == 8)
+				{
+					elt.style.color = '';
+				}
+			}
+		});
+	}
 };
 
 /**

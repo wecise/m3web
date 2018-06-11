@@ -1,0 +1,393 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.fs-node-selected {
+			-webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+			-moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+			box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+		}
+
+		.fs-footer{
+			position:fixed;
+			bottom:30px;
+		}
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-fs-view-component"  ----------*/
+	<template>
+
+		<div>
+			<div class="row">
+					<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+						<ul style="list-style: none;display:  flex;margin-left: -40px;">
+							<li style="padding:5px 0px;">
+								<a href="javascript:void(0);" @click="forwardDir('/home')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 当前项目 </a>
+							</li>
+							<li>
+								<ol class="breadcrumb">
+									<li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
+										<a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))">${item}</a>
+									</li>
+								</ol>
+							</li>
+						</ul>
+					</div>
+					<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+						<div class="btn-group" role="group" aria-label="..." style="float: right;">
+							<!--<a href="javascript:void(0)" class="btn btn-xs btn-default btn-noborder" @click="toggleLeft" style="margin-right: 5px;">
+								<i class="fa fa-caret-right navtoggle"></i>
+							</a>-->
+							<a class="btn btn-xs btn-success btn-noborder fileinput-button" style="margin-right: 5px;">
+								<i class="fa fa-upload"></i>
+								<input id="file-upload" type="file" name="uploadfile" multiple>
+							</a>
+							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-icon-component active" style="margin-right: 5px;">
+								<i class="fa fa-th" aria-hidden="true"></i>
+							</a>
+							<a href="#table" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-table-component" style="margin-right: 5px;">
+								<i class="fa fa-list" aria-hidden="true"></i>
+							</a>
+						</div>
+					</div>
+				</div>
+			<div class="row">
+				<!-- TAB CONTENT -->
+				<div class="tab-content">
+				  <div class="active tab-pane fade in" id="grid">
+					  <div :class="item.ftype=='dir'?'dir col-xs-3 col-md-3 col-sm-3 col-lg-2 fs-node context-menu-file':'col-xs-3 col-md-3 col-sm-3 col-lg-2 fs-node context-menu-file'"
+					       :id="'fs_node_'+item.id"
+					       @click="forwardDir(item.parent+'/'+item.name);clickMe(item);"
+					       @mouseover="mouseOver(item)"
+					       @mouseout="mouseOut(item)"
+					       style="cursor: pointer;"
+					       :title="item.name"
+					       v-for="item in model">
+						  <div class="widget widget-stats bg-silver animated flipInX">
+							  <div class="stats-icon"></div>
+							  <div class="stats-info">
+								  <p><img :src="'/web/assets/images/files/'+item.ftype+'.svg'"
+								          class="img-responsive"
+								          alt="Image"
+								          style="width:48px;height:48px;"></p>
+							  </div>
+							  <div class="stats-link">
+								  <a href="javascript:;" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title">
+									  ${item.name}
+								  </a>
+							  </div>
+						  </div>
+					  </div>
+				  </div>
+					<div class="tab-pane fade" id="table">
+						<vue-base-datatables-component id="files-list-datatable"
+						                               :columns="table.columns"
+						                               :dataset="model"></vue-base-datatables-component>
+				  </div>
+				</div>
+
+			</div>
+			<div class="row fs-footer">
+	            <div class="col-lg-12">
+		            <small>数量：${model.length} <i class="fa fa-clock"></i> ${moment().format("LLL")}</small>
+	            </div>
+			</div>
+		</div>
+
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-fs-view-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+			id: String,
+			root: String
+		},
+		data: function () {
+			return {
+                model: [],
+                selectedNode: {},
+			    table: {
+                    columns: [
+                        {field: "name", title: "Name"},
+                        {field: "ftype", title: "Type"},
+                        {field: "parent", title: "Parent"},
+                        {field: "vtime", title: "Create Time"}
+                    ]
+				},
+                upload:{
+                    option: {
+                        url: '/fs/home',
+                        dataType: 'json',
+                        autoUpload: false,
+                        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt)$/i,
+                        maxFileSize: 999000,
+                        disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
+                        previewMaxWidth: 100,
+                        previewMaxHeight: 100,
+                        previewCrop: true
+                    },
+                    swal: {}
+                }
+			}
+		},
+        created: function() {
+            let self = this;
+
+            self.init();
+
+            eventHub.$on("FS-FORWARD-EVENT", self.forwardDir);
+        },
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                self.initPlugIn();
+
+			})
+		},
+		watch: {
+			root: function(val,oldVal){
+			    let self = this;
+
+                self.load();
+			},
+            selectedNode: function(val,oldVal){
+                let self = this;
+
+                if(val.ftype === 'dir' ){
+                    $('#file-upload').fileupload({url: '/fs' + val.parent + '/' + val.name});
+                }
+            }
+		},
+        computed: {
+            filePath: function(){
+                let self = this;
+                let _tmp = self.root.split("/");
+
+                return _tmp;
+            }
+        },
+		methods: {
+			init: function(){
+                let self = this;
+
+                self.load();
+
+			},
+			initPlugIn: function(){
+			    let self = this;
+
+
+                self.initFileUpload();
+			},
+            forwardDir: function(path){
+                let self = this;
+
+                self.root = path;
+
+                self.load();
+            },
+            load: function() {
+                let self = this;
+
+                let _rtn = fsList(self.root);
+
+                self.model = _.map(_rtn,function(v,k){
+
+                    return _.merge(v, {"username": `{{.SignedUser.Name}}`});
+
+                });
+
+                _.delay(function(){
+
+                    self.refresh();
+
+                },200);
+
+            },
+            refresh: function() {
+                let self = this;
+
+                $(".tagsLabel").tagsinput({
+                    tagClass: function(item) {
+                        return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
+                    }
+                });
+
+                $(".tagsLabel").on('itemAdded', function(event) {
+
+                    let _id = $(this).data("index");
+                    let _item = _.find(self.model.list,{id:_id});
+
+                    fetchData(_item.id + ' | tags +' + event.item);
+
+                });
+
+                $(".tagsLabel").on('itemRemoved', function(event) {
+
+                    let _id = $(this).data("index");
+                    let _item = _.find(self.model.list,{id:_id});
+
+                    fetchData(_item.id + ' | tags -' + event.item);
+
+                });
+            },
+            clickMe: function(item){
+			    let self = this;
+
+			    self.selectedNode = item;
+
+			    self.open();
+            },
+            open: function(){
+                let self = this;
+
+                if(_.isEmpty(self.selectedNode.name)) return false;
+
+                if(self.selectedNode.ftype === 'dir'){
+                    //self.dblClick(self.contextmenu.selected);
+                } else {
+                    let contents = '/fs' + self.selectedNode.parent + '/'  + self.selectedNode.name + '?type=download';
+
+                    if(self.selectedNode.ftype === 'png'){
+                        //contents = `<img src="/fs` + self.contextmenu.selected.parent + `/`  + self.contextmenu.selected.name + `?type=download" class="img-responsive" alt="Image">`;
+                    }
+
+                    layer.open({
+                        type: 2,
+                        title: self.selectedNode.name,
+                        shadeClose: true,
+                        shade: false,
+                        maxmin: true,
+                        area: ['1024px', '600px'],
+                        content: contents
+                    });
+                }
+            },
+            initFileUpload: function(){
+                let self = this;
+                var uploadButton = $('<button/>')
+                    .addClass('btn btn-primary')
+                    .prop('disabled', true)
+                    .text('Processing...')
+                    .on('click', function () {
+                        var $this = $(this),
+                            data = $this.data();
+                        $this
+                            .off('click')
+                            .text('中止')
+                            .on('click', function () {
+                                $this.remove();
+                                data.abort();
+                            });
+                        data.submit().always(function () {
+                            $this.remove();
+                        });
+                    });
+
+                $('#file-upload').fileupload(self.upload.option)
+                    .on('fileuploadadd', function (e, data) {
+                        self.swal = swal({
+                            title: '',
+                            type: 'info',
+                            html:`  <div id="progress" class="progress">
+                                                        <div class="progress-bar progress-bar-success"></div>
+                                                    </div>
+                                                    <div id="files" class="files"></div>`,
+                            showConfirmButton: false,
+                        });
+                        data.context = $('<div/>').appendTo('#files');
+                        $.each(data.files, function (index, file) {
+                            var node = $('<p/>')
+                                .append($('<span/>').text(file.name));
+                            if (!index) {
+                                node
+                                    .append('<br>')
+                                    .append(uploadButton.clone(true).data(data));
+                            }
+                            node.appendTo(data.context);
+                        });
+                    })
+                    .on('fileuploadprocessalways', function (e, data) {
+                        var index = data.index,
+                            file = data.files[index],
+                            node = $(data.context.children()[index]);
+                        if (file.preview) {
+                            node
+                                .prepend('<hr>')
+                                .prepend(file.preview);
+                        }
+                        if (file.error) {
+                            node
+                                .append('<hr>')
+                                .append($('<span class="text-danger"/>').text(file.error));
+                        }
+                        if (index + 1 === data.files.length) {
+                            data.context.find('button')
+                                .text('上传')
+                                .prop('disabled', !!data.files.error);
+                        }
+                    })
+                    .on('fileuploadprogressall', function (e, data) {
+                        var progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css(
+                            'width',
+                            progress + '%'
+                        );
+                    })
+                    .on('fileuploaddone', function (e, data) {
+                        $.each(data.result.files, function (index, file) {
+                            if (file.url) {
+                                var link = $('<a>')
+                                    .attr('target', '_blank')
+                                    .prop('href', file.url);
+                                $(data.context.children()[index])
+                                    .wrap(link);
+                            } else if (file.error) {
+                                var error = $('<span class="text-danger"/>').text(file.error);
+                                $(data.context.children()[index])
+                                    .append('<br>')
+                                    .append(error);
+                            }
+                        });
+
+                        self.load();
+
+                        swal.close();
+
+                    })
+                    .on('fileuploadfail', function (e, data) {
+                        $.each(data.files, function (index) {
+                            var error = $('<span class="text-danger"/>').text('上传失败。');
+                            $(data.context.children()[index])
+                                .append('<br>')
+                                .append(error);
+                        });
+                        swal.close();
+                    })
+                    .prop('disabled', !$.support.fileInput)
+                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
+            },
+            mouseOver: function(item){
+                let self = this;
+
+                $(self.$el).find('.fs-node-selected').removeClass('fs-node-selected');
+                $('#fs_node_'+item.id).find('.widget').addClass('fs-node-selected');
+
+            },
+            mouseOut: function(item){
+                let self = this;
+
+                $('#fs_node_'+item.id).find('.fs-node-selected').removeClass('fs-node-selected');
+            }
+		}
+	
+	}
+	</script>
+
+</code>

@@ -4,10 +4,6 @@
  */
 var mxLog =
 {
-	editorContainer: null,
-
-	editor:null,
-
 	/**
 	 * Class: mxLog
 	 * 
@@ -61,7 +57,7 @@ var mxLog =
 	{
 		if (mxLog.window == null && document.body != null)
 		{
-			var title = mxLog.consoleName;// + ' - mxGraph ' + mxClient.VERSION;
+			var title = mxLog.consoleName + ' - mxGraph ' + mxClient.VERSION;
 
 			// Creates a table that maintains the layout
 			var table = document.createElement('table');
@@ -73,23 +69,25 @@ var mxLog =
 			var td = document.createElement('td');
 			td.style.verticalAlign = 'top';
 				
-			// Adds the actual console as a editorContainer
-			mxLog.editorContainer = document.createElement('div');
-			mxLog.editorContainer.setAttribute('id', 'mxlog-editor');
-			mxLog.editorContainer.style.height = '100%';
-			mxLog.editorContainer.style.resize = 'none';
+			// Adds the actual console as a textarea
+			mxLog.textarea = document.createElement('textarea');
+			mxLog.textarea.setAttribute('wrap', 'off');
+			mxLog.textarea.setAttribute('readOnly', 'true');
+			mxLog.textarea.style.height = '100%';
+			mxLog.textarea.style.resize = 'none';
+			mxLog.textarea.value = mxLog.buffer;
 
 			// Workaround for wrong width in standards mode
 			if (mxClient.IS_NS && document.compatMode != 'BackCompat')
 			{
-				mxLog.editorContainer.style.width = '99%';
+				mxLog.textarea.style.width = '99%';
 			}
 			else
 			{
-				mxLog.editorContainer.style.width = '100%';
+				mxLog.textarea.style.width = '100%';
 			}
 			
-			td.appendChild(mxLog.editorContainer);
+			td.appendChild(mxLog.textarea);
 			tr.appendChild(td);
 			tbody.appendChild(tr);
 
@@ -104,12 +102,36 @@ var mxLog =
 			table.appendChild(tbody);
 
 			// Adds various debugging buttons
+			mxLog.addButton('Info', function (evt)
+			{
+				mxLog.info();
+			});
+		
+			mxLog.addButton('DOM', function (evt)
+			{
+				var content = mxUtils.getInnerHtml(document.body);
+				mxLog.debug(content);
+			});
+	
+			mxLog.addButton('Trace', function (evt)
+			{
+				mxLog.TRACE = !mxLog.TRACE;
+				
+				if (mxLog.TRACE)
+				{
+					mxLog.debug('Tracing enabled');
+				}
+				else
+				{
+					mxLog.debug('Tracing disabled');
+				}
+			});	
 
 			mxLog.addButton('Copy', function (evt)
 			{
 				try
 				{
-					mxUtils.copy(mxLog.editor.getValue());
+					mxUtils.copy(mxLog.textarea.value);
 				}
 				catch (err)
 				{
@@ -121,7 +143,7 @@ var mxLog =
 			{
 				try
 				{
-					mxUtils.popup(mxLog.editor.getValue());
+					mxUtils.popup(mxLog.textarea.value);
 				}
 				catch (err)
 				{
@@ -131,7 +153,7 @@ var mxLog =
 			
 			mxLog.addButton('Clear', function (evt)
 			{
-				mxLog.editor.setValue('');
+				mxLog.textarea.value = '';
 			});
 
 			// Cross-browser code to get window size
@@ -149,7 +171,7 @@ var mxLog =
 				w = document.body.clientWidth;
 			}
 
-			mxLog.window = new mxWindow(title, table, Math.max(0, w - 520), Math.max(0, h - 300), 500, 260);
+			mxLog.window = new mxWindow(title, table, Math.max(0, w - 320), Math.max(0, h - 210), 300, 160);
 			mxLog.window.setMaximizable(true);
 			mxLog.window.setScrollable(false);
 			mxLog.window.setResizable(true);
@@ -195,8 +217,6 @@ var mxLog =
 	addButton: function(lab, funct)
 	{
 		var button = document.createElement('button');
-		button.setAttribute('class', 'btn btn-xs btn-default');
-		button.style.margin = "2px 3px";
 		mxUtils.write(button, lab);
 		mxEvent.addListener(button, 'click', funct);
 		mxLog.td.appendChild(button);
@@ -226,16 +246,6 @@ var mxLog =
 	show: function()
 	{
 		mxLog.setVisible(true);
-		mxLog.editor = ace.edit("mxlog-editor");
-		mxLog.editor.setOptions({
-		
-		});
-		
-		mxLog.editor.$blockScrolling = Infinity
-		mxLog.editor.setTheme("ace/theme/terminal");
-		mxLog.editor.getSession().setMode("ace/mode/json");
-		mxLog.editor.getSession().setUseWorker(false);
-		mxLog.editor.setAutoScrollEditorIntoView(true);
 	},
 
 	/**
@@ -358,14 +368,18 @@ var mxLog =
 			}
 		}
 		
-		if (mxLog.editor)
+		if (mxLog.textarea != null)
 		{
-			var session = mxLog.editor.session;
-			session.insert({
-			   row: session.getLength(),
-			   column: 0
-			}, "\n" + string)
+			mxLog.textarea.value = mxLog.textarea.value + string;
+
+			// Workaround for no update in Presto 2.5.22 (Opera 10.5)
+			if (navigator.userAgent.indexOf('Presto/2.5') >= 0)
+			{
+				mxLog.textarea.style.visibility = 'hidden';
+				mxLog.textarea.style.visibility = 'visible';
+			}
 			
+			mxLog.textarea.scrollTop = mxLog.textarea.scrollHeight;
 		}
 		else
 		{
@@ -393,13 +407,7 @@ var mxLog =
 			}
 		}
 
-		if(mxLog.editor){
-			var session = mxLog.editor.session;
-			session.insert({
-			   row: session.getLength(),
-			   column: 0
-			}, "\n" + string)
-		}
+		mxLog.write(string + '\n');
 	}
 	
 };

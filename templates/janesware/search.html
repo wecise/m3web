@@ -4,26 +4,32 @@
 <link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
 
 <style type="text/css" media="screen">
-  
-  	body{
-		background-color: #d9e0e7;
-  	}
-	
-	.container-fluid{
-		margin: 5px -5px;
-	}
 
 	.panel{
-		background-color: #b6c2ca;
-		border-radius: 0px!important;
+		border-radius: 5px!important;
+	}
+
+	.panel-body {
+		padding:0px;
 	}
 
 	.well {
-		border: 1px solid transparent;
+		border: 1px solid rgb(226, 231, 236);
 	    border-radius: 0px;
 	    -webkit-box-shadow: inset 0 0px 0px rgba(0,0,0,.05);
 	    box-shadow: inset 0 0px 0px rgba(0,0,0,.05);
-	    background-color: #b6c2ca;
+	    background-color: #ffffff;
+		margin-bottom: 10px;
+		padding: 0px 5px;
+	}
+
+	.btn.dropdown-toggle {
+		padding: 7px 12px;
+		border-radius: 0px;
+	}
+
+	.vue-search-input-component > .btn-group > .btn.dropdown-toggle {
+		border-bottom: 2px solid rgb(182, 194, 202);
 	}
 
 	code {
@@ -128,6 +134,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <script>
 	
@@ -139,7 +146,8 @@
 						"vue-search-preset-component",
 						"vue-search-input-component",
 						"vue-common-form-component",
-						"vue-object-detail-component"],function() {
+						"vue-object-detail-component",
+						"vue-ai-robot-component"],function() {
 
 		$(function(){
 
@@ -899,9 +907,7 @@
 <script type="text/x-template" id="app-template">
 	<div class="container-fluid main-container">
 
-		<span><i class="fa fa-search fa-fw"></i> <label><h4>{{.i18n.Tr "mxsearch_search_new"}}</h4></label></span>
-
-	  	<div class="row">
+		<div class="row">
 	  	
 		  	<div class="col-lg-12">
 		  		
@@ -982,7 +988,7 @@
 
 <script type="text/x-template" id="search-event-template">
 	<div id="search-event">
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:10px;">
+		<div class="well well-default expandit">
 						    
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-info" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1056,7 +1062,7 @@
 
 <script type="text/x-template" id="search-syslog-template">
 	<div id="search-syslog">
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:10px;">
+		<div class="well well-default expandit">
 						    
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-info" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1130,7 +1136,7 @@
 
 <script type="text/x-template" id="search-journal-template">
 	<div id="search-journal">
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:0px;">
+		<div class="well well-default expandit">
 
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1187,7 +1193,7 @@
 
 <script type="text/x-template" id="search-raw-template">
 	<div id="search-raw">
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:0px;">
+		<div class="well well-default expandit">
 
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1265,7 +1271,7 @@
 
 <script type="text/x-template" id="search-log-template">
 	<div id="search-log">
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:0px;">
+		<div class="well well-default expandit">
 
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1344,7 +1350,7 @@
 
 <script type="text/x-template" id="search-tickets-template">
 	<div id="search-tickets">  
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:10px;">
+		<div class="well well-default expandit">
 
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1388,7 +1394,7 @@
 
 <script type="text/x-template" id="search-change-template">
 	<div id="search-change">  
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:10px;">
+		<div class="well well-default expandit">
 
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
@@ -1432,7 +1438,7 @@
 
 <script type="text/x-template" id="search-performance-template">
 	<div id="search-performance">  
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:0px;">
+		<div class="well well-default expandit">
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-line-chart" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapsePerformance" aria-expanded="true" aria-controls="collapsePerformance">
@@ -1452,7 +1458,7 @@
 
 <script type="text/x-template" id="search-graph-template">
 	<div id="search-graph">  
-		<div class="well well-default expandit" style="margin-bottom:0px; padding-top:0px;">
+		<div class="well well-default expandit">
 			<h5>
 				<span class="badge" style="background-color:#fff;"><i class="fa fa-dashboard" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseITmap" aria-expanded="true" aria-controls="collapseITmap">

@@ -397,26 +397,18 @@ var mxEvent =
 	 *
 	 * Disables the context menu for the given element.
 	 */
-	disableContextMenu: function()
+	disableContextMenu: function(element)
 	{
-		if (mxClient.IS_IE && (typeof(document.documentMode) === 'undefined' || document.documentMode < 9))
+		mxEvent.addListener(element, 'contextmenu', function(evt)
 		{
-			return function(element)
+			if (evt.preventDefault)
 			{
-				mxEvent.addListener(element, 'contextmenu', function()
-				{
-					return false;
-				});
-			};
-		}
-		else
-		{
-			return function(element)
-			{
-				element.setAttribute('oncontextmenu', 'return false;');
-			};		
-		}
-	}(),
+				evt.preventDefault();
+			}
+			
+			return false;
+		});
+	},
 	
 	/**
 	 * Function: getSource
@@ -448,6 +440,18 @@ var mxEvent =
 		return (evt.pointerType != null) ? (evt.pointerType == 'touch' || evt.pointerType ===
 			evt.MSPOINTER_TYPE_TOUCH) : ((evt.mozInputSource != null) ?
 					evt.mozInputSource == 5 : evt.type.indexOf('touch') == 0);
+	},
+
+	/**
+	 * Function: isPenEvent
+	 * 
+	 * Returns true if the event was generated using a pen (not a touch device or mouse).
+	 */
+	isPenEvent: function(evt)
+	{
+		return (evt.pointerType != null) ? (evt.pointerType == 'pen' || evt.pointerType ===
+			evt.MSPOINTER_TYPE_PEN) : ((evt.mozInputSource != null) ?
+					evt.mozInputSource == 2 : evt.type.indexOf('pen') == 0);
 	},
 
 	/**

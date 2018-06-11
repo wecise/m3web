@@ -53,218 +53,18 @@ var init =  function(){
 
 };
 
-var initPlugIn = function () {
 
-    let _theme = localStorage.getItem("MATRIX_THEME");
-
-    toggleTheme(_theme);
-};
 
 /*
-*  FullScreen Util
-*
-*/
-var toggleFullScreen = function () {
-    if (!document.fullscreenElement &&    // alternative standard method
-        !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) {
-            document.documentElement.msRequestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-            document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-    }
-};
+        #####  ###  #####  #     #    ### #     #
+        #     #  #  #     # ##    #     #  ##    #
+        #        #  #       # #   #     #  # #   #
+         #####   #  #  #### #  #  #     #  #  #  #
+              #  #  #     # #   # #     #  #   # #
+        #     #  #  #     # #    ##     #  #    ##
+         #####  ###  #####  #     #    ### #     #
 
-/*
-*  皮肤切换
-*
-* */
-
-var MATRIX_THEME = "LIGHT";
-
-var toggleTheme = function(event){
-
-    if(event == 'LIGHT'){
-
-        $(".navbar.navbar-default.navbar-fixed-top").css({
-                                                            "backgroundColor": "rgb(33, 149, 244)",
-            
-                                                        });
-
-        $(".layer.btn.btn-primary").css({
-                                            "backgroundColor": "rgb(33, 149, 244)"
-                                        });
-
-        $(".layer > .dropdown > a").css({
-                                            "color": "rgb(110, 180, 236)"
-                                        });
-
-        $(".layer > .dropdown > a i").css({
-            "color": "rgba(255,255,255,0.5)"
-        });
-
-        $(".layer a").css({
-            "color": "rgb(255,255,255)"
-        });
-
-        $(".row-fluid .btn.btn-primary").css({
-                                        "backgroundColor": "rgb(33, 149, 244)",
-                                        "borderColor": "rgb(255, 255, 255)"
-                                });
-
-
-        $(".navbar.navbar-default.navbar-fixed-bottom").show(500);
-    } else if (event == 'DARK'){
-
-        $(".navbar.navbar-default.navbar-fixed-top").css({
-                                                            "backgroundColor": "rgb(90, 90, 90)",
-
-                                                        });
-
-        $(".layer.btn.btn-primary").css({
-            "backgroundColor": "rgb(90, 90, 90)"
-        });
-
-        $(".layer > .dropdown > a").css({
-            "color": "rgb(255,255,255)"
-        });
-
-        $(".layer > .dropdown > a i").css({
-            "color": "rgba(255,255,255,0.5)"
-        });
-
-        $(".layer a").css({
-            "color": "rgb(255,255,255)"
-        });
-
-        $(".row-fluid .btn.btn-primary").css({
-            "backgroundColor": "rgb(90, 90, 90)",
-            "borderColor": "rgb(90,90,90)"
-        });
-
-
-        $(".navbar.navbar-default.navbar-fixed-bottom").hide(500);
-    }
-
-    localStorage.setItem("MATRIX_THEME",event);
-
-};
-
-/*
-*
-*
-*
-*/
-var loadLogo = function () {
-    let _logo = '{{.logo}}';
-    
-    _logo = _logo.replace(/"/g,"");
-
-    jQuery.ajax({
-        url: '/fs/' + _logo,
-        type: 'GET',
-        contentType: "application/text; charset=utf-8",
-        dataType: 'text json',
-        data: {
-          type: 'file'
-        },
-        beforeSend:function(xhr){ 
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function(data, textStatus, xhr) {
-            
-            if( _.isEmpty(data.message) ) return false;
-            
-        },
-        error: function(xhr, textStatus, errorThrown) {
-        }
-    });
-};
-
-/*
-*
-*
-*
-* */
-var pathNameGet = function () {
-    let _rtn = null;
-
-    let path = window.location.pathname;
-    _rtn = path.split("/").pop();
-
-    return _rtn;
-}
-
-/*
- *  Load Function
- *
  */
-var loadResource = function(filename, filetype, id){
-
-    if (filetype == "js"){
-        var fileref = document.createElement('script')
-        fileref.setAttribute("type","text/javascript")
-        fileref.setAttribute("src", filename)
-    } else if (filetype == "template"){
-        var fileref = document.createElement('script')
-        fileref.setAttribute("type","text/x-template")
-        fileref.setAttribute("id", id)
-        $.get( filename, function( data ) {
-            $(fileref).html(data);
-        });
-    } else if (filetype == "css"){ 
-        var fileref = document.createElement("link")
-        fileref.setAttribute("rel", "stylesheet")
-        fileref.setAttribute("type", "text/css")
-        fileref.setAttribute("href", filename)
-    } 
-    if (typeof fileref != "undefined"){
-        console.log(fileref)
-        document.getElementsByTagName("head")[0].appendChild(fileref)
-    }
-}
-
-/*
- *  Get Url Params
- *
- */
-var urlParams = (function(url)
-{
-    var result = new Object();
-    var idx = url.lastIndexOf('?');
-
-    if (idx > 0)
-    {
-        var params = url.substring(idx + 1).split('&');
-        
-        for (var i = 0; i < params.length; i++)
-        {
-            idx = params[i].indexOf('=');
-            
-            if (idx > 0)
-            {
-                result[params[i].substring(0, idx)] = params[i].substring(idx + 1);
-            }
-        }
-    }
-    
-    return result;
-})(window.location.href);
 
 var ifSignIn = function (event) {
     if (event.status == 'signin'){
@@ -273,6 +73,15 @@ var ifSignIn = function (event) {
     }
 };
 
+/*
+        #     # ####### #     # #######
+        #     # #     # ##   ## #
+        #     # #     # # # # # #
+        ####### #     # #  #  # #####
+        #     # #     # #     # #
+        #     # #     # #     # #
+        #     # ####### #     # #######
+ */
 
 /*
 *   设置Home
@@ -309,129 +118,18 @@ var setDefaultHome = function(name,token){
     return rtn;
 };
 
-/*
-*   类管理
-*
-*   树
-*
-*
-* */
-var classList = function(event){
-    let rtn = null;
-    let loading = null;
-
-
-    jQuery.ajax({
-        url: "/mxobject/schema/class/list",
-        dataType: 'json',
-        type: 'GET',
-        data: {
-            id: event
-        },
-        async: false,
-        beforeSend:function(xhr){
-            loading = layer.load(2, {
-                shade: [0.1,'#ccc'],
-                time: 30*1000
-            });
-        },
-        complete: function(xhr, textStatus) {
-            layer.close(loading);
-        },
-        success: function(data, textStatus, xhr) {
-
-            ifSignIn(data);
-
-            if (!_.isEmpty(data.message)){
-                rtn = data.message;
-            }
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            layer.close(loading);
-            console.log(errorThrown);
-        }
-    })
-    return rtn;
-};
-
-/*
-*   类管理
-*
-*   新建
-*
-*
-* */
-var classNew = function (event) {
-    let rtn = 0;
-
-    jQuery.ajax({
-        url: "/mxobject/schema/class",
-        dataType: 'json',
-        type: 'POST',
-        data: {
-            classinfo: JSON.stringify(event)
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-
-            if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                alertify.success("Success" + " " + event.class + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("Failed" + " " + event.class + " " + moment().format("LLL"));
-            }
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            rtn = 0;
-            alertify.error("Failed" + " " + event.class + " " + moment().format("LLL"));
-            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    });
-    return rtn;
-}
 
 
 /*
-*   类管理
-*
-*   删除
-*
-*
-* */
-var classDelete = function(event){
-    let rtn = 0;
+        ####### ### #       #######     #####  #     #  #####  ####### ####### #     #
+        #        #  #       #          #     #  #   #  #     #    #    #       ##   ##
+        #        #  #       #          #         # #   #          #    #       # # # #
+        #####    #  #       #####       #####     #     #####     #    #####   #  #  #
+        #        #  #       #                #    #          #    #    #       #     #
+        #        #  #       #          #     #    #    #     #    #    #       #     #
+        #       ### ####### #######     #####     #     #####     #    ####### #     #
 
-    jQuery.ajax({
-        url: "/mxobject/schema/class?cid=" + event,
-        dataType: 'json',
-        type: 'DELETE',
-        async: false,
-        beforeSend:function(xhr){
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function(data, textStatus, xhr) {
-
-            ifSignIn(data);
-
-            if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                alertify.success("Success" + " " + event + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("Failed" + " " + event + " " + moment().format("LLL"));
-            }
-
-        },
-        error: function(xhr, textStatus, errorThrown) {
-            rtn = 0;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    })
-    return rtn;
-};
+ */
 
 /*
 *   文件系统
@@ -443,25 +141,24 @@ var classDelete = function(event){
 *       扩展名
 *
 */
-var fsNew = function(type, name, content){
+var fsNew = function(ftype, parent, name, content, attr){
     let rtn = 0;
 
     let fm = new FormData();
 
     fm.append("data", content);
-    fm.append("attr", JSON.stringify({
-                'content': content, 'pic': ''
-            }));
-    fm.append("type", "file");
+    fm.append("type", ftype);
+    fm.append("attr", JSON.stringify(attr));
 
     jQuery.ajax({
-        url: "/fs/home/creative/" + name,
+        url: "/fs" + parent + "/" + name,
         type: 'PUT',
         processData: false,
         contentType: false,
         mimeType: 'multipart/form-data',
         dataType: "json",
         data: fm,
+        async:false,
         beforeSend: function(xhr) {
         },
         complete: function(xhr, textStatus) {
@@ -501,7 +198,7 @@ var fsList = function(parent){
     let rtn = null;
     
     jQuery.ajax({
-        url: '/fs/home/' + parent,
+        url: '/fs' + parent,
         type: 'GET',
         dataType: 'text json',
         contentType: "application/text; charset=utf-8",
@@ -523,7 +220,7 @@ var fsList = function(parent){
 
         },
         error: function(xhr, textStatus, errorThrown) {
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
         }
     });
     return rtn;
@@ -616,6 +313,228 @@ var fsContent = function(parent,name){
     return rtn;
 };
 
+/*
+*   文件系统
+*
+*   更改文件名
+*
+*
+*/
+var fsRename = function(oldVal,newVal){
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: '/fs/rename',
+        type: 'GET',
+        dataType: 'json',
+        async:false,
+        data: {
+            oldpath: oldVal,
+            newpath: newVal
+        },
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("编辑成功" + " " + newVal);
+            } else {
+                rtn = 0;
+                alertify.error("编辑失败" + " " + newVal);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+
+/*
+*   文件系统
+*
+*   更新属性
+*
+*
+*/
+var fsUpdateAttr = function(parent, name, attr) {
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: '/fs' + parent + '/' + name + '?type=attr',
+        dataType: 'json',
+        type: 'PUT',
+        data: {
+            attr: JSON.stringify(attr)
+        },
+        async:false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("编辑成功" + " " + parent + "/" + name);
+            } else {
+                rtn = 0;
+                alertify.error("编辑失败" + " " + parent + "/" + name);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+
+/*
+        #######            #     #####   #####
+        #       #         # #   #     # #     #
+        #       #        #   #  #       #
+        #       #       #     #  #####   #####
+        #       #       #######       #       #
+        #     # #       #     # #     # #     #
+         #####  ####### #     #  #####   #####
+ */
+
+/*
+*   类管理
+*
+*   树
+*
+*
+* */
+var classList = function(event){
+    let rtn = null;
+    let loading = null;
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class/list",
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            id: event
+        },
+        async: false,
+        beforeSend:function(xhr){
+            loading = layer.load(2, {
+                shade: [0.1,'#ccc'],
+                time: 30*1000
+            });
+        },
+        complete: function(xhr, textStatus) {
+            layer.close(loading);
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if (!_.isEmpty(data.message)){
+                rtn = data.message;
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            layer.close(loading);
+            console.log(errorThrown);
+        }
+    })
+    return rtn;
+};
+
+/*
+*   类管理
+*
+*   新建
+*
+*
+* */
+var classNew = function (event) {
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+            classinfo: JSON.stringify(event)
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("Success" + " " + event.name + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("Failed" + " " + event.name + " " + moment().format("LLL"));
+            }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("Failed" + " " + event.name + " " + moment().format("LLL"));
+            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+}
+
+
+/*
+*   类管理
+*
+*   删除
+*
+*
+* */
+var classDelete = function(event){
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: "/mxobject/schema/class?cid=" + event,
+        dataType: 'json',
+        type: 'DELETE',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("Success" + " " + event + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("Failed" + " " + event + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
 
 /*
 *   获取类的信息并生成tree
@@ -699,6 +618,17 @@ var fetchClass = function (param) {
 
 
 /*
+         #####  #######    #    ######   #####  #     #
+        #     # #         # #   #     # #     # #     #
+        #       #        #   #  #     # #       #     #
+         #####  #####   #     # ######  #       #######
+              # #       ####### #   #   #       #     #
+        #     # #       #     # #    #  #     # #     #
+         #####  ####### #     # #     #  #####  #     #
+
+ */
+
+/*
 *   一键搜索
 *
 *       参数：
@@ -724,14 +654,27 @@ var fetchData = function (param) {
             ifSignIn(data);
 
             rtn = data;
+
         },
         error: function(xhr, textStatus, errorThrown) {
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            mxLog.writeln("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
 
     return rtn;
 };
+
+
+/*
+        ####### ######        # #######  #####  #######    ######     #    #######    #
+        #     # #     #       # #       #     #    #       #     #   # #      #      # #
+        #     # #     #       # #       #          #       #     #  #   #     #     #   #
+        #     # ######        # #####   #          #       #     # #     #    #    #     #
+        #     # #     # #     # #       #          #       #     # #######    #    #######
+        #     # #     # #     # #       #     #    #       #     # #     #    #    #     #
+        ####### ######   #####  #######  #####     #       ######  #     #    #    #     #
+ */
 
 /*
 *   对象数据管理
@@ -779,48 +722,6 @@ var putDataToClass = function (param) {
 };
 
 /*
-*   执行MQL
-*
-*       参数：
-*           mql
-*/
-var fetchDataByMql = function (param) {
-
-    let rtn = null;
-
-    jQuery.ajax({
-        url: "/mxobject/mql",
-        dataType: 'json',
-        type: 'POST',
-        async: false,
-        data: {
-           mql: param
-        },
-        beforeSend:function(xhr){
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-
-            // MQL for CRUD
-            if(_.lowerCase(data.message) == "ok"){
-                alertify.success("成功" + " " + moment().format("LLL"));
-            }
-
-            rtn = data;
-
-        },
-        error: function(xhr, textStatus, errorThrown){
-            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    });
-
-    return rtn;
-};
-
-/*
 *  调用MQL，不建议使用！！！
 *
 *    参数：
@@ -864,39 +765,60 @@ var putDataByMql = function (event) {
 };
 
 /*
-*   获取一个文件内容
+*   执行MQL
 *
 *       参数：
-*          url
+*           mql
 */
-var fetchFile = function (url) {
+var fetchDataByMql = function (param) {
 
     let rtn = null;
 
     jQuery.ajax({
-        url: url,
-        async:false,
-        beforeSend: function(xhr) {
+        url: "/mxobject/mql",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+            mql: param
+        },
+        beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
         },
-        success: function(data, textStatus, xhr) {
+        success: function (data, status) {
 
             ifSignIn(data);
 
-            rtn = data.data;
+            // MQL for CRUD
+            if(_.lowerCase(data.status) == "ok"){
+                alertify.success("成功" + " " + moment().format("LLL"));
+                rtn = data;
+            } else {
+                console.log("["+ moment().format("LLL")+"] " + data.message);
+            }
+
         },
-        error: function(xhr, textStatus, errorThrown) {
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        error: function(xhr, textStatus, errorThrown){
+            mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + JSON.stringify(xhr.responseJSON));
         }
     });
 
     return rtn;
-
 };
 
 
 
+/*
+              # ####### ######
+              # #     # #     #
+              # #     # #     #
+              # #     # ######
+        #     # #     # #     #
+        #     # #     # #     #
+         #####  ####### ######
+
+* */
 
 /*
 *   作业管理
@@ -930,6 +852,50 @@ var jobContextGet = function (key,prefix) {
 
         },
         error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*   作业管理
+*
+*   作业状态
+*
+*
+*/
+var jobContextSetup = function (key,content) {
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: `/job/context/${key}`,
+        dataType: 'json',
+        type: 'PUT',
+        async:false,
+        data: {
+            name:key,
+            value: content
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = 0;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -988,10 +954,10 @@ var jobContextReset = function (key) {
 */
 var callJob = function (cmd,host) {
     let rtn = null;
-    let event = '{"cmd": "' + cmd + '","HOST!": "'+host+'", "timeout": 5}';
+    let event = `{"cmd": "${cmd}", "HOST!": "${host}", "timeout": 5}`;
     
     jQuery.ajax({
-        url: '/job/remote_command@system/common',
+        url: '/job/remote_remote_command@system/common',
         dataType: 'json',
         type: 'GET',
         async:false,
@@ -999,7 +965,39 @@ var callJob = function (cmd,host) {
             receive_output: true,
             param: event
         },
-        timeout: 3000,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (_.isEmpty(data.message)) return rtn;
+
+            rtn = data;
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+var callBobJob = function (cmd,host) {
+    let rtn = null;
+    let event = `{"cmd": "${cmd}", "HOST!": "${host}", "timeout": 6000}`;
+
+    jQuery.ajax({
+        url: '/job/remote_wincall@system/common',
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        data: {
+            receive_output: true,
+            param: event
+        },
         beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
@@ -1021,7 +1019,17 @@ var callJob = function (cmd,host) {
 };
 
 
+/*
 
+        #     #  #####  ####### ######       ##        #####  ######  ####### #     # ######
+        #     # #     # #       #     #     #  #      #     # #     # #     # #     # #     #
+        #     # #       #       #     #      ##       #       #     # #     # #     # #     #
+        #     #  #####  #####   ######      ###       #  #### ######  #     # #     # ######
+        #     #       # #       #   #      #   # #    #     # #   #   #     # #     # #
+        #     # #     # #       #    #     #    #     #     # #    #  #     # #     # #
+         #####   #####  ####### #     #     ###  #     #####  #     # #######  #####  #
+
+ */
 
 /*
 *  用户管理
@@ -1061,81 +1069,19 @@ var ldapMaintain = function (event) {
         }
     });
     return rtn;
-}
-
-/*
-*  Grok解析规则列表
-*
-*/
-var grokList = function (event) {
-    let rtn = null;
-    
-    jQuery.ajax({
-        url: "/pattern",
-        dataType: 'json',
-        type: 'GET',
-        async: false,
-        beforeSend:function(xhr){
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-            
-            if (data.status == "ok"){
-                rtn = data;
-            }
-        },
-        error: function(xhr, textStatus, errorThrown){
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    });
-    return rtn;
 };
 
+
 /*
-*  Grok解析规则列表
-*
+
+         #####   #####  #     # ####### ######  #     # #       #######     #####  ######  ####### #     # ######
+        #     # #     # #     # #       #     # #     # #       #          #     # #     # #     # #     # #     #
+        #       #       #     # #       #     # #     # #       #          #       #     # #     # #     # #     #
+         #####  #       ####### #####   #     # #     # #       #####      #  #### ######  #     # #     # ######
+              # #       #     # #       #     # #     # #       #          #     # #   #   #     # #     # #
+        #     # #     # #     # #       #     # #     # #       #          #     # #    #  #     # #     # #
+         #####   #####  #     # ####### ######   #####  ####### #######     #####  #     # #######  #####  #
 */
-var grokNew = function (event) {
-    let rtn = 1;
-
-    var form = new FormData();
-    form.append("eg", event.eg);
-    form.append("pattern", event.pattern);
-    
-    jQuery.ajax({
-        url: "/pattern/" + event.name,
-        dataType: 'json',
-        type: 'POST',
-        async: false,
-        data: event,
-        beforeSend:function(xhr){
-        },
-        complete: function(xhr, textStatus) {
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-
-            if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                swal("Success!","","success");
-            } else {
-                rtn = 0;
-                swal("Failed!",data.message,"warning");
-            }
-
-        },
-        error: function(xhr, textStatus, errorThrown){
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            return 0;
-        }
-    });
-    return rtn;
-};
-
 
 /*
 *  调度器组管理
@@ -1265,38 +1211,15 @@ var serverGroupDelete = function(event) {
 
 
 /*
-*  探针管理
-*  Agent list
-*
-*
+
+        ######  #     # #       #######
+        #     # #     # #       #
+        #     # #     # #       #
+        ######  #     # #       #####
+        #   #   #     # #       #
+        #    #  #     # #       #
+        #     #  #####  ####### #######
 */
-var agentList = function () {
-    let rtn = null;
-
-    jQuery.ajax({
-        url: '/monitoring',
-        dataType: 'json',
-        type: 'GET',
-        async: false,
-        beforeSend: function (xhr) {
-        },
-        complete: function (xhr, textStatus) {
-        },
-        success: function (data, status) {
-
-            ifSignIn(data);
-
-            if( _.lowerCase(data.status) === "ok"){
-                rtn = data;
-            }
-
-        },
-        error: function (xhr, textStatus, errorThrown) {
-            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
-        }
-    });
-    return rtn;
-};
 
 /*
 *  规则管理
@@ -1417,11 +1340,22 @@ var ruleDelete = function(event) {
 };
 
 /*
-*  探针管理
-*
-*  Agent list
-*
+
+        ######  ######  ####### ######  #######
+        #     # #     # #     # #     # #
+        #     # #     # #     # #     # #
+        ######  ######  #     # ######  #####
+        #       #   #   #     # #     # #
+        #       #    #  #     # #     # #
+        #       #     # ####### ######  #######
 */
+
+    /*
+    *  探针管理
+    *
+    *  Agent list
+    *
+    */
 var agentList = function () {
     let rtn = null;
 
@@ -1542,6 +1476,88 @@ var agentDispatch = function(key,content) {
     return rtn;
 };
 
+/*
+        #####  ######  ####### #    #
+        #     # #     # #     # #   #
+        #       #     # #     # #  #
+        #  #### ######  #     # ###
+        #     # #   #   #     # #  #
+        #     # #    #  #     # #   #
+         #####  #     # ####### #    #
+ */
+
+/*
+*  Grok解析规则列表
+*
+*/
+var grokList = function (event) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: "/pattern",
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (data.status == "ok"){
+                rtn = data;
+            }
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+    return rtn;
+};
+
+/*
+*  Grok解析规则列表
+*
+*/
+var grokNew = function (event) {
+    let rtn = 1;
+
+    var form = new FormData();
+    form.append("eg", event.eg);
+    form.append("pattern", event.pattern);
+
+    jQuery.ajax({
+        url: "/pattern/" + event.name,
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                swal("Success!","","success");
+            } else {
+                rtn = 0;
+                swal("Failed!",data.message,"warning");
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            return 0;
+        }
+    });
+    return rtn;
+};
 
 /*
 *  Grok解析规则列表
@@ -1580,6 +1596,16 @@ var grokDelete = function (event) {
     return rtn;
 };
 
+
+/*
+           #    ######  ######      #####  ####### #     # ####### ####### #     # #######
+          # #   #     # #     #    #     # #     # ##    #    #    #        #   #     #
+         #   #  #     # #     #    #       #     # # #   #    #    #         # #      #
+        #     # ######  ######     #       #     # #  #  #    #    #####      #       #
+        ####### #       #          #       #     # #   # #    #    #         # #      #
+        #     # #       #          #     # #     # #    ##    #    #        #   #     #
+        #     # #       #           #####  ####### #     #    #    ####### #     #    #
+ */
 
 /*
 *   全局缓存
@@ -1664,50 +1690,185 @@ var appContextSet = function (event,context) {
 
 
 /*
+        #     # ### #     # ######  ####### #     #
+        #  #  #  #  ##    # #     # #     # #  #  #
+        #  #  #  #  # #   # #     # #     # #  #  #
+        #  #  #  #  #  #  # #     # #     # #  #  #
+        #  #  #  #  #   # # #     # #     # #  #  #
+        #  #  #  #  #    ## #     # #     # #  #  #
+         ## ##  ### #     # ######  #######  ## ##
+ */
+
+/*
 *  新建一个窗体
 *  参数：
 *   size: 大小 [mini,small,large]
 *   title: 标题
 *   template: 模板（Vue渲染用）
 */
-var newWindow = function (size, title, template) {
-    let win;
+var newWindow = function (type, title, template, position) {
+    let win = null;
     let w = $( window ).width();//document.body.clientWidth;
     let h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
     let wW = $( window ).width()*2.2/3;
     let hH = $( window ).height()*2.5/3;
-
-    if(size === 'narrow'){
-        wW = $( window ).width()*0.6/3;
-        hH = $( window ).height()*1.45/3;
-    }
-
-    if(size === 'mini'){
-        wW = $( window ).width()*0.7/3;
-        hH = $( window ).height()*0.8/3;
-    }
-
-    if(size === 'small'){
-        wW = $( window ).width()*1.5/3;
-        hH = $( window ).height()*1.8/3;
-    } 
-
-    if(size === 'middle'){
-        wW = $( window ).width()*1.8/3;
-        hH = $( window ).height()*2.0/3;
-    }
-
     let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
-    let _position = localStorage.getItem(_.upperCase(size+"_window_position"));
 
-    if(!_.isEmpty(_position)){
-        let _p = _.attempt(JSON.parse.bind(null, _position));
-        lrwh[0] = _p.x || (w-wW)/2;
-        lrwh[1] = _p.y || (h-hH)/2;
+    if(type === 'toolbars'){
+
+        win = $.jsPanel({
+                theme:          'filledlight',
+                contentSize:    {width: 35, height: 210},
+                position: {
+                    left: position[0],
+                    top:  position[1]
+                },
+                headerRemove:  true,
+                dragit:         {handles: 'div.jsPanel-content'},
+                content:        template,
+                callback:       function(){
+
+
+                }
+            });
+
+        return win;
+
     }
 
-    var tb = document.createElement('div');
-    
+    if(type === 'cmd'){
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: 320, height: 125},
+            position: {
+                my: "left-top",
+                at: "right-bottom",
+                of: $(position),
+                offsetX: 10,
+            },
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'appsbox'){
+        lrwh[2] = $( window ).width()*0.8/3;
+        lrwh[3] = $( window ).height()*2.0/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'robot'){
+        lrwh[2] = $( window ).width()*0.8/3;
+        lrwh[3] = $( window ).height()*2.1/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'fsinfo'){
+        lrwh[2] = $( window ).width()*0.6/3;
+        lrwh[3] = $( window ).height()*2.2/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'narrow'){
+        lrwh[2] = $( window ).width()*0.6/3;
+        lrwh[3] = $( window ).height()*1.45/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'mini'){
+        lrwh[2] = $( window ).width()*0.7/3;
+        lrwh[3] = $( window ).height()*0.8/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'small'){
+        lrwh[2] = $( window ).width()*1.5/3;
+        lrwh[3] = $( window ).height()*1.8/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    if(type === 'middle'){
+        lrwh[2] = $( window ).width()*1.8/3;
+        lrwh[3] = $( window ).height()*2.0/3;
+
+        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+        if(!_.isEmpty(_position)){
+            let _p = _.attempt(JSON.parse.bind(null, _position));
+            lrwh[0] = _p.x || (w-wW)/2;
+            lrwh[1] = _p.y || (h-hH)/2;
+        }
+    }
+
+    let tb = document.createElement('div');
+    console.log(title, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true)
     $(tb).append(template);
     win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
     win.hide();
@@ -1738,12 +1899,370 @@ var newWindow = function (size, title, template) {
 
     win.addListener(mxEvent.MOVE_END, function(event){
         console.log(win.getX(),win.getY())
-        localStorage.setItem(_.upperCase(size+"_window_position"),JSON.stringify({x: win.getX(),y:win.getY()}));
+        localStorage.setItem(_.upperCase(type+"_window_position"),JSON.stringify({x: win.getX(),y:win.getY()}));
     });
 
     return win;
 };
 
+
+var newWindows = function(event, type, theme, title, content){
+    let win = null;
+
+    let w = $( window ).width();
+    let h = $( window ).height();
+    let wW = $( window ).width()*2.2/3;
+    let hH = $( window ).height()*2.5/3;
+
+    if(type === 'cmd'){
+        wW = $( window ).width()*0.8/3;
+        hH = $( window ).height()*1.8/3;
+    }
+
+    if(type === 'appsbox'){
+        wW = $( window ).width()*0.8/3;
+        hH = $( window ).height()*2.0/3;
+    }
+
+    if(type === 'robot'){
+        wW = $( window ).width()*0.8/3;
+        hH = $( window ).height()*2.1/3;
+    }
+
+    if(type === 'fsinfo'){
+        wW = $( window ).width()*0.6/3;
+        hH = $( window ).height()*2.2/3;
+    }
+
+    if(type === 'narrow'){
+        wW = $( window ).width()*0.6/3;
+        hH = $( window ).height()*1.45/3;
+    }
+
+    if(type === 'mini'){
+        wW = $( window ).width()*0.7/3;
+        hH = $( window ).height()*0.8/3;
+    }
+
+    if(type === 'small'){
+        wW = $( window ).width()*1.5/3;
+        hH = $( window ).height()*1.8/3;
+    }
+
+    if(type === 'middle'){
+        wW = $( window ).width()*1.8/3;
+        hH = $( window ).height()*2.0/3;
+    }
+
+    let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+    let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
+
+    if(!_.isEmpty(_position)){
+        let _p = _.attempt(JSON.parse.bind(null, _position));
+        lrwh[0] = _p.x || (w-wW)/2;
+        lrwh[1] = _p.y || (h-hH)/2;
+    }
+
+    win = $.jsPanel({
+                position: {
+                    at: "body",
+                    of: event.target,
+                    offsetX: 100,
+                },
+                theme:       theme,
+                headerControls: { iconfont: "font-awesome" },
+                contentSize: {width: lrwh[2], height: lrwh[3]},
+                headerTitle: title,
+                content:     content,
+                callback:    function () {
+
+                    $(".jsPanel-headerbar").css({
+                            "backgroundColor": "rgb(249, 249, 249)",
+                            "borderColor": "rgb(236, 236, 236)",
+                            "backgroundImage": "linear-gradient(180deg, rgb(249, 249, 249), rgb(224, 224, 224))",
+                            "backgroundRepeat": "repeat-x"
+                    });
+
+                    $(".jsPanel-content").css({
+                       "border-top": "1px solid #ddd"
+                    });
+
+                    return win;
+                }
+            });
+
+};
+
+/*
+        #     # ####### ### #        #####
+        #     #    #     #  #       #     #
+        #     #    #     #  #       #
+        #     #    #     #  #        #####
+        #     #    #     #  #             #
+        #     #    #     #  #       #     #
+         #####     #    ### #######  #####
+ */
+
+/*
+*  FullScreen Util
+*
+*/
+var toggleFullScreen = function () {
+    if (!document.fullscreenElement &&    // alternative standard method
+        !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+            document.documentElement.msRequestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+};
+
+var getPage = function(){
+    let path = window.location.pathname;
+    let page = path.split("/").pop();
+    return page;
+    console.log( page );
+};
+
+
+var initPlugIn = function () {
+
+    let _theme = localStorage.getItem("MATRIX_THEME");
+
+    toggleTheme(_theme);
+
+
+    let page = getPage();
+    console.log(1,page);
+    $(".ai.ai-robot").removeClass("ai-robot");
+
+    if(_.includes(['home',''],page)){
+        $(".ai").addClass("ai-robot");
+    }
+};
+
+
+/*
+*  皮肤切换
+*
+* */
+
+var MATRIX_THEME = "LIGHT";
+
+var toggleTheme = function(event){
+
+    if(event == 'LIGHT'){
+
+        $(".navbar.navbar-default.navbar-fixed-top").css({
+            "backgroundColor": "rgb(33, 149, 244)",
+
+        });
+
+        $(".layer.btn.btn-primary").css({
+            "backgroundColor": "rgb(33, 149, 244)"
+        });
+
+        $(".layer > .dropdown > a").css({
+            "color": "rgb(110, 180, 236)"
+        });
+
+        $(".layer > .dropdown > a i").css({
+            "color": "rgba(255,255,255,0.5)"
+        });
+
+        $(".layer a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".row-fluid .btn.btn-primary").css({
+            "backgroundColor": "rgb(33, 149, 244)",
+            "borderColor": "rgb(255, 255, 255)"
+        });
+
+        $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(240, 243, 244)");
+        $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#333333");
+        $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#333333");
+
+    } else if (event == 'DARK'){
+
+        $(".navbar.navbar-default.navbar-fixed-top").css({
+            "backgroundColor": "rgb(90, 90, 90)",
+
+        });
+
+        $(".layer.btn.btn-primary").css({
+            "backgroundColor": "rgb(90, 90, 90)"
+        });
+
+        $(".layer > .dropdown > a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".layer > .dropdown > a i").css({
+            "color": "rgba(255,255,255,0.5)"
+        });
+
+        $(".layer a").css({
+            "color": "rgb(255,255,255)"
+        });
+
+        $(".row-fluid .btn.btn-primary").css({
+            "backgroundColor": "rgb(90, 90, 90)",
+            "borderColor": "rgb(90,90,90)"
+        });
+
+        $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(90, 90, 90)");
+        $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#f9f9f9");
+        $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#f9f9f9");
+    }
+
+    localStorage.setItem("MATRIX_THEME",event);
+
+};
+
+
+var loadLogo = function () {
+    let _logo = '{{.logo}}';
+
+    _logo = _logo.replace(/"/g,"");
+
+    jQuery.ajax({
+        url: '/fs/' + _logo,
+        type: 'GET',
+        contentType: "application/text; charset=utf-8",
+        dataType: 'text json',
+        data: {
+            type: 'file'
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            if( _.isEmpty(data.message) ) return false;
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+        }
+    });
+};
+
+/*
+*
+*
+* */
+var pathNameGet = function () {
+    let _rtn = null;
+
+    let path = window.location.pathname;
+    _rtn = path.split("/").pop();
+
+    return _rtn;
+}
+
+/*
+ *  Load Function
+ *
+ */
+var loadResource = function(filename, filetype, id){
+
+    if (filetype == "js"){
+        var fileref = document.createElement('script')
+        fileref.setAttribute("type","text/javascript")
+        fileref.setAttribute("src", filename)
+    } else if (filetype == "template"){
+        var fileref = document.createElement('script')
+        fileref.setAttribute("type","text/x-template")
+        fileref.setAttribute("id", id)
+        $.get( filename, function( data ) {
+            $(fileref).html(data);
+        });
+    } else if (filetype == "css"){
+        var fileref = document.createElement("link")
+        fileref.setAttribute("rel", "stylesheet")
+        fileref.setAttribute("type", "text/css")
+        fileref.setAttribute("href", filename)
+    }
+    if (typeof fileref != "undefined"){
+        console.log(fileref)
+        document.getElementsByTagName("head")[0].appendChild(fileref)
+    }
+}
+
+/*
+ *  Get Url Params
+ *
+ */
+var urlParams = (function(url)
+{
+    var result = new Object();
+    var idx = url.lastIndexOf('?');
+
+    if (idx > 0)
+    {
+        var params = url.substring(idx + 1).split('&');
+
+        for (var i = 0; i < params.length; i++)
+        {
+            idx = params[i].indexOf('=');
+
+            if (idx > 0)
+            {
+                result[params[i].substring(0, idx)] = params[i].substring(idx + 1);
+            }
+        }
+    }
+
+    return result;
+})(window.location.href);
+
+/*
+*   获取一个文件内容
+*
+*       参数：
+*          url
+*/
+var fetchFile = function (url) {
+
+    let rtn = null;
+
+    jQuery.ajax({
+        url: url,
+        async:false,
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            rtn = data.data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+
+};
 
 
 
@@ -1828,6 +2347,74 @@ var handleBootstrapWizards = function(id) {
     $("#" + id).bwizard()
 };
 
+/*
+
+       #    ###    ######  ####### ######  ####### #######
+      # #    #     #     # #     # #     # #     #    #
+     #   #   #     #     # #     # #     # #     #    #
+    #     #  #     ######  #     # ######  #     #    #
+    #######  #     #   #   #     # #     # #     #    #
+    #     #  #     #    #  #     # #     # #     #    #
+    #     # ###    #     # ####### ######  #######    #
+ */
+var robot = function(){
+    $(".ai-robot").html(`<div style="position: absolute;right:0px;top: -38px;cursor: pointer;" class="animated bounceInLeft">
+                            <img src="/web/assets/images/robot.svg" style="width:120px;height:120px;transform: scale(0.5);">
+                         </div>`).click(function(){
+        let _win = null;
+
+        _win = localStorage.getItem("mx-window");
+
+        if(!_.isEmpty(_win)){
+            $(".mxWindow").remove();
+        }
+
+        _win = newWindow("robot", "∵", '<div class="animated slideInDown" id="robot-active-win"></div>', null);
+        _win.setMaximizable(false);
+
+        let _robotVue = new Vue({
+            el: '#robot-active-win',
+            template: '<vue-ai-robot-component id="THIS-IS-ROBOT"></vue-ai-robot-component>',
+            mounted:function(){
+                let me = this;
+
+                me.$nextTick(function() {
+
+                })
+            }
+        });
+    });
+};
+
+var appsBox = function(){
+    $(".apps-box").html(`<div style="position:absolute;right:10px;top:65px;z-index:100;">
+                            <i class="fa fa-th fa-2x" style="color:rgb(182, 194, 202);cursor:pointer;"></i>
+                          </div>`).click(function(){
+        let _win = null;
+
+        _win = localStorage.getItem("mx-window");
+
+        if(!_.isEmpty(_win)){
+            $(".mxWindow").remove();
+        }
+
+        _win = newWindow("appsbox","∷", '<div class="animated slideInDown" id="apps-box-win"></div>',null);
+        _win.setMaximizable(false);
+
+        let _robotVue = new Vue({
+            el: '#apps-box-win',
+            template: '<vue-apps-box-component id="THIS-IS-MY-APPS"></vue-apps-box-component>',
+            mounted:function(){
+                let me = this;
+
+                me.$nextTick(function() {
+
+                })
+            }
+        });
+    });
+}
+
 
 init();
 
@@ -1835,4 +2422,6 @@ initPlugIn();
 
 _.delay(function () {
     //copyBoard();
+    robot();
+    //appsBox();
 },5000)

@@ -1,0 +1,527 @@
+
+<!--
+  Copyright (c) 2006-2013, JGraph Ltd
+
+  Monitor example for mxGraph. This eample demonstrates using a
+  graph to display the current state of a workflow.
+-->
+<html>
+<head>
+    <title>mxGraph Workflow Monitor</title>
+
+    <!-- Sets the basepath for the library if not in same directory -->
+    <script type="text/javascript">
+        mxBasePath = '/web/vendor/mxgraph/src';
+    </script>
+
+    <!-- Loads and initializes the library -->
+    <script src="/web/vendor/mxgraph/src/js/mxClient.js" type="text/javascript"></script>
+
+    <link href="/web/vendor/alertifyjs/themes/alertify.default.css" type="text/css" rel="stylesheet" />
+
+    <!--Jquery JS-->
+    <script src="/web/vendor/jquery/jquery-3.3.1.min.js"></script>
+    <!--Jquery UI JS-->
+    <script src="/web/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
+    <!-- font-awesome  CSS -->
+    <link href="/web/vendor/font-awesome/4.7.1/css/font-awesome.min.css" rel="stylesheet" >
+    <!-- animate CSS -->
+    <link href="/web/vendor/animate/animate.css" rel="stylesheet" >
+
+    <!--lodash JS-->
+    <script src="/web/vendor/lodash/dist/lodash.min.js"></script>
+
+    <!--VUE Core JS-->
+    <script src="/web/vendor/vue/2.5.13/dist/vue.min.js"></script>
+    <script src="/web/vendor/vueloader/vue.loader.min.js"></script>
+
+    <!--Util JS-->
+    <script src="{{AppSubUrl}}/web/vendor/moment/min/moment.min.js"></script>
+    <script src="{{AppSubUrl}}/web/vendor/moment/min/moment-with-locales.min.js"></script>
+
+    <!-- App JS-->
+    <script src="/web/js/util.js"></script>
+    <script src="/web/js/cfg.js"></script>
+    <script src="/web/js/init.js"></script>
+
+    <!--Pace Progress JS & CSS-->
+    <script src="/web/vendor/pace/pace.min.js"></script>
+
+    <!-- Example code -->
+    <script type="text/javascript">
+        // Program starts here. Creates a sample graph in the
+        // DOM node with the specified ID. This function is invoked
+        // from the onLoad event handler of the document (see below).
+        function main(container)
+        {
+            // Checks if the browser is supported
+            if (!mxClient.isBrowserSupported())
+            {
+                // Displays an error message if the browser is not supported.
+                mxUtils.error('Browser is not supported!', 200, false);
+            }
+            else
+            {
+                mxConstants.SHADOWCOLOR = '#e0e0e0';
+
+                // Creates the graph inside the given container
+                var graph = createGraph(container);
+
+                // Creates a process display using the activity names as IDs to refer to the elements
+                var xml = `<mxGraphModel dx="1030" dy="576" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" background="#ffffff">
+  <root>
+    <object label="" ssss="wzd" id="0">
+      <mxCell/>
+    </object>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="17ea667e15c223fc-28" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#000000;strokeWidth=1;fontFamily=Verdana;fontSize=8;fontColor=#000000;shadow=0;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="17ea667e15c223fc-29" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#000000;strokeWidth=1;fontFamily=Verdana;fontSize=8;fontColor=#000000;shadow=0;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="289" y="233" as="targetPoint"/>
+        <mxPoint x="289" y="153" as="sourcePoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="289" y="385" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="541" style="edgeStyle=none;rounded=0;html=1;jettySize=auto;orthogonalLoop=1;dashed=1;strokeWidth=3;strokeColor=#B3B3B3;" parent="1" target="02" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="288.93076923076933" y="280" as="sourcePoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="288.5" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="53" value="否" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=none;" parent="27" vertex="1" connectable="0">
+      <mxGeometry x="-0.15" y="-1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="51" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="140" y="420"/>
+          <mxPoint x="140" y="857"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="52" value="是" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="51" vertex="1" connectable="0">
+      <mxGeometry x="-0.0947" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="542" style="edgeStyle=none;rounded=0;html=1;exitX=0.5;exitY=1;exitPerimeter=0;entryX=0.483;entryY=-0.068;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;dashed=1;strokeWidth=3;strokeColor=#B3B3B3;" parent="1" source="02" target="03" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="02" value="判断模块" style="shape=mxgraph.flowchart.preparation;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="240" y="390" width="97" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="289" y="684" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="54" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=1;entryY=0.5;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="440" y="568"/>
+          <mxPoint x="440" y="420"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="61" value="开始时间：16:39:21" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="54" vertex="1" connectable="0">
+      <mxGeometry x="0.1404" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="62" value="执行时长：1分15秒" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="54" vertex="1" connectable="0">
+      <mxGeometry x="-0.4678" y="46" relative="1" as="geometry">
+        <mxPoint x="46" y="-46" as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="543" style="edgeStyle=none;rounded=0;html=1;jettySize=auto;orthogonalLoop=1;dashed=1;strokeWidth=3;strokeColor=#B3B3B3;" parent="1" source="03" target="04" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="03" value="普通流程" style="shape=mxgraph.flowchart.round_rectangle;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="229" y="520" width="121" height="74" as="geometry"/>
+    </mxCell>
+    <mxCell id="59" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="500" y="857"/>
+          <mxPoint x="500" y="110"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="544" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="460" y="830"/>
+          <mxPoint x="460" y="105"/>
+        </Array>
+        <mxPoint x="330" y="830" as="sourcePoint"/>
+        <mxPoint x="630" y="105" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="559" value="是" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="544" vertex="1" connectable="0">
+      <mxGeometry x="-0.0815" y="-1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="37" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0.621;entryY=0;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="652" y="234" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="545" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="665.5" y="230" as="targetPoint"/>
+        <mxPoint x="665.5" y="133" as="sourcePoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="39" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="650" y="384" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="546" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="650" y="380" as="targetPoint"/>
+        <mxPoint x="650" y="304" as="sourcePoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="575" style="edgeStyle=orthogonalEdgeStyle;rounded=1;comic=0;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeWidth=3;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#CCCCCC;strokeColor=#CCCCCC;" parent="1" source="05" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="930" y="230" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="05" value="数据112233" style="shape=mxgraph.flowchart.parallelepiped;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="583" y="234" width="140" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="44" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="650.5" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="58" value="是" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="44" vertex="1" connectable="0">
+      <mxGeometry x="-0.0731" y="1" relative="1" as="geometry">
+        <mxPoint as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="56" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;entryX=0;entryY=0.5;entryPerimeter=0;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="570" y="424"/>
+          <mxPoint x="570" y="720"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="57" value="否" style="text;html=1;resizable=0;points=[];align=center;verticalAlign=middle;labelBackgroundColor=#ffffff;" parent="56" vertex="1" connectable="0">
+      <mxGeometry x="0.0902" y="-2" relative="1" as="geometry">
+        <mxPoint y="-1" as="offset"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="547" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;" parent="1" source="06" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="650.5" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;orthogonalLoop=1;strokeColor=#CCCCCC;strokeWidth=2;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="540" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;jettySize=auto;orthogonalLoop=1;strokeWidth=2;strokeColor=#CCCCCC;dashed=1;" parent="1" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="651" y="680" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="548" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=3;" parent="1" source="10" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="651" y="680" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="10" value="正在执行流程" style="shape=mxgraph.flowchart.round_rectangle;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="591" y="535" width="120" height="74" as="geometry"/>
+    </mxCell>
+    <mxCell id="END" value="结束" style="shape=mxgraph.flowchart.oval;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="602" y="690" width="98" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="565" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;orthogonalLoop=1;strokeWidth=3;dashed=1;strokeColor=#B3B3B3;" parent="1" source="04" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="290" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="04" value="等待用户手动操作" style="shape=mxgraph.flowchart.oval;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=1;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="200" y="672" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="A2" value="A2" style="ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="640" y="80" width="50" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="A1" value="A1" style="ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="270" y="803" width="50" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="01" value="获取/分析数据" style="shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="230" y="234" width="120" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="568" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2" parent="1" vertex="1">
+      <mxGeometry x="860" y="160" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="06" value="判定" style="shape=mxgraph.flowchart.gateway;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2;fontColor=#666666;fontFamily=Microsoft YaHei;gradientColor=none;shadow=1;" parent="1" vertex="1">
+      <mxGeometry x="601" y="384" width="99" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="585" value="开始" style="shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2" parent="1" vertex="1">
+      <mxGeometry x="228.5" y="90" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="586" value="" style="shape=process;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2" vertex="1" parent="1">
+      <mxGeometry x="40" y="190" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="587" value="" style="ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2" vertex="1" parent="1">
+      <mxGeometry x="70" y="380" width="120" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="588" value="" style="shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="49" value="www" parent="0"/>
+    <mxCell id="577" style="edgeStyle=orthogonalEdgeStyle;rounded=1;comic=0;html=1;dashed=1;jettySize=auto;orthogonalLoop=1;strokeWidth=3;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#CCCCCC;strokeColor=#CCCCCC;" parent="49" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="710" y="424" as="sourcePoint"/>
+        <mxPoint x="850" y="180" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="780" y="424"/>
+          <mxPoint x="780" y="180"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="571" value="切换流程演练" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Microsoft YaHei;fontSize=32;fontColor=#CCCCCC;" parent="49" vertex="1">
+      <mxGeometry x="169" y="10" width="302" height="40" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
+`;
+                var doc = mxUtils.parseXml(xml);
+                var codec = new mxCodec(doc);
+                codec.decode(doc.documentElement, graph.getModel());
+            }
+
+            // Creates a button to invoke the refresh function
+            document.body.appendChild(mxUtils.button('Update', function(evt)
+            {
+                // XML is normally fetched from URL at server using mxUtils.get - this is a client-side
+                // string with randomized states to demonstrate the idea of the workflow monitor
+                var xml = '<process><update id="ApproveClaim" state="'+getState()+'"/><update id="AuthorizeClaim" state="'+getState()+'"/>'+
+                    '<update id="CheckAccountingData" state="'+getState()+'"/><update id="ReviewClaim" state="'+getState()+'"/>'+
+                    '<update id="ApproveReviewedClaim" state="'+getState()+'"/><update id="EnterAccountingData" state="'+getState()+'"/></process>';
+                update(graph, xml);
+            }));
+        };
+
+        /**
+         * Updates the display of the given graph using the XML data
+         */
+        function update(graph, xml)
+        {
+            if (xml != null && xml.length > 0)
+            {
+                var doc = mxUtils.parseXml(xml);
+
+                if (doc != null && doc.documentElement != null)
+                {
+                    var model = graph.getModel();
+                    var nodes = doc.documentElement.getElementsByTagName('update');
+
+                    if (nodes != null && nodes.length > 0)
+                    {
+                        model.beginUpdate();
+
+                        try
+                        {
+                            for (var i = 0; i < nodes.length; i++)
+                            {
+                                // Processes the activity nodes inside the process node
+                                var id = nodes[i].getAttribute('id');
+                                var state = nodes[i].getAttribute('state');
+
+                                // Gets the cell for the given activity name from the model
+                                var cell = model.getCell(id);
+
+                                // Updates the cell color and adds some tooltip information
+                                if (cell != null)
+                                {
+                                    // Resets the fillcolor and the overlay
+                                    graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
+                                    graph.removeCellOverlays(cell);
+
+                                    // Changes the cell color for the known states
+                                    if (state == 'Running')
+                                    {
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#f8cecc', [cell]);
+                                    }
+                                    else if (state == 'Waiting')
+                                    {
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#fff2cc', [cell]);
+                                    }
+                                    else if (state == 'Completed')
+                                    {
+                                        graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#d4e1f5', [cell]);
+                                    }
+
+                                    // Adds tooltip information using an overlay icon
+                                    if (state != 'Init')
+                                    {
+                                        // Sets the overlay for the cell in the graph
+                                        graph.addCellOverlay(cell, createOverlay(graph.warningImage, 'State: '+state));
+                                    }
+                                }
+                            } // for
+                        }
+                        finally
+                        {
+                            model.endUpdate();
+                        }
+                    }
+                }
+            }
+        };
+
+        /**
+         * Creates an overlay object using the given tooltip and text for the alert window
+         * which is being displayed on click.
+         */
+        function createOverlay(image, tooltip)
+        {
+            var overlay = new mxCellOverlay(image, tooltip);
+
+            // Installs a handler for clicks on the overlay
+            overlay.addListener(mxEvent.CLICK, function(sender, evt)
+            {
+                mxUtils.alert(tooltip + '\nLast update: ' + new Date());
+            });
+
+            return overlay;
+        };
+
+        /**
+         * Creates and returns an empty graph inside the given container.
+         */
+        function createGraph(container)
+        {
+            var graph = new mxGraph(container);
+            graph.setTooltips(true);
+            graph.setEnabled(false);
+
+            // Disables folding
+            graph.isCellFoldable = function(cell, collapse)
+            {
+                return false;
+            };
+
+            // Creates the stylesheet for the process display
+            var style = graph.getStylesheet().getDefaultVertexStyle();
+            style[mxConstants.STYLE_FONTSIZE] = 11;
+            style[mxConstants.STYLE_FONTCOLOR] = 'black';
+            style[mxConstants.STYLE_STROKECOLOR] = '#808080';
+            style[mxConstants.STYLE_FILLCOLOR] = 'white';
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+            style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_EAST;
+            style[mxConstants.STYLE_ROUNDED] = true;
+            style[mxConstants.STYLE_SHADOW] = true;
+            style[mxConstants.STYLE_FONTSTYLE] = 1;
+
+            style = graph.getStylesheet().getDefaultEdgeStyle();
+            style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
+            style[mxConstants.STYLE_STROKECOLOR] = '#808080';
+            style[mxConstants.STYLE_ROUNDED] = true;
+            style[mxConstants.STYLE_SHADOW] = true;
+
+            style = [];
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_SWIMLANE;
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+            style[mxConstants.STYLE_STROKECOLOR] = '#a0a0a0';
+            style[mxConstants.STYLE_FONTCOLOR] = '#606060';
+            style[mxConstants.STYLE_FILLCOLOR] = '#E0E0DF';
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+            style[mxConstants.STYLE_STARTSIZE] = 30;
+            style[mxConstants.STYLE_ROUNDED] = false;
+            style[mxConstants.STYLE_FONTSIZE] = 12;
+            style[mxConstants.STYLE_FONTSTYLE] = 0;
+            style[mxConstants.STYLE_HORIZONTAL] = false;
+            // To improve text quality for vertical labels in some old IE versions...
+            style[mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#efefef';
+
+            graph.getStylesheet().putCellStyle('swimlane', style);
+
+            style = [];
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RHOMBUS;
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RhombusPerimeter;
+            style[mxConstants.STYLE_STROKECOLOR] = '#91BCC0';
+            style[mxConstants.STYLE_FONTCOLOR] = 'gray';
+            style[mxConstants.STYLE_FILLCOLOR] = '#91BCC0';
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+            style[mxConstants.STYLE_FONTSIZE] = 16;
+            graph.getStylesheet().putCellStyle('step', style);
+
+            style = [];
+            style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;
+            style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
+            style[mxConstants.STYLE_FONTCOLOR] = 'gray';
+            style[mxConstants.STYLE_FILLCOLOR] = '#A0C88F';
+            style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+            style[mxConstants.STYLE_STROKECOLOR] = '#A0C88F';
+            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+            style[mxConstants.STYLE_FONTSIZE] = 16;
+            graph.getStylesheet().putCellStyle('start', style);
+
+            style = mxUtils.clone(style);
+            style[mxConstants.STYLE_FILLCOLOR] = '#DACCBC';
+            style[mxConstants.STYLE_STROKECOLOR] = '#AF7F73';
+            graph.getStylesheet().putCellStyle('end', style);
+
+            return graph;
+        };
+
+        /**
+         * Returns a random state.
+         */
+        function getState()
+        {
+            var state = 'Init';
+            var rnd = Math.random() * 4;
+
+            if (rnd > 3)
+            {
+                state = 'Completed';
+            }
+            else if (rnd > 2)
+            {
+                state = 'Running';
+            }
+            else if (rnd > 1)
+            {
+                state = 'Waiting';
+            }
+
+            return state;
+        };
+    </script>
+</head>
+
+<!-- Page passes the container and control to the main function -->
+<body onload="main(document.getElementById('graphContainer'));">
+
+<!-- Acts as a container for the graph -->
+<div id="graphContainer" style="overflow:hidden;position:relative;width:861px;height:406px;cursor:default;">
+</div>
+<br>
+</body>
+</html>

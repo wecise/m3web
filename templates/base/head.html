@@ -87,6 +87,9 @@
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-split.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-settings_menu.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-statusbar.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/theme-tomorrow.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/mode-sql.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/snippets/sql.js"></script>
 
 	<!-- Object-Hash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/object-hash/dist/object_hash.js"></script>
@@ -110,7 +113,12 @@
 	<script src="{{AppSubUrl}}/web/vendor/alertifyjs/lib/alertify.min.js" type="text/javascript"></script>
 	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.core.css" type="text/css" rel="stylesheet" />
 	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.bootstrap.css" type="text/css" rel="stylesheet" />
-	
+
+	<!--Panel JS & CSS -->
+	<script src="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.js" type="text/javascript"></script>
+	<link href="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
+
+
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/util.js"></script>
 	<script src="{{AppSubUrl}}/web/js/cfg.js"></script>
@@ -207,9 +215,8 @@
 		}
 
 		.container-fluid {
-		    margin-top: 5px;
 		    margin-bottom: 45px;
-		    margin: 5px -10px;
+		    margin: 8px -10px;
 		}
 		
 		#company_logo::selection {
@@ -340,6 +347,10 @@
 		    border-bottom: 1px solid rgb(230, 230, 230);
 	    }
 
+		.dropdown-menu.top-bar{
+			margin: 5px 20px 0px 15px!important
+		}
+
 	    .context-menu-icon.context-menu-icon--fa::before {
 		    color: rgb(33, 148, 245)!important;
 		}
@@ -351,6 +362,15 @@
 		}
 		.context-menu-hover {
 		    background-color: rgb(237, 240, 246)!important;
+		}
+
+		.pace .pace-progress {
+			background: transparent;
+		}
+
+		.pace .pace-activity {
+			border-top-color: rgb(33, 148, 245);
+			border-left-color: rgb(33, 148, 245);
 		}
 	</style>
 </head>
@@ -373,7 +393,7 @@
 					{{if .IsSigned}}
 
 						
-						<li id="robot">
+						<li class="ai">
 						</li>
 
 						<li>
@@ -391,7 +411,7 @@
 
 					{{if .IsSigned}}
 
-						<li class="dropdown">
+						<li class="dropdown top-bar">
 
 							<a id="drop3" href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								<!--img class="ui mini image" src="{{.SignedUser.AvatarLink}}"-->
@@ -399,7 +419,7 @@
 								<i class="caret"></i>
 							</a>
 
-							<ul class="dropdown-menu" aria-labelledby="drop3" style="padding:10px 0px;">
+							<ul class="dropdown-menu top-bar animated fadeInDown" aria-labelledby="drop3" style="padding:10px 0px;">
 								<li>
 									<a href="{{AppSubUrl}}/janesware/user?name={{.SignedUser.Name}}">
 										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}} 

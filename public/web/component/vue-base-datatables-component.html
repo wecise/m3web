@@ -135,7 +135,7 @@
                                                                                                         let _table = $('#'+opt.$trigger.attr("id")).DataTable();
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`);
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null);
 
                                                                                                         _.delay(function(){
 
@@ -160,7 +160,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`);
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null);
 
                                                                                                         _.delay(function() {
 
@@ -276,7 +276,7 @@
                     grok: {
                                 "new": { app:"grok", name: "新建", icon: "fa-paste", callback: function(key, opt) {
 
-                                                                                                        newWindow('small', '新建', `<div id="grok-new-template"></div>`);
+                                                                                                        newWindow('small', '新建', `<div id="grok-new-template"></div>`,null);
 
                                                                                                         _.delay(function() {
 
@@ -392,7 +392,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('small', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`);
+                                                                                                        newWindow('small', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`,null);
 
                                                                                                         _.delay(function() {
 
@@ -662,13 +662,13 @@
                 // init selected row's status
                 $(self.$el).find("tbody").on("mouseenter", "tr", function () {
 
-                    if ( $(this).hasClass('selected') ) {
+                    /*if ( $(this).hasClass('selected') ) {
                         $(this).removeClass('selected');
                     }
                     else {
                         self.datatable.$("tr.selected").removeClass("selected");
                         $(this).addClass("selected");
-                    }
+                    }*/
                     self.selectedRow = self.datatable.row( this ).data();
                 } );
 
@@ -681,6 +681,15 @@
 
                 // selected row
                 $(self.$el).on( 'click', 'tr', function () {
+
+                    if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }
+
                     self.selectedRow = self.datatable.row( this ).data();
                 } );
 
@@ -688,7 +697,7 @@
                 $(self.$el).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`);
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
 
                     _.delay(function(){
 

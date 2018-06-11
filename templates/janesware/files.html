@@ -33,29 +33,8 @@
 <link href="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css" rel="stylesheet" />
 
 <style>
-    body {
-        background-color: #d9e0e7;
-    }
 
-    .btn.dropdown-toggle {
-        padding: 7px 12px;
-        border-radius: 0px;
-    }
 
-    /* For zTree */
-    .ztree{
-        overflow: auto;
-    }
-
-    .p-20 {
-        padding: 10px 30px!important;
-    }
-
-    .item-selected {
-        -webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-        -moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-        box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-    }
 
 </style>
 
@@ -81,342 +60,20 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js" ></script>
 <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.ui.position.min.js" ></script>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-view-component.html"></link>
 
 <script type="text/javascript">
 
     var eventHub = new Vue();
     
-    VueLoader.onloaded(["vue-base-datatables-component"
+    VueLoader.onloaded(["vue-base-datatables-component",
+                        "vue-fs-tree-component",
+                        "vue-fs-view-component"
                         ],function() {
 
         $(function() {
 
-            var timeoutId = 0;
-
-            const ENTITIES_OBJECT = {
-                                        '/matrix/entities/biz': {name:'业务'},
-                                        '/matrix/entities/app': {name:'应用'},
-                                        '/matrix/entities/host': {name:'服务器'},
-                                        '/matrix/entities/network': {name:'网络'},
-                                        '/matrix/entities/cluster': {name:'集群'},
-                                        '/matrix/entities/storage': {name:'存储'}
-                                    };
-
-            Vue.component('tree-component',{
-                template: '<ul class="ztree"></ul>',
-                data: function(){
-                    return {
-                        zTree: Object,
-                        setting: Object,
-                        nodes: Array,
-                    }
-                },
-                created:function(){
-                    let self = this;
-
-                    eventHub.$on('tree-refresh-event',self.refresh);
-
-                    self.init();
-                },
-                mounted: function() {
-                    let self = this;
-
-                    self.$nextTick(function(){
-                        
-                        self.setting = {
-                                        view: {
-                                            showLine: true,
-                                            selectedMulti: false,
-                                            dblClickExpand: false
-                                        },
-                                        edit: {
-                                            enable: false,
-                                        },
-                                        data: {
-                                            simpleData: {
-                                                enable: true
-                                            },
-                                            key: {
-                                                name: 'title',
-                                                title: "title"
-                                            }
-                                        },
-                                        callback: {
-                                            onClick: self.onClick,
-                                        }
-                                    };
-
-                    })
-                },
-                watch: {
-                    setting: {
-                        handler:function(val, oldVal){
-                            let self = this;
-
-                            self.zTree = $.fn.zTree.init($(self.$el), val, self.nodes);
-                        },
-                        deep: true
-                    },
-                    nodes: {
-                        handler:function(val, oldVal){
-                            let self = this;
-
-                            self.zTree = $.fn.zTree.init($(self.$el), self.setting, val);
-
-                            eventHub.$emit('file-view-event', _.filter(val,function(v){if(v.id > 1) return v;}));
-                        },
-                        deep: true
-                    }
-                },
-                methods: {
-                    init: function() {
-                        let self = this;
-                        
-                        jQuery.ajax({
-                            url: '/fs/home',
-                            type: 'GET',
-                            data: {
-                                type: 'dir'
-                            },
-                            dataType: 'text json',
-                            contentType: "application/text; charset=utf-8",
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                console.log(JSON.stringify(data.message))
-                                if(_.isEmpty(data.message)){
-                                    self.nodes = [];
-                                } else {
-                                    self.nodes = _.map(data.message,function(v,k){
-                                                    var type = "dir";
-                                                    
-                                                    if(!_.isEmpty(v.type)){
-                                                        type = v.type;
-                                                    }
-
-                                                    return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: type});
-                                                 });
-                                }
-
-                                self.nodes.push({id:1, pId: -1, isParent: true, name: 'home', title: 'Documents', type: 'dir', open:true});
-                                
-                                self.zTree = $.fn.zTree.init($(self.$el), self.setting, self.nodes);
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
-                    },
-                    refresh: function(event){
-                        let self = this;
-                        var url = "/fs/home";
-
-                        if(!_.isEmpty(event)){
-                            url = url + '/' +  event.name
-                        }
-                        console.log(111,url)
-                        jQuery.ajax({
-                            url: url,
-                            type: 'GET',
-                            data: {
-                                type: 'dir'
-                            },
-                            dataType: 'text json',
-                            contentType: "application/text; charset=utf-8",
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                
-                                if(_.isEmpty(data.message)){
-                                    self.nodes = [];
-                                } else {
-                                    self.nodes = _.map(data.message,function(v,k){
-                                                    var type = "dir";
-                                                    
-                                                    if(!_.isEmpty(v.type)){
-                                                        type = v.type;
-                                                    }
-                                                    return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: type});
-                                                 });
-                                }
-
-                                self.nodes.push({id:1, pId: -1, isParent: true, name: 'home', title: '我的所有文件', type: 'dir', open:true});
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
-                    },
-                    onClick: function(event, treeId, treeNode) {
-                        let self = this;
-                        
-                        if(!treeNode.isParent) return false;
-                        
-                        if(treeNode.type === 'dir' && treeNode.id === 1){
-                            self.refresh(null);
-                            return false;
-                        } else if(treeNode.type === 'dir'){
-                            jQuery.ajax({
-                                url: url = '/fs/home/' + treeNode.name,
-                                type: 'GET',
-                                dataType: 'text json',
-                                data: {
-                                    type: 'dir'
-                                },
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    
-                                    if(!_.isEmpty(data.message)) {
-
-                                        var tree = $.fn.zTree.getZTreeObj(self.zTree.setting.treeId);
-                                        var nodes = tree.getSelectedNodes();
-                                        if (nodes && nodes.length>0) {
-                                            tree.removeChildNodes(nodes[0]);
-                                        }
-                                        
-                                        // append sub nodes
-                                        var subNodes = _.map(data.message,function(v,k){
-                                                            var type = "dir";
-                                                
-                                                            if(!_.isEmpty(v.type)){
-                                                                type = v.type;
-                                                            }
-                                                            return _.merge(v, { pId: treeNode.id, isParent: v.isdir, title: v.name, type: type})
-                                                        });
-
-                                        tree.addNodes(treeNode, subNodes);
-                                        
-                                        var parentObj = [{id: treeNode.id, name: treeNode.parent, title: "上一级", parent:treeNode.name, type: 'parent'}];
-                                        subNodes.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', _.filter(subNodes,function(v){if(v.id > 1) return v;}));
-                                    }
-                                    
-                                    //if(!treeNode.isParent) {
-                                        //console.log(222,treeNode.name)
-                                        //eventHub.$emit('node-selected-event', treeNode.name);
-                                    //}
-                                    
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    console.log(errorThrown);
-                                }
-                            });
-                        }
-
-                        
-                    }
-                }
-            })
-
-            Vue.component('bootstraptag-component', {
-                delimiters: ['${', '}'],
-                template: `<input class="tagsLabel" :value="item.tag._all" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>`,
-                mounted: function() {
-                    let self = this;
-
-                    self.$nextTick(function() {
-                        self.init();
-                    })
-                },
-                methods: {
-                    init: function() {
-                        let self = this;
-
-                        $(self.$el).tagsinput({
-                            tagClass: function(item) {
-
-                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
-                                    return 'label label-danger label-important';
-                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
-                                    return 'label label-warning';
-                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
-                                    return 'label label-primary';
-                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
-                                    return 'label label-success';
-                                } else if (item.indexOf("黑色") > -1) {
-                                    return 'label label-default';
-                                } else {
-                                    return 'label label-default';
-                                }
-                            },
-                        })
-
-                        $(self.$el).on('itemAdded', function(event) {
-
-                            var oneLevelLoading;
-                            var index = $(this).data("index");
-
-                            self.model[index].tag._all.push(event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.model[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                    oneLevelLoading = layer.load(3, {
-                                        shade: [0.1, '#ccc'],
-                                        time: 30 * 1000
-                                    });
-                                },
-                                complete: function(xhr, textStatus) {
-                                    layer.close(oneLevelLoading);
-                                },
-                                success: function(data, textStatus, xhr) {
-
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    layer.close(oneLevelLoading);
-                                }
-                            });
-                        })
-
-                        $(self.$el).on('itemRemoved', function(event) {
-
-                            var oneLevelLoading;
-
-                            var index = $(this).data("index");
-
-                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.model[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                    oneLevelLoading = layer.load(3, {
-                                        shade: [0.1, '#ccc'],
-                                        time: 30 * 1000
-                                    });
-                                },
-                                complete: function(xhr, textStatus) {
-                                    layer.close(oneLevelLoading);
-                                },
-                                success: function(data, textStatus, xhr) {
-
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    layer.close(oneLevelLoading);
-                                }
-                            });
-                        })
-                    }
-                }
-            })
 
             Vue.component('file-view-component',{
                 delimiters: ['${', '}'],
@@ -993,82 +650,6 @@
                 }
             })
 
-            Vue.component('file-view-icon-component',{
-                delimiters: ['${', '}'],
-                props: {
-                    model: Array
-                },
-                template: `#file-view-icon-component-template`,
-                mounted: function() {
-                    let self = this;
-
-                    self.$nextTick(function() {
-                        
-                    })
-                },
-                methods: {
-                    mouseOver: function(item){
-                        eventHub.$emit("file-mouseover-event",item);
-                    },
-                    mouseOut: function(item){
-                        eventHub.$emit("file-mouseout-event",item);
-                    },
-                    click: function(item){
-                        eventHub.$emit("file-click-event",item);
-                    },
-                    dblClick: function(item){
-                        eventHub.$emit("file-dblclick-event",item);
-                    },
-                    rightClick: function(item){
-                        eventHub.$emit("file-rightclick-event",item);
-                    }
-                }
-            })
-
-            Vue.component('file-view-table-component',{
-                delimiters: ['${', '}'],
-                props: {
-                    model: Array
-                },
-                template: `#file-view-table-component-template`,
-                data: function(){
-                    return {
-                        columns: [
-                                    {field: "title", title: "Name"},
-                                    {field: "type", title: "Type"},
-                                    {field: "vtime", title: "Create Time"}
-                                 ],
-                        data:[]
-                    }
-                },
-                mounted: function(){
-                    let self = this;
-
-                    self.$nextTick(function() {
-                        
-                    })
-                },
-                methods: {
-                    init: function(){
-                        let self = this;
-                    },
-                    mouseOver: function(item){
-                        eventHub.$emit("file-mouseover-event",item);
-                    },
-                    mouseOut: function(item){
-                        eventHub.$emit("file-mouseout-event",item);
-                    },
-                    click: function(item){
-                        eventHub.$emit("file-click-event",item);
-                    },
-                    dblClick: function(item){
-                        eventHub.$emit("file-dblclick-event",item);
-                    },
-                    rightClick: function(item){
-                        eventHub.$emit("file-rightclick-event",item);
-                    }
-                }
-            })
             
             var appVue = new Vue({
                 delimiters: ['${', '}'],
@@ -1076,6 +657,7 @@
                 template: '#app-template',
                 data: {
                     model: [],
+                    root: "/home",
                     toggle: {
                         left: true
                     }
@@ -1105,46 +687,6 @@
                     init: function() {
                         let self = this;
 
-                        $search = $(".search");
-                        $search.off("keyup drop").on("keyup drop", function(event) {
-                            clearTimeout(timeoutId);
-                            timeoutId = setTimeout(function() {
-                                self.search(_.trim($search.val()));
-                            }, 500);
-                        })
-
-                    },
-                    search: function(term) {
-                        let self = this;
-                        var param;
-
-                        if (_.isEmpty(term)) {
-                            param = `#/matrix/filesystem: | username=` + {{.SignedUser.Name}} + ` | ispublic=1 `;
-                        } else {
-                            param = `#/matrix/filesystem: | username=` + {{.SignedUser.Name}} + ` | ispublic=1  | ` + term;
-                        }
-                        console.log(param)
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: param,
-                                flag: false
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                var data = data.message;
-
-                                self.model = _.sortBy(data, "vtime").reverse();
-                                _.delay(self.refresh, 100);
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                            }
-                        });
                     },
                     newModal: function() {
                         let self = this;
@@ -1272,73 +814,25 @@
 
                         $(".tagsLabel").tagsinput({
                             tagClass: function(item) {
-
-                                if (item.indexOf("事件") > -1 || item.indexOf("event") > -1) {
-                                    return 'label label-danger label-important';
-                                } else if (item.indexOf("性能") > -1 || item.indexOf("performance") > -1) {
-                                    return 'label label-warning';
-                                } else if (item.indexOf("日志") > -1 || item.indexOf("log") > -1 || item.indexOf("蓝色") > -1) {
-                                    return 'label label-primary';
-                                } else if (item.indexOf("作业") > -1 || item.indexOf("job") > -1 || item.indexOf("绿色") > -1) {
-                                    return 'label label-success';
-                                } else if (item.indexOf("黑色") > -1) {
-                                    return 'label label-default';
-                                } else {
-                                    return 'label label-default';
-                                }
-                            },
-
+                                return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
+                            }
                         });
+
                         $(".tagsLabel").on('itemAdded', function(event) {
 
-                            var index = $(this).data("index");
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model.list,{id:_id});
 
-                            self.model[index].tag._all.push(event.item);
+                            fetchData(_item.id + ' | tags +' + event.item);
 
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.model[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                }
-                            });
                         });
 
                         $(".tagsLabel").on('itemRemoved', function(event) {
 
-                            var index = $(this).data("index");
+                            let _id = $(this).data("index");
+                            let _item = _.find(self.model.list,{id:_id});
 
-                            self.model[index].tag._all = _.pull(self.model[index].tag._all, event.item);
-
-                            jQuery.ajax({
-                                url: '/mxobject/actiontoclass',
-                                type: 'POST',
-                                dataType: 'json',
-                                data: {
-                                    data: JSON.stringify(self.model[index]),
-                                    ctype: "insert"
-                                },
-                                beforeSend: function(xhr) {
-                                },
-                                complete: function(xhr, textStatus) {
-                                },
-                                success: function(data, textStatus, xhr) {
-
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                }
-                            });
+                            fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     },
@@ -1393,118 +887,22 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    
-    <div class="row">
-        <div class="col-lg-2" id="nav" style="padding: 10px 5px 5px 15px;">
-            <div class="panel panel-grey" style="border-radius: 0px;min-height:100vh;">
-                <div class="panel-heading">
-                    <i class="fa fa-th-large toggle-nav"></i> 
-                    我的文件
-                </div>
-                <div class="panel-body" style="padding-top: 5px;">
-                    <tree-component></tree-component>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-10" id="content" style="padding: 10px 15px 5px 0px;">
-            <file-view-component></file-view-component>
-        </div>
 
-    </div>
-</script>
-
-<script type="text/x-template" id="file-view-component-template">
-    <div class="panel panel-grey">
-        <div class="panel-heading">
-            文件内容
-        </div>
+    <div class="panel panel-grey" >
         <div class="panel-body">
             <div class="row">
-                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                    <ol class="breadcrumb" style="padding-left:7px;">
-                        <li v-for="item in contextmenu.path">
-                            <a href="#" @click="dblClick({name:item})">${item}</a>
-                        </li>
-                    </ol>  
+                <div class="col-lg-2" id="nav">
+                    <vue-fs-tree-component id="file-fs-tree" :root="root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
                 </div>
-                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <div class="btn-group" role="group" aria-label="..." style="float: right;">
-                        <a href="javascript:void(0)" class="btn btn-xs btn-default btn-noborder" @click="toggleLeft" style="margin-right: 5px;">
-                            <i class="fa fa-caret-right navtoggle"></i>
-                        </a>
-                        <a class="btn btn-xs btn-success btn-noborder fileinput-button" style="margin-right: 5px;">
-                            <i class="fa fa-upload"></i>
-                            <input id="fileupload" type="file" name="uploadfile" multiple>
-                        </a>
-                        <a type="button" class="btn btn-xs btn-default btn-noborder file-view-icon-component active" @click="view('file-view-icon-component')" style="margin-right: 5px;">
-                            <i class="fa fa-th" aria-hidden="true"></i>
-                        </a>
-                        <a type="button" class="btn btn-xs btn-default btn-noborder file-view-table-component" @click="view('file-view-table-component')" style="margin-right: 5px;">
-                            <i class="fa fa-list" aria-hidden="true"></i>
-                        </a>
-                    </div>
+                <div class="col-lg-10" id="content">
+                    <vue-fs-view-component id="file-fs-view" :root="root"></vue-fs-view-component>
                 </div>
+
             </div>
-            <div class="row" id="files-container" style="padding-top:5px;">  
-                <component v-bind:is="currentView" :model="model.list"></component>
-            </div>
-            <div class="row parse-container" style="display:none;">
-                <div class="col-lg-12">
-                    <hr>
-                    <dl class="parse-view" style="background-color: #333333;padding:5px 5px;">
-                        <dt style="color: #efefef;"><h5>解析结果</h5></dt>
-                        <dd  v-for="(item,index) in model.parse.list" style="color: #5cf55e;">
-                            ${'[' + (index+1) +']\t'} <a href="#" style="color: #efefef;">
-                                <span>${item}</span>
-                            </a>
-                        </dd>
-                    </dl>
-                </div>
-            </div>  
-        </div>
-        <div class="panel-footer">
-            <span>
-                <small>files：${model.list.length}</small>
-            </span>
         </div>
     </div>
+
 </script>
 
-<script type="text/x-template" id="file-view-icon-component-template">
-    <div>
-        <div :class="item.ftype=='dir'?'dir col-xs-3 col-md-3 col-sm-3 col-lg-2 context-menu-file':'col-xs-3 col-md-3 col-sm-3 col-lg-2 context-menu-file'"
-             :id="'file_'+item.id"
-             v-for="item in model"
-             @mouseover="mouseOver(item)"
-             @mouseout="mouseOut(item)"
-             @click="click(item)"
-             @oncontextmenu="rightClick(item)"
-             style="cursor: pointer;"
-             :title="item.title">
-            <div class="widget widget-stats bg-silver animated flipInX">
-                <div class="stats-icon"></div>
-                <div class="stats-info">
-                    <p><img :src="'/web/assets/images/files/'+item.ftype+'.svg'"
-                            class="img-responsive"
-                            alt="Image"
-                            style="width:48px;height:48px;"></p>
-                </div>
-                <div class="stats-link">
-                    <a href="javascript:;" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title">
-                        ${item.title.substring(0,9)}
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
-
-<script type="text/x-template" id="file-view-table-component-template">
-    <div class="file-view-table table-responsive">
-        <vue-base-datatables-component id="files-list-datatable"
-                                       :columns="columns"
-                                       :dataset="model"></vue-base-datatables-component>
-    </div>
-</script>
 
 {{template "base/footer" .}}

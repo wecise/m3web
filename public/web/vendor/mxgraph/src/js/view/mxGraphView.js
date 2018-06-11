@@ -966,6 +966,9 @@ mxGraphView.prototype.validateCellState = function(cell, recurse)
 				if (cell != this.currentRoot && !state.invalid)
 				{
 					this.graph.cellRenderer.redraw(state, false, this.isRendering());
+
+					// Handles changes to invertex paintbounds after update of rendering shape
+					state.updateCachedBounds();
 				}
 			}
 
@@ -1474,8 +1477,9 @@ mxGraphView.prototype.isLoopStyleEnabled = function(edge, points, source, target
 	var sc = this.graph.getConnectionConstraint(edge, source, true);
 	var tc = this.graph.getConnectionConstraint(edge, target, false);
 	
-	if (!mxUtils.getValue(edge.style, mxConstants.STYLE_ORTHOGONAL_LOOP, false) ||
-		((sc == null || sc.point == null) && (tc == null || tc.point == null)))
+	if ((points == null || points.length < 2) &&
+		(!mxUtils.getValue(edge.style, mxConstants.STYLE_ORTHOGONAL_LOOP, false) ||
+		((sc == null || sc.point == null) && (tc == null || tc.point == null))))
 	{
 		return source != null && source == target;
 	}
@@ -1667,10 +1671,50 @@ mxGraphView.prototype.getPerimeterPoint = function(terminal, next, orthogonal, b
 		if (perimeter != null && next != null)
 		{
 			var bounds = this.getPerimeterBounds(terminal, border);
-			
+
 			if (bounds.width > 0 || bounds.height > 0)
 			{
-				point = perimeter(bounds, terminal, next, orthogonal);
+				point = new mxPoint(next.x, next.y);
+				var flipH = false;
+				var flipV = false;	
+				
+				if (this.graph.model.isVertex(terminal.cell))
+				{
+					flipH = mxUtils.getValue(terminal.style, mxConstants.STYLE_FLIPH, 0) == 1;
+					flipV = mxUtils.getValue(terminal.style, mxConstants.STYLE_FLIPV, 0) == 1;	
+	
+					// Legacy support for stencilFlipH/V
+					if (terminal.shape != null && terminal.shape.stencil != null)
+					{
+						flipH = (mxUtils.getValue(terminal.style, 'stencilFlipH', 0) == 1) || flipH;
+						flipV = (mxUtils.getValue(terminal.style, 'stencilFlipV', 0) == 1) || flipV;
+					}
+	
+					if (flipH)
+					{
+						point.x = 2 * bounds.getCenterX() - point.x;
+					}
+					
+					if (flipV)
+					{
+						point.y = 2 * bounds.getCenterY() - point.y;
+					}
+				}
+				
+				point = perimeter(bounds, terminal, point, orthogonal);
+
+				if (point != null)
+				{
+					if (flipH)
+					{
+						point.x = 2 * bounds.getCenterX() - point.x;
+					}
+					
+					if (flipV)
+					{
+						point.y = 2 * bounds.getCenterY() - point.y;
+					}
+				}
 			}
 		}
 		
@@ -2815,6 +2859,9 @@ mxGraphView.prototype.createSvg = function()
 	this.canvas.appendChild(this.decoratorPane);
 	
 	var root = document.createElementNS(mxConstants.NS_SVG, 'svg');
+//	root.style.position = 'relative';
+//	root.style.left = '0px';
+//	root.style.top = '0px';
 	root.style.width = '100%';
 	root.style.height = '100%';
 	

@@ -21,7 +21,8 @@
 
 -->
 {{template "base/head" .}}
-
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <style>
 
@@ -83,9 +84,6 @@
         padding: 7px 12px;
         border-radius: 0px;
     }
-    .vue-search-input-component > .btn-group > .btn.dropdown-toggle {
-        border-bottom: 2px solid rgb(182, 194, 202);
-    }
 
     .widget-stats.bg-info:hover,.widget-stats.bg-info.active {
         box-shadow: 2px 2px 2px 2px #999;
@@ -124,14 +122,11 @@
 
 <!-- Bootstrap x-editable JS -->
 <script src="{{AppSubUrl}}/web/vendor/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
-
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-tree-component.html"></link>
 
 <script type="text/javascript">
     
-    VueLoader.onloaded(["vue-search-preset-component",
-                        "vue-search-input-component"
+    VueLoader.onloaded(["vue-fs-tree-component"
                         ],function() {
 
         moment.locale({{.Lang}});
@@ -140,75 +135,46 @@
 
         $(function() {
             
-            var theme = {
-                "blue": {
-                    "body": "rgba(4,83,119,1)",
-                    "panel": "rgba(7,121,173,.8)",
-                    "h3": "rgba(255,255,255,0.9)",
-                    "h4": "rgba(255,255,255,.8)",
-                    "smal": "rgba(255,255,255,.6)",
-                    "thumbnail": "rgba(3,169,244,1)"
-                },
-                "dark": {
-                    "body": "rgba(0,0,0,1)",
-                    "panel": "rgba(47,47,47,1)",
-                    "h3": "rgba(255,255,255,0.5)",
-                    "h4": "rgba(128,0,128,1)",
-                    "small": "rgba(0,0,0,1)",
-                    "thumbnail": "rgba(32,32,32,1)"
-                },
-                "gray": {
-                    "body": "rgba(255,255,255,1)",
-                    "panel": "rgba(237,237,237,1)",
-                    "h3": "rgba(130,130,130,1)",
-                    "h4": "rgba(0,0,0,0.8)",
-                    "small": "rgba(0,0,0,1)",
-                    "thumbnail": "rgba(227,227,227,1)"
-                }
-            };
-
-            var appVue = new Vue({
+            let _appVue = new Vue({
                 delimiters: ['${', '}'],
                 el: '#app',
                 template: '#app-template',
                 data: {
-                    model: [],
-                    search: {
-                        params: {
-                                at: '#',
-                                class: '/matrix/filesystem/',
-                                subclass: ': | ftype=imap;ftype=ishow;ftype=iflow',
-                                top: 'top 200',
-                                lua: ''
-                        },
-                        filter:[],
-                        input: {
-                            type: {type:"event",quick: ""},
-                            term: ""
-                        },
-                        preset: {},
-                        regexp: {
-                            top: /top (\d+(\.\d)*)/gmi,
-                            undefined:  /undefined/g,
-                            doubleGrep: /\|(\s+(\|))/g,
+                    model: {
+                        list:[],
+                        category: [
+                                    {name: "流程设计", path: "/home/creative/流程设计", value: "iflow", class: "btn btn-xs btn-warning"},
+                                    {name: "仪表盘", path: "/home/creative/仪表盘", value: "ishow", class: "btn btn-xs btn-info"},
+                                    {name: "IT地图", path: "/home/creative/IT地图", value: "imap", class: "btn btn-xs btn-success"},
+                                    {name: "模板", path: "/home/creative/模板", value: "iflowt", class: "btn btn-xs btn-default"}
+                        ],
+                        root: "/home/creative",
+                        parent: "",
+                        name: null,
+                        project: {
+                                    title: "",
+                                    current:"",
+                                    stime: "",
+                                    etime: "",
+                                    status: "start",
+                                    diaglog: {
+                                        title: "",
+                                        prompt: [],
+                                        select: ""
+                                    },
+                                    action: {
+                                        node: "",
+                                        status: ""
+                                    }
 
-                        },
-                        result:{
-                            data: [],
-                            columns: [],
-                            options: {
-                                classes: "table table-no-bordered",
-                                search: true,
-                                locale: '{{.Lang}}',
-                                rowStyle:   function rowStyle(row, index) {
-                                    return {
-                                        classes: 'text-nowrap'
-                                    };
                                 }
-                            }
-                        },
-                        currentTimer: null
                     },
+                    crontab: {
+                        project:{
+                            sched: Object,
+                            timer: Object
+                        }
+                    }
 
                 },
                 mounted: function() {
@@ -235,9 +201,34 @@
                 created: function() {
                     let self = this;
 
-                    eventHub.$on('preset-selected-event', self.setPresetDefault);
-                    eventHub.$on("input-term-event", self.setSearchTerm);
-                    eventHub.$on("input-reset-event", self.setSearchReset);
+                    self.initProject();
+
+                    eventHub.$on("FS-FORWARD-EVENT", self.forwardDir);
+                },
+                computed: {
+                    filePath: function(){
+                        let self = this;
+                        let _tmp = self.model.root.split("/");
+
+                        return _tmp;
+                    }
+                },
+                filters: {
+                    pickTitle: function (value) {
+                        let self = this;
+
+                        if (!value) return '';
+
+                        let _attr = _.attempt(JSON.parse.bind(null, value));
+
+                        return _attr.title;
+                    },
+                    readMore: function (text, length, suffix) {
+                        return text.substring(0, length) + suffix;
+                    },
+                    toLocalTime: function (value) {
+                        return moment(value).format("LLL");
+                    }
                 },
                 methods: {
                     init: function() {
@@ -259,117 +250,93 @@
                                                                                     self.forwardCreative('edit',opt.$trigger.data("item"));
                                                                                 }
                                 },
+                                /*"sep1": "---------",
                                 "saveas": {name: "另存为", icon: "fa-save", callback: function(key, opt) {
                                                                                     self.saveas(opt.$trigger.data("item"));
                                                                                 }
-                                },
-                                "sep1": "---------",
+                                },*/
+                                "sep2": "---------",
                                 
                                 "delete": {name: "删除", icon: "fa-trash", callback: function(key, opt) {
                                                                                     self.remove(opt.$trigger.data("item"));
                                                                                 }
+                                },
+                                "sep3": "---------",
+
+                                "info": {name: "信息", icon: "fa-info", callback: function(key, opt) {
+                                        self.info(opt.$trigger.data("item").attr);
+                                    }
                                 }
                             }
                         });
 
                         $('.list-context-menu').on('click', function(e){
                             console.log('clicked', this);
-                        })    
+                        })
+
+                        self.crontab.project.sched = later.parse.text('every 15 sec');
+                        self.crontab.project.timer = later.setInterval(self.initProject, self.crontab.project.sched);
                     },
-                    setPresetDefault: function(event){
+                    initProject: function(){
                         let self = this;
 
-                        self.search.preset = event;
-                        self.search.preset.others.ifHistory = false;
-                    },
-                    setSearchReset: function(){
-                        let self = this;
-                        let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
-                        let _preset = self.search.preset.default;
+                        let _rtn = jobContextGet("BOB", "BOB");
 
-                        self.search.params.top = 'top 200';
-
-                        _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
-
-                        self.setSearchTerm("");
-                        self.searchHandler(_param, null);
-                    },
-                    setSearchTerm: function (term){
-                        let self = this;
-
-                        self.search.params.top = 'top 200';
-                        self.search.input.term = term;
-
-                    },
-                    setSubClass: function(event){
-                        let self = this;
-
-                        self.search.params.subclass = ': | ' + event;
-                    },
-                    onSearch: function() {
-                        let self = this;
-                        let _param = "";
-                        let _preset = self.search.preset.default;
-                        let _ifDebug = "";
-
-                        _ifDebug = self.search.preset.others.ifDebug?"debug> ":"";
-                        self.search.params.at = self.search.preset.others.ifHistory?"":"#";
-
-                        if(!_.isEmpty(self.search.input.term)){
-
-                            let _top = self.search.input.term.match(self.search.regexp.top);
-
-                            if(!_.isEmpty(_top)){
-                                self.search.params.top = _.last(_top);
+                        if (!_.isEmpty(_rtn) && !_.isEmpty(_rtn.message)) {
+                            if (!_.isEmpty(_rtn.message["BOB"])){
+                                self.model.project = _rtn.message["BOB"];
                             }
-
-                            _param = self.search.params.at + self.search.params.class + self.search.params.subclass + " | " + self.search.input.term;
-                        } else {
-                            _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
                         }
-                        
-                        if(!_.isEmpty(_preset)) {
-                            _param = _param + _preset.value + self.search.fortime;
-                        } else {
-                            _param = _param + _preset.value;
-                        }
-                        _param = _param + " | " + self.search.params.top;
-
-                        _param = _ifDebug + _param.replace(self.search.regexp.undefined,"").replace(self.search.regexp.doubleGrep," | ");
-
-                        self.searchHandler(_param, null);
                     },
-                    searchHandler: function(param,func) {
+                    forwardDir: function(path){
                         let self = this;
 
-                        let _list = fetchData(param);
+                        self.model.root = path;
 
-                        if (_.isEmpty(_list)) {
-                            self.model = [];
-                            return false;
-                        }
-
-                        console.log(_list)
-
-                        self.model = _.map(_list.message,function(v,k){
-                                        v.parent = v.parent.replace(/\/home\/admin/,"");
-                                        return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
-                                    });
-
-                        _.delay(self.refresh,100);
+                        self.load();
                     },
                     load: function() {
                         let self = this;
-                        
-                        let _data = fsList("creative");
-                        
-                        self.model = _.pickBy(_.map(_data,function(v,k){
-                                        if(_.includes(["iflow","ishow","imap"],v.ftype)) {
-                                            return _.merge(v, {"username": {{.SignedUser.Name}}, "star": ""});
-                                        }
-                                    }),_.identity);
 
-                        _.delay(self.refresh,200);
+                        let _rtn = fsList(self.model.root);
+
+                        self.initProject();
+
+                        self.model.list = _.map(_rtn,function(v,k){
+
+                                            return _.merge(v, {"username": {{.SignedUser.Name}}, "project": self.model.project });
+
+                                        });
+
+                        _.delay(function(){
+
+                            self.refresh();
+
+                            $(".fs-name").editable({
+                                type: "text",
+                                container: 'body',
+                                validate: function (value) {
+                                    if (!$.trim(value)) {
+                                        return '不能为空';
+                                    }
+                                },
+                                success: function (response,newValue) {
+
+                                    let _node = $(this).data("info");
+                                    let _info = _.attempt(JSON.parse.bind(null, _node.attr));
+
+                                    _info.title = _.trim(newValue);
+
+                                    let _rtn = fsUpdateAttr(_node.parent, _node.name, _info);
+
+                                    if(_rtn == 1){
+                                        self.load();
+                                    }
+                                }
+                            });
+
+                        },200);
+
                     },
                     saveas: function(event){
                         let self = this;
@@ -410,11 +377,11 @@
                                         return false;
                                     }
                                     
-                                    let _name = me.model.name + "." + event.ftype;
+                                    let _name = me.model.name;
                                     let _type = event.ftype;
 
                                     if(me.model.astemplate){
-                                        _name = me.model.name + "." + event.ftype + "t";  
+                                        _name = me.model.name;
                                         _type = event.ftype+ "t";                                      
                                     }
                                     
@@ -443,15 +410,21 @@
                             template: "#creative-project-template",
                             data: {
                                 model: {
+                                    project: {
+                                        value: "流程设计",
+                                        extName: {
+                                            "流程设计": "iflow",
+                                            "仪表盘": "ishow",
+                                            "IT地图": "imap"
+                                        }
+                                    },
                                     name: "",
                                     type: "dir",
-                                    item: {
-                                        attr: ""
-                                    },
                                     tags: [],
-                                    ifshare: 0,
-                                    astemplate: 0,
-                                    templates: []
+                                    info: {
+                                        remark: ""
+                                    },
+                                    ifshare: 0
                                 }
                             },
                             mounted:function(){
@@ -462,13 +435,7 @@
                                 })
                             },
                             watch: {
-                                'model.type': function(val,oldVal){
-                                    let me = this;
 
-                                    me.initTemplates();
-
-                                },
-                                deep:true
                             },
                             computed: {
                                 type: function(){
@@ -487,57 +454,54 @@
                                         }
                                     });
 
-                                    // 只导入template
-                                    me.initTemplates();
-
-                                },
-                                initTemplates: function(){
-                                    let me = this;
 
 
-                                    let _list = fetchData("#/matrix/filesystem/: | ftype=" + me.type + "| top 200");
-
-                                    me.model.templates = _.map(_list.message,function(v,k){
-                                        v.parent = v.parent.replace(/\/home\/admin/,"");
-                                        return _.merge(v, {"username": `{{.SignedUser.Name}}`, "star": ""});
-                                    });
-
-                                    _.delay(self.refresh,100);
                                 },
                                 save: function(){
                                     let me = this;
+                                    let _root = _.cloneDeep(self.model.root);
 
                                     if (_.isEmpty(me.model.name)) {
                                         swal("名称不能为空！", "", "warning");
                                         return false;
                                     }
 
-                                    let _name = me.model.name + "." + me.model.type;
+                                    let _name = me.model.name;
                                     let _type = me.model.type;
+                                    let _info = {title: _name, parent: _root, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
 
-                                    if(me.model.astemplate){
-                                        _name = me.model.name + "." + me.type;
-                                        _type = me.type;
+                                    let _rtn = fsNew(_type, _root, _name, null, _info);
+
+                                    if(_rtn == 1){
+
+                                        alertify.success("",me.model.name,"success");
+
+                                        let _parent = _root + "/" + me.model.name;
+
+                                        me.newFile(_parent);
+
+                                        win.destroy();
                                     }
+                                },
+                                newFile: function(parent){
 
-                                    let tmp = _.attempt(JSON.parse.bind(null, me.model.item.attr));
-
-                                    fsNew(_type, _name, tmp.content);
-
-                                    swal("",_name,"success");
+                                    let me = this;
 
                                     _.delay(function(){
-                                        self.load();
-                                        win.destroy();
-                                    },500);
-                                },
-                                click: function(item){
-                                    let me = self;
 
-                                    _vue.model.item = item;
+                                        let _name = "PAGE01";
+                                        let _type = me.model.project.extName[me.model.project.value];
+                                        let _info = {title: _name, parent: parent, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                        let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
 
-                                    $(".widget-stats.active").removeClass("active");
-                                    $("#"+item.id).addClass("active");
+                                        if(_rtn == 1){
+
+                                            alertify.success("",_name,"success");
+
+                                            self.load();
+                                        }
+                                    },500)
+
                                 }
                             }
                         })
@@ -555,10 +519,10 @@
                                 model: {
                                     name: "",
                                     type: "iflow",
-                                    item: {
-                                        attr: ""
-                                    },
                                     tags: [],
+                                    info: {
+                                        remark: ""
+                                    },
                                     ifshare: 0,
                                     astemplate: 0,
                                     templates: []
@@ -622,24 +586,28 @@
                                         return false;
                                     }
                                     
-                                    let _name = me.model.name + "." + me.model.type;
+                                    let _name = me.model.name;
                                     let _type = me.model.type;
 
+                                    let _info = {title: _name, parent: self.model.root, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+
                                     if(me.model.astemplate){
-                                        _name = me.model.name + "." + me.type;  
+                                        _name = me.model.name;
                                         _type = me.type;                                      
                                     }
-                                    
-                                    let tmp = _.attempt(JSON.parse.bind(null, me.model.item.attr));
-                                    
-                                    fsNew(_type, _name, tmp.content);
 
-                                    swal("",_name,"success");
 
-                                    _.delay(function(){
-                                        self.load();
-                                        win.destroy();
-                                    },500);
+                                    let _rtn = fsNew(_type, self.model.root, _name+"."+_type, null, _info);
+
+                                    if(_rtn == 1){
+                                        swal("",_name,"success");
+
+                                        _.delay(function(){
+                                            self.load();
+                                            win.destroy();
+                                        },500);
+                                    }
+
                                 },
                                 click: function(item){
                                     let me = self;
@@ -686,7 +654,7 @@
                         $(".tagsLabel").on('itemAdded', function(event) {
 
                             let _id = $(this).data("index");
-                            let _item = _.find(self.model,{id:_id});
+                            let _item = _.find(self.model.list,{id:_id});
                             
                             fetchData(_item.id + ' | tags +' + event.item);
 
@@ -695,30 +663,11 @@
                         $(".tagsLabel").on('itemRemoved', function(event) {
 
                             let _id = $(this).data("index");
-                            let _item = _.find(self.model,{id:_id});
+                            let _item = _.find(self.model.list,{id:_id});
 
                             fetchData(_item.id + ' | tags -' + event.item);
 
                         });
-                    },
-                    validate: function(event) {
-                        let self = this;
-                        var name = event.val();
-                        var retValue = {};
-
-                        if (name == "") {
-                            retValue.status = false;
-                            retValue.msg = "";
-                        } else {
-                            retValue.status = true;
-                        }
-
-                        return retValue;
-                    },
-                    searchByInput: function (event){
-                        let self = this;
-
-                        self.search(event);
                     },
                     forwardCreative: function(action,item){
                         let self = this;
@@ -732,6 +681,7 @@
                         obj.name = item.name;
                         obj.parent = item.parent;
                         obj.fsExtension = item.name.split(".")[1] || "ishow";
+                        obj.attr = item.attr;
 
                         localStorage.setItem("graph-object",JSON.stringify(obj));
 
@@ -747,6 +697,9 @@
                                 "/janesware/" + obj.fsExtension,
                                 "_blank"
                             );
+                        } else if(item.ftype === 'dir'){
+                            self.model.root = item.parent+"/"+item.name.replace(/\/home\/admin/g,"");
+                            self.load();
                         } else {
                             if (action == 'edit'){
                                 window.open(
@@ -760,6 +713,72 @@
                                 );
                             }
                         }
+                    },
+                    info: function(node){
+                        let self = this;
+
+                        let _win = newWindow("fsinfo","信息",'<div id="fs-info"></div>');
+                        _win.setMaximizable(false);
+                        _win.setMinimizable(false);
+                        _win.setResizable(true);
+                        _win.setClosable(true);
+
+                        let _infoVue = new Vue({
+                            el: "#fs-info",
+                            template: `<div class="panel">
+                                            <div class="panel-body">
+                                                <form>
+
+                                                <div class="form-group">
+                                                    <label for="title">名称</label>
+                                                    <input type="text" class="form-control" id="title" placeholder="" v-model="model.title">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="parent">目录</label>
+                                                    <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="type">类型</label>
+                                                    <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="author">作者</label>
+                                                    <input type="text" class="form-control" id="author" placeholder="" v-model="model.author" disabled>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="ctime">修改时间</label>
+                                                    <input type="text" class="form-control" id="ctime" placeholder="" v-model="model.ctime" disabled>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="remark">备注</label>
+                                                    <textarea type="text" class="form-control" id="remark" placeholder="" v-model="model.remark">
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>`,
+                            data: {
+                                model: _.attempt(JSON.parse.bind(null, node))
+                            },
+                            filters: {
+                                pickTitle: function (value) {
+                                    let self = this;
+
+                                    if (!value) return '';
+
+                                    let _attr = _.attempt(JSON.parse.bind(null, value));
+
+                                    return _attr.title;
+                                },
+                                readMore: function (text, length, suffix) {
+                                    return text.substring(0, length) + suffix;
+                                },
+                                toLocalTime: function (value) {
+                                    return moment(value).format("LLL");
+                                }
+                            }
+                        })
+
                     }
                 }
             })
@@ -769,29 +788,7 @@
 
 <script type="text/x-template" id="app-template">
     <div class="container-fluid">
-        <div class="row" style="padding:5px;">
-
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="input-group searchinput">
-                            <vue-search-input-component :model="search.preset"></vue-search-input-component>
-                            <div class="input-group-btn">
-                                <vue-search-preset-component :preset="search.preset"></vue-search-preset-component>
-                            </div>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row" style="padding:5px;">
-
-        </div>
+        <div class="row" style="padding:5px;"></div>
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-grey">
@@ -799,67 +796,87 @@
                         {{.i18n.Tr "creative-title"}}
                     </div>
                     <div class="panel-body" style="border:1px solid #dddddd;">
-                        <div class="row" style="padding:0px 5px;">
-                            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                <div class="btn-group-action">
-                                    <a href="#" class="btn btn-xs btn-info" @click="setSearchTerm('ftype=iflow');onSearch();">
-                                        流程设计 
-                                    </a>
-                                    <a href="#" class="btn btn-xs btn-warning" @click="setSearchTerm('ftype=ishow');onSearch();">
-                                        仪表盘
-                                    </a>
-                                    <a href="#" class="btn btn-xs btn-danger" @click="setSearchTerm('ftype=imap');onSearch();">
-                                        IT地图
-                                    </a>
-                                    <a href="#" class="btn btn-xs btn-success" @click="setSubClass('ftype=iflowt;ftype=ishowt;ftype=imapt');onSearch();">
-                                        模板
-                                    </a>
-                                </div>    
-                            </div>
-                            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                <div class="btn-group-action pull-right">
-                                    <a href="#" class="btn btn-xs btn-default" @click="newDir"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-project"}}</a>
-                                    <a href="#" class="btn btn-xs btn-default" @click="newFile"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-file"}}</a>
-                                </div>    
-                            </div>
+                        <div class="col-lg-2">
+                            <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
                         </div>
-                        <div class="row" style="padding:5px;"></div>
-                        <div class="row">
-                            <transition-group name="list" tag="div">
-                                <div class="col-xs-3 col-lg-2" v-for="(item,index) in model" :key="item.id">
-                                        <div class="widget widget-stats bg-info animated flipInX">
-                                            <div>
-                                                
-                                                <span class="stats-number" style="font-size:12px;color:rgb(102,102,102);line-height: 25px;overflow-x: auto;overflow-y: hidden;max-height: 36px;">
-                                                    <i class="fa fa-braille"></i> ${item.name}
-                                                </span>
+                        <div class="col-lg-10">
 
-                                                <span>
-                                                    <a href="javascript:void(0)"
-                                                       @click="forwardCreative('show',item)">
-                                                        <img :src="'/web/assets/images/'+item.ftype+'.png'" style="width:75%;height:80px; margin: 0px 20px;">
-                                                    </a>
-                                                </span>
-                                                <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
-                                            </div>
-                                            <div class="stats-desc" style="margin-bottom: -10px;">
-                                                <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username}<BR/>
-                                                <i class='fa fa-clock-o' style='color:#337ab7;'></i>${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;
-                                                <span class="rating" v-for="data in item.star">
-                                                    <span style="color:gold;">☆</span>
-                                                </span>
-                                                <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                    <i class="fa fa-wrench"></i>
+                            <div class="row" style="padding:0px 5px;">
+                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                                    <ul style="list-style: none;display:  flex;margin-left: -40px;">
+                                        <li style="padding:5px 0px;">
+                                            <a href="javascript:void(0);" @click="forwardDir('/home/creative')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 当前项目 </a>
+                                        </li>
+                                        <li>
+                                            <ol class="breadcrumb">
+                                                <li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
+                                                    <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))">${item}</a>
+                                                </li>
+                                            </ol>
+                                        </li>
+                                    </ul>
+
+                                    <!--<div class="btn-group-action">
+                                        <a href="javascript:void(0);" :class="item.class" @click="forwardDir(item.path);" v-for="item in model.category" style="margin-right: 5px;">
+                                             ${item.name}
+                                        </a>
+                                    </div>-->
+
+                                </div>
+                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                    <div class="btn-group-action pull-right">
+                                        <a href="#" class="btn btn-xs btn-default" @click="newDir"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-project"}}</a>
+                                        <a href="#" class="btn btn-xs btn-default" @click="newFile"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-file"}}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="padding:5px;"></div>
+                            <div class="row">
+                                <transition-group name="list" tag="div">
+                                    <div class="col-xs-4 col-lg-3" v-for="(item,index) in model.list" :key="item.id">
+                                            <div class="widget widget-stats bg-info animated flipInX">
+                                                <div>
+
+                                                    <span class="stats-number" style="font-size:12px;color:rgb(102,102,102);line-height: 25px;overflow-x: auto;overflow-y: hidden;max-height: 36px;">
+                                                        <i class="fa fa-braille"></i> <span class="fs-name" :data-info="JSON.stringify(item)">${ item.attr | pickTitle}</span>
+                                                    </span>
+
+                                                    <span>
+                                                        <a href="javascript:void(0)"
+                                                           @click="forwardCreative('show',item)">
+                                                            <img :src="'/web/assets/images/'+item.ftype+'.png'" style="width:75%;height:80px; margin: 0px 20px;">
+                                                        </a>
+                                                    </span>
+                                                    <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                                                </div>
+                                                <div class="stats-desc" style="margin-bottom: -10px;">
+                                                    <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username}<BR/>
+                                                    <i class='fa fa-hourglass-start' style='color:#337ab7;'></i> ${ item.project.stime }<BR/>
+                                                    <i class='fa fa-hourglass-end' style='color:#337ab7;'></i> ${ item.project.etime }<BR/>
+                                                    <div v-if="item.project.status==='start'">
+                                                        <i class='fa fa-spinner fa-spin' style='color:#337ab7;'></i> 运行中
+                                                    </div>
+                                                    <div v-else>
+                                                        <i class='fa fa-spinner' style='color:#337ab7;'></i>
+                                                    </div>
+                                                    <span class="rating" v-for="data in item.star">
+                                                        <span style="color:gold;">☆</span>
+                                                    </span>
+
+                                                    <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+                                                        <i class="fa fa-wrench"></i>
+                                                    </div>
+
                                                 </div>
                                             </div>
-                                        </div>
-                                    
-                                </div>
-                            </transition-group>
+
+                                    </div>
+                                </transition-group>
+                            </div>
                         </div>
                     </div>
                 </div>  
-            </div>  
+            </div>
         </div>
     </div>
 </script>
@@ -888,44 +905,78 @@
 </script>
 
 <script type="text/x-template" id="creative-project-template">
-    <div>
-        <div class="row">
-            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                <div style="padding:5px;">
-                    <input type="text" class="form-control" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:none;">
+    <div class="panel">
+        <div class="panel-body">
+            <form>
+
+                <div class="form-group">
+                    <label for="title">{{.i18n.Tr "mxdashboard_modal_project&name"}}</label>
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#{model.project.value}# <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <label style="padding:5px;">
+                                        <input type="radio" v-model="model.project.value" value="流程设计" checked> 流程设计
+                                    </label>
+                                <li>
+                                    <label style="padding:5px;">
+                                        <input type="radio" v-model="model.project.value" value="仪表盘"> 仪表盘
+                                    </label>
+                                <li>
+                                    <label style="padding:5px;">
+                                        <input type="radio" v-model="model.project.value" value="IT地图"> IT地图
+                                    </label>
+                            </ul>
+                        </div>
+                        <input type="text" class="form-control" id="title" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="height:33px;">
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
-                <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div style="padding:5px;">
-                    <input type="radio" v-model="model.ifshare" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_public"}}
-                    <input type="radio" v-model="model.ifshare" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_private"}}
+
+                <div class="form-group">
+                    <label for="remark">{{.i18n.Tr "mxdashboard_modal_remark"}}</label>
+                    <textarea class="form-control" id="remark" rows="6" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark"></textarea>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <div class="pull-right" style="background-color:transparent;padding:5px 15px;">
-                    <a href="javascript:void(0)" type="button" class="btn btn-sm btn-primary" @click="save">{{.i18n.Tr "mxdashboard_modal_submit"}}</a>
+
+                <div class="form-group" style="max-height: 5vh;overflow:auto;">
+                    <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <div style="padding:5px;">
+                        <input type="radio" v-model="model.ifshare" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_public"}}
+                        <input type="radio" v-model="model.ifshare" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_private"}}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="pull-right" style="background-color:transparent;padding:5px 15px;">
+                        <a href="javascript:void(0)" type="button" class="btn btn-sm btn-primary" @click="save">{{.i18n.Tr "mxdashboard_modal_submit"}}</a>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </script>
 
 <script type="text/x-template" id="creative-list-template">
-    <div>
+    <div style="padding:10px 0px;">
         <div class="row" style="border-bottom:1px solid #ddd;">
-            <div class="col-xs-10 col-sm-10 col-md-10 col-lg-10">
-                <div style="padding:5px;">
-                    <input type="text" class="form-control" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:none;">
-                </div>
+            <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="name" class="col-sm-2 control-label">{{.i18n.Tr "mxdashboard_modal_title"}}</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="name" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:1px solid #ddd;">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="remark"  class="col-sm-2 control-label">{{.i18n.Tr "mxdashboard_modal_remark"}}</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="remark" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark" style="border:1px solid #ddd;">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="row" style="background-color:#f7f7f7;">
@@ -955,7 +1006,7 @@
                 <div class="panel panel-grey" style="background-color:transparent;margin-bottom: 0px;">
                     <div class="panel-body">
                         
-                        <div class="row" style="min-height:45vh;max-height:50vh;overflow: auto;border-bottom:1px solid #ddd;">
+                        <div class="row" style="min-height:42vh;max-height:42vh;overflow: auto;border-bottom:1px solid #ddd;">
                             <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
                                 <div class="widget widget-stats bg-grey" id="blank" @click="click({'id':'blank'})">
                                     <div>

@@ -380,15 +380,30 @@
                             self.host.list = data.data;
                         });
 
-                        $.getJSON( "https://easy-mock.com/mock/5a3c6a010df23b51b3615692/wecise/script", function( data ) {
-                            self.script.list = data.data;
-                        });
+                        self.initPlugIn();
 
                         $.getJSON( "https://easy-mock.com/mock/5a3c6a010df23b51b3615692/wecise/agent", function( data ) {
                             self.agent.table = data.data;
                         });
 
 
+                    },
+                    initPlugIn: function(){
+                        let self = this;
+
+                        self.script.list = [
+                                                {cid:1,pid:null,name:'脚本',children: self.initScriptList(),open:true},
+                                                {cid:2,pid:null,name:'日志',children:[],open:true},
+                                                {cid:3,pid:null,name:'作业',children:[],open:true}
+                                            ];
+
+                    },
+                    initScriptList: function(){
+                        let self = this;
+                        let _list = agentList();
+                        return _.map(_list.message,function(v,k){
+                                    return { name:v, children:[], open:true };
+                                });
                     },
                     onSearch: function() {
                         let self = this;

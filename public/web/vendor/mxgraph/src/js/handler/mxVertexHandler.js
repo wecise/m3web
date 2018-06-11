@@ -791,6 +791,7 @@ mxVertexHandler.prototype.mouseMove = function(sender, me)
 				if (this.customHandles != null)
 				{
 					this.customHandles[mxEvent.CUSTOM_HANDLE - this.index].processEvent(me);
+					this.customHandles[mxEvent.CUSTOM_HANDLE - this.index].active = true;
 				}
 			}
 			else if (this.index == mxEvent.LABEL_HANDLE)
@@ -1122,6 +1123,7 @@ mxVertexHandler.prototype.mouseUp = function(sender, me)
 			{
 				if (this.customHandles != null)
 				{
+					this.customHandles[mxEvent.CUSTOM_HANDLE - this.index].active = false;
 					this.customHandles[mxEvent.CUSTOM_HANDLE - this.index].execute();
 				}
 			}
@@ -1290,7 +1292,15 @@ mxVertexHandler.prototype.reset = function()
 	{
 		for (var i = 0; i < this.customHandles.length; i++)
 		{
-			this.customHandles[i].reset();
+			if (this.customHandles[i].active)
+			{
+				this.customHandles[i].active = false;
+				this.customHandles[i].reset();
+			}
+			else
+			{
+				this.customHandles[i].setVisible(true);
+			}
 		}
 	}
 	
@@ -1766,11 +1776,14 @@ mxVertexHandler.prototype.redrawHandles = function()
 		var sin = Math.sin(alpha);
 		
 		var ct = new mxPoint(this.state.getCenterX(), this.state.getCenterY());
-		var pt = mxUtils.getRotatedPoint(new mxPoint(s.x + s.width / 2, s.y + this.rotationHandleVSpacing), cos, sin, ct);
+		var pt = mxUtils.getRotatedPoint(this.getRotationHandlePosition(), cos, sin, ct);
 
 		if (this.rotationShape.node != null)
 		{
 			this.moveSizerTo(this.rotationShape, pt.x, pt.y);
+
+			// Hides rotation handle during text editing
+			this.rotationShape.node.style.visibility = (this.state.view.graph.isEditing()) ? 'hidden' : '';
 		}
 	}
 	
@@ -1791,11 +1804,26 @@ mxVertexHandler.prototype.redrawHandles = function()
 	{
 		for (var i = 0; i < this.customHandles.length; i++)
 		{
+			var temp = this.customHandles[i].shape.node.style.display;
 			this.customHandles[i].redraw();
+			this.customHandles[i].shape.node.style.display = temp;
+
+			// Hides custom handles during text editing
+			this.customHandles[i].shape.node.style.visibility = (this.graph.isEditing()) ? 'hidden' : '';
 		}
 	}
 
 	this.updateParentHighlight();
+};
+
+/**
+ * Function: getRotationHandlePosition
+ * 
+ * Returns an <mxPoint> that defines the rotation handle position.
+ */
+mxVertexHandler.prototype.getRotationHandlePosition = function()
+{
+	return new mxPoint(this.bounds.x + this.bounds.width / 2, this.bounds.y + this.rotationHandleVSpacing)
 };
 
 /**
