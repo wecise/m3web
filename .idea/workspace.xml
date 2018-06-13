@@ -2,135 +2,506 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/assets/images/dir.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/assets/images/dir.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-bootstrap-table.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-ci-card-component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/js/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/init.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/js/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/util.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/checkmark.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/clear.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/close.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/collapsed.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/dropdown.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/dropdown.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/edit.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/expanded.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/grid.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/handle-fixed.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/handle-main.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/handle-rotate.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/handle-secondary.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/handle-terminal.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/help.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/locked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/nocolor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/refresh.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/round-drop.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/search.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/tooltip.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/transparent.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/triangle-down.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/triangle-left.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/triangle-right.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/triangle-up.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/images/unlocked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Actions.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Dialogs.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Editor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/EditorUi.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Footbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Format.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Graph.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Init.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Menus.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Shapes.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Sidebar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/Toolbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/js/cross.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/jscolor/arrow.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/jscolor/cross.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/jscolor/hs.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/jscolor/hv.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/jscolor/jscolor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/open.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/open/factory.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/editor_eg.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/graph_eg.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/grapheditor.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/grapheditor_eg.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/grapheditor_zh.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/help.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/resources/help_de.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/sanitizer/sanitizer.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/arrows.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/bankofchina_flowchart.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/basic.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/bpmn.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/China_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Credit_Card_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Database_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Doctor1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Earth_globe_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Email_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Empty_Folder_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Firewall_02_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Full_Folder_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Gear_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Graph_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Laptop_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Lock_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/MacBook_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Monitor_Tower_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Piggy_Bank_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Pilot1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Printer_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Router_Icon_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Safe_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Security1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Server_Tower_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Shopping_Cart_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Skip_128x74.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Skip_128x74.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Software_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Soldier1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Suit1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Suit2_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Suit3_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Tech1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Telesales1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Virtual_Machine_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Virus_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Wireless_Router_N_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Worker1_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/Workstation_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/iMac_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/clipart/iPad_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/flowchart.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/map/China.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/map/Singapore.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/map/UnitedKingdom.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/map/Usa.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/add.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/app.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/bar-chart.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/binoculars.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/biz.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/browser.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/bug.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/chat-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/chat-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/chat.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/cloud-computing-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/compass-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/compass.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/computer-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/computer.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/connection-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/connection.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/desk.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/directions.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/dislike.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/dollar-symbol-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/dollar-symbol.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/email.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/flat.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/group-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/group-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/group.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/handshake.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/hierarchical-structure.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/host.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/invoice.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/laptop-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/laptop.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like-3.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like-4.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like-5.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/like.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/list-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/list.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/money-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/money.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/mouse-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/mouse-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/mouse.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/network-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/network.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking-3.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking-4.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking-5.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/networking.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/padlock-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/padlock.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/pencil.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/people.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/pie-chart-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/pie-chart.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/piggy-bank-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/piggy-bank.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/placeholder.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/printer.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/route.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/search.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/security.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/settings-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/settings-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/settings.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/sharing.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/shopping-bag.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/smartphone-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/smartphone.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/startup.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/strategy.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/teamwork.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/transfer-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/transfer-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/transfer.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-10.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-11.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-12.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-13.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-14.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-3.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-4.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-5.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-6.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-7.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-8.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user-9.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/user.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/worldwide-1.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/worldwide-2.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/worldwide.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/wrench.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/11/wristwatch.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_ compass.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_ juice.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_Set.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_TV.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_U_disk.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_adaptive.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_basketball.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_brush.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_camera (1).svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_camera.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_chat.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_clock.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_cloud.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_code.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_computer.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_copy.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_cup_coffee.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_desk.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_draft.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_electricity.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_email.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_eye.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_file.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_glasses.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_headset.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_key.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_laptop.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_link.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_mouse.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_movie.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_music.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_notebook.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_package.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_pad.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_palette.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_phone.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_photo_album.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_record.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_ruler.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_seat.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_sketch_plate.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_tool.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_update.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_voice.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/12/icon_wifi.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/app.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/biz.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/biz_3d.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/cisco.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/cluster.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/crm.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/hardware.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/hardware_3d.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/host.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/im.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/link.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/link_3d.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/linux.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/network.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/network_3d.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/software.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/software_3d.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/switch.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/unix.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/vm.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/17/windows.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/app_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/biz_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/cassandra_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/check.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/datacenter_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/etcd_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/gnats_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/host_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/ibm_server_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/matrix_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/mxsvr201_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/mxsvr211_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/mxsvr221_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/mxsvr231_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/mxsvr232_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/network_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/stencils/matrix/web_128x128.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/down.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/grapheditor.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/help.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/sprites.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/thumb_horz.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/thumb_vertical.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/styles/up.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph-backup/viewer.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Dialogs.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Dialogs.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Footbar.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Format.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Format.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Graph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Graph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Shapes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Shapes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/cross.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/open/factory.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/editor_eg.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/graph_eg.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/stencils/bankofchina_flowchart.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/stencils/clipart/China_128x128.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/stencils/clipart/Skip_128x74.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/stencils/clipart/Skip_128x74.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/styles/grapheditor.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/styles/grapheditor.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/mxClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/mxClient.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/mxClient.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/mxClient.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/css/common.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/css/common.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/close.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/error.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/maximize.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/minimize.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/normalize.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/0.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/100.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/25.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/50.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/75.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/grey.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/normal.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/red.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/progress/yellow.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/thermometer/0.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/thermometer/100.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/thermometer/25.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/thermometer/50.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/status/thermometer/75.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/images/warning.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/editor/mxEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/editor/mxEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxCellHighlight.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxCellHighlight.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxCellMarker.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxCellMarker.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxConnectionHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxConnectionHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxConstraintHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxConstraintHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxEdgeHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxEdgeHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxEdgeSegmentHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxEdgeSegmentHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxGraphHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxGraphHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxHandle.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxHandle.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxPanningHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxPanningHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxRubberband.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxRubberband.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxSelectionCellsHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxSelectionCellsHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxTooltipHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxTooltipHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxVertexHandler.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/handler/mxVertexHandler.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/io/mxChildChangeCodec.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/io/mxChildChangeCodec.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/model/mxSwimlaneModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/model/mxSwimlaneModel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/mxHierarchicalLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/mxHierarchicalLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/stage/mxCoordinateAssignment.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/hierarchical/stage/mxCoordinateAssignment.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxCircleLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxCircleLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxCompactTreeLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxCompactTreeLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxFastOrganicLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxFastOrganicLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxGraphLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxGraphLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxRadialTreeLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxRadialTreeLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxStackLayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/layout/mxStackLayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/model/mxGraphModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/model/mxGraphModel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/mxClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/mxClient.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxActor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxActor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxConnector.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxConnector.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxRectangleShape.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxRectangleShape.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxShape.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxShape.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxStencil.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxStencil.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxSwimlane.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxSwimlane.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxText.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxText.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxAbstractCanvas2D.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxAbstractCanvas2D.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxConstants.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxConstants.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxDragSource.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxDragSource.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxEvent.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxEvent.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog的副本.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxMorphing.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxMorphing.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxPanningManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxPanningManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxPopupMenu.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxPopupMenu.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxResources.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxResources.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxSvgCanvas2D.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxSvgCanvas2D.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxUrlConverter.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxUrlConverter.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxUtils.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxUtils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/mxClient.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/mxClient.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/css/common.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/css/explorer.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/button.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/close.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/close.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/collapsed.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/error.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/error.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/expanded.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/maximize.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/maximize.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/minimize.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/minimize.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/normalize.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/normalize.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/point.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/resize.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/separator.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/0.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/100.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/25.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/50.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/75.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/grey.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/normal.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/red.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/progress/yellow.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/thermometer/0.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/thermometer/100.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/thermometer/25.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/thermometer/50.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/status/thermometer/75.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/submenu.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/transparent.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/warning.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/warning.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/warning.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/window-title.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/images/window.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/editor/mxDefaultKeyHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/editor/mxDefaultPopupMenu.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/editor/mxDefaultToolbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/editor/mxEditor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxCellHighlight.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxCellMarker.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxCellTracker.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxConnectionHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxConstraintHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxEdgeHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxEdgeSegmentHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxElbowEdgeHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxGraphHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxHandle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxKeyHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxPanningHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxPopupMenuHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxRubberband.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxSelectionCellsHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxTooltipHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/handler/mxVertexHandler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/index.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxCellCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxChildChangeCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxCodecRegistry.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxDefaultKeyHandlerCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxDefaultPopupMenuCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxDefaultToolbarCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxEditorCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxGenericChangeCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxGraphCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxGraphViewCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxModelCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxObjectCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxRootChangeCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxStylesheetCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/io/mxTerminalChangeCodec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/model/mxGraphAbstractHierarchyCell.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/model/mxGraphHierarchyEdge.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/model/mxGraphHierarchyModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/model/mxGraphHierarchyNode.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/model/mxSwimlaneModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/mxHierarchicalLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/mxSwimlaneLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/stage/mxCoordinateAssignment.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/stage/mxHierarchicalLayoutStage.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/stage/mxMedianHybridCrossingReduction.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/stage/mxMinimumCycleRemover.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/hierarchical/stage/mxSwimlaneOrdering.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxCircleLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxCompactTreeLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxCompositeLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxEdgeLabelLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxFastOrganicLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxGraphLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxParallelEdgeLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxPartitionLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxRadialTreeLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/layout/mxStackLayout.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/model/mxCell.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/model/mxCellPath.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/model/mxGeometry.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/model/mxGraphModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/mxClient.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxActor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxArrow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxArrowConnector.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxCloud.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxConnector.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxCylinder.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxDoubleEllipse.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxEllipse.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxHexagon.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxImageShape.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxLabel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxLine.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxMarker.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxPolyline.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxRectangleShape.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxRhombus.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxShape.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxStencil.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxStencilRegistry.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxSwimlane.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxText.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/shape/mxTriangle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxAbstractCanvas2D.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxAnimation.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxAutoSaveManager.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxClipboard.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxConstants.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxDictionary.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxDivResizer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxDragSource.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxEffects.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxEvent.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxEventObject.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxEventSource.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxForm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxGuide.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxImage.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxImageBundle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxImageExport.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxLog.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxLog的副本.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxMorphing.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxMouseEvent.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxObjectIdentity.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxPanningManager.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxPoint.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxPopupMenu.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxRectangle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxResources.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxSvgCanvas2D.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxToolbar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxUndoManager.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxUndoableEdit.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxUrlConverter.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxUtils.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxVmlCanvas2D.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxWindow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxXmlCanvas2D.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/util/mxXmlRequest.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxCellEditor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxCellOverlay.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxCellRenderer.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxCellState.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxCellStatePreview.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxConnectionConstraint.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxEdgeStyle.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxGraph.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxGraphSelectionModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxGraphView.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxLayoutManager.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxMultiplicity.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxOutline.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxPerimeter.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxPrintPreview.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxStyleRegistry.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxStylesheet.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxSwimlaneManager.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/js/view/mxTemporaryCellStates.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/editor.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/editor_de.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/editor_eg.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/editor_zh.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/graph.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/graph_de.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/graph_eg.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src-backup/src/resources/graph_zh.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxXmlCanvas2D.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxXmlCanvas2D.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxCellEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxCellEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxCellRenderer.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxCellRenderer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxGraphView.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxGraphView.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxOutline.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxOutline.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxPrintPreview.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxPrintPreview.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxTemporaryCellStates.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/view/mxTemporaryCellStates.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/resources/editor_eg.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/resources/graph_eg.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/base/head.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base/head.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/creative.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/creative.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/event.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/event.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/files.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/files.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/iflow.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/iflow.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/log.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/log.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/object.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/object.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/performance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/performance.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/probe.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/probe.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/search.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/system.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/system.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -147,7 +518,7 @@
       <file leaf-file-name="ciview.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state>
+            <state relative-caret-position="8304">
               <caret line="692" selection-start-line="688" selection-start-column="28" selection-end-line="692" />
             </state>
           </provider>
@@ -156,17 +527,8 @@
       <file leaf-file-name="creative.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="351">
-              <caret line="325" column="93" lean-forward="true" selection-start-line="325" selection-start-column="48" selection-end-line="325" selection-end-column="93" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-dispatch-manager-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4452">
-              <caret line="371" column="19" selection-start-line="369" selection-start-column="41" selection-end-line="371" selection-end-column="19" />
+            <state relative-caret-position="336">
+              <caret line="1003" column="56" lean-forward="true" selection-start-line="1003" selection-start-column="56" selection-end-line="1003" selection-end-column="56" />
             </state>
           </provider>
         </entry>
@@ -180,47 +542,46 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vue-ci-card-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7908">
-              <caret line="659" selection-start-line="659" selection-end-line="659" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="performance.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/performance.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="18" column="5" selection-start-line="11" selection-start-column="4" selection-end-line="18" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-ci-tags-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="588">
-              <caret line="49" column="28" selection-start-line="49" selection-start-column="28" selection-end-line="49" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="Actions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="30" column="7" selection-start-line="30" selection-start-column="7" selection-end-line="30" selection-end-column="7" />
+            <state relative-caret-position="1500">
+              <caret line="127" column="35" lean-forward="true" selection-start-line="127" selection-start-column="35" selection-end-line="127" selection-end-column="35" />
             </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="activate.tmpl" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/user/auth/activate.tmpl">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="forgot_passwd.tmpl" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/user/auth/forgot_passwd.tmpl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="25" column="37" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="signin.tmpl" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/user/auth/signin.tmpl">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="signup.tmpl" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/user/auth/signup.tmpl">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-15156" />
           </provider>
         </entry>
       </file>
       <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/base/head.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="312">
-              <caret line="319" column="9" lean-forward="true" selection-start-line="310" selection-start-column="8" selection-end-line="319" selection-end-column="9" />
+            <state relative-caret-position="624">
+              <caret line="116" column="4" selection-start-line="116" selection-start-column="4" selection-end-line="118" selection-end-column="108" />
             </state>
           </provider>
         </entry>
@@ -243,41 +604,20 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="iflow.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="iflow.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="465" column="63" lean-forward="true" selection-start-line="465" selection-start-column="63" selection-end-line="465" selection-end-column="63" />
-              <folding>
-                <element signature="e#24744#33654#0" />
-              </folding>
+            <state relative-caret-position="390">
+              <caret line="544" column="38" selection-start-line="544" selection-start-column="38" selection-end-line="544" selection-end-column="38" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Sidebar.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+      <file leaf-file-name="locale_en-US.ini" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conf/locale/locale_en-US.ini">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3997">
-              <caret line="3504" column="5" selection-start-line="3504" selection-start-column="5" selection-end-line="3504" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Editor.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="70" column="5" selection-start-line="70" selection-start-column="5" selection-end-line="70" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="EditorUi.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="950" column="39" selection-start-line="950" selection-start-column="39" selection-end-line="950" selection-end-column="39" />
+            <state relative-caret-position="3276">
+              <caret line="273" selection-start-line="273" selection-end-line="273" />
             </state>
           </provider>
         </entry>
@@ -285,8 +625,44 @@
       <file leaf-file-name="jquery.jspanel.min.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="40" column="538" selection-start-line="40" selection-start-column="526" selection-end-line="40" selection-end-column="538" />
+            <state relative-caret-position="1524">
+              <caret line="127" column="334" selection-start-line="127" selection-start-column="327" selection-end-line="127" selection-end-column="334" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="locale_zh-CN.ini" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conf/locale/locale_zh-CN.ini">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3348">
+              <caret line="279" selection-start-line="279" selection-end-line="279" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Sidebar.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="611">
+              <caret line="3479" column="55" lean-forward="true" selection-start-line="3479" selection-start-column="55" selection-end-line="3479" selection-end-column="55" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Editor.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="307">
+              <caret line="1898" column="6" selection-start-line="1898" selection-start-column="6" selection-end-line="1898" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="EditorUi.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="11400">
+              <caret line="950" column="39" selection-start-line="950" selection-start-column="39" selection-end-line="950" selection-end-column="39" />
             </state>
           </provider>
         </entry>
@@ -294,17 +670,8 @@
       <file leaf-file-name="object.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4272">
-              <caret line="356" column="5" selection-start-line="353" selection-start-column="4" selection-end-line="356" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-base-table-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-table-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="312">
-              <caret line="26" selection-start-line="26" selection-end-line="26" />
+            <state relative-caret-position="1415">
+              <caret line="1968" column="52" selection-start-line="1968" selection-start-column="52" selection-end-line="1968" selection-end-column="52" />
             </state>
           </provider>
         </entry>
@@ -312,26 +679,17 @@
       <file leaf-file-name="Menus.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="32" column="75" selection-start-line="32" selection-start-column="75" selection-end-line="32" selection-end-column="75" />
+            <state relative-caret-position="283">
+              <caret line="1012" column="47" selection-start-line="1012" selection-start-column="34" selection-end-line="1012" selection-end-column="47" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="132">
-              <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Toolbar.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="423">
-              <caret line="178" column="19" selection-start-line="178" selection-start-column="19" selection-end-line="178" selection-end-column="19" />
+            <state relative-caret-position="432">
+              <caret line="180" column="41" lean-forward="true" selection-start-line="180" selection-start-column="41" selection-end-line="180" selection-end-column="41" />
             </state>
           </provider>
         </entry>
@@ -339,8 +697,8 @@
       <file leaf-file-name="vue-fs-tree-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1668">
-              <caret line="139" column="32" selection-start-line="139" selection-start-column="32" selection-end-line="139" selection-end-column="32" />
+            <state relative-caret-position="2136">
+              <caret line="178" column="35" lean-forward="true" selection-start-line="178" selection-start-column="35" selection-end-line="178" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -354,20 +712,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="files.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="36" selection-start-line="36" selection-end-line="36" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="init.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="209">
-              <caret line="373" column="17" selection-start-line="373" selection-start-column="17" selection-end-line="373" selection-end-column="17" />
+            <state relative-caret-position="450">
+              <caret line="1769" column="47" lean-forward="true" selection-start-line="1769" selection-start-column="47" selection-end-line="1769" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -383,36 +732,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>crontab.on</find>
-      <find>crontab</find>
-      <find>Bob</find>
-      <find>css/common.css</find>
-      <find>tabs</find>
-      <find>addEntitiesMatrixPalette</find>
-      <find>addSvg</find>
-      <find>insertSear</find>
-      <find>defaultImageWidth</find>
-      <find>prototype.addPalette</find>
-      <find>initGraph</find>
-      <find>{{AppSubUrl}}</find>
-      <find>vue-base-datatables-component</find>
-      <find>jobContextGet</find>
-      <find>list-context-menu</find>
-      <find>info</find>
+      <find>toolbars</find>
+      <find>{{.SignedUser.</find>
+      <find>info(</find>
+      <find>mxGraph.prototype.</find>
+      <find>mxGraph.prototype.pageScale</find>
+      <find>mxGraph.prototype</find>
+      <find>mxGraphPanGraph</find>
+      <find>mxGraph.prototype.panGraph</find>
+      <find>updatePageBreaks</find>
+      <find>mxGraph.prototype.updatePageBreaks</find>
+      <find>createSvgGrid</find>
+      <find>validateBackgroundStyles</find>
+      <find>text</find>
+      <find>557</find>
+      <find>mx-properties</find>
+      <find>jsPanel.activePanels.list</find>
+      <find>jsPanel</find>
+      <find>initData</find>
+      <find>_classKeys</find>
+      <find>callJob</find>
+      <find>as400</find>
+      <find>Window</find>
+      <find>zoomToCenter</find>
+      <find>self.crontab.load.sched</find>
       <find>pickTitle</find>
-      <find>callBo</find>
-      <find>reset()</find>
-      <find>reset</find>
-      <find>reset:</find>
-      <find>fsNew</find>
-      <find>graphObject</find>
-      <find>graphObject.attr</find>
-      <find>fsUpdateAttr</find>
-      <find>addDropDownArrow</find>
-      <find>// Creates the sidebar</find>
-      <find>Menus.prototype.createPopupMenu</find>
-      <find>menubarHeight</find>
-      <find>config-accordion</find>
+      <find>model.project</find>
+      <find>$(&quot;.navbar.navbar-default.navbar-fixed-bottom&quot;).fadeOut()</find>
+      <find>initProject</find>
+      <find>frequence</find>
+      <find>tip</find>
     </findStrings>
     <replaceStrings>
       <replace>let self =  this;</replace>
@@ -468,8 +817,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/templates/janesware/temp" />
-        <option value="$PROJECT_DIR$/templates/user/auth/signin.tmpl" />
         <option value="$PROJECT_DIR$/public/web/js/cfg.js" />
         <option value="$PROJECT_DIR$/templates/janesware/creative_list.html" />
         <option value="$PROJECT_DIR$/templates/janesware/monitoring.html" />
@@ -490,14 +837,11 @@
         <option value="$PROJECT_DIR$/templates/janesware/omdb.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" />
-        <option value="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" />
         <option value="$PROJECT_DIR$/conf/locale/locale_en-US.ini" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/files.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-base-robot-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/event.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
         <option value="$PROJECT_DIR$/templates/janesware/performance.html" />
         <option value="$PROJECT_DIR$/templates/janesware/log.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html" />
@@ -511,14 +855,19 @@
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" />
         <option value="$PROJECT_DIR$/templates/janesware/test.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/iflow.html" />
-        <option value="$PROJECT_DIR$/public/web/js/init.js" />
-        <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" />
+        <option value="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" />
+        <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
+        <option value="$PROJECT_DIR$/public/web/js/init.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/iflow.html" />
       </list>
     </option>
   </component>
@@ -535,8 +884,6 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="-1920" />
-    <option name="y" value="-280" />
     <option name="width" value="1920" />
     <option name="height" value="1080" />
   </component>
@@ -615,6 +962,46 @@
             <path>
               <item name="web" type="b2602c69:ProjectViewProjectNode" />
               <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+              <item name="util" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -622,6 +1009,19 @@
               <item name="web" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
               <item name="janesware" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="user" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="user" type="462c0819:PsiDirectoryNode" />
+              <item name="auth" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -712,30 +1112,31 @@
       <workItem from="1527348242716" duration="31118000" />
       <workItem from="1527671497839" duration="146936000" />
       <workItem from="1528412914724" duration="25791000" />
-      <workItem from="1528519429696" duration="25480000" />
+      <workItem from="1528519429696" duration="48726000" />
+      <workItem from="1528786609441" duration="16233000" />
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="727386000" />
+    <option name="totallyTimeSpent" value="766865000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1920" y="-280" width="1920" height="1080" extended-state="0" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32956383" />
-      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.1629393" />
+      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.17528272" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32904148" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32965517" />
       <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32965517" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24959612" />
       <window_info anchor="bottom" id="Terminal" order="7" weight="0.32935324" />
-      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -796,55 +1197,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/templates/janesware/object.html</url>
-          <line>2426</line>
+          <line>2427</line>
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/templates/janesware/diagnosis.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
-          <caret line="1579" column="40" selection-start-line="1579" selection-start-column="40" selection-end-line="1579" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/shape/mxShape.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="615" column="50" lean-forward="true" selection-start-line="615" selection-start-column="50" selection-end-line="615" selection-end-column="50" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="1260" column="28" selection-end-line="3568" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="588">
-          <caret line="49" column="28" selection-start-line="49" selection-start-column="28" selection-end-line="49" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="8040">
-          <caret line="670" column="23" selection-start-line="664" selection-start-column="20" selection-end-line="670" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/job.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="708">
-          <caret line="1207" column="85" lean-forward="true" selection-start-line="1207" selection-start-column="85" selection-end-line="1207" selection-end-column="148" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="96">
@@ -859,45 +1218,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conf/locale/locale_zh-CN.ini">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="214" selection-start-line="214" selection-end-line="214" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/locale/locale_en-US.ini">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="202">
-          <caret line="210" column="52" selection-start-line="210" selection-start-column="52" selection-end-line="210" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/user.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="235" column="74" selection-start-line="235" selection-start-column="54" selection-end-line="235" selection-end-column="74" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1668">
-          <caret line="139" column="32" selection-start-line="139" selection-start-column="32" selection-end-line="139" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
+        <state relative-caret-position="8304">
           <caret line="692" selection-start-line="688" selection-start-column="28" selection-end-line="692" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="319">
-          <caret line="198" column="27" selection-start-line="198" selection-start-column="13" selection-end-line="198" selection-end-column="27" />
         </state>
       </provider>
     </entry>
@@ -909,13 +1233,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-robot-component.html" />
-    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4272">
-          <caret line="356" column="5" selection-start-line="353" selection-start-column="4" selection-end-line="356" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="312">
@@ -965,13 +1282,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="12" column="24" selection-start-line="11" selection-start-column="12" selection-end-line="12" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-tools-box-component.html" />
     <entry file="file://$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html">
       <provider selected="true" editor-type-id="text-editor">
@@ -994,13 +1304,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="40" column="538" selection-start-line="40" selection-start-column="526" selection-end-line="40" selection-end-column="538" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="16368">
@@ -1008,16 +1311,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/css/common.css">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4104" />
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/index.html">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/mxClient.js">
       <provider selected="true" editor-type-id="text-editor">
@@ -1045,55 +1342,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="70" column="5" selection-start-line="70" selection-start-column="5" selection-end-line="70" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3997">
-          <caret line="3504" column="5" selection-start-line="3504" selection-start-column="5" selection-end-line="3504" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/test.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="539">
           <caret line="307" selection-start-line="307" selection-end-line="307" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="465" column="63" lean-forward="true" selection-start-line="465" selection-start-column="63" selection-end-line="465" selection-end-column="63" />
-          <folding>
-            <element signature="e#24744#33654#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="373" column="17" selection-start-line="373" selection-start-column="17" selection-end-line="373" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="325" column="93" lean-forward="true" selection-start-line="325" selection-start-column="48" selection-end-line="325" selection-end-column="93" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="30" column="7" selection-start-line="30" selection-start-column="7" selection-end-line="30" selection-end-column="7" />
         </state>
       </provider>
     </entry>
@@ -1104,24 +1356,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="32" column="75" selection-start-line="32" selection-start-column="75" selection-end-line="32" selection-end-column="75" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
+        <state relative-caret-position="11400">
           <caret line="950" column="39" selection-start-line="950" selection-start-column="39" selection-end-line="950" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="319" column="9" lean-forward="true" selection-start-line="310" selection-start-column="8" selection-end-line="319" selection-end-column="9" />
         </state>
       </provider>
     </entry>
@@ -1132,10 +1370,168 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="672">
+          <caret line="249" column="85" selection-start-line="249" selection-start-column="85" selection-end-line="249" selection-end-column="85" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxToolbar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1824">
+          <caret line="152" column="32" selection-start-line="152" selection-start-column="32" selection-end-line="152" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2136">
+          <caret line="178" column="35" lean-forward="true" selection-start-line="178" selection-start-column="35" selection-end-line="178" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/locale/locale_en-US.ini">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3276">
+          <caret line="273" selection-start-line="273" selection-end-line="273" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/locale/locale_zh-CN.ini">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3348">
+          <caret line="279" selection-start-line="279" selection-end-line="279" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="12" column="24" selection-start-line="11" selection-start-column="12" selection-end-line="12" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-table-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7908">
+          <caret line="659" selection-start-line="659" selection-end-line="659" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4452">
+          <caret line="371" column="19" selection-start-line="369" selection-start-column="41" selection-end-line="371" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/user.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="128" column="67" selection-start-line="128" selection-start-column="53" selection-end-line="128" selection-end-column="67" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="1003" column="56" lean-forward="true" selection-start-line="1003" selection-start-column="56" selection-end-line="1003" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="307">
+          <caret line="1898" column="6" selection-start-line="1898" selection-start-column="6" selection-end-line="1898" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="611">
+          <caret line="3479" column="55" lean-forward="true" selection-start-line="3479" selection-start-column="55" selection-end-line="3479" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="283">
+          <caret line="1012" column="47" selection-start-line="1012" selection-start-column="34" selection-end-line="1012" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="624">
+          <caret line="116" column="4" selection-start-line="116" selection-start-column="4" selection-end-line="118" selection-end-column="108" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user/auth/activate.tmpl">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user/auth/forgot_passwd.tmpl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="25" column="37" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user/auth/signin.tmpl">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user/auth/signup.tmpl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-15156" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="39" column="9" selection-start-line="39" selection-start-column="9" selection-end-line="39" selection-end-column="9" />
+        <state relative-caret-position="432">
+          <caret line="180" column="41" lean-forward="true" selection-start-line="180" selection-start-column="41" selection-end-line="180" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1524">
+          <caret line="127" column="334" selection-start-line="127" selection-start-column="327" selection-end-line="127" selection-end-column="334" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="127" column="35" lean-forward="true" selection-start-line="127" selection-start-column="35" selection-end-line="127" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1415">
+          <caret line="1968" column="52" selection-start-line="1968" selection-start-column="52" selection-end-line="1968" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="1769" column="47" lean-forward="true" selection-start-line="1769" selection-start-column="47" selection-end-line="1769" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="544" column="38" selection-start-line="544" selection-start-column="38" selection-end-line="544" selection-end-column="38" />
         </state>
       </provider>
     </entry>

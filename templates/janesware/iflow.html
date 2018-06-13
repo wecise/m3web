@@ -27,6 +27,16 @@
 
 <style>
 
+    #title{
+        font-size: 38px;
+        font-weight: 600;
+        font-family: "micosoft yahei";
+        left: 35px;
+        top: 10px;
+        position: fixed;
+        color:rgb(219, 219, 219)
+    }
+
     .tools-item {
         width: 28px;
         height: 28px;
@@ -138,6 +148,9 @@
 
         moment.locale({{.Lang}});
 
+        $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
+        $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
+
 
         $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
 
@@ -155,23 +168,7 @@
                             nodes: {},
                             tip: []
                         },
-                        project: {
-                            title: "",
-                            current:"",
-                            stime: "",
-                            etime: "",
-                            status: "start",
-                            diaglog: {
-                                title: "",
-                                prompt: [],
-                                select: ""
-                            },
-                            action: {
-                                node: "",
-                                status: ""
-                            }
-
-                        },
+                        project: {},
                         container: null,
                         model: null,
                         graph: null,
@@ -183,6 +180,7 @@
                     theme: "",
                     crontab: {
                         on: false,
+                        frequency: 3,
                         load: {
                             sched: Object,
                             timer: Object
@@ -208,21 +206,28 @@
                     })
                 },
                 watch: {
-                    'crontab.on': {
+                    'crontab.frequency': {
                         handler: function (val, oldVal) {
                             let self = this;
 
-                            if (val) {
-                                self.crontab.load.sched = later.parse.text('every 1 sec');
-                                self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+                            self.crontab.load.sched = later.parse.text('every '+val+' sec');
+                            self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
 
-                                self.update();
+                            self.update();
 
-                                self.crontab.project.sched = later.parse.text('every 5 sec');
-                                self.crontab.project.timer = later.setInterval(self.initProject, self.crontab.project.sched);
-                            }
                         },
                         deep: true
+                    },
+                    'model.project.current':{
+                        handler: function(val,oldVal){
+                            let self = this;
+
+                            if(val != oldVal){
+                                self.model.object.data = fsContent(self.model.object.param.parent, val);
+                                self.initGraph();
+                            }
+                        },
+                        deep:true
                     }
                 },
                 created: function() {
@@ -235,7 +240,42 @@
                     self.model.object.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
 
                 },
+                filters: {
+                    pickTitle: function(value){
+                        let _title = "";
+                        let _value = value;
+
+                        if(!_.isEmpty(_value)){
+                            _title = _value.title;
+                        }
+
+                        return _title;
+
+                    }
+                },
                 methods: {
+                    zoomToCenter: function(margin){
+                        let self = this;
+
+                        var bounds = self.model.graph.getGraphBounds();
+                        margin = margin || 10;
+
+                        self.model.container.style.overflow = "hidden";
+
+                        self.model.graph.view.setTranslate(
+                            -bounds.x -(bounds.width - self.model.container.clientWidth)/ 2,
+                            -bounds.y - (bounds.height - self.model.container.clientHeight) / 2
+                        );
+
+                        while( (bounds.width + margin * 2) > self.model.container.clientWidth
+                        || (bounds.height + margin * 2) > self.model.container.clientHeight ){
+                            self.model.graph.zoomOut();
+                            bounds = self.model.graph.getGraphBounds();
+                        }
+
+                        self.model.container.style.overflow = "auto";
+
+                    },
                     init: function() {
                         let self = this;
 
@@ -348,11 +388,14 @@
 
                         // Load cells and layouts the graph
                         self.model.graph.getModel().beginUpdate();
+
                         try
                         {
                             var doc = mxUtils.parseXml(self.model.object.data);
                             var codec = new mxCodec(doc);
                             codec.decode(doc.documentElement, self.model.graph.getModel());
+
+                            $("svg").addClass("animated fadeInUp");
 
                             let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
 
@@ -365,7 +408,7 @@
                                     self.model.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [cell]);
 
                                     let state = self.model.graph.view.getCellStates(cell.mxObjectId);
-                                    console.log(11,self.model.graph.view,cell,state)
+
                                     //state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
                                 }
                             })
@@ -376,6 +419,8 @@
                             // Updates the display
                             self.model.graph.getModel().endUpdate();
 
+                            //self.zoomToCenter();
+
                             self.crontab.on = true;
                         }
                     },
@@ -384,15 +429,21 @@
 
                         self.initOutline();
                         self.initTools();
+                        self.model.container.style.top = "0px";
+
+                        self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
+                        self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+
+                        self.update();
                     },
                     initData: function(){
                         let self = this;
 
-                        let _attr = JSON.parse(self.model.object.param.attr);
+                        let _attr = _.attempt(JSON.parse.bind(null, self.model.object.param.attr));
                         let _project = _.last(_attr.parent.split("/"));
                         let _page = _attr.title;
 
-                        let _rtn = jobContextGet(_project, _project + "/" + _page);
+                        let _rtn = jobContextGet(_project, _project);// + "/" + _page);
 
                         if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
                             self.reset();
@@ -401,21 +452,10 @@
                         if (!_.isEmpty(_rtn)) {
                             self.model.object.nodes = _rtn.message;
                             self.update();
+
+                            self.model.project = _.attempt(JSON.parse.bind(null, _rtn.message[_project]));
                         }
 
-                    },
-                    initProject: function(){
-                        let self = this;
-
-                        let _attr = JSON.parse(self.model.object.param.attr);
-                        let _project = _.last(_attr.parent.split("/"));
-                        let _page = _attr.title;
-
-                        let _rtn = jobContextGet(_project, _project);
-
-                        if (!_.isEmpty(_rtn)) {
-                            //self.model.project = _rtn.message["BOB"];
-                        }
                     },
                     reset: function(){
                        let self = this;
@@ -446,21 +486,6 @@
 
                         try {
 
-                            /*let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
-
-                            _.forEach(_cells, function (cell, k) {
-                                self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
-                                self.model.graph.removeCellOverlays(cell);
-                            })
-
-                            if(_.isEmpty(self.model.object.nodes)) {
-                                _.forEach(_cells, function (cell, k) {
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
-                                    self.model.graph.removeCellOverlays(cell);
-                                })
-                                return;
-                            }*/
-
                             _.forEach(self.model.object.nodes,function (val,k) {
                                 let v = JSON.parse(val);
                                 let _id = _.last(k.split("/"));
@@ -468,7 +493,7 @@
 
 
                                 let state = self.model.graph.view.getState(_cell);
-                                console.log(_cell,state)
+
                                 if(v.status == 1){
                                     self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
@@ -481,7 +506,7 @@
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#fb831b', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
 
-                                    self.tip(_id + " 正在运行",2);
+                                    //self.tip(_id + " 正在运行",2);
 
                                     if(state && state.shape.node){
                                         if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
@@ -509,7 +534,7 @@
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 报错",4);
+                                    //self.tip(_id + " 报错",4);
 
                                 } else if(v.status == 5){
                                     self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [_cell]);
@@ -517,7 +542,7 @@
                                     self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
                                     self.model.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 跳过不执行",5);
+                                    //self.tip(_id + " 跳过不执行",5);
                                 }
 
 
@@ -588,7 +613,7 @@
 
                         tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
                         {
-                            if ($(".navbar.navbar-default.navbar-fixed-top").css("display") == "none"){
+                            /*if ($(".navbar.navbar-default.navbar-fixed-top").css("display") == "none"){
 
                                 $(".navbar.navbar-default.navbar-fixed-top").fadeIn();
                                 $(".navbar.navbar-default.navbar-fixed-bottom").fadeIn();
@@ -607,17 +632,17 @@
 
                                 self.model.container.style.top = "0px";
 
-                            }
+                            }*/
 
                             toggleFullScreen();
 
 
                         },null,'tools-item');
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-reset"}}', '/web/assets/images/iflow/reset.png',function(evt)
+                        /*tb.addItem('{{.i18n.Tr "creative-tools-reset"}}', '/web/assets/images/iflow/reset.png',function(evt)
                         {
                             self.reload();
-                        },null,'tools-item');
+                        },null,'tools-item');*/
 
                         tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
                         {
@@ -679,18 +704,6 @@
                                 });*/
                             }
                         },100)
-                    },
-                    initStyle: function(){
-                        let self = this;
-
-                        $("svg").append(`<defs>
-                                            <filter id="f1" x="0" y="0" width="200%" height="200%">
-                                              <feOffset result="offOut" in="SourceAlpha" dx="1" dy="1" />
-                                              <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
-                                              <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-                                            </filter>
-                                          </defs>`);
-                        $("rect").attr("filter","url(#f1)");
                     },
                     initNodeTools: function(graph){
                         let self = this;
@@ -866,18 +879,21 @@
                     },
                     cmdVue: function(evt) {
                         let self = this;
+                        let _attr = _.attempt(JSON.parse.bind(null, self.model.object.param.attr));
+                        let _project = _.last(_attr.parent.split("/"));
 
                         let _vue = new Vue({
                             delimiters: ['#{', '}#'],
                             el: '#cmd_window',
                             data: {
                                 cmd: {
-                                    start: `as400f -oneswitchfile bob`,
-                                    end: `as400f -oneswitchfile bob`,
+                                    start: `as400f -oneswitchfile ` + _project,
+                                    end: `as400f -oneswitchfile ` + _project,
                                     reset: {
                                         value: 'ALL',
                                         list: []
-                                    }
+                                    },
+                                    frequency: self.crontab.frequency
                                 }
                             },
                             template: `<div class="animated fadeInLeft" style="font-size:12px;">
@@ -902,6 +918,13 @@
                                                       </div>
                                                       <div class="input-group-btn">
                                                           <a class="btn btn-primary" href="javascript:void(0)" @click="reset"><i class="fa fa-refresh"></i> 重置</a>
+                                                      </div>
+                                                    </div>
+                                                    <div class="input-group" style="margin:5px;">
+                                                      <span class="input-group-addon">刷新频率(秒)</span>
+                                                      <input type="number" class="form-control" placeholder="" v-model="cmd.frequency">
+                                                      <div class="input-group-btn">
+                                                         <a class="btn btn-primary" href="javascript:void(0)" @click="apply"><i class="fa fa-clock-o"></i> 应用</a>
                                                       </div>
                                                     </div>
                                                 </div>`,
@@ -958,12 +981,25 @@
                                 reset: function () {
                                     let me = this;
 
+                                    let _attr = JSON.parse(self.model.object.param.attr);
+                                    let _project = _.last(_attr.parent.split("/"));
+                                    let _page = _attr.title;
+
                                     if (me.cmd.reset.value === "ALL") {
-                                        jobContextReset("BOB");
+                                        jobContextReset(_project);
                                         alertify.log("重置项目 " + moment().format("LLL"));
                                     } else {
+                                        let _name = _project + "/" + _page + ".iflow/" + _.find(me.cmd.reset.list, {name:me.cmd.reset.value}).id;
+                                        let _value = `{"status":"3","ctrl":"0"}`;
+
+                                        jobContextSetup(_project, _name, _value);
                                         alertify.log("重置节点 " + moment().format("LLL") + " " + me.cmd.reset.value);
                                     }
+                                },
+                                apply: function(){
+                                    let me = this;
+
+                                    self.crontab.frequency = me.cmd.frequency;
                                 }
                             }
                         });
@@ -979,10 +1015,11 @@
 {{template "base/footer" .}}
 <script type="text/x-template" id="app-template">
     <div>
-        <div id="graph"></div>
+        <div id="title">${ model.project | pickTitle } <small style="font-size:45%;">${model.project.stime} - ${model.project.etime}</small></div>
+        <div id="graph" style="top:0px;"></div>
         <div id="nav">
             <a href="javascript:void(0);" @click="navToggle();">
-                <i class="fa fa-th fa-2x" style="position:absolute;left:5px;top:60px;z-index:1000;color:rgb(219, 219, 219);cursor:pointer;"></i>
+                <i class="fa fa-th fa-2x" style="position:absolute;left:5px;top:29px;z-index:1000;color:rgb(219, 219, 219);cursor:pointer;"></i>
             </a>
             <div id="tools"></div>
             <div id="outlineContainer"></div>

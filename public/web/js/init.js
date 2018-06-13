@@ -865,7 +865,7 @@ var jobContextGet = function (key,prefix) {
 *
 *
 */
-var jobContextSetup = function (key,content) {
+var jobContextSetup = function (key,name,value) {
     let rtn = 1;
 
     jQuery.ajax({
@@ -874,8 +874,8 @@ var jobContextSetup = function (key,content) {
         type: 'PUT',
         async:false,
         data: {
-            name:key,
-            value: content
+            name:name,
+            value: value
         },
         beforeSend:function(xhr){
         },
@@ -1710,6 +1710,7 @@ var newWindow = function (type, title, template, position) {
     let win = null;
     let w = $( window ).width();//document.body.clientWidth;
     let h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+
     let wW = $( window ).width()*2.2/3;
     let hH = $( window ).height()*2.5/3;
     let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
@@ -1718,7 +1719,7 @@ var newWindow = function (type, title, template, position) {
 
         win = $.jsPanel({
                 theme:          'filledlight',
-                contentSize:    {width: 35, height: 210},
+                contentSize:    {width: 35, height: 180},
                 position: {
                     left: position[0],
                     top:  position[1]
@@ -1740,7 +1741,7 @@ var newWindow = function (type, title, template, position) {
         win = $.jsPanel({
             theme:          'filledlight',
             headerTitle:   title,
-            contentSize:    {width: 320, height: 125},
+            contentSize:    {width: 320, height: 160},
             position: {
                 my: "left-top",
                 at: "right-bottom",
@@ -1754,6 +1755,140 @@ var newWindow = function (type, title, template, position) {
             },
             content:        template,
             callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'small'){
+        lrwh[2] = $( window ).width()*0.55;
+        lrwh[3] = $( window ).height()*0.55;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'large'){
+        lrwh[2] = $( window ).width()*0.7;
+        lrwh[3] = $( window ).height()*0.8;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'properties'){
+        lrwh[2] = $( window ).width()*0.18;
+        lrwh[3] = $( window ).height()*0.45;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
                 $(".jsPanel-headerbar",this).css({
                     "background-color": "rgb(238, 238, 238)",
                     "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
@@ -1815,7 +1950,7 @@ var newWindow = function (type, title, template, position) {
         }
     }
 
-    if(type === 'narrow'){
+    /*if(type === 'narrow'){
         lrwh[2] = $( window ).width()*0.6/3;
         lrwh[3] = $( window ).height()*1.45/3;
 
@@ -1826,7 +1961,7 @@ var newWindow = function (type, title, template, position) {
             lrwh[0] = _p.x || (w-wW)/2;
             lrwh[1] = _p.y || (h-hH)/2;
         }
-    }
+    }*/
 
     if(type === 'mini'){
         lrwh[2] = $( window ).width()*0.7/3;

@@ -33,7 +33,6 @@ Actions.prototype.init = function()
     // Object Properties
     this.addAction('mx-properties', function() {
         let self = this;
-        let wnd = null;
 
         let createPropertiesTextField = function (graph, form, cell, attributes) {
 
@@ -128,26 +127,18 @@ Actions.prototype.init = function()
             inputW.disabled = true;
             inputH.disabled = true;
 
-
-            let btn = form.addButtons(function(){},function(){this.remove();});
-
         };
 
         let cell = graph.getSelectionCell() || graph.getModel().getRoot();
 
-        let _wnd = localStorage.getItem("mx-window");
-        if(!_.isEmpty(_wnd)){
-            $(".mxWindow").remove();
+        if(!_.isEmpty(window.jsPanel.activePanels.list)){
+            window.jsPanel.activePanels.getPanel(0).close();
         }
 
         if (cell != null)
         {
 
-            wnd = newWindow("narrow","",'<div id="properties"></div>');
-            wnd.setMaximizable(false);
-            wnd.setTitle("属性 " + cell.getId());
-
-            localStorage.setItem("mx-window", cell.getId());
+        	let wnd = newWindow("properties",cell.getId(),'<div id="properties"></div>', null);
 
             let div = document.getElementById('properties');
 

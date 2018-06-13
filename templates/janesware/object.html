@@ -1965,6 +1965,7 @@
                                     _concat = _.concat(_tmp,_columns);
 
                                     me.model.columns = _concat;
+
                                     me.model.data = _.filter(_list.message,{class:_classKeys[0]});
 
                                     me.result.summary.count = _.size(me.model.data);

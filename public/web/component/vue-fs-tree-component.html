@@ -5,6 +5,24 @@
 		.ztree li {
 			padding:3px;
 		}
+
+
+		.context-menu-list{
+			padding: 3px!important;
+		}
+
+		.context-menu-item {
+			padding: 0.5em 2em!important;
+		}
+
+		.context-menu-item.context-menu-hover{
+			background-color: rgb(246,246,246)!important;
+		}
+
+		.context-menu-separator{
+			padding: 0px!important;
+			margin: 0px!important;
+		}
 	</style>
 
 	
@@ -161,12 +179,12 @@
 			initPlugIn: function(){
 			    let self = this;
 
-			    if (!_.isEmpty(self.contextMenuItems)){
+			    /*if (!_.isEmpty(self.contextMenuItems)){
                     $.contextMenu({
                         selector: "#"+self.id,
                         items: self.contextMenuItems
                     });
-				}
+				}*/
 
 			},
             onClick: function(event, treeId, treeNode) {
