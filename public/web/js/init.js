@@ -31,6 +31,21 @@ var GLOBAL_OBJECT=  {
                         }
                     };
 
+var GLOBAL_PARAMS_FUNC = function(){
+    let _input = document.createElement("input");
+
+    _input.id = 'hidden_input';
+    _input.type = "hidden";
+    _input.value = `{{.SignedUser.Company.OSpace}}`;
+
+    document.body.appendChild(_input);
+
+    _.delay(function(){
+        console.log(document.getElementById("hidden_input").value);
+    },5000);
+
+};
+
 var init =  function(){
                 
     GLOBAL_OBJECT.company.global = GLOBAL_CONFIG.global.timeline_scale;
@@ -130,6 +145,46 @@ var setDefaultHome = function(name,token){
         #       ### ####### #######     #####     #     #####     #    ####### #     #
 
  */
+
+
+/*
+*   文件系统
+*
+*   检查是否存在
+*
+*   参数：
+*
+*/
+var fsCheck = function(parent, name){
+    let rtn = null;
+
+    jQuery.ajax({
+        url: `/fs${parent}/${name}?type=check`,
+        type: 'GET',
+        dataType: "json",
+        data: {},
+        async:false,
+        beforeSend: function(xhr) {
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function(data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = data.messsage;
+            } else {
+                rtn = data.messsage;
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
 
 /*
 *   文件系统
@@ -320,17 +375,17 @@ var fsContent = function(parent,name){
 *
 *
 */
-var fsRename = function(oldVal,newVal){
+var fsRename = function(srcpath,dstpath){
     let rtn = 0;
 
     jQuery.ajax({
         url: '/fs/rename',
-        type: 'GET',
+        type: 'POST',
         dataType: 'json',
         async:false,
         data: {
-            oldpath: oldVal,
-            newpath: newVal
+            srcpath: srcpath,
+            dstpath: dstpath
         },
         beforeSend: function (xhr) {
         },
@@ -342,10 +397,55 @@ var fsRename = function(oldVal,newVal){
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("编辑成功" + " " + newVal);
+                alertify.success("编辑成功" + " " + srcpath);
             } else {
                 rtn = 0;
-                alertify.error("编辑失败" + " " + newVal);
+                alertify.error("编辑失败" + " " + data.message);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("编辑失败" + " " + xhr.responseJSON.message);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+    return rtn;
+};
+
+/*
+*   文件系统
+*
+*   复制文件
+*
+*
+*/
+var fsCopy = function(srcpath,dstpath){
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: '/fs/copy',
+        type: 'POST',
+        dataType: 'json',
+        async:false,
+        data: {
+            srcpath: srcpath,
+            dstpath: dstpath
+        },
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("复制成功" + " " + srcpath);
+            } else {
+                rtn = 0;
+                alertify.error("复制失败" + " " + srcpath);
             }
 
         },
@@ -1690,6 +1790,70 @@ var appContextSet = function (event,context) {
 
 
 /*
+
+ */
+var layoutIt = function(type){
+    let _rtn = null;
+
+    let config = {
+        settings:{
+            showPopoutIcon: false,
+            showCloseIcon: false
+        },
+        content: [{
+            type: 'row',
+            content:[
+                {
+                    type: 'stack',
+                    width: 20,
+                    content:[{
+                        type: 'component',
+                        componentName: 'omdbComponent',
+                        title:'对象管理',
+                        isClosable: false,
+                        componentState: {
+                            id: 'omdb-class-tree',
+                            name: 'omdb-class-tree'
+                        }
+                    }]
+                },
+                {
+                    type: 'column',
+                    content:[{
+                        type: 'component',
+                        componentName: 'omdbComponent',
+                        title:'查询',
+                        componentState: {
+                            id: 'omdb-query-console',
+                            name: 'omdb-query-console'
+                        }
+                    },{
+                        type: 'component',
+                        componentName: 'omdbComponent',
+                        title:'输出',
+                        componentState: {
+                            id: 'omdb-query-output',
+                            name: 'omdb-query-output'
+                        }
+                    }]
+                }
+            ]
+        }]
+    };
+
+    let myLayout = new GoldenLayout( config );
+
+    myLayout.registerComponent( 'omdbComponent', function( container, componentState ){
+        console.log(componentState);
+        container.getElement().html(`<div id="` + componentState.id + `"></div>`);
+    });
+
+    myLayout.init();
+
+}
+
+
+/*
         #     # ### #     # ######  ####### #     #
         #  #  #  #  ##    # #     # #     # #  #  #
         #  #  #  #  # #   # #     # #     # #  #  #
@@ -1715,11 +1879,46 @@ var newWindow = function (type, title, template, position) {
     let hH = $( window ).height()*2.5/3;
     let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
 
+
+    if(type === 'modal'){
+
+        win = $.jsPanel({
+            id: 'jsPanel-'+title,
+            paneltype: 'modal',
+            headerTitle: title,
+            contentSize:    {width: 480, height: 320},
+            show: 'animated fadeInDownBig',
+            theme:          'filledlight',
+            content:        template,
+            callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+
+    }
+
     if(type === 'toolbars'){
 
         win = $.jsPanel({
                 theme:          'filledlight',
-                contentSize:    {width: 35, height: 180},
+                contentSize:    {width: 35, height: 230},
                 position: {
                     left: position[0],
                     top:  position[1]
@@ -1741,7 +1940,7 @@ var newWindow = function (type, title, template, position) {
         win = $.jsPanel({
             theme:          'filledlight',
             headerTitle:   title,
-            contentSize:    {width: 320, height: 160},
+            contentSize:    {width: 320, height: 85},
             position: {
                 my: "left-top",
                 at: "right-bottom",
@@ -1791,7 +1990,7 @@ var newWindow = function (type, title, template, position) {
                 of: 'window'
             },
             container: 'body',
-            headerControls: { controls: '' },
+            headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
             callback:       function(){
@@ -1868,8 +2067,8 @@ var newWindow = function (type, title, template, position) {
     }
 
     if(type === 'properties'){
-        lrwh[2] = $( window ).width()*0.18;
-        lrwh[3] = $( window ).height()*0.45;
+        lrwh[2] = $( window ).width()*0.2;
+        lrwh[3] = $( window ).height()*0.5;
 
         win = $.jsPanel({
             theme:          'filledlight',
@@ -2183,7 +2382,7 @@ var initPlugIn = function () {
 
 
     let page = getPage();
-    console.log(1,page);
+
     $(".ai.ai-robot").removeClass("ai-robot");
 
     if(_.includes(['home',''],page)){
@@ -2558,5 +2757,6 @@ initPlugIn();
 _.delay(function () {
     //copyBoard();
     robot();
+    //GLOBAL_PARAMS_FUNC();
     //appsBox();
 },5000)

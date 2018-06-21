@@ -33,6 +33,8 @@ Actions.prototype.init = function()
     // Object Properties
     this.addAction('mx-properties', function() {
         let self = this;
+        let tmp = localStorage.getItem("graph-object");
+        let graphObject = _.attempt(JSON.parse.bind(null, tmp));
 
         let createPropertiesTextField = function (graph, form, cell, attributes) {
 
@@ -51,8 +53,7 @@ Actions.prototype.init = function()
                     input = form.addText(_.startCase(k), cell.getTerminal(cell));
                 }
 
-                let applyHandler = function()
-                {
+                let applyHandler = function() {
                     let newValue = input.value || '';
                     let oldValue = '';
 
@@ -67,13 +68,23 @@ Actions.prototype.init = function()
                     }
 
 
-                    if (newValue != oldValue)
-                    {
-                        graph.getModel().beginUpdate();
+                    if (newValue != oldValue) {
+
+                    	graph.getModel().beginUpdate();
 
                         try
                         {
                             if(k == 'id') {
+                                // check if exist id
+                                let _xml = mxUtils.getXml(ui.editor.getGraphXml());
+                                let _hasId = _.includes(_xml, `id="${newValue}"`);
+                                if(_hasId){
+                                	alertify.error(`ID: ${newValue} 已存在，请确认！`);
+                                    //input.value = oldValue;
+                                	input.autofocus = true;
+									return false;
+								}
+
                                 cell.setId(newValue);
                             } else if(k == 'value'){
                                 graph.model.setValue(cell, newValue);
@@ -126,6 +137,17 @@ Actions.prototype.init = function()
             inputY.disabled = true;
             inputW.disabled = true;
             inputH.disabled = true;
+
+            let btn = form.addButtons(function(){
+                let _xml = mxUtils.getXml(ui.editor.getGraphXml());
+                let _attr = _.attempt(JSON.parse.bind(null, graphObject.attr));
+
+                let _rtn = fsNew('file',graphObject.parent, graphObject.name, _xml, _attr);
+			},function(){
+                if(!_.isEmpty(window.jsPanel.activePanels.list)){
+                    window.jsPanel.activePanels.getPanel(0).close();
+                }
+			});
 
         };
 

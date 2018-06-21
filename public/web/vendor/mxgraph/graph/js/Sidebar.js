@@ -1063,6 +1063,8 @@ Sidebar.prototype.addBobPalette = function(expand)
 {
     var sb = this;
 
+    var lineTags = 'line lines connector connectors connection connections arrow arrows ';
+
     var fns = [
 
         this.createVertexTemplateEntry('rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Rounded Rectangle', null, null, 'rounded rect rectangle box'),
@@ -1070,12 +1072,21 @@ Sidebar.prototype.addBobPalette = function(expand)
         // Explicit strokecolor/fillcolor=none is a workaround to maintain transparent background regardless of current style
         this.createVertexTemplateEntry('text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;',
             40, 20, 'Text', 'Text', null, null, 'text textbox textarea label'),
-        this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rectangle', null, null, 'rect rectangle box double'),
-        this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rounded Rectangle', null, null, 'rounded rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rectangle', null, null, 'rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rounded Rectangle', null, null, 'rounded rect rectangle box double'),
         this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Double Ellipse', null, null, 'oval ellipse start end state double'),
-        this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Parallelogram'),
-        this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Hexagon', null, null, 'hexagon preparation'),
+
+		this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Parallelogram', null, null, 'Parallelogram'),
+
+		this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Hexagon', null, null, 'hexagon preparation'),
         this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Process', null, null, 'process task'),
+
+        this.createEdgeTemplateEntry('endArrow=none;dashed=1;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Dashed Line', null, lineTags + 'dashed undirected no'),
+        this.createEdgeTemplateEntry('endArrow=none;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Line', null, lineTags + 'simple undirected plain blank no'),
+        this.createEdgeTemplateEntry('endArrow=classic;startArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Bidirectional Connector', null, lineTags + 'bidirectional'),
+        this.createEdgeTemplateEntry('endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Directional Connector', null, lineTags + 'directional directed')
     ];
 
     this.addPaletteFunctions('general', mxResources.get('general'), (expand != null) ? expand : true, fns);

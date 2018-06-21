@@ -29,7 +29,11 @@
 
     body {
         overflow: hidden;
-        background-color: #d9e0e7;
+        background-color: #ffffff;
+    }
+
+    .lm_content{
+        background-color: #ffffff!important;
     }
 
     div.mxWindowPane > table > tbody > tr > td > textarea {
@@ -46,68 +50,68 @@
     }
 
     .btn-xs{
-      border-radius: 0px;
+        border-radius: 0px;
     }
 
     .item {
-      cursor: pointer;
+        cursor: pointer;
     }
     .bold {
-      font-weight: bold;
+        font-weight: bold;
     }
 
     ul {
-      padding-left: 1em;
-      line-height: 1.5em;
-      list-style-type: dot;
+        padding-left: 1em;
+        line-height: 1.5em;
+        list-style-type: dot;
     }
 
     .item li {
-      padding: 0;
-      margin: 0;
-      list-style: none;/*square inside url('{{AppSubUrl}}/web/vendor/zTree/css/metroStyle/img/line_conn.png');*/
-      line-height: 24px;
-      text-align: left;
-      white-space: nowrap;
-      outline: 0;
+        padding: 0;
+        margin: 0;
+        list-style: none;/*square inside url('{{AppSubUrl}}/web/vendor/zTree/css/metroStyle/img/line_conn.png');*/
+        line-height: 24px;
+        text-align: left;
+        white-space: nowrap;
+        outline: 0;
     }
 
     .item li :hover{
-      background-color: #efefef;
+        background-color: #efefef;
     }
     .item li ::selection{padding-top:0px; background-color:#e5e5e5; color:black; height:24px; opacity:0.8;}
 
 
     .node {
-      fill: #000;
-      cursor: crosshair;
+        fill: #000;
+        cursor: crosshair;
     }
 
     .node_selected {
-      fill: #ff7f0e;
-      stroke: #ff7f0e;
+        fill: #ff7f0e;
+        stroke: #ff7f0e;
     }
 
     .drag_line {
-      stroke: #999;
-      stroke-width: 5;
-      pointer-events: none;
+        stroke: #999;
+        stroke-width: 5;
+        pointer-events: none;
     }
 
     .drag_line_hidden {
-      stroke: #999;
-      stroke-width: 0;
-      pointer-events: none;
+        stroke: #999;
+        stroke-width: 0;
+        pointer-events: none;
     }
 
     .link {
-      stroke: #999;
-      stroke-width: 5;
-      cursor: crosshair;
+        stroke: #999;
+        stroke-width: 5;
+        cursor: crosshair;
     }
 
     .link_selected {
-      stroke: #ff7f0e;
+        stroke: #ff7f0e;
     }
 
     /* For Table Start*/
@@ -191,12 +195,12 @@
 
     /********************/
     svg {
-      overflow: auto;
-      padding-left: 35px;
+        overflow: auto;
+        padding-left: 35px;
     }
 
     .node {
-      cursor: pointer;
+        cursor: pointer;
     }
     .node circle {
         fill: #fff;
@@ -219,47 +223,47 @@
 
     /*----------  Class Table Start  ----------*/
     .panel-class {
-       padding: 0px;
+        padding: 0px;
     }
 
 
     /*----------  Data Table Start  ----------*/
     .panel-data {
-       padding: 0px;
+        padding: 0px;
     }
 
     /*----------  Query Input Start  ----------*/
     #query_input{
-      /*
-      min-height: 10vh;
-      max-height: 65vh;
-      */
-      border: 1px solid #f7f7f7;
-      border-left: none;
-      border-right: none;
-      margin: auto;
-      width: 100%!important;
+        /*
+        min-height: 10vh;
+        max-height: 65vh;
+        */
+        border: 1px solid #f7f7f7;
+        border-left: none;
+        border-right: none;
+        margin: auto;
+        width: 100%!important;
     }
 
     #db_trigger_input{
-      min-height: calc(100vh - 220px);
-      max-height: calc(100vh - 220px);
-      border: 1px solid #f7f7f7;
-      border-left: none;
-      border-right: none;
-      margin: auto;
-      height: 400px;
-      width: 100%;
+        min-height: calc(100vh - 220px);
+        max-height: calc(100vh - 220px);
+        border: 1px solid #f7f7f7;
+        border-left: none;
+        border-right: none;
+        margin: auto;
+        height: 400px;
+        width: 100%;
     }
     .script-editor-component {
-      min-height: calc(100vh - 180px);
-      max-height: calc(100vh - 180px);
-      border: 1px solid #f7f7f7;
-      border-left: none;
-      border-right: none;
-      margin: auto;
-      height: 400px;
-      width: 100%;
+        min-height: calc(100vh - 180px);
+        max-height: calc(100vh - 180px);
+        border: 1px solid #f7f7f7;
+        border-left: none;
+        border-right: none;
+        margin: auto;
+        height: 400px;
+        width: 100%;
     }
 
     /*----------  Query Table Start  ----------*/
@@ -292,20 +296,14 @@
         padding: 0px;
     }
 
-    /*----------  Panel  ----------*/
-    .panel-footer {
-        padding: 5px 15px;
-        border-top: 1px solid rgb(226, 231, 237);
-    }
-
     /*----------  Split  ----------*/
     .split, .split-flex {
-      -webkit-box-sizing: border-box;
-         -moz-box-sizing: border-box;
-              box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
 
-      overflow-y: hidden;
-      overflow-x: hidden;
+        overflow-y: hidden;
+        overflow-x: hidden;
     }
 
     .gutter {
@@ -316,13 +314,13 @@
     }
 
     .gutter.gutter-horizontal {
-      background-image: url('{{AppSubUrl}}/web/vendor/split/grips/vertical.png');
-      cursor: ew-resize;
+        background-image: url('{{AppSubUrl}}/web/vendor/split/grips/vertical.png');
+        cursor: ew-resize;
     }
 
     .gutter.gutter-vertical {
-      background-image: url('{{AppSubUrl}}/web/vendor/split/grips/horizontal.png');
-      cursor: ns-resize;
+        background-image: url('{{AppSubUrl}}/web/vendor/split/grips/horizontal.png');
+        cursor: ns-resize;
     }
 
     .split.split-horizontal, .gutter.gutter-horizontal {
@@ -352,6 +350,12 @@
         height:  82vh;
     }
 
+
+    .object-footer{
+        position:fixed;
+        bottom:30px;
+    }
+
 </style>
 
 <!--<div id="app"></div>-->
@@ -378,9 +382,9 @@
     var eventHub = new Vue();
 
     VueLoader.onloaded(["vue-base-datatables-component"
-                        ],function() {
+    ],function() {
 
-        <!--
+    <!--
         var loading,
             curTreeNodeField,
             objRelationContent = "",
@@ -496,9 +500,9 @@
 
                         if(_.isEmpty(cols)){ // table null
                             $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                                    data: val,
-                                                    columns: self.columns
-                                                }, self.defaultOptions, self.options));
+                                data: val,
+                                columns: self.columns
+                            }, self.defaultOptions, self.options));
                         } else {
                             $(self.$el).bootstrapTable('load',val);
                             $(self.$el).bootstrapTable('refreshOptions', _.extend(self.defaultOptions, val));
@@ -511,9 +515,9 @@
                     self.$nextTick(function () {
 
                         $(self.$el).bootstrapTable(_.extend({
-                                                        data: self.dataset,
-                                                        columns: self.columns
-                                                    }, self.defaultOptions, self.options));
+                            data: self.dataset,
+                            columns: self.columns
+                        }, self.defaultOptions, self.options));
 
 
                     })
@@ -549,14 +553,14 @@
 
                         if(_.isEmpty(cols)){ // table null
                             $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                                    data: val,
-                                                    columns: self.columns
-                                                }, self.defaultOptions, self.options));
+                                data: val,
+                                columns: self.columns
+                            }, self.defaultOptions, self.options));
                         } else {
                             $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                                    data: val,
-                                                    columns: self.columns
-                                                }, self.defaultOptions, self.options));
+                                data: val,
+                                columns: self.columns
+                            }, self.defaultOptions, self.options));
                         }
                     }
                 },
@@ -566,9 +570,9 @@
                     self.$nextTick(function () {
 
                         $(self.$el).bootstrapTable(_.extend({
-                                                        data: self.dataset,
-                                                        columns: self.columns
-                                                    }, self.defaultOptions, self.options));
+                            data: self.dataset,
+                            columns: self.columns
+                        }, self.defaultOptions, self.options));
 
 
                     })
@@ -615,9 +619,9 @@
                     }
                 },
                 created: function(){
-                   let self = this;
+                    let self = this;
 
-                   eventHub.$on("class-tree-refresh-event", self.refresh);
+                    eventHub.$on("class-tree-refresh-event", self.refresh);
                 },
                 mounted: function () {
                     var self =  this;
@@ -679,18 +683,18 @@
                             } else {
                                 let jsonObj = new Object();
 
-                                    jsonObj.pid = _treeNode.cid;
-                                    jsonObj.name = _class;
-                                    jsonObj.alias = alias;
-                                    jsonObj.remedy = remedy;
-                                    jsonObj.keymethod = _treeNode.keymethod;
-                                    jsonObj.ttl = _treeNode.ttl;
-                                    jsonObj.loption = _treeNode.loption;
-                                    jsonObj.Fields = _treeNode.Fields;
-                                    jsonObj.keys = _treeNode.keys;
-                                    jsonObj.readonly = _treeNode.readonly;
-                                    jsonObj.mtime = _treeNode.mtime;
-                                    jsonObj.fieldsObj = _treeNode.fieldsObj;
+                                jsonObj.pid = _treeNode.cid;
+                                jsonObj.name = _class;
+                                jsonObj.alias = alias;
+                                jsonObj.remedy = remedy;
+                                jsonObj.keymethod = _treeNode.keymethod;
+                                jsonObj.ttl = _treeNode.ttl;
+                                jsonObj.loption = _treeNode.loption;
+                                jsonObj.Fields = _treeNode.Fields;
+                                jsonObj.keys = _treeNode.keys;
+                                jsonObj.readonly = _treeNode.readonly;
+                                jsonObj.mtime = _treeNode.mtime;
+                                jsonObj.fieldsObj = _treeNode.fieldsObj;
 
 
                                 let _rtn = classNew(jsonObj);
@@ -705,11 +709,11 @@
                         $("#acc_btn_class_toggle").on("click",function(){
                             var zTree = $.fn.zTree.getZTreeObj("tree");
                             if(self.setting.data.key.name == "name"){
-                              self.setting.data.key.name = "alias";
-                              self.init();
+                                self.setting.data.key.name = "alias";
+                                self.init();
                             } else {
-                              self.setting.data.key.name = "name";
-                              self.init();
+                                self.setting.data.key.name = "name";
+                                self.init();
                             }
                         })
 
@@ -770,9 +774,9 @@
                             data: {id: appVue.class.tree.cid},
                             beforeSend:function(xhr){
                                 loading = layer.load(2, {
-                                            shade: [0.1,'#ccc'],
-                                            time: 30*1000
-                                          });
+                                    shade: [0.1,'#ccc'],
+                                    time: 30*1000
+                                });
                             },
                             complete: function(xhr, textStatus) {
                                 layer.close(loading);
@@ -794,7 +798,7 @@
 
                                     var nodes = zTree.getSelectedNodes();
                                     if (nodes && nodes.length>0) {
-                                    zTree.removeChildNodes(nodes[0]);
+                                        zTree.removeChildNodes(nodes[0]);
                                     }
 
                                     // append sub nodes
@@ -820,18 +824,18 @@
                         $("#class_name").val(getSubNodeName(treeNode));
 
                         $("input#class_color").ColorPickerSliders({
-                          placement: 'top',
-                          color: 'red',
-                          swatches: ['red', 'blue', '#green'],
-                          customswatches: false,
-                          order: {}
+                            placement: 'top',
+                            color: 'red',
+                            swatches: ['red', 'blue', '#green'],
+                            customswatches: false,
+                            order: {}
                         });
 
                         $("#class_tags").val($("#class_name").val());
                         $('#class_tags').select2({
-                          tags: true,
-                          placeholder: "标签",
-                          language: "zh-CN",
+                            tags: true,
+                            placeholder: "标签",
+                            language: "zh-CN",
                         });
                     },
                     getSubNodeName: function (treeNode) {
@@ -845,12 +849,12 @@
                     addDiyDom: function (treeId, treeNode) {
                         let self = this;
                         let aObj = $("#" + treeNode.tId + "_a");
-                        
+
                         if(!_.isEmpty(treeNode.child)){
                             if (treeNode.child.length > 0){
                                 let str = "<small style='color:rgb(160,160,160);'>("+treeNode.child.length+")</small>";
                                 aObj.append(str);
-                            }  
+                            }
                         }
                     },
                     refresh: function () {
@@ -861,13 +865,13 @@
 
                         if (sNodes.length > 0) {
                             var pNode = sNodes[0].getParentNode() || sNodes[0];
-                            
+
                             jQuery.ajax({
                                 url: "/mxobject/schema/class/list",
                                 dataType: 'json',
                                 type: 'GET',
                                 data: {
-                                  id: pNode.cid
+                                    id: pNode.cid
                                 },
                                 beforeSend: function(xhr) {
                                 },
@@ -876,39 +880,39 @@
                                 success: function(data, textStatus, xhr) {
                                     self.zTree.removeChildNodes(pNode);
                                     self.zTree.addNodes(pNode, JSON.parse(data.message));
-                                    
+
                                     $("[title='" + self.selectedNodeName + "']").addClass('curSelectedNode');
                                 },
                                 error: function(xhr, textStatus, errorThrown) {
                                 }
                             })
-                        } 
+                        }
                     }
                 }
             });
 
             Vue.component('script-editor-component',{
-                  delimiters: ['${', '}'],
-                  template: `<div :id="id" style="height:45vh;"></div>`,
-                  props: {
-                      id: String,
-                      model: Object
-                  },
-                  data: function(){
-                      return {
-                          editor: Object,
-                          inputText: String,
-                      }
-                  },
-                  mounted: function(){
-                      let self = this;
+                delimiters: ['${', '}'],
+                template: `<div :id="id" style="height:45vh;"></div>`,
+                props: {
+                    id: String,
+                    model: Object
+                },
+                data: function(){
+                    return {
+                        editor: Object,
+                        inputText: String,
+                    }
+                },
+                mounted: function(){
+                    let self = this;
 
-                      self.$nextTick(function(){
-                          self.init();
-                      })
-                  },
-                  watch: {
-                      'model.oldInput': {
+                    self.$nextTick(function(){
+                        self.init();
+                    })
+                },
+                watch: {
+                    'model.oldInput': {
                         handler:function(val,oldVal){
                             let self = this;
 
@@ -916,57 +920,57 @@
                         },
                         deep:true
                     }
-                  },
-                  created: function () {
-                      let self = this;
+                },
+                created: function () {
+                    let self = this;
 
-                  },
-                  methods: {
-                      init: function() {
-                          let self = this;
+                },
+                methods: {
+                    init: function() {
+                        let self = this;
 
-                          self.editor = ace.edit(self.id);
+                        self.editor = ace.edit(self.id);
 
-                          self.editor.setOptions({
-                              minLines: 15,
-                          });
-                          self.editor.$blockScrolling = Infinity;
+                        self.editor.setOptions({
+                            minLines: 15,
+                        });
+                        self.editor.$blockScrolling = Infinity;
 
-                          if(_.isEmpty(self.model.mode)) {
-                              self.model.mode = "sql";
-                          }
+                        if(_.isEmpty(self.model.mode)) {
+                            self.model.mode = "sql";
+                        }
 
-                          self.setTheme();
-                          self.setMode();
-                          self.setValue();
+                        self.setTheme();
+                        self.setMode();
+                        self.setValue();
 
-                      },
-                      setTheme: function(){
-                          let self = this;
+                    },
+                    setTheme: function(){
+                        let self = this;
 
-                          self.editor.setTheme("ace/theme/tomorrow");
-                      },
-                      setMode: function(){
-                          let self = this;
+                        self.editor.setTheme("ace/theme/tomorrow");
+                    },
+                    setMode: function(){
+                        let self = this;
 
-                          self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
-                      },
-                      setValue: function(){
-                          let self = this;
+                        self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                    },
+                    setValue: function(){
+                        let self = this;
 
-                          self.editor.setValue(self.model.oldInput);
-                      },
-                      getSelected: function(){
-                          let self = this;
-                          var temp = self.editor.getSelectedText();
+                        self.editor.setValue(self.model.oldInput);
+                    },
+                    getSelected: function(){
+                        let self = this;
+                        var temp = self.editor.getSelectedText();
 
-                          if(_.isEmpty(temp)){
-                              self.inputText = self.editor.getValue();
-                          } else {
-                              self.inputText = temp;
-                          }
-                      }
-                  }
+                        if(_.isEmpty(temp)){
+                            self.inputText = self.editor.getValue();
+                        } else {
+                            self.inputText = temp;
+                        }
+                    }
+                }
             });
 
             var config = {
@@ -979,13 +983,13 @@
                             name: 'app',
                             componentName: 'example',
                             componentState: { id: 'app', label: 'A' },
-                            isClosable: false
+                            isClosable: true
                         }
                     ]
                 }],
                 settings:{
                     hasHeaders: false
-                    }
+                }
             };
 
             var myLayout = new GoldenLayout( config);
@@ -1014,19 +1018,19 @@
                         },
                         table: {
                             columns:[
-                                        {'name':'name','title':'Name'},
-                                        {'name':'title','title':'Title'},
-                                        {'name':'ftype','title':'Ftype'},
-                                        {'name':'loption','title':'Loption', visible:false},
-                                        {'name':'fparam','title':'Fparam', visible:false},
-                                        {'name':'isindex','title':'Index'},
-                                        {'name':'iskey','title':'Primary Key'},
-                                        {'name':'note','title':'Note'},
-                                        {'name':'mtime','title':'Mtime'},
-                                        {'name':'class','title':'Class'},
-                                        {'name':'dispname','title':'Dispname'},
-                                        {'name':'remedy','title':'Remedy'}
-                                    ],
+                                {'name':'name','title':'Name'},
+                                {'name':'title','title':'Title'},
+                                {'name':'ftype','title':'Ftype'},
+                                {'name':'loption','title':'Loption', visible:false},
+                                {'name':'fparam','title':'Fparam', visible:false},
+                                {'name':'isindex','title':'Index'},
+                                {'name':'iskey','title':'Primary Key'},
+                                {'name':'note','title':'Note'},
+                                {'name':'mtime','title':'Mtime'},
+                                {'name':'class','title':'Class'},
+                                {'name':'dispname','title':'Dispname'},
+                                {'name':'remedy','title':'Remedy'}
+                            ],
                             dataset:[],
                             options: {
                                 rowStyle: classTableRowStyle
@@ -1084,49 +1088,49 @@
                     initTabsHandle: function() {
                         let self = this;
 
-                      /**
-                       * @author  cnwangzd
-                       * @todo Tab关闭按钮操作定义
-                       */
-                      $(".nav-tabs.object").on("click", "[tabclose]", function (e) {
-                          self.closeTab();
-                      });
+                        /**
+                         * @author  cnwangzd
+                         * @todo Tab关闭按钮操作定义
+                         */
+                        $(".nav-tabs.object").on("click", "[tabclose]", function (e) {
+                            self.closeTab();
+                        });
 
-                      /**
-                       * @author  cnwangzd
-                       * @todo Tab双击关闭操作定义
-                       */
-                      $(".nav-tabs.object").on("dblclick", "[tabcloser]", function (e) {
-                          self.closeTab();
-                      });
+                        /**
+                         * @author  cnwangzd
+                         * @todo Tab双击关闭操作定义
+                         */
+                        $(".nav-tabs.object").on("dblclick", "[tabcloser]", function (e) {
+                            self.closeTab();
+                        });
 
-                      /**
-                       * @author  cnwangzd
-                       * @todo Tab双击关闭操作定义
-                       */
-                      $(".nav-tabs.object").on("click", "a", function (e) {
-                          let _tab = $(this).attr("tabcloser").split("_")[2];
+                        /**
+                         * @author  cnwangzd
+                         * @todo Tab双击关闭操作定义
+                         */
+                        $(".nav-tabs.object").on("click", "a", function (e) {
+                            let _tab = $(this).attr("tabcloser").split("_")[2];
 
-                          self.tab.selectedTabId = _tab;
-                          console.log(_tab)
-                          switch (_tab) {
-                              case "class":
-                                  self.initClass();
-                                  break;
-                              case "data":
-                                  self.initData();
-                                  break;
-                              case "query":
-                                  self.initQuery();
-                                  break;
-                              case "trigger":
-                                  //self.initTrigger();
-                                  break;
-                              case "relation":
-                                  //self.initRelation();
-                                  break;
-                          }
-                      });
+                            self.tab.selectedTabId = _tab;
+                            console.log(_tab)
+                            switch (_tab) {
+                                case "class":
+                                    self.initClass();
+                                    break;
+                                case "data":
+                                    self.initData();
+                                    break;
+                                case "query":
+                                    //self.initQuery();
+                                    break;
+                                case "trigger":
+                                    //self.initTrigger();
+                                    break;
+                                case "relation":
+                                    //self.initRelation();
+                                    break;
+                            }
+                        });
 
                     },
                     initFtype: function () {
@@ -1139,54 +1143,54 @@
                             success: function (data, status) {
 
                                 jQuery.each(JSON.parse(data.message),function(key,value){
-                                  var o = new Object();
-                                  o.value = value.name;
-                                  o.text = value.name;
-                                  self.class.ftypeData.push(o);
+                                    var o = new Object();
+                                    o.value = value.name;
+                                    o.text = value.name;
+                                    self.class.ftypeData.push(o);
                                 });
 
 
-                             },
-                             error: function(xhr, textStatus, errorThrown) {
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
                                 mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                             }
+                            }
                         });
                     },
                     initColumnByName: function () {
                         let self = this;
 
                         jQuery.ajax({
-                           url: '/mxobject/system/schema/field',
-                           dataType: 'json',
-                           type: 'GET',
-                           success: function (data, status) {
+                            url: '/mxobject/system/schema/field',
+                            dataType: 'json',
+                            type: 'GET',
+                            success: function (data, status) {
 
-                               obj = JSON.parse(data.message);
-                               jQuery.each(obj,function(key,value){
-                                  var o = new Object();
-                                  o.value = value.name;
-                                  o.text = value.name;
-                                  self.class.nameData.push(o);
-                               })
-                           },
-                           error: function(xhr, textStatus, errorThrown) {
-                              mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                           }
+                                obj = JSON.parse(data.message);
+                                jQuery.each(obj,function(key,value){
+                                    var o = new Object();
+                                    o.value = value.name;
+                                    o.text = value.name;
+                                    self.class.nameData.push(o);
+                                })
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
                         });
                     },
                     initColumnByAll: function () {
                         let self = this;
 
                         jQuery.ajax({
-                           url: '/mxobject/system/schema/field',
-                           dataType: 'json',
-                           type: 'GET',
-                           success: function (data, status) {
-                               self.class.nameObjData = JSON.parse(data.message);
-                           },
-                           error: function(xhr, textStatus, errorThrown) {
-                              mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                           }
+                            url: '/mxobject/system/schema/field',
+                            dataType: 'json',
+                            type: 'GET',
+                            success: function (data, status) {
+                                self.class.nameObjData = JSON.parse(data.message);
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
                         });
                     },
                     getSelectedParentByName: function (name) {
@@ -1200,7 +1204,7 @@
                             type: 'GET',
                             async: false,
                             data: {
-                              id: _name.join("/") || "/"
+                                id: _name.join("/") || "/"
                             },
                             success: function (data, status) {
 
@@ -1327,7 +1331,7 @@
                                         field: "state",
                                         radio: true
                                     });
-                                    
+
                                     _.forEach(appVue.class.table.columns, function(v,k) {
                                         if( v.name == "name" ){
 
@@ -1742,7 +1746,7 @@
 
                                             _.forEach(row, function(v,k){
                                                 if(_.isObject(v) && v!=null){
-                                                   self.model =  _.map(v,function(val,key){
+                                                    self.model =  _.map(v,function(val,key){
                                                         return {name:key, title: _.upperFirst(key), value:val};
                                                     })
                                                 }else {
@@ -1826,8 +1830,8 @@
                                     data: [],
                                     columns: [],
                                     options: {
-                                                info: false
-                                             }
+                                        info: false
+                                    }
                                 },
                                 table: {
                                     dataset: [],
@@ -1855,7 +1859,7 @@
                                     let me = this;
 
                                     let _param = `#` + appVue.class.tree.name + `/: | top 100`;
-                                    
+
                                     let _stime = _.now();
 
                                     let _list = fetchData(_param);
@@ -1868,7 +1872,7 @@
 
                                     let _classKeys = _.keys(_list.meta.classes);
                                     let _columns = [];
-                                    
+
                                     _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
                                         let _sortable = false;
 
@@ -1895,16 +1899,16 @@
                                                 field: v.name,
                                                 title: v.title,
                                                 render: function(data, type, row) {
-                                                          return JSON.stringify(data);
-                                                      }
+                                                    return JSON.stringify(data);
+                                                }
                                             });
                                         } else if (v.type === 'set' || v.type === 'list'){
                                             _columns.push({
                                                 field: v.name,
                                                 title: v.title,
                                                 render: function(data, type, row) {
-                                                          return data.join(",");
-                                                      }
+                                                    return data.join(",");
+                                                }
                                             });
                                         } else if (v.type === 'smallint'){
                                             _columns.push({
@@ -1961,11 +1965,12 @@
                                     _concat = _.concat(_tmp,_columns);
 
                                     me.model.columns = _concat;
+
                                     me.model.data = _.filter(_list.message,{class:_classKeys[0]});
 
                                     me.result.summary.count = _.size(me.model.data);
                                     me.result.summary.time = moment().diff(moment(_stime), 'seond');
-                                    
+
                                 }
                             }
                         });
@@ -1974,35 +1979,35 @@
                         let self = this;
 
                         let onContextMenu = function(row, $el){
-                                                let self = this;
+                            let self = this;
 
-                                                if($el.data("item") == "action-details"){
-                                                    openDetailPanel(row);
-                                                }
-                                            };
+                            if($el.data("item") == "action-details"){
+                                openDetailPanel(row);
+                            }
+                        };
 
                         let openDetailPanel = function(row){
-                                                  let self = this;
-                                                  var win;
-                                                  var w = $( window ).width();//document.body.clientWidth;
-                                                  var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
-                                                  var wW = $( window ).width()*2/3;
-                                                  var hH = $( window ).height()*2/3;
-                                                  var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
-                                                  var tb = document.createElement('div');
+                            let self = this;
+                            var win;
+                            var w = $( window ).width();//document.body.clientWidth;
+                            var h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+                            var wW = $( window ).width()*2/3;
+                            var hH = $( window ).height()*2/3;
+                            var lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
+                            var tb = document.createElement('div');
 
-                                                  $(tb).append(`<div class="panel" id="query-table-details-panel" :model="model"></div>`);
-                                                  win = new mxWindow(row.id || row.host, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
-                                                  win.setMaximizable(true);
-                                                  win.setResizable(true);
-                                                  win.setClosable(true);
-                                                  win.setVisible(true);
+                            $(tb).append(`<div class="panel" id="query-table-details-panel" :model="model"></div>`);
+                            win = new mxWindow(row.id || row.host, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
+                            win.setMaximizable(true);
+                            win.setResizable(true);
+                            win.setClosable(true);
+                            win.setVisible(true);
 
-                                                  _.delay(function(){
-                                                      var panelVue = new Vue({
-                                                          delimiters: ['$', '$'],
-                                                          el: '#query-table-details-panel',
-                                                          template: ` <div>
+                            _.delay(function(){
+                                var panelVue = new Vue({
+                                    delimiters: ['$', '$'],
+                                    el: '#query-table-details-panel',
+                                    template: ` <div>
                                                                           <div class="panel-body" style="padding:0px;">
                                                                               <div class="input-group input-group-sm" style="width:100%;" v-for="(item,index) in _.sortBy(model,'name')">
                                                                                   <div class="input-group-addon" :id="item.name" style="width:200px;text-align: right;border:0px;border-bottom: 1px solid #ccc;border-radius: 0px;background-color:#f7f7f7;">$item.title$</div>
@@ -2017,415 +2022,408 @@
 
                                                                           </div>
                                                                       </div>`,
-                                                          data:{
-                                                              model:[]
-                                                          },
-                                                          mounted: function(){
-                                                              let self = this;
+                                    data:{
+                                        model:[]
+                                    },
+                                    mounted: function(){
+                                        let self = this;
 
-                                                              self.$nextTick(function(){
+                                        self.$nextTick(function(){
 
-                                                                  _.forEach(row, function(v,k){
-                                                                      if(_.isObject(v) && v!=null){
-                                                                          self.model.push({name:k, title: _.upperFirst(k), value: JSON.stringify(v,null,"\t")});
-                                                                      }else {
-                                                                          self.model.push({name:k, title: _.upperFirst(k), value:v});
-                                                                      }
-                                                                      _.delay(function(){
-                                                                          $("#attr_"+k).editable({
-                                                                              type: _.isObject(v)?'textarea':'text',
-                                                                              emptytext: "-",
-                                                                              title: k,
-                                                                              container: 'body',
-                                                                              /*
-                                                                              pk: v.id,
-                                                                              url: "/mxobject/list/sql",
-                                                                              ajaxOptions: {
-                                                                                  type: 'POST',
-                                                                                  data: {
-                                                                                      ctype: "obj",
-                                                                                      sql: `INSERT JSON '` + JSON.stringify(row) + `'`;
-                                                                                  }
-                                                                              }
-                                                                              */
-                                                                          });
-                                                                      },500)
-                                                                  })
+                                            _.forEach(row, function(v,k){
+                                                if(_.isObject(v) && v!=null){
+                                                    self.model.push({name:k, title: _.upperFirst(k), value: JSON.stringify(v,null,"\t")});
+                                                }else {
+                                                    self.model.push({name:k, title: _.upperFirst(k), value:v});
+                                                }
+                                                _.delay(function(){
+                                                    $("#attr_"+k).editable({
+                                                        type: _.isObject(v)?'textarea':'text',
+                                                        emptytext: "-",
+                                                        title: k,
+                                                        container: 'body',
+                                                        /*
+                                                        pk: v.id,
+                                                        url: "/mxobject/list/sql",
+                                                        ajaxOptions: {
+                                                            type: 'POST',
+                                                            data: {
+                                                                ctype: "obj",
+                                                                sql: `INSERT JSON '` + JSON.stringify(row) + `'`;
+                                                            }
+                                                        }
+                                                        */
+                                                    });
+                                                },500)
+                                            })
 
-                                                                  $(self.$el).on('click keyup keydown', 'textarea', function () {
-                                                                      $(this).height(0).height(this.scrollHeight);
-                                                                  }).find('textarea').change();
+                                            $(self.$el).on('click keyup keydown', 'textarea', function () {
+                                                $(this).height(0).height(this.scrollHeight);
+                                            }).find('textarea').change();
 
-                                                              })
+                                        })
 
-                                                          },
-                                                          methods: {
-                                                              autosize: function () {
-                                                                  $("textarea").each(function(textarea) {
-                                                                      $this.height( $this[0].scrollHeight );
-                                                                  });
-                                                              },
-                                                              onSave: function(){
-                                                                  let self = this;
-                                                                  let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
-                                                                  let _rtn = putDataByMql(_mql);
-                                                              }
-                                                          }
-                                                      });
-                                                  },500);
-                                              };
+                                    },
+                                    methods: {
+                                        autosize: function () {
+                                            $("textarea").each(function(textarea) {
+                                                $this.height( $this[0].scrollHeight );
+                                            });
+                                        },
+                                        onSave: function(){
+                                            let self = this;
+                                            let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
+                                            let _rtn = putDataByMql(_mql);
+                                        }
+                                    }
+                                });
+                            },500);
+                        };
 
                         let queryVue = new Vue({
-                                          delimiters: ['${', '}'],
-                                          el: "#panel-query",
-                                          template: "#query-template",
-                                          data: {
-                                              query: {
-                                                  editor: null,
-                                              },
-                                              result: {
-                                                  list: [],
-                                                  summary: {
-                                                      count: 0,
-                                                      time: 0.00,
-                                                  }
-                                              },
-                                              split: {
-                                                  obj: {}
-                                              }
-                                          },
-                                          mounted: function() {
-                                              let me = this;
+                            delimiters: ['${', '}'],
+                            el: "#panel-query",
+                            template: "#query-template",
+                            data: {
+                                query: {
+                                    editor: null,
+                                },
+                                result: {
+                                    list: [],
+                                    summary: {
+                                        count: 0,
+                                        time: 0.00,
+                                    }
+                                },
+                                split: {
+                                    obj: {}
+                                }
+                            },
+                            mounted: function() {
+                                let me = this;
 
-                                              me.$nextTick(function () {
-                                                  _.delay(function(){
-                                                      me.initEditor();
-                                                      me.initSplit();
-                                                    },500);
-                                              })
-                                          },
-                                          created: function() {
-                                              let me = this;
+                                me.$nextTick(function () {
+                                    _.delay(function(){
+                                        me.initEditor();
+                                        me.initSplit();
+                                    },300);
+                                })
+                            },
+                            created: function() {
+                                let me = this;
 
+                            },
+                            methods: {
+                                initSplit: function () {
+                                    let me = this;
 
-                                          },
-                                          methods: {
-                                              initSplit: function () {
-                                                  let me = this;
+                                    $(".gutter.gutter-vertical").remove();
 
-                                                  if(_.isEmpty(me.split.obj)){
-                                                      me.split.obj = Split(['#query_input', '#query_result'], {
-                                                                          direction: 'vertical',
-                                                                          cursor: 'row-resize',
-                                                                          sizes: [22,52.5],
-                                                                          onDragEnd: function (argument) {
-                                                                              me.heightUpdate();
-                                                                          }
-                                                                      });
-                                                  }
-                                              },
-                                              heightUpdate: function () {
-                                                  let me = this;
+                                    me.split.obj = Split(['#query_input', '#query_result'], {
+                                        direction: 'vertical',
+                                        cursor: 'row-resize',
+                                        sizes: [22,52.5],
+                                        onDragEnd: function (argument) {
+                                            me.heightUpdate();
+                                        }
+                                    });
+                                },
+                                heightUpdate: function () {
+                                    let me = this;
 
-                                                  let containerHeight = $('#query_input').outerHeight();
-                                                  let lineHeight = me.query.editor.renderer.lineHeight;
-                                                  let lines = Math.floor(containerHeight/lineHeight);
+                                    let containerHeight = $('#query_input').outerHeight();
+                                    let lineHeight = me.query.editor.renderer.lineHeight;
+                                    let lines = Math.floor(containerHeight/lineHeight);
 
-                                                  me.query.editor.setOptions({
-                                                      minLines: lines,
-                                                      maxLines: lines,//Infinity,
-                                                  });
-                                              },
-                                              initEditor: function(){
-                                                  let me = this;
+                                    me.query.editor.setOptions({
+                                        minLines: lines,
+                                        maxLines: lines,//Infinity,
+                                    });
+                                },
+                                initEditor: function(){
+                                    let me = this;
 
-                                                  me.query.editor = ace.edit("query_input");
+                                    me.query.editor = ace.edit("query_input");
 
-                                                  ace.require('ace/ext/settings_menu').init(me.query.editor);
+                                    ace.require('ace/ext/settings_menu').init(me.query.editor);
 
-                                                  me.query.editor.getSession().on('change', function() {
-                                                      localStorage.setItem(appVue.class.tree.name,me.query.editor.getValue());
-                                                  });
-                                                  me.query.editor.$blockScrolling = Infinity;
-                                                  me.query.editor.setTheme("ace/theme/tomorrow");
-                                                  me.query.editor.getSession().setMode("ace/mode/sql");
-                                                  me.query.editor.focus();
-                                                  me.query.editor.setOptions({
-                                                      minLines: 10,
-                                                      maxLines: Infinity,
-                                                      enableBasicAutocompletion: true,
-                                                      enableSnippets: true,
-                                                      enableLiveAutocompletion: true,
-                                                      autoScrollEditorIntoView: true,
-                                                  });
-                                                  me.query.editor.container.style.lineHeight = 2;
-                                                  me.query.editor.renderer.updateFontSize();
+                                    me.query.editor.getSession().on('change', function() {
+                                        localStorage.setItem(appVue.class.tree.name,me.query.editor.getValue());
+                                    });
+                                    me.query.editor.$blockScrolling = Infinity;
+                                    me.query.editor.setTheme("ace/theme/tomorrow");
+                                    me.query.editor.getSession().setMode("ace/mode/sql");
+                                    me.query.editor.focus();
+                                    me.query.editor.setOptions({
+                                        minLines: 10,
+                                        maxLines: Infinity,
+                                        enableBasicAutocompletion: true,
+                                        enableSnippets: true,
+                                        enableLiveAutocompletion: true,
+                                        autoScrollEditorIntoView: true,
+                                    });
+                                    me.query.editor.container.style.lineHeight = 2;
+                                    me.query.editor.renderer.updateFontSize();
 
-                                                  me.query.editor.commands.addCommands([{
-                                                      name: "showSettingsMenu",
-                                                      bindKey: {
-                                                          win: "Ctrl-9",
-                                                          mac: "Command-9"
-                                                      },
-                                                      exec: function(editor) {
-                                                          me.query.editor.showSettingsMenu();
-                                                      },
-                                                      readOnly: true
-                                                  }]);
+                                    me.query.editor.commands.addCommands([{
+                                        name: "showSettingsMenu",
+                                        bindKey: {
+                                            win: "Ctrl-9",
+                                            mac: "Command-9"
+                                        },
+                                        exec: function(editor) {
+                                            me.query.editor.showSettingsMenu();
+                                        },
+                                        readOnly: true
+                                    }]);
 
-                                                  me.heightUpdate();
+                                    me.heightUpdate();
 
-                                                  me.query.editor.getSession().on('change', me.heightUpdate);
+                                    me.query.editor.getSession().on('change', me.heightUpdate);
 
-                                                  let n = me.query.editor.getSession().getValue().split("\n").length;
-                                                  me.query.editor.gotoLine(n);
+                                    let n = me.query.editor.getSession().getValue().split("\n").length;
+                                    me.query.editor.gotoLine(n);
 
-                                                  $('#query_input').keydown(function (e) {
+                                    $('#query_input').keydown(function (e) {
 
-                                                      if (e.ctrlKey && e.keyCode == 13) {
-                                                          me.onQuery();
-                                                      }
+                                        if (e.ctrlKey && e.keyCode == 13) {
+                                            me.onQuery();
+                                        }
 
-                                                  });
+                                    });
 
-                                                  $("#query_result_table").on('click-row.bs.table', function (e, row, $element) {
-                                                      $('.info').removeClass('info');
-                                                      $($element).addClass('info');
-                                                      $("#query_result_table").removeClass('table-hover');
-                                                  });
+                                    $("#query_result_table").on('click-row.bs.table', function (e, row, $element) {
+                                        $('.info').removeClass('info');
+                                        $($element).addClass('info');
+                                        $("#query_result_table").removeClass('table-hover');
+                                    });
 
-                                                  let colms =  _.without(appVue.class.tree.selected.Fields,"_tokens");
-                                                  let cls = "";
-                                                  if(_.isEmpty(colms)){
-                                                      cls = "*";
-                                                  } else {
-                                                      cls = colms.join(",\n");
-                                                  }
-                                                  let querySql = "select " + cls + " from " + appVue.class.tree.name;
+                                    let colms =  _.without(appVue.class.tree.selected.Fields,"_tokens");
+                                    let cls = "";
+                                    if(_.isEmpty(colms)){
+                                        cls = "*";
+                                    } else {
+                                        cls = colms.join(",\n");
+                                    }
+                                    let querySql = "select " + cls + " from " + appVue.class.tree.name;
 
-                                                  let _cache = me.loadCacheSql();
+                                    let _cache = me.loadCacheSql();
 
-                                                  if(!_.isEmpty(_cache)){
-                                                      me.query.editor.setValue(_cache);
-                                                  } else {
-                                                      me.query.editor.setValue(querySql);
-                                                  }
+                                    if(!_.isEmpty(_cache)){
+                                        me.query.editor.setValue(_cache);
+                                    } else {
+                                        me.query.editor.setValue(querySql);
+                                    }
 
-                                                  me.query.editor.setValue(me.query.editor.getValue(), 1);
+                                    me.query.editor.setValue(me.query.editor.getValue(), 1);
 
-                                                  me.onFormat();
+                                    me.onFormat();
 
-                                              },
-                                              loadCacheSql: function() {
-                                                  let me = this;
+                                },
+                                loadCacheSql: function() {
+                                    let me = this;
 
-                                                  return localStorage.getItem(appVue.class.tree.name) || "";
-                                              },
-                                              onFormat: function() {
-                                                  let me = this;
+                                    return localStorage.getItem(appVue.class.tree.name) || "";
+                                },
+                                onFormat: function() {
+                                    let me = this;
 
-                                                  let _mql = me.query.editor.getValue();
+                                    let _mql = me.query.editor.getValue();
 
-                                                  if(_.isEmpty(_mql)) return false;
+                                    if(_.isEmpty(_mql)) return false;
 
-                                                  _mql = _mql.replace(/\r?\n/g, " ")
-                                                             .replace(/\s{0,}select /ig, "\nSELECT\n\t")
-                                                             .replace(/\s{0,}delete /ig, "\nDELETE\n\t")
-                                                             .replace(/\s{0,}from /ig, "\nFROM\n\t")
-                                                             .replace(/\s{0,}where /ig, "\nWHERE\n\t")
-                                                             .replace(/\s{0,}order\s{1,}by/ig,"\nORDER BY\n\t")
-                                                             .replace(/\s{0,}limit/ig, "\nLIMIT\n\t")
-                                                             .replace(/\s{0,}with version /ig, "\nWITH VERSION\n\t")
-                                                             .replace(/\s{0,}create class /ig, "\nCREATE CLASS\n\t")
-                                                             .replace(/\s{0,}drop class /ig, "\nDROP CLASS\n\t")
-                                                             .replace(/\s{0,}\t/g,"\n\t");
+                                    _mql = _mql.replace(/\r?\n/g, " ")
+                                        .replace(/\s{0,}select /ig, "\nSELECT\n\t")
+                                        .replace(/\s{0,}delete /ig, "\nDELETE\n\t")
+                                        .replace(/\s{0,}from /ig, "\nFROM\n\t")
+                                        .replace(/\s{0,}where /ig, "\nWHERE\n\t")
+                                        .replace(/\s{0,}order\s{1,}by/ig,"\nORDER BY\n\t")
+                                        .replace(/\s{0,}limit/ig, "\nLIMIT\n\t")
+                                        .replace(/\s{0,}with version /ig, "\nWITH VERSION\n\t")
+                                        .replace(/\s{0,}create class /ig, "\nCREATE CLASS\n\t")
+                                        .replace(/\s{0,}drop class /ig, "\nDROP CLASS\n\t")
+                                        .replace(/\s{0,}\t/g,"\n\t");
 
-                                                  me.query.editor.setValue(_mql);
+                                    me.query.editor.setValue(_mql);
 
-                                              },
-                                              onQuery: function(){
-                                                  let me = this;
-                                                  let oneLevelLoading;
-                                                  let _sql = me.query.editor.getValue();
-                                                  let _stime = _.now();
-                                                  let _columns = [];
-                                                  let _objAttrList = ['contain','connect','depend','refer','runon'];
+                                },
+                                onQuery: function(){
+                                    let me = this;
+                                    let oneLevelLoading;
+                                    let _sql = me.query.editor.getValue();
+                                    let _stime = _.now();
+                                    let _columns = [];
+                                    let _objAttrList = ['contain','connect','depend','refer','runon'];
 
-                                                  if(_.isEmpty(me.query.editor.getValue())){
-                                                      return false;
-                                                  }
+                                    if(_.isEmpty(me.query.editor.getValue())){
+                                        return false;
+                                    }
 
-                                                  if( me.query.editor.getSelectedText().length > 0 ) {
-                                                      _sql = me.query.editor.getSelectedText();
-                                                  }
+                                    if( me.query.editor.getSelectedText().length > 0 ) {
+                                        _sql = me.query.editor.getSelectedText();
+                                    }
 
-                                                  let _list = fetchDataByMql(_sql);
+                                    let _list = fetchDataByMql(_sql);
 
-                                                  // MQL for  CRUD
-                                                  if( _.lowerCase(_list.message) == "ok"){
-                                                      eventHub.$emit("class-tree-refresh-event",null);
-                                                      swal("Success!","","success");
-                                                      layer.close(oneLevelLoading);
-                                                  }
+                                    if(_.isEmpty(_list)) return false;
 
-                                                  let _data = _.attempt(JSON.parse.bind(null,_list.message));
-                                                  _.forEach(_data,function (v,k) {
-                                                      _.forEach(v,function(val,key){
-                                                          if(_.isObject(val)){
-                                                              //_data[k][key] = JSON.stringify(val).replace(/\n\t/g,"");
-                                                              console.log(_data[k][key])
-                                                          }
-                                                      })
-                                                  });
+                                    // MQL for  CRUD
+                                    if( _.lowerCase(_list.message) == "ok" ){
+                                        eventHub.$emit("class-tree-refresh-event",null);
+                                        swal("Success!","","success");
+                                        layer.close(oneLevelLoading);
+                                    }
 
-                                                  _columns.push({
-                                                      field: "num",
-                                                      formatter: asNumFormatter,
-                                                  });
+                                    let _data = _.attempt(JSON.parse.bind(null,_list.message));
 
-                                                  let _tmp = _.upperCase(_sql).split("FROM")[0].replace(/SELECT/g,"");
+                                    _columns.push({
+                                        field: "num",
+                                        formatter: asNumFormatter,
+                                    });
 
-                                                  if(_tmp.indexOf("*") > -1 || _.trim(_tmp).length < 1){
-                                                      _.map(_data[0], function(v,k) {
+                                    let _tmp = _.upperCase(_sql).split("FROM")[0].replace(/SELECT/g,"");
 
-                                                          let tmp = {};
+                                    if(_tmp.indexOf("*") > -1 || _.trim(_tmp).length < 1){
+                                        _.map(_data[0], function(v,k) {
 
-                                                          if(k.indexOf("time") > -1){
-                                                              tmp = {
-                                                                  field: k,
-                                                                  title: _.upperFirst(k),
-                                                                  sortable: true,
-                                                                  formatter: function(val){
-                                                                      return moment(val).format("LLL");
-                                                                  }
-                                                              };
-                                                          } else {
-                                                              if(_.indexOf(_objAttrList,k) > -1){
+                                            let tmp = {};
 
-                                                                  tmp = {
-                                                                      field: k,
-                                                                      title: _.upperFirst(k),
-                                                                      sortable: true,
-                                                                      formatter: function(value,row,index){
-                                                                          console.log(555,value,row,index)
-                                                                          return JSON.stringify(value);
-                                                                      },
-                                                                      editable: {
-                                                                          emptytext: "-",
-                                                                          title: k,
-                                                                          container: 'body',
-                                                                          inputclass: 'query-table-text',
-                                                                          type: 'textarea'
-                                                                      }
-                                                                  };
-                                                              } else {
-                                                                  tmp = {
-                                                                      field: k,
-                                                                      title: _.upperFirst(k),
-                                                                      sortable: true,
-                                                                      editable: {
-                                                                          emptytext: "-",
-                                                                          title: k,
-                                                                          container: 'body',
-                                                                          inputclass: 'query-table-text'
-                                                                      }
-                                                                  };
-                                                              }
+                                            if(k.indexOf("time") > -1){
+                                                tmp = {
+                                                    field: k,
+                                                    title: _.upperFirst(k),
+                                                    sortable: true,
+                                                    formatter: function(val){
+                                                        return moment(val).format("LLL");
+                                                    }
+                                                };
+                                            } else {
+                                                if(_.indexOf(_objAttrList,k) > -1){
 
-                                                          }
-                                                          _columns.push(tmp);
-                                                      });
-                                                  } else {
-                                                      let _cols = _tmp.split(" ");
-                                                      _.forEach(_cols,function(k){
-                                                          if(!_.isEmpty(k)){
-                                                              if(_.indexOf(_objAttrList,k) > -1){
-                                                                  _columns.push({
-                                                                      field: _.lowerCase(k),
-                                                                      title: _.upperFirst(k),
-                                                                      sortable: true,
-                                                                      editable: {
-                                                                          emptytext: "-",
-                                                                          title: k,
-                                                                          container: 'body',
-                                                                          inputclass: 'query-table-text'
-                                                                      }
-                                                                  });
-                                                              } else {
-                                                                  _columns.push({
-                                                                      field: _.lowerCase(k),
-                                                                      title: _.upperFirst(k),
-                                                                      sortable: true,
-                                                                      editable: {
-                                                                          emptytext: "-",
-                                                                          title: k,
-                                                                          container: 'body',
-                                                                          inputclass: 'query-table-text'
-                                                                      }
-                                                                  });
-                                                              }
-                                                          }
-                                                      })
-                                                  }
+                                                    tmp = {
+                                                        field: k,
+                                                        title: _.upperFirst(k),
+                                                        sortable: true,
+                                                        formatter: function(value,row,index){
+                                                            console.log(555,value,row,index)
+                                                            return JSON.stringify(value);
+                                                        },
+                                                        editable: {
+                                                            emptytext: "-",
+                                                            title: k,
+                                                            container: 'body',
+                                                            inputclass: 'query-table-text',
+                                                            type: 'textarea'
+                                                        }
+                                                    };
+                                                } else {
+                                                    tmp = {
+                                                        field: k,
+                                                        title: _.upperFirst(k),
+                                                        sortable: true,
+                                                        editable: {
+                                                            emptytext: "-",
+                                                            title: k,
+                                                            container: 'body',
+                                                            inputclass: 'query-table-text'
+                                                        }
+                                                    };
+                                                }
 
-                                                  let _hash = objectHash.sha1(_.trim(_sql));
-                                                  let _index = _.findIndex(self.result.list, {id: _hash});
-                                                  let _obj = {
-                                                      id: _hash,
-                                                      name: "query_" + _.size(me.result.list)+1,
-                                                      model:{
-                                                          options:{
-                                                              showColumns: false,
-                                                              pagination: false,
-                                                              showExport: false,
-                                                              contextMenu: '#context-menu',
-                                                              onContextMenuItem: onContextMenu,
-                                                              onEditableShown: function(editable, field, row, $el){
-                                                                  console.log(12,field[editable])
-                                                              },
-                                                              onEditableSave: function (field, row, oldValue, $el) {
-                                                                  me.onSave(row);
-                                                              }
-                                                          },
-                                                          columns: _columns,
-                                                          dataset: _data
-                                                      }
-                                                  };
+                                            }
+                                            _columns.push(tmp);
+                                        });
+                                    } else {
+                                        let _cols = _tmp.split(" ");
+                                        _.forEach(_cols,function(k){
+                                            if(!_.isEmpty(k)){
+                                                if(_.indexOf(_objAttrList,k) > -1){
+                                                    _columns.push({
+                                                        field: _.lowerCase(k),
+                                                        title: _.upperFirst(k),
+                                                        sortable: true,
+                                                        editable: {
+                                                            emptytext: "-",
+                                                            title: k,
+                                                            container: 'body',
+                                                            inputclass: 'query-table-text'
+                                                        }
+                                                    });
+                                                } else {
+                                                    _columns.push({
+                                                        field: _.lowerCase(k),
+                                                        title: _.upperFirst(k),
+                                                        sortable: true,
+                                                        editable: {
+                                                            emptytext: "-",
+                                                            title: k,
+                                                            container: 'body',
+                                                            inputclass: 'query-table-text'
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        })
+                                    }
 
-                                                  if(_index > -1){
-                                                      _obj.name = me.result.list[_index].name;
-                                                      me.result.list.splice(_index,1,_obj);
-                                                  } else {
-                                                      me.result.list.push(_obj);
-                                                  }
+                                    let _hash = objectHash.sha1(_.trim(_sql));
+                                    let _index = _.findIndex(me.result.list, {id: _hash});
+                                    let _obj = {
+                                        id: _hash,
+                                        name: "query_" + _.size(me.result.list)+1,
+                                        model:{
+                                            options:{
+                                                showColumns: false,
+                                                pagination: false,
+                                                showExport: false,
+                                                contextMenu: '#context-menu',
+                                                onContextMenuItem: onContextMenu,
+                                                onEditableShown: function(editable, field, row, $el){
+                                                    console.log(12,field[editable])
+                                                },
+                                                onEditableSave: function (field, row, oldValue, $el) {
+                                                    me.onSave(row);
+                                                }
+                                            },
+                                            columns: _columns,
+                                            dataset: _data
+                                        }
+                                    };
 
-                                                  $(".ul-query>li").removeClass("active");
-                                                  $(".ul-query").find("#"+_hash).addClass("active");
+                                    if(_index > -1){
+                                        _obj.name = me.result.list[_index].name;
+                                        me.result.list.splice(_index,1,_obj);
+                                    } else {
+                                        me.result.list.push(_obj);
+                                    }
 
-                                                  $(".tab-query>li").removeClass("active");
-                                                  $(".tab-query").find("#"+_hash).addClass("active");
+                                    $(".ul-query>li").removeClass("active");
+                                    $(".ul-query").find("#"+_hash).addClass("active");
 
-                                                  me.result.summary.count = _.size(_data);
-                                                  me.result.summary.time = moment().diff(moment(_stime), 'seond');
+                                    $(".tab-query>li").removeClass("active");
+                                    $(".tab-query").find("#"+_hash).addClass("active");
 
-                                              },
-                                              onRemove: function(item){
-                                                  let me = this;
-                                                  let _index = _.findIndex(me.result.list, item);
+                                    me.result.summary.count = _.size(_data);
+                                    me.result.summary.time = moment().diff(moment(_stime), 'seond');
 
-                                                  me.result.list.splice(_index,1);
-                                              },
-                                              onHelp: function() {
-                                                  mxLog.consoleName = 'M³ Debug Console';
-                                                  mxLog.show();
-                                              },
-                                              onSave: function(row){
-                                                  let me = this;
-                                                  let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
-                                                  let _rtn = putDataByMql(_mql);
-                                              }
-                                          }
-                                      });
+                                },
+                                onRemove: function(item){
+                                    let me = this;
+                                    let _index = _.findIndex(me.result.list, item);
+
+                                    me.result.list.splice(_index,1);
+                                },
+                                onHelp: function() {
+                                    mxLog.consoleName = 'M³ Debug Console';
+                                    mxLog.show();
+                                },
+                                onSave: function(row){
+                                    let me = this;
+                                    let _mql = `INSERT JSON '` + JSON.stringify(row) + `'`;
+                                    let _rtn = putDataByMql(_mql);
+                                }
+                            }
+                        });
                     },
                     initTrigger: function () {
                         let self = this;
@@ -2455,28 +2453,28 @@
 
                                             if( _.isEmpty(data.message) ) {
                                                 self.list = [{  name: "",
-                                                                time: moment().format("LLL"),
-                                                                class: appVue.class.tree.name,
-                                                                model:{
-                                                                    oldInput: "",
-                                                                    newInput: "",
-                                                                    mode: "lua"
-                                                                }
-                                                            }];
+                                                    time: moment().format("LLL"),
+                                                    class: appVue.class.tree.name,
+                                                    model:{
+                                                        oldInput: "",
+                                                        newInput: "",
+                                                        mode: "lua"
+                                                    }
+                                                }];
                                             } else {
                                                 self.list = _.values(_.map(data.message,function(v){
-                                                                        return _.map(v.script,function(val,key){
-                                                                            return   {  name: key,
-                                                                                        time: v.vtime,
-                                                                                        class: v.class,
-                                                                                        model:{
-                                                                                            oldInput: val,
-                                                                                            newInput: val,
-                                                                                            mode: "lua"
-                                                                                        }
-                                                                                    }
-                                                                        })
-                                                                    }))[0];
+                                                    return _.map(v.script,function(val,key){
+                                                        return   {  name: key,
+                                                            time: v.vtime,
+                                                            class: v.class,
+                                                            model:{
+                                                                oldInput: val,
+                                                                newInput: val,
+                                                                mode: "lua"
+                                                            }
+                                                        }
+                                                    })
+                                                }))[0];
                                             }
                                             self.selected = _.head(self.list);
                                         })
@@ -2560,28 +2558,28 @@
 
                                                     if( _.isEmpty(data.message)) {
                                                         self.list = [{  name: "",
-                                                                        time: moment().format("LLL"),
-                                                                        class: appVue.class.tree.name,
-                                                                        model:{
-                                                                            oldInput: "",
-                                                                            newInput: "",
-                                                                            mode: "lua"
-                                                                        }
-                                                                    }];
+                                                            time: moment().format("LLL"),
+                                                            class: appVue.class.tree.name,
+                                                            model:{
+                                                                oldInput: "",
+                                                                newInput: "",
+                                                                mode: "lua"
+                                                            }
+                                                        }];
                                                     } else {
                                                         self.list = _.values(_.map(data.message,function(v){
-                                                                                return _.map(v.script,function(val,key){
-                                                                                    return   {    name: key,
-                                                                                                time: v.vtime,
-                                                                                                class: v.class,
-                                                                                                model:{
-                                                                                                    oldInput: val,
-                                                                                                    newInput: val,
-                                                                                                    mode: "lua"
-                                                                                                }
-                                                                                            }
-                                                                                })
-                                                                            }))[0];
+                                                            return _.map(v.script,function(val,key){
+                                                                return   {    name: key,
+                                                                    time: v.vtime,
+                                                                    class: v.class,
+                                                                    model:{
+                                                                        oldInput: val,
+                                                                        newInput: val,
+                                                                        mode: "lua"
+                                                                    }
+                                                                }
+                                                            })
+                                                        }))[0];
                                                     }
                                                     self.selected = _.head(self.list);
                                                 },
@@ -2636,7 +2634,7 @@
                                                     success: function(data, textStatus, xhr) {
 
                                                         if(_.isEmpty(data.message)) {
-                                                          return false;
+                                                            return false;
                                                         }
 
                                                         let _tmp = _.map(data.message,_.partialRight(_.pick, ['vtime','msg']));
@@ -2668,21 +2666,21 @@
                         var sql = `select json * from matrix.rels`;
 
                         jQuery.ajax({
-                          url: '/mxobject/action',
-                          type: 'POST',
-                          dataType: 'json',
-                          data: {
-                              sql
-                          },
-                          complete: function(xhr, textStatus) {
-                          },
-                          success: function(data, textStatus, xhr) {
-                              $("#realMaintainTable").bootstrapTable({data: JSON.parse(data.message)});
-                              $("#realMaintainTable").bootstrapTable("load",JSON.parse(data.message));
-                          },
-                          error: function(xhr, textStatus, errorThrown) {
-                              mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
-                          }
+                            url: '/mxobject/action',
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                sql
+                            },
+                            complete: function(xhr, textStatus) {
+                            },
+                            success: function(data, textStatus, xhr) {
+                                $("#realMaintainTable").bootstrapTable({data: JSON.parse(data.message)});
+                                $("#realMaintainTable").bootstrapTable("load",JSON.parse(data.message));
+                            },
+                            error: function(xhr, textStatus, errorThrown) {
+                                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                            }
                         });
                     },
                     initRelation: function () {
@@ -2725,7 +2723,7 @@
                                             url: "/mxobject/rel",
                                             dataType: 'json',
                                             type: 'POST',
-                                            data: {query},
+                                            data: { query },
                                             beforeSend:function(xhr){
                                             },
                                             complete: function(xhr, textStatus) {
@@ -2911,7 +2909,7 @@
                                         var name = $("#realAddModal_name").val();
                                         var remedy = $("#realAddModal_remedy").val();
                                         var sql = `insert into matrix.rels json '{"name": "`+ name + `", "remedy": "` + remedy + `", "mtime": "` +  _.now() + `"}'`;
-                                        
+
                                         jQuery.ajax({
                                             url: '/mxobject/action',
                                             type: 'POST',
@@ -2983,7 +2981,7 @@
         }
 
         function asNumFormatter(value, row, index) {
-          return index+1;
+            return index+1;
         }
 
         function rowStyle(row, index) {
@@ -2994,9 +2992,9 @@
                     classes: classes[0]
                 };
             } else {
-              return {
-                  classes: classes[1]
-              };
+                return {
+                    classes: classes[1]
+                };
             }
             return {};
         }
@@ -3006,13 +3004,13 @@
         }
 
         //-->
-  })
+    })
 </SCRIPT>
 
 
 <script type="text/x-template" id="app-template">
     <div>
-        <div id="sidebar" class="sidebar __web-inspector-hide-shortcut__" style="background-color:transparent;overflow:auto;padding-top:0px;">
+        <div id="sidebar" class="sidebar __web-inspector-hide-shortcut__" style="background-color:#ffffff;overflow:auto;padding-top:0px;">
 
             <div class="panel panel-grey" style="border-radius: 0px;border-right: 1px solid #f0f3f5;">
 
@@ -3045,7 +3043,7 @@
                     <class-tree-component></class-tree-component>
                 </div>
 
-                <div class="panel-footer">
+                <div class="panel-footer object-footer">
                     {{.SignedUser.Name}}
                 </div>
 
@@ -3072,100 +3070,100 @@
 
         <div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  <h4 class="modal-title" id="myModalLabel">请输入类名称</h4>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">请输入类名称</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <label for="">类名称</label>
+                        <input type="text" class="form-control" id="class_name">
+
+                        <BR>
+                        <label for="">类显示名称</label>
+                        <input type="text" class="form-control" id="class_alias" >
+
+                        <BR>
+                        <label for="">备注</label>
+                        <input type="text" class="form-control" id="class_remedy" >
+
+                        <BR>
+                        <label for="">颜色</label>
+                        <input id="class_color" type="text" class="form-control" value="hsl(180, 50%, 50%)">
+
+                        <BR>
+                        <label for="">标签</label>
+                        <select id="class_tags" class="form-control" multiple="multiple" style="width:100%;"></select>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btn_class_new" data-dismiss="modal">提交</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-
-                  <label for="">类名称</label>
-                  <input type="text" class="form-control" id="class_name">
-
-                  <BR>
-                  <label for="">类显示名称</label>
-                  <input type="text" class="form-control" id="class_alias" >
-
-                  <BR>
-                  <label for="">备注</label>
-                  <input type="text" class="form-control" id="class_remedy" >
-
-                  <BR>
-                  <label for="">颜色</label>
-                  <input id="class_color" type="text" class="form-control" value="hsl(180, 50%, 50%)">
-
-                  <BR>
-                  <label for="">标签</label>
-                  <select id="class_tags" class="form-control" multiple="multiple" style="width:100%;"></select>
-
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                  <button type="button" class="btn btn-primary" id="btn_class_new" data-dismiss="modal">提交</button>
-                </div>
-              </div>
             </div>
         </div>
 
         <div class="modal fade" id="viewAddAndUpdateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
-          <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">视图</h4>
-              </div>
-              <div class="modal-body" style="padding:10px 0px 0px 0px;">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">视图</h4>
+                    </div>
+                    <div class="modal-body" style="padding:10px 0px 0px 0px;">
 
-                <ul class="nav nav-tabs">
-                  <li class="active"><a href="#grid" aria-controls="grid" role="tab" data-toggle="tab">页面设计</a></li>
-                  <li><a href="#jsonview" aria-controls="jsonview" role="tab" data-toggle="tab">源码</a></li>
-                </ul>
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#grid" aria-controls="grid" role="tab" data-toggle="tab">页面设计</a></li>
+                            <li><a href="#jsonview" aria-controls="jsonview" role="tab" data-toggle="tab">源码</a></li>
+                        </ul>
 
-                <!--Tab container-->
-                <div class="tab-content">
-                  <div role="tabpanel" class="tab-pane fade in active" id="grid" style="padding:10px 30px 0px 30px;">
+                        <!--Tab container-->
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade in active" id="grid" style="padding:10px 30px 0px 30px;">
 
-                    <label for="">视图名称</label>
-                    <input type="text" class="form-control" id="view_name">
+                                <label for="">视图名称</label>
+                                <input type="text" class="form-control" id="view_name">
 
-                    <BR>
-                    <label for="">图标</label>
-                    <input type="text" class="form-control" id="view_icon" >
+                                <BR>
+                                <label for="">图标</label>
+                                <input type="text" class="form-control" id="view_icon" >
 
-                    <BR>
-                    <label for="">行[row]</label>
-                    <input type="number" class="form-control" id="view_row" min="1" step="1">
+                                <BR>
+                                <label for="">行[row]</label>
+                                <input type="number" class="form-control" id="view_row" min="1" step="1">
 
-                    <BR>
-                    <label for="">列[col]</label>
-                    <input type="number" class="form-control" id="view_col" min="1" step="1">
+                                <BR>
+                                <label for="">列[col]</label>
+                                <input type="number" class="form-control" id="view_col" min="1" step="1">
 
-                    <BR>
-                    <label for="">PortalLet</label>
-                    <div class="well"></div>
+                                <BR>
+                                <label for="">PortalLet</label>
+                                <div class="well"></div>
 
-                    <BR>
-                    <label for="">是否显示</label><BR>
-                    <input type="checkbox" class="form-control" id="view_active" >
-                    <BR>
-                    <BR>
-                  </div>
+                                <BR>
+                                <label for="">是否显示</label><BR>
+                                <input type="checkbox" class="form-control" id="view_active" >
+                                <BR>
+                                <BR>
+                            </div>
 
-                  <div role="tabpanel" class="tab-pane fade" id="jsonview">
-                    <div id="view_config_textarea"></div>
-                  </div>
+                            <div role="tabpanel" class="tab-pane fade" id="jsonview">
+                                <div id="view_config_textarea"></div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="btn_view_submit" data-dismiss="modal">提交</button>
+                    </div>
 
                 </div>
-
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" id="btn_view_submit" data-dismiss="modal">提交</button>
-              </div>
-
             </div>
-          </div>
         </div>
     </div>
 </script>
@@ -3234,7 +3232,7 @@
             </table>
             <!-- /Table -->
         </div>
-        <div class="panel-footer class-panel-footer">
+        <div class="panel-footer object-footer class-panel-footer">
             Count:
         </div>
     </div>
@@ -3289,10 +3287,10 @@
                    data-toolbar="#data-table-toolbar">
             </table>
         </div>
-        <div class="panel-footer">
+        <div class="panel-footer object-footer">
             <span><b>Count:</b> ${result.summary.count}  |  <b>Primary Key: </b> ${appVue.class.tree.iskey.join(",")} | <b>Use:</b> ${result.summary.time} ms</span>
         </div>
-     </div>
+    </div>
 </script>
 
 <script type="text/x-template" id="query-template">
@@ -3301,17 +3299,17 @@
           <span>
             <i class="fa fa-newspaper-o"></i>
           </span>
-          <div class="btn-group pull-right">
-            <a href="javascript:void(0)" @click="onFormat" class="btn btn-xs btn-default tippy" title="Format">
-                <i class="fa fa-outdent"></i>
-            </a>
-            <a href="javascript:void(0)" @click="onQuery" class="btn btn-xs btn-success tippy" title="Query">
-              <i class="fa fa-play"></i>
-            </a>
-            <a href="javascript:void(0)" @click="onHelp" class="btn btn-xs btn-default tippy" title="Debug">
-              <i class="fa fa-television"></i>
-            </a>
-          </div>
+            <div class="btn-group pull-right">
+                <a href="javascript:void(0)" @click="onFormat" class="btn btn-xs btn-default tippy" title="Format">
+                    <i class="fa fa-outdent"></i>
+                </a>
+                <a href="javascript:void(0)" @click="onQuery" class="btn btn-xs btn-success tippy" title="Query">
+                    <i class="fa fa-play"></i>
+                </a>
+                <a href="javascript:void(0)" @click="onHelp" class="btn btn-xs btn-default tippy" title="Debug">
+                    <i class="fa fa-television"></i>
+                </a>
+            </div>
         </div>
 
         <div class="panel-body" style="padding:0px;">
@@ -3325,17 +3323,17 @@
                 </div>
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs ul-query" role="tablist">
-                  <li role="presentation"
-                      :class="_.size(result.list)==index+1?'active':''"
-                      v-for="(item,index) in result.list"
-                      style="display:-webkit-box;">
-                      <a :href="'#'+item.id" :aria-controls="item.id" role="tab" data-toggle="tab">${item.name}</a>
-                      <a  href="javascropt:void(0);"
-                          @click="onRemove(item)"
-                          style="color:#9f9f9f;cursor:pointer;">
-                          <i class="fa fa-close"></i>
-                      </a>
-                  </li>
+                    <li role="presentation"
+                        :class="_.size(result.list)==index+1?'active':''"
+                        v-for="(item,index) in result.list"
+                        style="display:-webkit-box;">
+                        <a :href="'#'+item.id" :aria-controls="item.id" role="tab" data-toggle="tab">${item.name}</a>
+                        <a  href="javascropt:void(0);"
+                            @click="onRemove(item)"
+                            style="color:#9f9f9f;cursor:pointer;">
+                            <i class="fa fa-close"></i>
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- Tab panes -->
@@ -3346,7 +3344,7 @@
                 </div>
             </div>
         </div>
-        <div class="panel-footer">
+        <div class="panel-footer object-footer">
             <span><b>Count: </b>${result.summary.count}  | <b>Use: </b>${result.summary.time} ms</span>
         </div>
     </div>
@@ -3354,110 +3352,110 @@
 
 <script type="text/x-template" id="trigger-template">
     <div class="panel">
-      <div class="panel-body">
-          <div v-if="_.isEmpty(selected.name)">
-              <div class="jumbotron trigger-jumbotron">
-                  <h2>No Trigger</h2>
-                  <p>The implementation of triggers includes the capability to register a trigger on a table using the familiar MQL syntax. The Trigger API is semi-private and subject to change. </p>
-                  <p>
-                      <a  class="btn btn-success btn-lg" style="cursor:pointer;padding:0px 5px;"
-                          href="#modal-trigger-add" title="New Trigger" data-toggle="modal">
-                          Add a trigger
-                      </a>
-                  </p>
-              </div>
-          </div>
-          <div class="well well-sm" style="background-color:#F7F7F7;margin-bottom:0px;border-radius:0px;border:none;font-size:12px;" v-else>
+        <div class="panel-body">
+            <div v-if="_.isEmpty(selected.name)">
+                <div class="jumbotron trigger-jumbotron">
+                    <h2>No Trigger</h2>
+                    <p>The implementation of triggers includes the capability to register a trigger on a table using the familiar MQL syntax. The Trigger API is semi-private and subject to change. </p>
+                    <p>
+                        <a  class="btn btn-success btn-lg" style="cursor:pointer;padding:0px 5px;"
+                            href="#modal-trigger-add" title="New Trigger" data-toggle="modal">
+                            Add a trigger
+                        </a>
+                    </p>
+                </div>
+            </div>
+            <div class="well well-sm" style="background-color:#F7F7F7;margin-bottom:0px;border-radius:0px;border:none;font-size:12px;" v-else>
 
-              <div class="btn-group">
-                <a style="cursor:pointer;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    ${selected.name} <i class="fa fa-angle-down"></i>
-                </a>
-                <ul class="dropdown-menu">
-                  <li v-for="item in list" style="display: flex;">
-                    <a href="javascript:void(0)" style="cursor:pointer;width:90%;"
-                       @click="toggle(item)">
-                        <i class="fa fa-tasks"></i> ${item.name}
+                <div class="btn-group">
+                    <a style="cursor:pointer;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        ${selected.name} <i class="fa fa-angle-down"></i>
                     </a>
-                    <a  href="javascript:void(0)" style="float:right;color:#ddd;float:right;"
-                        @click="remove(item.name)"><i class="fa fa-remove"></i></a>
-                  </li>
-                </ul>
-              </div>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-              <div class="btn-group pull-right">
-                  <a  href="#modal-trigger-add"
-                      class="btn btn-xs btn-default tippy"
-                      title="New Trigger"
-                      style="cursor:pointer;padding:0px 5px;"
-                      data-toggle="modal">
-                      <i class="fa fa-plus"></i>
-                  </a>
-                  <a  href="javascript:void(0)"
-                      class="btn btn-xs btn-default tippy"
-                      title="Save"
-                      style="cursor:pointer;padding:0px 5px;"
-                      @click="save">
-                      <i class="fa fa-save"></i>
-                  </a>
-                  <a  href="javascript:void(0)"
-                      class="btn btn-xs btn-default tippy"
-                      title="Save as"
-                      style="cursor:pointer;padding:0px 5px;">
-                      <i class="fa fa-files-o"></i>
-                  </a>
-                  <a  href="javascript:void(0)"
-                      class="btn btn-xs btn-default tippy"
-                      title="Debug"
-                      style="cursor:pointer;padding:0px 5px;"
-                      @click="debug">
-                      <i class="fa fa-television"></i>
-                  </a>
-              </div>
+                    <ul class="dropdown-menu">
+                        <li v-for="item in list" style="display: flex;">
+                            <a href="javascript:void(0)" style="cursor:pointer;width:90%;"
+                               @click="toggle(item)">
+                                <i class="fa fa-tasks"></i> ${item.name}
+                            </a>
+                            <a  href="javascript:void(0)" style="float:right;color:#ddd;float:right;"
+                                @click="remove(item.name)"><i class="fa fa-remove"></i></a>
+                        </li>
+                    </ul>
+                </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn-group pull-right">
+                    <a  href="#modal-trigger-add"
+                        class="btn btn-xs btn-default tippy"
+                        title="New Trigger"
+                        style="cursor:pointer;padding:0px 5px;"
+                        data-toggle="modal">
+                        <i class="fa fa-plus"></i>
+                    </a>
+                    <a  href="javascript:void(0)"
+                        class="btn btn-xs btn-default tippy"
+                        title="Save"
+                        style="cursor:pointer;padding:0px 5px;"
+                        @click="save">
+                        <i class="fa fa-save"></i>
+                    </a>
+                    <a  href="javascript:void(0)"
+                        class="btn btn-xs btn-default tippy"
+                        title="Save as"
+                        style="cursor:pointer;padding:0px 5px;">
+                        <i class="fa fa-files-o"></i>
+                    </a>
+                    <a  href="javascript:void(0)"
+                        class="btn btn-xs btn-default tippy"
+                        title="Debug"
+                        style="cursor:pointer;padding:0px 5px;"
+                        @click="debug">
+                        <i class="fa fa-television"></i>
+                    </a>
+                </div>
 
-              <span class="pull-right">
+                <span class="pull-right">
                 <a id="btn_agent_filter_fullscreen" style="cursor:pointer;">
                     <i class="fa fa-fullscreen"></i>
                 </a>
               </span>
-          </div>
+            </div>
 
-          <div class="vertical-box">
+            <div class="vertical-box">
                 <div v-if="list[0].name.length > 0">
                     <script-editor-component :id="'trigger_editor_'+selected.name" :model="selected.model"></script-editor-component>
                 </div>
                 <div v-else>
 
                 </div>
-          </div>
-      </div>
-
-      <div class="modal fade" id="modal-trigger-add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Name</h4>
-              </div>
-              <div class="modal-body">
-
-                <label for="">Name</label>
-                <input type="text" class="form-control" id="trigger_name" >
-
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" @click="add()">Save</button>
-              </div>
             </div>
-          </div>
-      </div>
+        </div>
+
+        <div class="modal fade" id="modal-trigger-add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Name</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <label for="">Name</label>
+                        <input type="text" class="form-control" id="trigger_name" >
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" @click="add()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </script>
 
 <script type="text/x-template" id="graph-template">
-  <div id="svg">
-  </div>
+    <div id="svg">
+    </div>
 </script>
 
 <script type="text/x-template" id="relation-template">

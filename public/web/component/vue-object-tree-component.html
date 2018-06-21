@@ -1,0 +1,205 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		.ztree li a.curSelectedNode {
+			background-color: rgb(244, 244, 244)!important;
+			border:1px solid #ffffff!important;
+		}
+
+		.ztree li a:hover{
+			text-decoration: none!important;
+		}
+
+		.hover-toolbars {
+			padding: 0px 4px!important;
+			position: relative;
+			left: 85px;
+			top: 0px;
+			margin: -20px 5px!important;
+			width: 72px;
+			display: block;
+			background-color: rgb(255, 255, 255);
+			border: 1px solid rgb(246, 246, 246);
+			border-radius: 0;
+		}
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-object-tree-component"  ----------*/
+	<template>
+		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-object-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+        },
+        data: function(){
+            return {
+                zTree: Object,
+                zSetting: {
+                    view: {
+                        dblClickExpand: this.onDblClickExpand,
+                        addDiyDom: this.addCountDom,
+                        addHoverDom: this.addHoverDom,
+                        removeHoverDom: this.removeHoverDom,
+                    },
+                    edit: {
+                        enable: false
+                    },
+                    callback: {
+                        onClick: this.onClick
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: 'name',
+                            title: 'name'
+                        }
+                    },
+                    check: {
+                        enable: false
+                    }
+                },
+                zNodes: [
+                            {cid:-10, parent:null, isParent:true, name: '/类管理', title: '类管理'},
+	                        {cid:-20, parent:null, isParent:true, name: '/规则', title: '规则', children: []},
+	                        {cid:-30, parent:null, isParent:true, name: '/关系', title: '关系', children:[]}
+                        ],
+
+
+            }
+        },
+        created: function(){
+            let self = this;
+
+
+        },
+        mounted: function () {
+            let self =  this;
+
+            self.$nextTick(function () {
+
+                self.init();
+
+            })
+        },
+        methods:{
+            init: function () {
+                let self = this;
+
+                if(!_.isEmpty(self.zTree)){
+                    self.zTree.destroy();
+                }
+
+                _.delay(function() {
+                    self.initData([{cid: -1, treeNode: null}]);
+                },500);
+
+            },
+            initData: function(node){
+				let self = this;
+
+                _.forEach(node, function(v,k){
+
+                    let _rtn = classList(v.cid);
+
+                    if (_.isEmpty(_rtn)) {
+                        return;
+                    }
+
+                    if( v.cid == -1 ) {
+
+                        _.merge(self.zNodes[0],{ children: JSON.parse(_rtn) });
+
+                        self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+
+                    } else {
+
+	                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+
+                        let nodes = zTree.getSelectedNodes();
+
+                        if (nodes && nodes.length>0) {
+                            zTree.removeChildNodes(nodes[0]);
+                        }
+
+                        zTree.addNodes(v.treeNode, JSON.parse(_rtn));
+
+                    }
+                })
+
+	        },
+            onClick: function (event, treeId, treeNode, clickFlisParentag) {
+                let self = this;
+
+                if(treeNode.cid == -20){
+
+                } else if(treeNode.cid == -30){
+
+                } else if(treeNode.cid == -10) {
+                    self.initData([{cid: -1, treeNode: null}]);
+                } else {
+
+                    // 只有目录可点击
+                    if (treeNode.child.length < 1) return false;
+
+                    self.initData([{cid:treeNode.cid,treeNode:treeNode}]);
+                }
+
+            },
+            addCountDom: function (treeId, treeNode) {
+                let self = this;
+                let aObj = $("#" + treeNode.tId + "_a");
+
+                if(!_.isEmpty(treeNode.child)){
+                    if (treeNode.child.length > 0){
+                        let str = "<span class='count' style='color:rgb(160,160,160);'>("+treeNode.child.length+")</span>";
+                        aObj.append(str);
+                    }
+                }
+            },
+            addHoverDom: function (treeId, treeNode) {
+
+                if(treeNode.cid == -20 || treeNode.cid == -30) return false;
+
+                let sObj = $("#" + treeNode.tId + "_span");
+                let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                let addStr = `<div class="well hover-toolbars" id='toolbars_${treeNode.tId}' >
+								<span class='button add' id='addBtn_${treeNode.tId}' title='新建' onfocus='this.blur();' ></span>
+								<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑' onfocus='this.blur();' ></span>
+								<span class='button remove' id='removeBtn_${treeNode.tId}' title='删除' onfocus='this.blur();' ></span>
+							</div>`;
+
+                if(scObj.length > 0){
+                    scObj.after(addStr);
+                } else {
+                    sObj.after(addStr);
+                }
+
+                let btn = $("#addBtn_"+treeNode.tId);
+                if (btn) btn.bind("click", function(){
+                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+                    zTree.addNodes(treeNode, {cid: treeNode.cid + _.now(), pId:treeNode.id, name:treeNode.name + _.now()});
+                    return false;
+                });
+            },
+            removeHoverDom: function (treeId, treeNode) {
+                $("#toolbars_"+treeNode.tId).unbind().remove();
+            }
+        }
+	
+	}
+	</script>
+
+</code>

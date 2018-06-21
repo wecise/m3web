@@ -128,6 +128,10 @@
 
 <!-- Bootstrap x-editable JS -->
 <script src="{{AppSubUrl}}/web/vendor/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+
+<!--Clipboard JS-->
+<script src="{{AppSubUrl}}/web/vendor/clipboard/dist/clipboard.min.js"></script>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-tree-component.html"></link>
 
 <script type="text/javascript">
@@ -148,15 +152,11 @@
                 data: {
                     model: {
                         list:[],
-                        category: [
-                                    {name: "流程设计", path: "/home/creative/流程设计", value: "iflow", class: "btn btn-xs btn-warning"},
-                                    {name: "仪表盘", path: "/home/creative/仪表盘", value: "ishow", class: "btn btn-xs btn-info"},
-                                    {name: "IT地图", path: "/home/creative/IT地图", value: "imap", class: "btn btn-xs btn-success"},
-                                    {name: "模板", path: "/home/creative/模板", value: "iflowt", class: "btn btn-xs btn-default"}
-                        ],
                         root: "/home/creative",
-                        parent: "",
-                        name: null,
+                        action: {
+                            from: null,
+                            to: null
+                        },
                         project: {
                                     title: "",
                                     current:"",
@@ -180,6 +180,9 @@
                             sched: Object,
                             timer: Object
                         }
+                    },
+                    toggle: {
+                        left: false
                     }
 
                 },
@@ -196,12 +199,15 @@
                     })
                 },
                 watch: {
-                    model: function(newValue, oldValue) {
-                        let self = this;
+                    model: {
+                        handler:function(newValue, oldValue) {
+                            let self = this;
 
-                        if (!_.isEqual(newValue, oldValue)) {
-                            self.refresh();
-                        }
+                            if (!_.isEqual(newValue, oldValue)) {
+                                self.refresh();
+                            }
+                        },
+                        deep:true
                     }
                 },
                 created: function() {
@@ -220,14 +226,12 @@
                     }
                 },
                 filters: {
-                    pickTitle: function (value) {
+                    pickName: function (item) {
                         let self = this;
 
-                        if (!value) return '';
+                        if (_.isEmpty(item)) return '';
 
-                        let _attr = _.attempt(JSON.parse.bind(null, value));
-
-                        return _attr.title;
+                        return item.name;
                     },
                     readMore: function (text, length, suffix) {
                         return text.substring(0, length) + suffix;
@@ -247,20 +251,11 @@
                         $.contextMenu({
                             selector: '.list-context-menu', 
                             trigger: 'left',
-                            callback: function(key, options) {
-                                var m = key.data("item");
-                                console.log(m)
-                            },
                             items: {
                                 "edit": {name: "编辑", icon: "fa-edit", callback: function(key, opt) {
                                                                                     self.forwardCreative('edit',opt.$trigger.data("item"));
                                                                                 }
                                 },
-                                /*"sep1": "---------",
-                                "saveas": {name: "另存为", icon: "fa-save", callback: function(key, opt) {
-                                                                                    self.saveas(opt.$trigger.data("item"));
-                                                                                }
-                                },*/
                                 "sep2": "---------",
 
                                 "delete": {name: "删除", icon: "fa-trash", callback: function(key, opt) {
@@ -269,31 +264,49 @@
                                 },
                                 "sep3": "---------",
                                 "copy": {name: "复制", icon: "fa-copy", callback: function(key, opt) {
-
+                                        self.copyIt(opt.$trigger.data("item"));
                                     }
                                 },
                                 "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
+                                        self.pasteIt();
 
                                                                                 }
                                 },
                                 "sep4": "---------",
 
                                 "info": {name: "信息", icon: "fa-info", callback: function(key, opt) {
-                                        self.info(opt.$trigger.data("item").attr);
+                                        self.info(opt.$trigger.data("item"));
                                     }
                                 }
                             }
                         });
 
-                        $('.list-context-menu').on('click', function(e){
-                            console.log('clicked', this);
+
+                        $('.context-menu-empty-area').dblclick(function(event){
+
+                            event.preventDefault();
+
+                            $.contextMenu({
+                                selector: '.context-menu-empty-area',
+                                trigger: 'right',
+                                items: {
+                                    "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
+                                            self.pasteIt();
+
+                                        }
+                                    }
+                                }
+                            });
                         })
 
                         self.crontab.project.sched = later.parse.text('every 15 sec');
                         self.crontab.project.timer = later.setInterval(self.initProject, self.crontab.project.sched);
+                        self.initProject();
+
                     },
                     initProject: function(){
                         let self = this;
+
 
                         let _rtn = jobContextGet("BOB", "BOB");
 
@@ -315,13 +328,11 @@
 
                         let _rtn = fsList(self.model.root);
 
-                        self.initProject();
-
-                        self.model.list = _.map(_rtn,function(v,k){
+                        self.model.list = _.sortBy(_.map(_rtn,function(v,k){
 
                                             return _.merge(v, {"username": {{.SignedUser.Name}}, "project": self.model.project });
 
-                                        });
+                                        }),'name');
 
                         _.delay(function(){
 
@@ -337,82 +348,24 @@
                                 },
                                 success: function (response,newValue) {
 
-                                    let _node = $(this).data("info");
-                                    let _info = _.attempt(JSON.parse.bind(null, _node.attr));
+                                    let _item = $(this).data("info");
 
-                                    _info.title = _.trim(newValue);
+                                    let _old = _item.parent + "/" + $(this).text();
+                                    let _new = _item.parent + "/" + newValue;
 
-                                    let _rtn = fsUpdateAttr(_node.parent, _node.name, _info);
+                                    let _rtn = fsRename(_old, _new);
 
                                     if(_rtn == 1){
                                         self.load();
+                                    } else {
+                                        $(this).innerHTML($(this).text());
+                                        console.log($(this).text());
                                     }
                                 }
                             });
 
                         },200);
 
-                    },
-                    saveas: function(event){
-                        let self = this;
-
-                        let win = newWindow('mini', event.name + ' ' + '{{.i18n.Tr "creative-saveas"}}',`<div id="creative-saveas"></div>`);
-                        win.setMaximizable(false);
-                        win.setMinimizable(false);
-                        win.setResizable(false);
-                    
-
-                        let _vue = new Vue({
-                            el: "#creative-saveas",
-                            template: "#creative-saveas-template",
-                            data: {
-                                model: {
-                                    name: "",
-                                    astemplate: 0
-                                }
-                            },
-                            mounted:function(){
-                                let me = this;
-
-                                me.$nextTick(function() {
-                                    me.init();
-                                })
-                            },
-                            methods: {
-                                init: function(){
-                                    let me = this;
-
-
-                                },
-                                save: function(){
-                                    let me = this;
-
-                                    if (_.isEmpty(me.model.name)) {
-                                        swal("名称不能为空！", "", "warning");
-                                        return false;
-                                    }
-                                    
-                                    let _name = me.model.name;
-                                    let _type = event.ftype;
-
-                                    if(me.model.astemplate){
-                                        _name = me.model.name;
-                                        _type = event.ftype+ "t";                                      
-                                    }
-                                    
-                                    let tmp = _.attempt(JSON.parse.bind(null, event.attr));
-                                    
-                                    fsNew(_type, _name, tmp.content);
-
-                                    swal("",_name,"success");
-
-                                    _.delay(function(){
-                                        win.destroy();
-                                        self.load();
-                                    },500);
-                                }
-                            }
-                        });
                     },
                     newDir: function() {
                         let self = this;
@@ -469,8 +422,6 @@
                                         }
                                     });
 
-
-
                                 },
                                 save: function(){
                                     let me = this;
@@ -483,17 +434,19 @@
 
                                     let _name = me.model.name;
                                     let _type = me.model.type;
-                                    let _info = {title: _name, parent: _root, name: _name+"."+_type, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                    let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
 
+                                    let _check = fsCheck(_root, _name);
+                                    
                                     let _rtn = fsNew(_type, _root, _name, null, _info);
 
                                     if(_rtn == 1){
 
                                         alertify.success("",me.model.name,"success");
 
-                                        let _parent = _root + "/" + me.model.name;
+                                        /*let _parent = _root + "/" + me.model.name;
 
-                                        me.newFile(_parent);
+                                        me.newFile(_parent);*/
 
                                         win.close();
                                     }
@@ -506,7 +459,7 @@
 
                                         let _name = "PAGE_" + _.now();
                                         let _type = me.model.project.extName[me.model.project.value];
-                                        let _info = {title: _name, parent: parent,  name: _name+"."+_type, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                        let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
                                         let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
 
                                         if(_rtn == 1){
@@ -604,13 +557,12 @@
                                     let _name = me.model.name;
                                     let _type = me.model.type;
 
-                                    let _info = {title: _name, parent: self.model.root,  name: _name+"."+_type, remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                    let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
 
                                     if(me.model.astemplate){
                                         _name = me.model.name;
                                         _type = me.type;                                      
                                     }
-
 
                                     let _rtn = fsNew(_type, self.model.root, _name+"."+_type, null, _info);
 
@@ -640,21 +592,21 @@
                         
                         swal({
                             title: event.name,
-                            text: "Confirm Delete it?",
+                            text: "确定要删除?",
                             type: "warning",
                             showCancelButton: true,
                             closeOnConfirm: false,
-                            cancelButtonText: "Cancel",
-                            confirmButtonText: "Delete",
+                            cancelButtonText: "取消",
+                            confirmButtonText: "删除",
                             confirmButtonColor: "#ff0000"
-                        }).then(function () {
+                        }).then((result) => {
+                            if (result.value) {
+                                let _rtn = fsDelete(event.parent,event.name);
 
-                            let _rtn = fsDelete(event.parent,event.name);
-
-                            if (_rtn == 1){
-                                self.load();
+                                if (_rtn == 1){
+                                    self.load();
+                                }
                             }
-
                         })
                     },
                     refresh: function() {
@@ -743,51 +695,50 @@
                             template: `<div class="panel">
                                             <div class="panel-body">
                                                 <form>
-
-                                                <div class="form-group">
-                                                    <label for="title">标题</label>
-                                                    <input type="text" class="form-control" id="title" placeholder="" v-model="model.title">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="parent">目录</label>
-                                                    <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="name">名称</label>
-                                                    <input type="text" class="form-control" id="name" placeholder="" v-model="model.name" disabled>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="type">类型</label>
-                                                    <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="author">作者</label>
-                                                    <input type="text" class="form-control" id="author" placeholder="" v-model="model.author" disabled>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="ctime">修改时间</label>
-                                                    <input type="text" class="form-control" id="ctime" placeholder="" v-model="model.ctime" disabled>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="remark">备注</label>
-                                                    <textarea type="text" class="form-control" id="remark" placeholder="" v-model="model.remark">
-                                                </div>
-
+                                                    <div class="form-group">
+                                                        <label for="name">名称</label>
+                                                        <input type="text" class="form-control" id="name" placeholder="" v-model="model.name" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="parent">目录</label>
+                                                        <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="type">类型</label>
+                                                        <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="author">作者</label>
+                                                        <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="ctime">修改时间</label>
+                                                        <input type="text" class="form-control" id="ctime" placeholder="" v-model="model.attr.ctime" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="remark">备注</label>
+                                                        <textarea type="text" class="form-control" id="remark" placeholder="" v-model="model.attr.remark" disabled>
+                                                    </div>
                                             </form>
                                         </div>
                                     </div>`,
                             data: {
-                                model: _.attempt(JSON.parse.bind(null, node))
+                                model: {
+                                    parent: node.parent,
+                                    name: node.name,
+                                    type: node.ftype,
+                                    attr: _.attempt(JSON.parse.bind(null, node.attr))
+                                }
                             },
                             filters: {
-                                pickTitle: function (value) {
+                                pickName: function (value) {
                                     let self = this;
 
                                     if (!value) return '';
 
                                     let _attr = _.attempt(JSON.parse.bind(null, value));
 
-                                    return _attr.title;
+                                    return _attr.name;
                                 },
                                 readMore: function (text, length, suffix) {
                                     return text.substring(0, length) + suffix;
@@ -798,7 +749,61 @@
                             }
                         })
 
+                    },
+                    copyIt: function(item){
+                        let self = this;
+
+                        self.model.action.from = item.parent + "/" + item.name;
+                        alertify.log("已复制 " + self.model.action.from);
+                    },
+                    pasteIt: function(){
+                        let self = this;
+
+                        if(_.isEmpty(self.model.action.from)){
+                            alertify.log("请选择复制内容")
+                            return false;
+                        }
+
+                        self.model.action.to = self.model.root;
+                        let _rtn = fsCopy(self.model.action.from, self.model.action.to);
+                        if(_rtn == 1){
+                            alertify.log("已粘贴 " + self.model.action.to);
+                            self.load();
+
+                            //
+                            self.model.action.from = null;
+                            self.model.action.to = null;
+                        }
+                    },
+                    toggleLeft: function() {
+                        let self = this;
+
+                        if(self.toggle.left) {
+
+                            $("#nav").hide();
+
+                            $("#content").removeClass("col-lg-10");
+                            $("#content").addClass("col-lg-12");
+
+                            $(".navtoggle").removeClass("fa fa-caret-left");
+                            $(".navtoggle").addClass("fa fa-caret-right");
+
+                            self.toggle.left = false;
+                        } else {
+                            $("#nav").slideDown(500);
+                            $("#nav").show();
+
+                            $("#content").removeClass("col-lg-12");
+                            $("#content").addClass("col-lg-10");
+                            //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+
+                            $(".navtoggle").removeClass("fa fa-caret-right");
+                            $(".navtoggle").addClass("fa fa-caret-left");
+
+                            self.toggle.left = true;
+                        }
                     }
+
                 }
             })
         })
@@ -807,18 +812,14 @@
 
 <script type="text/x-template" id="app-template">
     <div class="container-fluid">
-        <div class="row" style="padding:5px;"></div>
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-grey">
-                    <div class="panel-heading">
-                        {{.i18n.Tr "creative-title"}}
-                    </div>
-                    <div class="panel-body" style="border:1px solid #dddddd;">
-                        <div class="col-lg-2" id="nav">
+                    <div class="panel-body" style="padding: 5px 0px;">
+                        <div class="col-lg-2" id="nav" style="display:none;">
                             <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
                         </div>
-                        <div class="col-lg-10" id="cotent">
+                        <div class="col-lg-12" id="content">
                             <div class="row" style="padding:0px 5px;">
                                 <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
                                     <ul style="list-style: none;display:  flex;margin-left: -40px;">
@@ -836,15 +837,11 @@
                                         </li>
                                     </ul>
 
-                                    <!--<div class="btn-group-action">
-                                        <a href="javascript:void(0);" :class="item.class" @click="forwardDir(item.path);" v-for="item in model.category" style="margin-right: 5px;">
-                                             ${item.name}
-                                        </a>
-                                    </div>-->
-
                                 </div>
                                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                                     <div class="btn-group-action pull-right">
+                                        <a href="#" class="btn btn-xs btn-default" @click="toggleLeft"><i class="fa fa-caret-right m-r-5 navtoggle"></i> </a>
+                                        <a href="#" class="btn btn-xs btn-default" @click="pasteIt"><i class="fa fa-paste m-r-5"></i> 粘贴</a>
                                         <a href="#" class="btn btn-xs btn-default" @click="newDir"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-project"}}</a>
                                         <a href="#" class="btn btn-xs btn-default" @click="newFile"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-file"}}</a>
                                     </div>
@@ -852,13 +849,13 @@
                             </div>
                             <div class="row" style="padding:5px;"></div>
                             <div class="row">
-                                <transition-group name="list" tag="div">
+                                <transition-group class="context-menu-empty-area" name="list" tag="div">
                                     <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3" v-for="(item,index) in model.list" :key="item.id">
                                             <div class="widget widget-stats bg-info animated flipInX">
                                                 <div>
 
                                                     <span class="stats-number" style="font-size:12px;color:rgb(102,102,102);line-height: 25px;overflow-x: auto;overflow-y: hidden;max-height: 36px;">
-                                                        <i class="fa fa-braille"></i> <span class="fs-name" :data-info="JSON.stringify(item)">${ item.attr | pickTitle}</span>
+                                                        <i class="fa fa-braille"></i> <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
                                                     </span>
 
                                                     <span>
@@ -873,7 +870,7 @@
                                                     <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username}<BR/>
                                                     <i class='fa fa-hourglass-start' style='color:#337ab7;'></i> ${ item.project.stime }<BR/>
                                                     <i class='fa fa-hourglass-end' style='color:#337ab7;'></i> ${ item.project.etime }<BR/>
-                                                    <div v-if="item.project.status==='start'">
+                                                    <div v-if="item.project.status==='1'">
                                                         <i class='fa fa-spinner fa-spin' style='color:#337ab7;'></i> 运行中
                                                     </div>
                                                     <div v-else>
@@ -958,6 +955,8 @@
                     <textarea class="form-control" id="remark" rows="6" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark"></textarea>
                 </div>
 
+                {{if eq .SignedUser.Company.OSpace "oneswitch"}}
+                {{else}}
                 <div class="form-group" style="max-height: 5vh;overflow:auto;">
                     <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
                 </div>
@@ -968,7 +967,7 @@
                         <input type="radio" v-model="model.ifshare" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_private"}}
                     </div>
                 </div>
-
+                {{end}}
                 <div class="form-group">
                     <div class="pull-right" style="background-color:transparent;position: relative;">
                         <a href="javascript:void(0)" type="button" class="btn btn-sm btn-primary" @click="save">{{.i18n.Tr "mxdashboard_modal_submit"}}</a>
@@ -1005,19 +1004,24 @@
 
                     <div class="form-group">
                         <div class="col-lg-12">
+                            {{if eq .SignedUser.Company.OSpace "oneswitch"}}
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="iflow" checked>&nbsp;流程设计
                                 <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
                             </label>
-                            {{if .SignedUser.Company.OSpace}}
-                                <label class="radio-inline">
-                                    <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
-                                    <p><img src="{{AppSubUrl}}/web/assets/images/ishow.png" class="img-fluid img-thumbnail"></p>
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" v-model="model.type" value="imap">&nbsp;IT地图
-                                    <p><img src="{{AppSubUrl}}/web/assets/images/imap.png" class="img-fluid img-thumbnail"></p>
-                                </label>
+                            {{else}}
+                            <label class="radio-inline">
+                                <input type="radio" v-model="model.type" value="iflow" checked>&nbsp;流程设计
+                                <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
+                                <p><img src="{{AppSubUrl}}/web/assets/images/ishow.png" class="img-fluid img-thumbnail"></p>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" v-model="model.type" value="imap">&nbsp;IT地图
+                                <p><img src="{{AppSubUrl}}/web/assets/images/imap.png" class="img-fluid img-thumbnail"></p>
+                            </label>
                             {{end}}
                         </div>
                     </div>
@@ -1050,6 +1054,23 @@
                                 </div>
                             </div>
                         </div>
+                        {{if eq .SignedUser.Company.OSpace "oneswitch"}}
+                        <div class="row" style="padding-top:10px;">
+                            <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-2">
+
+                            </div>
+                        </div>
+                        {{else}}
                         <div class="row" style="padding-top:10px;">
                             <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
                                 <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
@@ -1066,6 +1087,7 @@
                                 <input type="checkbox" v-model="model.astemplate" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_astemplate"}}
                             </div>
                         </div>
+                        {{end}}
                     </div>
                 </div>
             </div>

@@ -40,14 +40,16 @@
 							<!--<a href="javascript:void(0)" class="btn btn-xs btn-default btn-noborder" @click="toggleLeft" style="margin-right: 5px;">
 								<i class="fa fa-caret-right navtoggle"></i>
 							</a>-->
-							<a class="btn btn-xs btn-success btn-noborder fileinput-button" style="margin-right: 5px;">
+							<a href="#" class="btn btn-xs btn-default btn-noborder" @click="newDir"><i class="fa fa-folder m-r-5""></i></a>
+							<!--<a href="#" class="btn btn-xs btn-default btn-noborder" @click="newFile"><i class="fa fa-file m-r-5"></i></a>-->
+							<a class="btn btn-xs btn-success btn-noborder fileinput-button">
 								<i class="fa fa-upload"></i>
 								<input id="file-upload" type="file" name="uploadfile" multiple>
 							</a>
-							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-icon-component active" style="margin-right: 5px;">
+							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-icon-component active">
 								<i class="fa fa-th" aria-hidden="true"></i>
 							</a>
-							<a href="#table" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-table-component" style="margin-right: 5px;">
+							<a href="#table" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-table-component">
 								<i class="fa fa-list" aria-hidden="true"></i>
 							</a>
 						</div>
@@ -59,22 +61,21 @@
 				  <div class="active tab-pane fade in" id="grid">
 					  <div :class="item.ftype=='dir'?'dir col-xs-3 col-md-3 col-sm-3 col-lg-2 fs-node context-menu-file':'col-xs-3 col-md-3 col-sm-3 col-lg-2 fs-node context-menu-file'"
 					       :id="'fs_node_'+item.id"
-					       @click="forwardDir(item.parent+'/'+item.name);clickMe(item);"
 					       @mouseover="mouseOver(item)"
 					       @mouseout="mouseOut(item)"
 					       style="cursor: pointer;"
 					       :title="item.name"
 					       v-for="item in model">
 						  <div class="widget widget-stats bg-silver animated flipInX">
-							  <div class="stats-icon"></div>
-							  <div class="stats-info">
+							  <div class="stats-icon"  @click="forwardDir(item.parent+'/'+item.name);clickMe(item);"></div>
+							  <div class="stats-info" @click="forwardDir(item.parent+'/'+item.name);clickMe(item);">
 								  <p><img :src="'/web/assets/images/files/'+item.ftype+'.svg'"
 								          class="img-responsive"
 								          alt="Image"
 								          style="width:48px;height:48px;"></p>
 							  </div>
 							  <div class="stats-link">
-								  <a href="javascript:;" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title">
+								  <a class="fs-name" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
 									  ${item.name}
 								  </a>
 							  </div>
@@ -184,6 +185,35 @@
 
 
                 self.initFileUpload();
+
+                self.initEditName();
+			},
+			initEditName: function(){
+			    let self = this;
+
+                $(".fs-name").editable({
+                    type: "text",
+                    container: 'body',
+                    validate: function (value) {
+                        if (!$.trim(value)) {
+                            return '不能为空';
+                        }
+                    },
+                    success: function (response,newValue) {
+
+                        let _item = $(this).data("info");
+
+                        let _old = _.trim(_item.parent + "/" + $(this).text());
+                        let _new = _.trim(_item.parent + "/" + newValue);
+
+                        let _rtn = fsRename(_old, _new);
+
+                        if(_rtn == 1){
+                            self.load();
+                        }
+                    }
+                });
+
 			},
             forwardDir: function(path){
                 let self = this;
@@ -206,6 +236,8 @@
                 _.delay(function(){
 
                     self.refresh();
+
+                    self.initEditName();
 
                 },200);
 
@@ -384,10 +416,28 @@
                 let self = this;
 
                 $('#fs_node_'+item.id).find('.fs-node-selected').removeClass('fs-node-selected');
+            },
+            newDir: function() {
+                let self = this;
+
+                let _name = '新文件夹_' + _.now();
+                let _type = 'dir';
+                let _info = null;
+
+                let _rtn = fsNew(_type, self.root, _name, null, _info);
+
+                if(_rtn == 1){
+
+                    self.load();
+                    alertify.success("",_name,"success");
+
+                }
             }
 		}
 	
 	}
 	</script>
+
+
 
 </code>

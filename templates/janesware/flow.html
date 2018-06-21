@@ -1,6 +1,29 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
 {{template "base/head" .}}
 
-<link rel="stylesheet" type="text/css" href="{{AppSubUrl}}/web/vendor/mxgraph/graph/styles/grapheditor.css">
+<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.default.css" type="text/css" rel="stylesheet" />
+
 
 <style>
 
@@ -40,19 +63,8 @@
         border: 1px solid rgb(195, 195, 195);
     }
 
-    /*
-        Theme
-     */
     .theme-white {
-        background-image: linear-gradient(120deg, #ffffff 10%, #f9f9f9 100%);
-    }
-
-    .theme-white #graph {
-        background-color: transparent;
-    }
-
-    .theme-white #title {
-        color: #999999;
+        background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
     }
 
     .theme-grey {
@@ -74,14 +86,6 @@
                 radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
         background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
         background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
-    }
-    .theme-dark #graph {
-        background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.35) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.70) 120%) #989898;
-        background-image: linear-gradient( 135deg, #333333 10%, #000000 100%);
-        background-blend-mode: multiply,multiply;
-    }
-    .theme-dark #title {
-        color: #f7f7f7;
     }
 
     #tools > img:hover{
@@ -137,58 +141,9 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 
 <script type="text/javascript">
-    // urlParams is null when used for embedding
-    window.urlParams = window.urlParams || {};
-
-    // Public global variables
-    window.MAX_REQUEST_SIZE = window.MAX_REQUEST_SIZE  || 10485760;
-    window.MAX_AREA = window.MAX_AREA || 15000 * 15000;
-
-    // URLs for save and export
-    window.RESOURCES_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/resources";
-    window.STYLE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
-    window.STENCIL_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/stencils";
-    window.IMAGE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/images";
-    window.CSS_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
-    window.OPEN_FORM = "{{AppSubUrl}}/web/vendor/mxgraph/graph/open.html";
-
-    window.EXPORT_URL = window.EXPORT_URL || '/export';
-    window.SAVE_URL = window.SAVE_URL || '/save';
-    window.OPEN_URL = window.OPEN_URL || '/open';
-    window.RESOURCES_PATH = window.RESOURCES_PATH || 'resources';
-    window.RESOURCE_BASE = window.RESOURCE_BASE || window.RESOURCES_PATH + '/grapheditor';
-    window.STENCIL_PATH = window.STENCIL_PATH || 'stencils';
-    window.IMAGE_PATH = window.IMAGE_PATH || 'images';
-    window.STYLE_PATH = window.STYLE_PATH || 'styles';
-    window.CSS_PATH = window.CSS_PATH || 'styles';
-    window.OPEN_FORM = window.OPEN_FORM || 'open.html';
-
-    mxBasePath = '{{AppSubUrl}}/web/vendor/mxgraph/src';
-    mxLanguage = '{{.Lang}}'.replace(/"/g,"").replace(/en/g,"eg").split("-")[0];
-
-</script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/pako.min.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/base64.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/jscolor/jscolor.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/sanitizer/sanitizer.min.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/src/js/mxClient.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/EditorUi.js"></script>
-<!--<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Editor.js"></script>-->
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Sidebar.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Graph.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Format.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Shapes.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Actions.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Menus.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Toolbar.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Dialogs.js"></script>
-
-
-
-
-<script type="text/javascript">
-
-    VueLoader.onloaded(["vue-base-datatables-component"],function() {
+    
+    VueLoader.onloaded(["vue-base-datatables-component"
+                        ],function() {
 
         moment.locale({{.Lang}});
 
@@ -237,9 +192,7 @@
                     },
                     win: {
                         toolbars: null,
-                        cmd: null,
-                        start: null,
-                        end: null,
+                        cmd: null
                     }
                 },
                 mounted: function() {
@@ -380,9 +333,9 @@
                         {
 
                             mxConstants.SHADOWCOLOR = "#b9b9b9";
-                            mxConstants.SHADOW_OFFSET_X = 3;
-                            mxConstants.SHADOW_OFFSET_Y = 3;
-                            mxConstants.SHADOW_OPACITY = 0.12;
+                            mxConstants.SHADOW_OFFSET_X = 4;
+                            mxConstants.SHADOW_OFFSET_Y = 4;
+                            mxConstants.SHADOW_OPACITY = 0.22;
 
 
                             self.model.graph.container = document.getElementById('graph');
@@ -427,23 +380,23 @@
                             var style = [];
                             style[mxConstants.STYLE_SHADOW] = true;
 
-                            // style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-                            // style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-                            // style[mxConstants.STYLE_STROKECOLOR] = '#DDDDDD';
-                            // style[mxConstants.STYLE_STROKEWIDTH] = 2;
-                            // style[mxConstants.STYLE_STROKE_OPACITY] = 80;
-                            // style[mxConstants.STYLE_ROUNDED] = true;
-                            // style[mxConstants.HIGHLIGHT_OPACITY] = '10%';
-                            // style[mxConstants.STYLE_FILLCOLOR] = 'none';
-                            // style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
-                            // style[mxConstants.STYLE_FONTCOLOR] = '#774400';
-                            //style[mxConstants.STYLE_GLASS] = 1;
-                            // style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_NORTH;
-                            // style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
-                            // style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
-                            // style[mxConstants.STYLE_FONTSIZE] = '12';
-                            // style[mxConstants.STYLE_FONTSTYLE] = 1;
-                             self.model.graph.graph.getStylesheet().putDefaultVertexStyle(style);
+                            //style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+                            //style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
+                            style[mxConstants.STYLE_STROKECOLOR] = '#ffffff';
+                            style[mxConstants.STYLE_STROKEWIDTH] = 0;
+                            style[mxConstants.STYLE_STROKE_OPACITY] = 80;
+                            style[mxConstants.STYLE_ROUNDED] = true;
+                            style[mxConstants.HIGHLIGHT_OPACITY] = '10%';
+                            //style[mxConstants.STYLE_FILLCOLOR] = 'none';
+                            //style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
+                            //style[mxConstants.STYLE_FONTCOLOR] = '#774400';
+                            style[mxConstants.STYLE_GLASS] = 0;
+                            style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_NORTH;
+                            style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
+                            style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
+                            style[mxConstants.STYLE_FONTSIZE] = '12';
+                            style[mxConstants.STYLE_FONTSTYLE] = 1;
+                            self.model.graph.graph.getStylesheet().putDefaultVertexStyle(style);
 
                             // Displays a popupmenu when the user clicks
                             // on a cell (using the left mouse button) but
@@ -477,6 +430,7 @@
                     initGraph: function(){
                         let self = this;
 
+                        // Load cells and layouts the graph
                         self.model.graph.graph.getModel().beginUpdate();
 
                         try
@@ -484,9 +438,23 @@
                             var doc = mxUtils.parseXml(self.model.graph.data);
                             var codec = new mxCodec(doc);
                             codec.decode(doc.documentElement, self.model.graph.graph.getModel());
+
+                            let _cells = self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent(),true);
+
+                            _.forEach(_cells, function (cell, k) {
+                                if(cell.getValue() === "开始" || cell.getValue() === "结束"){
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#DDDDDD', [cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#F9F9F9', [cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, '#FFFFFF', [cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [cell]);
+                                }
+                            })
+
                         }
                         finally
                         {
+                            // Updates the display
                             self.model.graph.graph.getModel().endUpdate();
 
                             //self.zoomToCenter();
@@ -497,7 +465,7 @@
                         let self = this;
 
                         self.initOutline();
-                        self.initToolBars();
+                        self.initTools();
                         self.model.graph.container.style.top = "0px";
 
                         self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
@@ -511,7 +479,7 @@
                         let _project = _.last(self.model.object.param.parent.split("/"));
                         let _page = self.model.object.param.name;
 
-                        let _rtn = jobContextGet(_project, null);// + "/" + _page);
+                        let _rtn = jobContextGet(_project, _project);// + "/" + _page);
 
                         if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
                             self.reset();
@@ -520,24 +488,20 @@
                         if (!_.isEmpty(_rtn)) {
 
                             // 项目
-                            self.model.project = _rtn.message;
+                            self.model.project = _.attempt(JSON.parse.bind(null, _rtn.message[_project]));
 
                             // 图
-                            self.model.object.nodes = _.omit(_rtn.message,['title','stime','etime','status','diaglog','current']);
+                            self.model.object.nodes = _.omit(_rtn.message,[_project]);
 
                             // 对话框
+                            console.log(11,self.model.project)
                             if(self.model.project){
-
-                                if(self.model.project.diaglog){
-                                    let _diaglog = JSON.parse(self.model.project.diaglog);
-
-                                    if(_diaglog) {
-                                        if (_diaglog.select == 0) {
-                                            self.initPrompt('modal', _diaglog);
-                                        }
+                                if(self.model.project.diaglog) {
+                                    console.log(13,self.model.project.diaglog)
+                                    if (self.model.project.diaglog.select > 0) {
+                                        self.initPrompt('modal', self.model.project.diaglog);
                                     }
                                 }
-
                             }
                         }
 
@@ -571,7 +535,7 @@
 
                     },
                     reset: function(){
-                        let self = this;
+                       let self = this;
 
                         self.model.graph.graph.getModel().beginUpdate();
 
@@ -611,7 +575,7 @@
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
-                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
                                     //self.tip(_id + " 未执行",1);
 
@@ -619,7 +583,6 @@
                                     //self.tip(_id + " 正在运行",2);
 
                                     if(state && state.shape.node){
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFFFF', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#fb831b', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
 
@@ -630,8 +593,8 @@
                                         }
 
                                         if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                            //state.shape.node.getElementsByTagName("path")[0].setAttribute('class', 'animated infinite flash');
-                                            state.shape.node.getElementsByTagName("path")[1].setAttribute('class', 'animated infinite flash');
+                                            state.shape.node.getElementsByTagName("path")[0].setAttribute('class', 'animated infinite flash');
+                                            //state.shape.node.getElementsByTagName("path")[1].setAttribute('class', 'animated infinite flash');
                                         }
                                     }
 
@@ -639,7 +602,7 @@
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#29adbf', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#29adbf', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
-                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
                                     //self.tip(_id + " 运行完毕",3);
 
@@ -647,7 +610,7 @@
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#e5494e', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#e5494e', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
-                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
                                     //self.tip(_id + " 报错",4);
 
@@ -655,7 +618,7 @@
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b8b8b8', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
-                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
                                     //self.tip(_id + " 跳过不执行",5);
                                 }
@@ -697,7 +660,7 @@
                         self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
                         self.initGraph();
                     },
-                    initToolBars: function () {
+                    initTools: function () {
                         let self = this;
 
                         let content = document.getElementById('tools');
@@ -728,7 +691,29 @@
 
                         tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
                         {
+                            /*if ($(".navbar.navbar-default.navbar-fixed-top").css("display") == "none"){
+
+                                $(".navbar.navbar-default.navbar-fixed-top").fadeIn();
+                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeIn();
+
+                                evt.target.src = "/web/assets/images/iflow/exit-fullscreen.png";
+
+                                self.model.graph.container.style.top = "55px";
+
+
+                            } else {
+
+                                $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
+                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
+
+                                evt.target.src = "/web/assets/images/iflow/fullscreen.png";
+
+                                self.model.graph.container.style.top = "0px";
+
+                            }*/
+
                             toggleFullScreen();
+
 
                         },null,'tools-item');
 
@@ -745,46 +730,26 @@
                             $("body").removeClass(self.model.graph.theme);
                             $('body').addClass(_theme);
 
+                            if(_theme == 'theme-dark'){
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(90, 90, 90)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(90, 90, 90),rgb(90, 90, 90))"
+                                });
+                            } else {
+                                $("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(33, 148, 245)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245))"
+                                });
+                            }
+
                             self.model.graph.theme = _theme;
                             localStorage.setItem("CREATIVE-THEME",_theme);
+
 
 
                         },null,'tools-item');
 
                         tb.addItem('{{.i18n.Tr "creative-tools-play"}}', '/web/assets/images/iflow/play.svg',function(evt)
-                        {
-
-                            let _project = _.last(self.model.object.param.parent.split("/"));
-                            let _cmdStart = `as400f -oneswitchfile ${_project}`;
-                            let _rtn = self.callJob(_cmdStart);
-
-                            alertify.success("任务开始 " + moment().format("LLL"));
-
-                            $(evt.target).addClass("animated infinite pulse");
-
-                            if (!_.isEmpty(_rtn.message)) {
-                                alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                            }
-
-                        },null,'tools-item');
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-stop"}}', '/web/assets/images/iflow/stop.svg',function(evt)
-                        {
-
-                            let _project = _.last(self.model.object.param.parent.split("/"));
-                            let _cmdStop = `as400f -oneswitchfile ${_project}`;
-                            let _rtn = self.callJob(_cmdStop);
-
-                            alertify.success("任务结束 " + moment().format("LLL"));
-                            $(".animated.infinite.pulse").removeClass("animated infinite pulse");
-
-                            if (!_.isEmpty(_rtn.message)) {
-                                alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                            }
-
-                        },null,'tools-item');
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-setup"}}', '/web/assets/images/iflow/setup.svg',function(evt)
                         {
 
                             self.win.cmd = newWindow('cmd', '>₋', `<div id="cmd_window"></div>`, evt.target);
@@ -805,8 +770,16 @@
 
                             if(self.model.graph.theme == 'theme-dark'){
                                 self.win.toolbars.setTheme("info");
+                                /*$("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(90, 90, 90)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(90, 90, 90),rgb(90, 90, 90))"
+                                });*/
                             } else {
                                 self.win.toolbars.setTheme("filledlight");
+                                /*$("html td.mxWindowTitle").css( {
+                                    "backgroundColor": "rgb(33, 148, 245)",
+                                    "backgroundImage": "linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245))"
+                                });*/
                             }
                         },100)
                     },
@@ -992,6 +965,8 @@
                             el: '#cmd_window',
                             data: {
                                 cmd: {
+                                    start: `as400f -oneswitchfile ` + _project,
+                                    end: `as400f -oneswitchfile ` + _project,
                                     reset: {
                                         value: 'ALL',
                                         list: []
@@ -1000,6 +975,18 @@
                                 }
                             },
                             template: `<div class="animated fadeInLeft" style="font-size:12px;">
+                                                    <div class="input-group" style="margin:5px;">
+                                                      <input type="text" class="form-control" placeholder="" v-model="cmd.start">
+                                                      <div class="input-group-btn">
+                                                          <a class="btn btn-success" href="javascript:void(0)" @click="play"><i class="fa fa-play"></i> 开始</a>
+                                                      </div>
+                                                    </div>
+                                                    <div class="input-group" style="margin:5px;">
+                                                      <input type="text" class="form-control" placeholder="" v-model="cmd.end">
+                                                      <div class="input-group-btn">
+                                                         <a class="btn btn-primary" href="javascript:void(0)" @click="stop"><i class="fa fa-stop"></i> 停止</a>
+                                                      </div>
+                                                    </div>
                                                     <div class="input-group" style="margin:5px;">
                                                       <span class="input-group-addon">选择</span>
                                                       <div class="input-group-select">
@@ -1075,7 +1062,7 @@
                                         jobContextReset(_project);
                                         alertify.log("重置项目 " + moment().format("LLL"));
                                     } else {
-                                        let _name = _project + "/" + _page + "/" + _.find(me.cmd.reset.list, {name:me.cmd.reset.value}).id;
+                                        let _name = _project + "/" + _page + ".iflow/" + _.find(me.cmd.reset.list, {name:me.cmd.reset.value}).id;
                                         let _value = `{"status":"3","ctrl":"0"}`;
 
                                         jobContextSetup(_project, _name, _value);
@@ -1096,12 +1083,11 @@
 
         })
     })
-
 </script>
 
 <script type="text/x-template" id="app-template">
     <div>
-        <div id="title" style="position:absolute;z-index:1000;">${ model.project | pickTitle } <small style="font-size:45%;">${model.project.stime} - ${model.project.etime}</small></div>
+        <div id="title">${ model.project | pickTitle } <small style="font-size:45%;">${model.project.stime} - ${model.project.etime}</small></div>
         <div id="graph" style="top:0px;"></div>
         <div id="nav">
             <a href="javascript:void(0);" @click="navToggle();">
