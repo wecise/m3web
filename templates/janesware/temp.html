@@ -58,12 +58,66 @@
 		border: none;
 	}
 
+	.lm_selected .lm_header {
+		background-color: rgb(230, 230, 230);
+	}
+
+	.lm_tabs > li:nth-child(1) .lm_close_tab {
+		display:none;
+	}
+
 	[id="app"] {
 		width: 100vw;
 		height: 100vh;
 	}
 
+	.logToolBar {
+		height: 22px;
+		width: 100%;
+	}
 
+	.log-console {
+		height: 1000%;
+	}
+
+	.log-console-content {
+		margin: 5px 0px 100px 0px;
+		width: 100%;
+		height: 300vh;
+		border:none;
+		outline:none;
+		white-space: pre-wrap;
+	}
+
+	.log-console.light {
+		background-color: #ffffff;
+	}
+
+	.log-console-content.light {
+		color: #333333;
+		background-color: #ffffff;
+	}
+
+	.log-console.dark {
+		background-color: #000000;
+	}
+
+	.log-console-content.dark {
+		color: #38FF41;
+		background-color: #000000;
+	}
+
+	.log-severity.ERROR {
+		color: #FF0000;
+	}
+
+	.log-severity.INFO {
+		color: #38B741;
+	}
+
+	.log-severity.WARNING {
+		color: #CEC335;
+	}
 
 </style>
 
@@ -71,6 +125,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-graph-component.html"></link>
 
 
 <!-- Golden Layout container -->
@@ -78,83 +133,420 @@
 
 <script>
 
+	'use static';
+
     $(".current-active-item").html(`<a class="active item" href="/janesware/object">
 										<i class="fa fa-cube"></i>  {{.i18n.Tr .ActiveView }}
 									</a>`);
 
     VueLoader.onloaded(["vue-base-datatables-component",
-	                    "vue-object-tree-component",
-	                    "vue-editor-component"], function() {
+				        "vue-object-tree-component",
+				        "vue-editor-component",
+	                    "vue-graph-component"], function() {
 
-        let classTree = {
-            delimiters: ['${', '}'],
-            el: '#class-tree-template',
-            data: {
+        let classTree = function(id, type, node){
 
-            },
-            mounted: function() {
-                let self = this;
+            return {
+	            delimiters: ['${', '}'],
+	            el: '#' + id,
+	            template: '#class-tree-template',
+	            data: {
+					id: id + '-' + type,
+	            },
+	            mounted: function() {
+	                let self = this;
 
-                self.$nextTick(function() {
+	                self.$nextTick(function() {
+	                    $(self.$el).click(function(){
+	                        self.click();
+	                    })
+	                })
+	            },
+	            methods: {
+	                click: function(){
 
-                })
-            },
-            methods: {
-
-            }
+	                }
+	            }
+            };
         };
 
-        let queryConsole = {
-            delimiters: ['${', '}'],
-            el: '#query-console-template',
-            data: {
-                model:{
-                    oldInput: "",
-                    newInput: "",
-                    mode: "toml",
-                    theme: "tomorrow",
-                    printMargin: false,
-                    readOnly: false
+        var classEdit = function(id, type, node){
+
+            console.log(JSON.stringify(node))
+            let _dataset = [];
+            let _columns = [];
+
+            if(!_.isEmpty(node.fieldsObj)) {
+                _dataset = node.fieldsObj;
+                _columns = [
+			                    {"field": "name", "title": "Name"},
+			                    {"field": "title", "title": "Title"},
+			                    {"field": "colname", "title": "ColName"},
+			                    {"field": "ftype", "title": "Ftype"},
+			                    {"field": "loption", "title": "Loption"},
+			                    {"field": "fparam", "title": "Fparam"},
+			                    {"field": "isindex", "title": "Index"},
+			                    {"field": "iskey", "title": "Primary Key"},
+			                    {"field": "note", "title": "Note"},
+			                    {"field": "mtime", "title": "Mtime"},
+			                    {"field": "class", "title": "Class"},
+			                    {"field": "dispname", "title": "Dispname"},
+			                    {"field": "tags", "title": "Tags", "visible": false},
+			                    {"field": "isrel", "title": "Rel", "visible": false},
+			                    {"field": "btype", "title": "Btype", "visible": false}
+                            ];
+            }
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: '#class-edit-template',
+                data: {
+                    id: id + '-' + type,
+                    model: {
+                        dataset: _dataset,
+                        columns: _columns,
+                        options: {
+                            info:true,
+                            scrollY: '35vh',
+                            searching: false,
+                        }
+                    },
+                    result: node
+                },
+                created: function(){
+                    let self = this;
+
+                    eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
+                },
+                mounted: function() {
+                    let self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                    })
+                },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+                        self.model.dataset = _.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+
+                    },
+                    setScrollY: function(event){
+                        let self = this;
+
+                        self.model.options.scrollY = event.scrollY;
+                    }
                 }
-            },
-            mounted: function() {
-                let self = this;
-
-                self.$nextTick(function() {
-
-                })
-            },
-            methods: {
-
-            }
+            };
         };
 
-        let queryOutput = {
+        var queryConsole = function(id, type, node){
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: '#console-template',
+                data: {
+                    id: id + '-' + type,
+                    model: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "sql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: false,
+                    }
+                },
+                mounted: function () {
+                    let self = this;
+
+                    self.$nextTick(function () {
+						self.init();
+                    })
+                },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+                        let colms =  _.without(node.Fields,"_tokens");
+                        let cls = "";
+                        if(_.isEmpty(colms)){
+                            cls = "*";
+                        } else {
+                            cls = colms.join(",");
+                        }
+                        let querySql = "select\n\t " + cls + "\nfrom\n\t " + node.name;
+
+                        self.model.newInput = querySql;
+                    }
+                }
+            };
+        };
+
+        let outPut = function(id, type, node){
+
+
+            let _dataset = [];
+            let _columns = [];
+
+            if(!_.isEmpty(node)) {
+                _dataset = node.data[_.keys(node.data)[0]];//_.map(node.data[_.keys(node.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+	            _columns = node.columns[_.keys(node.columns)[0]];
+            }
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: '#output-template',
+                data: {
+					id: id + '-' + type,
+	                model: {
+                        dataset: _dataset,
+                        columns: _columns,
+                        options: {
+                            info:true,
+                            scrollY: '20vh',
+                            searching: false,
+                        }
+	                },
+	                result: node
+                },
+	            created: function(){
+                    let self = this;
+
+                    eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
+	            },
+                mounted: function() {
+                    let self = this;
+
+                    self.$nextTick(function() {
+                        self.init();
+                    })
+                },
+                methods: {
+					init: function(){
+					    let self = this;
+
+					    self.model.dataset = _.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+
+					},
+                    setScrollY: function(event){
+					    let self = this;
+
+					    self.model.options.scrollY = event.scrollY;
+                    }
+                }
+            };
+        };
+
+
+        var graph = function(id, type, node){
+
+	        let _data = {nodes:[], edges:[]};
+
+            if(!_.isEmpty(node.data)){
+                _data.nodes = node.data;
+            };
+
+            if(!_.isEmpty(node.edges)){
+                _data.edges = node.edges;
+            };
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: '#graph-template',
+                data: {
+                    id: id + '-' + type,
+                    model: _data,
+                },
+                mounted: function () {
+                    let self = this;
+
+                    self.$nextTick(function () {
+                        self.init();
+                    })
+                },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+
+                    }
+                }
+            };
+        };
+
+        var logConsole = function(id, type, node){
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: '#log-console-template',
+                data: {
+                    id: id + '-' + type,
+                    model: [],
+	                theme: 'light'
+                },
+	            watch: {
+                    model: function(val,oldVal){
+                        let self = this;
+
+                        //self.markIt();
+                    }
+	            },
+	            created: function(){
+                    let self = this;
+
+                    eventHub.$on("LOG-CONSOLE-APPEND-EVENT", self.append);
+	            },
+                mounted: function () {
+                    let self = this;
+
+                    self.$nextTick(function () {
+                        self.init();
+                    })
+                },
+                filters: {
+					format: function(value){
+					    return value.join('\n\n');
+					}
+	            },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+						self.model.push(self.info("加载完成"));
+
+                        self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
+
+                    },
+	                append: function(fun, event){
+                        let self = this;
+                        let _log = null;
+
+                        if(fun === 'error'){
+                            _log = self.error(event);
+	                    } else if(fun === 'info'){
+                            _log = self.info(event);
+                        } else if(fun === 'warning'){
+                            _log = self.warning(event);
+                        }
+
+                        self.model.push(_log);
+
+	                },
+	                markIt: function(){
+                        let self = this;
+
+                        $(self.$el).find(".log-console-content").mark(['ERROR'], {
+                                "element": "span",
+                                "className": "btn-danger",
+                                "separateWordSearch": true
+                            }
+                        );
+
+                        $(self.$el).find(".log-console-content").mark(['INFO']);
+	                },
+                    error: function(event){
+                        let self = this;
+                        let _content = event;
+
+                        if(typeof(event) === 'object'){
+                            _content = JSON.stringify(event);
+                        }
+
+                        return [moment().format("LLL"), `ERROR`, _content];
+                    },
+	                info: function(event){
+                        let self = this;
+                        let _content = event;
+
+                        if(typeof(event) === 'object'){
+                            _content = JSON.stringify(event);
+                        }
+
+                        return [moment().format("LLL"), `INFO`, _content];
+	                },
+                    warning: function(event){
+                        let self = this;
+                        let _content = event;
+
+                        if(typeof(event) === 'object'){
+                            _content = JSON.stringify(event);
+                        }
+
+                        return [moment().format("LLL"), `WARNING`, _content];
+                    },
+	                copyIt: function(event){
+                        let self = this;
+
+                        new Clipboard(".copy", {
+                            text: function(trigger) {
+                                alertify.log("已复制")
+                                return self.model.join("\n");
+                            }
+                        });
+
+	                },
+                    clearIt: function(){
+						let self = this;
+
+                        self.model = [];
+
+                    },
+                    toggleTheme: function(){
+                        let self = this;
+
+						if(self.theme === 'light') {
+
+                            $(self.$el).removeClass("light");
+						    $(self.$el).addClass("dark");
+
+                            $(self.$el).find(".light").addClass("dark");
+                            $(self.$el).find(".light").removeClass("light");
+
+                            self.theme = 'dark';
+
+                        } else {
+
+                            $(self.$el).removeClass("dark");
+                            $(self.$el).addClass("light");
+
+						    $(self.$el).find(".dark").addClass("light");
+                            $(self.$el).find(".dark").removeClass("dark");
+
+                            self.theme = 'light';
+						}
+
+                        localStorage.setItem("LOG-CONSOLE-THEME", self.theme);
+
+                    }
+                }
+            };
+        };
+
+
+        let appVue = new Vue({
             delimiters: ['${', '}'],
-            el: '#query-output-template',
+            el: '#app',
             data: {
-
-            },
-            mounted: function() {
-                let self = this;
-
-                self.$nextTick(function() {
-
-                })
-            },
-            methods: {
-
-            }
-        };
-
-        let VueApp = new Vue({
-	        delimiters: ['${', '}'],
-	        el: '#app',
-	        data: {
-	            config: {
+                layout: null,
+	            id: null,
+                config: {
                     settings:{
                         showPopoutIcon: false,
-                        showCloseIcon: false
+                        showCloseIcon: false,
+                        selectionEnabled: true
                     },
                     content: [{
                         type: 'row',
@@ -169,136 +561,282 @@
                                     isClosable: false,
                                     componentState: {
                                         id: 'class-tree',
-                                        templateId: 'class-tree-template'
+                                        type: 'tree'
                                     }
                                 }]
                             },
                             {
                                 type: 'column',
-                                content:[{
-                                    type: 'component',
-                                    componentName: 'omdbComponent',
-                                    title:'查询',
-                                    componentState: {
-                                        id: 'query-console',
-                                        templateId: 'query-console-template'
-                                    }
-                                },{
-                                    type: 'stack',
-                                    content:[{
-                                        type: 'component',
-                                        componentName: 'omdbComponent',
-                                        title:'列表',
-                                        componentState: {
-                                            id: 'query-output-grid',
-                                            templateId: 'query-output-grid-template'
-                                        }
+                                content:[
+                                    {
+                                        type: 'stack',
+                                        content:[{
+                                            type: 'component',
+                                            componentName: 'omdbComponent',
+                                            title: '查询',
+                                            componentState: {
+                                                id: 'query-console',
+                                                type: 'console'
+                                            }
+                                        }]
                                     },
                                     {
-                                        type: 'component',
-                                        componentName: 'omdbComponent',
-                                        title:'文本',
-                                        componentState: {
-                                            id: 'query-output-text',
-                                            templateId: 'query-output-text-template'
-                                        }
-                                    }]
-                                }]
+                                        type: 'stack',
+                                        content:[{
+                                            type: 'component',
+                                            componentName: 'omdbComponent',
+                                            title:'日志',
+                                            componentState: {
+                                                id: 'log-console',
+                                                type: 'log'
+                                            }
+                                        }]
+                                    }
+                                ]
                             }
                         ]
                     }]
+                },
+                newItemConfig: {
+                    title: null,
+                    type: 'component',
+                    componentName: 'omdbComponent',
+                    componentState: {
+                        id: null,
+                        type: null,
+                    }
                 }
 
-	        },
+            },
+            created: function(){
+                let self = this;
+
+                eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addConsole);
+                eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.setQueryResult);
+            },
             mounted: function() {
-				let self = this;
+                let self = this;
 
                 self.$nextTick(function() {
                     setTimeout(function () {
                         self.init();
                     });
                 })
-		    },
-	        methods: {
-	            init: function(){
-	                let self = this;
+            },
+            methods: {
+                init: function(){
+                    let self = this;
 
                     //var savedState = localStorage.getItem('savedState');
                     //self.config = savedState !== null ? JSON.parse(savedState) : self.config;
 
-                    var layout = new GoldenLayout(self.config, self.$el);
+                    self.layout = new GoldenLayout(self.config, self.$el);
 
-                    layout.registerComponent('omdbComponent', function (container, state) {
-                        var html = "<div id=\"" + state.templateId + "\">" + $('#' + state.templateId).html() + "</div>";
-                        container.getElement().html(html);
+                    self.layout.registerComponent('omdbComponent', function (container, state) {
+
+                    });
+
+                    self.layout.on( 'stackCreated', function( stack ){
+
+                    });
+
+                    self.layout.on( 'componentCreated', function( component ){
+
+                        let _state = component.config;
+                        let _id = _state.componentState.id;
+                        let _node = _state.componentState.node;
+                        let html = `<div id="` + _id + `"></div>`;
+                        let _comp = null;
+
+
+                        if(!_.isEmpty(_state.componentState.template)){
+                            // Only Show Info
+                            html = _state.componentState.template;
+                            component.container.getElement().html(html);
+
+                            return false;
+                        } else {
+
+                            // Add Template
+                            component.container.getElement().html(html);
+                        }
+
+
+                        if(_state.componentState.type == 'tree'){
+
+                            _comp = classTree(_id, _state.componentState.type, _node);
+
+
+                        } else if(_state.componentState.type == 'classEdit'){
+
+                            _comp = classEdit(_id, _state.componentState.type, _node);
+
+                        } else if(_state.componentState.type == 'console'){
+
+                            _comp = queryConsole(_id, _state.componentState.type, _node);
+
+                        } else if(_state.componentState.type == 'output'){
+
+                            _comp = outPut(_id, _state.componentState.type, _node);
+
+                        } else if(_state.componentState.type == 'graph'){
+
+                            _comp = graph(_id, _state.componentState.type, _node);
+
+                        } else if(_state.componentState.type == 'log'){
+
+                            _comp = logConsole(_id, _state.componentState.type, _node);
+
+                        }
 
                         setTimeout(function(){
-                            if(state.id == 'class-tree'){
-                                new Vue(classTree);
-                            } else if(state.id == 'query-console'){
-                                new Vue(queryConsole);
-                            } else if(state.id == 'query-output'){
-                                new Vue(queryOutput);
-                            }
-                        })
+                            new Vue(_comp);
+                        });
+
+
+                        component.container.on('resize',function() {
+
+                            let _scrollBody = component.container.height;//_.ceil(pxTOvh(component.container.height)*0.52);
+                            let _scrollY = _scrollBody * 0.5;
+                            console.log(33, _scrollBody, _scrollY);
+                            eventHub.$emit("LAYOUT-RESIZE-TRIGGER-EVENT", {scrollY:_scrollY, scrollBody: _scrollBody});
+                        });
                     });
+
                     //
                     //	Save state in local storage
                     //
-                    layout.on('stateChanged', function () {
-                        var state = JSON.stringify(layout.toConfig());
+                    self.layout.on('stateChanged', function () {
+                        var state = JSON.stringify(self.layout.toConfig());
                         localStorage.setItem('savedState', state);
                     });
                     //  Initialize GL
-                    layout.init();
+                    self.layout.init();
                     //  Update GL on window resize
-                    window.addEventListener('resize', function () { layout.updateSize(); });
+                    window.addEventListener('resize', function () { self.layout.updateSize(); });
 
-	            },
-	            resetLayout: function () {
-	                localStorage.removeItem('savedState');
-	                window.location.reload(true);
-	            },
-		        initClassTree: function(){
-	                let self = this;
-		        },
-                queryConsole: function(){
+                },
+                resetLayout: function () {
+                    localStorage.removeItem('savedState');
+                    window.location.reload(true);
+                },
+                addConsole: function( event ) {
                     let self = this;
+                    let _id = 'ID'+objectHash.sha1(event.node);
 
-                    return {
-                        methods: {
-							init: function(){
-							    alert(3)
-							}
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        title: event.node.name,
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+	                        node: event.node
                         }
+	                });
+
+                    if(_.size($("#"+_id+'-' + event.type)) > 0){
+                        return false;
+                    }
+
+                    if( self.layout.selectedItem === null ) {
+			            self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
+			        } else {
+			            self.layout.selectedItem.addChild(self.newItemConfig);
+			        }
+
+                },
+                addOutput: function(event){
+                    let self = this;
+                    let _id = 'ID'+objectHash.sha1(event.node);
+
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        title: event.type + '-' + moment().format("LT"),
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+                            node: event.node
+                        }
+                    });
+
+                    if(_.size($("#"+_id+'-' + event.type)) > 0){
+                        return false;
+                    }
+
+                    if( self.layout.selectedItem === null ) {
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                    } else {
+                        self.layout.selectedItem.addChild(self.newItemConfig);
                     }
                 },
-                initQueryOutput: function(){
+                setQueryResult: function(event){
                     let self = this;
+
+
+                    if(event.type == 'table'){
+                        appVue.addOutput({
+                            type: 'output',
+                            node: event
+                        });
+                    } else if(event.type == 'graph'){
+                        appVue.addOutput({
+                            type: 'graph',
+                            node: event
+                        });
+                    }
                 }
-	        }
-	    });
-
-
+            }
+        });
 
     })
 </script>
 
 
 <script type="text/x-template"  id="class-tree-template">
-	<vue-object-tree-component id="omdb-class-tree"></vue-object-tree-component>
+	<vue-object-tree-component :id="id"></vue-object-tree-component>
 </script>
 
-<script type="text/x-template"  id="query-console-template">
-	<vue-editor-component id="query-console" :model="model"></vue-editor-component>
+<script type="text/x-template"  id="console-template">
+	<vue-editor-component :id="id"
+	                      :model="model"
+	                      showToolsBar="true"
+	                      showStatusBar="true"></vue-editor-component>
 </script>
 
-<script type="text/x-template"  id="query-output-grid-template">
-
+<script type="text/x-template"  id="class-edit-template">
+	<vue-base-datatables-component :id="id"
+	                               :dataset="model.dataset"
+	                               :columns="model.columns"
+	                               :options="model.options"
+	                               contextmenu="null"
+	                               :result="result"></vue-base-datatables-component>
 </script>
 
-<script type="text/x-template"  id="query-output-text-template">
+<script type="text/x-template"  id="output-template">
+	<vue-base-datatables-component :id="id"
+	                               :dataset="model.dataset"
+	                               :columns="model.columns"
+	                               :options="model.options"
+	                               contextmenu="null"
+	                               :result="result"></vue-base-datatables-component>
+</script>
 
+
+<script type="text/x-template"  id="graph-template">
+	<vue-graph-component :id="id" :graphData="model"></vue-graph-component>
+</script>
+
+<script type="text/x-template" id="log-console-template">
+	<div :class="'log-console '+ theme">
+		<div class="logToolBar">
+			<div class="btn-group" role="group" aria-label="..." style="float: right;">
+				<a href="javascript:void(0);" class="btn btn-sm btn-default toggle" @click="toggleTheme" title="切换主题"><i class="fa fa-sun-o"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-default copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-default clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
+			</div>
+		</div>
+		<div contenteditable="true" :class="'log-console-content '+ theme">
+			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] ${item[2]} </p>
+		</div>
+	</div>
 </script>
 
 

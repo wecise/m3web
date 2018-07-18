@@ -174,9 +174,9 @@ Toolbar.prototype.init = function()
 
     this.addItems(['editDiagram']);
 
-    this.addSeparator();
+    // this.addSeparator();
 
-    this.addItems(['mx-close']);
+    // this.addItems(['mx-close']);
 };
 
 /**

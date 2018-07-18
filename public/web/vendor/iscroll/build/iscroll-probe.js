@@ -1,4 +1,4 @@
-/*! iScroll v5.2.0-snapshot ~ (c) 2008-2017 Matteo Spinelli ~ http://cubiq.org/license */
+/*! iScroll v5.2.0 ~ (c) 2008-2016 Matteo Spinelli ~ http://cubiq.org/license */
 (function (window, document, Math) {
 var rAF = window.requestAnimationFrame	||
 	window.webkitRequestAnimationFrame	||
@@ -124,8 +124,7 @@ var utils = (function () {
 		transitionTimingFunction: _prefixStyle('transitionTimingFunction'),
 		transitionDuration: _prefixStyle('transitionDuration'),
 		transitionDelay: _prefixStyle('transitionDelay'),
-		transformOrigin: _prefixStyle('transformOrigin'),
-		touchAction: _prefixStyle('touchAction')
+		transformOrigin: _prefixStyle('transformOrigin')
 	});
 
 	me.hasClass = function (e, c) {
@@ -258,57 +257,14 @@ var utils = (function () {
 			ev;
 
 		if ( !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName) ) {
-			// https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/initMouseEvent
-			// initMouseEvent is deprecated.
-			ev = document.createEvent(window.MouseEvent ? 'MouseEvents' : 'Event');
-			ev.initEvent('click', true, true);
-			ev.view = e.view || window;
-			ev.detail = 1;
-			ev.screenX = target.screenX || 0;
-			ev.screenY = target.screenY || 0;
-			ev.clientX = target.clientX || 0;
-			ev.clientY = target.clientY || 0;
-			ev.ctrlKey = !!e.ctrlKey;
-			ev.altKey = !!e.altKey;
-			ev.shiftKey = !!e.shiftKey;
-			ev.metaKey = !!e.metaKey;
-			ev.button = 0;
-			ev.relatedTarget = null;
+			ev = document.createEvent('MouseEvents');
+			ev.initMouseEvent('click', true, true, e.view, 1,
+				target.screenX, target.screenY, target.clientX, target.clientY,
+				e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+				0, null);
+
 			ev._constructed = true;
 			target.dispatchEvent(ev);
-		}
-	};
-
-	me.getTouchAction = function(eventPassthrough, addPinch) {
-		var touchAction = 'none';
-		if ( eventPassthrough === 'vertical' ) {
-			touchAction = 'pan-y';
-		} else if (eventPassthrough === 'horizontal' ) {
-			touchAction = 'pan-x';
-		}
-		if (addPinch && touchAction != 'none') {
-			// add pinch-zoom support if the browser supports it, but if not (eg. Chrome <55) do nothing
-			touchAction += ' pinch-zoom';
-		}
-		return touchAction;
-	};
-
-	me.getRect = function(el) {
-		if (el instanceof SVGElement) {
-			var rect = el.getBoundingClientRect();
-			return {
-				top : rect.top,
-				left : rect.left,
-				width : rect.width,
-				height : rect.height
-			};
-		} else {
-			return {
-				top : el.offsetTop,
-				left : el.offsetLeft,
-				width : el.offsetWidth,
-				height : el.offsetHeight
-			};
 		}
 	};
 
@@ -379,18 +335,14 @@ function IScroll (el, options) {
 		this.options.tap = 'tap';
 	}
 
-	// https://github.com/cubiq/iscroll/issues/1029
-	if (!this.options.useTransition && !this.options.useTransform) {
-		if(!(/relative|absolute/i).test(this.scrollerStyle.position)) {
-			this.scrollerStyle.position = "relative";
-		}
-	}
-
 	if ( this.options.shrinkScrollbars == 'scale' ) {
 		this.options.useTransition = false;
 	}
 
 	this.options.invertWheelDirection = this.options.invertWheelDirection ? -1 : 1;
+
+	if ( this.options.probeType == 3 ) {
+		this.options.useTransition = false;	}
 
 // INSERT POINT: NORMALIZATION
 
@@ -411,7 +363,7 @@ function IScroll (el, options) {
 }
 
 IScroll.prototype = {
-	version: '5.2.0-snapshot',
+	version: '5.2.0',
 
 	_init: function () {
 		this._initEvents();
@@ -602,13 +554,19 @@ IScroll.prototype = {
 		this._translate(newX, newY);
 
 /* REPLACE START: _move */
-
 		if ( timestamp - this.startTime > 300 ) {
 			this.startTime = timestamp;
 			this.startX = this.x;
 			this.startY = this.y;
+
+			if ( this.options.probeType == 1 ) {
+				this._execEvent('scroll');
+			}
 		}
 
+		if ( this.options.probeType > 1 ) {
+			this._execEvent('scroll');
+		}
 /* REPLACE END: _move */
 
 	},
@@ -751,16 +709,15 @@ IScroll.prototype = {
 	},
 
 	refresh: function () {
-		utils.getRect(this.wrapper);		// Force reflow
+		var rf = this.wrapper.offsetHeight;		// Force reflow
 
 		this.wrapperWidth	= this.wrapper.clientWidth;
 		this.wrapperHeight	= this.wrapper.clientHeight;
 
-		var rect = utils.getRect(this.scroller);
 /* REPLACE START: refresh */
 
-		this.scrollerWidth	= rect.width;
-		this.scrollerHeight	= rect.height;
+		this.scrollerWidth	= this.scroller.offsetWidth;
+		this.scrollerHeight	= this.scroller.offsetHeight;
 
 		this.maxScrollX		= this.wrapperWidth - this.scrollerWidth;
 		this.maxScrollY		= this.wrapperHeight - this.scrollerHeight;
@@ -769,7 +726,7 @@ IScroll.prototype = {
 
 		this.hasHorizontalScroll	= this.options.scrollX && this.maxScrollX < 0;
 		this.hasVerticalScroll		= this.options.scrollY && this.maxScrollY < 0;
-		
+
 		if ( !this.hasHorizontalScroll ) {
 			this.maxScrollX = 0;
 			this.scrollerWidth = this.wrapperWidth;
@@ -783,17 +740,7 @@ IScroll.prototype = {
 		this.endTime = 0;
 		this.directionX = 0;
 		this.directionY = 0;
-		
-		if(utils.hasPointer && !this.options.disablePointer) {
-			// The wrapper should have `touchAction` property for using pointerEvent.
-			this.wrapper.style[utils.style.touchAction] = utils.getTouchAction(this.options.eventPassthrough, true);
 
-			// case. not support 'pinch-zoom'
-			// https://github.com/cubiq/iscroll/issues/1118#issuecomment-270057583
-			if (!this.wrapper.style[utils.style.touchAction]) {
-				this.wrapper.style[utils.style.touchAction] = utils.getTouchAction(this.options.eventPassthrough, false);
-			}
-		}
 		this.wrapperOffset = utils.offset(this.wrapper);
 
 		this._execEvent('refresh');
@@ -802,7 +749,7 @@ IScroll.prototype = {
 
 // INSERT POINT: _refresh
 
-	},	
+	},
 
 	on: function (type, fn) {
 		if ( !this._events[type] ) {
@@ -878,13 +825,11 @@ IScroll.prototype = {
 		pos.top  -= this.wrapperOffset.top;
 
 		// if offsetX/Y are true we center the element to the screen
-		var elRect = utils.getRect(el);
-		var wrapperRect = utils.getRect(this.wrapper);
 		if ( offsetX === true ) {
-			offsetX = Math.round(elRect.width / 2 - wrapperRect.width / 2);
+			offsetX = Math.round(el.offsetWidth / 2 - this.wrapper.offsetWidth / 2);
 		}
 		if ( offsetY === true ) {
-			offsetY = Math.round(elRect.height / 2 - wrapperRect.height / 2);
+			offsetY = Math.round(el.offsetHeight / 2 - this.wrapper.offsetHeight / 2);
 		}
 
 		pos.left -= offsetX || 0;
@@ -899,15 +844,9 @@ IScroll.prototype = {
 	},
 
 	_transitionTime: function (time) {
-		if (!this.options.useTransition) {
-			return;
-		}
 		time = time || 0;
-		var durationProp = utils.style.transitionDuration;
-		if(!durationProp) {
-			return;
-		}
 
+		var durationProp = utils.style.transitionDuration;
 		this.scrollerStyle[durationProp] = time + 'ms';
 
 		if ( !time && utils.isBadAndroid ) {
@@ -1244,6 +1183,10 @@ IScroll.prototype = {
 
 		this.scrollTo(newX, newY, 0);
 
+		if ( this.options.probeType > 1 ) {
+			this._execEvent('scroll');
+		}
+
 // INSERT POINT: _wheel
 	},
 
@@ -1261,8 +1204,7 @@ IScroll.prototype = {
 				x = 0, y,
 				stepX = this.options.snapStepX || this.wrapperWidth,
 				stepY = this.options.snapStepY || this.wrapperHeight,
-				el,
-				rect;
+				el;
 
 			this.pages = [];
 
@@ -1302,8 +1244,7 @@ IScroll.prototype = {
 				n = -1;
 
 				for ( ; i < l; i++ ) {
-					rect = utils.getRect(el[i]);
-					if ( i === 0 || rect.left <= utils.getRect(el[i-1]).left ) {
+					if ( i === 0 || el[i].offsetLeft <= el[i-1].offsetLeft ) {
 						m = 0;
 						n++;
 					}
@@ -1312,16 +1253,16 @@ IScroll.prototype = {
 						this.pages[m] = [];
 					}
 
-					x = Math.max(-rect.left, this.maxScrollX);
-					y = Math.max(-rect.top, this.maxScrollY);
-					cx = x - Math.round(rect.width / 2);
-					cy = y - Math.round(rect.height / 2);
+					x = Math.max(-el[i].offsetLeft, this.maxScrollX);
+					y = Math.max(-el[i].offsetTop, this.maxScrollY);
+					cx = x - Math.round(el[i].offsetWidth / 2);
+					cy = y - Math.round(el[i].offsetHeight / 2);
 
 					this.pages[m][n] = {
 						x: x,
 						y: y,
-						width: rect.width,
-						height: rect.height,
+						width: el[i].offsetWidth,
+						height: el[i].offsetHeight,
 						cx: cx,
 						cy: cy
 					};
@@ -1634,7 +1575,7 @@ IScroll.prototype = {
 			if ( now >= destTime ) {
 				that.isAnimating = false;
 				that._translate(destX, destY);
-
+				
 				if ( !that.resetPosition(that.options.bounceTime) ) {
 					that._execEvent('scrollEnd');
 				}
@@ -1651,11 +1592,16 @@ IScroll.prototype = {
 			if ( that.isAnimating ) {
 				rAF(step);
 			}
+
+			if ( that.options.probeType == 3 ) {
+				that._execEvent('scroll');
+			}
 		}
 
 		this.isAnimating = true;
 		step();
 	},
+
 	handleEvent: function (e) {
 		switch ( e.type ) {
 			case 'touchstart':
@@ -1789,9 +1735,6 @@ function Indicator (scroller, options) {
 	if ( this.options.fade ) {
 		this.wrapperStyle[utils.style.transform] = this.scroller.translateZ;
 		var durationProp = utils.style.transitionDuration;
-		if(!durationProp) {
-			return;
-		}
 		this.wrapperStyle[durationProp] = utils.isBadAndroid ? '0.0001ms' : '0ms';
 		// remove 0.0001ms
 		var self = this;
@@ -1853,7 +1796,7 @@ Indicator.prototype = {
 			utils.removeEvent(window, 'mouseup', this);
 		}
 
-		if ( this.options.defaultScrollbars && this.wrapper.parentNode ) {
+		if ( this.options.defaultScrollbars ) {
 			this.wrapper.parentNode.removeChild(this.wrapper);
 		}
 	},
@@ -1909,6 +1852,15 @@ Indicator.prototype = {
 
 		this._pos(newX, newY);
 
+
+		if ( this.scroller.options.probeType == 1 && timestamp - this.startTime > 300 ) {
+			this.startTime = timestamp;
+			this.scroller._execEvent('scroll');
+		} else if ( this.scroller.options.probeType > 1 ) {
+			this.scroller._execEvent('scroll');
+		}
+
+
 // INSERT POINT: indicator._move
 
 		e.preventDefault();
@@ -1954,10 +1906,6 @@ Indicator.prototype = {
 	transitionTime: function (time) {
 		time = time || 0;
 		var durationProp = utils.style.transitionDuration;
-		if(!durationProp) {
-			return;
-		}
-
 		this.indicatorStyle[durationProp] = time + 'ms';
 
 		if ( !time && utils.isBadAndroid ) {
@@ -2011,7 +1959,7 @@ Indicator.prototype = {
 			}
 		}
 
-		utils.getRect(this.wrapper);	// force refresh
+		var r = this.wrapper.offsetHeight;	// force refresh
 
 		if ( this.options.listenX ) {
 			this.wrapperWidth = this.wrapper.clientWidth;

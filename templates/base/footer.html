@@ -11,7 +11,8 @@
 		 style="max-height: 30px;min-height: 30px;background-color:#f0f3f4;-webkit-box-shadow: none;box-shadow: none;">
 		<div class="container-fluid" style="margin:0px 10px 0px 10px;padding:0px 15px 0px 15px;">
 			<div class="navbar-header">
-				<span class="navbar-brand" style="font-size: 12px;height: 30px;padding: 0px 15px;">© 2016 {{.i18n.Tr "app_name"}} {{if (or .ShowFooterVersion .PageIsAdmin)}}{{.i18n.Tr "version"}}: {{AppVer}}{{end}} {{.i18n.Tr "page"}}: <strong>{{LoadTimes .PageStartTime}}</strong> {{.i18n.Tr "template"}}: <strong>{{call .TmplLoadTimes}}</strong></span>
+				<!--<span class="navbar-brand" style="font-size: 12px;height: 30px;padding: 0px 15px;">© 2018 {{.i18n.Tr "app_name"}} {{if (or .ShowFooterVersion .PageIsAdmin)}}{{.i18n.Tr "version"}}: {{AppVer}}{{end}} {{.i18n.Tr "page"}}: <strong>{{LoadTimes .PageStartTime}}</strong> {{.i18n.Tr "template"}}: <strong>{{call .TmplLoadTimes}}</strong></span>-->
+				<span class="navbar-brand" style="width:auto;font-size: 12px;height: 30px;padding: 0px 15px;color:#000000;">© 2018 {{.i18n.Tr "app_name"}} {{if (or .ShowFooterVersion .PageIsAdmin)}}{{.i18n.Tr "version"}}: {{AppVer}}{{end}} {{if eq .company "tghd"}}<strong>  &nbsp;临时Licese，有效期至：2018-12-31</strong>{{end}}</span>
 			</div>
 			<ul class="nav navbar-nav navbar-right" style="padding:5px;">
 		        <li><a target="_blank" href="/help/REST_API.html"  style="padding-top: 0px;padding-bottom: 0px;font-size:12px;">API</a></li>

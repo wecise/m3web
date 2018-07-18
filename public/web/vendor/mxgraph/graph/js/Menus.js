@@ -1010,7 +1010,7 @@ Menus.prototype.createPopupMenu = function(menu, cell, evt)
 	}
 	else
 	{
-        this.addMenuItems(menu, ['mx-properties','-'], null, evt);
+        this.addMenuItems(menu, ['mxProperties','-'], null, evt);
 		this.addMenuItems(menu, ['delete', '-', 'cut', 'copy', '-', 'duplicate'], null, evt);
 	}
 

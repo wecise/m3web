@@ -1,0 +1,227 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+		#outlineContainer {
+			z-index:1;
+			position:absolute;
+			overflow:hidden;
+			top:0px;
+			left:5px;
+			width: 80px;
+			height:80px;
+			background:transparent;
+			box-shadow: 3px 3px 12px #C0C0C0;
+			border: 1px solid rgb(195, 195, 195);
+		}
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="vue-graph-component"  ----------*/
+	<template>
+		<div>
+			<div :id="id" style="position:relative;overflow:auto;padding:10px;"></div>
+			<div id="container" style="top:0px;"></div>
+			<div id="nav">
+				<div id="tools"></div>
+				<div id="outlineContainer"></div>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="vue-graph-component">
+	{
+		
+	    delimiters: ['${', '}'],
+	    props: {
+	        id: String,
+	        graphData: Object,
+	    },
+	    data: function () {
+	        return {
+                model:{
+                    graph:{
+                        container: null,
+                        model: null,
+                        graph: null,
+	                    layout: null,
+	                    parent: null,
+                        theme: "",
+                        outline: null
+                    }
+                }
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+
+                self.init();
+                self.initPlugIn();
+	            
+	        })
+	    },
+	    methods: {
+            init: function() {
+                let self = this;
+
+                if (!mxClient.isBrowserSupported())
+                {
+                    // Displays an error message if the browser is
+                    // not supported.
+                    mxUtils.error('Browser is not supported!', 200, false);
+                }
+                else
+                {
+
+                    self.model.graph.container = document.getElementById("container");
+                    self.model.graph.container.style.position = 'releative';
+                    self.model.graph.container.style.overflow = 'hidden';
+                    self.model.graph.container.style.left = '0px';
+                    self.model.graph.container.style.top = '0px';
+                    self.model.graph.container.style.right = '0px';
+                    self.model.graph.container.style.bottom = '0px';
+                    document.getElementById(self.id).appendChild(self.model.graph.container);
+
+
+                    //mxEvent.disableContextMenu(self.model.graph.container);
+
+                    if (mxClient.IS_QUIRKS)
+                    {
+                        document.body.style.overflow = 'hidden';
+                        new mxDivResizer(self.model.graph.container);
+                        new mxDivResizer(outline);
+                    }
+
+                    // Creates the graph inside the given container
+                    self.model.graph.model = new mxGraphModel();
+                    self.model.graph.graph = new mxGraph(self.model.graph.container, self.model.graph.model);
+
+                    // Enables automatic sizing for vertices after editing and
+                    // panning by using the left mouse button.
+                    self.model.graph.graph.setEnabled(false);
+                    self.model.graph.graph.setCellsMovable(true);
+                    self.model.graph.graph.setAutoSizeCells(true);
+                    self.model.graph.graph.setPanning(true);
+                    self.model.graph.graph.centerZoom = true;
+                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                    // Disables tooltips on touch devices
+                    self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
+                    self.model.graph.graph.htmlLabels = true;
+
+
+                    self.model.graph.graph.getCursorForCell = function(cell){
+                        if (cell != null && cell.value != null && cell.vertex ==1 ){
+                            return 'pointer';
+                        }
+                    }
+
+                    // Displays a popupmenu when the user clicks
+                    // on a cell (using the left mouse button) but
+                    // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
+                    // is displayed
+                    self.model.graph.graph.panningHandler.popupMenuHandler = false;
+
+
+                    // Creates a layout algorithm to be used
+                    // with the graph
+                    self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
+                    let organic = new mxFastOrganicLayout(self.model.graph.graph);
+                    organic.forceConstant = 120;
+
+                    self.model.graph.parent = self.model.graph.graph.getDefaultParent();
+
+
+                    self.initGraph();
+
+                    _.delay(function(){
+
+                        self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+
+                            let cell = evt.getProperty('cell');
+
+                            if(_.isEmpty(cell)) return;
+
+                            let _value = cell.getValue();
+
+
+
+                            self.tip(cell.getValue());
+
+                        });
+                    },500)
+
+                }
+            },
+            initGraph: function(){
+                let self = this;
+
+                self.model.graph.graph.getModel().beginUpdate();
+
+                try
+                {
+                    let nodes = {};
+                    _.forEach(self.graphData.nodes,function(v){
+                        let node = self.model.graph.graph.insertVertex(self.model.graph.parent, null, v.id, 50, 50, 120, 50,
+                            'shape=image;image=/fs/home/assets/iflow.png?type=download;verticalLabelPosition=bottom;verticalAlign=top');
+
+                        nodes[v.id] = node;
+                    })
+
+                    _.forEach(self.graphData.edges,function(k){
+                        let source = nodes[k.data.source];
+                        let target = nodes[k.data.target];
+                        let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, '', k.classes, source, target, 'startArrow=block;endArrow=block;edgeStyle=orthogonalEdgeStyle;');
+                    })
+
+                    // Executes the layout
+	                self.model.graph.layout.execute(self.model.graph.parent);
+                }
+                finally
+                {
+                    self.model.graph.graph.getModel().endUpdate();
+
+                    self.toCenter();
+
+                }
+            },
+            initPlugIn: function(){
+                let self = this;
+
+                self.initOutline();
+
+            },
+            tip: function(event){
+                let self = this;
+
+                alertify.log(event + ' ' + moment().format("LLL"));
+            },
+            initOutline: function(){
+                let self = this;
+
+                let outline = document.getElementById('outlineContainer');
+
+                self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
+
+            },
+            toCenter: function(){
+                let self = this;
+
+                self.model.graph.graph.fit();
+                self.model.graph.graph.center(true,true,0.5,0.5);
+
+            }
+	    }
+	
+	}
+	</script>
+
+</code>

@@ -36,8 +36,16 @@
         height:120px;
         background:transparent;
         box-shadow: 3px 3px 12px #C0C0C0;
-        background: url(../images/window.gif);
         border: 1px solid rgb(195, 195, 195);
+    }
+
+    #graph > svg {
+        background-image:none!important;
+        padding-top: 10px;
+    }
+
+    .geDiagramContainer {
+        border:none;
     }
 
     /*
@@ -130,6 +138,67 @@
         -webkit-animation-iteration-count: infinite;
     }
 
+    select.bs-select-hidden, select.selectpicker {
+        display: unset!important;
+    }
+
+    .reset-status-select .bootstrap-select button {
+        padding: 7px 12px;
+        border-radius: 0px;
+        background-color: rgb(255, 255, 255);
+        border-right:none;
+        color: #000000;
+    }
+
+    select.no-radius{
+        border-left:none;
+        border-radius:0px;
+        -webkit-appearance: none;
+        height: 33px;
+    }
+    .select-wrapper{
+        width: 25%;
+        padding: 0px;
+        border-radius: 0px;
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    .panel-confirm .btn-danger{
+        border: 0;
+        border-radius: 3px;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        color: rgb(255, 255, 255);
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: 500;
+        padding: 10px 32px;
+    }
+
+
+    .panel-confirm .btn-danger:focus,
+    .panel-confirm .btn-danger:hover{
+        background-color: rgb(255, 0, 0);
+        border-left-color: rgb(255, 0, 0);
+        border-right-color: rgb(255, 0, 0);
+        outline: 0;
+        -webkit-box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50,100,150,.4);
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50,100,150,.4);
+    }
+
+    .panel-confirm h4 {
+        /*font-family: "microsoft yahei";*/
+        color: rgb(84, 84, 84);
+        font-weight: 300;
+        position: relative;
+        float: none;
+        margin: 0;
+        padding: 0;
+        line-height: 28px;
+        word-wrap: break-word;
+    }
+
+
 </style>
 
 <div id="app"></div>
@@ -173,7 +242,7 @@
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/sanitizer/sanitizer.min.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/src/js/mxClient.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/EditorUi.js"></script>
-<!--<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Editor.js"></script>-->
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Editor.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Sidebar.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Graph.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Format.js"></script>
@@ -218,10 +287,12 @@
                             model: null,
                             graph: null,
                             selectedCell: null,
-                            theme: "",
+                            theme: "theme-white",
                             data: null,
-                            prompt: null
-                        }
+                            prompt: null,
+                            outline: null
+                        },
+                        promptWin: null
 
                     },
                     crontab: {
@@ -260,9 +331,9 @@
 
                                 self.update();
 
-                                _.delay(function(){
+                                /*_.delay(function(){
                                     $("svg").addClass("animated fadeInUp");
-                                },500);
+                                },500);*/
                             }
 
                         },
@@ -345,26 +416,54 @@
                     }
                 },
                 methods: {
-                    zoomToCenter: function(margin){
+                    play: function(){
                         let self = this;
 
-                        var bounds = self.model.graph.graph.getGraphBounds();
-                        margin = margin || 10;
+                        swal({
+                            title: '',
+                            text: "确定要开始流程切换?",
+                            type: "info",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "取消",
+                            confirmButtonText: "确定",
+                            confirmButtonColor: "#ff0000"
+                        }).then((result) => {
+                            if (result.value) {
+                                let _project = _.last(self.model.object.param.parent.split("/"));
+                                let _cmdStart = `as400f -oneswitchfile ${_project} -oneswitchaction loadstart`;
+                                let _rtn = self.callJob(_cmdStart);
 
-                        self.model.graph.container.style.overflow = "hidden";
+                                alertify.success("任务开始 " + moment().format("LLL"));
 
-                        self.model.graph.graph.view.setTranslate(
-                            -bounds.x -(bounds.width - self.model.graph.container.clientWidth)/ 2,
-                            -bounds.y - (bounds.height - self.model.graph.container.clientHeight) / 2
-                        );
+                                if (!_.isEmpty(_rtn.message)) {
+                                    alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
+                                }
+                            }
+                        })
 
-                        while( (bounds.width + margin * 2) > self.model.graph.container.clientWidth
-                        || (bounds.height + margin * 2) > self.model.graph.container.clientHeight ){
-                            self.model.graph.graph.zoomOut();
-                            bounds = self.model.graph.graph.getGraphBounds();
+                    },
+                    stop: function(){
+                        let self = this;
+
+                        let _project = _.last(self.model.object.param.parent.split("/"));
+                        let _cmdStop = `as400f -oneswitchfile ${_project} -oneswitchaction stop`;
+                        let _rtn = self.callJob(_cmdStop);
+
+                        alertify.success("任务结束 " + moment().format("LLL"));
+
+                        if (!_.isEmpty(_rtn.message)) {
+                            alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
                         }
 
-                        self.model.graph.container.style.overflow = "auto";
+                    },
+                    toCenter: function(){
+                        let self = this;
+
+                        self.model.graph.graph.fit();//自适应
+                        self.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
+                        // var sc = self.model.graph.graph.getView().getScale();//获取当前的缩放比例
+                        // self.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
 
                     },
                     init: function() {
@@ -379,12 +478,6 @@
                         else
                         {
 
-                            mxConstants.SHADOWCOLOR = "#b9b9b9";
-                            mxConstants.SHADOW_OFFSET_X = 3;
-                            mxConstants.SHADOW_OFFSET_Y = 3;
-                            mxConstants.SHADOW_OPACITY = 0.12;
-
-
                             self.model.graph.container = document.getElementById('graph');
                             self.model.graph.container.style.position = 'absolute';
                             self.model.graph.container.style.overflow = 'hidden';
@@ -395,7 +488,7 @@
                             document.body.appendChild(self.model.graph.container);
 
 
-                            mxEvent.disableContextMenu(self.model.graph.container);
+                            //mxEvent.disableContextMenu(self.model.graph.container);
 
                             if (mxClient.IS_QUIRKS)
                             {
@@ -411,11 +504,15 @@
                             // Enables automatic sizing for vertices after editing and
                             // panning by using the left mouse button.
                             self.model.graph.graph.setEnabled(false);
-                            self.model.graph.graph.setCellsMovable(false);
+                            self.model.graph.graph.setCellsMovable(true);
                             self.model.graph.graph.setAutoSizeCells(true);
                             self.model.graph.graph.setPanning(true);
                             self.model.graph.graph.centerZoom = true;
                             self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                            // Disables tooltips on touch devices
+                            self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
+                            self.model.graph.graph.htmlLabels = true;
+
 
                             self.model.graph.graph.getCursorForCell = function(cell){
                                 if (cell != null && cell.value != null && cell.vertex ==1 ){
@@ -423,37 +520,12 @@
                                 }
                             }
 
-                            // Creates the default style for vertices
-                            var style = [];
-                            style[mxConstants.STYLE_SHADOW] = true;
-
-                            // style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
-                            // style[mxConstants.STYLE_PERIMETER] = mxPerimeter.RectanglePerimeter;
-                            // style[mxConstants.STYLE_STROKECOLOR] = '#DDDDDD';
-                            // style[mxConstants.STYLE_STROKEWIDTH] = 2;
-                            // style[mxConstants.STYLE_STROKE_OPACITY] = 80;
-                            // style[mxConstants.STYLE_ROUNDED] = true;
-                            // style[mxConstants.HIGHLIGHT_OPACITY] = '10%';
-                            // style[mxConstants.STYLE_FILLCOLOR] = 'none';
-                            // style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
-                            // style[mxConstants.STYLE_FONTCOLOR] = '#774400';
-                            //style[mxConstants.STYLE_GLASS] = 1;
-                            // style[mxConstants.STYLE_GRADIENT_DIRECTION] = mxConstants.DIRECTION_NORTH;
-                            // style[mxConstants.STYLE_ALIGN] = mxConstants.ALIGN_CENTER;
-                            // style[mxConstants.STYLE_VERTICAL_ALIGN] = mxConstants.ALIGN_MIDDLE;
-                            // style[mxConstants.STYLE_FONTSIZE] = '12';
-                            // style[mxConstants.STYLE_FONTSTYLE] = 1;
-                             self.model.graph.graph.getStylesheet().putDefaultVertexStyle(style);
-
                             // Displays a popupmenu when the user clicks
                             // on a cell (using the left mouse button) but
-                            // do not select the cell when the popup menu
+                            // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
                             // is displayed
                             self.model.graph.graph.panningHandler.popupMenuHandler = false;
 
-
-                            // Disables tooltips on touch devices
-                            self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
 
                             self.initGraph();
 
@@ -466,6 +538,11 @@
                                     if(_.isEmpty(cell)) return;
 
                                     let _value = cell.getValue();
+
+
+                                    if(_value === '开始'){
+                                        self.play();
+                                    }
 
                                     self.tip(cell.getValue());
 
@@ -483,13 +560,14 @@
                         {
                             var doc = mxUtils.parseXml(self.model.graph.data);
                             var codec = new mxCodec(doc);
+
                             codec.decode(doc.documentElement, self.model.graph.graph.getModel());
                         }
                         finally
                         {
                             self.model.graph.graph.getModel().endUpdate();
 
-                            //self.zoomToCenter();
+                            self.toCenter();
 
                         }
                     },
@@ -504,17 +582,27 @@
                         self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
 
                         self.update();
+
+                        $("#nav").find("div").hide();
+                        self.win.toolbars.hide();
                     },
                     initData: function(){
                         let self = this;
 
                         let _project = _.last(self.model.object.param.parent.split("/"));
                         let _page = self.model.object.param.name;
+                        let _jsPanels =  window.jsPanel.activePanels.list;
 
                         let _rtn = jobContextGet(_project, null);// + "/" + _page);
 
                         if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
+
                             self.reset();
+
+                            if(_.indexOf(_jsPanels,'jsPanel-prompt') > -1){
+
+                                window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+                            }
                         }
 
                         if (!_.isEmpty(_rtn)) {
@@ -528,13 +616,24 @@
                             // 对话框
                             if(self.model.project){
 
-                                if(self.model.project.diaglog){
-                                    let _diaglog = JSON.parse(self.model.project.diaglog);
+                                console.log(11,typeof(self.model.project.diaglog), _jsPanels)
+
+                                if(!_.isEmpty(self.model.project.diaglog)){
+
+                                    let _diaglog = _.attempt(JSON.parse.bind(null, self.model.project.diaglog));
 
                                     if(_diaglog) {
-                                        if (_diaglog.select == 0) {
-                                            self.initPrompt('modal', _diaglog);
+                                        console.log(22, _diaglog.select, _jsPanels, _.indexOf(_jsPanels,'jsPanel-prompt'))
+                                        if (_diaglog.select == 0 && _.indexOf(_jsPanels,'jsPanel-prompt')==-1) {
+                                            self.initPrompt(_diaglog);
+                                        } else if(_diaglog.select == -1 && _.indexOf(_jsPanels,'jsPanel-prompt') > -1){
+                                            window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
                                         }
+                                    }
+                                } else {
+                                    if(_.indexOf(_jsPanels,'jsPanel-prompt') > -1){
+
+                                        window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
                                     }
                                 }
 
@@ -542,28 +641,53 @@
                         }
 
                     },
-                    initPrompt: function(type,item){
+                    initPrompt: function(item){
                         let self = this;
 
-                        let _wnd = newWindow(type, item.title, '<div id="modal-panel"></div>', null);
-                        if(_wnd){
+                        self.model.promptWin = newWindow('fsmodal', 'prompt', '<div id="modal-panel"></div>', null);
+
+                        if(self.model.promptWin){
                             let _vue = new Vue({
                                 delimiters: ['#{', '}#'],
                                 el: '#modal-panel',
-                                template: `<div class="panel">
+                                template: `<div class="panel panel-confirm">
                                                <div class="panel-body">
-                                                    <div class="well" v-for="item in model">
-                                                        <p>#{item}#</p>
-                                                        <a class="btn btn-xs btn-primary" href="javascript:void(0)" @click="confirm(item)">确认</a>
+                                                    <h2 style="text-align:center;"><!--<i class="fa fa-arrow-right fa-1x" style="color:rgb(28, 220, 28);"></i>--> #{model.title}#</h2>
+                                                    <hr>
+                                                    <div style="overflow-y:auto;overflow-x:hidden;max-height: 30vh;min-height: 30vh;">
+                                                        <div v-for="item in model.prompt">
+                                                            <h4>#{item}#</h4>
+                                                        </div>
                                                     </div>
+                                                </div>
+                                                <div class="panel-footer" style="text-align:center;position: absolute;width: 100%;bottom:10px;}">
+                                                    <a class="btn btn-lg btn-danger" href="javascript:void(0);" @click="save">确认</a>
                                                 </div>
                                             </div>`,
                                 data: {
-                                    model: eval(item.prompt)
+                                    model: item,
+                                },
+                                mounted: function(){
+                                    let me = this;
+
+                                    if(window.jsPanel.activePanels.getPanel("jsPanel-undefined")) {
+                                        window.jsPanel.activePanels.getPanel("jsPanel-undefined").close();
+                                    }
                                 },
                                 methods: {
-                                    confirm: function () {
+                                    save: function () {
                                         let me = this;
+
+                                        let _project = _.last(self.model.object.param.parent.split("/"));
+
+                                        let _name = "diaglog";
+
+                                        me.model.select = -1;
+
+                                        jobContextSetup(_project, _name, me.model);
+
+                                        window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+
                                     }
                                 }
                             });
@@ -581,9 +705,11 @@
 
                             _.forEach(_cells, function (cell, k) {
                                 // Resets the fillcolor and the overlay
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFFFF', [cell]);
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#dddddd', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b8b8b8', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, '#f9f9f9', [cell]);
                                 self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '2', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [cell]);
                                 self.model.graph.graph.removeCellOverlays(cell);
                             })
                         }
@@ -607,10 +733,12 @@
 
                                 let state = self.model.graph.graph.view.getState(_cell);
 
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [_cell]);
+
                                 if(v.status == 1){
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b8b8b8', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '2', [_cell]);
                                     //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
                                     //self.tip(_id + " 未执行",1);
@@ -619,19 +747,42 @@
                                     //self.tip(_id + " 正在运行",2);
 
                                     if(state && state.shape.node){
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFFFF', [_cell]);
+                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFFFF', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#fb831b', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
 
 
                                         if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                            //state.shape.node.getElementsByTagName("rect")[0].setAttribute('class', 'animated infinite flash');
-                                            state.shape.node.getElementsByTagName("rect")[1].setAttribute('class', 'animated infinite flash');
+                                            _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
                                         }
 
                                         if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                            //state.shape.node.getElementsByTagName("path")[0].setAttribute('class', 'animated infinite flash');
-                                            state.shape.node.getElementsByTagName("path")[1].setAttribute('class', 'animated infinite flash');
+                                            _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("path")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
+                                        }
+
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
+                                            _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
                                         }
                                     }
 
@@ -652,8 +803,8 @@
                                     //self.tip(_id + " 报错",4);
 
                                 } else if(v.status == 5){
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#b8b8b8', [_cell]);
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b8b8b8', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
                                     self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
                                     //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
@@ -688,7 +839,7 @@
                         outline.style.top = '90px';
                         outline.style.left = '5px'
 
-                        let outln = new mxOutline(self.model.graph.graph, outline);
+                        self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
 
                     },
                     reload: function(){
@@ -724,6 +875,7 @@
                         {
                             var preview = new mxPrintPreview(self.model.graph.graph, 1);
                             preview.open();
+
                         },null,'tools-item');
 
                         tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
@@ -740,13 +892,17 @@
                         tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
                         {
 
-                            let _theme = _.sample(['theme-white', 'theme-dark']);
-
                             $("body").removeClass(self.model.graph.theme);
-                            $('body').addClass(_theme);
 
-                            self.model.graph.theme = _theme;
-                            localStorage.setItem("CREATIVE-THEME",_theme);
+                            if(self.model.graph.theme === 'theme-white'){
+                                $('body').addClass('theme-dark');
+                                self.model.graph.theme = 'theme-dark';
+                                localStorage.setItem("CREATIVE-THEME",'theme-dark');
+                            } else {
+                                $('body').addClass('theme-white');
+                                self.model.graph.theme = 'theme-white';
+                                localStorage.setItem("CREATIVE-THEME",'theme-white');
+                            }
 
 
                         },null,'tools-item');
@@ -754,33 +910,19 @@
                         tb.addItem('{{.i18n.Tr "creative-tools-play"}}', '/web/assets/images/iflow/play.svg',function(evt)
                         {
 
-                            let _project = _.last(self.model.object.param.parent.split("/"));
-                            let _cmdStart = `as400f -oneswitchfile ${_project}`;
-                            let _rtn = self.callJob(_cmdStart);
-
-                            alertify.success("任务开始 " + moment().format("LLL"));
+                            self.play();
 
                             $(evt.target).addClass("animated infinite pulse");
 
-                            if (!_.isEmpty(_rtn.message)) {
-                                alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                            }
 
                         },null,'tools-item');
 
                         tb.addItem('{{.i18n.Tr "creative-tools-stop"}}', '/web/assets/images/iflow/stop.svg',function(evt)
                         {
 
-                            let _project = _.last(self.model.object.param.parent.split("/"));
-                            let _cmdStop = `as400f -oneswitchfile ${_project}`;
-                            let _rtn = self.callJob(_cmdStop);
+                            self.stop();
 
-                            alertify.success("任务结束 " + moment().format("LLL"));
                             $(".animated.infinite.pulse").removeClass("animated infinite pulse");
-
-                            if (!_.isEmpty(_rtn.message)) {
-                                alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                            }
 
                         },null,'tools-item');
 
@@ -810,171 +952,13 @@
                             }
                         },100)
                     },
-                    initNodeTools: function(graph){
-                        let self = this;
-
-                        // Defines the tolerance before removing the icons
-                        let iconTolerance = 20;
-
-                        // Shows icons if the mouse is over a cell
-                        graph.addMouseListener(
-                            {
-                                currentState: null,
-                                currentIconSet: null,
-                                mouseDown: function(sender, me)
-                                {
-                                    // Hides icons on mouse down
-                                    if (this.currentState != null)
-                                    {
-                                        this.dragLeave(me.getEvent(), this.currentState);
-                                        this.currentState = null;
-                                    }
-                                },
-                                mouseMove: function(sender, me)
-                                {
-                                    if (this.currentState != null && (me.getState() == this.currentState ||
-                                        me.getState() == null))
-                                    {
-                                        var tol = iconTolerance;
-                                        var tmp = new mxRectangle(me.getGraphX() - tol,
-                                            me.getGraphY() - tol, 2 * tol, 2 * tol);
-
-                                        if (mxUtils.intersects(tmp, this.currentState))
-                                        {
-                                            return;
-                                        }
-                                    }
-
-                                    var tmp = graph.view.getState(me.getCell());
-
-                                    // Ignores everything but vertices
-                                    if (graph.isMouseDown || (tmp != null && !graph.getModel().isVertex(tmp.cell)))
-                                    {
-                                        tmp = null;
-                                    }
-
-                                    if (tmp != this.currentState)
-                                    {
-                                        if (this.currentState != null)
-                                        {
-                                            this.dragLeave(me.getEvent(), this.currentState);
-                                        }
-
-                                        this.currentState = tmp;
-
-                                        if (this.currentState != null)
-                                        {
-                                            this.dragEnter(me.getEvent(), this.currentState);
-                                        }
-                                    }
-                                },
-                                mouseUp: function(sender, me) { },
-                                dragEnter: function(evt, state)
-                                {
-                                    if (this.currentIconSet == null)
-                                    {
-                                        this.currentIconSet = new self.mxIconSet(state);
-                                    }
-                                },
-                                dragLeave: function(evt, state)
-                                {
-                                    if (this.currentIconSet != null)
-                                    {
-                                        this.currentIconSet.destroy();
-                                        this.currentIconSet = null;
-                                    }
-                                }
-                            });
-                    },
                     navToggle: function(){
                         let self = this;
 
                         $("#nav").find("div").toggle(500);
                         self.win.toolbars.toggle(500);
-                    },
-                    mxIconSet: function (state){
-                        this.images = [];
-                        var graph = state.view.graph;
 
-                        // Icon1
-                        var img = mxUtils.createImage('/web/assets/images/iflow/zoom_in.png');
-                        img.setAttribute('title', 'Duplicate');
-                        img.style.position = 'absolute';
-                        img.style.cursor = 'pointer';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.left = (state.x + state.width) + 'px';
-                        img.style.top = (state.y + state.height) + 'px';
-
-                        mxEvent.addGestureListeners(img,
-                            mxUtils.bind(this, function(evt)
-                            {
-                                var s = graph.gridSize;
-                                graph.setSelectionCells(graph.moveCells([state.cell], s, s, true));
-                                mxEvent.consume(evt);
-                                this.destroy();
-                            })
-                        );
-
-                        state.view.graph.container.appendChild(img);
-                        this.images.push(img);
-
-                        // Delete
-                        var img = mxUtils.createImage('/web/assets/images/iflow/zoom_out.png');
-                        img.setAttribute('title', 'Delete');
-                        img.style.position = 'absolute';
-                        img.style.cursor = 'pointer';
-                        img.style.width = '16px';
-                        img.style.height = '16px';
-                        img.style.left = (state.x + state.width) + 'px';
-                        img.style.top = (state.y - 16) + 'px';
-
-                        mxEvent.addGestureListeners(img,
-                            mxUtils.bind(this, function(evt)
-                            {
-                                // Disables dragging the image
-                                mxEvent.consume(evt);
-                            })
-                        );
-
-                        mxEvent.addListener(img, 'click',
-                            mxUtils.bind(this, function(evt)
-                            {
-                                graph.removeCells([state.cell]);
-                                mxEvent.consume(evt);
-                                this.destroy();
-                            })
-                        );
-
-                        state.view.graph.container.appendChild(img);
-                        this.images.push(img);
-                    },
-                    delOverlay: function(id){
-                        let self = this;
-                        let cell = self.model.graph.graph.getModel().getCell(id);
-
-                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#CCCCCC", [cell]);
-                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#000000", [cell]);
-
-                        self.model.graph.graph.removeCellOverlays(cell);
-                    },
-                    addOverlay: function(id, state){
-                        let self = this;
-                        let cell = self.model.graph.graph.getModel().getCell(id);
-
-                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#FF0000", [cell]);
-                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#FFFFFF", [cell]);
-
-                        self.model.graph.graph.addCellOverlay(cell, createOverlay(graph.warningImage, '状态: '+state));
-                    },
-                    createOverlay: function(image, tooltip){
-                        let self = this;
-                        let overlay = new mxCellOverlay(image, tooltip);
-
-                        overlay.addListener(mxEvent.CLICK, function(sender, evt){
-                            mxUtils.alert(tooltip);
-                        });
-                        return overlay;
+                        self.initOutline();
                     },
                     callJob: function(job){
                         let self = this;
@@ -994,7 +978,17 @@
                                 cmd: {
                                     reset: {
                                         value: 'ALL',
-                                        list: []
+                                        list: [],
+                                        status: {
+                                            value: '3',
+                                            list: [
+                                                    {name:'未执行',value: 1},
+                                                    {name:'正在运行',value: 2},
+                                                    {name:'运行完毕',value: 3},
+                                                    {name:'报错',value: 4},
+                                                    {name:'跳过不执行',value: 5}
+                                                ]
+                                        }
                                     },
                                     frequency: self.crontab.frequency
                                 }
@@ -1002,9 +996,14 @@
                             template: `<div class="animated fadeInLeft" style="font-size:12px;">
                                                     <div class="input-group" style="margin:5px;">
                                                       <span class="input-group-addon">选择</span>
-                                                      <div class="input-group-select">
-                                                          <select class="form-control" v-model="cmd.reset.value">
-                                                            <option :value="item.name" v-for="item in cmd.reset.list">#{item.name}#</option>
+                                                      <div class="input-group-select reset-status-select" style="width:255px;">
+                                                          <select class="selectpicker" data-style="btn-default" data-live-search="true" v-model="cmd.reset.value" data-width="100%">
+                                                            <option :data-subtext="item.id" :value="item.id" v-for="item in cmd.reset.list">#{item.name}#</option>
+                                                          </select>
+                                                      </div>
+                                                      <div class="input-group-addon select-wrapper" style="width: 25%;padding: 0px;border-radius: 0px;background-color: rgba(0, 0, 0, 0);">
+                                                          <select class="form-control no-radius" v-model="cmd.reset.status.value">
+                                                            <option :value="item.value" v-for="item in cmd.reset.status.list">#{item.name}#</option>
                                                           </select>
                                                       </div>
                                                       <div class="input-group-btn">
@@ -1018,11 +1017,25 @@
                                                          <a class="btn btn-primary" href="javascript:void(0)" @click="apply"><i class="fa fa-clock-o"></i> 应用</a>
                                                       </div>
                                                     </div>
+
                                                 </div>`,
                             created: function () {
                                 let me = this;
 
                                 me.loadCells();
+                            },
+                            mounted: function(){
+                                let me = this;
+
+                                me.$nextTick(function() {
+                                    _.delay(function(){
+                                        $('.selectpicker').selectpicker({
+                                            container: 'body'
+                                        });
+                                        $('.selectpicker').selectpicker('refresh');
+                                    },500);
+                                })
+
                             },
                             methods: {
                                 loadCells: function () {
@@ -1036,34 +1049,8 @@
                                     })
 
                                     me.cmd.reset.list.unshift({name: me.cmd.reset.value, id: "ALL"});
-                                },
-                                play: function () {
-                                    let me = this;
 
-                                    alertify.success("任务开始 " + moment().format("LLL"));
-
-                                    evt.target.src = "/web/assets/images/iflow/stop.svg";
-                                    $(evt.target).addClass("animated infinite pulse");
-
-                                    let _rtn = self.callJob(me.cmd.start);
-
-                                    if (!_.isEmpty(_rtn.message)) {
-                                        alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                                    }
-
-                                },
-                                stop: function () {
-                                    let me = this;
-
-                                    alertify.success("任务结束 " + moment().format("LLL"));
-
-                                    evt.target.src = "/web/assets/images/iflow/play.svg";
-                                    $(evt.target).removeClass("animated infinite pulse");
-
-                                    let _rtn = self.callJob('tasklist');//AS400F -OneSwitchFile AS400A -OneSwitchAction LOAD');
-                                    if (!_.isEmpty(_rtn.message)) {
-                                        alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
-                                    }
+                                    me.cmd.reset.list = _.orderBy(me.cmd.reset.list,['id','name'],['asc','asc']);
                                 },
                                 reset: function () {
                                     let me = this;
@@ -1075,8 +1062,8 @@
                                         jobContextReset(_project);
                                         alertify.log("重置项目 " + moment().format("LLL"));
                                     } else {
-                                        let _name = _project + "/" + _page + "/" + _.find(me.cmd.reset.list, {name:me.cmd.reset.value}).id;
-                                        let _value = `{"status":"3","ctrl":"0"}`;
+                                        let _name = _project + "/" + _page + "/" + _.find(me.cmd.reset.list, {id:me.cmd.reset.value}).id;
+                                        let _value = `{"status":"${me.cmd.reset.status.value}","ctrl":"0"}`;
 
                                         jobContextSetup(_project, _name, _value);
                                         alertify.log("重置节点 " + moment().format("LLL") + " " + me.cmd.reset.value);

@@ -145,7 +145,7 @@
 			root: function (val,oldVal) {
 			    let self = this;
 
-				if(val !== '/home/creative') return false;
+				if(val !== '/home') return false;
 
                 if(!_.isEmpty(self.treeObj)){
                     self.treeObj.destroy();
@@ -156,7 +156,7 @@
 		methods: {
 			init: function(){
                 let self = this;
-                let _rtn = fsList('/home/creative');
+                let _rtn = fsList('/home');
 
                 if(_.isEmpty(_rtn)){
                     self.treeNodes = [];
@@ -194,7 +194,7 @@
                 let _root = treeNode.parent + "/" + treeNode.name;
                 let _rtn = fsList(_root);
 
-                eventHub.$emit("FS-FORWARD-EVENT",_root);
+                eventHub.$emit("FS-FORWARD-EVENT", treeNode,_root);
 
                 self.treeObj.removeChildNodes(treeNode);
 
@@ -210,7 +210,7 @@
 					                        return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
                                 });
 
-                    // append sub nodes
+                    // append sub nodesGr
                     self.treeObj.addNodes(treeNode, _nodes);
 
                 }

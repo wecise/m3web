@@ -26,7 +26,177 @@
 
 <style>
 
-    
+
+    #content .bg-info.dir {
+        background: rgb(255, 255, 255);
+        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
+        background: -webkit-linear-gradient(top, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
+        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
+    }
+
+    #content .bg-info {
+        background: rgb(255, 255, 255);
+        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
+        background: -webkit-linear-gradient(top, rgb(178, 225, 255) 0%,rgb(102, 182, 252) 100%);
+        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(201, 233, 249) 100%);
+    }
+
+    #content .col-md-3 {
+        width: 25%;
+        max-width: 350px;
+        min-width: 310px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    #content .fa-wrench{
+        color: #999999;
+    }
+
+    .widget-stats .stats-desc, .widget-stats .stats-title {
+        color: rgb(0, 0, 0);
+    }
+
+    @media screen and (max-width: 2560px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 13.5em;
+        }
+    }
+
+    @media screen and (max-width: 1960px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 13.5em;
+        }
+    }
+
+    @media screen and (max-width: 1280px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 12em;
+        }
+    }
+
+    #content .stats-subtitle{
+        font-size:12px;
+        color: #999999;
+        line-height: 25px;
+        overflow: hidden;
+        max-height: 46px;
+        min-height: 46px;
+        cursor: pointer;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2
+    }
+
+    #content .media {
+        cursor: pointer;
+        margin-bottom: 0px;
+    }
+
+    #content .media-body{
+        color: #999999;
+    }
+
+    #content .media-body p{
+        margin: 0px 0px 3px 20px;
+    }
+
+    #content .media-object{
+        max-width:75px;
+        min-width:60px;
+    }
+
+    #content .stats-desc {
+        display: -webkit-box;
+        margin: 0px -15px -15px -15px;
+        background-color: rgb(247, 247, 247);
+        padding: 5px 10px;
+        border-top: 0.5px solid rgb(240, 243, 244);
+        color: rgb(124, 124, 124)!important;
+    }
+
+    #content .stats-desc .fa-wrench {
+        color: rgb(144, 144, 144);
+    }
+
+    #content .stats-desc .status {
+        right: -73%;
+        position: relative;
+        color: rgb(124, 124, 124)!important;
+    }
+
+    #icon-list ul{
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #icon-list ul > li{
+        float: left;
+        width: 25%;
+        height: 115px;
+        padding: 10px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+    }
+
+    .col-lg-12 .widget-stats{
+        border: 1px solid rgb(229, 229, 229);
+        border-radius: 10px;
+        max-height: 210px;
+        min-height: 205px;
+    }
+
+    .col-lg-10 .widget-stats{
+        border: 1px solid rgb(240, 240, 240);
+        border-radius: 10px;
+        max-height: 210px;
+        min-height: 200px;
+    }
 
     .rating {
         unicode-bidi: bidi-override;
@@ -76,29 +246,21 @@
         min-width: 85%;
     }
 
-    .stats-desc{
-        color: #7d7974!important;
-    }
-
     .btn.dropdown-toggle {
         padding: 7px 12px;
         border-radius: 0px;
     }
 
     .widget-stats.bg-info:hover,.widget-stats.bg-info.active {
-        box-shadow: 2px 2px 2px 2px #999;
-        background-color: rgb(217, 237, 247)!important;
-        background-image: linear-gradient(to bottom, rgb(217, 237, 247) 0%, rgb(249, 249, 249) 100%)!important;
+        box-shadow: 2px 2px 20px 2px #999999;
+        background-color: rgb(255, 255, 255)!important;
+        /*background-image: linear-gradient(to bottom, rgb(255, 255, 255) 0%, rgb(239, 239, 239) 100%)!important;*/
     }
 
     .widget-stats.bg-grey:hover,.widget-stats.bg-grey.active {
         box-shadow: 2px 2px 2px 2px #999;
         background-color: rgb(183, 190, 208)!important;
         background-image: linear-gradient(to bottom, rgb(182, 194, 202) 0%, rgb(244, 244, 244) 100%)!important;
-    }
-
-    td>.mxWindowPane {
-        overflow: hidden!important;
     }
 
     .bootstrap-tagsinput>input {
@@ -120,6 +282,14 @@
         background-color: transparent;
         border: none;
         max-width: 60%;
+    }
+
+
+    .breadcrumb > li {
+        text-overflow: ellipsis;
+        width: 10em;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
 
@@ -231,7 +401,49 @@
 
                         if (_.isEmpty(item)) return '';
 
-                        return item.name;
+                        let _name = _.head(item.name.split("."));
+
+                        /*if(!_.isEmpty(_name) && _.size(_name) > 9){
+                            _name = _.split(_name,"",9).join("") + "...";
+                        }*/
+
+                        return _name;
+                    },
+                    pickRemark: function (item) {
+                        let self = this;
+
+                        if (_.isEmpty(item.attr)) return '';
+
+                        let _remark = '';
+
+                        if(_.attempt(JSON.parse.bind(null, item.attr)).remark){
+
+                            _remark = _.attempt(JSON.parse.bind(null, item.attr)).remark;
+
+                            /*if(_.isEmpty(_remark)) return '';
+
+
+                            if($(window).width()>1280){
+                                if(_.size(_remark) > 50){
+                                    _remark = _.split(_remark,"",49).join("") + "..."
+                                }
+                            } else {
+
+                                if(_.size(_remark) > 44){
+                                    _remark = _.split(_remark,"",43).join("") + "..."
+                                }
+                            }*/
+
+                        }
+
+                        return _remark;
+                    },
+                    pickIcon: function(item){
+                        let self = this;
+
+                        if (_.isEmpty(item.attr)) return `/fs/home/assets/${item.ftype}.png?type=download`;
+
+                        return JSON.parse(item.attr).icon;
                     },
                     readMore: function (text, length, suffix) {
                         return text.substring(0, length) + suffix;
@@ -248,67 +460,65 @@
                     initPlugin: function(){
                         let self = this;
 
-                        $.contextMenu({
-                            selector: '.list-context-menu', 
-                            trigger: 'left',
-                            items: {
-                                "edit": {name: "编辑", icon: "fa-edit", callback: function(key, opt) {
-                                                                                    self.forwardCreative('edit',opt.$trigger.data("item"));
-                                                                                }
-                                },
-                                "sep2": "---------",
-
-                                "delete": {name: "删除", icon: "fa-trash", callback: function(key, opt) {
-                                        self.remove(opt.$trigger.data("item"));
-                                    }
-                                },
-                                "sep3": "---------",
-                                "copy": {name: "复制", icon: "fa-copy", callback: function(key, opt) {
-                                        self.copyIt(opt.$trigger.data("item"));
-                                    }
-                                },
-                                "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
-                                        self.pasteIt();
-
-                                                                                }
-                                },
-                                "sep4": "---------",
-
-                                "info": {name: "信息", icon: "fa-info", callback: function(key, opt) {
-                                        self.info(opt.$trigger.data("item"));
-                                    }
-                                }
-                            }
-                        });
-
-
-                        $('.context-menu-empty-area').dblclick(function(event){
-
-                            event.preventDefault();
-
-                            $.contextMenu({
-                                selector: '.context-menu-empty-area',
-                                trigger: 'right',
-                                items: {
-                                    "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
-                                            self.pasteIt();
-
-                                        }
-                                    }
-                                }
-                            });
-                        })
-
                         self.crontab.project.sched = later.parse.text('every 15 sec');
                         self.crontab.project.timer = later.setInterval(self.initProject, self.crontab.project.sched);
                         self.initProject();
+
+                        self.initContextMenu();
+
+                    },
+                    initContextMenu: function(){
+                        let self = this;
+
+                        $.contextMenu({
+                            selector: '.list-context-menu',
+                            trigger: 'left',
+                            build: function($trigger, e) {
+                                // this callback is executed every time the menu is to be shown
+                                // its results are destroyed every time the menu is hidden
+                                // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
+                                let _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+
+                                return {
+
+                                    items: {
+                                        "edit": {name: "编辑", icon: "fa-edit", callback: function(key, opt) {
+                                                self.forwardCreative('edit', _item);
+                                            }
+                                        },
+                                        "sep2": "---------",
+
+                                        "delete": {name: "删除", icon: "fa-trash", callback: function(key, opt) {
+                                                self.remove(_item);
+                                            }
+                                        },
+                                        "sep3": "---------",
+                                        "copy": {name: "复制", icon: "fa-copy", callback: function(key, opt) {
+                                                self.copyIt(_item);
+                                            }
+                                        },
+                                        "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
+                                                self.pasteIt();
+
+                                            }
+                                        },
+                                        "sep4": "---------",
+
+                                        "info": {name: "属性", icon: "fa-info", callback: function(key, opt, rootMenu, originalEvent) {
+                                                self.info(_item);
+                                            }
+                                        }
+                                    }
+                                };
+                            }
+                        });
 
                     },
                     initProject: function(){
                         let self = this;
 
 
-                        let _rtn = jobContextGet("BOB", "BOB");
+                        let _rtn = jobContextGet("BOB", "");
 
                         if (!_.isEmpty(_rtn) && !_.isEmpty(_rtn.message)) {
                             if (!_.isEmpty(_rtn.message["BOB"])){
@@ -328,17 +538,20 @@
 
                         let _rtn = fsList(self.model.root);
 
-                        self.model.list = _.sortBy(_.map(_rtn,function(v,k){
+                        console.log(JSON.stringify(_rtn))
+
+                        self.model.list = _.orderBy(_.map(_rtn,function(v,k){
 
                                             return _.merge(v, {"username": {{.SignedUser.Name}}, "project": self.model.project });
 
-                                        }),'name');
+                                        }),['fullname'],['asc']);
+
 
                         _.delay(function(){
 
                             self.refresh();
 
-                            $(".fs-name").editable({
+                            /*$(".fs-name").editable({
                                 type: "text",
                                 container: 'body',
                                 validate: function (value) {
@@ -346,23 +559,35 @@
                                         return '不能为空';
                                     }
                                 },
+                                display: function(value, sourceData) {
+                                    if(value.length > 10) {
+                                        $(this).html(_.split(value,"",9).join("")+"...");
+                                    }
+                                },
                                 success: function (response,newValue) {
 
                                     let _item = $(this).data("info");
 
-                                    let _old = _item.parent + "/" + $(this).text();
-                                    let _new = _item.parent + "/" + newValue;
+                                    let _extName = _item.ftype=='dir'?'':'.'+_item.ftype;
+                                    let _old = _item.parent + "/" + $(this).editable('getValue', true) + _extName;
+                                    let _new = _item.parent + "/" + newValue + _extName;
+
+
+                                    let _check = fsCheck( _item.parent, newValue);
+                                    if(_check) {
+                                        alertify.error("文件已存在，请确认！")
+                                        return false;
+                                    }
 
                                     let _rtn = fsRename(_old, _new);
 
                                     if(_rtn == 1){
                                         self.load();
                                     } else {
-                                        $(this).innerHTML($(this).text());
-                                        console.log($(this).text());
+                                        $(this).innerHTML($(this).editable('getValue', true));
                                     }
                                 }
-                            });
+                            });*/
 
                         },200);
 
@@ -434,15 +659,21 @@
 
                                     let _name = me.model.name;
                                     let _type = me.model.type;
-                                    let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
 
                                     let _check = fsCheck(_root, _name);
-                                    
+                                    if(_check) {
+                                        alertify.error("文件已存在，请确认！")
+                                        return false;
+                                    }
+
                                     let _rtn = fsNew(_type, _root, _name, null, _info);
 
                                     if(_rtn == 1){
 
                                         alertify.success("",me.model.name,"success");
+
+                                        self.load();
 
                                         /*let _parent = _root + "/" + me.model.name;
 
@@ -459,7 +690,7 @@
 
                                         let _name = "PAGE_" + _.now();
                                         let _type = me.model.project.extName[me.model.project.value];
-                                        let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                        let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
                                         let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
 
                                         if(_rtn == 1){
@@ -548,6 +779,7 @@
                                 },
                                 save: function(){
                                     let me = this;
+                                    let _xml = null;
                                     
                                     if (_.isEmpty(me.model.name)) {
                                         swal("名称不能为空！", "", "warning");
@@ -557,14 +789,20 @@
                                     let _name = me.model.name;
                                     let _type = me.model.type;
 
-                                    let _info = {remakr: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/iflow.png?type=download"};
 
                                     if(me.model.astemplate){
                                         _name = me.model.name;
                                         _type = me.type;                                      
                                     }
 
-                                    let _rtn = fsNew(_type, self.model.root, _name+"."+_type, null, _info);
+                                    let _check = fsCheck(self.model.root, _name+"."+_type);
+                                    if(_check) {
+                                        alertify.error("文件已存在，请确认！")
+                                        return false;
+                                    }
+
+                                    let _rtn = fsNew(_type, self.model.root, _name+"."+_type, _xml, _info);
 
                                     if(_rtn == 1){
                                         swal("",_name,"success");
@@ -583,28 +821,6 @@
 
                                     $(".widget-stats.active").removeClass("active");
                                     $("#"+item.id).addClass("active");
-                                }
-                            }
-                        })
-                    },
-                    remove: function(event) {
-                        let self = this;
-                        
-                        swal({
-                            title: event.name,
-                            text: "确定要删除?",
-                            type: "warning",
-                            showCancelButton: true,
-                            closeOnConfirm: false,
-                            cancelButtonText: "取消",
-                            confirmButtonText: "删除",
-                            confirmButtonColor: "#ff0000"
-                        }).then((result) => {
-                            if (result.value) {
-                                let _rtn = fsDelete(event.parent,event.name);
-
-                                if (_rtn == 1){
-                                    self.load();
                                 }
                             }
                         })
@@ -681,58 +897,125 @@
                             }
                         }
                     },
+                    remove: function(event) {
+                        let self = this;
+
+                        swal({
+                            title: event.name,
+                            text: "确定要删除?",
+                            type: "warning",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "取消",
+                            confirmButtonText: "删除",
+                            confirmButtonColor: "#ff0000"
+                        }).then((result) => {
+                            if (result.value) {
+                                let _rtn = fsDelete(event.parent,event.name);
+
+                                if (_rtn == 1){
+                                    self.load();
+                                }
+                            }
+                        })
+                    },
                     info: function(node){
                         let self = this;
 
-                        let _win = newWindow("fsinfo","信息",'<div id="fs-info"></div>');
-                        _win.setMaximizable(false);
-                        _win.setMinimizable(false);
-                        _win.setResizable(true);
-                        _win.setClosable(true);
+                        let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null);
 
                         let _infoVue = new Vue({
+                            delimiters: ['#{', '}#'],
                             el: "#fs-info",
-                            template: `<div class="panel">
-                                            <div class="panel-body">
-                                                <form>
-                                                    <div class="form-group">
-                                                        <label for="name">名称</label>
-                                                        <input type="text" class="form-control" id="name" placeholder="" v-model="model.name" disabled>
+                            template: `<div class="tab-content">
+                                            <div role="tabpanel" class="tab-pane active" id="home">
+                                                    <form>
+                                                        <div class="form-group">
+                                                            <label for="name">项目名称</label>
+                                                            <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="remark">项目备注</label>
+                                                            <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="ctime">更新时间</label>
+                                                            <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="parent">目录</label>
+                                                            <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="type">类型</label>
+                                                            <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="author">作者</label>
+                                                            <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
+                                                                <label for="icon">图标</label> <small style="color: rgb(153, 153, 153);">点击更换图标</small>
+                                                                <img class="media-object" :src="model.icon.value" style="width:15%;">
+                                                            </a>
+                                                        </div>
+
+                                                        <div class="form-group" style="text-align: center;">
+                                                            <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
+                                                            <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
+                                                            <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
+                                                        </div>
+
+                                                </form>
+                                            </div>
+                                            <div role="tabpanel" class="tab-pane" id="icon-list">
+                                                <div class="row">
+                                                  <div class="col-md-12" style="display: list-item;height: 44em;overflow: auto;">
+                                                    <ul>
+                                                        <li v-for="icon in model.icon.list">
+                                                            <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
+                                                              <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
+                                                              <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download'" v-model="model.icon.value" >
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                  </div>
+                                                </div>
+                                                <div class="row" style="margin-top:15px;">
+                                                    <div class="col-md-12" style="text-align:center;">
+                                                        <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
                                                     </div>
-                                                    <div class="form-group">
-                                                        <label for="parent">目录</label>
-                                                        <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="type">类型</label>
-                                                        <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="author">作者</label>
-                                                        <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="ctime">修改时间</label>
-                                                        <input type="text" class="form-control" id="ctime" placeholder="" v-model="model.attr.ctime" disabled>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="remark">备注</label>
-                                                        <textarea type="text" class="form-control" id="remark" placeholder="" v-model="model.attr.remark" disabled>
-                                                    </div>
-                                            </form>
-                                        </div>
-                                    </div>`,
+                                                </div>
+                                            </div>
+
+                                        </div>`,
                             data: {
                                 model: {
                                     parent: node.parent,
-                                    name: node.name,
+                                    oldName: node.name,
+                                    newName: _.head(_.split(node.name,'.')),
+                                    extName: node.ftype=='dir'?'':'.'+node.ftype,
                                     type: node.ftype,
-                                    attr: _.attempt(JSON.parse.bind(null, node.attr))
+                                    attr: null,
+                                    icon: {
+                                        value: '',
+                                        list: []
+                                    }
                                 }
+                            },
+                            mounted: function() {
+                                let me = this;
+
+                                me.$nextTick(function() {
+                                    me.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
+                                    me.model.icon.value = me.model.attr.icon;
+                                    me.init();
+                                })
                             },
                             filters: {
                                 pickName: function (value) {
-                                    let self = this;
+                                    let me = this;
 
                                     if (!value) return '';
 
@@ -740,11 +1023,84 @@
 
                                     return _attr.name;
                                 },
+                                pickIcon: function(item) {
+                                    return "/fs" + item.parent + "/" + item.name + "?type=download";
+                                },
                                 readMore: function (text, length, suffix) {
                                     return text.substring(0, length) + suffix;
                                 },
                                 toLocalTime: function (value) {
                                     return moment(value).format("LLL");
+                                }
+                            },
+                            destroyed: function(){
+                                let me = this;
+
+                                me.model = null;
+                            },
+                            methods: {
+                                init: function(){
+                                    let me = this;
+
+                                    me.model.icon.list = fsList('/home/assets');
+                                },
+                                triggerInput: function(id){
+                                    let self = this;
+
+                                    $(self.$refs[id]).click()
+                                },
+                                apply: function(){
+                                    let me = this;
+
+                                    me.saveAttr();
+
+                                },
+                                save: function(){
+                                    let me = this;
+
+                                    me.saveAttr();
+                                    _win.close();
+                                },
+                                close: function(){
+                                    let me = this;
+
+                                    _win.close();
+                                },
+                                saveName: function(){
+                                    let me = this;
+
+                                    let _old = node.parent + "/" + node.name;// + _extName;
+                                    let _new = node.parent + "/" + me.model.newName + me.model.extName;
+
+
+                                    let _check = fsCheck( node.parent, me.model.newName + me.model.extName);
+                                    if(_check) {
+                                        alertify.error("文件已存在，请确认！")
+                                        return false;
+                                    }
+
+                                    let _rtn = fsRename(_old, _new);
+
+                                    if(_rtn == 1){
+
+                                        self.load();
+                                    }
+                                },
+                                saveAttr: function(){
+                                    let me = this;
+
+                                    me.model.attr.icon = me.model.icon.value;
+
+                                    let _rtn = fsUpdateAttr(node.parent, node.name, me.model.attr);
+
+                                    if(_rtn == 1){
+                                        self.load();
+
+                                        if(me.model.oldName != me.model.newName + me.model.extName){
+
+                                            me.saveName();
+                                        }
+                                    }
                                 }
                             }
                         })
@@ -767,6 +1123,7 @@
                         self.model.action.to = self.model.root;
                         let _rtn = fsCopy(self.model.action.from, self.model.action.to);
                         if(_rtn == 1){
+
                             alertify.log("已粘贴 " + self.model.action.to);
                             self.load();
 
@@ -820,18 +1177,18 @@
                             <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
                         </div>
                         <div class="col-lg-12" id="content">
-                            <div class="row" style="padding:0px 5px;">
+                            <div class="row" style="margin: 0px -15px;">
                                 <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                    <ul style="list-style: none;display:  flex;margin-left: -40px;">
+                                    <ul style="font-size:16px; list-style: none;display:  flex;margin-left: -40px;">
                                         <li style="padding:5px 0px;">
                                             <a href="javascript:void(0);" @click="forwardDir('/home/creative')" style="text-decoration:none;color:#333333;">
                                                 <i class="fa fa-folder-o"></i> 所有
                                             </a>
                                         </li>
-                                        <li>
+                                        <li style="padding-top: 2px;">
                                             <ol class="breadcrumb">
                                                 <li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
-                                                    <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))">${item}</a>
+                                                    <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))" :title="item">${item}</a>
                                                 </li>
                                             </ol>
                                         </li>
@@ -840,55 +1197,58 @@
                                 </div>
                                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                                     <div class="btn-group-action pull-right">
-                                        <a href="#" class="btn btn-xs btn-default" @click="toggleLeft"><i class="fa fa-caret-right m-r-5 navtoggle"></i> </a>
-                                        <a href="#" class="btn btn-xs btn-default" @click="pasteIt"><i class="fa fa-paste m-r-5"></i> 粘贴</a>
-                                        <a href="#" class="btn btn-xs btn-default" @click="newDir"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-project"}}</a>
-                                        <a href="#" class="btn btn-xs btn-default" @click="newFile"><i class="fa fa-plus m-r-5"></i> {{.i18n.Tr "creative-new-file"}}</a>
+                                        <!--a href="#" class="btn btn-sm btn-default" @click="toggleLeft"><i class="fa fa-caret-right navtoggle"></i> </a-->
+                                        <a href="#" class="btn btn-sm btn-primary" @click="pasteIt"><i class="fa fa-paste"></i> 粘贴</a>
+                                        <a href="#" class="btn btn-sm btn-primary" @click="newDir"><i class="fa fa-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
+                                        <a href="#" class="btn btn-sm btn-primary" @click="newFile"><i class="fa fa-plus"></i> {{.i18n.Tr "creative-new-file"}}</a>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="padding:5px;"></div>
+
                             <div class="row">
-                                <transition-group class="context-menu-empty-area" name="list" tag="div">
-                                    <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3" v-for="(item,index) in model.list" :key="item.id">
-                                            <div class="widget widget-stats bg-info animated flipInX">
-                                                <div>
 
-                                                    <span class="stats-number" style="font-size:12px;color:rgb(102,102,102);line-height: 25px;overflow-x: auto;overflow-y: hidden;max-height: 36px;">
-                                                        <i class="fa fa-braille"></i> <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
-                                                    </span>
-
-                                                    <span>
-                                                        <a href="javascript:void(0)"
-                                                           @click="forwardCreative('show',item)">
-                                                            <img :src="'/web/assets/images/'+item.ftype+'.png'" style="width:75%;height:80px; margin: 0px 20px;">
-                                                        </a>
-                                                    </span>
-                                                    <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
-                                                </div>
-                                                <div class="stats-desc" style="margin-bottom: -10px;">
-                                                    <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username}<BR/>
-                                                    <i class='fa fa-hourglass-start' style='color:#337ab7;'></i> ${ item.project.stime }<BR/>
-                                                    <i class='fa fa-hourglass-end' style='color:#337ab7;'></i> ${ item.project.etime }<BR/>
-                                                    <div v-if="item.project.status==='1'">
-                                                        <i class='fa fa-spinner fa-spin' style='color:#337ab7;'></i> 运行中
-                                                    </div>
-                                                    <div v-else>
-                                                        <i class='fa fa-spinner' style='color:#337ab7;'></i>
-                                                    </div>
-                                                    <span class="rating" v-for="data in item.star">
-                                                        <span style="color:gold;">☆</span>
-                                                    </span>
-
-                                                    <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                        <i class="fa fa-wrench"></i>
-                                                    </div>
-
-                                                </div>
+                                <div class="col-md-3 col-sm-6" v-for="(item,index) in model.list" >
+                                        <div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
+                                            <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+                                                <i class="fa fa-wrench"></i>
                                             </div>
+                                            <div @click="forwardCreative('show',item)">
+                                                <div class="stats-title">
+                                                    <i class="fa fa-braille fa-fw"></i>
+                                                    <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
+                                                </div>
 
-                                    </div>
-                                </transition-group>
+                                                <div class="stats-subtitle">
+                                                    ${item | pickRemark}
+                                                </div>
+
+                                                <div class="media">
+                                                    <div class="media-left">
+                                                        <img class="media-object" :src="item | pickIcon">
+                                                    </div>
+                                                    <div class="media-body">
+                                                        <p>项目作者： ${item.username}</p>
+                                                        <p>更新日期： ${ moment(item.vtime).format("L") }</p>
+                                                        <p>更新时间： ${ moment(item.vtime).format("LTS") }</p>
+                                                        <p class="status" v-if="item.project.status==='1'">
+                                                            项目状态： 运行中 <i class='fa fa-spinner fa-spin'></i>
+                                                        </p>
+                                                        <p class="status" v-else>
+                                                            项目状态： 就绪
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            {{if not .SignedUser.Company.OSpace}}
+                                            <div class="stats-desc">
+                                                <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                                            </div>
+                                            {{end}}
+                                        </div>
+
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -955,8 +1315,7 @@
                     <textarea class="form-control" id="remark" rows="6" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark"></textarea>
                 </div>
 
-                {{if eq .SignedUser.Company.OSpace "oneswitch"}}
-                {{else}}
+                {{if ne .SignedUser.Company.OSpace "oneswitch"}}
                 <div class="form-group" style="max-height: 5vh;overflow:auto;">
                     <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
                 </div>
@@ -1004,16 +1363,12 @@
 
                     <div class="form-group">
                         <div class="col-lg-12">
-                            {{if eq .SignedUser.Company.OSpace "oneswitch"}}
+
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="iflow" checked>&nbsp;流程设计
                                 <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
                             </label>
-                            {{else}}
-                            <label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="iflow" checked>&nbsp;流程设计
-                                <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
-                            </label>
+                            {{if ne .SignedUser.Company.OSpace "oneswitch"}}
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
                                 <p><img src="{{AppSubUrl}}/web/assets/images/ishow.png" class="img-fluid img-thumbnail"></p>
@@ -1054,23 +1409,8 @@
                                 </div>
                             </div>
                         </div>
-                        {{if eq .SignedUser.Company.OSpace "oneswitch"}}
-                        <div class="row" style="padding-top:10px;">
-                            <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
 
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-2">
-
-                            </div>
-                        </div>
-                        {{else}}
+                        {{if ne .SignedUser.Company.OSpace "oneswitch"}}
                         <div class="row" style="padding-top:10px;">
                             <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
                                 <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">

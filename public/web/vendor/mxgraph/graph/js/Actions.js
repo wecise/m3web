@@ -27,11 +27,14 @@ Actions.prototype.init = function()
     // Clase actions
     this.addAction('mx-close', function()
     {
-        window.close();
+        window.onbeforeunload = function() {
+            return "确定要退出编辑界面?"
+        };
+    	window.close();
     });
 
     // Object Properties
-    this.addAction('mx-properties', function() {
+    this.addAction('mxProperties', function() {
         let self = this;
         let tmp = localStorage.getItem("graph-object");
         let graphObject = _.attempt(JSON.parse.bind(null, tmp));
@@ -46,12 +49,15 @@ Actions.prototype.init = function()
                     input = form.addText(_.startCase(k), cell.getId());
                     input.autofocus = true;
                 } else if(k == 'value'){
-                    input = form.addText(_.startCase(k), cell.getValue());
+                    input = form.addTextarea(_.startCase(k), cell.getValue(), 3);
                 } else if(k == 'parent'){
                     input = form.addText(_.startCase(k), cell.getParent().getValue());
                 } else if(k == 'terminal'){
                     input = form.addText(_.startCase(k), cell.getTerminal(cell));
                 }
+                $(input).css({
+					"width":"100%"
+                });
 
                 let applyHandler = function() {
                     let newValue = input.value || '';
@@ -129,9 +135,21 @@ Actions.prototype.init = function()
             })
 
             let inputX = form.addText('X', cell.getGeometry().x);
+            $(inputX).css({
+                "width":"100%"
+            });
             let inputY = form.addText('Y', cell.getGeometry().y);
+            $(inputY).css({
+                "width":"100%"
+            });
             let inputW = form.addText('长', cell.getGeometry().width);
+            $(inputW).css({
+                "width":"100%"
+            });
             let inputH = form.addText('宽', cell.getGeometry().height);
+            $(inputH).css({
+                "width":"100%"
+            });
 
             inputX.disabled = true;
             inputY.disabled = true;
@@ -149,6 +167,15 @@ Actions.prototype.init = function()
                 }
 			});
 
+            _.delay(function(){
+            	$(".btn-ok").addClass("btn btn-sm btn-success");
+                $(".btn-ok").css({
+					"margin-right":"5px"
+				});
+                $(".btn-cancel").addClass("btn btn-sm btn-default");
+            },100);
+
+
         };
 
         let cell = graph.getSelectionCell() || graph.getModel().getRoot();
@@ -160,7 +187,7 @@ Actions.prototype.init = function()
         if (cell != null)
         {
 
-        	let wnd = newWindow("properties",cell.getId(),'<div id="properties"></div>', null);
+        	let wnd = newWindow("properties", cell.getId(), '<div id="properties"></div>', null);
 
             let div = document.getElementById('properties');
 

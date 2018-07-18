@@ -1,86 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="">
+    <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="remove vue-timeinlie-component.html">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/component/vue-editor-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-editor-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-object-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-object-tree-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/variables.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/variables.less" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/wecise_enterprise.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/wecise_enterprise.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/css/color/style.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/css/color/style.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/Find Results" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/js/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/init.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/build/ns.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/build/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/build/task.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/dist/goldenlayout.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/dist/goldenlayout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/lib/jquery.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/default-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/default-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-base.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-base.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-base.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-base.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-dark-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-dark-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-dark-theme.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-dark-theme.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-soda-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-soda-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-soda-theme.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-soda-theme.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-translucent-theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-translucent-theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-translucent-theme.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/css/goldenlayout-translucent-theme.css.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_close_black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_close_tab_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_close_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_docked_black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_docked_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_maximise_black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_maximise_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_minimize_black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_minimize_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_popin_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_popout_black.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/img/lm_popout_white.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/LayoutManager.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/LayoutManager.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/container/ItemContainer.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/container/ItemContainer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/controls/Header.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/controls/Header.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/controls/Tab.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/controls/Tab.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/items/RowOrColumn.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/items/RowOrColumn.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/items/Stack.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/js/items/Stack.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-base.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-base.less" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-dark-theme.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-dark-theme.less" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-light-theme.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-light-theme.less" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-soda-theme.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-soda-theme.less" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-translucent-theme.less" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/golden-layout/src/less/goldenlayout-translucent-theme.less" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/component-creation-events-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/component-state-save-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/create-config.tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/create-from-config-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/deferred-create-drag-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/disabled-selection-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/drag-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/empty-item-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/enabled-selection-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/event-bubble-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/event-emitter-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/id-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/initialisation-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/item-creation-events-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/minifier-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/popout-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/selector-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/tab-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/test-tools.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/title-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/tree-manipulation-tests.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/golden-layout/test/xss_tests.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/iscroll/iscroll-infinite.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/iscroll/iscroll-lite.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/iscroll/iscroll-probe.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/iscroll/iscroll-zoom.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/iscroll/iscroll.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.eot" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.woff" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.woff2" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/font/context-menu-icons.woff2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Graph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Graph.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_eg.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_eg.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_zh.txt" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_zh.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/edit.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/edit.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/new.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/new.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/trash.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/img/diy/icon/trash.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/api.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/api.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/base/head.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base/head.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/creative.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/creative.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/files.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/files.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/iflow.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/iflow.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/object.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/object.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/omdb.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/omdb.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/janesware/temp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/temp.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/temp.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/untitled.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/untitled.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/user.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/user.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/user/auth/signin.tmpl" beforeDir="false" afterPath="$PROJECT_DIR$/templates/user/auth/signin.tmpl" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -94,21 +69,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="creative.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="creative.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="439" column="36" selection-start-line="439" selection-start-column="36" selection-end-line="439" selection-end-column="36" />
+            <state relative-caret-position="-96">
+              <caret line="546" column="65" lean-forward="true" selection-start-line="546" selection-start-column="65" selection-end-line="546" selection-end-column="65" />
               <folding>
-                <element signature="e#11042#11218#0" />
-                <element signature="e#19826#25076#0" />
-                <element signature="e#25122#25933#0" />
-                <element signature="e#25975#27055#0" />
-                <element signature="e#27115#29049#0" />
-                <element signature="e#29091#33337#0" />
-                <element signature="e#34737#34953#0" />
-                <element signature="e#34994#35390#0" />
-                <element signature="e#31354#32460#0" />
+                <element signature="e#33938#44782#0" />
               </folding>
             </state>
           </provider>
@@ -117,8 +84,17 @@
       <file leaf-file-name="vue-base-datatables-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="514">
-              <caret line="418" column="246" lean-forward="true" selection-start-line="418" selection-start-column="140" selection-end-line="418" selection-end-column="246" />
+            <state relative-caret-position="-636">
+              <caret line="48" column="30" selection-start-line="48" selection-start-column="30" selection-end-line="48" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="jquery.datatables.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/new/assets/js/jquery.datatables.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="462">
+              <caret line="4818" column="57" selection-start-line="4818" selection-start-column="47" selection-end-line="4818" selection-end-column="57" />
             </state>
           </provider>
         </entry>
@@ -126,8 +102,11 @@
       <file leaf-file-name="Actions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="162" column="43" selection-start-line="162" selection-start-column="33" selection-end-line="162" selection-end-column="43" />
+            <state relative-caret-position="719">
+              <caret line="172" column="39" selection-start-line="172" selection-start-column="39" selection-end-line="172" selection-end-column="39" />
+              <folding>
+                <element signature="e#1020#4681#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -135,44 +114,8 @@
       <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/base/head.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="482">
-              <caret line="148" column="18" selection-start-line="148" selection-start-column="10" selection-end-line="148" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/home.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret selection-end-column="26" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-apps-box-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-apps-box-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="108">
-              <caret line="9" column="12" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="iflow.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2616">
-              <caret line="446" lean-forward="true" selection-start-line="446" selection-end-line="446" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Sidebar.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="542">
-              <caret line="1088" column="96" selection-start-line="1088" selection-start-column="96" selection-end-line="1088" selection-end-column="96" />
+            <state relative-caret-position="306">
+              <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
             </state>
           </provider>
         </entry>
@@ -180,47 +123,33 @@
       <file leaf-file-name="object.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="16734">
-              <caret line="2153" column="80" selection-start-line="2153" selection-start-column="72" selection-end-line="2153" selection-end-column="80" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="omdb.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-9">
-              <caret line="628" column="11" selection-start-line="628" selection-start-column="11" selection-end-line="628" selection-end-column="11" />
+            <state relative-caret-position="310">
+              <caret line="1032" column="29" selection-start-line="1019" selection-start-column="36" selection-end-line="1032" selection-end-column="29" />
               <folding>
-                <element signature="e#14280#16281#0" />
-                <element signature="e#16336#18434#0" />
-                <element signature="e#18663#20001#0" />
-                <element signature="e#20038#20171#0" />
-                <element signature="e#20298#24389#0" />
-                <element signature="e#31919#34555#0" />
-                <element signature="e#38918#40843#0" />
-                <element signature="e#40888#41858#0" />
-                <element signature="e#41910#42919#0" />
-                <element signature="e#42970#43655#0" />
-                <element signature="e#43718#44792#0" />
-                <element signature="e#44839#49176#0" />
-                <element signature="e#49220#49553#0" />
-                <element signature="e#49598#76329#0" />
-                <element signature="e#76373#92378#0" />
-                <element signature="e#92423#118263#0" />
-                <element signature="e#118310#132795#0" />
-                <element signature="e#132838#133875#0" />
-                <element signature="e#133923#151429#0" />
+                <element signature="e#92818#99246#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vue-object-tree-component.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="iflow.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="420">
+              <caret line="903" column="83" selection-start-line="903" selection-start-column="83" selection-end-line="903" selection-end-column="83" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-object-tree-component.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/web/component/vue-object-tree-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="72">
-              <caret line="65" column="22" lean-forward="true" selection-start-line="65" selection-start-column="22" selection-end-line="65" selection-end-column="22" />
+            <state relative-caret-position="-408">
+              <caret line="184" column="48" lean-forward="true" selection-start-line="184" selection-start-column="48" selection-end-line="184" selection-end-column="48" />
+              <folding>
+                <element signature="e#6383#7649#0" />
+                <element signature="e#7707#7786#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -228,8 +157,17 @@
       <file leaf-file-name="Editor.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4488">
-              <caret line="374" column="43" selection-start-line="374" selection-start-column="37" selection-end-line="374" selection-end-column="43" />
+            <state relative-caret-position="6000">
+              <caret line="500" column="50" selection-start-line="500" selection-start-column="50" selection-end-line="500" selection-end-column="50" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="EditorUi.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="38556">
+              <caret line="3213" column="15" selection-start-line="3213" selection-start-column="15" selection-end-line="3213" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -237,8 +175,35 @@
       <file leaf-file-name="temp.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/temp.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-156">
-              <caret line="35" column="25" selection-start-line="35" selection-start-column="25" selection-end-line="35" selection-end-column="25" />
+            <state relative-caret-position="540">
+              <caret line="429" column="77" selection-start-line="429" selection-start-column="77" selection-end-line="429" selection-end-column="77" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="variables.less" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/variables.less">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="346">
+              <caret line="106" column="29" selection-start-line="106" selection-start-column="29" selection-end-line="106" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="untitled.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/untitled.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="120">
+              <caret line="10" column="37" lean-forward="true" selection-end-line="14" selection-end-column="51" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-editor-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-editor-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="185" column="45" selection-start-line="185" selection-start-column="45" selection-end-line="185" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -246,8 +211,8 @@
       <file leaf-file-name="Menus.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-137">
-              <caret line="1012" column="47" selection-start-line="1012" selection-start-column="34" selection-end-line="1012" selection-end-column="47" />
+            <state relative-caret-position="5628">
+              <caret line="469" column="25" selection-start-line="469" selection-start-column="13" selection-end-line="469" selection-end-column="25" />
             </state>
           </provider>
         </entry>
@@ -255,44 +220,8 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2064">
-              <caret line="7" column="4" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="73" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="flow.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/flow.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="459" column="50" lean-forward="true" selection-end-line="1102" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="files.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-6468">
-              <caret line="56" column="28" lean-forward="true" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-fs-tree-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="144" column="12" selection-start-line="144" selection-start-column="12" selection-end-line="144" selection-end-column="12" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="vue-fs-view-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="516">
-              <caret line="215" lean-forward="true" selection-start-line="215" selection-end-line="215" />
+            <state relative-caret-position="2556">
+              <caret line="213" column="22" selection-start-line="213" selection-start-column="22" selection-end-line="213" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -300,8 +229,51 @@
       <file leaf-file-name="init.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="157" column="11" selection-start-line="157" selection-start-column="4" selection-end-line="157" selection-end-column="11" />
+            <state relative-caret-position="5164">
+              <caret line="908" column="12" selection-start-line="908" selection-start-column="12" selection-end-line="908" selection-end-column="35" />
+              <folding>
+                <element signature="e#61842#64257#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="files.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1008">
+              <caret line="131" column="32" selection-start-line="131" selection-start-column="28" selection-end-line="131" selection-end-column="32" />
+              <folding>
+                <element signature="e#3676#4170#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="init.min.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/js/init.min.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="348">
+              <caret line="91" column="78" selection-start-line="91" selection-start-column="78" selection-end-line="91" selection-end-column="78" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="vue-fs-view-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="396">
+              <caret line="37" column="36" selection-start-line="37" selection-start-column="36" selection-end-line="37" selection-end-column="36" />
+              <folding>
+                <element signature="e#9375#11516#0" />
+                <element signature="e#11545#13182#0" />
+                <element signature="e#13222#15141#0" />
+                <element signature="e#15180#15990#0" />
+                <element signature="e#16021#16471#0" />
+                <element signature="e#16505#17421#0" />
+                <element signature="e#17461#22796#0" />
+                <element signature="e#22835#23057#0" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -317,43 +289,38 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>forwardDir</find>
+      <find>dataTables_scrollBody</find>
+      <find>sScrollBody</find>
+      <find>max-height</find>
+      <find>initClass</find>
+      <find>'</find>
+      <find>&quot;,&quot;</find>
+      <find>&quot;:&quot;</find>
+      <find>toggleTheme</find>
+      <find>log-console-label</find>
+      <find>copy</find>
+      <find>@border-</find>
+      <find>.btn</find>
+      <find>@border-radius-base:</find>
+      <find>fetchDataByMql</find>
+      <find>log-console-content</find>
+      <find>filter</find>
+      <find>append</find>
+      <find>mark(</find>
+      <find>mark</find>
+      <find>opacity</find>
+      <find>filters</find>
+      <find>orderBy</find>
+      <find>self.model.list</find>
       <find>model.list</find>
-      <find>toggle</find>
-      <find>#nav</find>
-      <find>fsRename</find>
-      <find>addText</find>
-      <find>pickTitle</find>
-      <find>fsContent</find>
-      <find>geEditor</find>
-      <find>resource</find>
-      <find>Editor</find>
-      <find>chrome</find>
-      <find>editorUiInit</find>
-      <find>initTools</find>
-      <find>initToolBars</find>
-      <find>localStorage</find>
-      <find>CREATIVE-THEME</find>
-      <find>theme</find>
-      <find>tomorrow</find>
-      <find>creative-tools-play</find>
-      <find>tools</find>
-      <find>toolbars</find>
-      <find>win.cmd</find>
-      <find>properties</find>
-      <find>jobContext</find>
-      <find>jobContextGet</find>
-      <find>reset</find>
-      <find>bob</find>
-      <find>fsList</find>
-      <find>addBobPalette</find>
+      <find>animated</find>
+      <find>self.model.graph.theme</find>
+      <find>`</find>
+      <find>context-menu-list</find>
+      <find>initContextMenu</find>
+      <find>hover-toolbars</find>
     </findStrings>
     <replaceStrings>
-      <replace>&quot;category&quot;: &quot;Connect&quot;,</replace>
-      <replace>data-active-color=&quot;green&quot; data-background-color=&quot;write&quot;</replace>
-      <replace>&quot; data-background-color=&quot;blue&quot;</replace>
-      <replace>data-active-color=&quot;blue&quot; data-background-color=&quot;write&quot;</replace>
-      <replace>index.html</replace>
       <replace>47.92.151.165</replace>
       <replace>top 100</replace>
       <replace>/web/vendor/</replace>
@@ -379,12 +346,18 @@
       <replace>self.model.graph.graph</replace>
       <replace>self.model.graph.model</replace>
       <replace>self.model.graph.container</replace>
+      <replace>.rootPath</replace>
+      <replace>open</replace>
+      <replace>&quot;</replace>
+      <replace>&quot;, &quot;</replace>
+      <replace>&quot;: &quot;</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
       <dir>$USER_HOME$/Documents/Admin/Color/seantheme.com/color-admin-v1.7/admin/html/assets</dir>
       <dir>$PROJECT_DIR$/public/web/vendor/defiantjs</dir>
       <dir>$PROJECT_DIR$/public/web/vendor/js-load-image</dir>
+      <dir>$PROJECT_DIR$/public/web/vendor/mxgraph副本</dir>
       <dir>$PROJECT_DIR$/public/web/vendor/mxgraph</dir>
     </dirStrings>
   </component>
@@ -402,57 +375,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/public/web/component/vue-ci-tags-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/imap.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_zh.txt" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_eg.txt" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-search-preset-component_zh-CN.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-search-preset-component_en-US.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/job.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/probe.html" />
-        <option value="$PROJECT_DIR$/public/web/js/util.js" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-base-tree-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/files.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-base-robot-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/event.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/performance.html" />
         <option value="$PROJECT_DIR$/templates/janesware/log.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/search.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-tools-box-component.html" />
-        <option value="$PROJECT_DIR$/templates/home.html" />
         <option value="$PROJECT_DIR$/public/web/component/vue-apps-box-component.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.css" />
         <option value="$PROJECT_DIR$/templates/janesware/system.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js" />
         <option value="$PROJECT_DIR$/templates/janesware/test.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js" />
         <option value="$PROJECT_DIR$/templates/janesware/api.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
-        <option value="$PROJECT_DIR$/templates/base/head.html" />
         <option value="$PROJECT_DIR$/templates/janesware/temp" />
         <option value="$PROJECT_DIR$/templates/janesware/omdb.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" />
-        <option value="$PROJECT_DIR$/templates/janesware/temp.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-editor-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-object-tree-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
         <option value="$PROJECT_DIR$/templates/janesware/flow.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Graph.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_eg.txt" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/resources/grapheditor_zh.txt" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/object.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-home-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js" />
+        <option value="$PROJECT_DIR$/templates/base/footer.html" />
+        <option value="$PROJECT_DIR$/templates/user/auth/signin.tmpl" />
         <option value="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" />
         <option value="$PROJECT_DIR$/conf/locale/locale_en-US.ini" />
-        <option value="$PROJECT_DIR$/templates/janesware/iflow.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" />
+        <option value="$PROJECT_DIR$/public/web/js/init.min.js" />
+        <option value="$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" />
+        <option value="$PROJECT_DIR$/templates/home.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/user.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/files.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-graph-component.html" />
+        <option value="$PROJECT_DIR$/templates/base/head.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/untitled.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/variables.less" />
+        <option value="$PROJECT_DIR$/public/web/css/color/style.min.css" />
         <option value="$PROJECT_DIR$/public/web/js/init.js" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-editor-component.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js" />
         <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/iflow.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/temp.html" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-object-tree-component.html" />
       </list>
     </option>
   </component>
@@ -469,8 +442,6 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="-1920" />
-    <option name="y" value="-280" />
     <option name="width" value="1920" />
     <option name="height" value="1080" />
   </component>
@@ -482,6 +453,106 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="graph" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
+              <item name="graph" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="mxobjectTreeStyle" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="base" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="janesware" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="Scope">
         <subPane subId="Project Files">
           <expand>
@@ -511,147 +582,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="conf" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="conf" type="462c0819:PsiDirectoryNode" />
-              <item name="locale" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-              <item name="js" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="css" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="js" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="janesware" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="user" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="user" type="462c0819:PsiDirectoryNode" />
-              <item name="auth" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="ChangesBrowser.SHOW_FLATTEN" value="false" />
+    <property name="ChangesTree.GroupingKeys" value="directory&#10;module" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
     <property name="WebServerToolWindowFactoryState" value="true" />
@@ -674,8 +608,9 @@
       <recent name="https://github.com/jclulow/jsondiff/blob/master/jsondiff.js" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/templates/janesware" />
       <recent name="$PROJECT_DIR$/public/web/component" />
+      <recent name="$PROJECT_DIR$/public/web/js" />
+      <recent name="$PROJECT_DIR$/templates/janesware" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -734,30 +669,32 @@
       <workItem from="1527671497839" duration="146936000" />
       <workItem from="1528412914724" duration="25791000" />
       <workItem from="1528519429696" duration="48726000" />
-      <workItem from="1528786609441" duration="124955000" />
+      <workItem from="1528786609441" duration="134301000" />
+      <workItem from="1529588436898" duration="147715000" />
+      <workItem from="1530355425713" duration="213535000" />
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="875587000" />
+    <option name="totallyTimeSpent" value="1246183000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1920" y="-280" width="1920" height="1080" extended-state="0" />
+    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32956383" />
-      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.11022364" />
+      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.110662356" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.32904148" />
+      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.3283582" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32965517" />
+      <window_info anchor="bottom" id="Run" order="2" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24959612" />
       <window_info anchor="bottom" id="Terminal" order="7" weight="0.32935324" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
@@ -769,11 +706,11 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32956383" />
       <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.16720517" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.24959612" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -838,383 +775,399 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/templates/janesware/object.html</url>
-          <line>2427</line>
+          <line>2428</line>
         </line-breakpoint>
       </breakpoints>
       <option name="time" value="2" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/src/js/util/mxLog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11400">
-          <caret line="950" column="39" selection-start-line="950" selection-start-column="39" selection-end-line="950" selection-end-column="39" />
+        <state relative-caret-position="-336">
+          <caret line="19" column="27" lean-forward="true" selection-start-line="19" selection-start-column="27" selection-end-line="19" selection-end-column="27" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/graph/index.html">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxLog.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="711">
-          <caret line="1453" column="37" selection-start-line="1453" selection-start-column="37" selection-end-line="1453" selection-end-column="37" />
+        <state relative-caret-position="504">
+          <caret line="174" column="72" selection-start-line="174" selection-start-column="72" selection-end-line="174" selection-end-column="72" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxWindow.js">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/mxClient.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="672">
-          <caret line="249" column="85" selection-start-line="249" selection-start-column="85" selection-end-line="249" selection-end-column="85" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxToolbar.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1824">
-          <caret line="152" column="32" selection-start-line="152" selection-start-column="32" selection-end-line="152" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-table-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="26" selection-start-line="26" selection-end-line="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4452">
-          <caret line="371" column="19" selection-start-line="369" selection-start-column="41" selection-end-line="371" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/user.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="128" column="67" selection-start-line="128" selection-start-column="53" selection-end-line="128" selection-end-column="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/user/auth/signin.tmpl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/user/auth/signup.tmpl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-15156" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1524">
-          <caret line="127" column="334" selection-start-line="127" selection-start-column="327" selection-end-line="127" selection-end-column="334" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/user/auth/reset_passwd.tmpl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/user/auth/forgot_passwd.tmpl">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="25" column="37" selection-start-line="25" selection-start-column="37" selection-end-line="25" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/api.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="104" column="99" selection-start-line="104" selection-start-column="99" selection-end-line="104" selection-end-column="99" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="1914" column="41" selection-start-line="1914" selection-start-column="26" selection-end-line="1914" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/temp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="73" column="8" selection-start-line="73" selection-start-column="8" selection-end-line="73" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/test.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3684">
-          <caret line="307" selection-start-line="307" selection-end-line="307" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-9">
-          <caret line="628" column="11" selection-start-line="628" selection-start-column="11" selection-end-line="628" selection-end-column="11" />
-          <folding>
-            <element signature="e#14280#16281#0" />
-            <element signature="e#16336#18434#0" />
-            <element signature="e#18663#20001#0" />
-            <element signature="e#20038#20171#0" />
-            <element signature="e#20298#24389#0" />
-            <element signature="e#31919#34555#0" />
-            <element signature="e#38918#40843#0" />
-            <element signature="e#40888#41858#0" />
-            <element signature="e#41910#42919#0" />
-            <element signature="e#42970#43655#0" />
-            <element signature="e#43718#44792#0" />
-            <element signature="e#44839#49176#0" />
-            <element signature="e#49220#49553#0" />
-            <element signature="e#49598#76329#0" />
-            <element signature="e#76373#92378#0" />
-            <element signature="e#92423#118263#0" />
-            <element signature="e#118310#132795#0" />
-            <element signature="e#132838#133875#0" />
-            <element signature="e#133923#151429#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/awesomeStyle/awesome.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="314" column="15" selection-start-line="314" selection-start-column="15" selection-end-line="314" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="936">
-          <caret line="78" column="83" selection-start-line="78" selection-start-column="83" selection-end-line="78" selection-end-column="83" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/home.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="514">
-          <caret line="418" column="246" lean-forward="true" selection-start-line="418" selection-start-column="140" selection-end-line="418" selection-end-column="246" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ci-card-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="727">
-          <caret line="766" column="48" selection-start-line="766" selection-start-column="48" selection-end-line="766" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/user/auth/activate.tmpl">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-search-input-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="310">
-          <caret line="200" column="36" selection-start-line="200" selection-start-column="36" selection-end-line="200" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-editor-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-300">
-          <caret line="25" column="20" lean-forward="true" selection-start-line="25" selection-start-column="20" selection-end-line="25" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/temp.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-156">
-          <caret line="35" column="25" selection-start-line="35" selection-start-column="25" selection-end-line="35" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-object-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="65" column="22" lean-forward="true" selection-start-line="65" selection-start-column="22" selection-end-line="65" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="516">
-          <caret line="215" lean-forward="true" selection-start-line="215" selection-end-line="215" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/graph/js/EditorUi.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="1465" column="8" selection-start-line="1465" selection-start-column="8" selection-end-line="1465" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/src/js/editor/mxEditor.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="587">
-          <caret line="2596" column="8" selection-start-line="2596" selection-start-column="8" selection-end-line="2596" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/graph/js/Actions.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="1312" column="8" selection-start-line="1312" selection-start-column="8" selection-end-line="1312" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="214">
-          <caret line="759" column="45" lean-forward="true" selection-start-line="759" selection-start-column="28" selection-end-line="759" selection-end-column="45" />
+        <state relative-caret-position="132">
+          <caret line="85" column="6" lean-forward="true" selection-start-line="85" selection-start-column="6" selection-end-line="85" selection-end-column="6" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Menus.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-137">
-          <caret line="1012" column="47" selection-start-line="1012" selection-start-column="34" selection-end-line="1012" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="144" column="12" selection-start-line="144" selection-start-column="12" selection-end-line="144" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-6468">
-          <caret line="56" column="28" lean-forward="true" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="482">
-          <caret line="148" column="18" selection-start-line="148" selection-start-column="10" selection-end-line="148" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="372">
-          <caret line="31" column="25" lean-forward="true" selection-end-line="31" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/alpaca/dist/lib/ace-builds/src-noconflict/ext-spellcheck.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="218">
-          <caret line="51" column="4" selection-start-line="51" selection-start-column="4" selection-end-line="51" selection-end-column="4" />
+        <state relative-caret-position="5628">
+          <caret line="469" column="25" selection-start-line="469" selection-start-column="13" selection-end-line="469" selection-end-column="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2064">
-          <caret line="7" column="4" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="73" />
+        <state relative-caret-position="2556">
+          <caret line="213" column="22" selection-start-line="213" selection-start-column="22" selection-end-line="213" selection-end-column="22" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Editor.js">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4488">
-          <caret line="374" column="43" selection-start-line="374" selection-start-column="37" selection-end-line="374" selection-end-column="43" />
+        <state relative-caret-position="-22620" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/jquery-file-upload/js/jquery.fileupload.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="492">
+          <caret line="42" column="46" lean-forward="true" selection-start-line="42" selection-start-column="46" selection-end-line="42" selection-end-column="46" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/flow.html">
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-home-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="459" column="50" lean-forward="true" selection-end-line="1102" />
+        <state relative-caret-position="60">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/src/js/util/mxForm.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="470">
+          <caret line="73" column="43" selection-start-line="73" selection-start-column="43" selection-end-line="73" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Toolbar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="456">
+          <caret line="178" column="7" selection-start-line="178" selection-start-column="7" selection-end-line="178" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="12">
+          <caret line="31" column="25" selection-start-line="31" selection-start-column="25" selection-end-line="31" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/alpaca/dist/lib/datatables.net/js/jquery.dataTables.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="59" column="17" lean-forward="true" selection-start-line="59" selection-start-column="4" selection-end-line="59" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/cfg.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="2638" column="5" lean-forward="true" selection-start-line="2638" selection-start-column="5" selection-end-line="2638" selection-end-column="5" />
+          <folding>
+            <element signature="e#993#2976#0" />
+            <element signature="e#3058#4900#0" />
+            <element signature="e#4939#27751#0" />
+            <element signature="e#27767#50243#0" />
+            <element signature="e#50262#72717#0" />
+            <element signature="e#72732#95187#0" />
+            <element signature="e#95205#117681#0" />
+            <element signature="e#117698#146410#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1677">
+          <caret line="185" column="19" selection-start-line="185" selection-start-column="19" selection-end-line="185" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/ishow.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="1090" column="57" selection-start-line="1090" selection-start-column="48" selection-end-line="1090" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-search-preset-component_zh-CN.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="311" column="47" lean-forward="true" selection-start-line="310" selection-start-column="24" selection-end-line="311" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/user/auth/signin.tmpl">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="312">
+          <caret line="173" column="44" selection-start-line="173" selection-start-column="39" selection-end-line="173" selection-end-column="44" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/conf/locale/locale_zh-CN.ini">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="294" selection-start-line="294" selection-end-line="294" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="16734">
-          <caret line="2153" column="80" selection-start-line="2153" selection-start-column="72" selection-end-line="2153" selection-end-column="80" />
+        <state relative-caret-position="311">
+          <caret line="320" column="20" selection-start-line="320" selection-start-column="20" selection-end-line="320" selection-end-column="20" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/conf/locale/locale_en-US.ini">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="330">
-          <caret line="288" column="28" selection-start-line="288" selection-start-column="28" selection-end-line="288" selection-end-column="28" />
+        <state relative-caret-position="435">
+          <caret line="312" column="19" lean-forward="true" selection-start-line="312" selection-start-column="19" selection-end-line="312" selection-end-column="19" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
+    <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="162" column="43" selection-start-line="162" selection-start-column="33" selection-end-line="162" selection-end-column="43" />
+        <state relative-caret-position="7536">
+          <caret line="628" column="11" selection-start-line="628" selection-start-column="11" selection-end-line="628" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="477">
+          <caret line="67" column="50" lean-forward="true" selection-start-line="67" selection-start-column="50" selection-end-line="67" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-apps-box-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="9" column="12" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/flow.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5508">
+          <caret line="459" column="50" selection-end-line="1102" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/user.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="708">
+          <caret line="457" column="30" lean-forward="true" selection-start-line="457" selection-start-column="30" selection-end-line="457" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="951" column="68" selection-start-line="951" selection-start-column="68" selection-end-line="951" selection-end-column="68" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1260">
-          <caret line="609" column="28" lean-forward="true" selection-start-line="609" selection-start-column="28" selection-end-line="609" selection-end-column="28" />
+        <state relative-caret-position="-301">
+          <caret line="1779" column="49" lean-forward="true" selection-start-line="1779" selection-start-column="49" selection-end-line="1779" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="1359" column="135" lean-forward="true" selection-start-line="1358" selection-start-column="24" selection-end-line="1359" selection-end-column="135" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1008">
+          <caret line="131" column="32" selection-start-line="131" selection-start-column="28" selection-end-line="131" selection-end-column="32" />
           <folding>
-            <element signature="e#14571#18460#0" />
+            <element signature="e#3676#4170#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+    <entry file="file://$PROJECT_DIR$/templates/home.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="542">
-          <caret line="1088" column="96" selection-start-line="1088" selection-start-column="96" selection-end-line="1088" selection-end-column="96" />
+        <state relative-caret-position="371">
+          <caret line="661" column="38" lean-forward="true" selection-start-line="661" selection-start-column="38" selection-end-line="661" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="37" column="36" selection-start-line="37" selection-start-column="36" selection-end-line="37" selection-end-column="36" />
+          <folding>
+            <element signature="e#9375#11516#0" />
+            <element signature="e#11545#13182#0" />
+            <element signature="e#13222#15141#0" />
+            <element signature="e#15180#15990#0" />
+            <element signature="e#16021#16471#0" />
+            <element signature="e#16505#17421#0" />
+            <element signature="e#17461#22796#0" />
+            <element signature="e#22835#23057#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-graph-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-264">
+          <caret line="77" column="60" lean-forward="true" selection-start-line="77" selection-start-column="30" selection-end-line="77" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/footer.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="14" column="247" selection-start-line="14" selection-start-column="245" selection-end-line="14" selection-end-column="247" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="348">
+          <caret line="91" column="78" selection-start-line="91" selection-start-column="78" selection-end-line="91" selection-end-column="78" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-graph-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-132">
+          <caret line="133" column="22" selection-start-line="133" selection-start-column="22" selection-end-line="133" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/new/assets/js/jquery.datatables.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="462">
+          <caret line="4818" column="57" selection-start-line="4818" selection-start-column="47" selection-end-line="4818" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-base-datatables-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-636">
+          <caret line="48" column="30" selection-start-line="48" selection-start-column="30" selection-end-line="48" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/bootstrap-3.3.7/less/variables.less">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="106" column="29" selection-start-line="106" selection-start-column="29" selection-end-line="106" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/css/color/style.min.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="371">
+          <caret line="1117" column="21" lean-forward="true" selection-start-line="1117" selection-start-column="21" selection-end-line="1117" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="310">
+          <caret line="1032" column="29" selection-start-line="1019" selection-start-column="36" selection-end-line="1032" selection-end-column="29" />
+          <folding>
+            <element signature="e#92818#99246#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/untitled.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="10" column="37" lean-forward="true" selection-end-line="14" selection-end-column="51" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="157" column="11" selection-start-line="157" selection-start-column="4" selection-end-line="157" selection-end-column="11" />
+        <state relative-caret-position="5164">
+          <caret line="908" column="12" selection-start-line="908" selection-start-column="12" selection-end-line="908" selection-end-column="35" />
+          <folding>
+            <element signature="e#61842#64257#0" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2616">
-          <caret line="446" lean-forward="true" selection-start-line="446" selection-end-line="446" />
+        <state relative-caret-position="306">
+          <caret line="56" lean-forward="true" selection-start-line="56" selection-end-line="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph的副本/graph/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1436">
+          <caret line="534" column="48" selection-start-line="534" selection-start-column="44" selection-end-line="534" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="719">
+          <caret line="172" column="39" selection-start-line="172" selection-start-column="39" selection-end-line="172" selection-end-column="39" />
+          <folding>
+            <element signature="e#1020#4681#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-editor-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="185" column="45" selection-start-line="185" selection-start-column="45" selection-end-line="185" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Sidebar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="1075" column="141" selection-start-line="1075" selection-start-column="134" selection-end-line="1075" selection-end-column="141" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="439" column="36" selection-start-line="439" selection-start-column="36" selection-end-line="439" selection-end-column="36" />
+        <state relative-caret-position="-96">
+          <caret line="546" column="65" lean-forward="true" selection-start-line="546" selection-start-column="65" selection-end-line="546" selection-end-column="65" />
           <folding>
-            <element signature="e#11042#11218#0" />
-            <element signature="e#19826#25076#0" />
-            <element signature="e#25122#25933#0" />
-            <element signature="e#25975#27055#0" />
-            <element signature="e#27115#29049#0" />
-            <element signature="e#29091#33337#0" />
-            <element signature="e#34737#34953#0" />
-            <element signature="e#34994#35390#0" />
-            <element signature="e#31354#32460#0" />
+            <element signature="e#33938#44782#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="420">
+          <caret line="903" column="83" selection-start-line="903" selection-start-column="83" selection-end-line="903" selection-end-column="83" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/temp.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="429" column="77" selection-start-line="429" selection-start-column="77" selection-end-line="429" selection-end-column="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-object-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-408">
+          <caret line="184" column="48" lean-forward="true" selection-start-line="184" selection-start-column="48" selection-end-line="184" selection-end-column="48" />
+          <folding>
+            <element signature="e#6383#7649#0" />
+            <element signature="e#7707#7786#0" />
           </folding>
         </state>
       </provider>

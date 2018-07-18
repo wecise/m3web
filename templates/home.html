@@ -6,7 +6,6 @@
         margin-top: 10%;
     }
 
-
     .panel {
         background-color: transparent;
         border: 0px;
@@ -60,7 +59,7 @@
         box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
     }
     .tile_name {
-        cursor: move;
+        cursor: pointer;
         padding-bottom: 0px;
         border-bottom: 0px solid rgba(255,255,255,.2);
     }
@@ -215,14 +214,14 @@
         background-color: rgb(33, 149, 244);
     }
 
-    .layer > .dropdown {
-        position:relative;
-        left:40px;
-        bottom:10px;
+    .layer .list-context-menu {
+        position: relative;
+        right: -45px;
+        bottom: 5px;
     }
 
-    .layer > .dropdown > a {
-        color: #6eb4ec;
+    .layer .list-context-menu i {
+        color: rgb(169, 211, 245);
     }
 
 </style>
@@ -236,14 +235,13 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-apps-box-component.html"></link>
+<!--<link rel="vc" href="{{AppSubUrl}}/web/component/vue-home-component.html"></link>-->
 
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
 <script defer>
     
-    var eventHub = new Vue();
-
     VueLoader.onloaded(["vue-editor-component",
                         "vue-search-preset-component",
                         "vue-ai-robot-component",
@@ -299,18 +297,9 @@
                     let self = this;
 
                     self.$nextTick(function(){
-                        self.loadApps();
                         self.init();
-                        App.init();
+                        self.initPlugIn();
                     })
-                },
-                watch: {
-                    'path.view':function(val,oldVal){
-                        let self = this;
-
-                        setDefaultHome('janesware/' + val.split("/")[2],self.path._csrf);
-                    },
-                    deep:true
                 },
                 methods: {
                     init: function() {
@@ -329,6 +318,40 @@
 
                             }, 500);
                         })
+                    },
+                    initPlugIn: function(){
+                        let self = this;
+
+                        self.loadApps();
+
+                        self.initContextMenu();
+
+                        App.init();
+                    },
+                    initContextMenu: function(){
+                        let self = this;
+
+                        $.contextMenu({
+                            selector: '.list-context-menu',
+                            trigger: 'left',
+                            build: function($trigger, e) {
+                                // this callback is executed every time the menu is to be shown
+                                // its results are destroyed every time the menu is hidden
+                                // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
+                                let _item = e.target.attributes.getNamedItem('data-item').value;
+
+                                return {
+
+                                    items: {
+                                        "default": {name: '{{.i18n.Tr "home_defaulthome"}}', icon: "fa-home", callback: function(key, opt) {
+                                                setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
+                                            }
+                                        }
+                                    }
+                                };
+                            }
+                        });
+
                     },
                     setPresetDefault: function(event){
                         let self = this;
@@ -577,6 +600,11 @@
                                 })
                             }
                         });
+                    },
+                    triggerInput: function(name){
+                        let self = this;
+
+                        $(self.$refs[name]).click();
                     }
                 }
             });
@@ -622,14 +650,10 @@
             </div>
         </div>
         <!-- /.row -->
-        <BR/>
-        <BR/>
-        <BR/>
-        <BR/>
         <div class="row">
             <div class="col-lg-offset-3 col-lg-6">
                 <div>
-                    <div id="multi" style="margin-left: 30px">
+                    <div id="multi" style="margin-left: 30px;margin-top: 30px">
                         <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
                             <a :href="item.url" :target="item.target" style="color:#ffffff;">
                                 <div class="tile_name">
@@ -637,23 +661,13 @@
                                     <p class="small">${item.{{.i18n.Tr "mxhome_portlet_name"}}}</p>
                                 </div>
                             </a>
-                            <div class="dropdown">
-                                <a href="#" class="email-header-link" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-angle-down m-l-5"></i></a>
-                                <ul class="dropdown-menu">
-                                    <li class="">
-                                        <a href="javascript:void(0)">
-                                            <label>
-                                                <input type="radio" :id="item.name" :value="item.url" v-model="path.view"> {{.i18n.Tr "home_defaulthome"}}
-                                            </label>
-                                        </a>
-                                    </li>
-                                </ul>
+                            <div class="list-context-menu" :data-item="item.url">
+                                <i class="fa fa-angle-down"></i>
                             </div>
                         </div>
-                        <div class="layer btn btn-primary" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;">
-                            <a href="#addAppModal" data-toggle="modal"><span class="fa fa-plus" style="font-size: 20px;"></span>
-                            </a>
-                        </div>
+                        <a class="layer btn btn-primary" href="#addAppModal" data-toggle="modal" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;">
+                            <span class="fa fa-plus" style="font-size: 20px;"></span>
+                        </a>
                     </div>
                 
                 </div>
@@ -670,13 +684,13 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-lg-12">
-                                <a href="javascript:void(0);" :target="item.target" class="layer select btn btn-primary" v-for="item in user.appList">
+                                <a href="javascript:void(0);" :target="item.target" class="layer select btn btn-primary" v-for="item in user.appList" @click="triggerInput(item.name)">
                                     <i :class="item.icon"></i> 
                                     <p class="small">
                                         ${item.{{.i18n.Tr "mxhome_portlet_name"}}}
                                     </p>
                                     <p>
-                                        <input type="checkbox" :value="item.name" v-model='item.selected' @click="toogle(item)">
+                                        <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)">
                                     </p>
                                 </a>
                             </div>

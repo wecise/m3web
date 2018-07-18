@@ -3183,7 +3183,39 @@ EditorUi.prototype.createFormat = function(container)
  */
 EditorUi.prototype.createFooter = function()
 {
-	return this.createDiv('geFooter');
+    let footer = this.createDiv('geFooter');
+
+    $(footer).css({
+		"padding": "0px 10px"
+	});
+
+	let content = `<div id="editorui-footer"></div>`;
+
+    $(footer).html(content).ready(function(){
+		_.delay(function(){
+            let _footVue = new Vue({
+                delimiters: ['#{', '}#'],
+                el: '#editorui-footer',
+                template: ` <div>
+                            <i class="fa fa-file"></i> 
+							<select style="width: auto;height: 22px;border: none;background-color: rgba(0, 0, 0, 0);margin: 2px 0px;">
+								<option>#{model.parent+'/'+model.name}#</option>
+							</select>
+						</div>`,
+                data:{
+                    model: null
+                },
+                mounted: function(){
+                    this.$nextTick(function() {
+                        let tmp = localStorage.getItem("graph-object");
+                        this.model = _.attempt(JSON.parse.bind(null, tmp));
+                    })
+                }
+            });
+		},500)
+	});
+
+    return footer;
 };
 
 /**

@@ -3,25 +3,40 @@
 	<style>
 		/*----------  style  ----------*/
 		.ztree li a.curSelectedNode {
-			background-color: rgb(244, 244, 244)!important;
+			background-color: rgb(0,0,0)!important;
 			border:1px solid #ffffff!important;
+			color: rgb(255,255,255)!important;
 		}
 
 		.ztree li a:hover{
 			text-decoration: none!important;
 		}
 
-		.hover-toolbars {
-			padding: 0px 4px!important;
+		.hover-toolbars{
 			position: relative;
-			left: 85px;
+			left: calc(100% - 68px);
 			top: 0px;
-			margin: -20px 5px!important;
-			width: 72px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
 			display: block;
-			background-color: rgb(255, 255, 255);
-			border: 1px solid rgb(246, 246, 246);
+			background-color: rgb(0,0,0);
+			border: none;
 			border-radius: 0;
+		}
+
+		/*.hover-toolbars > .button:hover{
+			box-shadow: 0px 0px 0px 2px rgba(255,255,255,1);
+		}*/
+
+
+		.lm_splitter {
+			opacity: .2;
+		}
+
+		.context-menu-list.context-menu-root{
+			z-index: 100!important;
 		}
 		
 	</style>
@@ -46,7 +61,7 @@
                     view: {
                         dblClickExpand: this.onDblClickExpand,
                         addDiyDom: this.addCountDom,
-                        addHoverDom: this.addHoverDom,
+                        //addHoverDom: this.addHoverDom,
                         removeHoverDom: this.removeHoverDom,
                     },
                     edit: {
@@ -103,7 +118,65 @@
                     self.initData([{cid: -1, treeNode: null}]);
                 },500);
 
+                self.initPlugIn();
+
             },
+	        initPlugIn: function(){
+                let self = this;
+
+                $("#class-tree-tree").contextMenu({
+                    selector: 'span.more',
+                    trigger: 'left',
+                    items: {
+
+                        "classNew": {
+                            name: "创建类", icon: "fa-sitemap", callback: function (key, opt) {
+
+                            }
+                        },
+                        "classNewByMql": {
+                            name: "创建类(Mql)", icon: "fa-terminal", callback: function (key, opt) {
+
+                            }
+                        },
+                        "sep1": "---------",
+                        "数据": {
+                            name: "查看数据", icon: "fa-database", callback: function (key, opt) {
+
+                            }
+                        },
+                        "sep2": "---------",
+                        "删除": {
+                            name: "删除类", icon: "fa-trash", callback: function (key, opt) {
+
+                            }
+                        },
+                        "sep3": "---------",
+                        "ddl": {
+                            name: "DDL", icon: "fa-cubes", callback: function (key, opt) {
+
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                            console.log(opt)
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
+                            console.log(opt)
+                        }
+                    }
+                });
+
+	        },
             initData: function(node){
 				let self = this;
 
@@ -148,10 +221,76 @@
                     self.initData([{cid: -1, treeNode: null}]);
                 } else {
 
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr = `<div class="well hover-toolbars" id='toolbars_${treeNode.tId}' >
+										<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
+										<span class='button console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
+										<span class='button more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+               // <span class='button add' id='addBtn_${treeNode.tId}' title='新建' ></span>
+
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    // add
+                    let btnAdd = $("#addBtn_"+treeNode.tId);
+                    if (btnAdd) btnAdd.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'classNew', node: treeNode});
+
+                    });
+
+                    // edit
+                    let btnEdit = $("#editBtn_"+treeNode.tId);
+                    if (btnEdit) btnEdit.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'classEdit', node: treeNode});
+
+                    });
+
+                    // console
+                    let btnConsole = $("#consoleBtn_"+treeNode.tId);
+                    if (btnConsole) btnConsole.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'console', node: treeNode});
+
+                    });
+
+
+                    // more
+                    let btnMore = $("#moreBtn_"+treeNode.tId);
+                    if (btnMore) btnMore.bind("click", function(event){
+
+                        //event.stopPropagation();
+                        event.preventDefault();
+
+                        //self.initContextMenu(event, treeNode);
+                    });
+
+
                     // 只有目录可点击
-                    if (treeNode.child.length < 1) return false;
+	                if (!treeNode.child) return false;
 
                     self.initData([{cid:treeNode.cid,treeNode:treeNode}]);
+
                 }
 
             },
@@ -187,8 +326,10 @@
                     sObj.after(addStr);
                 }
 
-                let btn = $("#addBtn_"+treeNode.tId);
-                if (btn) btn.bind("click", function(){
+                let btnNew = $("#addBtn_"+treeNode.tId);
+
+                if (btnNew) btnNew.bind("click", function(event){
+
                     let zTree = $.fn.zTree.getZTreeObj(self.id);
                     zTree.addNodes(treeNode, {cid: treeNode.cid + _.now(), pId:treeNode.id, name:treeNode.name + _.now()});
                     return false;

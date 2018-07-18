@@ -1113,9 +1113,9 @@ legend{
 }
 .btn{
     font-weight:300;
-    -webkit-border-radius:3px;
-    -moz-border-radius:3px;
-    border-radius:3px
+    -webkit-border-radius:0px;
+    -moz-border-radius:0px;
+    border-radius:0px
 }
 .btn.active:focus,.btn:active:focus,.btn:focus{
     outline:0

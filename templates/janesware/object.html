@@ -2122,7 +2122,7 @@
                                     me.split.obj = Split(['#query_input', '#query_result'], {
                                         direction: 'vertical',
                                         cursor: 'row-resize',
-                                        sizes: [22,52.5],
+                                        sizes: [42,32.5],
                                         onDragEnd: function (argument) {
                                             me.heightUpdate();
                                         }
@@ -2203,9 +2203,9 @@
                                     if(_.isEmpty(colms)){
                                         cls = "*";
                                     } else {
-                                        cls = colms.join(",\n");
+                                        cls = colms.join(",");
                                     }
-                                    let querySql = "select " + cls + " from " + appVue.class.tree.name;
+                                    let querySql = "select\n\t " + cls + "\nfrom\n\t " + appVue.class.tree.name;
 
                                     let _cache = me.loadCacheSql();
 
@@ -2217,7 +2217,7 @@
 
                                     me.query.editor.setValue(me.query.editor.getValue(), 1);
 
-                                    me.onFormat();
+                                    //me.onFormat();
 
                                 },
                                 loadCacheSql: function() {
@@ -2242,6 +2242,7 @@
                                         .replace(/\s{0,}with version /ig, "\nWITH VERSION\n\t")
                                         .replace(/\s{0,}create class /ig, "\nCREATE CLASS\n\t")
                                         .replace(/\s{0,}drop class /ig, "\nDROP CLASS\n\t")
+                                        .replace(/\s{0,}alert class /ig, "\nALERT CLASS\n\t")
                                         .replace(/\s{0,}\t/g,"\n\t");
 
                                     me.query.editor.setValue(_mql);

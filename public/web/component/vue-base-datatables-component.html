@@ -29,14 +29,49 @@
             padding: 5px 5px;
             color:rgb(102, 102, 102)!important;
         }
-		
+
+		div.toolbar {
+			float: left;
+		}
+
+		div.toolbar i {
+			color: rgb(218, 224, 231);
+			cursor: pointer;
+			margin: 10px 0px 0px 5px;
+		}
+
+		.dataTables_scrollBody {
+			max-height: unset;
+		}
+
+
+		div[id*="classEdit"].dataTables_info{
+			position: absolute;
+			bottom: 0px;
+			height: 28px;
+			background-color: rgb(255, 255, 255);
+			width: 100%;
+			text-align: left;
+			border-top: 1px solid rgb(226, 231, 236)
+		}
+
+		div[id*="output"].dataTables_info {
+			position: fixed;
+			bottom: 32px;
+			height: 28px;
+			background-color: rgb(255, 255, 255);
+			width: 100%;
+			text-align: left;
+			border-top: 1px solid rgb(226, 231, 236)
+		}
+
         
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-base-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-striped table-bordered" width="100%">
+		<table :id="id" class="table table-striped table-bordered pageResize" width="100%">
 		</table>
 	</template>
 
@@ -49,7 +84,8 @@
 			columns: Array,
 			dataset: Array,
 			options: Object,
-            contextmenu: String
+            contextmenu: String,
+			result: Object,
 		},
 		data: function(){
           	return {
@@ -555,6 +591,7 @@
             let self = this;
 
             eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.resize);
         },
 		mounted: function () {
             let self = this;
@@ -584,7 +621,9 @@
           	dataset: {
                 handler: function(val,oldVal){
                       	    let self = this;
-                            
+
+                      	    if(val === oldVal) return false;
+
                             if( !_.isEmpty(self.datatable) ) {
                                 self.datatable.destroy(); 
                                 self.init();
@@ -608,9 +647,28 @@
                     self.datatable.columns.adjust().draw(); // Redraw the DataTable
                 }
 
-            }*/
+            }*/,
+            options: {
+                handler: function(val,oldVal){
+                    let self = this;
+
+                    //if(val == oldVal) return false;
+
+	                //self.datatable.destroy();
+                    //self.init();
+
+                },
+                deep:true
+            }
+
 		},
 		methods: {
+            resize: function(event){
+                let self = this;
+
+                $(".dataTables_wrapper").css('max-height', $(".dataTables_wrapper").parent().height());
+                $(".dataTables_scrollBody").css('max-height', event.scrollY);
+            },
             init: function(){
                 let self = this;
 
@@ -650,7 +708,12 @@
                                         "sSortAscending" : ": 以升序排列此列",
                                         "sSortDescending" : ": 以降序排列此列"
                                     }
-                                }
+                                },
+                                dom: '<"toolbar">frtip',
+			                    fixedHeader: {
+			                        header: true,
+			                        footer: true
+			                    }
                     },self.options)).columns.adjust().draw();
 
 				self.initPlugin();
@@ -658,6 +721,10 @@
 			},
 			initPlugin: function(){
                 let self = this;
+
+                $("div.toolbar").html(`<i class="fa fa-bars"></i>`).ready(function(){
+                    self.initClassMenu();
+                });
 
                 // init selected row's status
                 $(self.$el).find("tbody").on("mouseenter", "tr", function () {
@@ -736,12 +803,48 @@
                     }
                 });
 
+
 			},
             redraw: function(){
                 let self = this;
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
-            }
+            },
+			initClassMenu: function(){
+                let self = this;
+
+                if(_.isEmpty(self.result)) return false;
+
+                $.contextMenu({
+                    selector: '.toolbar',
+                    trigger: 'left',
+                    build: function($trigger, e) {
+
+                        let _keys = null;
+						let _items = null;
+
+						_keys = _.keys(self.result.data);
+						_.forEach(_keys, function(v){
+							let _o = {};
+
+							_o.name = v;
+                            _o.icon = "fa fa-bars";
+                            _o.callback = function(key,opt){
+
+                            };
+						    _items = _.merge(_items, {k:_o});
+						})
+
+
+                        return {
+
+                            items: _items
+
+                        }
+                    }
+                });
+
+			}
 		}
 	
 	}

@@ -24,11 +24,11 @@
 
 	<!-- Bootstrap core CSS -->
 	<!-- Dev Mode -->
-	<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
-	<script src="{{AppSubUrl}}/web/vendor/less/dist/less.min.js"></script>
+	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/less/bootstrap.less" rel="stylesheet/less" type="text/css">
+	<script src="{{AppSubUrl}}/web/vendor/less/dist/less.min.js"></script>-->
 
 	<!-- Pro Mode -->
-	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/css/wecise_enterprise.css" rel="stylesheet">-->
+	<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/wecise_enterprise.css" rel="stylesheet">
 	<!--<link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">-->
 	<script src="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
 
@@ -37,14 +37,12 @@
 	<link href="{{AppSubUrl}}/web/css/color/color_style_responsive.min.css" rel="stylesheet">
 	<link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
 
-	<!-- sweetalert core CSS -->
+	<!-- sweetalert core JS & CSS -->
 	<link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
-	<!-- sweetalert core JS -->
 	<script src="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.js"></script>
 
-	<!-- Bootstrap Select CSS -->
-	<link href='{{AppSubUrl}}/web/vendor/bootstrap-select/dist/css/bootstrap-select.min.css' rel='stylesheet' >
-	<!-- Bootstrap Select JS -->
+	<!-- Bootstrap Select JS & CSS -->
+	<link href='{{AppSubUrl}}/web/vendor/bootstrap-select/dist/css/bootstrap-select.min.css' rel='stylesheet'>
 	<script src='{{AppSubUrl}}/web/vendor/bootstrap-select/dist/js/bootstrap-select.min.js'></script>
 	
 	<!-- bootstrap-tagsinput core CSS -->
@@ -72,7 +70,7 @@
 	<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
 	
 	<!--VUE Core JS-->
-	<script src="{{AppSubUrl}}/web/vendor/vue/2.5.13/dist/vue.min.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/vue/2.5.16/dist/vue.min.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/vueloader/vue.loader.min.js"></script>
 	
 	<!--Later Core JS-->
@@ -118,6 +116,9 @@
 	<script src="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.js" type="text/javascript"></script>
 	<link href="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
 
+	<!--IScroll JS -->
+	<script src="{{AppSubUrl}}/web/vendor/iscroll/build/iscroll.js" type="text/javascript"></script>
+
 
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/util.js"></script>
@@ -158,8 +159,7 @@
 	<link href="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table.min.css" rel="stylesheet">
 	<link href="{{AppSubUrl}}/web/vendor/table/export/bootstrap-editable.css" rel="stylesheet">
 	<link href="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-fixed-columns.css" rel="stylesheet">
-	<link href="{{AppSubUrl}}/web/vendor/table/dragtable/dragtable.css" rel="stylesheet"
-	>
+	<link href="{{AppSubUrl}}/web/vendor/table/dragtable/dragtable.css" rel="stylesheet">
 	
 	<!--Bootstrap Table JS-->
 	<script src="{{AppSubUrl}}/web/vendor/table/dragtable/dragtable.js"></script>
@@ -202,6 +202,7 @@
 	<!-- DataTables JS & CSS -->
 	<script src="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
 
 
 	<title> {{.SignedUser.Company.Fullname}}</title>
@@ -218,10 +219,14 @@
 		    margin-bottom: 45px;
 		    margin: 8px -10px;
 		}
-		
+
 		#company_logo::selection {
 			background: #fff;
 			color: white;
+		}
+
+		#company_logo {
+			margin-right:5px;
 		}
 		
 		/* For mxWindwoPane Start*/
@@ -266,6 +271,18 @@
 
 		.navbar-default .navbar-nav > li > a.item {
 		    color: #fff;
+		}
+
+		.navbar-default .navbar-brand {
+			display: flex;
+			color: rgb(255, 255, 255);
+			font-size: 22px;
+			width:auto;
+		}
+
+		.navbar-default .navbar-brand > span{
+			color: rgb(255, 255, 255)!important;
+			font-weight: 400;
 		}
 
 		.modal-header{
@@ -372,6 +389,19 @@
 			border-top-color: rgb(33, 148, 245);
 			border-left-color: rgb(33, 148, 245);
 		}
+
+		.navbar-right .dropdown-menu {
+			padding:3px 0px!important;
+		}
+
+		.navbar-right .dropdown-menu .divider{
+			margin: 0.25em 0;
+		}
+		.navbar-right .dropdown-menu>li>a{
+			padding: 5px;
+		}
+
+
 	</style>
 </head>
 <body onload="initPlugIn()">
@@ -380,21 +410,23 @@
 	<div id="page-container" class="page-sidebar-fixed page-header-fixed">
 		
 		<div class="navbar navbar-default navbar-fixed-top">
-			<div class="container-fluid" style="margin:0px;padding:0px;">
+			<div class="container-fluid" style="margin:0px;padding:0px 10px 0px 0px;">
 				
 				<div class="navbar-header">
-					<a class="navbar-brand" href="#">
+					<a class="navbar-brand animated bounceIn" href="{{AppSubUrl}}/">
 						<img id="company_logo" src="">
+						<span>{{.title}}</span>
 					</a>
 			    </div>
-
-			    <ul class="nav navbar-nav navbar-right">
+				<div class="navbar-collapse collapse">
+			        <ul class="nav navbar-nav navbar-right">
 
 					{{if .IsSigned}}
 
-						
-						<li class="ai">
+				    {{if eq .company "wecise"}}
+				        <li class="ai">
 						</li>
+				    {{end}}
 
 						<li>
 							<a class="head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"><i class="fa fa-home fa-fw"></i> &nbsp;{{.i18n.Tr "home"}}</a>
@@ -413,28 +445,34 @@
 
 						<li class="dropdown top-bar">
 
-							<a id="drop3" href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								<!--img class="ui mini image" src="{{.SignedUser.AvatarLink}}"-->
 								<i class="fa fa-user"></i> {{.SignedUser.Name}}
 								<i class="caret"></i>
 							</a>
 
-							<ul class="dropdown-menu top-bar animated fadeInDown" aria-labelledby="drop3" style="padding:10px 0px;">
+							<ul class="dropdown-menu top-bar animated fadeInDown">
+
 								<li>
-									<a href="{{AppSubUrl}}/janesware/user?name={{.SignedUser.Name}}">
+									<a href="{{AppSubUrl}}/janesware/user">
 										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}} 
 									</a>
 								</li>
+								<li role="separator" class="divider"></li>
+
+
 								{{if .IsAdmin}}
-									<li role="separator" class="divider"></li>
+								{{if ne .company "oneswitch"}}
 									<li>
 										<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
 											<i class="fa fa-cogs"></i>
 											{{.i18n.Tr "system"}}<!-- Admin Panel -->
 										</a>
 									</li>
+									<li role="separator" class="divider"></li>
 								{{end}}
-								<li role="separator" class="divider"></li>
+								{{end}}
+
 								<li>
 									<a target="_blank" href="/janesware/files">
 										<i class="fa fa-files-o"></i>
@@ -442,6 +480,7 @@
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>
+
 								<li>
 									<a target="_blank" href="javascript:setDefaultHome('home','{{.CsrfToken}}')">
 										<i class="fa fa-home"></i>
@@ -449,6 +488,8 @@
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>
+
+								{{if ne .company "oneswitch"}}
 								<li>
 									<a target="_blank" href="/janesware/api">
 										<i class="fa fa-gear"></i>
@@ -456,6 +497,8 @@
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>
+								{{end}}
+
 								<li style="display: -webkit-inline-flex;">
 									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('LIGHT')" style="text-align:center;">
                                         <img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">亮色
@@ -465,6 +508,14 @@
 									</a>
 								</li>
 								<li role="separator" class="divider"></li>
+
+								<li>
+									<a target="_blank" href="javascript:void(0);" onclick="toggleFullScreen();">
+										<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
+									</a>
+								</li>
+								<li role="separator" class="divider"></li>
+
 								<li>
 									<a href="{{AppSubUrl}}/user/logout/{{.company}}">
 										<i class="fa fa-sign-out"></i>
@@ -495,8 +546,8 @@
 					{{end}}
 
 				</ul>
-
-			</div><!-- end container -->
+				</div>
+			</div>
 		</div>
 	
 {{/*

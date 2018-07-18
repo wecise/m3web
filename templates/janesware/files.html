@@ -34,7 +34,41 @@
 
 <style>
 
+    body {
+        overflow: hidden;
+    }
 
+    .lm_goldenlayout {
+        background: none;
+        background-color: rgb(249, 249, 249);
+    }
+
+    .lm_content {
+        background: rgb(255, 255, 255);
+        border: 1px solid rgb(255, 255, 255);
+        overflow: auto;
+        padding: 5px 15px 5px 0px;
+    }
+
+    .lm_header .lm_tab.lm_active {
+        border-bottom: none;
+        box-shadow: none;
+        padding-bottom: 5px;
+    }
+
+    .lm_tab:hover, .lm_tab.lm_active {
+        background: rgb(255, 255, 255);
+        color: rgb(119, 119, 119);
+    }
+
+    .lm_header .lm_tab {
+        border: none;
+    }
+
+    [id="app"] {
+        width: 100vw;
+        height: 100vh;
+    }
 
 </style>
 
@@ -54,9 +88,6 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
-<!-- Contextmenu core JS -->
-<script src="{{AppSubUrl}}/web/vendor/contextmenu/contextmenu.js"></script>
-
 <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js" ></script>
 <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.ui.position.min.js" ></script>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
@@ -74,587 +105,28 @@
 
         $(function() {
 
+            "use strict";
 
-            Vue.component('file-view-component',{
+            let treeVue = {
                 delimiters: ['${', '}'],
-                template: `#file-view-component-template`,
-                data: function(){
-                    return {
-                        model: {
-                            list: [],
-                            theme: "",
-                            parse: {
-                                list: []
-                            }
-                        },
-                        contextmenu: {
-                            container: {},
-                            dir: {},
-                            file: {},
-                            selected: {},
-                            path: []
-                        },
-                        upload:{
-                            option: {
-                                        url: '/fs/home',
-                                        dataType: 'json',
-                                        autoUpload: false,
-                                        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt)$/i,
-                                        maxFileSize: 999000,
-                                        disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
-                                        previewMaxWidth: 100,
-                                        previewMaxHeight: 100,
-                                        previewCrop: true
-                                    },
-                            swal: {}
-                        },
-                        currentView: 'file-view-icon-component',
-                    }
+                el: '#layout-tree-template',
+                template: `<vue-fs-tree-component id="file-fs-tree" :root="root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>`,
+                data: {
+                    root: "/home",
                 },
                 mounted: function() {
                     let self = this;
 
                     self.$nextTick(function() {
-                        
-                        self.init();
 
-                        $('body').click( function (e) { 
-
-                            if ( e.target.id == 'files-container' ) {
-                            
-                                $(".file-view-component").find('.item-selected').removeClass('item-selected');    
-
-                                self.contextmenu.selected = null;
-                                self.contextmenu.path = null;
-                            }
-                        });
                     })
-                },
-                watch: {
-                    'contextmenu.selected': {
-                        handler: function(val,oldVal){
-                                    let self = this;
-                                    
-                                    if(!_.isEmpty(val.fullname)){
-                                        self.contextmenu.path = val.fullname.split("/");
-                                    }
-                                    
-                                    if(val.type === 'dir' ){
-                                        $('#fileupload').fileupload({url: '/fs' + val.parent + '/' + val.name});
-                                    } 
-
-                                    if(_.isNull(val)){
-                                        $('#fileupload').fileupload({url: '/fs/home/admin/home'});
-                                    }
-                                 },
-                        deep:true
-                    }
-                },
-                created: function(){
-                    let self = this;
-
-                    eventHub.$on('file-view-event', self.setData);
-
-                    eventHub.$on("file-mouseover-event",self.mouseOver);
-                    eventHub.$on("file-mouseout-event",self.mouseOut);
-                    eventHub.$on("file-click-event",self.click);
-                    eventHub.$on("file-dblclick-event",self.dblClick);
-                    eventHub.$on("file-rightclick-event",self.rightClick);
-
-                },
-                methods: {
-                    init: function(){
-                        let self = this;
-
-                        self.initContentMenu();
-                        self.initFileUpload();
-
-                    },
-                    initFileUpload: function(){
-                        let self = this;
-                        var uploadButton = $('<button/>')
-                                            .addClass('btn btn-primary')
-                                            .prop('disabled', true)
-                                            .text('Processing...')
-                                            .on('click', function () {
-                                                var $this = $(this),
-                                                    data = $this.data();
-                                                $this
-                                                    .off('click')
-                                                    .text('中止')
-                                                    .on('click', function () {
-                                                        $this.remove();
-                                                        data.abort();
-                                                    });
-                                                data.submit().always(function () {
-                                                    $this.remove();
-                                                });
-                                            });
-                        
-                        $('#fileupload').fileupload(self.upload.option)
-                        .on('fileuploadadd', function (e, data) {
-                            self.swal = swal({
-                                            title: '',
-                                            type: 'info',
-                                            html:`  <div id="progress" class="progress">
-                                                        <div class="progress-bar progress-bar-success"></div>
-                                                    </div>
-                                                    <div id="files" class="files"></div>`,
-                                            showConfirmButton: false,
-                                        });
-                            data.context = $('<div/>').appendTo('#files');
-                            $.each(data.files, function (index, file) {
-                                var node = $('<p/>')
-                                        .append($('<span/>').text(file.name));
-                                if (!index) {
-                                    node
-                                        .append('<br>')
-                                        .append(uploadButton.clone(true).data(data));
-                                }
-                                node.appendTo(data.context);
-                            });
-                        })
-                        .on('fileuploadprocessalways', function (e, data) {
-                            var index = data.index,
-                                file = data.files[index],
-                                node = $(data.context.children()[index]);
-                            if (file.preview) {
-                                node
-                                    .prepend('<hr>')
-                                    .prepend(file.preview);
-                            }
-                            if (file.error) {
-                                node
-                                    .append('<hr>')
-                                    .append($('<span class="text-danger"/>').text(file.error));
-                            }
-                            if (index + 1 === data.files.length) {
-                                data.context.find('button')
-                                    .text('上传')
-                                    .prop('disabled', !!data.files.error);
-                            }
-                        })
-                        .on('fileuploadprogressall', function (e, data) {
-                            var progress = parseInt(data.loaded / data.total * 100, 10);
-                            $('#progress .progress-bar').css(
-                                'width',
-                                progress + '%'
-                            );
-                        })
-                        .on('fileuploaddone', function (e, data) {
-                            $.each(data.result.files, function (index, file) {
-                                if (file.url) {
-                                    var link = $('<a>')
-                                        .attr('target', '_blank')
-                                        .prop('href', file.url);
-                                    $(data.context.children()[index])
-                                        .wrap(link);
-                                } else if (file.error) {
-                                    var error = $('<span class="text-danger"/>').text(file.error);
-                                    $(data.context.children()[index])
-                                        .append('<br>')
-                                        .append(error);
-                                }
-                            });
-
-                            eventHub.$emit('tree-refresh-event',null);
-
-                            swal.close();
-                            
-                        })
-                        .on('fileuploadfail', function (e, data) {
-                            $.each(data.files, function (index) {
-                                var error = $('<span class="text-danger"/>').text('上传失败。');
-                                $(data.context.children()[index])
-                                    .append('<br>')
-                                    .append(error);
-                            });
-                            swal.close();
-                        })
-                        .prop('disabled', !$.support.fileInput)
-                        .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                    },
-                    initContentMenu: function(){
-                        let self = this;
-
-                        self.contextmenu.dir = contextmenu([
-                                                {
-                                                    label: "打开",
-                                                    onclick: function (e){
-                                                        self.open(self.contextmenu.selected);
-                                                    }},
-                                                {
-                                                    label: "下载",
-                                                    onclick: function (e){
-                                                        self.download(self.contextmenu.selected);
-                                                    }
-                                                },
-                                                {hr : true},
-                                                {
-                                                    label: "新建文件夹",
-                                                    onclick: function (e){
-                                                        self.mkdir(self.contextmenu.selected);
-                                                    }
-                                                } ,
-                                                {
-                                                    label: "新建文件",
-                                                    onclick: function (e){
-                                                        self.mkfile(self.contextmenu.selected);
-                                                    }
-                                                },
-                                                {hr : true},
-                                                {
-                                                    label: "删除",
-                                                    onclick: function(e){
-                                                        self.delete(self.contextmenu.selected);
-                                                    }
-                                                }
-                                            ]);
-
-                        self.contextmenu.file = contextmenu([
-                                                {
-                                                    label: "打开",
-                                                    onclick: function (e){
-                                                        self.open(self.contextmenu.selected);
-                                                    }},
-                                                {
-                                                    label: "下载",
-                                                    onclick: function (e){
-                                                        self.download(self.contextmenu.selected);
-                                                    }
-                                                },
-                                                {hr : true},
-                                                {
-                                                    label: "删除",
-                                                    onclick: function(e){
-                                                        self.delete(self.contextmenu.selected);
-                                                    }
-                                                }
-                                            ]);
-
-                        contextmenu.attach($("#files-container"), self.contextmenu.dir);
-
-                        //contextmenu.show(self.contextmenu.container, 300, 200);
-                        //contextmenu.show(self.contextmenu.dir, 300, 200);
-                        //contextmenu.show(self.contextmenu.file, 300, 200);
-                    },
-                    mouseOver: function(event){
-                        let self = this;
-                        
-                        $(self.$el).find('.item-selected').removeClass('item-selected');
-                        $('#file_'+event.id).find('.widget').addClass('item-selected');
-
-                    },
-                    mouseOut: function(event){
-                        let self = this;
-
-                        //$('#file_'+event.id).find('.item-selected').removeClass('item-selected');
-                    },
-                    click: function(event){
-                        let self = this;
-
-                        $(self.$el).find('.item-selected').removeClass('item-selected');
-                        $('#file_'+event.id).find('.widget').addClass('item-selected');
-
-
-                        self.contextmenu.selected = event;
-
-                        if(event.type === 'dir') {
-                            jQuery.ajax({
-                                url: '/fs/home/' + event.name,
-                                type: 'GET',
-                                dataType: 'text json',
-                                contentType: "application/text; charset=utf-8",
-                                data: {
-                                    type: 'dir'
-                                },
-                                beforeSend: function(xhr) {
-                                    oneLevelLoading = layer.load(3, {
-                                        shade: [0.1, '#ccc'],
-                                        time: 30 * 1000
-                                    });
-                                },
-                                complete: function(xhr, textStatus) {
-                                    layer.close(oneLevelLoading);
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    
-                                    var rtn = data.message;
-
-                                    if(!_.isEmpty(rtn)){
-                                        rtn = _.map(rtn, function(v,k){
-                                                    return _.merge(v,{title:v.name});
-                                                });
-                                        //rtn.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', rtn);
-                                    } else {
-                                        eventHub.$emit('file-view-event', parentObj);
-                                    }
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    layer.close(oneLevelLoading);
-                                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                }
-                            });
-                        } else {
-                            self.open();
-                        }
-                    },
-                    dblClick: function(event){
-                        let self = this;
-                        var parentObj = [{id: _.random(event.id), name: event.parent, title: "上一级", parent:event.name, type: 'parent'}];
-
-                        self.contextmenu.selected = event;
-                        
-                        if(event.type === 'dir') {
-                            jQuery.ajax({
-                                url: '/fs/home/' + event.name,
-                                type: 'GET',
-                                dataType: 'text json',
-                                contentType: "application/text; charset=utf-8",
-                                data: {
-                                    type: 'dir'
-                                },
-                                beforeSend: function(xhr) {
-                                    oneLevelLoading = layer.load(3, {
-                                        shade: [0.1, '#ccc'],
-                                        time: 30 * 1000
-                                    });
-                                },
-                                complete: function(xhr, textStatus) {
-                                    layer.close(oneLevelLoading);
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    
-                                    var rtn = data.message;
-
-                                    if(!_.isEmpty(rtn)){
-                                        rtn = _.map(rtn, function(v,k){
-                                                    return _.merge(v,{title:v.name});
-                                                });
-                                        rtn.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', rtn);
-                                    } else {
-                                        eventHub.$emit('file-view-event', parentObj);
-                                    }
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    layer.close(oneLevelLoading);
-                                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                }
-                            });
-                        } else if(event.type === 'parent'){
-
-                            jQuery.ajax({
-                                url: '/fs/home/' + event.parent,
-                                type: 'GET',
-                                dataType: 'text json',
-                                contentType: "application/text; charset=utf-8",
-                                data: {
-                                    type: 'dir'
-                                },
-                                beforeSend: function(xhr) {
-                                    oneLevelLoading = layer.load(3, {
-                                        shade: [0.1, '#ccc'],
-                                        time: 30 * 1000
-                                    });
-                                },
-                                complete: function(xhr, textStatus) {
-                                    layer.close(oneLevelLoading);
-                                },
-                                success: function(data, textStatus, xhr) {
-                                    
-                                    var rtn = data.message;
-
-                                    if(!_.isEmpty(rtn)){
-                                        rtn = _.map(rtn, function(v,k){
-                                                    return _.merge(v,{title:v.name});
-                                                });
-                                        rtn.unshift(parentObj[0]);
-                                        eventHub.$emit('file-view-event', rtn);
-                                    } else {
-                                        eventHub.$emit('file-view-event', parentObj);
-                                    }
-                                },
-                                error: function(xhr, textStatus, errorThrown) {
-                                    layer.close(oneLevelLoading);
-                                    console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-                                }
-                            });
-                        } else {
-                            self.open();
-                        }
-                    },
-                    rightClick: function(event){
-                        let self = this;
-
-                        alert(event.name)
-                    },
-                    setData: function(event) {
-                        let self = this;
-                        
-                        self.model.list = event;
-                    },
-                    mkdir: function(){
-                        let self = this;
-                        
-                        swal({
-                            title: '输入名称',
-                            input: 'text',
-                            showCancelButton: true,
-                            confirmButtonText:'确定',
-                            cancelButtonText:'取消',
-                            inputValidator: function (value) {
-                                return new Promise(function (resolve, reject) {
-                                    if (value) {
-                                        var url = "";
-
-                                        if(_.isEmpty(self.contextmenu.selected.name)){
-                                            url = '/fs/home/' + value;
-                                        } else {
-                                            url = '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name + '/' + value;
-                                        }
-                                        console.log(url)
-                                        jQuery.ajax({
-                                            url: url,
-                                            type: 'PUT',
-                                            dataType: 'text',
-                                            contentType: "application/x-www-form-urlencoded",
-                                            data: {
-                                                type:'dir'
-                                            },
-                                            beforeSend: function(xhr) {
-                                                oneLevelLoading = layer.load(3, {
-                                                    shade: [0.1, '#ccc'],
-                                                    time: 30 * 1000
-                                                });
-                                            },
-                                            complete: function(xhr, textStatus) {
-                                                layer.close(oneLevelLoading);
-                                            },
-                                            success: function(data, textStatus, xhr) {
-                                                eventHub.$emit('tree-refresh-event',null);
-                                                resolve();
-                                            },
-                                            error: function(xhr, textStatus, errorThrown) {
-                                                layer.close(oneLevelLoading);
-                                                console.log(errorThrown);
-                                            }
-                                        });
-                                    } else {
-                                        reject('输入名称!')
-                                    }
-                                })
-                            }
-                        }).then(
-                            function () {
-                                swal({
-                                    type: 'success'
-                                });
-                            }
-                        )
-                    },
-                    open: function(){
-                        let self = this;
-
-                        if(_.isEmpty(self.contextmenu.selected.name)) return false;
-
-                        if(self.contextmenu.selected.ftype === 'dir'){
-                            self.dblClick(self.contextmenu.selected);
-                        } else {
-                            var contents = '/fs' + self.contextmenu.selected.parent + '/'  + self.contextmenu.selected.name + '?type=download';
-                            
-                            if(self.contextmenu.selected.ftype === 'png'){
-                                //contents = `<img src="/fs` + self.contextmenu.selected.parent + `/`  + self.contextmenu.selected.name + `?type=download" class="img-responsive" alt="Image">`;
-                            }
-
-                            layer.open({
-                                type: 2,
-                                title: self.contextmenu.selected.name,
-                                shadeClose: true,
-                                shade: false,
-                                maxmin: true,
-                                area: ['1024px', '600px'],
-                                content: contents
-                            });
-                        }
-                    },
-                    download: function(){
-                        let self = this;
-
-                        if(_.isEmpty(self.contextmenu.selected.name)) return false;
-                        console.log(123,'/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name + '?type=download')
-                        window.location = '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name + '?type=download';
-                    },
-                    delete: function(){
-                        let self = this;
-
-                        if(_.isEmpty(self.contextmenu.selected.name)) return false;
-
-                        console.log('/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name);
-                        
-                        jQuery.ajax({
-                            url: '/fs' + self.contextmenu.selected.parent + '/' + self.contextmenu.selected.name,
-                            type: 'DELETE',
-                            dataType: 'text json',
-                            contentType: "application/text; charset=utf-8",
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                eventHub.$emit('tree-refresh-event',null);
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.log(xhr,textStatus, errorThrown);
-                                eventHub.$emit('tree-refresh-event',null);
-                            }
-                        });
-                    },
-                    parse: function(event){
-                        let self = this;
-                        console.log("/web/data/"+event)
-                        Papa.parse("/web/data/"+event, {
-                            download: true,
-                            complete: function(results, file) {
-                                //self.model.parse.list = results.data;
-                                //console.log("Parsing complete:", JSON.stringify(results), file);
-                            },
-                            step: function(results, parser) {
-                                //console.log("Row data:", JSON.stringify(results.data));
-                                self.model.parse.list.push(results.data[0].join(" "));
-                            }
-                        })
-
-                        if($(".parse-container").hasClass('parse-container-active')){
-                            console.log(1)
-                            $(".parse-container").removeClass('parse-container-active');
-                            $(".parse-container").css("display","none");
-                        } else {
-                            console.log(2)
-                            $(".parse-container").addClass('parse-container-active');
-                            $(".parse-container").css("display","");
-                        }
-                    },
-                    toggleLeft: function(){
-                        appVue.toggleLeft();
-                    },
-                    view: function(event){
-                        let self = this;
-
-                        self.currentView = event;
-
-                        $("a.btn-xs").removeClass('active');
-                        $("."+event).addClass('active');
-                    }
                 }
-            })
+            };
 
-            
-            var appVue = new Vue({
+            let consoleVue = {
                 delimiters: ['${', '}'],
-                el: '#app',
-                template: '#app-template',
+                el: '#layout-console-template',
+                template: `<vue-fs-view-component id="file-fs-view" :root="root"></vue-fs-view-component>`,
                 data: {
                     model: [],
                     root: "/home",
@@ -665,7 +137,6 @@
                 created: function(){
                     let self = this;
 
-                    
                 },
                 mounted: function() {
                     let self = this;
@@ -865,7 +336,7 @@
                             $(".navtoggle").addClass("fa fa-caret-right");
 
                             self.toggle.left = false;
-                          } else {
+                        } else {
                             $("#nav").show(500);
 
                             $("#content").removeClass("col-lg-12");
@@ -874,33 +345,129 @@
 
                             $(".navtoggle").removeClass("fa fa-caret-right");
                             $(".navtoggle").addClass("fa fa-caret-left");
-                            
+
                             self.toggle.left = true;
                         }
                     },
                 }
-            })
+            };
+
+            let appApp = new Vue({
+                delimiters: ['${', '}'],
+                el: '#app',
+                data: {
+                    config: {
+                        settings:{
+                            showPopoutIcon: false,
+                            showCloseIcon: false,
+                            hasHeaders: false,
+                        },
+                        content: [{
+                            type: 'row',
+                            content:[
+                                {
+                                    type: 'stack',
+                                    width: 20,
+                                    content:[{
+                                        type: 'component',
+                                        componentName: 'layoutComponent',
+                                        title:'我的文件',
+                                        isClosable: false,
+                                        componentState: {
+                                            id: 'layout-tree',
+                                            templateId: 'layout-tree-template'
+                                        }
+                                    }]
+                                },
+                                {
+                                    type: 'column',
+                                    content:[{
+                                        type: 'component',
+                                        componentName: 'layoutComponent',
+                                        title:'内容',
+                                        componentState: {
+                                            id: 'layout-console',
+                                            templateId: 'layout-console-template'
+                                        }
+                                    }]
+                                }
+                            ]
+                        }]
+                    }
+
+                },
+                mounted: function() {
+                    let self = this;
+
+                    self.$nextTick(function() {
+                        setTimeout(function () {
+                            self.init();
+                        });
+                    })
+                },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+                        //var savedState = localStorage.getItem('savedState');
+                        //self.config = savedState !== null ? JSON.parse(savedState) : self.config;
+
+                        var layout = new GoldenLayout(self.config, self.$el);
+
+                        layout.registerComponent('layoutComponent', function (container, state) {
+                            var html = "<div id=\"" + state.templateId + "\">" + $('#' + state.templateId).html() + "</div>";
+                            container.getElement().html(html);
+
+                            setTimeout(function(){
+                                if(state.id == 'layout-tree'){
+                                    new Vue(treeVue);
+                                } else if(state.id == 'layout-console'){
+                                    new Vue(consoleVue);
+                                } else if(state.id == 'layout-output'){
+                                    //new Vue(queryOutput);
+                                }
+                            })
+                        });
+                        //
+                        //	Save state in local storage
+                        //
+                        layout.on('stateChanged', function () {
+                            var state = JSON.stringify(layout.toConfig());
+                            localStorage.setItem('savedState', state);
+                        });
+                        //  Initialize GL
+                        layout.init();
+                        //  Update GL on window resize
+                        window.addEventListener('resize', function () { layout.updateSize(); });
+
+                    },
+                    resetLayout: function () {
+                        localStorage.removeItem('savedState');
+                        window.location.reload(true);
+                    },
+                    initClassTree: function(){
+                        let self = this;
+                    },
+                    queryConsole: function(){
+                        let self = this;
+
+                        return {
+                            methods: {
+                                init: function(){
+                                    alert(3)
+                                }
+                            }
+                        }
+                    },
+                    initQueryOutput: function(){
+                        let self = this;
+                    }
+                }
+            });
+
         })
 
     })
-
-</script>
-
-<script type="text/x-template" id="app-template">
-
-    <div class="panel panel-grey" >
-        <div class="panel-body">
-            <div class="row">
-                <div class="col-lg-2" id="nav">
-                    <vue-fs-tree-component id="file-fs-tree" :root="root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
-                </div>
-                <div class="col-lg-10" id="content">
-                    <vue-fs-view-component id="file-fs-view" :root="root"></vue-fs-view-component>
-                </div>
-
-            </div>
-        </div>
-    </div>
 
 </script>
 

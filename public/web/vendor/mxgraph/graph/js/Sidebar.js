@@ -18,7 +18,6 @@ function Sidebar(editorUi, container)
 	this.graph.container.style.visibility = 'hidden';
 	document.body.appendChild(this.graph.container);
 
-
 	
 	this.pointerUpHandler = mxUtils.bind(this, function()
 	{
@@ -141,13 +140,12 @@ Sidebar.prototype.init = function()
                         tags[val.name] = _.values(val).join(" ");
                     })
 
-                    console.log(JSON.stringify(_data),JSON.stringify(tags))
-                    self.addEntitiesMatrixPalette('clipart', v.alias, dir + '/matrix/12/', 'icon_laptop', '.svg', _data, _data, tags, false);
+                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', 'icon_laptop', '.svg', _data, _data, tags, false);
                 })
 
             }
 
-            self.addSvgPalette('clipart', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
+            self.addSvgPalette('map', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
                 ['China', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'Singapore', 'UnitedKingdom', 'Usa'],
                 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
                     'Router_Icon': 'router switch'});
@@ -1067,26 +1065,33 @@ Sidebar.prototype.addBobPalette = function(expand)
 
     var fns = [
 
-        this.createVertexTemplateEntry('rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Rounded Rectangle', null, null, 'rounded rect rectangle box'),
-        this.createVertexTemplateEntry('ellipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Ellipse', null, null, 'oval ellipse state'),
-        // Explicit strokecolor/fillcolor=none is a workaround to maintain transparent background regardless of current style
-        this.createVertexTemplateEntry('text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;',
-            40, 20, 'Text', 'Text', null, null, 'text textbox textarea label'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 80, 80, '开始', '开始', null, null, 'circle'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 80, 80, '结束', '结束', null, null, 'circle'),
 
-		this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rectangle', null, null, 'rect rectangle box double'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 80, 80, '', '圆', null, null, 'circle'),
 
-		this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Double Rounded Rectangle', null, null, 'rounded rect rectangle box double'),
-        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Double Ellipse', null, null, 'oval ellipse start end state double'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 80, '', '椭圆', null, null, 'oval ellipse start end state double'),
 
-		this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Parallelogram', null, null, 'Parallelogram'),
+		// Explicit strokecolor/fillcolor=none is a workaround to maintain transparent background regardless of current style
+        this.createVertexTemplateEntry('text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;opacity=0;fontColor=#000000;',
+            40, 20, '文字', '文字', null, null, 'text textbox textarea label'),
 
-		this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 80, '', 'Hexagon', null, null, 'hexagon preparation'),
-        this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2', 120, 60, '', 'Process', null, null, 'process task'),
+        this.createVertexTemplateEntry('rounded=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '长方形1', null, null, 'rounded rect rectangle box'),
 
-        this.createEdgeTemplateEntry('endArrow=none;dashed=1;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Dashed Line', null, lineTags + 'dashed undirected no'),
-        this.createEdgeTemplateEntry('endArrow=none;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Line', null, lineTags + 'simple undirected plain blank no'),
-        this.createEdgeTemplateEntry('endArrow=classic;startArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Bidirectional Connector', null, lineTags + 'bidirectional'),
-        this.createEdgeTemplateEntry('endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=2;', 50, 50, '', 'Directional Connector', null, lineTags + 'directional directed')
+		this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '长方形2', null, null, 'rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '长方形3', null, null, 'rounded rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '平行四边形', null, null, 'Parallelogram'),
+
+		this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 80, '', '六边形', null, null, 'hexagon preparation'),
+        this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;', 120, 60, '', '复合形', null, null, 'process task'),
+
+        this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线1', null, lineTags + 'manual'),
+        this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;dashed=1;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线2', null, lineTags + 'manual'),
+
+        this.createEdgeTemplateEntry('endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;', 50, 50, '', '线3', null, lineTags + 'directional directed'),
+        this.createEdgeTemplateEntry('endArrow=classic;dashed=1;html=1;strokeColor=#b3b3b3;strokeWidth=3;', 50, 50, '', '线4', null, lineTags + 'directional directed')
     ];
 
     this.addPaletteFunctions('general', mxResources.get('general'), (expand != null) ? expand : true, fns);
@@ -3518,7 +3523,7 @@ Sidebar.prototype.addPalette = function(id, title, expanded, onInit)
     // Keeps references to the DOM nodes
     if (id != null)
     {
-    		this.palettes[id] = [elt, outer];
+    	this.palettes[id] = [elt, outer];
     }
     
     return div;

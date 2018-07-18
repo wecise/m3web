@@ -240,6 +240,7 @@
                     this.actions.get('saveAs').setEnabled(enabled);
                     this.actions.get('export').setEnabled(enabled);
                 }));
+
             }
         };
 
@@ -292,6 +293,14 @@
                 editorUi.editor.graph.model.endUpdate();
             }
 
+            // Auto Toggle Properties Panel
+            editorUi.editor.graph.getSelectionModel().addListener(mxEvent.CHANGE, function(sender, evt)
+            {
+                if(!_.isEmpty(window.jsPanel.activePanels.list)){
+                    let action = editorUi.actions.get('mxProperties');
+                    action.funct(null);
+                }
+            });
 
             $(".geMenubarContainer").remove();
             $(".geSprite-editdiagram").removeClass('geSprite');

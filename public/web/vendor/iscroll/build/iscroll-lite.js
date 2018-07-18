@@ -1,4 +1,4 @@
-/*! iScroll v5.2.0-snapshot ~ (c) 2008-2017 Matteo Spinelli ~ http://cubiq.org/license */
+/*! iScroll v5.2.0 ~ (c) 2008-2016 Matteo Spinelli ~ http://cubiq.org/license */
 (function (window, document, Math) {
 var rAF = window.requestAnimationFrame	||
 	window.webkitRequestAnimationFrame	||
@@ -124,8 +124,7 @@ var utils = (function () {
 		transitionTimingFunction: _prefixStyle('transitionTimingFunction'),
 		transitionDuration: _prefixStyle('transitionDuration'),
 		transitionDelay: _prefixStyle('transitionDelay'),
-		transformOrigin: _prefixStyle('transformOrigin'),
-		touchAction: _prefixStyle('touchAction')
+		transformOrigin: _prefixStyle('transformOrigin')
 	});
 
 	me.hasClass = function (e, c) {
@@ -258,57 +257,14 @@ var utils = (function () {
 			ev;
 
 		if ( !(/(SELECT|INPUT|TEXTAREA)/i).test(target.tagName) ) {
-			// https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/initMouseEvent
-			// initMouseEvent is deprecated.
-			ev = document.createEvent(window.MouseEvent ? 'MouseEvents' : 'Event');
-			ev.initEvent('click', true, true);
-			ev.view = e.view || window;
-			ev.detail = 1;
-			ev.screenX = target.screenX || 0;
-			ev.screenY = target.screenY || 0;
-			ev.clientX = target.clientX || 0;
-			ev.clientY = target.clientY || 0;
-			ev.ctrlKey = !!e.ctrlKey;
-			ev.altKey = !!e.altKey;
-			ev.shiftKey = !!e.shiftKey;
-			ev.metaKey = !!e.metaKey;
-			ev.button = 0;
-			ev.relatedTarget = null;
+			ev = document.createEvent('MouseEvents');
+			ev.initMouseEvent('click', true, true, e.view, 1,
+				target.screenX, target.screenY, target.clientX, target.clientY,
+				e.ctrlKey, e.altKey, e.shiftKey, e.metaKey,
+				0, null);
+
 			ev._constructed = true;
 			target.dispatchEvent(ev);
-		}
-	};
-
-	me.getTouchAction = function(eventPassthrough, addPinch) {
-		var touchAction = 'none';
-		if ( eventPassthrough === 'vertical' ) {
-			touchAction = 'pan-y';
-		} else if (eventPassthrough === 'horizontal' ) {
-			touchAction = 'pan-x';
-		}
-		if (addPinch && touchAction != 'none') {
-			// add pinch-zoom support if the browser supports it, but if not (eg. Chrome <55) do nothing
-			touchAction += ' pinch-zoom';
-		}
-		return touchAction;
-	};
-
-	me.getRect = function(el) {
-		if (el instanceof SVGElement) {
-			var rect = el.getBoundingClientRect();
-			return {
-				top : rect.top,
-				left : rect.left,
-				width : rect.width,
-				height : rect.height
-			};
-		} else {
-			return {
-				top : el.offsetTop,
-				left : el.offsetLeft,
-				width : el.offsetWidth,
-				height : el.offsetHeight
-			};
 		}
 	};
 
@@ -373,13 +329,6 @@ function IScroll (el, options) {
 		this.options.tap = 'tap';
 	}
 
-	// https://github.com/cubiq/iscroll/issues/1029
-	if (!this.options.useTransition && !this.options.useTransform) {
-		if(!(/relative|absolute/i).test(this.scrollerStyle.position)) {
-			this.scrollerStyle.position = "relative";
-		}
-	}
-
 // INSERT POINT: NORMALIZATION
 
 	// Some defaults
@@ -399,7 +348,7 @@ function IScroll (el, options) {
 }
 
 IScroll.prototype = {
-	version: '5.2.0-snapshot',
+	version: '5.2.0',
 
 	_init: function () {
 		this._initEvents();
@@ -706,16 +655,15 @@ IScroll.prototype = {
 	},
 
 	refresh: function () {
-		utils.getRect(this.wrapper);		// Force reflow
+		var rf = this.wrapper.offsetHeight;		// Force reflow
 
 		this.wrapperWidth	= this.wrapper.clientWidth;
 		this.wrapperHeight	= this.wrapper.clientHeight;
 
-		var rect = utils.getRect(this.scroller);
 /* REPLACE START: refresh */
 
-		this.scrollerWidth	= rect.width;
-		this.scrollerHeight	= rect.height;
+		this.scrollerWidth	= this.scroller.offsetWidth;
+		this.scrollerHeight	= this.scroller.offsetHeight;
 
 		this.maxScrollX		= this.wrapperWidth - this.scrollerWidth;
 		this.maxScrollY		= this.wrapperHeight - this.scrollerHeight;
@@ -724,7 +672,7 @@ IScroll.prototype = {
 
 		this.hasHorizontalScroll	= this.options.scrollX && this.maxScrollX < 0;
 		this.hasVerticalScroll		= this.options.scrollY && this.maxScrollY < 0;
-		
+
 		if ( !this.hasHorizontalScroll ) {
 			this.maxScrollX = 0;
 			this.scrollerWidth = this.wrapperWidth;
@@ -738,17 +686,7 @@ IScroll.prototype = {
 		this.endTime = 0;
 		this.directionX = 0;
 		this.directionY = 0;
-		
-		if(utils.hasPointer && !this.options.disablePointer) {
-			// The wrapper should have `touchAction` property for using pointerEvent.
-			this.wrapper.style[utils.style.touchAction] = utils.getTouchAction(this.options.eventPassthrough, true);
 
-			// case. not support 'pinch-zoom'
-			// https://github.com/cubiq/iscroll/issues/1118#issuecomment-270057583
-			if (!this.wrapper.style[utils.style.touchAction]) {
-				this.wrapper.style[utils.style.touchAction] = utils.getTouchAction(this.options.eventPassthrough, false);
-			}
-		}
 		this.wrapperOffset = utils.offset(this.wrapper);
 
 		this._execEvent('refresh');
@@ -757,7 +695,7 @@ IScroll.prototype = {
 
 // INSERT POINT: _refresh
 
-	},	
+	},
 
 	on: function (type, fn) {
 		if ( !this._events[type] ) {
@@ -833,13 +771,11 @@ IScroll.prototype = {
 		pos.top  -= this.wrapperOffset.top;
 
 		// if offsetX/Y are true we center the element to the screen
-		var elRect = utils.getRect(el);
-		var wrapperRect = utils.getRect(this.wrapper);
 		if ( offsetX === true ) {
-			offsetX = Math.round(elRect.width / 2 - wrapperRect.width / 2);
+			offsetX = Math.round(el.offsetWidth / 2 - this.wrapper.offsetWidth / 2);
 		}
 		if ( offsetY === true ) {
-			offsetY = Math.round(elRect.height / 2 - wrapperRect.height / 2);
+			offsetY = Math.round(el.offsetHeight / 2 - this.wrapper.offsetHeight / 2);
 		}
 
 		pos.left -= offsetX || 0;
@@ -854,15 +790,9 @@ IScroll.prototype = {
 	},
 
 	_transitionTime: function (time) {
-		if (!this.options.useTransition) {
-			return;
-		}
 		time = time || 0;
-		var durationProp = utils.style.transitionDuration;
-		if(!durationProp) {
-			return;
-		}
 
+		var durationProp = utils.style.transitionDuration;
 		this.scrollerStyle[durationProp] = time + 'ms';
 
 		if ( !time && utils.isBadAndroid ) {

@@ -10,6 +10,7 @@
 *
 */
 
+"use strict";
 
 var eventHub = new Vue();
 
@@ -56,7 +57,12 @@ var init =  function(){
 
     GLOBAL_OBJECT.company.name = GLOBAL_OBJECT.company.name.replace(/"/g,"");
     let _name = GLOBAL_OBJECT.company.name;
-    GLOBAL_OBJECT.company.dimension = GLOBAL_CONFIG.keyspace[_name].dimension;
+
+    GLOBAL_OBJECT.company.dimension = GLOBAL_CONFIG.keyspace['wecise'].dimension;
+
+    if(GLOBAL_CONFIG.keyspace[_name]){
+        GLOBAL_OBJECT.company.dimension = GLOBAL_CONFIG.keyspace[_name].dimension;
+    }
 
     _.forEach(_.keys(GLOBAL_OBJECT.company.object),function(v){
         if(!_.isEmpty(GLOBAL_CONFIG.keyspace[_name])){
@@ -156,7 +162,7 @@ var setDefaultHome = function(name,token){
 *
 */
 var fsCheck = function(parent, name){
-    let rtn = null;
+    let rtn = false;
 
     jQuery.ajax({
         url: `/fs${parent}/${name}?type=check`,
@@ -173,9 +179,7 @@ var fsCheck = function(parent, name){
             ifSignIn(data);
 
             if( _.lowerCase(data.status) == "ok"){
-                rtn = data.messsage;
-            } else {
-                rtn = data.messsage;
+                rtn = data.message;
             }
 
         },
@@ -258,7 +262,8 @@ var fsList = function(parent){
         dataType: 'text json',
         contentType: "application/text; charset=utf-8",
         data: {
-            type: 'dir'
+            type: 'dir',
+            issys: false
         },
         async:false,
         beforeSend: function(xhr) {
@@ -658,7 +663,8 @@ var fetchSubClass = function(parent){
         type: 'POST',
         async: false,
         data: {
-          cond: `call tree ` + JSON.stringify(_cond)
+            cond: `call tree ` + JSON.stringify(_cond),
+            meta: true
         },
         beforeSend:function(xhr){
         },
@@ -743,7 +749,8 @@ var fetchData = function (param) {
         dataType: 'json',
         async: false,
         data: {
-            cond: param
+            cond: param,
+            meta: true
         },
         beforeSend: function(xhr) {
         },
@@ -880,7 +887,8 @@ var fetchDataByMql = function (param) {
         type: 'POST',
         async: false,
         data: {
-            mql: param
+            mql: param,
+            meta: true
         },
         beforeSend:function(xhr){
         },
@@ -894,12 +902,11 @@ var fetchDataByMql = function (param) {
             if(_.lowerCase(data.status) == "ok"){
                 alertify.success("成功" + " " + moment().format("LLL"));
                 rtn = data;
-            } else {
-                console.log("["+ moment().format("LLL")+"] " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
+            rtn = xhr.responseJSON;
             mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + JSON.stringify(xhr.responseJSON));
         }
     });
@@ -1144,7 +1151,8 @@ var ldapMaintain = function (event) {
         type: 'POST',
         async: false,
         data: {
-            cond: `call user ` + JSON.stringify(event)
+            cond: `call user ` + JSON.stringify(event),
+            meta: true
         },
         beforeSend:function(xhr){
         },
@@ -1170,6 +1178,224 @@ var ldapMaintain = function (event) {
     });
     return rtn;
 };
+
+
+/*
+*        #####  ####### #     # ######     #    #     # #     #
+        #     # #     # ##   ## #     #   # #   ##    #  #   #
+        #       #     # # # # # #     #  #   #  # #   #   # #
+        #       #     # #  #  # ######  #     # #  #  #    #
+        #       #     # #     # #       ####### #   # #    #
+        #     # #     # #     # #       #     # #    ##    #
+         #####  ####### #     # #       #     # #     #    #
+*
+* */
+
+/*
+*  公司管理
+*
+*  添加
+*
+*/
+
+var companyNew = function(event){
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: '/companys',
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: event,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + data.message);
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + data.message);
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+
+    })
+
+    return rtn;
+
+};
+
+
+/*
+*  公司管理
+*
+*  获取
+*
+*
+*/
+
+var companyGet = function(name) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: `/companys/${name}`,
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            rtn = data;
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+
+    })
+
+    return rtn;
+
+};
+
+
+/*
+*  公司管理
+*
+*  列表
+*
+*/
+
+var companyList = function() {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/companys',
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            rtn = data;
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+
+    })
+
+    return rtn;
+
+};
+
+
+/*
+*  公司管理
+*
+*  删除
+*
+*/
+var companyDelete = function(name) {
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: `/companys/${name}`,
+        dataType: 'json',
+        type: 'DELETE',
+        async: false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + data.message);
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + data.message);
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+
+    })
+
+    return rtn;
+
+};
+
+
+/*
+*  公司管理
+*
+*  更新
+*
+*/
+var companyUpdate = function(com) {
+    let rtn = 0;
+
+    jQuery.ajax({
+        url: '/companys',
+        dataType: 'json',
+        contentType: 'application/json',
+        type: 'PUT',
+        async: false,
+        data: JSON.stringify(com),
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + data.message);
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + data.message);
+            }
+
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            alertify.error("失败" + " " + JSON.stringify(xhr));
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+
+    })
+
+    return rtn;
+
+};
+
 
 
 /*
@@ -1880,14 +2106,64 @@ var newWindow = function (type, title, template, position) {
     let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
 
 
-    if(type === 'modal'){
+    if(type === 'fsupload'){
+
+        lrwh[2] = $( window ).width()*0.60;
+        lrwh[3] = $( window ).height()*0.60;
+
+        win = $.jsPanel({
+            id: 'jsPanel-'+title,
+            headerTitle: title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            show: 'animated fadeInDownBig',
+            headerRemove:  false,
+            theme:          'filledlight',
+            content:        template,
+            container: 'body',
+            dragit: {
+                containment: 'parent',
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+
+    }
+
+    if(type === 'fsmodal'){
+
+        lrwh[2] = $( window ).width()*0.50;
+        lrwh[3] = $( window ).height()*0.50;
 
         win = $.jsPanel({
             id: 'jsPanel-'+title,
             paneltype: 'modal',
             headerTitle: title,
-            contentSize:    {width: 480, height: 320},
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
             show: 'animated fadeInDownBig',
+            headerRemove:  true,
             theme:          'filledlight',
             content:        template,
             callback:       function(){
@@ -1937,10 +2213,14 @@ var newWindow = function (type, title, template, position) {
     }
 
     if(type === 'cmd'){
+
+        lrwh[2] = $( window ).width()*0.4;
+        lrwh[3] = $( window ).height()*0.125;
+
         win = $.jsPanel({
             theme:          'filledlight',
             headerTitle:   title,
-            contentSize:    {width: 320, height: 85},
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
             position: {
                 my: "left-top",
                 at: "right-bottom",
@@ -1954,6 +2234,50 @@ var newWindow = function (type, title, template, position) {
             },
             content:        template,
             callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsapp'){
+        lrwh[2] = $( window ).width()*0.55;
+        lrwh[3] = $( window ).height()*0.55;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
                 $(".jsPanel-headerbar",this).css({
                     "background-color": "rgb(238, 238, 238)",
                     "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
@@ -2067,22 +2391,32 @@ var newWindow = function (type, title, template, position) {
     }
 
     if(type === 'properties'){
-        lrwh[2] = $( window ).width()*0.2;
-        lrwh[3] = $( window ).height()*0.5;
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-PROPERTIES-POSITION")));
+
+        let _position = { top: 60, left: 60 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        lrwh[2] = 300;//$( window ).width()*0.2;
+        lrwh[3] = 340;//$( window ).height()*0.55;
 
         win = $.jsPanel({
             theme:          'filledlight',
             headerTitle:   title,
             contentSize:    {width: lrwh[2], height: lrwh[3]},
-            position: {
-                my: 'center',
-                at: 'center',
-                of: 'window'
-            },
+            position: _position,
             container: 'body',
             headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-PROPERTIES-POSITION",JSON.stringify(position));
+                }
+            },
             callback:       function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -2095,7 +2429,7 @@ var newWindow = function (type, title, template, position) {
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd"
+                    "border": "1px solid #dddddd",
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
@@ -2109,6 +2443,63 @@ var newWindow = function (type, title, template, position) {
 
         return win;
     }
+
+    if(type === 'fsinfo'){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem(_.upperCase(type)+"-WINDOW-POSITION")));
+
+        let _position = { top: 10, left: 60 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        lrwh[2] = 400;//$( window ).width()*0.25;
+        lrwh[3] = 600;//$( window ).height()* 0.85 > 600 ? 620: $( window ).height()* 0.85;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    console.log(panel,position)
+                    localStorage.setItem(_.upperCase(type)+"-WINDOW-POSITION",JSON.stringify(position));
+                }
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
 
     if(type === 'appsbox'){
         lrwh[2] = $( window ).width()*0.8/3;
@@ -2136,18 +2527,6 @@ var newWindow = function (type, title, template, position) {
         }
     }
 
-    if(type === 'fsinfo'){
-        lrwh[2] = $( window ).width()*0.6/3;
-        lrwh[3] = $( window ).height()*2.2/3;
-
-        let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
-
-        if(!_.isEmpty(_position)){
-            let _p = _.attempt(JSON.parse.bind(null, _position));
-            lrwh[0] = _p.x || (w-wW)/2;
-            lrwh[1] = _p.y || (h-hH)/2;
-        }
-    }
 
     /*if(type === 'narrow'){
         lrwh[2] = $( window ).width()*0.6/3;
@@ -2370,24 +2749,69 @@ var getPage = function(){
     let path = window.location.pathname;
     let page = path.split("/").pop();
     return page;
-    console.log( page );
+};
+
+var getLicense = function(){
+
+    let _config = _.attempt(JSON.parse.bind(null, `{{.config}}`));
+
+    if(_.isEmpty(_config)){
+        $(".license").html("");
+    } else {
+        $(".license").html(_config.license);
+    }
 };
 
 
+var renameKey = function(obj, key, newKey) {
+
+    if(_.includes(_.keys(obj), key)) {
+        obj[newKey] = _.clone(obj[key], true);
+
+        delete obj[key];
+        delete obj['enum'];
+        delete obj['type'];
+    }
+
+    return obj;
+};
+
+
+var columnsParse = function(meta){
+    let _columns = null;
+
+    // *
+
+    if(_.isEmpty(meta)) {
+        return _columns;
+    }
+
+    // meta
+    _.forEach(meta.columns, function(v,k){
+        _.forEach(v,function(val,key){
+            renameKey(val, 'name', 'field');
+        })
+    })
+
+    return meta.columns;
+
+};
+
 var initPlugIn = function () {
 
+    // Theme
     let _theme = localStorage.getItem("MATRIX_THEME");
 
     toggleTheme(_theme);
 
 
-    let page = getPage();
-
+    // Robot
     $(".ai.ai-robot").removeClass("ai-robot");
 
-    if(_.includes(['home',''],page)){
+    if(_.includes(['home',''],getPage())){
         $(".ai").addClass("ai-robot");
     }
+
 };
 
 
@@ -2423,9 +2847,9 @@ var toggleTheme = function(event){
             "color": "rgb(255,255,255)"
         });
 
-        $(".row-fluid .btn.btn-primary").css({
+        $(".row .btn.btn-primary").css({
             "backgroundColor": "rgb(33, 149, 244)",
-            "borderColor": "rgb(255, 255, 255)"
+            "borderColor": "rgba(0, 0, 0, 0)"
         });
 
         $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(240, 243, 244)");
@@ -2455,7 +2879,7 @@ var toggleTheme = function(event){
             "color": "rgb(255,255,255)"
         });
 
-        $(".row-fluid .btn.btn-primary").css({
+        $(".row .btn.btn-primary").css({
             "backgroundColor": "rgb(90, 90, 90)",
             "borderColor": "rgb(90,90,90)"
         });
@@ -2681,6 +3105,59 @@ var handleBootstrapWizards = function(id) {
     $("#" + id).bwizard()
 };
 
+
+var vwTOpx = function (value) {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    var result = (x*value)/100;
+
+    return result;
+};
+
+var vhTOpx = function (value) {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    var result = (y*value)/100;
+
+    return result;
+};
+
+var pxTOvw = function (value) {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    var result = (100*value)/x;
+
+    return result;
+};
+
+var pxTOvh = function (value) {
+    var w = window,
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        x = w.innerWidth || e.clientWidth || g.clientWidth,
+        y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+
+    var result = (100*value)/y;
+
+    return result;
+};
+
 /*
 
        #    ###    ######  ####### ######  ####### #######
@@ -2692,6 +3169,7 @@ var handleBootstrapWizards = function(id) {
     #     # ###    #     # ####### ######  #######    #
  */
 var robot = function(){
+
     $(".ai-robot").html(`<div style="position: absolute;right:0px;top: -38px;cursor: pointer;" class="animated bounceInLeft">
                             <img src="/web/assets/images/robot.svg" style="width:120px;height:120px;transform: scale(0.5);">
                          </div>`).click(function(){
@@ -2748,6 +3226,10 @@ var appsBox = function(){
         });
     });
 }
+
+var license = function(){
+
+};
 
 
 init();
