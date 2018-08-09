@@ -21,6 +21,65 @@ var GLOBAL_CONFIG = {
             "6" : {'scale':'minute', 'step': 6, 'title':'Minute', 'pattern':'YYYY/MM/DD HH:mm:ss', 'filter':'YYYY/MM'},
             "7" : {'scale':'second', 'step': 7, 'title':'Second', 'pattern':'YYYY/MM/DD HH:mm:ss.sss', 'filter':'YYYY/MM'}
         },
+        gremlin: `#
+g.V("linux:wecise").Out("contain").All();
+
+# 节点 linux:wecise 双向包含哪些节点
+g.V("linux:wecise").Both("contain").All();
+
+# 那个节点包含app:cassandra
+g.V().Has("contain", "app:cassandra").All();
+
+# 支持多个，有 bug
+g.V().Out("contain").Is("app:cassandra").All();
+
+
+# linux:wecise 包含？, ? 包含etcd:etcd
+g.V("linux:wecise").Out("contain").Has("contain", "etcd:etcd").All();
+
+# linux:wecise 任意关系 ，发出或指向
+g.V("linux:wecise").Both().All();
+
+
+# linux:wecise 两种关系 ，发出或指向
+g.V("linux:wecise").Both(["contain","connect"]).All();
+
+# 从多个顶点出发
+g.V("linux:wecise", "linux:wecise1").Both("contain").All();
+
+
+# 集合运算 ，并集
+var cFollows = g.V("linux:wecise").Out("contain")
+var dFollows = g.V("linux:wecise1").Out("contain")
+cFollows.Union(dFollows).All();
+
+# 集合运算 ，交集 ???
+var cFollows = g.V("linux:wecise").Out("contain");
+var dFollows = g.V("linux:wecise1").Out("contain");
+cFollows.Intersect(dFollows).All();
+
+
+# 集合运算 ，差集
+var cFollows = g.V("linux:wecise").Out("contain")
+var dFollows = g.V("linux:wecise1").Out("contain")
+cFollows.Except(dFollows).All();
+
+# js 处理 , d 是 js object 能被序列化为json
+g.V("linux:wecise", "linux:wecise1").Both("contain").All().ForEach(function(d) { g.Emit(d) } );
+
+# A string or list of strings to act as a result key. The value for tag was the vertex the path was on at the time it reached "Tag"
+# 过滤环
+g.V("linux:wecise").Tag("a").Out("contain").Out("contain").ForEach(function (item) { if (item.id !== item.a) g.Emit({ id: item.id }); });
+g.V("linux:wecise").As("a").Out("contain").Out("contain").ForEach(function (item) { if (item.id !== item.a) g.Emit({ id: item.id }); });
+
+# 返回路径
+g.V("linux:wecise").As("a").Out("contain").As("b").Out("contain").As("c").ForEach(function (item) { if (item.id !== item.a) g.Emit({ id: item.a+"-"+item.b+"-"+item.c }); });
+g.V("linux:wecise").As("a").Out("contain").As("b").Out("contain").As("c").Map(function (item) { if (item.id !== item.a) g.Emit({ id: item.a+"-"+item.b+"-"+item.c }); });
+
+# 路径复用
+path = g.M().Out("contain").As("b").Out("contain").As("c")
+g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== item.a) g.Emit({ id: item.a+"-"+item.b+"-"+item.c }); });
+g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== item.a) g.Emit({ id: item.a+"-"+item.b+"-"+item.c+"$"+item.etcd.name }); });`,
         help: [
             `
       ___  ___   _____  

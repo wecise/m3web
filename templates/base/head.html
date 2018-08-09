@@ -86,8 +86,8 @@
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-settings_menu.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-statusbar.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/theme-tomorrow.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/mode-sql.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/snippets/sql.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/mode-mql.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/snippets/mql.js"></script>
 
 	<!-- Object-Hash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/object-hash/dist/object_hash.js"></script>
@@ -129,7 +129,10 @@
 	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js"></script>
 	<script>
 
-		$(document).ajaxStart(function() { Pace.restart(); });
+		$(document).ajaxStart(function() {
+            Pace.options.ajax.trackWebSockets = false;
+		    Pace.restart();
+		});
 		
 		let lang = `{{.Lang}}`;
 		lang = lang.replace(/"/g,"");

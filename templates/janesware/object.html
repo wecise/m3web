@@ -1316,11 +1316,10 @@
                                     appVue.class.tree.iskey =  _.map(_.filter(_data.fieldsObj,function(v){
                                         return v.iskey == "1";
                                     }),'name');
+
                                     $("#class-table-toolbar").html(`<i class="fa fa-home fa-fw"></i>`+appVue.class.tree.name);
-
-                                    $(".class-panel-footer").html(`<b>Count:</b> ` + _data.Fields.length + ` | <b>Primary Keys: </b>` + appVue.class.tree.iskey.join(","));
+                                    $(".class-panel-footer").html(`<b>Count:</b> ` + _data.fields.length + ` | <b>Primary Keys: </b>` + appVue.class.tree.iskey.join(","));
                                     $("#objectDataTable").bootstrapTable('destroy');
-
 
                                     cols.push({
                                         field: "num",
@@ -1583,9 +1582,12 @@
                                         }
                                     });
 
+                                    console.log(20)
+
                                     appVue.class.table.dataset = _data;
                                     appVue.class.tree.difference = _.map(_.intersection(appVue.class.tree.selected.Fields, appVue.class.tree.selectedParent.Fields));
 
+                                    console.log(30,appVue.class.table.dataset,cols)
                                     $("#class_define_alias").val(_data.alias);
                                     $("#class_define_remedy").val(_data.remedy);
                                     $("#class_define_ttl").val(_data.ttl);

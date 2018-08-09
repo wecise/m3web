@@ -1,31 +1,18 @@
-<!--
-
-    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
-    [::::::::::::::      ::::::::::::::]
-    [::::::::::::::      ::::::::::::::]
-    [::::::[[[[[[[:      :]]]]]]]::::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[    CODE BY WANGZD    ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [:::::[                      ]:::::]
-    [::::::[[[[[[[:      :]]]]]]]::::::]
-    [::::::::::::::      ::::::::::::::]
-    [::::::::::::::      ::::::::::::::]
-    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
-
--->
 {{template "base/head" .}}
 
-<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.default.css" type="text/css" rel="stylesheet" />
-
+<link rel="stylesheet" type="text/css" href="{{AppSubUrl}}/web/vendor/mxgraph/graph/styles/grapheditor.css">
 
 <style>
+
+    #title{
+        font-size: 38px;
+        font-weight: 600;
+        font-family: "micosoft yahei";
+        left: 35px;
+        top: 10px;
+        position: fixed;
+        color:rgb(219, 219, 219)
+    }
 
     .tools-item {
         width: 28px;
@@ -43,36 +30,72 @@
         z-index:1;
         position:absolute;
         overflow:hidden;
-        top:60px;
+        top:80px;
         right:5px;
         width:160px;
         height:120px;
         background:transparent;
         box-shadow: 3px 3px 12px #C0C0C0;
-        background: url(../images/window.gif);
         border: 1px solid rgb(195, 195, 195);
     }
 
-    .mxWindow{
-        height:68px!important;
+    #graph > svg {
+        background-image:none!important;
+        padding-top: 10px;
     }
 
+    .geDiagramContainer {
+        border:none;
+    }
+
+    /*
+        Theme
+     */
     .theme-white {
-        background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+        background-image: linear-gradient(120deg, #ffffff 10%, #f9f9f9 100%);
+    }
+
+    .theme-white #graph {
+        background-color: transparent;
+    }
+
+    .theme-white #title {
+        color: #999999;
     }
 
     .theme-grey {
-        background: #f9f9f9;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to bottom, #f9f9f9, #dddddd);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to bottom, #f9f9f9, #dddddd); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: #ffffff;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to bottom, #ffffff, #f9f9f9);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to bottom, #ffffff, #f9f9f9); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
     }
 
     .theme-dark {
+        /*background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.35) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.70) 120%) #989898;*/
+        /*background-image: linear-gradient( 135deg, #333333 10%, #000000 100%);
+        background-blend-mode: multiply,multiply;*/
+        background-color:black;
+        background-image:
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px),
+                radial-gradient(rgba(255,255,255,.4), rgba(255,255,255,.1) 2px, transparent 30px);
+        background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
+        background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
+    }
+    .theme-dark #graph {
         background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.35) 100%), radial-gradient(at top center, rgba(255,255,255,0.40) 0%, rgba(0,0,0,0.70) 120%) #989898;
+        background-image: linear-gradient( 135deg, #333333 10%, #000000 100%);
         background-blend-mode: multiply,multiply;
     }
+    .theme-dark #title {
+        color: #f7f7f7;
+    }
 
+    #tools > img:hover{
+        background-color:#dddddd;
+        cursor:pointer;
+    }
 
     .flow {
         stroke-dasharray: 8;
@@ -85,25 +108,167 @@
         }
     }
 
+    @-webkit-keyframes flash {
+        from, 50%, to {
+            stroke-width: 6;
+            stroke-opacity: 1;
+        }
+
+        25%, 75% {
+            stroke-width: 2;
+            stroke-opacity: 0.2;
+        }
+    }
+
+    @keyframes flash {
+        from, 50%, to {
+            stroke-width: 6;
+            stroke-opacity: 1;
+        }
+
+        25%, 75% {
+            stroke-width: 2;
+            stroke-opacity: 0.2;
+        }
+    }
+
+    .flash {
+        -webkit-animation-duration: 2s;
+        -webkit-animation-delay: 0s;
+        -webkit-animation-iteration-count: infinite;
+    }
+
+    select.bs-select-hidden, select.selectpicker {
+        display: unset!important;
+    }
+
+    .reset-status-select .bootstrap-select button {
+        padding: 7px 12px;
+        border-radius: 0px;
+        background-color: rgb(255, 255, 255);
+        border-right:none;
+        color: #000000;
+    }
+
+    select.no-radius{
+        border-left:none;
+        border-radius:0px;
+        -webkit-appearance: none;
+        height: 33px;
+    }
+    .select-wrapper{
+        width: 25%;
+        padding: 0px;
+        border-radius: 0px;
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    .panel-confirm .btn-danger{
+        border: 0;
+        border-radius: 3px;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+        color: rgb(255, 255, 255);
+        cursor: pointer;
+        font-size: 17px;
+        font-weight: 500;
+        padding: 10px 32px;
+    }
+
+
+    .panel-confirm .btn-danger:focus,
+    .panel-confirm .btn-danger:hover{
+        background-color: rgb(255, 0, 0);
+        border-left-color: rgb(255, 0, 0);
+        border-right-color: rgb(255, 0, 0);
+        outline: 0;
+        -webkit-box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50,100,150,.4);
+        box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(50,100,150,.4);
+    }
+
+    .panel-confirm h4 {
+        /*font-family: "microsoft yahei";*/
+        color: rgb(84, 84, 84);
+        font-weight: 300;
+        position: relative;
+        float: none;
+        margin: 0;
+        padding: 0;
+        line-height: 28px;
+        word-wrap: break-word;
+    }
+
+
 </style>
 
 <div id="app"></div>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 
+<script type="text/javascript">
+    // urlParams is null when used for embedding
+    window.urlParams = window.urlParams || {};
+
+    // Public global variables
+    window.MAX_REQUEST_SIZE = window.MAX_REQUEST_SIZE  || 10485760;
+    window.MAX_AREA = window.MAX_AREA || 15000 * 15000;
+
+    // URLs for save and export
+    window.RESOURCES_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/resources";
+    window.STYLE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
+    window.STENCIL_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/stencils";
+    window.IMAGE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/images";
+    window.CSS_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
+    window.OPEN_FORM = "{{AppSubUrl}}/web/vendor/mxgraph/graph/open.html";
+
+    window.EXPORT_URL = window.EXPORT_URL || '/export';
+    window.SAVE_URL = window.SAVE_URL || '/save';
+    window.OPEN_URL = window.OPEN_URL || '/open';
+    window.RESOURCES_PATH = window.RESOURCES_PATH || 'resources';
+    window.RESOURCE_BASE = window.RESOURCE_BASE || window.RESOURCES_PATH + '/grapheditor';
+    window.STENCIL_PATH = window.STENCIL_PATH || 'stencils';
+    window.IMAGE_PATH = window.IMAGE_PATH || 'images';
+    window.STYLE_PATH = window.STYLE_PATH || 'styles';
+    window.CSS_PATH = window.CSS_PATH || 'styles';
+    window.OPEN_FORM = window.OPEN_FORM || 'open.html';
+
+    mxBasePath = '{{AppSubUrl}}/web/vendor/mxgraph/src';
+    mxLanguage = '{{.Lang}}'.replace(/"/g,"").replace(/en/g,"eg").split("-")[0];
+
+</script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/pako.min.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/base64.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/jscolor/jscolor.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/sanitizer/sanitizer.min.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/src/js/mxClient.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/EditorUi.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Editor.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Sidebar.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Graph.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Format.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Shapes.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Actions.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Menus.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Toolbar.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Dialogs.js"></script>
+
+
+
 
 <script type="text/javascript">
-    
-    VueLoader.onloaded(["vue-base-datatables-component"
-                        ],function() {
+
+    VueLoader.onloaded(["vue-base-datatables-component"],function() {
 
         moment.locale({{.Lang}});
+
+        $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
+        $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
 
 
         $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
 
         $(function() {
-            
+
             var appVue = new Vue({
                 delimiters: ['${', '}'],
                 el: '#app',
@@ -113,39 +278,112 @@
                         object: {
                             data: null,
                             param: null,
-                            nodes: {}
+                            nodes: {},
+                            tip: []
                         },
-                        container: null,
-                        model: null,
-                        graph:null,
-                        layout: null,
-                        layoutMgr: null
+                        project: {},
+                        graph:{
+                            container: null,
+                            model: null,
+                            graph: null,
+                            selectedCell: null,
+                            theme: "theme-white",
+                            data: null,
+                            prompt: null,
+                            outline: null
+                        },
+                        promptWin: null
 
                     },
-                    theme: "",
                     crontab: {
+                        frequency: 3,
                         load: {
                             sched: Object,
                             timer: Object
                         },
-                        update:{
+                        project:{
                             sched: Object,
                             timer: Object
                         }
                     },
-                    count: 1
+                    win: {
+                        toolbars: null,
+                        cmd: null,
+                        start: null,
+                        end: null,
+                    }
                 },
                 mounted: function() {
                     let self = this;
 
                     self.$nextTick(function() {
                         self.init();
+                        self.initData();
                         self.initPlugIn();
                     })
                 },
                 watch: {
-                    model: function(newValue, oldValue) {
+                    'model.object.nodes':{
+                        handler: function (val, oldVal) {
+                            let self = this;
 
+                            if(val != oldVal){
+
+                                self.update();
+
+                                /*_.delay(function(){
+                                    $("svg").addClass("animated fadeInUp");
+                                },500);*/
+                            }
+
+                        },
+                        deep: true
+                    },
+                    'crontab.frequency': {
+                        handler: function (val, oldVal) {
+                            let self = this;
+
+                            if(val != oldVal){
+                                self.crontab.load.sched = later.parse.text('every '+val+' sec');
+                                self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+
+                                self.update();
+                            }
+
+                        },
+                        deep: true
+                    },
+                    'model.project.current':{
+                        handler: function(val,oldVal){
+                            let self = this;
+
+                            if(val != oldVal){
+                                console.log(self.model.object.param.parent, val)
+                                self.model.graph.data = fsContent(self.model.object.param.parent, val);
+                                self.initGraph();
+                            }
+                        },
+                        deep:true
+                    },
+                    'model.project.diaglog':{
+                        handler: function(val,oldVal){
+                            let self = this;
+
+                            if(val !== oldVal){
+
+                                // 需要确认 1
+                                if(val.select < 1) {
+                                    return false;
+                                } else {
+                                    if(_.size(window.jsPanel.activePanels.list)>1) {
+                                        if(_.isEmpty($("#jsPanel-" + val.title ))) {
+                                            self.initPrompt('modal', val);
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        deep:true
                     }
                 },
                 created: function() {
@@ -155,15 +393,81 @@
 
                     self.model.object.param = _.attempt(JSON.parse.bind(null, _tmp));
 
-                    self.model.object.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                    self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+
 
                 },
+                filters: {
+                    pickTitle: function(value){
+
+                        let _tmp = localStorage.getItem("graph-object");
+
+                        let _param = _.attempt(JSON.parse.bind(null, _tmp));
+
+                        let _title = null;//_param.name.split(".")[0];
+                        let _value = value;
+
+                        if(!_.isEmpty(_value)){
+                            _title = _value.title;
+                        }
+
+                        return _title;
+
+                    }
+                },
                 methods: {
-                    init: function() {
+                    play: function(){
                         let self = this;
 
-                        self.theme = localStorage.getItem("creative-theme");
-                        $("body").addClass(self.theme);
+                        swal({
+                            title: '',
+                            text: "确定要开始流程切换?",
+                            type: "info",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "取消",
+                            confirmButtonText: "确定",
+                            confirmButtonColor: "#ff0000"
+                        }).then((result) => {
+                            if (result.value) {
+                                let _project = _.last(self.model.object.param.parent.split("/"));
+                                let _cmdStart = `as400f -oneswitchfile ${_project} -oneswitchaction loadstart`;
+                                let _rtn = self.callJob(_cmdStart);
+
+                                alertify.success("任务开始 " + moment().format("LLL"));
+
+                                if (!_.isEmpty(_rtn.message)) {
+                                    alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
+                                }
+                            }
+                        })
+
+                    },
+                    stop: function(){
+                        let self = this;
+
+                        let _project = _.last(self.model.object.param.parent.split("/"));
+                        let _cmdStop = `as400f -oneswitchfile ${_project} -oneswitchaction stop`;
+                        let _rtn = self.callJob(_cmdStop);
+
+                        alertify.success("任务结束 " + moment().format("LLL"));
+
+                        if (!_.isEmpty(_rtn.message)) {
+                            alertify.success("返回结果 " + moment().format("LLL") + "\n" + _rtn.message.outputs.join(""));
+                        }
+
+                    },
+                    toCenter: function(){
+                        let self = this;
+
+                        self.model.graph.graph.fit();//自适应
+                        self.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
+                        // var sc = self.model.graph.graph.getView().getScale();//获取当前的缩放比例
+                        // self.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
+
+                    },
+                    init: function() {
+                        let self = this;
 
                         if (!mxClient.isBrowserSupported())
                         {
@@ -174,198 +478,377 @@
                         else
                         {
 
-                            self.model.container = document.getElementById('graph');
-                            self.model.container.style.position = 'absolute';
-                            self.model.container.style.overflow = 'hidden';
-                            self.model.container.style.left = '0px';
-                            self.model.container.style.top = '55px';
-                            self.model.container.style.right = '0px';
-                            self.model.container.style.bottom = '0px';
-                            document.body.appendChild(self.model.container);
+                            self.model.graph.container = document.getElementById('graph');
+                            self.model.graph.container.style.position = 'absolute';
+                            self.model.graph.container.style.overflow = 'hidden';
+                            self.model.graph.container.style.left = '0px';
+                            self.model.graph.container.style.top = '55px';
+                            self.model.graph.container.style.right = '0px';
+                            self.model.graph.container.style.bottom = '0px';
+                            document.body.appendChild(self.model.graph.container);
+
+
+                            //mxEvent.disableContextMenu(self.model.graph.container);
+
+                            if (mxClient.IS_QUIRKS)
+                            {
+                                document.body.style.overflow = 'hidden';
+                                new mxDivResizer(self.model.graph.container);
+                                new mxDivResizer(outline);
+                            }
 
                             // Creates the graph inside the given container
-                            self.model.model = new mxGraphModel();
-                            self.model.graph = new mxGraph(self.model.container, self.model.model);
+                            self.model.graph.model = new mxGraphModel();
+                            self.model.graph.graph = new mxGraph(self.model.graph.container, self.model.graph.model);
 
                             // Enables automatic sizing for vertices after editing and
-                            self.model.graph.setEnabled(false);
-                            self.model.graph.setPanning(true);
-                            self.model.graph.setTooltips(true);
-                            self.model.graph.panningHandler.useLeftButtonForPanning = true;
+                            // panning by using the left mouse button.
+                            self.model.graph.graph.setEnabled(false);
+                            self.model.graph.graph.setCellsMovable(true);
+                            self.model.graph.graph.setAutoSizeCells(true);
+                            self.model.graph.graph.setPanning(true);
+                            self.model.graph.graph.centerZoom = true;
+                            self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                            // Disables tooltips on touch devices
+                            self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
+                            self.model.graph.graph.htmlLabels = true;
 
-                            // Load cells and layouts the graph
-                            self.model.graph.getModel().beginUpdate();
-                            try
-                            {
-                                let doc = mxUtils.parseXml(self.model.object.data);
-                                let codec = new mxCodec(doc);
 
-                                codec.decode(doc.documentElement, self.model.graph.getModel());
-                            }
-                            finally
-                            {
-                                // Updates the display
-                                self.model.graph.getModel().endUpdate();
+                            self.model.graph.graph.getCursorForCell = function(cell){
+                                if (cell != null && cell.value != null && cell.vertex ==1 ){
+                                    return 'pointer';
+                                }
                             }
 
+                            // Displays a popupmenu when the user clicks
+                            // on a cell (using the left mouse button) but
+                            // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
+                            // is displayed
+                            self.model.graph.graph.panningHandler.popupMenuHandler = false;
 
-                            self.model.graph.addListener(mxEvent.CLICK, function(sender, evt)
-                            {
 
-                                var cell = evt.getProperty('cell');
+                            self.initGraph();
+
+                            _.delay(function(){
+
+                                self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+
+                                    let cell = self.model.graph.selectedCell = evt.getProperty('cell');
+
+                                    if(_.isEmpty(cell)) return;
+
+                                    let _value = cell.getValue();
 
 
+                                    if(_value === '开始'){
+                                        self.play();
+                                    }
 
-                                self.tip(cell.getValue());
+                                    self.tip(cell.getValue());
 
-                            });
+                                });
+                            },500)
+
+                        }
+                    },
+                    initGraph: function(){
+                        let self = this;
+
+                        self.model.graph.graph.getModel().beginUpdate();
+
+                        try
+                        {
+                            var doc = mxUtils.parseXml(self.model.graph.data);
+                            var codec = new mxCodec(doc);
+
+                            codec.decode(doc.documentElement, self.model.graph.graph.getModel());
+                        }
+                        finally
+                        {
+                            self.model.graph.graph.getModel().endUpdate();
+
+                            self.toCenter();
 
                         }
                     },
                     initPlugIn: function(){
                         let self = this;
 
-                        self.crontab.load.sched = later.parse.text('every 5 sec');
-                        //self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
-
-                        self.crontab.update.sched = later.parse.text('every 2 sec');
-                        //self.crontab.update.timer = later.setInterval(self.update, self.crontab.update.sched);
-
                         self.initOutline();
-                        self.initTools();
+                        self.initToolBars();
+                        self.model.graph.container.style.top = "0px";
 
+                        self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
+                        self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+
+                        self.update();
+
+                        $("#nav").find("div").hide();
+                        self.win.toolbars.hide();
                     },
                     initData: function(){
                         let self = this;
 
+                        let _project = _.last(self.model.object.param.parent.split("/"));
+                        let _page = self.model.object.param.name;
+                        let _jsPanels =  window.jsPanel.activePanels.list;
 
-                        let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent());
+                        let _rtn = jobContextGet(_project, null);// + "/" + _page);
 
-                        /*_.forEach(_cells,function (cell,k) {
+                        if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
 
-                            let _cell = cell.getId();
-                            let o = "BOB.iflow#BOB.iflow#"+_cell;
-                            let _tmp = {[o]: { "status": _.random(1,5), "ctl": _.random(0,2) }};
+                            self.reset();
 
-                            self.model.object.nodes = _.extend(self.model.object.nodes,_tmp);
-                        })*/
+                            if(_.indexOf(_jsPanels,'jsPanel-prompt') > -1){
 
-                        let _key = self.model.object.param.name.split(".")[0];
-                        let _rtn = appContextGet(_key);
-
-                        if (!_.isEmpty(_rtn)) {
-                            self.model.object.nodes = _.attempt(JSON.parse.bind(null, _rtn.message));
+                                window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+                            }
                         }
 
+                        if (!_.isEmpty(_rtn)) {
+
+                            // 项目
+                            self.model.project = _rtn.message;
+
+                            // 图
+                            self.model.object.nodes = _.omit(_rtn.message,['title','stime','etime','status','diaglog','current']);
+
+                            // 对话框
+                            if(self.model.project){
+
+                                console.log(11,typeof(self.model.project.diaglog), _jsPanels)
+
+                                if(!_.isEmpty(self.model.project.diaglog)){
+
+                                    let _diaglog = _.attempt(JSON.parse.bind(null, self.model.project.diaglog));
+
+                                    if(_diaglog) {
+                                        console.log(22, _diaglog.select, _jsPanels, _.indexOf(_jsPanels,'jsPanel-prompt'))
+                                        if (_diaglog.select == 0 && _.indexOf(_jsPanels,'jsPanel-prompt')==-1) {
+                                            self.initPrompt(_diaglog);
+                                        } else if(_diaglog.select == -1 && _.indexOf(_jsPanels,'jsPanel-prompt') > -1){
+                                            window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+                                        }
+                                    }
+                                } else {
+                                    if(_.indexOf(_jsPanels,'jsPanel-prompt') > -1){
+
+                                        window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+                                    }
+                                }
+
+                            }
+                        }
+
+                    },
+                    initPrompt: function(item){
+                        let self = this;
+
+                        self.model.promptWin = newWindow('fsmodal', 'prompt', '<div id="modal-panel"></div>', null);
+
+                        if(self.model.promptWin){
+                            let _vue = new Vue({
+                                delimiters: ['#{', '}#'],
+                                el: '#modal-panel',
+                                template: `<div class="panel panel-confirm">
+                                               <div class="panel-body">
+                                                    <h2 style="text-align:center;"><!--<i class="fa fa-arrow-right fa-1x" style="color:rgb(28, 220, 28);"></i>--> #{model.title}#</h2>
+                                                    <hr>
+                                                    <div style="overflow-y:auto;overflow-x:hidden;max-height: 30vh;min-height: 30vh;">
+                                                        <div v-for="item in model.prompt">
+                                                            <h4>#{item}#</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="panel-footer" style="text-align:center;position: absolute;width: 100%;bottom:10px;}">
+                                                    <a class="btn btn-lg btn-danger" href="javascript:void(0);" @click="save">确认</a>
+                                                </div>
+                                            </div>`,
+                                data: {
+                                    model: item,
+                                },
+                                mounted: function(){
+                                    let me = this;
+
+                                    if(window.jsPanel.activePanels.getPanel("jsPanel-undefined")) {
+                                        window.jsPanel.activePanels.getPanel("jsPanel-undefined").close();
+                                    }
+                                },
+                                methods: {
+                                    save: function () {
+                                        let me = this;
+
+                                        let _project = _.last(self.model.object.param.parent.split("/"));
+
+                                        let _name = "diaglog";
+
+                                        me.model.select = -1;
+
+                                        jobContextSetup(_project, _name, me.model);
+
+                                        window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
+
+                                    }
+                                }
+                            });
+                        }
+
+                    },
+                    reset: function(){
+                        let self = this;
+
+                        self.model.graph.graph.getModel().beginUpdate();
+
+                        try {
+
+                            let _cells = self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent(),true);
+
+                            _.forEach(_cells, function (cell, k) {
+                                // Resets the fillcolor and the overlay
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#dddddd', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#dddddd', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, '#f9f9f9', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '2', [cell]);
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [cell]);
+                                self.model.graph.graph.removeCellOverlays(cell);
+                            })
+                        }
+                        finally {
+                            self.model.graph.graph.getModel().endUpdate();
+                        }
                     },
                     update: function () {
 
                         let self = this;
 
-                        self.model.graph.getModel().beginUpdate();
+                        self.model.graph.graph.getModel().beginUpdate();
 
                         try {
 
-                            /*  for (var k in self.model.object.nodes) {
-                                if (self.model.object.nodes.hasOwnProperty(k)) {
-                                    let val = self.model.object.nodes[k];
-                                    console.log(val, k)
-                                }
-                            }*/
-                            let _cells = self.model.graph.getChildVertices(self.model.graph.getDefaultParent(),true);
+                            _.forEach(self.model.object.nodes,function (val,k) {
+                                let v = JSON.parse(val);
+                                let _id = _.last(k.split("/"));
+                                let _cell = self.model.graph.graph.getModel().getCell(_id);
 
-                            _.forEach(_cells, function (cell, k) {
-                                // Resets the fillcolor and the overlay
-                                self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, 'white', [cell]);
-                                self.model.graph.removeCellOverlays(cell);
-                            })
-                        }
-                        finally {
-                            self.model.graph.getModel().endUpdate();
-                        }
 
-                        self.model.graph.getModel().beginUpdate();
+                                let state = self.model.graph.graph.view.getState(_cell);
 
-                        try {
-
-                            _.forEach(self.model.object.nodes,function (v,k) {
-
-                                let _id = _.last(k.split("#"));
-                                let _cell = self.model.graph.getModel().getCell(_id);
-
-                                // Adds animation to edge shape and makes "pipe" visible
-                                if (!_.isEmpty(_cell.edges)){
-                                    let state = self.model.graph.view.getState(_cell.edges[0]);
-                                    state.shape.node.getElementsByTagName('path')[1].removeAttribute('visibility');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke-width', '6');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('stroke', 'lightBlue');
-                                    state.shape.node.getElementsByTagName('path')[1].setAttribute('class', 'flow');
-                                }
-
+                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [_cell]);
 
                                 if(v.status == 1){
-                                    self.model.graph.setCellWarning(_cell, '<b>未开始:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#b9b9b9', [_cell]);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#dddddd', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#dddddd', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '2', [_cell]);
+                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 未开始",1);
+                                    //self.tip(_id + " 未执行",1);
+
                                 } else if(v.status == 2){
-                                    self.model.graph.setCellWarning(_cell, '<b>成功:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#0eef84', [_cell]);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+                                    //self.tip(_id + " 正在运行",2);
 
-                                    self.tip(_id + " 成功",2);
+                                    if(state && state.shape.node){
+                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#FFFFFF', [_cell]);
+                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#fb831b', [_cell]);
+                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
+
+
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
+                                            _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
+                                        }
+
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
+                                            _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("path")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
+                                        }
+
+                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
+                                            _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
+                                                if(k == 1){
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
+                                                } else {
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#dddddd";
+                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "2px"
+                                                }
+                                            })
+                                        }
+                                    }
+
                                 } else if(v.status == 3){
-                                    self.model.graph.setCellWarning(_cell, '<b>失败:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ec1f2b', [_cell]);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#29adbf', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#29adbf', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
+                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 失败",3);
+                                    //self.tip(_id + " 运行完毕",3);
+
                                 } else if(v.status == 4){
-                                    self.model.graph.setCellWarning(_cell, '<b>正在进行:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#22a8fa', [_cell]);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#e5494e', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#e5494e', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
+                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 正在进行",4);
+                                    //self.tip(_id + " 报错",4);
+
                                 } else if(v.status == 5){
-                                    self.model.graph.setCellWarning(_cell, '<b>跳过不执行:</b>: '+_id);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffbb49', [_cell]);
-                                    self.model.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '4', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#999999', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#999999', [_cell]);
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '0', [_cell]);
+                                    //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
 
-                                    self.tip(_id + " 跳过不执行",5);
+                                    //self.tip(_id + " 跳过不执行",5);
                                 }
+
+
                             })
 
 
                         }
                         finally {
-                            self.model.graph.getModel().endUpdate();
+                            self.model.graph.graph.getModel().endUpdate();
                         }
 
                     },
                     tip: function(event,severity){
                         let self = this;
 
-                        if (severity<4){
-                            alertify.success(event + ' ' + moment().format("LLL"));
-                        } else if (severity == 4){
+                        if (severity == 5) {
+                            alertify.log(event + ' ' + moment().format("LLL"));
+                        } else if (severity == 4) {
                             alertify.error(event + ' ' + moment().format("LLL"));
                         } else {
-                            alertify.log(event + ' ' + moment().format("LLL"));
+                            alertify.success(event + ' ' + moment().format("LLL"));
                         }
                     },
                     initOutline: function(){
                         let self = this;
 
                         let outline = document.getElementById('outlineContainer');
-                        outline.style.top = '60px';
+                        outline.style.top = '90px';
                         outline.style.left = '5px'
 
-                        // Creates the outline (navigator, overview) for moving
-                        // around the graph in the top, right corner of the window.
-                        let outln = new mxOutline(self.model.graph, outline);
+                        self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
+
                     },
-                    initTools: function () {
+                    reload: function(){
+                        let self = this;
+
+                        self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                        self.initGraph();
+                    },
+                    initToolBars: function () {
                         let self = this;
 
                         let content = document.getElementById('tools');
@@ -375,125 +858,246 @@
 
                         tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/iflow/zoom_in.png',function(evt)
                         {
-                            self.model.graph.zoomIn();
+                            self.model.graph.graph.zoomIn();
                         },null,'tools-item');
 
                         tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/iflow/zoom_out.png',function(evt)
                         {
-                            self.model.graph.zoomOut();
+                            self.model.graph.graph.zoomOut();
                         },null,'tools-item');
 
                         /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/web/assets/images/iflow/actual_size.png',function(evt)
                         {
-                            self.model.graph.zoomActual();
+                            self.model.graph.graph.zoomActual();
                         },null,'tools-item');*/
 
                         tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
                         {
-                            var preview = new mxPrintPreview(self.model.graph, 1);
+                            var preview = new mxPrintPreview(self.model.graph.graph, 1);
                             preview.open();
+
                         },null,'tools-item');
 
                         tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
                         {
-                            if ($(".navbar.navbar-default.navbar-fixed-top").css("display") == "none"){
-
-                                $(".navbar.navbar-default.navbar-fixed-top").fadeIn();
-                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeIn();
-
-                                evt.target.src = "/web/assets/images/iflow/exit-fullscreen.png";
-
-                                self.model.container.style.top = "55px";
-
-
-                            } else {
-
-                                $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
-                                $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
-
-                                evt.target.src = "/web/assets/images/iflow/fullscreen.png";
-
-                                self.model.container.style.top = "0px";
-
-                            }
-
                             toggleFullScreen();
 
-
                         },null,'tools-item');
+
+                        /*tb.addItem('{{.i18n.Tr "creative-tools-reset"}}', '/web/assets/images/iflow/reset.png',function(evt)
+                        {
+                            self.reload();
+                        },null,'tools-item');*/
 
                         tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', '/web/assets/images/iflow/theme.png',function(evt)
                         {
 
-                            let _theme = _.sample(['theme-white', 'theme-dark']);
+                            $("body").removeClass(self.model.graph.theme);
 
-                            $("body").removeClass(self.theme);
-                            $('body').addClass(_theme);
-
-                            if(_theme == 'theme-dark'){
-                                $("html td.mxWindowTitle").css( {
-                                    "backgroundColor": "rgb(90, 90, 90)",
-                                    "backgroundImage": "linear-gradient(180deg,rgb(90, 90, 90),rgb(90, 90, 90))"
-                                });
+                            if(self.model.graph.theme === 'theme-white'){
+                                $('body').addClass('theme-dark');
+                                self.model.graph.theme = 'theme-dark';
+                                localStorage.setItem("CREATIVE-THEME",'theme-dark');
                             } else {
-                                $("html td.mxWindowTitle").css( {
-                                    "backgroundColor": "rgb(33, 148, 245)",
-                                    "backgroundImage": "linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245))"
-                                });
+                                $('body').addClass('theme-white');
+                                self.model.graph.theme = 'theme-white';
+                                localStorage.setItem("CREATIVE-THEME",'theme-white');
                             }
-
-                            self.theme = _theme;
-                            localStorage.setItem("creative-theme",_theme);
-
 
 
                         },null,'tools-item');
 
+                        tb.addItem('{{.i18n.Tr "creative-tools-play"}}', '/web/assets/images/iflow/play.svg',function(evt)
+                        {
 
-                        wnd = new mxWindow('{{.i18n.Tr "creative-tools"}}', content, 5, 190, 160, 86, false);//$( window ).width() - 165, 190, 160, 86, false);
-                        wnd.setMaximizable(false);
-                        wnd.setScrollable(false);
-                        wnd.setResizable(false);
-                        wnd.setVisible(true);
+                            self.play();
+
+                            $(evt.target).addClass("animated infinite pulse");
+
+
+                        },null,'tools-item');
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-stop"}}', '/web/assets/images/iflow/stop.svg',function(evt)
+                        {
+
+                            self.stop();
+
+                            $(".animated.infinite.pulse").removeClass("animated infinite pulse");
+
+                        },null,'tools-item');
+
+                        tb.addItem('{{.i18n.Tr "creative-tools-setup"}}', '/web/assets/images/iflow/setup.svg',function(evt)
+                        {
+
+                            self.win.cmd = newWindow('cmd', '>₋', `<div id="cmd_window"></div>`, evt.target);
+
+                            if(!_.isEmpty(self.win.cmd)){
+                                self.cmdVue(evt);
+                            }
+
+                        },null,'tools-item');
+
+
+                        self.win.toolbars = newWindow('toolbars','{{.i18n.Tr "creative-tools"}}',content,[5,220]);
+
+                        _.delay(function(){
+                            self.model.graph.theme = localStorage.getItem("CREATIVE-THEME");
+
+                            $("body").addClass(self.model.graph.theme);
+
+                            if(self.model.graph.theme == 'theme-dark'){
+                                self.win.toolbars.setTheme("info");
+                            } else {
+                                self.win.toolbars.setTheme("filledlight");
+                            }
+                        },100)
                     },
-                    delOverlay: function(id){
+                    navToggle: function(){
                         let self = this;
-                        let cell = self.model.graph.getModel().getCell(id);
 
-                        self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#CCCCCC", [cell]);
-                        self.model.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#000000", [cell]);
+                        $("#nav").find("div").toggle(500);
+                        self.win.toolbars.toggle(500);
 
-                        self.model.graph.removeCellOverlays(cell);
+                        self.initOutline();
                     },
-                    addOverlay: function(id, state){
+                    callJob: function(job){
                         let self = this;
-                        let cell = self.model.graph.getModel().getCell(id);
 
-                        self.model.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#FF0000", [cell]);
-                        self.model.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#FFFFFF", [cell]);
+                        return callBobJob(job,'OneSwitch');
 
-                        self.model.graph.addCellOverlay(cell, createOverlay(graph.warningImage, '状态: '+state));
                     },
-                    createOverlay: function(image, tooltip){
+                    cmdVue: function(evt) {
                         let self = this;
-                        let overlay = new mxCellOverlay(image, tooltip);
+                        let _project = _.last(self.model.object.param.parent.split("/"));
+                        let _page = self.model.object.param.name;
 
-                        overlay.addListener(mxEvent.CLICK, function(sender, evt){
-                            mxUtils.alert(tooltip);
+                        let _vue = new Vue({
+                            delimiters: ['#{', '}#'],
+                            el: '#cmd_window',
+                            data: {
+                                cmd: {
+                                    reset: {
+                                        value: 'ALL',
+                                        list: [],
+                                        status: {
+                                            value: '3',
+                                            list: [
+                                                {name:'未执行',value: 1},
+                                                {name:'正在运行',value: 2},
+                                                {name:'运行完毕',value: 3},
+                                                {name:'报错',value: 4},
+                                                {name:'跳过不执行',value: 5}
+                                            ]
+                                        }
+                                    },
+                                    frequency: self.crontab.frequency
+                                }
+                            },
+                            template: `<div class="animated fadeInLeft" style="font-size:12px;">
+                                                    <div class="input-group" style="margin:5px;">
+                                                      <span class="input-group-addon">选择</span>
+                                                      <div class="input-group-select reset-status-select" style="width:255px;">
+                                                          <select class="selectpicker" data-style="btn-default" data-live-search="true" v-model="cmd.reset.value" data-width="100%">
+                                                            <option :data-subtext="item.id" :value="item.id" v-for="item in cmd.reset.list">#{item.name}#</option>
+                                                          </select>
+                                                      </div>
+                                                      <div class="input-group-addon select-wrapper" style="width: 25%;padding: 0px;border-radius: 0px;background-color: rgba(0, 0, 0, 0);">
+                                                          <select class="form-control no-radius" v-model="cmd.reset.status.value">
+                                                            <option :value="item.value" v-for="item in cmd.reset.status.list">#{item.name}#</option>
+                                                          </select>
+                                                      </div>
+                                                      <div class="input-group-btn">
+                                                          <a class="btn btn-primary" href="javascript:void(0)" @click="reset"><i class="fa fa-refresh"></i> 重置</a>
+                                                      </div>
+                                                    </div>
+                                                    <div class="input-group" style="margin:5px;">
+                                                      <span class="input-group-addon">刷新频率(秒)</span>
+                                                      <input type="number" class="form-control" placeholder="" v-model="cmd.frequency">
+                                                      <div class="input-group-btn">
+                                                         <a class="btn btn-primary" href="javascript:void(0)" @click="apply"><i class="fa fa-clock-o"></i> 应用</a>
+                                                      </div>
+                                                    </div>
+
+                                                </div>`,
+                            created: function () {
+                                let me = this;
+
+                                me.loadCells();
+                            },
+                            mounted: function(){
+                                let me = this;
+
+                                me.$nextTick(function() {
+                                    _.delay(function(){
+                                        $('.selectpicker').selectpicker({
+                                            container: 'body'
+                                        });
+                                        $('.selectpicker').selectpicker('refresh');
+                                    },500);
+                                })
+
+                            },
+                            methods: {
+                                loadCells: function () {
+                                    let me = this;
+
+                                    let _cells = self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent(), true);
+
+                                    _.forEach(_cells, function (cell, k) {
+                                        if (!cell.getValue()) return;
+                                        me.cmd.reset.list.push({name: cell.getValue(), id: cell.getId()});
+                                    })
+
+                                    me.cmd.reset.list.unshift({name: me.cmd.reset.value, id: "ALL"});
+
+                                    me.cmd.reset.list = _.orderBy(me.cmd.reset.list,['id','name'],['asc','asc']);
+                                },
+                                reset: function () {
+                                    let me = this;
+
+                                    let _project = _.last(self.model.object.param.parent.split("/"));
+                                    let _page = self.model.object.param.name;
+
+                                    if (me.cmd.reset.value === "ALL") {
+                                        jobContextReset(_project);
+                                        alertify.log("重置项目 " + moment().format("LLL"));
+                                    } else {
+                                        let _name = _project + "/" + _page + "/" + _.find(me.cmd.reset.list, {id:me.cmd.reset.value}).id;
+                                        let _value = `{"status":"${me.cmd.reset.status.value}","ctrl":"0"}`;
+
+                                        jobContextSetup(_project, _name, _value);
+                                        alertify.log("重置节点 " + moment().format("LLL") + " " + me.cmd.reset.value);
+                                    }
+                                },
+                                apply: function(){
+                                    let me = this;
+
+                                    self.crontab.frequency = me.cmd.frequency;
+                                }
+                            }
                         });
-                        return overlay;
                     }
                 }
-            })
+            });
+
+
         })
     })
+
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div>
+        <div id="title" style="position:absolute;z-index:1000;">${ model.project | pickTitle } <small style="font-size:45%;">${model.project.stime} - ${model.project.etime}</small></div>
+        <div id="graph" style="top:0px;"></div>
+        <div id="nav">
+            <a href="javascript:void(0);" @click="navToggle();">
+                <i class="fa fa-th fa-2x" style="position:absolute;left:5px;top:29px;z-index:1000;color:rgb(219, 219, 219);cursor:pointer;"></i>
+            </a>
+            <div id="tools"></div>
+            <div id="outlineContainer"></div>
+        </div>
+    </div>
 </script>
 
 {{template "base/footer" .}}
-<script type="text/x-template" id="app-template">
-    <div>
-        <div id="graph"></div>
-        <div id="tools"></div>
-        <div id="outlineContainer"></div>
-    </div>
-</script>

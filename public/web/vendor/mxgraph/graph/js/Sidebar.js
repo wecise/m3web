@@ -114,7 +114,7 @@ Sidebar.prototype.init = function()
     let conds = `#&className/: | top &top`;
     let uname = localStorage.getItem("uname");
 
-    if(uname === 'wecise'){
+    if(uname !== 'oneswitch'){
 
         self.addSearchPalette(true);
 

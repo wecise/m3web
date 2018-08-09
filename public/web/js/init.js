@@ -160,12 +160,20 @@ var setDefaultHome = function(name,token){
 *
 *   参数：
 *
+*
 */
-var fsCheck = function(parent, name){
+var fsCheck = function(path, name){
     let rtn = false;
 
+    let parent = path.replace(/\/\//g,'/');
+    let _url = `/fs${parent}/${name}?type=check`;
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _url += '&issys=true';
+    }
+
     jQuery.ajax({
-        url: `/fs${parent}/${name}?type=check`,
+        url: _url,
         type: 'GET',
         dataType: "json",
         data: {},
@@ -200,8 +208,15 @@ var fsCheck = function(parent, name){
 *       扩展名
 *
 */
-var fsNew = function(ftype, parent, name, content, attr){
+var fsNew = function(ftype, path, name, content, attr){
     let rtn = 0;
+
+    let parent = path.replace(/\/\//g,'/');
+    let _url = `/fs${parent}/${name}`;
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }
 
     let fm = new FormData();
 
@@ -210,11 +225,11 @@ var fsNew = function(ftype, parent, name, content, attr){
     fm.append("attr", JSON.stringify(attr));
 
     jQuery.ajax({
-        url: "/fs" + parent + "/" + name,
+        url: _url,
         type: 'PUT',
         processData: false,
         contentType: false,
-        mimeType: 'multipart/form-data',
+        mimeType: 'multipart/form-data;',
         dataType: "json",
         data: fm,
         async:false,
@@ -228,10 +243,10 @@ var fsNew = function(ftype, parent, name, content, attr){
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("Success" + " " + name + " " + moment().format("LLL"));
+                alertify.success("创建成功 " + name + " " + moment().format("LLL"));
             } else {
                 rtn = 0;
-                alertify.error("Failed" + " " + name + " " + moment().format("LLL"));
+                alertify.error("创建失败 " + name + " " + moment().format("LLL"));
             }
 
         },
@@ -253,9 +268,15 @@ var fsNew = function(ftype, parent, name, content, attr){
 *       父目录
 *       文件名称
 */
-var fsList = function(parent){
+var fsList = function(path){
     let rtn = null;
-    
+    let _issys = false;
+    let parent = path.replace(/\/\//g,'/');
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _issys = true;
+    }
+
     jQuery.ajax({
         url: '/fs' + parent,
         type: 'GET',
@@ -263,7 +284,7 @@ var fsList = function(parent){
         contentType: "application/text; charset=utf-8",
         data: {
             type: 'dir',
-            issys: false
+            issys: _issys
         },
         async:false,
         beforeSend: function(xhr) {
@@ -296,12 +317,18 @@ var fsList = function(parent){
 *       扩展名
 *
 */
-var fsDelete = function(parent,name){
+var fsDelete = function(path,name){
     let rtn = 0;
+    let parent = path.replace(/\/\//g,'/');
+    let _url = `/fs${parent}/${name}`;
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }
 
     jQuery.ajax({
 
-        url: '/fs' + parent + '/' + name,
+        url: _url,
         type: 'DELETE',
         dataType: 'text json',
         contentType: "application/text; charset=utf-8",
@@ -341,11 +368,18 @@ var fsDelete = function(parent,name){
 *           父目录
 *           文件名称
 */
-var fsContent = function(parent,name){
+var fsContent = function(path,name){
     let rtn = null;
 
+    let parent = path.replace(/\/\//g,'/');
+    let _url = `/fs${parent}/${name}`;
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }
+
     jQuery.ajax({
-        url: '/fs' + parent + "/" + name,
+        url: _url,
         type: 'GET',
         contentType: "application/text; charset=utf-8",
         dataType: 'text json',
@@ -383,6 +417,13 @@ var fsContent = function(parent,name){
 var fsRename = function(srcpath,dstpath){
     let rtn = 0;
 
+    let _issys = false;
+
+    if(_.startsWith(dstpath,'/fs/extend') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }
+
+
     jQuery.ajax({
         url: '/fs/rename',
         type: 'POST',
@@ -390,7 +431,8 @@ var fsRename = function(srcpath,dstpath){
         async:false,
         data: {
             srcpath: srcpath,
-            dstpath: dstpath
+            dstpath: dstpath,
+            issys: _issys
         },
         beforeSend: function (xhr) {
         },
@@ -428,6 +470,12 @@ var fsRename = function(srcpath,dstpath){
 var fsCopy = function(srcpath,dstpath){
     let rtn = 0;
 
+    let _issys = false;
+
+    if(_.startsWith(dstpath,'/fs/extend') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }
+
     jQuery.ajax({
         url: '/fs/copy',
         type: 'POST',
@@ -435,7 +483,8 @@ var fsCopy = function(srcpath,dstpath){
         async:false,
         data: {
             srcpath: srcpath,
-            dstpath: dstpath
+            dstpath: dstpath,
+            issys: _issys
         },
         beforeSend: function (xhr) {
         },
@@ -470,11 +519,18 @@ var fsCopy = function(srcpath,dstpath){
 *
 *
 */
-var fsUpdateAttr = function(parent, name, attr) {
+var fsUpdateAttr = function(path, name, attr) {
     let rtn = 0;
 
+    let parent = path.replace(/\/\//g,'/');
+    let _url = `/fs${parent}/${name}?type=attr`;
+
+    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+        _url += '&issys=true';
+    }
+
     jQuery.ajax({
-        url: '/fs' + parent + '/' + name + '?type=attr',
+        url: _url,
         dataType: 'json',
         type: 'PUT',
         data: {
@@ -503,6 +559,26 @@ var fsUpdateAttr = function(parent, name, attr) {
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+    return rtn;
+};
+
+/*
+*   文件系统
+*
+*   创建临时文件
+*
+*
+*/
+var fsTemp = function(ftype, name, content, attr){
+    let rtn = null;
+
+
+    let _tmp = fsNew(ftype, '/home/temp', name, content, attr);
+
+    if(_tmp === 1){
+        rtn = `/home/temp/${name}`;
+    }
+
     return rtn;
 };
 
@@ -1122,6 +1198,134 @@ var callBobJob = function (cmd,host) {
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
+    return rtn;
+};
+
+
+/*
+
+        ####### ######  ###  #####   #####  ####### ######
+           #    #     #  #  #     # #     # #       #     #
+           #    #     #  #  #       #       #       #     #
+           #    ######   #  #  #### #  #### #####   ######
+           #    #   #    #  #     # #     # #       #   #
+           #    #    #   #  #     # #     # #       #    #
+           #    #     # ###  #####   #####  ####### #     #
+
+ */
+
+/*
+*  触发器管理
+*
+*  列表
+*/
+
+var triggerList = function(event){
+    let rtn = null;
+
+    jQuery.ajax({
+        url: '/mxobject/trigger?class=' + event,
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if (_.isEmpty(data.message)) return rtn;
+
+            rtn = data.message;
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+};
+
+/*
+*  触发器管理
+*
+*  添加
+*/
+var triggerNew = function(event){
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: '/mxobject/trigger',
+        dataType: 'json',
+        type: 'PUT',
+        async: false,
+        data: event,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) === "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
+    return rtn;
+};
+
+/*
+*  触发器管理
+*
+*  删除
+*/
+
+var triggerDelete = function(event,name){
+    let rtn = 1;
+
+    jQuery.ajax({
+        url: `/mxobject/trigger?class=${event}&name=${name}`,
+        dataType: 'json',
+        type: 'DELETE',
+        async: false,
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) === "ok"){
+                rtn = 1;
+                alertify.success("成功" + " " + moment().format("LLL"));
+            } else {
+                rtn = 0;
+                alertify.error("失败" + " " + moment().format("LLL"));
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    });
+
     return rtn;
 };
 
@@ -2516,7 +2720,7 @@ var newWindow = function (type, title, template, position) {
 
     if(type === 'robot'){
         lrwh[2] = $( window ).width()*0.8/3;
-        lrwh[3] = $( window ).height()*2.1/3;
+        lrwh[3] = $( window ).height()*2.25/3;
 
         let _position = localStorage.getItem(_.upperCase(type+"_window_position"));
 
@@ -2607,6 +2811,12 @@ var newWindow = function (type, title, template, position) {
     win.addListener(mxEvent.NORMALIZE, function(event){
         _.delay(function(){
             eventHub.$emit("win-resize-event",null);
+        },100);
+    });
+
+    win.addListener(mxEvent.CLOSE, function(event){
+        _.delay(function(){
+            eventHub.$emit("win-close-event",null);
         },100);
     });
 
@@ -2707,6 +2917,43 @@ var newWindows = function(event, type, theme, title, content){
 };
 
 /*
+*       #     # ####### ######      #####  #######  #####  #    # ####### #######
+        #  #  # #       #     #    #     # #     # #     # #   #  #          #
+        #  #  # #       #     #    #       #     # #       #  #   #          #
+        #  #  # #####   ######      #####  #     # #       ###    #####      #
+        #  #  # #       #     #          # #     # #       #  #   #          #
+        #  #  # #       #     #    #     # #     # #     # #   #  #          #
+         ## ##  ####### ######      #####  #######  #####  #    # #######    #
+*
+* */
+
+var checkWebSocket = function(){
+    if ("WebSocket" in window) {
+        alertify.error("您的浏览器不支持 WebSocket!");
+        return false;
+    }
+};
+
+var webSocketNew = function(url){
+    let ws = null;
+
+    if(!_.isEmpty(url)){
+        ws = new WebSocket(url);
+    } else {
+        ws = new WebSocket(`ws://${document.location.host}/websocket/event`);
+    }
+
+    return ws;
+
+};
+
+
+var webSocketClose = function (ws) {
+    ws.close(1000, 'close');
+    alertify.log('连接已关闭');
+};
+
+/*
         #     # ####### ### #        #####
         #     #    #     #  #       #     #
         #     #    #     #  #       #
@@ -2770,7 +3017,7 @@ var renameKey = function(obj, key, newKey) {
 
         delete obj[key];
         delete obj['enum'];
-        delete obj['type'];
+        //delete obj['type'];
     }
 
     return obj;
@@ -3157,6 +3404,29 @@ var pxTOvh = function (value) {
 
     return result;
 };
+
+
+var syntaxHighlight = function(json) {
+    if (typeof json != 'string') {
+        json = JSON.stringify(json, undefined, 4);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n\t/g,' ');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) {
+                cls = 'key';
+            } else {
+                cls = 'string';
+            }
+        } else if (/true|false/.test(match)) {
+            cls = 'boolean';
+        } else if (/null/.test(match)) {
+            cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+    });
+}
 
 /*
 

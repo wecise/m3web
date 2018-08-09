@@ -1,15 +1,47 @@
-{"field": "name", "title": "Name"},
-{"field": "title", "title": "Title"},
-{"field": "colname", "title": "ColName"},
-{"field": "ftype", "title": "Ftype"},
-{"field": "loption", "title": "Loption"},
-{"field": "fparam", "title": "Fparam"},
-{"field": "isindex", "title": "Index"},
-{"field": "iskey", "title": "Primary Key"},
-{"field": "note", "title": "Note"},
-{"field": "mtime", "title": "Mtime"},
-{"field": "class", "title": "Class"},
-{"field": "dispname", "title": "Dispname"},
-{"field": "tags", "title": "Tags", visible:false},
-{"field": "isrel", "title": "Rel", visible:false},
-{"field": "btype", "title": "Btype", visible:false}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="author" content="Matrix - Portal Service" />
+    <meta name="description" content="Matrix - Portal Service write in go" />
+    <meta name="keywords" content="matrix,bigdata,cassandra,go">
+    <meta name="referrer" content="no-referrer" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!--Jquery JS-->
+    <script src="/web/vendor/jquery/jquery-3.3.1.min.js"></script>
+
+    <title>Hello M³</title>
+
+    <script>
+        let init = function(){
+
+            let _mql = `#/matrix/devops/event/: | wecise | top 100`;
+
+            jQuery.ajax({
+                url: '/mxobject/search',
+                type: 'POST',
+                dataType: 'json',
+                async: false,
+                data: {
+                    cond: _mql,
+                    meta: true
+                },
+                beforeSend: function(xhr) {
+                },
+                complete: function(xhr, textStatus) {
+                },
+                success: function(data, textStatus, xhr) {
+
+                    console.table(data.message);
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    console.log("["+new Date().toLocaleString()+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                }
+            });
+        }
+    </script>
+
+</head>
+</html>

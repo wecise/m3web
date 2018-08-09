@@ -43,10 +43,15 @@
 		overflow: auto;
 	}
 
+	.lm_header{
+		height: 25px!important;
+	}
+
 	.lm_header .lm_tab.lm_active {
 		border-bottom: none;
 		box-shadow: none;
 		padding-bottom: 5px;
+		border-bottom: 1px solid rgb(255, 0, 0);
 	}
 
 	.lm_tab:hover, .lm_tab.lm_active {
@@ -56,13 +61,20 @@
 
 	.lm_header .lm_tab {
 		border: none;
+		height: 15px;
+		padding: 4px 25px 0px 15px;
 	}
 
 	.lm_selected .lm_header {
 		background-color: rgb(230, 230, 230);
 	}
 
-	.lm_tabs > li:nth-child(1) .lm_close_tab {
+	.lm_header .lm_tab .lm_close_tab {
+		top: 7px!important;
+	}
+
+	.lm_tabs > li[title=查询] .lm_close_tab,
+	.lm_tabs > li[title=日志] .lm_close_tab{
 		display:none;
 	}
 
@@ -87,6 +99,7 @@
 		border:none;
 		outline:none;
 		white-space: pre-wrap;
+		overflow:hidden;
 	}
 
 	.log-console.light {
@@ -107,6 +120,10 @@
 		background-color: #000000;
 	}
 
+	.log-severity.PANIC {
+		color: #B12727;
+	}
+
 	.log-severity.ERROR {
 		color: #FF0000;
 	}
@@ -119,12 +136,14 @@
 		color: #CEC335;
 	}
 
+
 </style>
 
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-omdb-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-graph-component.html"></link>
 
 
@@ -135,16 +154,18 @@
 
 	'use static';
 
+
     $(".current-active-item").html(`<a class="active item" href="/janesware/object">
 										<i class="fa fa-cube"></i>  {{.i18n.Tr .ActiveView }}
 									</a>`);
 
-    VueLoader.onloaded(["vue-base-datatables-component",
+    VueLoader.onloaded(["vue-omdb-datatables-component",
 				        "vue-object-tree-component",
 				        "vue-editor-component",
+	                    "vue-trigger-editor-component",
 	                    "vue-graph-component"], function() {
 
-        let classTree = function(id, type, node){
+        let classTree = function(id, type, pattern, node){
 
             return {
 	            delimiters: ['${', '}'],
@@ -170,9 +191,8 @@
             };
         };
 
-        var classEdit = function(id, type, node){
+        var classEdit = function(id, type, pattern, node){
 
-            console.log(JSON.stringify(node))
             let _dataset = [];
             let _columns = [];
 
@@ -185,12 +205,22 @@
 			                    {"field": "ftype", "title": "Ftype"},
 			                    {"field": "loption", "title": "Loption"},
 			                    {"field": "fparam", "title": "Fparam"},
-			                    {"field": "isindex", "title": "Index"},
-			                    {"field": "iskey", "title": "Primary Key"},
+			                    {"field": "isindex", "title": "Index",render: function (data, type, row) {
+			                        console.log(data, typeof(data))
+                                                                                    return data===1?'是':'否';
+				                                                                }
+                                },
+			                    {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
+										                                        return data===1?'是':'否';
+										                                    }
+                                },
 			                    {"field": "note", "title": "Note"},
-			                    {"field": "mtime", "title": "Mtime"},
-			                    {"field": "class", "title": "Class"},
-			                    {"field": "dispname", "title": "Dispname"},
+			                    {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
+										                                        return moment(data).format("LLL");
+										                                    }
+			                    },
+			                    {"field": "class", "title": "Class", "visible": false},
+			                    {"field": "dispname", "title": "Dispname", "visible": false},
 			                    {"field": "tags", "title": "Tags", "visible": false},
 			                    {"field": "isrel", "title": "Rel", "visible": false},
 			                    {"field": "btype", "title": "Btype", "visible": false}
@@ -244,7 +274,13 @@
             };
         };
 
-        var queryConsole = function(id, type, node){
+        var queryConsole = function(id, type, pattern, node){
+
+            let _readOnly = false;
+
+            if(pattern === 'ddl') {
+                _readOnly = true;
+            }
 
             return {
 
@@ -256,13 +292,19 @@
                     model: {
                         oldInput: "",
                         newInput: "",
-                        mode: "sql",
+                        mode: "mql",
                         theme: "tomorrow",
                         printMargin: false,
-                        readOnly: false,
-                    }
+                        readOnly: _readOnly,
+                    },
+	                keys: []
                 },
-                mounted: function () {
+                created: function(){
+                    let self = this;
+
+                    self.initKeys();
+                },
+	            mounted: function () {
                     let self = this;
 
                     self.$nextTick(function () {
@@ -273,30 +315,146 @@
                     init: function(){
                         let self = this;
 
-                        let colms =  _.without(node.Fields,"_tokens");
+                        let colms =  _.without(node.fields,"_tokens");
+
                         let cls = "";
                         if(_.isEmpty(colms)){
                             cls = "*";
                         } else {
                             cls = colms.join(",");
                         }
-                        let querySql = "select\n\t " + cls + "\nfrom\n\t " + node.name;
+                        let mql = null;
 
-                        self.model.newInput = querySql;
-                    }
+                        if(pattern === 'data') {
+                            mql = `SELECT\n\t ${cls} \nFROM\n\t ${node.name} limit 50`;
+                        } else if(pattern === 'select') {
+                            mql = "SELECT\n\t " + cls + "\nFROM\n\t " + node.name;
+                        } else if(pattern === 'insert') {
+                            mql = "INSERT INTO " + node.name + "\n" + _.map(node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
+                        } else if(pattern === 'update') {
+                            mql = "UPDATE " + node.name + "\nSET " + _.map(node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
+                        } else if(pattern === 'delete') {
+                            mql = "DELETE\n\t " + cls + "\nFROM\n\t " + node.name;
+                        } else if(pattern === 'ddl') {
+
+                            mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + node.name + " (\n\t" + _.map(node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + node.keys.join(",") + ")\n);";
+
+                            _.forEach(self.keys,function(v){
+
+								if(_.includes(v,'time')) {
+                                    mql += `\n\n#${_.startCase(v)}\n${v}=${moment(node[v]).format("LLL")}`;
+                                    return;
+								}
+
+                                let _value = node[v];
+
+                                if(_value === 1){
+                                    _value = true;
+                                } else if(_value === 0){
+                                    _value = false;
+                                }
+
+                                if(v === 'keymethod'){
+                                    if(_value === 1){
+                                        _value = 'uuid';
+                                    } else {
+                                        _value = 'md5';
+                                    }
+                                }
+
+                                mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                            })
+
+			            } else if(pattern === 'create-class') {
+			                let _rand = _.now();
+                            mql = `CREATE CLASS IF NOT EXISTS  ${node.name}/new_${_rand}();`;
+                            mql = _.replace(mql, "//", "/");
+			            } else if(pattern === 'drop-class') {
+                            mql = "DROP CLASS " + node.name + ";";
+                        } else if(pattern === 'alter') {
+                            mql = `#设置类属性`;
+
+                            let _keys = _.remove(self.keys, function(v){
+			                                return !_.includes(['cid','pid','fields','keys','mtime','fieldsObj','child', 'loption', 'subclass','vtimebase','tags', 'name'],v)
+			                            })
+
+                            _.forEach(_keys,function(v){
+                                let _value = node[v];
+
+                                if(_value === 1){
+                                    _value = true;
+                                } else if(_value === 0){
+                                    _value = false;
+                                }
+
+                                if(v === 'keymethod'){
+                                    if(_value === 1){
+                                        _value = 'uuid';
+                                    } else {
+                                        _value = 'md5';
+                                    }
+                                }
+
+                                if(_.includes(['alias','keymethod','remedy'],v)){
+                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                } else {
+                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                }
+                            })
+                        } else if(pattern === 'alter-add-column') {
+	                        mql = "ALTER CLASS " + node.name + " ADD COLUMN column_name type;\n\n";
+                        } else if(pattern === 'alter-drop-column') {
+                            mql = "ALTER CLASS " + node.name + " DROP COLUMN column_name;\n\n";
+                        } else if(pattern === 'alter-add-index') {
+                            mql = "ALTER CLASS " + node.name + " ADD INDEX index_name type;\n\n";
+                        } else if(pattern === 'alter-drop-index') {
+                            mql = "ALTER CLASS " + node.name + " DROP INDEX index_name type;\n\n";
+                        } else if(pattern === 'alter-add-key') {
+	                        mql = "ALTER CLASS " + node.name + " ADD KEY key_name;\n\n";
+                        } else if(pattern === 'alter-drop-key') {
+                            mql = "ALTER CLASS " + node.name + " DROP KEY key_name;\n\n";
+                        } else if(pattern === 'g') {  // edge  query
+	                        mql = `g.V(" ").In("${node.title}").All();`;
+                        } else if(pattern === 'create-edge-type') {  // edge  new edge type
+                            mql = `CREATE EDGE TYPE  type_name type_remedy;`;
+                        } else if(pattern === 'drop-edge-type') {  // edge drop edge type
+                            mql = `DROP EDGE TYPE ${node.title};`;
+                        } else if(pattern === 'edge-insert') {  // edge  create
+                            mql = `INSERT INTO class_name id="",${node.title}=[""];`;
+                        } else if(pattern === 'edge-update') {  // edge  update
+                            mql = `UPDATE class_name SET ${node.title}='' WHERE ID='';`;
+                        } else if(pattern === 'edge-g') {  // edge query all
+                            mql = GLOBAL_CONFIG.global.gremlin;
+                        }
+
+                        self.model.newInput = mql;
+                    },
+	                initKeys: function(){
+                        let self = this;
+
+                        let _rtn = classList(-1);
+                        self.keys = _.sortBy(_.keys(_.attempt(JSON.parse.bind(null, _rtn))[0]));
+	                },
+	                dropClass: function(){
+                        let self = this;
+
+
+	                }
                 }
             };
         };
 
-        let outPut = function(id, type, node){
-
+        let outPut = function(id, type, pattern, node){
 
             let _dataset = [];
             let _columns = [];
+            let _node = {};
 
             if(!_.isEmpty(node)) {
-                _dataset = node.data[_.keys(node.data)[0]];//_.map(node.data[_.keys(node.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
-	            _columns = node.columns[_.keys(node.columns)[0]];
+                _dataset = node.data[_.keys(node.columns)[0]];
+                _columns = node.columns[_.keys(node.columns)[0]];
+                _node = node;
+
             }
 
             return {
@@ -315,7 +473,7 @@
                             searching: false,
                         }
 	                },
-	                result: node
+	                result: _node
                 },
 	            created: function(){
                     let self = this;
@@ -333,7 +491,7 @@
 					init: function(){
 					    let self = this;
 
-					    self.model.dataset = _.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+					    self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
                         self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
 
 					},
@@ -347,7 +505,7 @@
         };
 
 
-        var graph = function(id, type, node){
+        var graph = function(id, type, pattern, node){
 
 	        let _data = {nodes:[], edges:[]};
 
@@ -395,13 +553,34 @@
                 data: {
                     id: id + '-' + type,
                     model: [],
-	                theme: 'light'
+	                theme: 'light',
+	                debug: {
+                        mql: [],
+		                flag: [],
+		                crontab: {
+                            sched: '30 second',
+                            timer: null
+		                }
+	                }
                 },
 	            watch: {
-                    model: function(val,oldVal){
-                        let self = this;
+                    'debug.mql': {
+                        handler: function(val,oldVal){
+                            let self = this;
 
-                        //self.markIt();
+                            if(val !== oldVal){
+                                self.debugIt(val);
+                            }
+
+                            if(_.isEmpty(val)){
+                                self.debug.crontab.sched = null;
+                                self.debug.crontab.timer = null;
+                            } else {
+                                self.debug.crontab.sched = later.parse.text(`every ${self.debug.crontab.sched}`);
+                                self.debug.crontab.timer = later.setInterval(self.refresh, self.debug.crontab.sched);
+                            }
+                        },
+	                    deep:true
                     }
 	            },
 	            created: function(){
@@ -414,6 +593,7 @@
 
                     self.$nextTick(function () {
                         self.init();
+                        self.initPlugin();
                     })
                 },
                 filters: {
@@ -425,68 +605,122 @@
                     init: function(){
                         let self = this;
 
-						self.model.push(self.info("加载完成"));
+						self.model.push(self.log('info','加载完成'));
 
                         self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
 
                     },
-	                append: function(fun, event){
+                    initPlugin: function(){
+                        let self = this;
+
+                        $(self.$el).contextMenu({
+                            selector: 'a.debug',
+                            trigger: 'left',
+                            build: function($trigger, e) {
+
+                                $(".context-menu-input-refresh").eq(3).prop('selected', true);
+
+                                let _items = {
+                                        "trigger": {
+                                            name: "调式触发器", type: "checkbox", selected: false
+                                        },
+                                        "scriptjs": {
+                                            name: "调式脚本", type: "checkbox", selected: false
+                                        },
+                                        "itil": {
+                                            name: "调式流程", type: "checkbox", selected: false
+                                        },
+                                        "rule": {
+                                            name: "调式规则", type: "checkbox", selected: false
+                                        },
+                                        "webcontext": {
+                                            name: "调式缓存", type: "checkbox", selected: false
+                                        },
+                                        "scriptlua": {
+                                            name: "调式脚本Lua", type: "checkbox", selected: false
+                                        },
+	                                    "refresh": {
+	                                        name: "刷新时间",
+	                                        type: 'select',
+	                                        options: {1: '5 second', 2: '15 second', 3: '30 second', 4: '1 mins'},
+	                                        selected: 3,
+                                            events: {
+                                                change: function (e) {
+                                                    self.debug.crontab.sched = e.target.options[e.target.selectedIndex].label;
+                                                }
+                                            }
+	                                    }
+                                    };
+
+                                if(!_.isEmpty(self.debug.flag)){
+									_.forEach(self.debug.flag,function(v,k){
+									    _items[v].selected = true;
+									})
+                                }
+
+                                return {
+                                    items: _items
+                                }
+                            },
+                            events: {
+	                            show: function(opt) {
+	                                let $this = this;
+
+	                                $.contextMenu.setInputValues(opt, $this.data());
+
+	                            },
+	                            hide: function(opt) {
+                                    let $this = this;
+
+	                                $.contextMenu.getInputValues(opt, $this.data());
+
+                                    self.debugs($this.data());
+
+
+	                            }
+	                        }
+                        });
+                    },
+	                refresh: function(){
+                       let self = this;
+
+                       self.debugIt(self.debug.mql);
+	                },
+                    debugs: function(key){
+                        let self = this;
+
+                        self.debug.mql = [];
+                        self.debug.flag = [];
+
+                        _.forEach(key, function(v,k){
+                            if(k !== 'contextMenu' && v != false){
+                                self.debug.mql.push(`#/matrix/consolelog/${k}: | nearest 1 day | sort ctime desc`);
+                                self.debug.flag.push(k);
+                            }
+                        });
+
+	                },
+	                append: function(level, event){
                         let self = this;
                         let _log = null;
 
-                        if(fun === 'error'){
-                            _log = self.error(event);
-	                    } else if(fun === 'info'){
-                            _log = self.info(event);
-                        } else if(fun === 'warning'){
-                            _log = self.warning(event);
-                        }
+                        _log = self.log(level, event);
 
-                        self.model.push(_log);
+                        self.model.unshift(_log);
+
+                        // $(".log-console-content").scrollTop(function() { return this.scrollHeight; });
 
 	                },
-	                markIt: function(){
-                        let self = this;
+                    log: function(level, event){
+	                    let self = this;
+	                    let _content = event;
 
-                        $(self.$el).find(".log-console-content").mark(['ERROR'], {
-                                "element": "span",
-                                "className": "btn-danger",
-                                "separateWordSearch": true
-                            }
-                        );
+	                    if(typeof(event) === 'object'){
+	                        _content = JSON.stringify(event);
+	                    }
 
-                        $(self.$el).find(".log-console-content").mark(['INFO']);
+	                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), _content];
 	                },
-                    error: function(event){
-                        let self = this;
-                        let _content = event;
-
-                        if(typeof(event) === 'object'){
-                            _content = JSON.stringify(event);
-                        }
-
-                        return [moment().format("LLL"), `ERROR`, _content];
-                    },
-	                info: function(event){
-                        let self = this;
-                        let _content = event;
-
-                        if(typeof(event) === 'object'){
-                            _content = JSON.stringify(event);
-                        }
-
-                        return [moment().format("LLL"), `INFO`, _content];
-	                },
-                    warning: function(event){
-                        let self = this;
-                        let _content = event;
-
-                        if(typeof(event) === 'object'){
-                            _content = JSON.stringify(event);
-                        }
-
-                        return [moment().format("LLL"), `WARNING`, _content];
-                    },
 	                copyIt: function(event){
                         let self = this;
 
@@ -502,6 +736,20 @@
 						let self = this;
 
                         self.model = [];
+
+                    },
+                    debugIt: function(event){
+						let self = this;
+
+						_.forEach(event,function(v){
+                            let _list = fetchData(v);
+
+                            _.forEach(_list.message,function(v){
+                                let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss"), _.upperCase(v.level), `[${v.name}] [${v.class}] ${v.msg}`];
+                                self.model.unshift(_log);
+                            })
+
+						})
 
                     },
                     toggleTheme: function(){
@@ -536,6 +784,151 @@
         };
 
 
+        var trigger = function(id, type, pattern, node){
+
+            let _readOnly = false;
+            let _node = null;
+
+            if(!_.isEmpty(node.result) && !_.isEmpty(node.result.message)){
+                _node = node.result.message;
+            }
+
+            return {
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: "#trigger-template",
+                data: {
+                    id: id + '-' + type,
+                    list: [],
+                    selected: []
+                },
+	            created: function(){
+                    let self = this;
+
+                    self.init();
+	            },
+                mounted: function() {
+                    let self = this;
+
+                    self.$nextTick(function () {
+
+                    })
+                },
+                methods: {
+                    init: function(){
+                        let self = this;
+
+
+                        if( _.isEmpty(_node) ) {
+                            self.list = [{  name: "",
+                                time: moment().format("LLL"),
+                                class: node.name,
+                                model: {
+                                    oldInput: "",
+                                    newInput: "",
+                                    mode: "lua",
+                                    theme: "tomorrow",
+                                    printMargin: false,
+                                    readOnly: _readOnly,
+                                }
+                            }];
+                        } else {
+                            self.list = _.values(_.map(_node,function(v){
+                                return _.map(v.script,function(val,key){
+                                    return   {  name: key,
+                                        time: v.vtime,
+                                        class: v.class,
+                                        model: {
+                                            oldInput: val,
+                                            newInput: val,
+                                            mode: "lua",
+                                            theme: "tomorrow",
+                                            printMargin: false,
+                                            readOnly: _readOnly,
+                                        }
+                                    }
+                                })
+                            }))[0];
+                        }
+
+                        self.selected = _.head(self.list);
+                    },
+                    toggle: function(item) {
+                        let self = this;
+
+                        self.selected = item;
+                    },
+                    add: function() {
+                        let self = this;
+                        let _name = $("#trigger_name").val();
+
+                        let _rtn = triggerNew({class:node.name, name:_name, script:''});
+
+                        if(_rtn === 1) {
+                            self.refresh();
+                        }
+                    },
+                    save: function() {
+                        let self = this;
+                        let _name = self.selected.name;
+                        let _class = self.selected.class;
+                        let _editor = ace.edit(self.id);
+                        let _script = _editor.getValue();
+
+                        let _rtn = triggerNew({class: _class, name:_name, script: _script});
+
+                        if(_rtn === 1) {
+                            self.refresh();
+                        }
+                    },
+                    refresh: function() {
+                        let self = this;
+
+                        let _list = triggerList(node.name);
+
+                        if( _.isEmpty(_list.message)) {
+                            self.list = [{  name: "",
+                                time: moment().format("LLL"),
+                                class: node.name,
+                                model:{
+                                    oldInput: "",
+                                    newInput: "",
+                                    mode: "lua"
+                                }
+                            }];
+                        } else {
+                            self.list = _.values(_.map(_list.message,function(v){
+                                return _.map(v.script,function(val,key){
+                                    return   {    name: key,
+                                        time: v.vtime,
+                                        class: v.class,
+                                        model:{
+                                            oldInput: val,
+                                            newInput: val,
+                                            mode: "lua"
+                                        }
+                                    }
+                                })
+                            }))[0];
+                        }
+                        self.selected = _.head(self.list);
+                    },
+                    remove: function(name) {
+                        let self = this;
+                        let _class = node.name;
+                        let _name = name;
+
+                        let _rtn = triggerDelete(_class, _name);
+
+                        if(_rtn === 1){
+                            self.refresh();
+                        }
+                    }
+                }
+            };
+        };
+
+
         let appVue = new Vue({
             delimiters: ['${', '}'],
             el: '#app',
@@ -555,6 +948,7 @@
                                 type: 'stack',
                                 width: 20,
                                 content:[{
+                                    id: 'class-tree',
                                     type: 'component',
                                     componentName: 'omdbComponent',
                                     title:'对象管理',
@@ -571,24 +965,28 @@
                                     {
                                         type: 'stack',
                                         content:[{
+                                            id: 'query-console',
                                             type: 'component',
                                             componentName: 'omdbComponent',
                                             title: '查询',
                                             componentState: {
                                                 id: 'query-console',
-                                                type: 'console'
+                                                type: 'console',
+                                                pattern: 'select'
                                             }
                                         }]
                                     },
                                     {
                                         type: 'stack',
                                         content:[{
+                                            id: 'log-console',
                                             type: 'component',
                                             componentName: 'omdbComponent',
                                             title:'日志',
                                             componentState: {
                                                 id: 'log-console',
-                                                type: 'log'
+                                                type: 'log',
+                                                pattern: ''
                                             }
                                         }]
                                     }
@@ -598,6 +996,7 @@
                     }]
                 },
                 newItemConfig: {
+                    id: null,
                     title: null,
                     type: 'component',
                     componentName: 'omdbComponent',
@@ -644,6 +1043,7 @@
 
                         let _state = component.config;
                         let _id = _state.componentState.id;
+                        let _pattern = _state.componentState.pattern || '';
                         let _node = _state.componentState.node;
                         let html = `<div id="` + _id + `"></div>`;
                         let _comp = null;
@@ -664,28 +1064,32 @@
 
                         if(_state.componentState.type == 'tree'){
 
-                            _comp = classTree(_id, _state.componentState.type, _node);
+                            _comp = classTree(_id, _state.componentState.type, _pattern, _node);
 
 
                         } else if(_state.componentState.type == 'classEdit'){
 
-                            _comp = classEdit(_id, _state.componentState.type, _node);
+                            _comp = classEdit(_id, _state.componentState.type, _pattern, _node);
 
                         } else if(_state.componentState.type == 'console'){
 
-                            _comp = queryConsole(_id, _state.componentState.type, _node);
+                            _comp = queryConsole(_id, _state.componentState.type, _pattern, _node);
 
                         } else if(_state.componentState.type == 'output'){
 
-                            _comp = outPut(_id, _state.componentState.type, _node);
+                            _comp = outPut(_id, _state.componentState.type, _pattern, _node);
 
                         } else if(_state.componentState.type == 'graph'){
 
-                            _comp = graph(_id, _state.componentState.type, _node);
+                            _comp = graph(_id, _state.componentState.type, _pattern, _node);
 
                         } else if(_state.componentState.type == 'log'){
 
-                            _comp = logConsole(_id, _state.componentState.type, _node);
+                            _comp = logConsole(_id, _state.componentState.type, _pattern, _node);
+
+                        } else if(_state.componentState.type == 'trigger'){
+
+                            _comp = trigger(_id, _state.componentState.type, _pattern, _node);
 
                         }
 
@@ -698,7 +1102,7 @@
 
                             let _scrollBody = component.container.height;//_.ceil(pxTOvh(component.container.height)*0.52);
                             let _scrollY = _scrollBody * 0.5;
-                            console.log(33, _scrollBody, _scrollY);
+
                             eventHub.$emit("LAYOUT-RESIZE-TRIGGER-EVENT", {scrollY:_scrollY, scrollBody: _scrollBody});
                         });
                     });
@@ -722,13 +1126,14 @@
                 },
                 addConsole: function( event ) {
                     let self = this;
-                    let _id = 'ID'+objectHash.sha1(event.node);
+                    let _id = 'ID'+objectHash.sha1(event.type + event.pattern + JSON.stringify(event.node));
 
                     self.newItemConfig = _.extend(self.newItemConfig, {
                         title: event.node.name,
                         componentState: {
                             id: _id,
                             type: event.type,
+                            pattern: event.pattern,
 	                        node: event.node
                         }
 	                });
@@ -737,22 +1142,25 @@
                         return false;
                     }
 
-                    if( self.layout.selectedItem === null ) {
+                    /*if( self.layout.selectedItem === null ) {
 			            self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
 			        } else {
 			            self.layout.selectedItem.addChild(self.newItemConfig);
-			        }
+			        }*/
+
+                    self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
 
                 },
                 addOutput: function(event){
                     let self = this;
-                    let _id = 'ID'+objectHash.sha1(event.node);
+                    let _id = 'ID'+objectHash.sha1(event.type + event.pattern + JSON.stringify(event.node));
 
                     self.newItemConfig = _.extend(self.newItemConfig, {
                         title: event.type + '-' + moment().format("LT"),
                         componentState: {
                             id: _id,
                             type: event.type,
+                            pattern: event.pattern,
                             node: event.node
                         }
                     });
@@ -761,24 +1169,71 @@
                         return false;
                     }
 
-                    if( self.layout.selectedItem === null ) {
+                    /*if( self.layout.selectedItem === null ) {
                         self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
                     } else {
                         self.layout.selectedItem.addChild(self.newItemConfig);
-                    }
+                    }*/
+
+                    self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                },
+	            updateOutput: function(event){
+                    let self = this;
+                    let id = 'output-console';
+                    let _id = 'ID'+objectHash.sha1(id);
+
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        id: id,
+                        title: '结果',
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+                            pattern: event.pattern,
+                            node: event.node
+                        }
+                    });
+
+                    /*if( self.layout.selectedItem === null ) {
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                    } else {
+                        self.layout.selectedItem.addChild(self.newItemConfig);
+                    }*/
+
+                    if(!_.isEmpty(self.layout.root.contentItems[0].contentItems[1].contentItems[1].getItemsById(id))){
+					    let _item = self.layout.root.contentItems[0].contentItems[1].contentItems[1].getItemsById(id)[0];
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].removeChild(_item, false);
+					}
+
+		            self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+
                 },
                 setQueryResult: function(event){
                     let self = this;
 
 
-                    if(event.type == 'table'){
+                    if(event.type === 'table-update'){
+                        appVue.updateOutput({
+                            type: 'output',
+                            node: event
+                        });
+                    } else if(event.type === 'table-new'){
                         appVue.addOutput({
                             type: 'output',
                             node: event
                         });
-                    } else if(event.type == 'graph'){
+                    } else if(event.type === 'graph-update'){
+			            appVue.updateOutput({
+			                type: 'graph',
+			                node: event
+			            });
+			        } else if(event.type === 'graph-new'){
                         appVue.addOutput({
                             type: 'graph',
+                            node: event
+                        });
+                    } else if(event.type === 'trigger'){
+                        appVue.addConsole({
+                            type: 'trigger',
                             node: event
                         });
                     }
@@ -802,21 +1257,21 @@
 </script>
 
 <script type="text/x-template"  id="class-edit-template">
-	<vue-base-datatables-component :id="id"
+	<vue-omdb-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
 	                               contextmenu="null"
-	                               :result="result"></vue-base-datatables-component>
+	                               :result="result"></vue-omdb-datatables-component>
 </script>
 
 <script type="text/x-template"  id="output-template">
-	<vue-base-datatables-component :id="id"
+	<vue-omdb-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
 	                               contextmenu="null"
-	                               :result="result"></vue-base-datatables-component>
+	                               :result="result"></vue-omdb-datatables-component>
 </script>
 
 
@@ -828,14 +1283,95 @@
 	<div :class="'log-console '+ theme">
 		<div class="logToolBar">
 			<div class="btn-group" role="group" aria-label="..." style="float: right;">
-				<a href="javascript:void(0);" class="btn btn-sm btn-default toggle" @click="toggleTheme" title="切换主题"><i class="fa fa-sun-o"></i></a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-default copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-default clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题"><i class="fa fa-sun-o"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary debug" @click="debugIt" title="调试"><i class="fa fa-desktop"></i></a>
 			</div>
 		</div>
 		<div contenteditable="true" :class="'log-console-content '+ theme">
 			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] ${item[2]} </p>
 		</div>
+	</div>
+</script>
+
+<script type="text/x-template" id="trigger-template">
+	<div>
+
+		<div style="background-color:#F7F7F7;margin-bottom:0px;border-radius:0px;border:none;font-size:12px;padding: 5px 0px 5px 10px;;">
+
+			<div class="btn-group">
+				<a style="cursor:pointer;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					选择触发器：${selected.name} <i class="fa fa-angle-down"></i>
+				</a>
+				<ul class="dropdown-menu">
+					<li v-for="item in list" style="display: flex;">
+						<a href="javascript:void(0)" style="cursor:pointer;width:90%;"
+						   @click="toggle(item)">
+							<i class="fa fa-tasks"></i> ${item.name}
+						</a>
+						<a  href="javascript:void(0)" style="float:right;color:#ddd;float:right;"
+						    @click="remove(item.name)"><i class="fa fa-remove"></i></a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="btn-group pull-right" style="margin:-7px 0px;">
+				<a  href="#modal-trigger-add"
+				    class="btn btn-sm btn-default"
+				    title="新建触发器"
+				    data-toggle="modal">
+					<i class="fa fa-plus"></i>
+				</a>
+				<a  href="javascript:void(0)"
+				    class="btn btn-sm btn-success"
+				    title="提交"
+				    @click="save">
+					<i class="fa fa-save"></i>
+				</a>
+			</div>
+
+			<span class="pull-right">
+            <a id="btn_agent_filter_fullscreen" style="cursor:pointer;">
+                <i class="fa fa-fullscreen"></i>
+            </a>
+          </span>
+		</div>
+
+		<div class="vertical-box">
+			<div v-if="list[0].name.length > 0">
+				<vue-trigger-editor-component :id="id"
+				                      :model="selected.model"
+				                      showToolsBar="true"
+				                      showStatusBar="true"></vue-trigger-editor-component>
+			</div>
+			<div v-else>
+
+			</div>
+		</div>
+
+
+		<div class="modal fade" id="modal-trigger-add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<h4 class="modal-title" id="myModalLabel">新增触发器</h4>
+					</div>
+					<div class="modal-body">
+
+						<label for="">名称</label>
+						<input type="text" class="form-control" id="trigger_name" >
+
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+						<button type="button" class="btn btn-primary" data-dismiss="modal" @click="add()">确定</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 	</div>
 </script>
 

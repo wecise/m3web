@@ -123,6 +123,9 @@
 			overflow: auto;
 		}
 
+		.vue-fs-view-component .toolbars{
+			margin: 0px -5px;
+		}
 
 
 	</style>
@@ -132,11 +135,11 @@
 	<template>
 
 		<div>
-			<div class="row">
+			<div class="row toolbars">
 					<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
 						<ul style="list-style: none;display:  flex;margin-left: -40px;">
 							<li style="padding:5px 0px;">
-								<a href="javascript:void(0);" @click="open(null,'/home')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 我的文件 </a>
+								<a href="javascript:void(0);" @click="open(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 我的文件 </a>
 							</li>
 							<li>
 								<ol class="breadcrumb">
@@ -152,19 +155,19 @@
 							<!--<a href="javascript:void(0)" class="btn btn-xs btn-default btn-noborder" @click="toggleLeft" style="margin-right: 5px;">
 								<i class="fa fa-caret-right navtoggle"></i>
 							</a>-->
-							<a href="#" class="btn btn-xs btn-default" @click="selectAll"><i class="fa fa-square-o"></i></a>
-							<a href="#" class="btn btn-xs btn-default" @click="pasteIt"><i class="fa fa-paste"></i></a>
-							<a href="#" class="btn btn-xs btn-danger" @click="deleteThem"><i class="fa fa-trash"></i></a>
-							<a href="#" class="btn btn-xs btn-default btn-noborder" @click="newDir"><i class="fa fa-folder""></i></a>
-							<!--<a href="#" class="btn btn-xs btn-default btn-noborder" @click="newFile"><i class="fa fa-file"></i></a>-->
-							<a href="javascript:void(0);" class="btn btn-xs btn-success btn-noborder fileinput-button">
+							<a href="#" class="btn btn-sm btn-default" @click="selectAll"><i class="fa fa-square-o"></i></a>
+							<a href="#" class="btn btn-sm btn-default" @click="pasteIt"><i class="fa fa-paste"></i></a>
+							<a href="#" class="btn btn-sm btn-danger" @click="deleteThem"><i class="fa fa-trash"></i></a>
+							<a href="#" class="btn btn-sm btn-default btn-noborder" @click="newDir"><i class="fa fa-folder""></i></a>
+							<!--<a href="#" class="btn btn-sm btn-default btn-noborder" @click="newFile"><i class="fa fa-file"></i></a>-->
+							<a href="javascript:void(0);" class="btn btn-sm btn-success btn-noborder fileinput-button">
 								<i class="fa fa-upload"></i>
 								<input id="file-upload" type="file" name="uploadfile" multiple>
 							</a>
-							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-icon-component active">
+							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-sm btn-default btn-noborder file-view-icon-component active">
 								<i class="fa fa-th" aria-hidden="true"></i>
 							</a>
-							<a href="#table" role="tab" data-toggle="tab" class="btn btn-xs btn-default btn-noborder file-view-table-component">
+							<a href="#table" role="tab" data-toggle="tab" class="btn btn-sm btn-default btn-noborder file-view-table-component">
 								<i class="fa fa-list" aria-hidden="true"></i>
 							</a>
 						</div>
@@ -184,7 +187,7 @@
 						       v-for="item in model">
 							  <div class="widget widget-stats bg-silver animated flipInX">
 								  <div class="stats-info" @click="open(item, item.parent+'/'+item.name);" >
-									  <p><img class="media-object" :src="item | pickIcon"></p>
+									  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/dir.png?type=download';"></p>
 								  </div>
 								  <div class="stats-link">
 									  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
@@ -289,7 +292,15 @@
                     self.load();
                 }
 
-                $('#file-upload').fileupload({url: '/fs' + val});
+	            let _url = val.replace(/\/\//g,'/');
+
+                // system || extend || ...
+                if(_.startsWith(_url,'/extend') || _.isEqual(_url,'/')){
+                    _url += '?issys=true';
+                }
+
+                console.log(2323,_url)
+                $('#file-upload').fileupload({url: `/fs${_url}`});
 
             }
 		},
@@ -308,8 +319,10 @@
 
                 let _name = _.head(item.name.split("."));
 
-                if(!_.isEmpty(_name) && _.size(_name) > 9){
-                    _name = _.split(_name,"",9).join("")+"..."
+                if(!_.isEmpty(_name)){
+                    _name = _.truncate(_name, {
+		                        'length': 9
+		                    });
                 }
 
 				return _name;
@@ -318,7 +331,14 @@
                 let self = this;
 
                 if (_.isEmpty(item.attr) || _.isEqual(item.attr, 'null')) {
-                    return `/fs/home/assets/${item.ftype}.png?type=download`;
+
+                    // system || extend || ...
+	                if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
+                        return `/fs/home/assets/dir-lock.png?type=download`;
+	                } else {
+                        return `/fs/home/assets/${item.ftype}.png?type=download`;
+	                }
+
                 }
 
                 return JSON.parse(item.attr).icon;
@@ -361,7 +381,12 @@
 
                             items: {
 
-                                "delete": {
+                                "download": {
+                                    name: "下载", icon: "fa-download", callback: function (key, opt) {
+                                        self.downloadIt(_item,true);
+                                    }
+                                },
+                                "sep3": "---------","delete": {
                                     name: "删除", icon: "fa-trash", callback: function (key, opt) {
                                         self.deleteIt(_item,true);
                                     }
@@ -412,8 +437,6 @@
                         let _item = $(this).data("info");
 
                         let _extName = _item.ftype=='dir'?'':'.'+_item.ftype;
-
-                        console.log($(this).editable('getValue', true), $(this).text(),newValue)
 
                         let _old = _.trim(_item.parent + "/" + $(this).editable('getValue', true) + _extName);
                         let _new = _.trim(_item.parent + "/" + newValue + _extName);
@@ -467,9 +490,13 @@
 
                         let _wnd = newWindow('fsapp', item.name, contents, null);
 
-                    } else if(_.includes(['pptx','ppt'], item.ftype)) {
+                    } else if(_.includes(['pptx','ppt','txt','html'], item.ftype)) {
 
-                        window.open(`/fs${path}?type=download`, "_parent");
+                        window.open(`/fs${path}?type=download`, "_blank");
+
+                    } else if(_.includes(['ltsv'], item.ftype)) {
+
+                        window.open(`/fs${path}?type=download&issys=true`, "_blank");
 
                     } else if(_.includes(['swf'], item.ftype)) {
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
@@ -579,7 +606,6 @@
 
                 $('#file-upload').fileupload(self.upload.option)
                     .on('fileuploadadd', function (e, data) {
-                        console.log(e,data)
 
                         let _wnd = newWindow('fsupload','上传', `<div id="files" class="files">
 																</div>`, null);
@@ -869,9 +895,6 @@
                             let _rtn = fsRename(_old, _new);
 
                             if(_rtn == 1){
-
-                                _win.close();
-
                                 self.load();
                             }
                         },
@@ -887,7 +910,6 @@
                                 $(".list-context-menu").contextMenu('update');
 
                                 if(me.model.oldName != me.model.newName){
-                                    _win.close();
                                     me.saveName();
                                 }
                             }
@@ -994,6 +1016,21 @@
                         self.load();
                     }
                 }
+
+            },
+            downloadIt: function(item, prompt) {
+                let self = this;
+
+
+                let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
+                let _target = '_blank';
+
+                // system || extend || ...
+                if(_.startsWith(item.parent,'/extend')){
+                    _url += '&issys=true';
+                }
+
+                window.open(_url, _target);
 
             },
             toggleLeft: function() {
