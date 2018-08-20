@@ -461,7 +461,11 @@
             open: function(item, path){
                 let self = this;
 
-                self.rootPath = path;
+                console.log(JSON.stringify(item), path)
+
+	            if(_.isNull(item) || typeof(item) === 'string' || item.ftype === 'dir'){
+                    self.rootPath = path;
+                }
 
                 if(!_.isEmpty(item)){
 
@@ -496,7 +500,14 @@
 
                     } else if(_.includes(['ltsv'], item.ftype)) {
 
-                        window.open(`/fs${path}?type=download&issys=true`, "_blank");
+                        //window.open(`/fs${path}?type=download&issys=true`, "_blank");
+	                    let _content = fsContent(item.parent, item.name);
+
+                        let contents = `<div style="height:100%;">
+                                            <pre style="border:none;background-color:#ffffff;">${_content}</pre>
+										</div>`;
+
+                        let _wnd = newWindow('fsapp', item.name, contents, null);
 
                     } else if(_.includes(['swf'], item.ftype)) {
                         let contents = `<div class="embed-responsive embed-responsive-16by9">

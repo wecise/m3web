@@ -52,13 +52,20 @@
 		.context-menu-list.context-menu-root{
 			z-index: 100!important;
 		}
+
+		.ztree {
+			height: 100%;
+			overflow: auto;
+			padding-bottom: 100px!important;
+			position: relative;
+		}
 		
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="vue-object-tree-component"  ----------*/
 	<template>
-		<ul class="ztree" :id="id" style="height:auto;overflow:auto;padding-bottom:100px;"></ul>
+		<ul class="ztree" :id="id"></ul>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -99,7 +106,7 @@
                 },
                 zNodes: [
                             {cid:'A1', parent:null, rtype:'A1', isParent:true, name: '/类管理', title: '类管理', open:true},
-	                        {cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/规则', title: '规则', children: []},
+	                        //{cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/规则', title: '规则', children: []},
 	                        {cid:'A3', parent:null, rtype:'A3', isParent:true, name: '/关系', title: '关系', children:[]}
                         ],
                 selectedNode: null,
@@ -230,7 +237,7 @@
 
                                 _columns = columnsParse(_list.meta);
 
-                                let _result = {type: 'table', data: _.groupBy(_data,'class'), columns: _columns};
+                                let _result = {type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
 
                                 eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT", _result);
                             }
@@ -270,7 +277,7 @@
                         "sep5": "---------",
                         "ddl": {
                             name: "DDL&属性", icon: "fa-info-circle", callback: function (key, opt) {
-                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'console', pattern: 'ddl', node: self.selectedNode});
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'console', pattern: 'ddl', node: self.selectedNode, pnode: self.selectedNode.getParentNode()});
                             }
                         }
                     },
@@ -505,7 +512,7 @@
                         event.stopPropagation();
                         event.preventDefault();
 
-                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'classEdit', pattern: '', node: treeNode});
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'classEdit', pattern: '', node: treeNode, pnode: treeNode.getParentNode()});
 
                     });
 
@@ -516,7 +523,7 @@
                         event.stopPropagation();
                         event.preventDefault();
 
-                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'console', pattern: 'select', node: treeNode});
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'console', pattern: 'select', node: treeNode, pnode: treeNode.getParentNode()});
 
                     });
 

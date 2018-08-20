@@ -2,12 +2,50 @@
 
 	<style>
 		/*----------  style  ----------*/
+
+		.ztree li a.curSelectedNode {
+			background-color: rgb(161, 212, 250)!important;
+			border:1px solid #ffffff!important;
+			color: rgb(255,255,255)!important;
+		}
+
+		.ztree li a:hover{
+			text-decoration: none!important;
+		}
+
 		ul.nav-tabs-no-bg {
     		background-color: rgba(0, 0, 0, 0)!important;
 		}
 
 		ul.nav-tabs-no-bg > li.active {
 			border-bottom: 2px solid rgb(231, 231, 231);
+		}
+
+		.tree-toolbars{
+			position: relative;
+			left: calc(100% - 68px);
+			top: 0px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
+			display: block;
+			background-color: rgb(161, 212, 250);
+			border: none;
+			border-radius: 0;
+		}
+
+		.context-menu-list.context-menu-root{
+			z-index: 100!important;
+		}
+
+		.media{
+			padding:10px;
+		}
+
+		.media h3 {
+			margin: 0px;
+			color: rgb(158, 158, 158);
 		}
 		
 	</style>
@@ -28,10 +66,10 @@
 		
 			<!-- Tab panes -->
 			<div class="tab-content" style="padding:0px;">
-				<div role="tabpanel" class="tab-pane active" id="entity-tree">
-					<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+				<div role="tabpanel" class="tab-pane active" id="entity-tree" style="height:120vh;">
+					<ul class="ztree" :id="id" style="height:auto;overflow:auto;padding-bottom:100px;margin:10px -7px;"></ul>
 				</div>
-				<div role="tabpanel" class="tab-pane" id="entity-tags">
+				<div role="tabpanel" class="tab-pane" id="entity-tags" style="height:120vh;">
 					<vue-ci-tags-component :id="'tags_'+id" :model="list"></vue-ci-tags-component>
 				</div>
 			</div>
@@ -56,34 +94,6 @@
 	            nodes: Array,
 	            expandNodes: Array,
 				selected: Object,
-				contextMenu: {
-					"create": {name: "Create CI", icon: "fa-plus",
-						callback: function (itemKey, opt, rootMenu, originalEvent) {
-							let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
-                            let nodes = treeObj.getSelectedNodes();
-                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
-
-							eventHub.$emit("vue-entity-tree-panel-event", _item);
-						}
-					},
-                    "sep1": "---------",
-					"remove": {name: "Remove All CI", icon: "fa-trash",
-                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
-                            let nodes = treeObj.getSelectedNodes();
-                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
-
-
-                            eventHub.$emit("vue-entity-tree-panel-event", _item);
-						}
-					},
-					"sep2": "---------",
-					"alias": {name: "Toggle View", icon: "fa-eye",
-                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-                            eventHub.$emit("vue-entity-tree-toggle-name-event", null);
-						}
-					}
-				},
 				cure:{
 	                create: {
 	                    template: `<div id="entity-create-template"></div>`
@@ -96,8 +106,8 @@
 
 	        self.init();
 
-            eventHub.$on("vue-entity-tree-panel-event", self.openPanel);
-            eventHub.$on("vue-entity-tree-toggle-name-event",self.toggleName);
+            eventHub.$on("ENTITY-TREE-PANEL-TRIGGER-EVENT", self.openCUREPanel);
+            eventHub.$on("ENTITY-TREE-TOGGLE-NAME-EVENT",self.toggleName);
 	    },
 	    mounted: function() {
 	        let self = this;
@@ -105,14 +115,9 @@
 	        self.$nextTick(function(){
 	            
 	            self.setting = {
-	                            view: {
-	                                showLine: true,
-	                                selectedMulti: false,
-	                                dblClickExpand: false
-	                            },
 	                            check: {
 									enable: false,
-									nocheckInherit: true
+									nocheckInherit: false
 								},
 	                            edit: {
 	                                enable: false,
@@ -130,11 +135,13 @@
 	                            },
 	                            callback: {
 	                                onClick: self.onClick,
-	                                onCheck: self.onCheck,
+	                                //onCheck: self.onCheck,
 	                            },
 	                            view: {
 									showTitle: true,
-									addDiyDom: self.addDiyDom
+                                    dblClickExpand: true,
+									addDiyDom: self.addDiyDom,
+                                    removeHoverDom: this.removeHoverDom,
 								}
 	                        };
 
@@ -174,7 +181,7 @@
 	            let _list = fetchData(`call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`);
 	            let _data = _.map(_list.message[0].tree,function(v,k){
 	            				let _name = _.last(v.name.split("/"));
-	            				v.icon = "/web/vendor/zTree/css/entitieszTreeStyle/img/diy/" + _name + ".svg";
+	            				v.icon = "/web/vendor/zTree/css/entityStyle/img/diy/" + _name + ".svg";
 				            	return v;
 				            });
 
@@ -198,7 +205,7 @@
         									title:v.name + " " + _.random(0,10),//+ "[" + v.summary.event + "]", 
         									checked: true, 
         									open:true,
-        									icon: "/web/vendor/zTree/css/entitieszTreeStyle/img/diy/" + _name + ".svg"
+        									icon: "/web/vendor/zTree/css/entityStyle/img/diy/" + _name + ".svg"
         								};
 	            			 })
                 
@@ -211,18 +218,100 @@
             initPlugIn: function(){
                 let self = this;
 
-                if (!_.isEmpty(self.contextMenu)){
-                    $.contextMenu({
-                        selector: "#"+self.id,//$(self.$el),
-                        items: self.contextMenu
+	            $("#ciview-entity-tree").contextMenu({
+                        selector: 'span.ci.more',
+                        trigger: 'left',
+                        items: {
+                            "create": {name: "新建CI", icon: "fa-plus",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+
+                                    let treeObj = $.fn.zTree.getZTreeObj(self.id);
+                                    let nodes = treeObj.getSelectedNodes();
+                                    let _item = {id:self.id,title:opt.items[itemKey].name, action:"create",node: nodes[0]};
+
+                                    eventHub.$emit("ENTITY-TREE-PANEL-TRIGGER-EVENT", _item);
+                                }
+                            },
+                            "sep1": "---------",
+                            "remove": {name: "删除CI", icon: "fa-trash",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    let treeObj = $.fn.zTree.getZTreeObj(self.id);
+                                    let nodes = treeObj.getSelectedNodes();
+                                    let _item = {id:self.id,title:opt.items[itemKey].name, action:"remove",node: nodes[0]};
+
+
+                                    eventHub.$emit("ENTITY-TREE-PANEL-TRIGGER-EVENT", _item);
+                                }
+                            },
+                            "sep2": "---------",
+                            "alias": {name: "切换视角", icon: "fa-eye",
+                                callback: function (itemKey, opt, rootMenu, originalEvent) {
+                                    eventHub.$emit("ENTITY-TREE-TOGGLE-NAME-EVENT", null);
+                                }
+                            }
+                        },
+                        events: {
+                            show: function(opt) {
+                                // this is the trigger element
+                                var $this = this;
+                                // import states from data store
+                                $.contextMenu.setInputValues(opt, $this.data());
+                            },
+                            hide: function(opt) {
+                                // this is the trigger element
+                                var $this = this;
+                                // export states to data store
+                                $.contextMenu.getInputValues(opt, $this.data());
+                            }
+                        }
                     });
-                }
 
             },
 	        onClick: function(event, treeId, treeNode) {
 	            let self = this;
 
-	            self.selected = treeNode;
+                self.selected = treeNode;
+
+                // 右键菜单
+                let sObj = $("#" + treeNode.tId + "_span");
+                let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                let addStr = `<div class="well tree-toolbars" id='toolbars_${treeNode.tId}' >
+										<span class='button ci edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
+										<span class='button ci add' id='consoleBtn_${treeNode.tId}' title='新建' ></span>
+										<span class='button ci more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+
+
+                if(scObj.length > 0){
+                    scObj.after(addStr);
+                } else {
+                    sObj.after(addStr);
+                }
+
+                // add
+                let btnAdd = $("#addBtn_"+treeNode.tId);
+                if (btnAdd) btnAdd.bind("click", function(event){
+
+                    event.stopPropagation();
+                    event.preventDefault();
+
+                    let _item = {id: treeNode.cid,title: treeNode.name, action:"create", node: treeNode};
+
+                    eventHub.$emit("ENTITY-TREE-PANEL-TRIGGER-EVENT", _item);
+
+                });
+
+                // more
+                let btnMore = $("#moreBtn_"+treeNode.tId);
+                if (btnMore) btnMore.bind("click", function(event){
+
+                    //event.stopPropagation();
+                    event.preventDefault();
+
+                });
 	            
 	            // entity object data false
 	            if(treeNode.name.indexOf("/") < 0){
@@ -286,45 +375,23 @@
 	            })
 	            return rtn;
 	        },
-            openPanel: function(item) {
-                let self = this;
-                var win;
-                var w = $(window).width();
-                var h = $(window).height();
-                var wW = $(window).width() * 2 / 3;
-                var hH = $(window).height() * 2.5 / 3;
-                var lrwh = [(w - wW) / 2, (h - hH) / 2, wW, hH];
-                var tb = document.createElement('div');
-
-                $(tb).append(self.cure[item.action].template);
-                win = new mxWindow(_.startCase(item.action)+" "+item.node.name, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
-                win.setMaximizable(true);
-                win.setResizable(true);
-                win.setClosable(true);
-                win.setVisible(true);
-
-                win.addListener(mxEvent.MAXIMIZE, function (event) {
-                    _.delay(function () {
-                        eventHub.$emit("win-resize-event", null);
-                    }, 100);
-                });
-
-                win.addListener(mxEvent.MINIMIZE, function (event) {
-                    _.delay(function () {
-                        eventHub.$emit("win-resize-event", null);
-                    }, 100);
-                });
-
-                win.addListener(mxEvent.NORMALIZE, function (event) {
-                    _.delay(function () {
-                        eventHub.$emit("win-resize-event", null);
-                    }, 100);
-                });
-
-                self.genCurePanel(item);
-            },
-            genCurePanel: function(item){
+            openCUREPanel: function(item){
 	            let self = this;
+
+                let contents = `<div class="media">
+								  <div class="media-left">
+								    <a href="#">
+								      <img class="media-object" src="${item.node.icon}" alt="${item.node.alias}">
+								    </a>
+								    <h3>${_.startCase(item.node.alias)}</h3>
+								  </div>
+								  <div class="media-body">
+								    <div id="entity-create-template"></div>
+								  </div>
+								</div>`;
+                let _wnd = newWindow('fsentity', `${item.title} ${item.node.alias}`, contents, null);
+
+	            console.log(JSON.stringify(item))
 
 	            let cVue = new Vue({
                     delimiters: ['$', '$'],
@@ -347,7 +414,7 @@
                                         form: {
                                             buttons: {
                                                 save: {
-                                                    title: "Save",
+                                                    title: "保存",
 													click: function() {
                                                         let val = this.getValue();
 
@@ -405,7 +472,7 @@
                             });
 
                             self.model.form.data = _data;
-                            self.model.form.schema.title = item.node.name;
+                            self.model.form.schema.title = `${item.node.name}`;
                             self.model.form.schema.properties = _properties;
 							self.model.form.options.fields = _fields;
 
@@ -447,7 +514,10 @@
 					let str = "<span> ["+treeNode.children.length+"]</span>";
 					aObj.append(str);
 				} 
-			}
+			},
+            removeHoverDom: function (treeId, treeNode) {
+                $("#toolbars_"+treeNode.tId).unbind().remove();
+            }
 
 
 	    }

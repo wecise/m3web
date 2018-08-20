@@ -486,6 +486,8 @@
                             self.user.apps.push (_.find(self.user.appList,{id:v}));
                         });
 
+                        self.user.apps = _.remove(self.user.apps,null);
+
                         self.user.appList = _.map(self.user.appList,function(v){
 
                                                 let _idx =  _.find(self.user.apps,{id:v.id});

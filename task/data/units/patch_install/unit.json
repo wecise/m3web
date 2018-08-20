@@ -1,0 +1,15 @@
+{
+	"ID": "patch_install",
+	"Name": "补丁安装",
+	"Group": "补丁管理",
+	"Version ": "0.0.1",
+	"Creator": "Mahmoud Reda",
+	"Command": "bin:/builtin fs mkdir {path}",
+	"Setting": {},
+	"Inputs": {
+		"path": "Path"
+	},
+	"Outputs": {
+		"path": "Path"
+	}
+}

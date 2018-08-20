@@ -18,7 +18,7 @@
 	<!--Jquery UI JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
 	<!-- font-awesome  CSS -->
-	<link href="{{AppSubUrl}}/web/vendor/font-awesome/4.7.1/css/font-awesome.min.css" rel="stylesheet" >
+	<link href="{{AppSubUrl}}/web/vendor/font-awesome/5.2.0/css/all.min.css" rel="stylesheet" >
 	<!-- animate CSS -->
 	<link href="{{AppSubUrl}}/web/vendor/animate/animate.css" rel="stylesheet" >
 
@@ -207,7 +207,6 @@
 	<link href="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
 
-
 	<title> {{.SignedUser.Company.Fullname}}</title>
 
 	<style>
@@ -357,7 +356,9 @@
 		    padding: 5px 5px;
 		}
 
-	    .dropdown-menu > li > a > .fa {
+	    .dropdown-menu > li > a > .fa,
+	    .dropdown-menu > li > a > .fab,
+	    .dropdown-menu > li > a > .fas {
 	    	color: rgb(33, 148, 245);
 	    }
 		
@@ -366,10 +367,6 @@
 		    margin: .25em 0;
 		    border-bottom: 1px solid rgb(230, 230, 230);
 	    }
-
-		.dropdown-menu.top-bar{
-			margin: 5px 20px 0px 15px!important
-		}
 
 	    .context-menu-icon.context-menu-icon--fa::before {
 		    color: rgb(33, 148, 245)!important;
@@ -404,6 +401,39 @@
 			padding: 5px;
 		}
 
+		.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
+			color: rgb(255, 255, 255)!important
+		}
+
+		ul .nav-menu-level1,
+		ul .nav-menu-user {
+			margin: 5px 10px 0px 10px!important
+		}
+
+		ul .nav-menu-level1,
+		ul .nav-menu-user {
+			width: 25.4vw;
+		}
+
+		ul .nav-menu-level1> li,
+		ul .nav-menu-user> li{
+			float: inherit;
+			width: 9em;
+			height: 90px;
+			padding: 15px 10px;
+			margin: 0px;
+			font-size: 12px;
+			line-height: 1.4;
+			text-align: center;
+			background-color: rgb(255, 255, 255);
+			border: 1px solid rgb(255, 255, 255);
+		}
+
+		ul .nav-menu-level1,
+		ul .nav-menu-user{
+			padding: 1px 0px!important;
+		}
+
 
 	</style>
 </head>
@@ -431,8 +461,12 @@
 						</li>
 				    {{end}}
 
-						<li>
-							<a class="head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"><i class="fa fa-home fa-fw"></i> &nbsp;{{.i18n.Tr "home"}}</a>
+						<li class="dropdown top-bar">
+							<a class="dropdown-toggle head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+								<i class="fa fa-th fa-fw"></i> &nbsp;应用<!--{{.i18n.Tr "home"}}-->
+							</a>
+							<div id="nav-menu-level1">
+							</div>
 						</li>
 
 						<li class="current-active-item"></li>
@@ -454,75 +488,79 @@
 								<i class="caret"></i>
 							</a>
 
-							<ul class="dropdown-menu top-bar animated fadeInDown">
+							<ul class="dropdown-menu top-bar animated fadeInDown nav-menu-user">
 
 								<li>
 									<a href="{{AppSubUrl}}/janesware/user">
-										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}} 
+										<i class="fa fa-user fa-3x"></i> <p>{{.i18n.Tr "your_profile"}}</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
-
 
 								{{if .IsAdmin}}
 								{{if ne .company "oneswitch"}}
 									<li>
 										<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
-											<i class="fa fa-cogs"></i>
-											{{.i18n.Tr "system"}}<!-- Admin Panel -->
+											<i class="fa fa-cogs fa-3x"></i>
+											<p>{{.i18n.Tr "system"}}</p>
 										</a>
 									</li>
-									<li role="separator" class="divider"></li>
+
 								{{end}}
 								{{end}}
 
 								<li>
 									<a target="_blank" href="/janesware/files">
-										<i class="fa fa-files-o"></i>
-										{{.i18n.Tr "files"}}
+										<i class="fa fa-list-alt fa-3x"></i>
+										<p>{{.i18n.Tr "files"}}</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
+
 
 								<li>
 									<a target="_blank" href="javascript:setDefaultHome('home','{{.CsrfToken}}')">
-										<i class="fa fa-home"></i>
-										{{.i18n.Tr "defaulthome"}}
+										<i class="fa fa-home fa-3x"></i>
+										<p>{{.i18n.Tr "defaulthome"}}</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
+
 
 								{{if ne .company "oneswitch"}}
 								<li>
 									<a target="_blank" href="/janesware/api">
-										<i class="fa fa-gear"></i>
-										REST API
+										<i class="fab fa-amilia fa-3x"></i>
+										<p>REST API</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
+
 								{{end}}
 
-								<li style="display: -webkit-inline-flex;">
-									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('LIGHT')" style="text-align:center;">
-                                        <img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">亮色
-									</a>
-									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('DARK')" style="text-align:center;">
-                                        <img src="/web/assets/images/dark.svg" class="img-responsive" alt="Image" style="max-width:48px;">深色
+								<li>
+									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('LIGHT')">
+										<i class="fas fa-sun fa-3x"></i><!--<img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">-->
+										<p>亮色</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
+
+								<li>
+									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('DARK')">
+										<i class="fas fa-sun fa-3x" style="color:#000;"></i><!--<img src="/web/assets/images/dark.svg" class="img-responsive" alt="Image" style="max-width:48px;">-->
+										<p>深色</p>
+									</a>
+								</li>
+
 
 								<li>
 									<a target="_blank" href="javascript:void(0);" onclick="toggleFullScreen();">
-										<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
+										<i class="fa fa-arrows-alt fa-3x" aria-hidden="true"></i>
+										<p>全屏切换</p>
 									</a>
 								</li>
-								<li role="separator" class="divider"></li>
+
 
 								<li>
 									<a href="{{AppSubUrl}}/user/logout/{{.company}}">
-										<i class="fa fa-sign-out"></i>
-										{{.i18n.Tr "sign_out"}}<!-- Sign Out -->
+										<i class="fa fa-sign-out-alt fa-3x"></i>
+										<p>{{.i18n.Tr "sign_out"}}</p>
 									</a>
 								</li>
 							</ul>

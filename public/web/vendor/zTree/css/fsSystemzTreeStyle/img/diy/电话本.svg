@@ -1,5 +1,0 @@
-<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1524795641880" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2319" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16"><defs><style type="text/css">
-        	path {
-        		fill: #bbbbbb;
-        	}
-        </style></defs><path d="M832 640h64v112h-64zM832 464h64v112h-64z" fill="" p-id="2320"></path><path d="M128 64v896h768v-144h-64v80H192V128h640v96h64V64H128z" fill="" p-id="2321"></path><path d="M832 288h64v112h-64zM560 416a96 96 0 0 0-16-64l-32-64a96 96 0 0 0-80-48h-48l-64 48c-48 32-48 96-16 160l160 272c32 48 80 80 112 80h32l80-48a80 80 0 0 0 32-48 96 96 0 0 0-16-64l-48-96a80 80 0 0 0-96-16h-32l-32-48h32a80 80 0 0 0 32-64z m-64-16l-48 32h-32l80 144v32h32l48-32h32l32 64-80 48c-16 0-32-16-64-48l-144-208c-16-32-16-64-16-80l64-48h48l32 64zM608 256h128v64h-128zM608 368h128v64h-128z" fill="" p-id="2322"></path></svg>

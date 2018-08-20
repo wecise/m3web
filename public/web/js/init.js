@@ -1140,10 +1140,11 @@ var callJob = function (cmd,host) {
     let event = `{"cmd": "${cmd}", "HOST!": "${host}", "timeout": 5}`;
     
     jQuery.ajax({
-        url: '/job/remote_remote_command@system/common',
+        url: '/job/remote_command@system/common',
         dataType: 'json',
         type: 'GET',
         async:false,
+        timeout:3000,
         data: {
             receive_output: true,
             param: event
@@ -2504,6 +2505,52 @@ var newWindow = function (type, title, template, position) {
         return win;
     }
 
+    if(type === 'fsentity'){
+        lrwh[2] = $( window ).width()*0.55;
+        lrwh[3] = $( window ).height()*0.55;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px",
+                    "font-family": "inherit"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
     if(type === 'small'){
         lrwh[2] = $( window ).width()*0.55;
         lrwh[3] = $( window ).height()*0.55;
@@ -3058,6 +3105,42 @@ var initPlugIn = function () {
     if(_.includes(['home',''],getPage())){
         $(".ai").addClass("ai-robot");
     }
+
+    // Nav Menu level1
+    let menu = {
+        delimiters: ['#{', '}#'],
+        el: '#nav-menu-level1',
+        data: {
+            model: null
+        },
+        template: `<ul class="dropdown-menu top-bar animated fadeInDown nav-menu-level1">
+                        <li>
+                            <a href="/">
+                                <i class="fa fa-home fa-3x"></i> <p>首页</p>
+                            </a>
+                        </li>
+                        <!--<li role="separator" class="divider"></li>-->
+                        <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
+                            <a :href="item.url" :target="item.target">
+                                <i :class="item.icon + ' fa-3x'"></i> <p>#{item.cnname}#</p>
+                            </a>
+                        </li>
+                    </ul>`,
+        created: function(){
+            let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
+            this.model = _list.message;
+            this.model.push({icon:'fa fa-plus', url:'/janesware/system?view=app', cnname:'应用管理', enname: 'App Console', target: '_parent'});
+        },
+        mounted: function () {
+
+            this.$nextTick(function () {
+                //$(".slot-li-divider").after(`<li role="separator" class="divider"></li>`);
+            })
+        }
+    };
+
+    new Vue(menu);
+
 
 };
 

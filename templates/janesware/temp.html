@@ -23,7 +23,7 @@
 {{template "base/head" .}}
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/zTree/css/mxobjectTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/omdbStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <style type="text/css">
 
@@ -39,12 +39,16 @@
 
 	.lm_content {
 		background: rgb(255, 255, 255);
-		border: 1px solid rgb(255, 255, 255);
-		overflow: auto;
+		border: none;
+		overflow: hidden;
 	}
 
 	.lm_header{
 		height: 25px!important;
+	}
+
+	.lm_item .lm_column > .lm_stack > .lm_header{
+		display: none!important;
 	}
 
 	.lm_header .lm_tab.lm_active {
@@ -84,40 +88,54 @@
 	}
 
 	.logToolBar {
-		height: 22px;
+		height: 30px;
 		width: 100%;
+		background-color: rgb(33, 149, 243);
 	}
 
 	.log-console {
-		height: 1000%;
+		height: 100%;
 	}
 
 	.log-console-content {
-		margin: 5px 0px 100px 0px;
+		padding: 5px 0px 150px 0px;
 		width: 100%;
-		height: 300vh;
+		height: 100%;
 		border:none;
 		outline:none;
 		white-space: pre-wrap;
-		overflow:hidden;
+		overflow:auto;
+		position: relative;
+	}
+
+	.log-console-content p {
+		white-space: nowrap;
+	}
+
+	.log-console-content p span{
+		white-space: pre-wrap;
 	}
 
 	.log-console.light {
 		background-color: #ffffff;
 	}
 
-	.log-console-content.light {
+	.log-console-content.light,
+	.log-console-content.light a{
 		color: #333333;
 		background-color: #ffffff;
+		cursor: pointer;
 	}
 
 	.log-console.dark {
 		background-color: #000000;
 	}
 
-	.log-console-content.dark {
+	.log-console-content.dark,
+	.log-console-content.dark a{
 		color: #38FF41;
 		background-color: #000000;
+		cursor: pointer;
 	}
 
 	.log-severity.PANIC {
@@ -136,11 +154,30 @@
 		color: #CEC335;
 	}
 
+	.logToolBar{
+		height: 30px;
+		background-color: rgb(246, 246, 246);
+		width: 100%;
+	}
+
+	.logToolBar .btn-primary,
+	.logToolBar .btn-primary:hover{
+		background-color: rgb(246, 246, 246);
+		border:none;
+		color: #333333;
+	}
+
+	.logToolBar .btn-group{
+		top: 1px;
+	}
+
 
 </style>
 
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-omdb-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-output-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-datatables-component.html"></link>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
@@ -155,11 +192,12 @@
 	'use static';
 
 
-    $(".current-active-item").html(`<a class="active item" href="/janesware/object">
+    $(".current-active-item").html(`<a class="active item" href="/janesware/omdb">
 										<i class="fa fa-cube"></i>  {{.i18n.Tr .ActiveView }}
 									</a>`);
 
-    VueLoader.onloaded(["vue-omdb-datatables-component",
+    VueLoader.onloaded(["omdb-output-datatables-component",
+				        "omdb-class-datatables-component",
 				        "vue-object-tree-component",
 				        "vue-editor-component",
 	                    "vue-trigger-editor-component",
@@ -191,41 +229,65 @@
             };
         };
 
-        var classEdit = function(id, type, pattern, node){
+        let classEdit = function(id, type, pattern, node, pnode){
 
             let _dataset = [];
             let _columns = [];
 
-            if(!_.isEmpty(node.fieldsObj)) {
-                _dataset = node.fieldsObj;
-                _columns = [
-			                    {"field": "name", "title": "Name"},
-			                    {"field": "title", "title": "Title"},
-			                    {"field": "colname", "title": "ColName"},
-			                    {"field": "ftype", "title": "Ftype"},
-			                    {"field": "loption", "title": "Loption"},
-			                    {"field": "fparam", "title": "Fparam"},
-			                    {"field": "isindex", "title": "Index",render: function (data, type, row) {
-			                        console.log(data, typeof(data))
-                                                                                    return data===1?'是':'否';
-				                                                                }
-                                },
-			                    {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
-										                                        return data===1?'是':'否';
-										                                    }
-                                },
-			                    {"field": "note", "title": "Note"},
-			                    {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
-										                                        return moment(data).format("LLL");
-										                                    }
-			                    },
-			                    {"field": "class", "title": "Class", "visible": false},
-			                    {"field": "dispname", "title": "Dispname", "visible": false},
-			                    {"field": "tags", "title": "Tags", "visible": false},
-			                    {"field": "isrel", "title": "Rel", "visible": false},
-			                    {"field": "btype", "title": "Btype", "visible": false}
-                            ];
+            _columns = [
+                {"field": "id", render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
+                    }
+                },
+                {"field": "icon", "title": "Inherit", render: function (data, type, row) {
+                        return `<img src="/web/assets/images/${data}.svg" style="width:22px;height:22px;">`;
+                    }
+                },
+                {"field": "name", "title": "Name"},
+                {"field": "title", "title": "Title"},
+                {"field": "colname", "title": "ColName"},
+                {"field": "ftype", "title": "Ftype"},
+                {"field": "loption", "title": "Loption"},
+                {"field": "fparam", "title": "Fparam"},
+                {"field": "isindex", "title": "Index",render: function (data, type, row) {
+                        return data===1?'是':'否';
+                    }
+                },
+                {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
+                        return data===1?'是':'否';
+                    }
+                },
+                {"field": "note", "title": "Note"},
+                {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
+                        return moment(data).format("LLL");
+                    }
+                },
+                {"field": "class", "title": "Class", "visible": false},
+                {"field": "dispname", "title": "Dispname", "visible": false},
+                {"field": "tags", "title": "Tags", "visible": false},
+                {"field": "isrel", "title": "Rel", "visible": false},
+                {"field": "btype", "title": "Btype", "visible": false}
+            ];
+
+            if(!_.isEmpty(node.fieldsObj) && !_.isEmpty(pnode.fieldsObj)) {
+                let _diff = _.map(_.differenceBy(node.fieldsObj, pnode.fieldsObj, 'name'), function (v) {
+                    return _.merge(v, {icon: 'child'});
+                });
+                let _pnode = _.map(pnode.fieldsObj, function (v) {
+                    return _.merge(v, {icon: 'parent'});
+                });
+                _dataset = _.merge(_diff, _pnode);
+            } else {
+                _dataset = _.map(node.fieldsObj, function (v) {
+                    return _.merge(v, {icon: 'parent'});
+                });
             }
+
+            _dataset = _.uniqBy(_dataset,'name');
+
+            _columns = _.uniqBy(_columns, 'field');
+
+	        console.log(23,JSON.stringify(_dataset))
 
             return {
 
@@ -239,8 +301,13 @@
                         columns: _columns,
                         options: {
                             info:true,
-                            scrollY: '35vh',
+                            scrollY: '40vh',
                             searching: false,
+                            rowCallback: function( row, data ) {
+                                if( data.icon === "parent" ) {
+                                    $('td', row).css('background-color', '#f9f9f9');
+                                }
+                            }
                         }
                     },
                     result: node
@@ -248,7 +315,7 @@
                 created: function(){
                     let self = this;
 
-                    eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
+                    //eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
                 },
                 mounted: function() {
                     let self = this;
@@ -261,8 +328,8 @@
                     init: function(){
                         let self = this;
 
-                        self.model.dataset = _.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
-                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+                        //self.model.dataset = self.result.dataset[_.keys(self.result.columns)[0]];//_.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+                        //self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
 
                     },
                     setScrollY: function(event){
@@ -274,9 +341,17 @@
             };
         };
 
-        var queryConsole = function(id, type, pattern, node){
+        let queryConsole = function(id, type, pattern, node, pnode){
 
             let _readOnly = false;
+            let _diff = null;
+
+            if(!_.isEmpty(pnode)){
+                if(node.fieldsObj && pnode.fieldsObj) {
+                    _diff = _.differenceBy(node.fieldsObj, pnode.fieldsObj, 'name');
+                    node["fieldsObj"] = _.uniqBy(_diff,'name');
+                }
+	        }
 
             if(pattern === 'ddl') {
                 _readOnly = true;
@@ -315,7 +390,7 @@
                     init: function(){
                         let self = this;
 
-                        let colms =  _.without(node.fields,"_tokens");
+                        let colms = _.without(node.fields,"_tokens") || node.fields;
 
                         let cls = "";
                         if(_.isEmpty(colms)){
@@ -337,7 +412,7 @@
                             mql = "DELETE\n\t " + cls + "\nFROM\n\t " + node.name;
                         } else if(pattern === 'ddl') {
 
-                            mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + node.name + " (\n\t" + _.map(node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + node.keys.join(",") + ")\n);";
+	                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + node.name + " (\n\t" + _.map(node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + node.keys.join(",") + ")\n);";
 
                             _.forEach(self.keys,function(v){
 
@@ -453,8 +528,11 @@
             if(!_.isEmpty(node)) {
                 _dataset = node.data[_.keys(node.columns)[0]];
                 _columns = node.columns[_.keys(node.columns)[0]];
+                _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
+				                        return meta.row + meta.settings._iDisplayStart + 1;
+				                    }
+				                });
                 _node = node;
-
             }
 
             return {
@@ -469,7 +547,7 @@
                         columns: _columns,
                         options: {
                             info:true,
-                            scrollY: '20vh',
+                            scrollY: '40vh',
                             searching: false,
                         }
 	                },
@@ -504,8 +582,7 @@
             };
         };
 
-
-        var graph = function(id, type, pattern, node){
+        let graph = function(id, type, pattern, node){
 
 	        let _data = {nodes:[], edges:[]};
 
@@ -543,7 +620,7 @@
             };
         };
 
-        var logConsole = function(id, type, node){
+        let logConsole = function(id, type, node){
 
             return {
 
@@ -719,15 +796,26 @@
 	                        _content = JSON.stringify(event);
 	                    }
 
-	                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), _content];
+	                    let _short = _.truncate(_content, {
+			                            'length': 130,
+			                            'separator': ' ',
+                                        'omission': ''
+			                        });
+
+	                    let _id = objectHash.sha1(level + _content + _.now());
+
+	                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
 	                },
 	                copyIt: function(event){
                         let self = this;
 
                         new Clipboard(".copy", {
                             text: function(trigger) {
-                                alertify.log("已复制")
-                                return self.model.join("\n");
+                                alertify.log("已复制");
+                                let _rtn = _.map(self.model,function(v){
+                                    return [v[0],v[1],v[2].short + v[2].content];
+                                });
+                                return _rtn.join("\n");
                             }
                         });
 
@@ -745,10 +833,21 @@
                             let _list = fetchData(v);
 
                             _.forEach(_list.message,function(v){
-                                let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss"), _.upperCase(v.level), `[${v.name}] [${v.class}] ${v.msg}`];
+
+                                let _content = `[${v.name}] [${v.class}] ${v.msg}`;
+
+                                let _short = _.truncate(_content, {
+                                    'length': 130,
+                                    'separator': ' ',
+                                    'omission': ''
+                                });
+
+                                let _id = objectHash.sha1(v.level + _content + _.now());
+
+                                let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(v.level), {id:_id, short: _short, content: _content.replace(_short,'')}];
+
                                 self.model.unshift(_log);
                             })
-
 						})
 
                     },
@@ -783,8 +882,7 @@
             };
         };
 
-
-        var trigger = function(id, type, pattern, node){
+        let trigger = function(id, type, pattern, node){
 
             let _readOnly = false;
             let _node = null;
@@ -928,7 +1026,6 @@
             };
         };
 
-
         let appVue = new Vue({
             delimiters: ['${', '}'],
             el: '#app',
@@ -939,14 +1036,18 @@
                     settings:{
                         showPopoutIcon: false,
                         showCloseIcon: false,
-                        selectionEnabled: true
+                        selectionEnabled: false,
+                        constrainDragToContainer: false
+                    },
+                    dimensions:{
+                        borderWidth:3
                     },
                     content: [{
                         type: 'row',
                         content:[
                             {
                                 type: 'stack',
-                                width: 20,
+                                width: 18,
                                 content:[{
                                     id: 'class-tree',
                                     type: 'component',
@@ -959,26 +1060,26 @@
                                     }
                                 }]
                             },
-                            {
-                                type: 'column',
-                                content:[
-                                    {
-                                        type: 'stack',
-                                        content:[{
+	                        {
+	                            type: 'stack',
+	                            content: [
+                                {
+                                    type: 'column',
+                                    title: '查询',
+                                    content:[
+                                        {
                                             id: 'query-console',
                                             type: 'component',
                                             componentName: 'omdbComponent',
-                                            title: '查询',
+                                            title: ' ',
+                                            isClosable: false,
                                             componentState: {
                                                 id: 'query-console',
                                                 type: 'console',
                                                 pattern: 'select'
                                             }
-                                        }]
-                                    },
-                                    {
-                                        type: 'stack',
-                                        content:[{
+                                        },
+                                        {
                                             id: 'log-console',
                                             type: 'component',
                                             componentName: 'omdbComponent',
@@ -988,22 +1089,37 @@
                                                 type: 'log',
                                                 pattern: ''
                                             }
-                                        }]
-                                    }
-                                ]
-                            }
+                                        }
+                                    ]
+                                }
+	                        ]}
                         ]
                     }]
                 },
                 newItemConfig: {
-                    id: null,
-                    title: null,
-                    type: 'component',
-                    componentName: 'omdbComponent',
-                    componentState: {
-                        id: null,
-                        type: null,
-                    }
+                    type: 'column',
+	                content: [
+		                {
+                            id: null,
+                            title: null,
+                            type: 'component',
+                            componentName: 'omdbComponent',
+                            componentState: {
+                                id: null,
+                                type: null,
+                            }
+		                },
+		                {
+                            id: null,
+			                title: '结果',
+                            type: 'component',
+                            componentName: 'omdbComponent',
+                            componentState: {
+                                id: null,
+                                type: null,
+                            }
+		                }
+	                ]
                 }
 
             },
@@ -1035,17 +1151,40 @@
 
                     });
 
+                    self.layout.on( 'initialised', function(){
+                        var noDropStack = myLayout.root.getItemsById( 'no-drop-target' )[ 0 ];
+                        var originalGetArea = noDropStack._$getArea;
+                        noDropStack._$getArea = function() {
+                            var area = originalGetArea.call( noDropStack );
+                            delete noDropStack._contentAreaDimensions.header;
+                            return area;
+                        };
+                    });
+
                     self.layout.on( 'stackCreated', function( stack ){
+                        console.log('stack',stack)
+
+                    });
+
+                    self.layout.on( 'itemCreated', function( item ){
+                        console.log('item',item.config)
+                    });
+
+                    self.layout.on( 'columnCreated', function( column ){
+                        console.log('column',column)
 
                     });
 
                     self.layout.on( 'componentCreated', function( component ){
 
+                        console.log('component',component)
+
                         let _state = component.config;
                         let _id = _state.componentState.id;
                         let _pattern = _state.componentState.pattern || '';
                         let _node = _state.componentState.node;
-                        let html = `<div id="` + _id + `"></div>`;
+                        let _pnode = _state.componentState.pnode;
+                        let html = `<div id="${_id}"></div>`;
                         let _comp = null;
 
 
@@ -1069,11 +1208,11 @@
 
                         } else if(_state.componentState.type == 'classEdit'){
 
-                            _comp = classEdit(_id, _state.componentState.type, _pattern, _node);
+                            _comp = classEdit(_id, _state.componentState.type, _pattern, _node, _pnode);
 
                         } else if(_state.componentState.type == 'console'){
 
-                            _comp = queryConsole(_id, _state.componentState.type, _pattern, _node);
+                            _comp = queryConsole(_id, _state.componentState.type, _pattern, _node, _pnode);
 
                         } else if(_state.componentState.type == 'output'){
 
@@ -1101,10 +1240,12 @@
                         component.container.on('resize',function() {
 
                             let _scrollBody = component.container.height;//_.ceil(pxTOvh(component.container.height)*0.52);
-                            let _scrollY = _scrollBody * 0.5;
+                            let _scrollY = _scrollBody;
 
                             eventHub.$emit("LAYOUT-RESIZE-TRIGGER-EVENT", {scrollY:_scrollY, scrollBody: _scrollBody});
                         });
+
+
                     });
 
                     //
@@ -1129,13 +1270,35 @@
                     let _id = 'ID'+objectHash.sha1(event.type + event.pattern + JSON.stringify(event.node));
 
                     self.newItemConfig = _.extend(self.newItemConfig, {
-                        title: event.node.name,
-                        componentState: {
-                            id: _id,
-                            type: event.type,
-                            pattern: event.pattern,
-	                        node: event.node
-                        }
+	                        type: 'column',
+	                        content: [
+	                        {
+	                            id: null,
+	                            title: event.node.name,
+	                            type: 'component',
+	                            componentName: 'omdbComponent',
+	                            componentState: {
+                                    id: _id,
+                                    type: event.type,
+                                    pattern: event.pattern,
+                                    node: event.node,
+                                    pnode: event.pnode || null
+	                            }
+	                        },
+	                        {
+	                            id: null,
+	                            title: '结果',
+	                            type: 'component',
+	                            componentName: 'omdbComponent',
+	                            componentState: {
+                                    id: _id,
+                                    type: event.type,
+                                    pattern: event.pattern,
+                                    node: event.node,
+                                    pnode: event.pnode || null,
+	                            }
+	                        }
+	                    ]
 	                });
 
                     if(_.size($("#"+_id+'-' + event.type)) > 0){
@@ -1148,7 +1311,7 @@
 			            self.layout.selectedItem.addChild(self.newItemConfig);
 			        }*/
 
-                    self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
+                    self.layout.root.contentItems[0].contentItems[1].addChild(self.newItemConfig);
 
                 },
                 addOutput: function(event){
@@ -1257,21 +1420,21 @@
 </script>
 
 <script type="text/x-template"  id="class-edit-template">
-	<vue-omdb-datatables-component :id="id"
+	<omdb-class-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
 	                               contextmenu="null"
-	                               :result="result"></vue-omdb-datatables-component>
+	                               :result="result"></omdb-class-datatables-component>
 </script>
 
 <script type="text/x-template"  id="output-template">
-	<vue-omdb-datatables-component :id="id"
+	<omdb-output-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
 	                               contextmenu="null"
-	                               :result="result"></vue-omdb-datatables-component>
+	                               :result="result"></omdb-output-datatables-component>
 </script>
 
 
@@ -1282,7 +1445,7 @@
 <script type="text/x-template" id="log-console-template">
 	<div :class="'log-console '+ theme">
 		<div class="logToolBar">
-			<div class="btn-group" role="group" aria-label="..." style="float: right;">
+			<div class="btn-group" role="group" aria-label="...">
 				<a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题"><i class="fa fa-sun-o"></i></a>
 				<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
 				<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
@@ -1290,7 +1453,8 @@
 			</div>
 		</div>
 		<div contenteditable="true" :class="'log-console-content '+ theme">
-			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] ${item[2]} </p>
+			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] <span v-if="_.isEmpty(item[2].content)">${item[2].short}</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">${item[2].short}</a><span class="collapse animated fadeInUp" :id="item[2].id">${item[2].content}</span></span>
+			</p>
 		</div>
 	</div>
 </script>

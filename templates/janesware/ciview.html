@@ -30,12 +30,12 @@
 
 
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/zTree/css/entitieszTreeStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 <link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 
 <style>
-    body {
-        background-color: #d9e0e7;
+    .ciview {
+        height: 100vh;
     }
 
     /* For zTree */
@@ -85,6 +85,16 @@
         color: rgba(0,0,0,0.7);
     }
 
+    .vue-search-input-component > .btn-group > .btn.dropdown-toggle {
+        border-bottom: 2px solid rgb(182, 194, 202);
+    }
+
+    .object-footer{
+        position: fixed;
+        bottom: 30px;
+        left: 220px;
+    }
+
 
 </style>
 
@@ -122,13 +132,15 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-card-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ci-tags-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/cmdb/vue-ci-card-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/cmdb/vue-ci-tags-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/cmdb/cmdb-datatables-component.html"></link>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-timeline-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-chinamap-2-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-script-manager-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-dispatch-manager-component.html"></link>
 
@@ -150,7 +162,7 @@
                         "vue-base-timeline-component",
                         "vue-echart-graph-component",
                         "vue-echart-chinamap-2-component",
-                        "vue-base-datatables-component",
+                        "cmdb-datatables-component",
                         "vue-script-manager-component",
                         "vue-dispatch-manager-component"
                         ],function() {
@@ -248,7 +260,7 @@
                     eventHub.$on("ci-dblclick-event", self.dblClick);
                     eventHub.$on("ci-rightclick-event", self.rightClick);
 
-                    eventHub.$on("view-toggle-event", self.view);
+                    eventHub.$on("ci-view-toggle-event", self.view);
 
                 },
                 methods: {
@@ -816,10 +828,10 @@
                     view: function (event) {
                         let self = this;
 
-                        self.currentView = event;
+                        self.currentView = event.view;
 
                         $("a.btn-xs").removeClass('active');
-                        $("." + event).addClass('active');
+                        $("." + event["view"]).addClass('active');
                     }
                 }
             })
@@ -882,10 +894,26 @@
 
                     self.$nextTick(function () {
 
-                        _.delay(function () {
-                            //self.initContentMenu();
-                        }, 1000)
+
                     })
+                },
+                computed: {
+                    result: function(){
+                        let self = this;
+
+                        let _data = _.map(self.model.data,function(v){
+                            return _.merge(v,{icon: `/web/vendor/zTree/css/entityStyle/img/diy/${_.last(v.class.split("/"))}.svg`});
+                        });
+
+                        self.model.columns.unshift({"field":"icon","title":"图例", render: function(data, type, row) {
+                                return `<img src="${data}">`;
+                            }}
+                        );
+
+                        let _options = self.model.options;
+
+                        return {data:_data, columns:self.model.columns, options:_options};
+                    }
                 },
                 methods: {
                     init: function () {
@@ -902,6 +930,30 @@
                             },
                             items: GLOBAL_CONFIG.global.ci_right_menu
                         });
+                    }
+                }
+            })
+
+            Vue.component('ci-view-card-component',{
+                delimiters: ['${', '}'],
+                props: {
+                  model: Object
+                },
+                template: '<vue-ci-card-component :row="model.data[0]"></vue-ci-card-component>',
+                data: function(){
+                    return {
+                        row: {}
+                    }
+                },
+                mounted: function () {
+                    let self = this;
+
+                    self.$nextTick(function () {
+
+                    })
+                },
+                methods: {
+                    init: function () {
                     }
                 }
             })
@@ -1228,6 +1280,7 @@
                 }
             })
 
+
             var config = {
                 content: [{
                     type: 'row',
@@ -1326,7 +1379,8 @@
                     eventHub.$on("input-term-event", self.setSearchTerm);
                     eventHub.$on("input-reset-event", self.setSearchReset);
 
-                    eventHub.$on("ci-save-event",self.onSearch);
+                    eventHub.$on("ci-save-event", self.onSearch);
+                    eventHub.$on("ci-card-trigger-event", self.onSearch);
                 },
                 mounted: function () {
                     let self = this;
@@ -1724,7 +1778,7 @@
                         eventHub.$emit("datatable-resize-event", null);
                     },
                     view: function (event) {
-                        eventHub.$emit("view-toggle-event", event);
+                        eventHub.$emit("ci-view-toggle-event", event);
                     },
                     home: function () {
                         eventHub.$emit('tree-init-event', null);
@@ -1756,7 +1810,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div class="container-fluid">
+    <div class="ciview container-fluid">
         <div class="row">
             <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
                 <div class="input-group searchinput">
@@ -1855,7 +1909,7 @@
                         <div role="tabpanel" class="tab-pane" id="cmdb">
                             <div class="row">
                                 <div class="col-lg-2" id="nav">
-                                    <div class="panel" style="border-radius: 0px;min-height:60vh;">
+                                    <div class="panel" style="border-radius: 0px;">
                                         <div class="panel-body">
                                             <vue-entity-tree-component id="ciview-entity-tree" :list="search.result.data"></vue-entity-tree-component>
                                         </div>
@@ -1874,15 +1928,15 @@
 
                                             </div>
                                             <div class="btn-group-action btn-group-action pull-right">
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('ci-view-icon-component')"><i class="fa fa-table m-r-5"></i>Grid</a>
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view('ci-view-table-component')"><i class="fa fa-list m-r-5"></i>List</a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-icon-component','model':null})"><i class="fa fa-table m-r-5"></i>Grid</a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-table-component','model':null})"><i class="fa fa-list m-r-5"></i>List</a>
                                             </div>
                                         </div>
                                         <div>
                                             <ci-view-component :model="search.result"></ci-view-component>
                                         </div>
                                     </div>
-                                    <div class="panel-footer">
+                                    <div class="panel-footer object-footer">
                                         <i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
                                         <i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
                                         <i class="fa fa-clock-o"></i> Time: ${search.currentTimer} &nbsp;&nbsp;
@@ -1940,10 +1994,10 @@
 
 <script type="text/x-template" id="ci-view-table-component-template">
     <div class="ci-view-table table-responsive">
-        <vue-base-datatables-component id="ci-list-datatable"
-                                       :columns="model.columns"
-                                       :dataset="model.data"
-                                       contextmenu="ciview"></vue-base-datatables-component>
+        <cmdb-datatables-component id="ci-list-datatable"
+                                       :columns="result.columns"
+                                       :dataset="result.data"
+                                       contextmenu="ciview"></cmdb-datatables-component>
     </div>
 </script>
 

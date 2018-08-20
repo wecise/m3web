@@ -4,28 +4,53 @@
 		/*----------  style  ----------*/
 		.vue-editor-component {
 			background-color: rgb(246, 246, 246);
+			width:100%;
+			height: 100%;
+			position: relative;
 		}
 
 		.vue-editor-component .ace_editor{
-			top: 30px!important;
 			border: none;
 			margin: 0px 0px 10px 0px;
 			width: 100%;
-			height:100vh;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.lm_maximised .vue-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
 		}
 
 		.ace_keyword {
 			color: #a70909!important;
 		}
 
-		.toolsBar {
+		.editorToolBar{
 			height: 30px;
+			background-color: rgb(246, 246, 246);/*rgb(33, 149, 243);*/
+			width: 100%;
+		}
+
+		.editorToolBar .btn-primary,
+		.editorToolBar .btn-primary:hover{
 			background-color: rgb(246, 246, 246);
-			position: fixed;
-			top: 80px;
-			right: 0px;
-			z-index: 300;
-			width:79.7vw;
+			color: #333333;
+			border:none;
+		}
+
+		.editorToolBar > .btn-group {
+			top: 1px;
+		}
+
+		.scrollmargin {
+			height: 500px;
+			text-align: center;
 		}
 
 
@@ -36,14 +61,14 @@
 	/*----------  最外层element会自动增加组件同名 class="vue-editor-component"  ----------*/
 	<template>
 		<div>
-			<div class="toolsBar" id="toolsBar">
-				<div class="btn-group" role="group" aria-label="..." style="float: right;">
+			<div class="editorToolBar" id="editorToolBar">
+				<div class="btn-group" role="group">
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fa fa-paste"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-square-o"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-check"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行"><i class="fa fa-play"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="执行"><i class="fa fa-play"></i>+</a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fa fa-forward"></i></a>
 				</div>
 			</div>
@@ -108,17 +133,20 @@
                 self.editor = ace.edit(self.id);
                 
                 self.editor.setOptions({
-                    maxLines: Infinity,
-                    minLines: 20,
+                    // maxLines: 1000,
+                    // minLines: 20,
                     autoScrollEditorIntoView: true,
                     enableBasicAutocompletion: true,
                     enableSnippets: true,
                     enableLiveAutocompletion: false
                 });
-                self.editor.$blockScrolling = Infinity;
+                //self.editor.$blockScrolling = Infinity;
                 self.editor.setShowPrintMargin(self.model.printMargin);
-                self.editor.setReadOnly(self.model.readOnly); 
+                self.editor.setReadOnly(self.model.readOnly);
                 self.editor.getSession().setUseSoftTabs(true);
+
+                self.editor.getSession().setTabSize(2);
+                self.editor.getSession().setUseWrapMode(true);
 
                 self.setTheme();
                 self.setMode();
@@ -126,7 +154,7 @@
 
 				self.toggleToolsBar();
 
-				self.toggleStatusBar();
+				//self.toggleStatusBar();
 
                 
             },
@@ -176,9 +204,9 @@
                 let self = this;
 
                 if(self.showToolsBar){
-                    $(".toolsBar").show();
+                    $(".editorToolBar").show();
                 } else {
-                    $(".toolsBar").hide();
+                    $(".editorToolBar").hide();
                 }
             },
 	        toggleStatusBar: function(){

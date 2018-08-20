@@ -1,0 +1,21 @@
+{
+	"ID": "app_ips_start",
+	"Name": "IPS启动",
+	"Group": "IPS应用",
+	"Version ": "0.0.1",
+	"Creator": "Mahmoud Reda",
+	"Command": "bin:/builtin ftp list {directory}",
+	"Setting": {
+		"host": {"Name": "Host", "Type": "text", "Value": "", "EnvVar": "PIPELINE_FTP_HOST"},
+		"port": {"Name": "Port", "Type": "text", "Value": "", "EnvVar": "PIPELINE_FTP_PORT"},
+		"username": {"Name": "Username", "Type": "text", "Value": "", "EnvVar": "PIPELINE_FTP_USER"},
+		"password": {"Name": "Password", "Type": "text", "Value": "", "EnvVar": "PIPELINE_FTP_PASS"}
+	},
+	"Inputs": {
+		"directory": "Directory"
+	},
+	"Outputs": {
+		"directory": "Directory",
+		"list": "List"
+	}
+}
