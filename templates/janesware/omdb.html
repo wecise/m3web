@@ -167,6 +167,10 @@
 		top: 1px;
 	}
 
+	.sidebar {
+		display:none;
+	}
+
 
 </style>
 
@@ -178,7 +182,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-graph-component.html"></link>
-
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <!-- Golden Layout container -->
 <div id="app"></div>
@@ -197,7 +201,8 @@
 				        "vue-object-tree-component",
 				        "vue-editor-component",
 	                    "vue-trigger-editor-component",
-	                    "vue-graph-component"], function() {
+	                    "vue-graph-component",
+                        "vue-ai-robot-component"], function() {
 
         let classTree = function(id, type, pattern, node){
 

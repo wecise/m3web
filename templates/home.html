@@ -39,7 +39,7 @@
         color: #fff;
         background-color: #03a9f4;
         border-color: #03a9f4;
-    }
+    }.layer.btn.btn-primary
 
     .tile {
         width: 100px;
@@ -199,19 +199,21 @@
     .layer.btn.btn-primary{
         padding: 10px 5px 0px 5px;
         margin: 5px;
-        min-width: 110px;
-        max-width: 110px;
-        height: 75px;
+        min-width: 120px;
+        max-width: 120px;
+        height: 80px;
         background-color: rgb(33, 149, 244);
+        border-radius: 3px;
     }
 
     .layer.select.btn.btn-primary{
         padding: 5px 5px 0px 5px;
         margin: 5px;
-        min-width: 110px;
-        max-width: 110px;
-        height: 75px;
+        min-width: 120px;
+        max-width: 120px;
+        height: 80px;
         background-color: rgb(33, 149, 244);
+        border-radius: 3px;
     }
 
     .layer .list-context-menu {
@@ -220,8 +222,8 @@
         bottom: 5px;
     }
 
-    .layer .list-context-menu i {
-        color: rgb(169, 211, 245);
+    .sidebar {
+        display:none;
     }
 
 </style>
@@ -296,10 +298,13 @@
                 mounted: function(){
                     let self = this;
 
-                    self.$nextTick(function(){
-                        self.init();
-                        self.initPlugIn();
-                    })
+
+                    self.$nextTick()
+                        .then(function () {
+                            self.init();
+                            self.initPlugIn();
+                        })
+
                 },
                 methods: {
                     init: function() {
@@ -343,7 +348,7 @@
                                 return {
 
                                     items: {
-                                        "default": {name: '{{.i18n.Tr "home_defaulthome"}}', icon: "fa-home", callback: function(key, opt) {
+                                        "default": {name: '{{.i18n.Tr "home_defaulthome"}}', icon: "fas fa-home", callback: function(key, opt) {
                                                 setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
                                             }
                                         }
@@ -372,7 +377,7 @@
                             _param = term + _preset.value;
                         }
 
-                        _param = _ifDebug + _ifHistory + _param + _forTime;
+                        _param = _ifDebug + _ifHistory + _param;// + _forTime;
 
                         console.log(_param);
 

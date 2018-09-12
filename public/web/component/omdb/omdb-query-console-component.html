@@ -1,0 +1,144 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.omdb-query-console-component{
+			background-color: #ff0000;
+			width: 100%;
+			height: 400px;
+		}
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="omdb-query-console-component"  ----------*/
+	<template>
+		<div :id="id"></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="omdb-query-console-component">
+	{
+	    delimiters: ['${', '}'],
+        props: {
+            id: String,
+            bid: String,
+        },
+        data: function(){
+            return {
+                layout: null,
+                config: {
+                    settings: {
+                        showPopoutIcon: false,
+                        showCloseIcon: false,
+                        selectionEnabled: false,
+                        constrainDragToContainer: false
+                    },
+                    dimensions: {
+                        borderWidth: 3
+                    },
+                    content: [{
+	                    type: 'column',
+	                    content:[
+	                        {
+	                            id: 'query-console',
+	                            type: 'component',
+	                            componentName: 'omdbComponent',
+	                            title: ' ',
+	                            isClosable: false,
+	                            componentState: {
+	                                id: 'query-console',
+	                                component: 'queryConsole',
+	                                template: 'query-console-template',
+	                                pattern: 'select',
+	                                model: { pattern: '', node: null, pnode: null }
+	                            }
+	                        },
+	                        {
+	                            id: 'log-console',
+	                            type: 'stack',
+	                            content: [{
+	                                id: 'log-console',
+	                                type: 'component',
+	                                componentName: 'omdbComponent',
+	                                title:'日志',
+	                                componentState: {
+	                                    id: 'log-console',
+	                                    component: 'logConsole',
+	                                    template: 'log-console-template',
+	                                    pattern: null,
+	                                    model: { pattern: '', node: null, pnode: null }
+	                                }
+	                            },
+	                            {
+	                                id: 'result-console',
+	                                type: 'component',
+	                                componentName: 'omdbComponent',
+	                                title:'结果',
+	                                componentState: {
+	                                    id: 'result-console',
+	                                    component: 'resultConsole',
+	                                    template: 'result-console-template',
+	                                    pattern: null,
+	                                    model: { pattern: '', node: null, pnode: null }
+	                                }
+	                            }]
+	                        }
+	                    ]
+	                }]
+                }
+            };
+
+        },
+        mounted: function(){
+            var self = this;
+
+            self.$nextTick(function(){
+                _.delay(function(){
+                    console.log(555,self.id)
+                    self.init();
+                },500);
+            })
+        },
+        created: function () {
+            let self = this;
+
+        },
+        methods: {
+            init: function() {
+                let self = this;
+
+                self.layout = new GoldenLayout(self.config, self.$el);
+
+                self.layout.registerComponent('omdbComponent', function (container, state) {
+                    // container.getElement().html( '<h2>' + state.title + '</h2>');
+
+                });
+
+                self.layout.on( 'componentCreated', function( component ){
+
+                    let _id = component.config.componentState.id;
+
+                    let _template = component.config.componentState.template;
+                    let _comp = null;
+
+                    component.container.getElement().html(_template);
+
+                });
+
+
+                //  Initialize GL
+                self.layout.init();
+
+                //  Update GL on window resize
+                window.addEventListener('resize', function () { self.layout.updateSize(); });
+
+            }
+        }
+    
+	
+	}
+	</script>
+
+</code>

@@ -1,0 +1,794 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+
+		.ztree li a.curSelectedNode {
+			background-color: rgb(161, 212, 250)!important;
+			border:1px solid #ffffff!important;
+			color: rgb(255,255,255)!important;
+		}
+
+		.ztree li a:hover{
+			text-decoration: none!important;
+		}
+
+		.class-toolbars{
+			position: relative;
+			left: calc(100% - 68px);
+			top: 0px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
+			display: block;
+			background-color: rgb(161, 212, 250);
+			border: none;
+			border-radius: 0;
+		}
+
+		.edge-toolbars{
+			position: relative;
+			left: calc(100% - 38px);
+			top: 0px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
+			display: block;
+			background-color: rgb(161, 212, 250);
+			border: none;
+			border-radius: 0;
+		}
+
+		/*.hover-toolbars > .button:hover{
+			box-shadow: 0px 0px 0px 2px rgba(255,255,255,1);
+		}*/
+
+
+		.lm_splitter {
+			opacity: .2;
+		}
+
+		.context-menu-list.context-menu-root{
+			z-index: 100!important;
+		}
+
+		.ztree {
+			height: 100%;
+			overflow: auto;
+			padding-bottom: 100px!important;
+			position: relative;
+		}
+
+	</style>
+
+
+
+	/*----------  最外层element会自动增加组件同名 class="omdb-class-tree-component"  ----------*/
+	<template>
+		<ul class="ztree" :id="id"></ul>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="omdb-class-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+        },
+        data: function(){
+            return {
+                zTree: Object,
+                zSetting: {
+                    view: {
+                        showTitle: true,
+                        dblClickExpand: this.onDblClickExpand,
+                        addDiyDom: this.addCountDom,
+                        removeHoverDom: this.removeHoverDom,
+                    },
+                    edit: {
+                        enable: false
+                    },
+                    callback: {
+                        onClick: this.onClick
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: 'name',
+                            title: 'name'
+                        }
+                    },
+                    check: {
+                        enable: false
+                    }
+                },
+                zNodes: [
+                            {cid:'A1', parent:null, rtype:'A1', isParent:true, name: '/类管理', title: '类管理', open:true},
+	                        //{cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/规则', title: '规则', children: []},
+	                        {cid:'A3', parent:null, rtype:'A3', isParent:true, name: '/关系', title: '关系', children:[]}
+                        ],
+                selectedNode: null,
+
+
+            }
+        },
+        created: function(){
+            let self = this;
+
+            eventHub.$on("OMDB-CLASS-REFRESH-EVENT", self.refresh);
+
+        },
+        mounted: function () {
+            let self =  this;
+
+            self.$nextTick(function () {
+
+                self.init();
+
+            })
+        },
+        methods:{
+            init: function () {
+                let self = this;
+
+                if(!_.isEmpty(self.zTree)){
+                    self.zTree.destroy();
+                }
+
+                _.delay(function() {
+                    self.initData([{cid: -1, treeNode: null}]);
+                },500);
+
+                _.delay(function() {
+                    self.initPlugIn();
+                },2500);
+
+            },
+	        initPlugIn: function(){
+                let self = this;
+
+                $("#class-tree").contextMenu({
+                    selector: 'span.class.more',
+                    trigger: 'left',
+                    items: {
+
+                        /*"classNew": {
+                            name: "创建类", icon: "fa-sitemap", callback: function (key, opt) {
+
+                            }
+                        },*/
+                        "classNewByMql": {
+                            name: "新建子类", icon: "fas fa-plus", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'create-class', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "classUpdateByMql": {
+                            name: "修改类", icon: "fas fa-ellipsis-v",
+                            items: {
+
+                                "columnNew": {
+                                    name: "新建属性", icon: "fas fa-plus", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-add-column', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "columnDel": {
+                                    name: "删除属性", icon: "fas fa-trash", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-drop-column', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "sep11": "---------",
+                                "indexNew": {
+                                    name: "新建索引", icon: "fas fa-plus", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-add-index', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "indexDel": {
+                                    name: "删除索引", icon: "fas fa-trash", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-drop-index', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "sep12": "---------",
+                                "keyNew": {
+                                    name: "新建主键", icon: "fas fa-plus", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-add-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "keyDel": {
+                                    name: "删除主键", icon: "fas fa-trash", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter-drop-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                },
+                                "sep13": "---------",
+                                "attributeSetup": {
+                                    name: "属性设置", icon: "fas fa-wrench", callback: function (key, opt) {
+                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                            name: self.selectedNode.name,
+											                                            title: self.selectedNode.name,
+											                                            model: { pattern: 'alter', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                        });
+                                    }
+                                }
+                            }
+                        },
+                        "sep1": "---------",
+                        "删除": {
+                            name: "删除类", icon: "fas fa-trash", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'drop-class', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "sep2": "---------",
+                        "数据": {
+                            name: "查看数据", icon: "fas fa-table", callback: function (key, opt) {
+
+                                let _mql = `SELECT * FROM ${self.selectedNode.name} limit 50`;
+                                let _list = fetchDataByMql(_mql);
+
+                                if(_list.status === 'ok'){
+                                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+                                } else {
+                                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+                                }
+
+
+                                if(_.isEmpty(_list)) {
+
+                                    alertify.log("查询结果为空");
+
+                                    return false;
+                                }
+
+                                _data = _.attempt(JSON.parse.bind(null,_list.message));
+
+                                _columns = columnsParse(_list.meta);
+
+                                let _result = {type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
+
+                                eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT", _result);
+                            }
+                        },
+                        "sep3": "---------",
+                        "触发器": {
+                            name: "触发器", icon: "fas fa-toggle-on", callback: function (key, opt) {
+
+                                let _list = triggerList(self.selectedNode.name);
+
+                                let _result = {name: self.selectedNode.name, result: _list};
+
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'trigger', pattern: 'trigger-list', node: _result});
+                            }
+                        },
+                        "sep4": "---------",
+                        "SELECT": {
+                            name: "SELECT", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'select', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "INSERT": {
+                            name: "INSERT", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+                                                                                name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'insert', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "UPDATE": {
+                            name: "UPDATE", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'update', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "DELETE": {
+                            name: "DELETE", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'delete', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "sep5": "---------",
+                        "ddl": {
+                            name: "DDL&属性", icon: "fas fa-info-circle", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'ddl', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
+                        }
+                    }
+                });
+
+                $("#class-tree").contextMenu({
+                    selector: 'span.edge.more',
+                    trigger: 'left',
+                    items: {
+
+                        /*"classNew": {
+                            name: "创建类", icon: "fa-sitemap", callback: function (key, opt) {
+
+                            }
+                        },*/
+                        "edgeNew": {
+                            name: "新建关系类型", icon: "fas fa-plus", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'create-edge-type', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+
+                        "sep1": "---------",
+                        "删除": {
+                            name: "删除关系类型", icon: "fas fa-trash", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'drop-edge-type', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "sep2": "---------",
+                        "G": {
+                            name: "查询", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'edge-g', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "INSERT": {
+                            name: "新建关系", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'edge-insert', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        },
+                        "UPDATE": {
+                            name: "更改关系", icon: "fas fa-database", callback: function (key, opt) {
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'edge-update', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+											                                });
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
+                        }
+                    }
+                });
+
+	        },
+            initData: function(node){
+				let self = this;
+
+                _.forEach(node, function(v,k){
+
+                    let _rtn = classList(v.cid);
+
+                    if (_.isEmpty(_rtn)) {
+                        return;
+                    }
+
+                    if( v.cid === -1 ) {
+
+
+                        let _tmp = _.attempt(JSON.parse.bind(null, _rtn));
+                        let _arr = _.map(_tmp,function(v){ return _.merge(v,{rtype:'A1', open:true})});
+
+                        _.merge(self.zNodes[0],{ children: _arr});
+
+                        self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+
+                    } else {
+
+	                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+
+                        let nodes = zTree.getSelectedNodes();
+
+                        if (nodes && nodes.length>0) {
+                            zTree.removeChildNodes(nodes[0]);
+                        }
+
+                        zTree.addNodes(v.treeNode, _.map(JSON.parse(_rtn),function(v){ return _.merge(v,{rtype:'A1'});}));
+
+                    }
+                })
+
+	        },
+	        edgeList: function(){
+                let self = this;
+                let _rtn = null;
+                let _list = fetchDataByMql('select edge type');
+
+                if(!_.isEmpty(_list)){
+                    _rtn = _list;
+                }
+
+                return _rtn;
+	        },
+	        ruleList: function(){
+                let self = this;
+
+                let _list = ruleList();
+
+                if(!_.isEmpty(_list)){
+                    _rtn = _list;
+                }
+
+                return _rtn;
+	        },
+            onClick: function (event, treeId, treeNode, clickFlisParentag) {
+                let self = this;
+
+                self.selectedNode = treeNode;
+
+                if(treeNode.cid === 'A1' && treeNode.rtype === 'A1') {
+                    self.initData([{cid: -1, treeNode: null}]);
+                    return;
+                }
+
+                if(treeNode.cid === 'A2' && treeNode.rtype === 'A2'){
+
+                    let _list = self.ruleList();
+
+                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+
+                    let _nodes = _.map(_.keys(_tmp),function(v){
+                        return {cid: _.now(), parent:'A2', rtype: 'A2', isParent:false, name: v, title: v, children:[]};
+                    });
+
+                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+
+                    let nodes = zTree.getSelectedNodes();
+
+                    if (nodes && nodes.length>0) {
+                        zTree.removeChildNodes(nodes[0]);
+                    }
+
+                    zTree.addNodes(nodes[0], _.map(_nodes,function(v){return _.merge(v,{rtype:'A2'})}));
+
+                    return;
+
+                }
+
+                if(treeNode.cid === 'A3' && treeNode.rtype === 'A3'){
+
+                    let _list = self.edgeList();
+
+                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+
+					let _nodes = _.map(_tmp,function(v){
+					    return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};
+					});
+
+					let zTree = $.fn.zTree.getZTreeObj(self.id);
+
+                    let nodes = zTree.getSelectedNodes();
+
+                    if (nodes && nodes.length>0) {
+                        zTree.removeChildNodes(nodes[0]);
+                    }
+
+                    zTree.addNodes(nodes[0], _.map(_nodes,function(v){return _.merge(v,{rtype:'A3'})}));
+
+                    return;
+
+                }
+
+                // A1 & Level 2+
+                if(treeNode.rtype === 'A1') {
+
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr = `<div class="well class-toolbars" id='toolbars_${treeNode.tId}' >
+										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
+										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
+										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    // add
+                    let btnAdd = $("#addBtn_"+treeNode.tId);
+                    if (btnAdd) btnAdd.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'classNew', pattern: '', node: treeNode});
+
+                    });
+
+                    // edit
+                    let btnEdit = $("#editBtn_"+treeNode.tId);
+                    if (btnEdit) btnEdit.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'class-edit',
+											                            name: treeNode.name,
+											                            title: treeNode.name,
+											                            model: { pattern: 'select', node: treeNode, pnode: treeNode.getParentNode() }
+											                        });
+
+                    });
+
+                    // console
+                    let btnConsole = $("#consoleBtn_"+treeNode.tId);
+                    if (btnConsole) btnConsole.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+	                                                                    name: treeNode.name,
+	                                                                    title: treeNode.name,
+	                                                                    model: { pattern: 'select', node: treeNode, pnode: treeNode.getParentNode() }
+                                                                    });
+
+                    });
+
+
+                    // more
+                    let btnMore = $("#moreBtn_"+treeNode.tId);
+                    if (btnMore) btnMore.bind("click", function(event){
+
+                        //event.stopPropagation();
+                        event.preventDefault();
+
+                    });
+
+
+                    // 只有目录可点击
+                    if (!treeNode.child) return false;
+
+                    self.initData([{cid:treeNode.cid,treeNode:treeNode}]);
+
+                    return;
+
+                }
+
+                // A3 & Level 2+
+                if(treeNode.rtype === 'A3') {
+
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr = `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
+										<span class='button edge console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
+										<span class='button edge more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    // console
+                    let btnConsole = $("#consoleBtn_"+treeNode.tId);
+                    if (btnConsole) btnConsole.bind("click", function(event){
+
+                        event.stopPropagation();
+                        event.preventDefault();
+
+                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+											                            name: treeNode.name,
+											                            title: treeNode.name,
+											                            model: { pattern: 'select', node: treeNode, pnode: treeNode.getParentNode() }
+											                        });
+
+                    });
+
+
+                    // more
+                    let btnMore = $("#moreBtn_"+treeNode.tId);
+                    if (btnMore) btnMore.bind("click", function(event){
+
+                        //event.stopPropagation();
+                        event.preventDefault();
+
+                    });
+
+                    return;
+
+                }
+
+            },
+            addCountDom: function (treeId, treeNode) {
+                let self = this;
+                let aObj = $("#" + treeNode.tId + "_a");
+
+                if(!_.isEmpty(treeNode.child)){
+                    if (treeNode.child.length > 0){
+                        let str = `<span class='${treeNode.name} count' style='color:rgb(160,160,160);'>(${treeNode.child.length})</span>`;
+                        aObj.append(str);
+                    }
+                }
+            },
+            /*addHoverDom: function (treeId, treeNode) {
+
+                if(treeNode.cid == 'A2' || treeNode.cid == 'A3') return false;
+
+                let sObj = $("#" + treeNode.tId + "_span");
+                let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                let addStr = `<div class="well hover-toolbars" id='toolbars_${treeNode.tId}' >
+								<span class='button add' id='addBtn_${treeNode.tId}' title='新建' onfocus='this.blur();' ></span>
+								<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑' onfocus='this.blur();' ></span>
+								<span class='button remove' id='removeBtn_${treeNode.tId}' title='删除' onfocus='this.blur();' ></span>
+							</div>`;
+
+                if(scObj.length > 0){
+                    scObj.after(addStr);
+                } else {
+                    sObj.after(addStr);
+                }
+
+                let btnNew = $("#addBtn_"+treeNode.tId);
+
+                if (btnNew) btnNew.bind("click", function(event){
+
+                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+                    zTree.addNodes(treeNode, {cid: treeNode.cid + _.now(), pId:treeNode.id, name:treeNode.name + _.now()});
+                    return false;
+                });
+            },*/
+            removeHoverDom: function (treeId, treeNode) {
+                $("#toolbars_"+treeNode.tId).unbind().remove();
+            },
+            refresh: function(event) {
+                let self = this;
+
+                let pNode = self.selectedNode;
+
+                if(event.pattern === 'create-class'){
+
+                    let _node = self.zTree.getNodesByParam("name", pNode.name, null)[0];
+
+                    self.zTree.removeChildNodes(_node.getParentNode());
+                    self.initData([{cid:_node.getParentNode().cid,treeNode:_node.getParentNode()}]);
+
+                    _.delay(function(){
+                        self.initData([{cid:_node.cid,treeNode:_node}]);
+                    },2000);
+
+                    _.delay(function(){
+                        self.zTree.expandNode(_node, false, false, true);
+                    },2500);
+                }
+
+                if(event.pattern === 'drop-class'){
+                    pNode = self.selectedNode.getParentNode();
+
+                    let _node = self.zTree.getNodesByParam("name", pNode.name, null)[0];
+
+                    self.zTree.removeChildNodes(_node.getParentNode());
+                    self.initData([{cid:_node.getParentNode().cid,treeNode:_node.getParentNode()}]);
+
+                    _.delay(function(){
+                        self.initData([{cid:_node.cid,treeNode:_node}]);
+                    },2000);
+
+                    _.delay(function(){
+                        self.zTree.expandNode(_node, false, false, true);
+                    },2500);
+                }
+
+                if(event.pattern === 'create-edge-type' || event.pattern === 'drop-edge-type'){
+                    pNode = self.selectedNode.getParentNode();
+
+                    let _node = self.zTree.getNodesByParam("name", pNode.name, null)[0];
+
+                    let _list = self.edgeList();
+
+                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+
+                    let _nodes = _.map(_tmp,function(v){
+                        return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};
+                    });
+
+                    self.zTree.removeChildNodes(_node);
+                    self.zTree.addNodes(_node, _.map(_nodes,function(v){return _.merge(v,{rtype:'A3'})}));
+
+                    // $("[title='" + _node.name + "']").addClass('curSelectedNode');
+
+                }
+
+            }
+        }
+	
+	}
+	</script>
+
+</code>

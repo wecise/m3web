@@ -3,6 +3,18 @@
 	<style>
 		/*----------  style  ----------*/
 
+		.ztree {
+			height: 100vh;
+			overflow: auto!important;
+			margin: 10px -5px!important;
+			padding-bottom: 250px!important;
+			position: relative;
+		}
+
+		.ztree li {
+			margin: 0px 0px 10px 0px!important;
+		}
+
 		.ztree li a.curSelectedNode {
 			background-color: rgb(161, 212, 250)!important;
 			border:1px solid #ffffff!important;
@@ -13,12 +25,13 @@
 			text-decoration: none!important;
 		}
 
+
 		ul.nav-tabs-no-bg {
     		background-color: rgba(0, 0, 0, 0)!important;
 		}
 
 		ul.nav-tabs-no-bg > li.active {
-			border-bottom: 2px solid rgb(231, 231, 231);
+			border-bottom: 2px solid rgb(3, 169, 244);
 		}
 
 		.tree-toolbars{
@@ -67,7 +80,7 @@
 			<!-- Tab panes -->
 			<div class="tab-content" style="padding:0px;">
 				<div role="tabpanel" class="tab-pane active" id="entity-tree" style="height:120vh;">
-					<ul class="ztree" :id="id" style="height:auto;overflow:auto;padding-bottom:100px;margin:10px -7px;"></ul>
+					<ul class="ztree" :id="id"></ul>
 				</div>
 				<div role="tabpanel" class="tab-pane" id="entity-tags" style="height:120vh;">
 					<vue-ci-tags-component :id="'tags_'+id" :model="list"></vue-ci-tags-component>
@@ -222,7 +235,7 @@
                         selector: 'span.ci.more',
                         trigger: 'left',
                         items: {
-                            "create": {name: "新建CI", icon: "fa-plus",
+                            "create": {name: "新建CI", icon: "fas fa-plus",
                                 callback: function (itemKey, opt, rootMenu, originalEvent) {
 
                                     let treeObj = $.fn.zTree.getZTreeObj(self.id);
@@ -233,7 +246,7 @@
                                 }
                             },
                             "sep1": "---------",
-                            "remove": {name: "删除CI", icon: "fa-trash",
+                            "remove": {name: "删除CI", icon: "fas fa-trash",
                                 callback: function (itemKey, opt, rootMenu, originalEvent) {
                                     let treeObj = $.fn.zTree.getZTreeObj(self.id);
                                     let nodes = treeObj.getSelectedNodes();
@@ -244,7 +257,7 @@
                                 }
                             },
                             "sep2": "---------",
-                            "alias": {name: "切换视角", icon: "fa-eye",
+                            "alias": {name: "切换视角", icon: "fas fa-eye",
                                 callback: function (itemKey, opt, rootMenu, originalEvent) {
                                     eventHub.$emit("ENTITY-TREE-TOGGLE-NAME-EVENT", null);
                                 }

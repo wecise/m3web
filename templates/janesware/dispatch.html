@@ -1429,7 +1429,7 @@ _ctime = MX_CTIME`);
             <div class="well well-xs" v-for="(param,index) in params" style="background-color: #f5f4ed;border: 0px solid #e3e3e3;border-radius: 0px;-webkit-box-shadow: inset 0 0px 0px rgba(0,0,0,.05);box-shadow: inset 0 0px 0px rgba(0,0,0,.05); ">
                 <span class="pull-right">
                     <i class="fa fa-square-o fa-fw" style="color:rgba(0,0,0,.1);cursor:pointer;" data-toggle="collapse" :data-target="'#collapse_'+index" aria-expanded="false" :aria-controls="'#collapse_'+index"></i>
-                    <i class="fa fa-remove" style="color:rgba(0,0,0,.1);cursor:pointer;" @click="remove(param)"></i>
+                    <i class="fas fa-times" style="color:rgba(0,0,0,.1);cursor:pointer;" @click="remove(param)"></i>
                 </span>
                 <span style="height: 15px;display: block;overflow: auto">
                     ${param}

@@ -1,15 +1,15 @@
 <code>
 
-	<style>
+	<style scoped>
 		/*----------  style  ----------*/
-		.vue-editor-component {
+		.omdb-editor-component {
 			background-color: rgb(246, 246, 246);
 			width:100%;
 			height: 100%;
 			position: relative;
 		}
 
-		.vue-editor-component .ace_editor{
+		.omdb-editor-component .ace_editor{
 			border: none;
 			margin: 0px 0px 10px 0px;
 			width: 100%;
@@ -18,7 +18,7 @@
 			overflow: auto;
 		}
 
-		.lm_maximised .vue-editor-component .ace_editor{
+		.lm_maximised .omdb-editor-component .ace_editor{
 			border: none;
 			margin: 0px 0px 10px 0px;
 			width: 100%;
@@ -57,14 +57,19 @@
 			text-align: center;
 		}
 
+		.editor-container{
+			width: 100%;
+			height: 100%;
+		}
+
 
 		
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="vue-editor-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="omdb-editor-component"  ----------*/
 	<template>
-		<div>
+		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
@@ -82,11 +87,12 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="vue-editor-component">
+	<script id="omdb-editor-component">
 	{
 	    delimiters: ['${', '}'],
         props: {
             id: String,
+			bid: String,
             model: Object,
             showToolsBar: Boolean,
 			showStatusBar: Boolean
@@ -119,7 +125,7 @@
                     let self = this;
 
                     if(val != oldVal) {
-                        eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT",self.result);
+                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                     }
                 },
                 deep:true
@@ -328,7 +334,10 @@
                     return false;
                 }
 
-                self.result = {type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns};
+                self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
+
+
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
             },
             queryPlus: function(){
@@ -363,37 +372,37 @@
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
                     alertify.log("创建成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
                     alertify.log("删除成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
                     alertify.log("创建成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
                     alertify.log("删除成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
                     alertify.log("修改成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
                     alertify.log("插入成功");
-                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                     return false;
                 }
 
@@ -411,7 +420,9 @@
                     return false;
                 }
 
-                self.result = {type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
+                self.result = {id:self.id, bid: self.bid, type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
+
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
             },
             queryAndSave: function(){

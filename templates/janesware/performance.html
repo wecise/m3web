@@ -138,7 +138,7 @@
     .object-footer{
         position: fixed;
         bottom: 30px;
-        left: 0px;
+        left: 5%;
     }
 
 </style>
@@ -167,6 +167,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/cmdb/vue-ci-tags-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <script>
 
@@ -198,7 +199,8 @@
                         "vue-gauge-linear-component",
                         "vue-common-form-component",
                         "vue-object-detail-component",
-                        "vue-ci-tags-component"], function () {
+                        "vue-ci-tags-component",
+                        "vue-ai-robot-component"], function () {
 
         var current_class_path = "/matrix/devops/performance";
 
@@ -817,7 +819,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div class="container-fluid">
+    <div id="content" class="content">
 
         <div class="row performance-search">
             <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">

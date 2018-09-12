@@ -1,6 +1,6 @@
 <code>
 
-	<style>
+	<style scoped>
 		
 		/* For Search Dropdown Panel */
 	    .dropdown-menu {
@@ -332,23 +332,27 @@
 	        initRange: function(){
 	            let self = this;
 
-	            $(".range_from").flatpickr({
-	                locale: "en",
-	                enableTime: true,
-	                time_24hr: true,
-	                onChange: function(selectedDates, dateStr, instance) {
-	                    self.model.preset.range.from = dateStr;
-	                }
-	            });
+                let sDate = $(".range_from").flatpickr({
+                    locale: "en",
+                    enableTime: true,
+                    time_24hr: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        self.model.preset.range.from = dateStr;
+                    }
+                });
+                let eDate = $(".range_to").flatpickr({
+                    locale: "en",
+                    enableTime: true,
+                    time_24hr: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        self.model.preset.range.to = dateStr;
+                    }
+                });
 
-	            $(".range_to").flatpickr({
-	                locale: "en",
-	                enableTime: true,
-	                time_24hr: true,
-	                onChange: function(selectedDates, dateStr, instance) {
-	                    self.model.preset.range.to = dateStr;
-	                }
-	            });
+                self.$once('hook:beforeDestroy', function () {
+                    sDate.destroy()
+                    eDate.destroy();
+                })
 	        },
 	        setByWindow: function(event){
 	            let self = this;

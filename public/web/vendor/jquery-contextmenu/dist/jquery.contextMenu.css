@@ -2,7 +2,7 @@
 /*!
  * jQuery contextMenu - Plugin for simple contextMenu handling
  *
- * Version: v2.6.4
+ * Version: v2.7.0
  *
  * Authors: Björn Brala (SWIS.nl), Rodney Rehm, Addy Osmani (patches for FF)
  * Web: http://swisnl.github.io/jQuery-contextMenu/
@@ -12,7 +12,7 @@
  * Licensed under
  *   MIT License http://www.opensource.org/licenses/mit-license
  *
- * Date: 2018-03-16T11:13:46.072Z
+ * Date: 2018-07-12T09:06:55.859Z
  */
 @-webkit-keyframes cm-spin {
   0% {
@@ -54,8 +54,8 @@
   font-style: normal; 
   font-weight: normal;
 
-  src: url("font/context-menu-icons.eot?1s39y");
-  src: url("font/context-menu-icons.eot?1s39y#iefix") format("embedded-opentype"), url("font/context-menu-icons.woff2?1s39y") format("woff2"), url("font/context-menu-icons.woff?1s39y") format("woff"), url("font/context-menu-icons.ttf?1s39y") format("truetype");
+  src: url("font/context-menu-icons.eot?36hmp");
+  src: url("font/context-menu-icons.eot?36hmp#iefix") format("embedded-opentype"), url("font/context-menu-icons.woff2?36hmp") format("woff2"), url("font/context-menu-icons.woff?36hmp") format("woff"), url("font/context-menu-icons.ttf?36hmp") format("truetype");
 }
 
 .context-menu-icon-add:before {
@@ -135,7 +135,7 @@
   top: 50%;
   left: 0;
   width: 2em; 
-  font-family: FontAwesome;
+  font-family: "Font Awesome 5 Free";
   font-size: 1em;
   font-style: normal;
   font-weight: normal;
@@ -154,6 +154,24 @@
   color: #fff;
 }
 .context-menu-icon.context-menu-icon--fa.context-menu-disabled::before {
+  color: #bbb;
+}
+
+.context-menu-icon.context-menu-icon--fa5 {
+  display: list-item;
+  font-family: inherit;
+  line-height: inherit;
+}
+.context-menu-icon.context-menu-icon--fa5 i, .context-menu-icon.context-menu-icon--fa5 svg {
+  position: absolute;
+  top: .45em;
+  left: .5em;
+  color: #2195f3;
+}
+.context-menu-icon.context-menu-icon--fa5.context-menu-hover i, .context-menu-icon.context-menu-icon--fa5.context-menu-hover svg {
+  color: #2195f3;
+}
+.context-menu-icon.context-menu-icon--fa5.context-menu-disabled i, .context-menu-icon.context-menu-icon--fa5.context-menu-disabled svg {
   color: #bbb;
 }
 

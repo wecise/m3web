@@ -92,7 +92,19 @@
     .object-footer{
         position: fixed;
         bottom: 30px;
-        left: 220px;
+        left: 22%;
+    }
+
+
+    .nav-tabs {
+        background-color: rgb(255, 255, 255) !important;
+        background-image: none!important;
+        background-repeat: repeat-x;
+        border-radius: 0px!important;
+    }
+
+    ul.nav-main > li.active {
+        border-bottom: 2px solid rgb(3, 169, 244)!important;
     }
 
 
@@ -143,6 +155,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-chinamap-2-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-script-manager-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-dispatch-manager-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <script type="text/javascript">
 
@@ -164,7 +177,8 @@
                         "vue-echart-chinamap-2-component",
                         "cmdb-datatables-component",
                         "vue-script-manager-component",
-                        "vue-dispatch-manager-component"
+                        "vue-dispatch-manager-component",
+                        "vue-ai-robot-component"
                         ],function() {
 
         $(function(){
@@ -1810,7 +1824,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div class="ciview container-fluid">
+    <div id="content" class="content ciview">
         <div class="row">
             <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
                 <div class="input-group searchinput">
@@ -1830,7 +1844,7 @@
                 <div role="tabpanel">
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs nav-main" role="tablist">
-                        <li role="presentation" class="dropdown active">
+                        <li role="presentation" class="active">
                             <a href="#summary" aria-controls="summary" role="tab" data-toggle="tab" title="CMDB Summary">配置统计</a>
                         </li>
                         <li role="presentation">
@@ -2032,7 +2046,7 @@
                                @click="forwardCreative('show',item)">
                                 <i class="fa fa-play" style='color:rgba(0,0,0,.3);position: absolute;right: 30px;top: 5px;z-index: 100;'></i>&nbsp;&nbsp;&nbsp;&nbsp;
                             </a>
-                            <i class='fa fa-remove' style='color:rgba(0,0,0,.3);cursor:pointer;position: absolute;right: 10px;top: 5px;z-index: 100;' v-on:click="remove(item)"></i>
+                            <i class='fas fa-times' style='color:rgba(0,0,0,.3);cursor:pointer;position: absolute;right: 10px;top: 5px;z-index: 100;' v-on:click="remove(item)"></i>
                         </div>
                     </div>
                 </div>

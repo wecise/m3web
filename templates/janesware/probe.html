@@ -27,8 +27,9 @@
 <link href="{{AppSubUrl}}/web/vendor/sco/css/scojs.css" rel="stylesheet">
 
 <style type="text/css">
-    body {
-        background-color: #d9e0e7;
+
+    .container-fluid{
+        margin: 0px -10px;
     }
 
     /* panel-group*/
@@ -200,6 +201,47 @@
         white-space: nowrap;
     }
 
+    .widget {
+        padding: 25px 15px 15px 15px;
+    }
+
+    .object-footer{
+        position: fixed;
+        bottom: 30px;
+        left: 325px;
+    }
+
+    ul .galleryContainer {
+        display: block;
+        list-style-type: disc;
+        -webkit-margin-before: 1em;
+        -webkit-margin-after: 1em;
+        -webkit-margin-start: 0px;
+        -webkit-margin-end: 0px;
+        -webkit-padding-start: 40px;
+
+        padding: 0 0 0 0;
+        margin: 0 0 0 0;
+    }
+
+    .galleryContainer li {
+        list-style: none;
+        margin-bottom: 25px;
+    }
+
+    .nav-tabs {
+        background-color: rgb(255, 255, 255) !important;
+        background-image: none!important;
+        background-repeat: repeat-x;
+        border-radius: 0px!important;
+    }
+
+    ul.nav-main > li.active {
+        border-bottom: 2px solid rgb(3, 169, 244)!important;
+    }
+
+
+
 </style>
 
 <div id="app"></div>
@@ -218,6 +260,7 @@
 <!-- SCO JS-->
 <script src="{{AppSubUrl}}/web/vendor/sco/js/sco.tooltip.js"></script>
 
+<script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 <script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
@@ -232,11 +275,12 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-kpi-manager-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-kpi-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 
 <SCRIPT type="text/javascript">
 
-    var eventHub = new Vue();
+    'use static';
 
     VueLoader.onloaded(["vue-base-tree-component",
                         "vue-search-preset-component",
@@ -247,16 +291,13 @@
                         "vue-dispatch-manager-component",
                         "vue-kpi-manager-component",
                         "vue-kpi-tree-component",
-                        "vue-object-detail-component"],function() {
+                        "vue-object-detail-component",
+                        "vue-ai-robot-component"],function() {
 
 
         moment.locale(`{{.Lang}}`);
 
         $(function () {
-
-            $(".current-active-item").html(`<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}"><i class="fa fa-tasks"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
-            var timeoutId = 0;
 
             var appVue = new Vue({
                 delimiters: ['${', '}'],
@@ -330,10 +371,10 @@
                        table: {}
                     },
                     agentModel: [
-                        {name: 'CPU_BUSY(%)', value: _.random(0,100), severity: [], col: 3, img: 'file.svg', id: _.now(), type: "isFolder"},
-                        {name: 'MEM_UTIL(%)', value: _.random(0,100), severity: [], col: 3, img: 'file.svg', id: _.now(), type: "isFolder"},
-                        {name: 'DISK_IO(%)', value: _.random(0,100), severity: [], col: 3, img: 'file.svg', id: _.now(), type: "isFolder"},
-                        {name: '告警', value: null, severity: [{color:"#ffd84d",count:3},{color:"#ff0000",count:4}], col: 3, img: 'file.svg', id: _.now(), type: "isFolder"}
+                        {name: 'CPU_BUSY(%)', value: _.random(0,100), severity: [], col: 'col-lg-2 col-md-2 col-sm-3 col-xs-4', img: 'file.svg', id: _.now(), type: "isFolder"},
+                        {name: 'MEM_UTIL(%)', value: _.random(0,100), severity: [], col: 'col-lg-2 col-md-2 col-sm-3 col-xs-4', img: 'file.svg', id: _.now(), type: "isFolder"},
+                        {name: 'DISK_IO(%)', value: _.random(0,100), severity: [], col: 'col-lg-2 col-md-2 col-sm-3 col-xs-4', img: 'file.svg', id: _.now(), type: "isFolder"},
+                        {name: '告警', value: null, severity: [{color:"#ffd84d",count:3},{color:"#ff0000",count:4}], col: 'col-lg-2 col-md-2 col-sm-3 col-xs-4', img: 'file.svg', id: _.now(), type: "isFolder"}
                     ]
                 },
                 mounted: function () {
@@ -368,6 +409,8 @@
                             self.outputEditor.getSession().setMode("ace/mode/toml");
 
                             App.init();
+
+                            handleSidebarMinify();
 
                         }, 2000)
                     })
@@ -1300,105 +1343,81 @@ _ctime = MX_CTIME`);
 
 <script type="text/x-template" id="app-template">
 
-    <div class="container-fluid">
-
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="input-group searchinput">
-                    <vue-search-input-component :model="search.input"></vue-search-input-component>
-                    <div class="input-group-btn">
-                        <vue-search-preset-component id="monitoring-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
+    <div id="content" class="content">
+        <ul class="nav nav-tabs nav-main" role="tablist">
+            <li class="active"><a href="#tab1" role="tab" data-toggle="tab">探针列表</a></li>
+            <li><a href="#tab2" role="tab" data-toggle="tab">策略管理</a></li>
+            <li><a href="#tab3" role="tab" data-toggle="tab">日志配置</a></li>
+            <li><a href="#tab4" role="tab" data-toggle="tab">脚本管理</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade in active" id="tab1">
+                <div class="row">
+                    <div class="col-lg-2">
+                        <div class="panel panel-default" style="border-radius: 0px;">
+                            <div class="panel-body" style="padding:0px;">
+                                <vue-base-tree-component id="host-tree" :zNodes="host.list"></vue-base-tree-component>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-group-btn">
-                        <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
+
+                    <div class="col-lg-10">
+
+                        <ul class="galleryContainer">
+                            <li :id="item.id" data-item="{}"
+                                :class="'dir '+item.col+' context-menu-file'"
+                                style="cursor: pointer;"
+                                v-for="item in agentModel">
+                                <div class="widget widget-stats bg-blue">
+                                    <div class="stats-icon"><i class="fa fa-desktop"></i></div>
+                                    <div class="stats-info">
+                                        <h4>${item.name}</h4>
+                                        <p>${item.value}</p>
+                                        <p>
+                                            <a class="btn btn-icon btn-circle btn-sm"
+                                               :style="'background-color: '+subitem.color+'; color: rgb(255, 255, 255);'"
+                                               v-for="subitem in item.severity">
+                                                ${subitem.count}
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="stats-link">
+                                        <a href="javascript:;"
+                                           style="text-align: left; margin: 15px -15px -15px; padding: 5px;">
+                                            更多
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <p>
+                                <vue-base-table-component :columns="agent.table.columns"
+                                                          :dataset="agent.table.dataset"
+                                                          :options="agent.table.options"
+                                                          id="agent-table"></vue-base-table-component>
+                            </p>
+                        </ul>
+                        <div class="object-footer">
+                            Count: 0 | ${moment().format("LLL")}
+                        </div>
+
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-        	<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="padding:5px;">
-
-        	</div>
-        </div>
-        <div class='row'>
-            <div class="col-lg-12">
-                <!-- TAB NAVIGATION -->
-                <ul class="nav nav-tabs nav-main" role="tablist">
-                    <li class="active"><a href="#tab1" role="tab" data-toggle="tab">监控代理</a></li>
-                    <li><a href="#tab2" role="tab" data-toggle="tab">{{.i18n.Tr "mx-monitoring-dispatch"}}</a></li>
-                    <li><a href="#tab3" role="tab" data-toggle="tab">{{.i18n.Tr "mx-monitoring-kpi"}}</a></li>
-                </ul>
-                <!-- TAB CONTENT -->
-                <div class="tab-content">
-                    <div class="tab-pane fade in active" id="tab1">
-                        <div class="row">
-                            <div class="col-lg-2">
-                                <div class="panel panel-default" style="border-radius: 0px;min-height: 100vw;">
-                                    <div class="panel-body" style="padding:0px;">
-                                        <vue-base-tree-component id="host-tree" :zNodes="host.list"></vue-base-tree-component>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-10">
-
-                                <div class="panel panel-grey">
-
-                                    <div class="panel-body" style="padding:0px 0px 15px 0px;">
-                                        <div :id="item.id" data-item="{}"
-                                             :class="'dir col-md-'+item.col+' context-menu-file'"
-                                             style="cursor: pointer;"
-                                             v-for="item in agentModel">
-                                            <div class="widget widget-stats bg-blue">
-                                                <div class="stats-icon"><i class="fa fa-desktop"></i></div>
-                                                <div class="stats-info">
-                                                    <h4>${item.name}</h4>
-                                                    <p>${item.value}</p>
-                                                    <p>
-                                                        <a class="btn btn-icon btn-circle btn-sm"
-                                                           :style="'background-color: '+subitem.color+'; color: rgb(255, 255, 255);'"
-                                                           v-for="subitem in item.severity">
-                                                            ${subitem.count}
-                                                        </a>
-                                                    </p>
-                                                </div>
-                                                <div class="stats-link">
-                                                    <a href="javascript:;"
-                                                       style="text-align: left; margin: 15px -15px -15px; padding: 5px;">
-                                                        更多
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <vue-base-table-component :columns="agent.table.columns"
-                                                                  :dataset="agent.table.dataset"
-                                                                  :options="agent.table.options"
-                                                                  id="agent-table"></vue-base-table-component>
-                                    </div>
-                                    <div class="panel-footer">
-                                        <div class="panel-footer">
-                                            Count: 0 | ${moment().format("LLL")}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="tab-pane fade" id="tab2">
+                <div class="row">
+                    <div class="col-lg-3">
+                        <vue-base-tree-component id="script-tree" :zNodes="script.list"></vue-base-tree-component>
                     </div>
-                    <div class="tab-pane fade" id="tab2">
-                        <div class="row">
-                            <div class="col-lg-3">
-                                <vue-base-tree-component id="script-tree" :zNodes="script.list"></vue-base-tree-component>
-                            </div>
-                            <div class="col-lg-9">
-                                <vue-dispatch-manager-component></vue-dispatch-manager-component>
-                            </div>
-                        </div>
+                    <div class="col-lg-9">
+                        <vue-dispatch-manager-component></vue-dispatch-manager-component>
                     </div>
-                    <div class="tab-pane fade in" id="tab3">
-                        <vue-kpi-manager-component></vue-kpi-manager-component>
-                    </div>
-
                 </div>
+            </div>
+            <div class="tab-pane fade in" id="tab3">
+                <vue-kpi-manager-component></vue-kpi-manager-component>
+            </div>
+            <div class="tab-pane fade in" id="tab4">
+                <vue-kpi-manager-component></vue-kpi-manager-component>
             </div>
         </div>
     </div>
@@ -1425,6 +1444,7 @@ _ctime = MX_CTIME`);
             </div>
         </div>
     </div>
+
 </script>
 
 <script type="text/x-template" id="rules-manage-template">

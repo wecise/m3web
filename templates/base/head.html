@@ -36,6 +36,7 @@
 	<link href="{{AppSubUrl}}/web/css/color/color_style.min.css" rel="stylesheet">
 	<link href="{{AppSubUrl}}/web/css/color/color_style_responsive.min.css" rel="stylesheet">
 	<link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
+	<script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
 
 	<!-- sweetalert core JS & CSS -->
 	<link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
@@ -121,9 +122,9 @@
 
 
 	<!-- App JS-->
-	<script src="{{AppSubUrl}}/web/js/util.js"></script>
 	<script src="{{AppSubUrl}}/web/js/cfg.js"></script>
 	<script src="{{AppSubUrl}}/web/js/init.js"></script>
+	<script src="{{AppSubUrl}}/web/js/app.js"></script>
 
 	<!--Pace Progress JS & CSS-->	
 	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js"></script>
@@ -137,6 +138,8 @@
 		let lang = `{{.Lang}}`;
 		lang = lang.replace(/"/g,"");
 		moment.locale(lang);
+
+        App.init();
 	</script>
 
 	<!--Defiant JS-->	
@@ -247,12 +250,20 @@
 
 		/* For mxWindwoPane End*/
 
+		/*.navbar.navbar-default.navbar-fixed-top {
+			z-index: 999;
+			border-color: transparent!important;
+			!*background-color: #2195f4;!*#348fe2;*#03a9f4;*!
+			-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+    		box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);*!
+		}*/
+
 		.navbar.navbar-default.navbar-fixed-top {
 			z-index: 999;
 			border-color: transparent!important;
-			background-color: #2195f4;/*#348fe2;*#03a9f4;*/
-			-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
-    		box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+			background-color: #2195f4;
+			-webkit-box-shadow: none;
+			box-shadow: none;
 		}
 
 		
@@ -412,7 +423,7 @@
 
 		ul .nav-menu-level1,
 		ul .nav-menu-user {
-			width: 25.4vw;
+			width: 27.4em;
 		}
 
 		ul .nav-menu-level1> li,
@@ -435,14 +446,39 @@
 		}
 
 
+		/*
+	        Style
+	    */
+
+		.sidebar{
+			background-color:rgb(33, 149, 244);
+		}
+
+		.sidebar .nav > li > a,
+		.sidebar .nav > li > a:hover{
+			color: rgb(255, 255, 255);
+		}
+
+		.sidebar .nav>li.expand>a, .sidebar .nav>li>a:focus, .sidebar .nav>li>a:hover {
+			background: rgb(77, 170, 245);
+			color: rgb(255, 255, 255);
+		}
+
+
+		.sidebar-toggle > i {
+			padding: 15px 0px;
+			color: rgb(166, 211, 248);
+		}
+
+
 	</style>
 </head>
 <body onload="initPlugIn()">
 	
 	<noscript>Please enable JavaScript in your browser!</noscript>
-	<div id="page-container" class="page-sidebar-fixed page-header-fixed">
+	<div id="page-container" class="fade page-sidebar-minified page-header-fixed in">
 		
-		<div class="navbar navbar-default navbar-fixed-top">
+		<div id="header" class="header navbar navbar-default navbar-fixed-top">
 			<div class="container-fluid" style="margin:0px;padding:0px 10px 0px 0px;">
 				
 				<div class="navbar-header">
@@ -450,6 +486,9 @@
 						<img id="company_logo" src="">
 						<span>{{.title}}</span>
 					</a>
+
+					<a class="sidebar-toggle" href="javascript:toggleSideBar();" title="切换导航栏"><i class="fas fa-bars fa-2x"></i></a>
+
 			    </div>
 				<div class="navbar-collapse collapse">
 			        <ul class="nav navbar-nav navbar-right">
@@ -457,19 +496,22 @@
 					{{if .IsSigned}}
 
 				    {{if eq .company "wecise"}}
-				        <li class="ai">
+				        <li class="ai-robot">
 						</li>
 				    {{end}}
 
-						<li class="dropdown top-bar">
+						<!--<li class="dropdown top-bar">
 							<a class="dropdown-toggle head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-								<i class="fa fa-th fa-fw"></i> &nbsp;应用<!--{{.i18n.Tr "home"}}-->
+								<i class="fa fa-th fa-fw"></i> &nbsp;应用&lt;!&ndash;{{.i18n.Tr "home"}}&ndash;&gt;
 							</a>
 							<div id="nav-menu-level1">
 							</div>
-						</li>
+						</li>-->
 
-						<li class="current-active-item"></li>
+
+				        <li>
+					        <a class="item" href="{{AppSubUrl}}/"><i class="fas fa-question"></i></a>
+				        </li>
 
 					{{else}}
 						<li>
@@ -480,7 +522,7 @@
 
 					{{if .IsSigned}}
 
-						<li class="dropdown top-bar">
+						<li class="dropdown navbar-user">
 
 							<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								<!--img class="ui mini image" src="{{.SignedUser.AvatarLink}}"-->
@@ -488,20 +530,21 @@
 								<i class="caret"></i>
 							</a>
 
-							<ul class="dropdown-menu top-bar animated fadeInDown nav-menu-user">
+							<ul class="dropdown-menu animated fadeInLeft">
 
 								<li>
 									<a href="{{AppSubUrl}}/janesware/user">
-										<i class="fa fa-user fa-3x"></i> <p>{{.i18n.Tr "your_profile"}}</p>
+										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}}
 									</a>
 								</li>
+
+								<li class="divider"></li>
 
 								{{if .IsAdmin}}
 								{{if ne .company "oneswitch"}}
 									<li>
 										<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
-											<i class="fa fa-cogs fa-3x"></i>
-											<p>{{.i18n.Tr "system"}}</p>
+											<i class="fa fa-cogs"></i> {{.i18n.Tr "system"}}
 										</a>
 									</li>
 
@@ -510,16 +553,14 @@
 
 								<li>
 									<a target="_blank" href="/janesware/files">
-										<i class="fa fa-list-alt fa-3x"></i>
-										<p>{{.i18n.Tr "files"}}</p>
+										<i class="fa fa-list-alt"></i> {{.i18n.Tr "files"}}
 									</a>
 								</li>
 
 
 								<li>
 									<a target="_blank" href="javascript:setDefaultHome('home','{{.CsrfToken}}')">
-										<i class="fa fa-home fa-3x"></i>
-										<p>{{.i18n.Tr "defaulthome"}}</p>
+										<i class="fa fa-home"></i> {{.i18n.Tr "defaulthome"}}
 									</a>
 								</li>
 
@@ -527,40 +568,38 @@
 								{{if ne .company "oneswitch"}}
 								<li>
 									<a target="_blank" href="/janesware/api">
-										<i class="fab fa-amilia fa-3x"></i>
-										<p>REST API</p>
+										<i class="fab fa-amilia"></i> REST API
 									</a>
 								</li>
 
 								{{end}}
 
+								<li class="divider"></li>
+
 								<li>
 									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('LIGHT')">
-										<i class="fas fa-sun fa-3x"></i><!--<img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">-->
-										<p>亮色</p>
+										<i class="fas fa-sun"></i><!--<img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">--> 亮色
 									</a>
 								</li>
 
 								<li>
 									<a target="_blank" href="javascript:void(0);" onclick="toggleTheme('DARK')">
-										<i class="fas fa-sun fa-3x" style="color:#000;"></i><!--<img src="/web/assets/images/dark.svg" class="img-responsive" alt="Image" style="max-width:48px;">-->
-										<p>深色</p>
+										<i class="fas fa-sun" style="color:#000;"></i><!--<img src="/web/assets/images/dark.svg" class="img-responsive" alt="Image" style="max-width:48px;">--> 深色
 									</a>
 								</li>
 
 
 								<li>
 									<a target="_blank" href="javascript:void(0);" onclick="toggleFullScreen();">
-										<i class="fa fa-arrows-alt fa-3x" aria-hidden="true"></i>
-										<p>全屏切换</p>
+										<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
 									</a>
 								</li>
 
+								<li class="divider"></li>
 
 								<li>
 									<a href="{{AppSubUrl}}/user/logout/{{.company}}">
-										<i class="fa fa-sign-out-alt fa-3x"></i>
-										<p>{{.i18n.Tr "sign_out"}}</p>
+										<i class="fa fa-sign-out-alt"></i> {{.i18n.Tr "sign_out"}}
 									</a>
 								</li>
 							</ul>
@@ -590,9 +629,12 @@
 				</div>
 			</div>
 		</div>
-	
-{{/*
+		<div id="sidebar" class="sidebar animated fadeInLeft">
+			<div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
+				<div data-scrollbar="true" data-height="100%" style="overflow: hidden; width: auto; height: 100%;">
+					<div id="sidebar-menu"></div>
+				</div>
+			</div>
+		</div>
 
-</body>
-</html>
-*/}}
+

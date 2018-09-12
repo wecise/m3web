@@ -34,10 +34,6 @@
 
 <style type="text/css">
 
-    body {
-        background-color: #d9e0e7;
-    }
-
     ul {
         margin: 0;
         padding: 0;
@@ -79,6 +75,11 @@
         min-height: calc(100vh - 225px);
         max-height: calc(100vh - 230px);
     }
+
+
+    .panel {
+        border: 1px solid rgb(239, 239, 239);
+    }
 </style>
 
 <div id="app"></div>
@@ -100,6 +101,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <script type="text/javascript">
     
@@ -109,7 +111,8 @@
 
      VueLoader.onloaded(["vue-editor-component",
                          "vue-base-datatables-component",
-                         "vue-common-form-component"
+                         "vue-common-form-component",
+                         "vue-ai-robot-component"
                         ],function() {
 
         moment.locale({{.Lang}});
@@ -2537,14 +2540,14 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div class="container-fluid">
+    <div id="content" class="content">
         <!--row-->
         <div class="row">
             <div  class="col-lg-3" id="nav">
                 <!--Accordion view-->
                 <div class="panel-group" id="accordion">
                     
-                    <div class="panel panel-grey">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
                             <i class="fa fa-tree"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse01" style="color:#000000;" @click="toggleView('config-manage')">配置</a>
@@ -2561,7 +2564,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
                             <i class="fa fa-random"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse08" aria-expanded="false" aria-controls="collapseSeven" style="color:#000000;" @click="toggleView('grok-manage')">
@@ -2572,7 +2575,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
                             <i class="fa fa-users"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse02" aria-expanded="false" aria-controls="collapseTwo" style="color:#000000;" @click="toggleView('user-manage')">
@@ -2605,7 +2608,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey" style="display:none;">
+                    <div class="panel panel-default" style="display:none;">
                         <div class="panel-heading">
                             <i class="fa fa-bell"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse03" aria-expanded="false" aria-controls="collapseThree" style="color:#000000;" @click="toggleView('notify-manage')">
@@ -2633,7 +2636,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey" style="display:none;">
+                    <div class="panel panel-default" style="display:none;">
                         <div class="panel-heading">
                             <i class="fa fa-calendar"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse06" aria-expanded="false" aria-controls="collapseSix" style="color:#000000;" @click="toggleView('calendar-manage')">
@@ -2647,7 +2650,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey" style="display:;">
+                    <div class="panel panel-default" style="display:;">
                         <div class="panel-heading">
                             <i class="fa fa-tasks"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse061" aria-expanded="false" aria-controls="collapseSixOne" style="color:#000000;" @click="toggleView('tools-manage')">
@@ -2659,7 +2662,7 @@
                         </div>
                     </div>
 
-                    <div class="panel panel-grey" style="display:none;">
+                    <div class="panel panel-default" style="display:none;">
                         <div class="panel-heading">
                             <i class="fa fa-slideshare"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse07" aria-expanded="false" aria-controls="collapseSeven" style="color:#000000;" @click="toggleView('session-manage')">
@@ -2671,7 +2674,7 @@
                         </div>
                     </div>
                        
-                    <div class="panel panel-grey" style="display:none;">
+                    <div class="panel panel-default" style="display:none;">
                         <div class="panel-heading">
                             <i class="fa fa-exchange"></i>
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapse08" aria-expanded="false" aria-controls="collapseEight" style="color:#000000;" @click="toggleView('queue-manage')">
@@ -2699,7 +2702,7 @@
 <script type="text/x-template" id="config-manage-template">
     <div>
         <div class="panel-group" id="accordionContent" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-grey">
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingOne" style="padding: 5px 15px;">
                     <div class="panel-heading-btn">
                         <div class="btn-group">
@@ -2720,7 +2723,7 @@
                                 Delete&nbsp;
                             </a>
                             <a href="javascript:void(0)" @click="debug" class="btn btn-xs btn-default">
-                                <i class="fa fa-television"></i>
+                                <i class="fas fa-tv"></i>
                             </a>
                         </div>
                     </div>
@@ -2746,7 +2749,7 @@
                     </div>
                 </div>
             </div>
-            <div class="panel panel-grey">
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingTwo">
                     <i class="fa fa-desktop"></i>
                     <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigMonitorInfo">TTL...</a>
@@ -2813,7 +2816,7 @@
 <script type="text/x-template" id="user-manage-template">
     <div>
         
-        <div class="panel panel-grey">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <span style="">
                     <b>User Info</b>
@@ -2843,7 +2846,7 @@
             <!-- Tab panes -->
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active fade in" id="byObject">
-                    <div class="panel panel-grey">
+                    <div class="panel panel-default">
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
@@ -2857,7 +2860,7 @@
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane fade in" id="byProperty">
-                    <div class="panel panel-grey">
+                    <div class="panel panel-default">
                         <div class="panel-body">
                             <div class="row">
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
@@ -2879,7 +2882,7 @@
 <script type="text/x-template" id="notify-manage-template">
     <div>
         
-        <div class="panel panel-grey">
+        <div class="panel panel-default">
             <div class="panel-heading">
                 <span>
                     通知规则
@@ -2948,10 +2951,10 @@
 <script type="text/x-template" id="rules-manage-template">
     <div>
         <div class="panel-group" id="accordionContent" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-grey">
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingOne">
                     <span data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigInfo">
-                      <i class="fa fa-home"></i>
+                      <i class="fas fa-home"></i>
                     </span>
                     <span id="olNav" style="font-size: 12px;font-weight: bold;"></span>
                     <span class="pull-right">
@@ -2991,7 +2994,7 @@
                     </div>
                 </div>
             </div>
-            <div class="panel panel-grey">
+            <div class="panel panel-default">
                 <div class="panel-heading" role="tab" id="headingTwo">
                     <i class="fa fa-desktop"></i>
                     <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigMonitorInfo">监控信息</a>
@@ -3059,7 +3062,7 @@
                 <!-- Tab panes -->
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="tools-list">
-                        <div class="panel panel-grey">
+                        <div class="panel panel-default">
                             <div class="panel-body">
                                 <div class="block__list_words">      
                                     <transition-group id="ul-li" type="transition" tag="ul">
@@ -3108,7 +3111,7 @@
                         </div>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="tools-keep">
-                        <div class="panel panel-grey">
+                        <div class="panel panel-default">
                             <div class="panel-body">
                                 <form class="tools-new">
                                     <div class="form-group">
@@ -3139,7 +3142,7 @@
 </script>
 
 <script type="text/x-template" id="calendar-manage-template">
-    <div class="panel panel-grey">
+    <div class="panel panel-default">
         <div class="panel-heading">
             <i class="fa fa-clock-o"></i> 日历管理
         </div>
@@ -3150,7 +3153,7 @@
 </script>
 
 <script type="text/x-template" id="session-manage-template">
-    <div class="panel panel-grey">
+    <div class="panel panel-default">
         <div class="panel-heading">
             会话管理
         </div>
@@ -3161,7 +3164,7 @@
 </script>
 
 <script type="text/x-template" id="grok-manage-template">
-    <div class="panel panel-grey">
+    <div class="panel panel-default">
         <div class="panel-heading">
             解析规则
         </div>
@@ -3177,7 +3180,7 @@
 
 <script type="text/x-template" id="queue-manage-template">
     <div class="panel-group" id="accordionx" role="tablist" aria-multiselectable="true">
-                <div class="panel panel-grey" v-for="(value, index) in model.data">
+                <div class="panel panel-default" v-for="(value, index) in model.data">
                     <div class="panel-heading" role="tab" :id="'heading' + index">
                       <h5 class="panel-title">
                         <i class="fa fa-server fa-fw" style="color:#4dd00b;"></i> 
@@ -3209,7 +3212,7 @@
                             <div class="tab-content">
 
                               <div role="tabpanel" class="tab-pane active" :id="'varz_' + index">
-                                <div class="panel panel-grey" style="border:none;">
+                                <div class="panel panel-default" style="border:none;">
                                   <div class="panel-body">
                                     <ul class="nav">
                                       <li class="col-md-3" v-for="(v, k) in value.Content[0].Content">
@@ -3227,7 +3230,7 @@
                               </div>
 
                               <div role="tabpanel" class="tab-pane" :id="'connz_' + index">
-                                <div class="panel panel-grey" style="border:none;">
+                                <div class="panel panel-default" style="border:none;">
                                   <div class="panel-body">
                                     <ul class="nav">
                                       <li class="col-md-3" v-for="(v, k) in value.Content[1].Content">
@@ -3265,7 +3268,7 @@
                               </div>
 
                               <div role="tabpanel" class="tab-pane" :id="'routez_' + index">
-                                <div class="panel panel-grey" style="border:none;">
+                                <div class="panel panel-default" style="border:none;">
                                   <div class="panel-body">
                                     <ul class="nav">
                                       <li class="col-md-3" v-for="(v, k) in value.Content[2].Content">
@@ -3300,7 +3303,7 @@
                               </div>
 
                               <div role="tabpanel" class="tab-pane" :id="'subsz_' + index">
-                                <div class="panel panel-grey" style="border:none;">
+                                <div class="panel panel-default" style="border:none;">
                                   <div class="panel-body">
                                     <ul class="nav">
                                       <li class="col-md-3" v-for="(v, k) in value.Content[3].Content">
@@ -3325,7 +3328,7 @@
 
 <script type="text/x-template" id="ldap-new-template">
     <div>
-        <div class="panel panel-grey">
+        <div class="panel panel-default">
             <div class="panel-body">
                 <form class="form-horizontal">
                     <div class="form-group">
@@ -3390,7 +3393,7 @@
 
 <script type="text/x-template" id="ldap-new-group-template">
     <div>
-        <div class="panel panel-grey">
+        <div class="panel panel-default">
             <div class="panel-body">
                 <form class="form-horizontal">
                     <div class="form-group">

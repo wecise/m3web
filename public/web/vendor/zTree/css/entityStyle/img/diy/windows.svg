@@ -4,7 +4,7 @@
     <defs>
         <style type="text/css">
         	path {
-        		fill: #bbbbbb;
+        		fill: rgb(33, 149, 243);
         	}
         </style>
     </defs>

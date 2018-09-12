@@ -77,6 +77,11 @@
 			color: #333333;
 		}
 
+		.datatables-toolbars .btn-group > a > i{
+			color: #666666;
+		}
+
+
 		.dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
 			background: rgb(239, 239, 239);
 			color: rgb(51, 51, 51);
@@ -98,6 +103,7 @@
         delimiters: ['${', '}'],
 		props: {
         	id: String,
+            bid: String,
 			columns: Array,
 			dataset: Array,
 			options: Object,
@@ -278,12 +284,12 @@
 			                            extend: 'copy',
 			                            text: '',
 			                            copyTitle: '已复制',
-			                            className: 'btn btn-sm btn-primary fa fa-copy',
+			                            className: 'btn btn-sm btn-primary fas fa-copy',
 			                        },
 			                        {
 			                            extend: 'excel',
 			                            text: '',
-			                            className: 'btn btn-sm btn-primary fa fa-download',
+			                            className: 'btn btn-sm btn-primary fas fa-download',
                                         title: function(){
 			                                return `${self.result.name.split("/").join("_").replace("_","")}_class_export_${moment().format("LLL")}`
                                         },
@@ -292,11 +298,10 @@
 			                        {
 			                            extend: 'colvis',
 			                            text: '',
-			                            className: 'btn btn-sm btn-primary fa fa-columns',
+			                            className: 'btn btn-sm btn-primary fas fa-columns',
 			                            collectionLayout: 'fixed four-column',
                                         columns: ':not(.noVis)',
 			                            columnText: function ( dt, idx, title ) {
-			                                console.log(dt,idx,title)
 			                                return `<input type="checkbox" name="${title}" checked="checked"> `+title;
 			                            }
 			                        }
@@ -417,7 +422,7 @@
                 let _items = {};
 
                 _.forEach(_keys, function (v) {
-                    console.log(v)
+
                     let o = {};
 
                     o.name = v;
@@ -433,8 +438,8 @@
                     el: `#${self.id}-datatables-tool-bars`,
                     template: `<div class="datatables-toolbars">
 									<div class="btn-group" role="group" aria-label="...">
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除"><i class="fa fa-trash"></i></a>
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑"><i class="fa fa-edit"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除"><i class="fas fa-trash"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑"><i class="fas fa-edit"></i></a>
 									</div>
 								</div>`,
                     data: {
@@ -526,7 +531,6 @@
 				let toolBarsVue = self.toolBars();
 
 				$(`div.${self.id}-datatables-tool-bars`).attr('id',`${self.id}-datatables-tool-bars`).ready(function(){
-                    console.log(JSON.stringify(toolBarsVue))
 				    new Vue(toolBarsVue);
                 });
 
