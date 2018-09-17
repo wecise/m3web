@@ -1,0 +1,284 @@
+<link rel="stylesheet" href="../../vendor/zTree/css/omdbStyle/zTreeStyle.css"><code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+
+		.probe-tree-component{
+			margin: -12px;
+		}
+
+		.navbar-form {
+			margin: 12px -15px;
+		}
+
+		.navbar-form .form-control:focus{
+			width: 200px;
+			animation:none;
+			-webkit-animation: none;
+		}
+
+		.navbar-form .btn-search {
+			right: -3px;
+			top: 2px;
+		}
+
+		.ztree li a.curSelectedNode {
+			background-color: rgb(161, 212, 250)!important;
+			border:1px solid #ffffff!important;
+			color: rgb(255,255,255)!important;
+		}
+
+		.ztree li a:hover{
+			text-decoration: none!important;
+		}
+
+		.ztree {
+			height: 100%;
+			overflow: auto;
+			padding-bottom: 100px!important;
+			position: relative;
+		}
+
+		.toolbar{
+			position: relative;
+			left: calc(100% - 68px);
+			top: 0px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
+			display: block;
+			background-color: rgb(161, 212, 250);
+			border: none;
+			border-radius: 0;
+		}
+
+		.ztree li span.button.add {margin-right:2px; background:url(../../img/new.png); vertical-align:middle; *vertical-align:middle}
+		.ztree li span.button.edit {margin-right:2px; background:url(../../img/edit.png); vertical-align:middle; *vertical-align:middle}
+		.ztree li span.button.console {margin-right:2px; background:url(../../img/console.png); vertical-align:middle; *vertical-align:middle}
+		.ztree li span.button.remove {margin-right:2px; background:url(../../img/trash.png); vertical-align:middle; *vertical-align:middle}
+		.ztree li span.button.more {margin-right:2px; background:url(../../img/more.png); vertical-align:middle; *vertical-align:middle}
+
+	</style>
+
+
+
+	/*----------  最外层element会自动增加组件同名 class="probe-tree-component"  ----------*/
+	<template>
+		<div>
+			<form class="navbar-form full-width">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="搜索">
+					<button type="submit" class="btn btn-search"><i class="fa fa-search"></i></button>
+				</div>
+			</form>
+			<ul class="ztree" :id="id"></ul>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="probe-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+        },
+        data: function(){
+            return {
+                zTree: Object,
+                zSetting: {
+                    view: {
+                        showTitle: true,
+                        dblClickExpand: this.onDblClickExpand,
+                        addDiyDom: this.addCountDom,
+                        removeHoverDom: this.removeHoverDom,
+                    },
+                    edit: {
+                        enable: false
+                    },
+                    callback: {
+                        onClick: this.onClick
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: 'name',
+                            title: 'name'
+                        }
+                    },
+                    check: {
+                        enable: false
+                    }
+                },
+                zNodes: [
+                            {cid:'A1', parent:null, rtype:'A1', isParent:true, name: '/探针列表', title: '探针列表', children:[
+                                    {cid:'A21', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Linux', title: 'Linux', children:[]},
+                                    {cid:'A22', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Windows', title: 'Windows', children:[]},
+                                    {cid:'A23', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Unix', title: 'Unix', children:[]}
+	                            ], open:true},
+	                        {cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/标签', title: '标签', children:[]}
+                        ],
+                selectedNode: null,
+
+
+            }
+        },
+        created: function(){
+            let self = this;
+
+
+
+        },
+        mounted: function () {
+            let self =  this;
+
+            self.$nextTick(function () {
+
+                self.init();
+                self.initPlugIn();
+
+            })
+        },
+        methods:{
+            init: function () {
+                let self = this;
+
+                self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+            },
+	        initPlugIn: function(){
+                let self = this;
+
+                $(self.$el).contextMenu({
+                    selector: 'span.class.more',
+                    trigger: 'left',
+                    items: {
+
+                        "classNewByMql": {
+                            name: "新建子类", icon: "fas fa-plus", callback: function (key, opt) {
+
+                            }
+                        },
+                        "sep1": "---------",
+                        "删除": {
+                            name: "删除类", icon: "fas fa-trash", callback: function (key, opt) {
+
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
+                        }
+                    }
+                });
+
+	        },
+            initData: function(node){
+				let self = this;
+
+                self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+
+	        },
+            onClick: function (event, treeId, treeNode, clickFlisParentag) {
+                let self = this;
+
+                self.selectedNode = treeNode;
+
+                if(treeNode.cid === 'A1') {
+
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
+										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
+										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
+										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    return;
+                }
+
+                if(treeNode.cid === 'A2'){
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+
+                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+
+                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
+										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
+										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
+										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+								</div>`;
+
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+                    return;
+                }
+
+            },
+            addCountDom: function (treeId, treeNode) {
+                let self = this;
+                let aObj = $("#" + treeNode.tId + "_a");
+
+                if(!_.isEmpty(treeNode.child)){
+                    if (treeNode.child.length > 0){
+                        let str = `<span class='${treeNode.name} count' style='color:rgb(160,160,160);'>(${treeNode.child.length})</span>`;
+                        aObj.append(str);
+                    }
+                }
+            },
+            removeHoverDom: function (treeId, treeNode) {
+                $("#toolbars_"+treeNode.tId).unbind().remove();
+            },
+            refresh: function(event) {
+                let self = this;
+
+                let pNode = self.selectedNode;
+
+
+                let _node = self.zTree.getNodesByParam("name", pNode.name, null)[0];
+
+                self.zTree.removeChildNodes(_node.getParentNode());
+                self.initData();
+
+                _.delay(function(){
+                    self.initData();
+                },2000);
+
+                _.delay(function(){
+                    self.zTree.expandNode(_node, false, false, true);
+                },2500);
+
+            }
+        }
+	
+	}
+	</script>
+
+</code>

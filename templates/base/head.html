@@ -123,23 +123,34 @@
 
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/cfg.js"></script>
+	<script src="{{AppSubUrl}}/web/js/dispatch.js"></script>
 	<script src="{{AppSubUrl}}/web/js/init.js"></script>
+	<script src="{{AppSubUrl}}/web/js/job.js"></script>
+	<script src="{{AppSubUrl}}/web/js/company.js"></script>
+	<script src="{{AppSubUrl}}/web/js/context.js"></script>
+	<script src="{{AppSubUrl}}/web/js/class.js"></script>
+	<script src="{{AppSubUrl}}/web/js/fs.js"></script>
+	<script src="{{AppSubUrl}}/web/js/grok.js"></script>
+	<script src="{{AppSubUrl}}/web/js/object.js"></script>
+	<script src="{{AppSubUrl}}/web/js/probe.js"></script>
+	<script src="{{AppSubUrl}}/web/js/rule.js"></script>
+	<script src="{{AppSubUrl}}/web/js/schgroup.js"></script>
+	<script src="{{AppSubUrl}}/web/js/search.js"></script>
+	<script src="{{AppSubUrl}}/web/js/sign.js"></script>
+	<script src="{{AppSubUrl}}/web/js/trigger.js"></script>
+	<script src="{{AppSubUrl}}/web/js/user.js"></script>
+	<script src="{{AppSubUrl}}/web/js/websocket.js"></script>
+	<script src="{{AppSubUrl}}/web/js/window.js"></script>
 	<script src="{{AppSubUrl}}/web/js/app.js"></script>
 
 	<!--Pace Progress JS & CSS-->	
 	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js"></script>
 	<script>
 
-		$(document).ajaxStart(function() {
-            Pace.options.ajax.trackWebSockets = false;
-		    Pace.restart();
-		});
-		
 		let lang = `{{.Lang}}`;
 		lang = lang.replace(/"/g,"");
 		moment.locale(lang);
 
-        App.init();
 	</script>
 
 	<!--Defiant JS-->	
@@ -216,7 +227,7 @@
 
 		body {
 			font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-			background-color: #ffffff; /*#f0f0f0;*/
+			background-color: #ffffff;
 			overflow-x: hidden;
 		}
 
@@ -246,17 +257,6 @@
 		    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
 		    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);*/
 		}
-
-
-		/* For mxWindwoPane End*/
-
-		/*.navbar.navbar-default.navbar-fixed-top {
-			z-index: 999;
-			border-color: transparent!important;
-			!*background-color: #2195f4;!*#348fe2;*#03a9f4;*!
-			-webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
-    		box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);*!
-		}*/
 
 		.navbar.navbar-default.navbar-fixed-top {
 			z-index: 999;
@@ -449,11 +449,6 @@
 		/*
 	        Style
 	    */
-
-		.sidebar{
-			background-color:rgb(33, 149, 244);
-		}
-
 		.sidebar .nav > li > a,
 		.sidebar .nav > li > a:hover{
 			color: rgb(255, 255, 255);
@@ -470,9 +465,22 @@
 			color: rgb(166, 211, 248);
 		}
 
+		.topbar.navbar-form {
+			margin: 12px 45px;
+		}
+
+		.topbar.navbar-form > .form-group > input{
+			width: 300px;
+		}
+
+		.topbar.navbar-form > .form-group > button{
+			right: 60px;
+			top: 12px;
+		}
 
 	</style>
 </head>
+
 <body onload="initPlugIn()">
 	
 	<noscript>Please enable JavaScript in your browser!</noscript>
@@ -493,24 +501,20 @@
 				<div class="navbar-collapse collapse">
 			        <ul class="nav navbar-nav navbar-right">
 
+				        <li>
+					        <div id="search-bar"></div>
+				        </li>
+
 					{{if .IsSigned}}
 
 				    {{if eq .company "wecise"}}
-				        <li class="ai-robot">
+				        <li>
+					        <div id="ai-robot"></div>
 						</li>
 				    {{end}}
 
-						<!--<li class="dropdown top-bar">
-							<a class="dropdown-toggle head_write_font{{if .PageIsHome}} active{{end}} item" href="{{AppSubUrl}}/"  data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-								<i class="fa fa-th fa-fw"></i> &nbsp;应用&lt;!&ndash;{{.i18n.Tr "home"}}&ndash;&gt;
-							</a>
-							<div id="nav-menu-level1">
-							</div>
-						</li>-->
-
-
 				        <li>
-					        <a class="item" href="{{AppSubUrl}}/"><i class="fas fa-question"></i></a>
+					        <a class="item" href="{{AppSubUrl}}/"><i class="fas fa-question"></i> 帮助</a>
 				        </li>
 
 					{{else}}
@@ -530,7 +534,7 @@
 								<i class="caret"></i>
 							</a>
 
-							<ul class="dropdown-menu animated fadeInLeft">
+							<ul class="dropdown-menu animated fadeIn">
 
 								<li>
 									<a href="{{AppSubUrl}}/janesware/user">
@@ -636,5 +640,6 @@
 				</div>
 			</div>
 		</div>
+		<div class="sidebar-bg"></div>
 
 

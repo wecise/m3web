@@ -138,8 +138,6 @@
 
 <script>
 	
-	var eventHub = new Vue();
-
 	VueLoader.onloaded(["vue-bootstrap-table",
 						"vue-timeline-component",
 						"vue-editor-component",
@@ -150,8 +148,6 @@
 						"vue-ai-robot-component"],function() {
 
 		$(function(){
-
-			$(".current-active-item").html(`<a class="active item" href="/janesware/search"><i class="fa fa-search"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
 
 			moment().format('LLL');
 
@@ -542,6 +538,7 @@
 
                     self.search.input.term = _searchObject.cond;
                     self.search.preset = _searchObject.preset;
+                    console.log(JSON.stringify(self.search.preset))
 
                     _.delay(function () {
                         eventHub.$on('preset-selected-event', self.setPresetDefault);
@@ -905,7 +902,8 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-	<div class="container-fluid main-container">
+
+	<div id="content" class="content">
 
 		<div class="row">
 	  	

@@ -23,14 +23,8 @@
 {{template "base/head" .}}
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
-<!-- SCO CSS-->
-<link href="{{AppSubUrl}}/web/vendor/sco/css/scojs.css" rel="stylesheet">
 
 <style type="text/css">
-
-    .container-fluid{
-        margin: 0px -10px;
-    }
 
     /* panel-group*/
     .panel-group > .panel > .panel-heading {
@@ -251,18 +245,6 @@
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
 
-<!-- Jquery Timer JS-->
-<script src="{{AppSubUrl}}/web/vendor/timer/jquery.timer.js"></script>
-
-<!--Layer Core JS-->
-<script src="{{AppSubUrl}}/web/vendor/layer/layer.js"></script>
-
-<!-- SCO JS-->
-<script src="{{AppSubUrl}}/web/vendor/sco/js/sco.tooltip.js"></script>
-
-<script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
-<script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
-
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
@@ -277,6 +259,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-list-datatables-component.html"></link>
 
 <SCRIPT type="text/javascript">
 
@@ -292,7 +276,9 @@
                         "vue-kpi-manager-component",
                         "vue-kpi-tree-component",
                         "vue-object-detail-component",
-                        "vue-ai-robot-component"],function() {
+                        "vue-ai-robot-component",
+                        "probe-tree-component",
+                        "probe-list-datatables-component"],function() {
 
 
         moment.locale(`{{.Lang}}`);
@@ -408,11 +394,13 @@
                             self.outputEditor.setTheme("ace/theme/clouds");
                             self.outputEditor.getSession().setMode("ace/mode/toml");
 
-                            App.init();
-
-                            handleSidebarMinify();
-
                         }, 2000)
+
+                        /* enable tooltip for all A tag */
+                        $("a").tooltip({
+                            enable: true,
+                            position: { my: "left+15 center", at: "right center" }
+                        });
                     })
                 },
                 methods: {
@@ -592,37 +580,6 @@
 
 
                         });
-                    },
-                    toogleView: function () {
-                        var self = this;
-
-                        if (self.ifShowNav) {
-
-                            $("#nav").hide();
-
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12")
-                                .css("padding-left", "10px");
-                            //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
-
-                            $(".navtoggle").removeClass("fa fa-caret-left");
-                            $(".navtoggle").addClass("fa fa-caret-right");
-
-                            self.ifShowNav = false;
-                        } else {
-                            $("#nav").slideDown(500);
-                            $("#nav").show();
-
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10")
-                                .css("padding-left", "0px");
-                            //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
-
-                            $(".navtoggle").removeClass("fa fa-caret-right");
-                            $(".navtoggle").addClass("fa fa-caret-left");
-
-                            self.ifShowNav = true;
-                        }
                     },
                     onSearch: function (term) {
                         let self = this;
@@ -1354,11 +1311,7 @@ _ctime = MX_CTIME`);
             <div class="tab-pane fade in active" id="tab1">
                 <div class="row">
                     <div class="col-lg-2">
-                        <div class="panel panel-default" style="border-radius: 0px;">
-                            <div class="panel-body" style="padding:0px;">
-                                <vue-base-tree-component id="host-tree" :zNodes="host.list"></vue-base-tree-component>
-                            </div>
-                        </div>
+                        <probe-tree-component id="host-tree" :zNodes="host.list"></probe-tree-component>
                     </div>
 
                     <div class="col-lg-10">
@@ -1389,13 +1342,11 @@ _ctime = MX_CTIME`);
                                     </div>
                                 </div>
                             </li>
-                            <p>
-                                <vue-base-table-component :columns="agent.table.columns"
-                                                          :dataset="agent.table.dataset"
-                                                          :options="agent.table.options"
-                                                          id="agent-table"></vue-base-table-component>
-                            </p>
                         </ul>
+                        <probe-list-datatables-component :columns="agent.table.columns"
+                                                  :dataset="agent.table.dataset"
+                                                  :options="agent.table.options"
+                                                  id="agent-table"></probe-list-datatables-component>
                         <div class="object-footer">
                             Count: 0 | ${moment().format("LLL")}
                         </div>

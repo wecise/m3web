@@ -137,12 +137,6 @@
 <!-- ECharts单文件引入 -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
-<!-- Cytoscape JS -->
-<script src="{{AppSubUrl}}/web/vendor/d3-cytoscapejs/dist/cytoscape.min.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/d3-cytoscapejs/dist/dagre.min.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/d3-cytoscapejs/dist/wzd-dagre.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/d3-cytoscapejs/dist/wzd-snap-to-grid.js"></script>
-<script src="{{AppSubUrl}}/web/vendor/d3-cytoscapejs/dist/wzd-edgehandles.js"></script>
 
 <!--Util JS-->
 <script src="{{AppSubUrl}}/web/js/app.js"></script>
@@ -1183,7 +1177,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-	<div class="container-fluid main-container">
+	<div id="content" class="content main-container">
 
 		<div class="row">
 			<div class="col-lg-4">

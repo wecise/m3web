@@ -47,10 +47,6 @@
 		height: 25px!important;
 	}
 
-	.lm_item .lm_column > .lm_stack:nth-child(1) > .lm_header{
-		display: none!important;
-	}
-
 	.lm_header .lm_tab.lm_active {
 		border-bottom: none;
 		box-shadow: none;
@@ -171,11 +167,9 @@
 		top: 1px;
 	}
 
-	.logToolBar .btn-group > a > i{
-		color: #666666;
-	}
-
-	.sidebar {
+	.sidebar,
+	.sidebar-bg,
+	.sidebar-toggle{
 		display:none;
 	}
 
@@ -185,9 +179,9 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-output-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-datatables-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-editor-component.html"></link>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
@@ -199,26 +193,27 @@
 
 	'use static';
 
+
     $(".current-active-item").html(`<a class="active item" href="/janesware/omdb">
 										<i class="fa fa-cube"></i>  {{.i18n.Tr .ActiveView }}
 									</a>`);
 
     VueLoader.onloaded(["omdb-output-datatables-component",
 				        "omdb-class-datatables-component",
-				        "omdb-class-tree-component",
-				        "omdb-editor-component",
+				        "vue-object-tree-component",
+				        "vue-editor-component",
 	                    "vue-trigger-editor-component",
 	                    "vue-graph-component",
                         "vue-ai-robot-component"], function() {
 
-        let classTree = function(id, bid, template, event){
+        let classTree = function(id, type, pattern, node){
 
             return {
 	            delimiters: ['${', '}'],
 	            el: '#' + id,
-                template: `#${template}-template`,
+	            template: '#class-tree-template',
 	            data: {
-					id: id,
+					id: id + '-' + type,
 	            },
 	            mounted: function() {
 	                let self = this;
@@ -237,7 +232,7 @@
             };
         };
 
-        let classEdit = function(id, bid, template, event){
+        var classEdit = function(id, type, pattern, node, pnode){
 
             let _dataset = [];
             let _columns = [];
@@ -277,16 +272,16 @@
                 {"field": "btype", "title": "Btype", "visible": false}
             ];
 
-            if(!_.isEmpty(event.model.node.fieldsObj) && !_.isEmpty(event.model.pnode.fieldsObj)) {
-                let _diff = _.map(_.differenceBy(event.model.node.fieldsObj, event.model.pnode.fieldsObj, 'name'), function (v) {
+            if(!_.isEmpty(node.fieldsObj) && !_.isEmpty(pnode.fieldsObj)) {
+                let _diff = _.map(_.differenceBy(node.fieldsObj, pnode.fieldsObj, 'name'), function (v) {
                     return _.merge(v, {icon: 'child'});
                 });
-                let _pnode = _.map(event.model.pnode.fieldsObj, function (v) {
+                let _pnode = _.map(pnode.fieldsObj, function (v) {
                     return _.merge(v, {icon: 'parent'});
                 });
                 _dataset = _.merge(_diff, _pnode);
             } else {
-                _dataset = _.map(event.model.node.fieldsObj, function (v) {
+                _dataset = _.map(node.fieldsObj, function (v) {
                     return _.merge(v, {icon: 'parent'});
                 });
             }
@@ -295,14 +290,15 @@
 
             _columns = _.uniqBy(_columns, 'field');
 
+	        console.log(23,JSON.stringify(_dataset))
+
             return {
 
                 delimiters: ['${', '}'],
                 el: '#' + id,
-                template: `#${template}-template`,
+                template: '#class-edit-template',
                 data: {
-                    id: id,
-	                bid: bid,
+                    id: id + '-' + type,
                     model: {
                         dataset: _dataset,
                         columns: _columns,
@@ -317,11 +313,12 @@
                             }
                         }
                     },
-                    result: event.model.node
+                    result: node
                 },
                 created: function(){
                     let self = this;
 
+                    //eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
                 },
                 mounted: function() {
                     let self = this;
@@ -334,25 +331,32 @@
                     init: function(){
                         let self = this;
 
+                        //self.model.dataset = self.result.dataset[_.keys(self.result.columns)[0]];//_.map(self.result.data[_.keys(self.result.data)[0]], function(o) { return _.omit(o, ['connect','contain','depend','mshare','vshare','owner','refer','runon']); });
+                        //self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
 
+                    },
+                    setScrollY: function(event){
+                        let self = this;
+
+                        self.model.options.scrollY = event.scrollY;
                     }
                 }
             };
         };
 
-        let queryConsole = function(id, bid, template, event){
+        var queryConsole = function(id, type, pattern, node, pnode){
 
             let _readOnly = false;
             let _diff = null;
 
-            if(!_.isEmpty(event.model.pnode)){
-                if(event.model.node.fieldsObj && event.model.pnode.fieldsObj) {
-                    _diff = _.differenceBy(event.model.node.fieldsObj, event.model.pnode.fieldsObj, 'name');
-                    event.model.node["fieldsObj"] = _.uniqBy(_diff,'name');
+            if(!_.isEmpty(pnode)){
+                if(node.fieldsObj && pnode.fieldsObj) {
+                    _diff = _.differenceBy(node.fieldsObj, pnode.fieldsObj, 'name');
+                    node["fieldsObj"] = _.uniqBy(_diff,'name');
                 }
 	        }
 
-            if(event.model.pattern === 'ddl') {
+            if(pattern === 'ddl') {
                 _readOnly = true;
             }
 
@@ -360,10 +364,9 @@
 
                 delimiters: ['${', '}'],
                 el: '#' + id,
-                template: `#query-console-template`,
+                template: '#console-template',
                 data: {
-                    id: id,
-                    bid: bid,
+                    id: id + '-' + type,
                     model: {
                         oldInput: "",
                         newInput: "",
@@ -390,9 +393,7 @@
                     init: function(){
                         let self = this;
 
-                        if(_.isEmpty(event.model.node)) return false;
-
-                        let colms = _.without(event.model.node.fields,"_tokens") || event.model.node.fields;
+                        let colms = _.without(node.fields,"_tokens") || node.fields;
 
                         let cls = "";
                         if(_.isEmpty(colms)){
@@ -400,30 +401,30 @@
                         } else {
                             cls = colms.join(",");
                         }
-                        let mql = "";
+                        let mql = null;
 
-                        if(event.model.pattern === 'data') {
-                            mql = `SELECT\n\t ${cls} \nFROM\n\t ${event.model.node.name} limit 50`;
-                        } else if(event.model.pattern === 'select') {
-                            mql = "SELECT\n\t " + cls + "\nFROM\n\t " + event.model.node.name;
-                        } else if(event.model.pattern === 'insert') {
-                            mql = "INSERT INTO " + event.model.node.name + "\n" + _.map(event.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
-                        } else if(event.model.pattern === 'update') {
-                            mql = "UPDATE " + event.model.node.name + "\nSET " + _.map(event.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
-                        } else if(event.model.pattern === 'delete') {
-                            mql = "DELETE\n\t " + cls + "\nFROM\n\t " + event.model.node.name;
-                        } else if(event.model.pattern === 'ddl') {
+                        if(pattern === 'data') {
+                            mql = `SELECT\n\t ${cls} \nFROM\n\t ${node.name} limit 50`;
+                        } else if(pattern === 'select') {
+                            mql = "SELECT\n\t " + cls + "\nFROM\n\t " + node.name;
+                        } else if(pattern === 'insert') {
+                            mql = "INSERT INTO " + node.name + "\n" + _.map(node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
+                        } else if(pattern === 'update') {
+                            mql = "UPDATE " + node.name + "\nSET " + _.map(node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
+                        } else if(pattern === 'delete') {
+                            mql = "DELETE\n\t " + cls + "\nFROM\n\t " + node.name;
+                        } else if(pattern === 'ddl') {
 
-	                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + event.model.node.name + " (\n\t" + _.map(event.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(event.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + event.model.node.keys.join(",") + ")\n);";
+	                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + node.name + " (\n\t" + _.map(node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + node.keys.join(",") + ")\n);";
 
                             _.forEach(self.keys,function(v){
 
 								if(_.includes(v,'time')) {
-                                    mql += `\n\n#${_.startCase(v)}\n${v}=${moment(event.model.node[v]).format("LLL")}`;
+                                    mql += `\n\n#${_.startCase(v)}\n${v}=${moment(node[v]).format("LLL")}`;
                                     return;
 								}
 
-                                let _value = event.model.node[v];
+                                let _value = node[v];
 
                                 if(_value === 1){
                                     _value = true;
@@ -442,13 +443,13 @@
                                 mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                             })
 
-			            } else if(event.model.pattern === 'create-class') {
+			            } else if(pattern === 'create-class') {
 			                let _rand = _.now();
-                            mql = `CREATE CLASS IF NOT EXISTS  ${event.model.node.name}/new_${_rand}();`;
+                            mql = `CREATE CLASS IF NOT EXISTS  ${node.name}/new_${_rand}();`;
                             mql = _.replace(mql, "//", "/");
-			            } else if(event.model.pattern === 'drop-class') {
-                            mql = "DROP CLASS " + event.model.node.name + ";";
-                        } else if(event.model.pattern === 'alter') {
+			            } else if(pattern === 'drop-class') {
+                            mql = "DROP CLASS " + node.name + ";";
+                        } else if(pattern === 'alter') {
                             mql = `#设置类属性`;
 
                             let _keys = _.remove(self.keys, function(v){
@@ -456,7 +457,7 @@
 			                            })
 
                             _.forEach(_keys,function(v){
-                                let _value = event.model.node[v];
+                                let _value = node[v];
 
                                 if(_value === 1){
                                     _value = true;
@@ -473,34 +474,34 @@
                                 }
 
                                 if(_.includes(['alias','keymethod','remedy'],v)){
-                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${event.model.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                                 } else {
-                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${event.model.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                    mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                                 }
                             })
-                        } else if(event.model.pattern === 'alter-add-column') {
-	                        mql = "ALTER CLASS " + event.model.node.name + " ADD COLUMN column_name type;\n\n";
-                        } else if(event.model.pattern === 'alter-drop-column') {
-                            mql = "ALTER CLASS " + event.model.node.name + " DROP COLUMN column_name;\n\n";
-                        } else if(event.model.pattern === 'alter-add-index') {
-                            mql = "ALTER CLASS " + event.model.node.name + " ADD INDEX index_name type;\n\n";
-                        } else if(event.model.pattern === 'alter-drop-index') {
-                            mql = "ALTER CLASS " + event.model.node.name + " DROP INDEX index_name type;\n\n";
-                        } else if(event.model.pattern === 'alter-add-key') {
-	                        mql = "ALTER CLASS " + event.model.node.name + " ADD KEY key_name;\n\n";
-                        } else if(event.model.pattern === 'alter-drop-key') {
-                            mql = "ALTER CLASS " + event.model.node.name + " DROP KEY key_name;\n\n";
-                        } else if(event.model.pattern === 'g') {  // edge  query
-	                        mql = `g.V(" ").In("${event.model.node.title}").All();`;
-                        } else if(event.model.pattern === 'create-edge-type') {  // edge  new edge type
+                        } else if(pattern === 'alter-add-column') {
+	                        mql = "ALTER CLASS " + node.name + " ADD COLUMN column_name type;\n\n";
+                        } else if(pattern === 'alter-drop-column') {
+                            mql = "ALTER CLASS " + node.name + " DROP COLUMN column_name;\n\n";
+                        } else if(pattern === 'alter-add-index') {
+                            mql = "ALTER CLASS " + node.name + " ADD INDEX index_name type;\n\n";
+                        } else if(pattern === 'alter-drop-index') {
+                            mql = "ALTER CLASS " + node.name + " DROP INDEX index_name type;\n\n";
+                        } else if(pattern === 'alter-add-key') {
+	                        mql = "ALTER CLASS " + node.name + " ADD KEY key_name;\n\n";
+                        } else if(pattern === 'alter-drop-key') {
+                            mql = "ALTER CLASS " + node.name + " DROP KEY key_name;\n\n";
+                        } else if(pattern === 'g') {  // edge  query
+	                        mql = `g.V(" ").In("${node.title}").All();`;
+                        } else if(pattern === 'create-edge-type') {  // edge  new edge type
                             mql = `CREATE EDGE TYPE  type_name type_remedy;`;
-                        } else if(event.model.pattern === 'drop-edge-type') {  // edge drop edge type
-                            mql = `DROP EDGE TYPE ${event.model.node.title};`;
-                        } else if(event.model.pattern === 'edge-insert') {  // edge  create
-                            mql = `INSERT INTO class_name id="",${event.model.node.title}=[""];`;
-                        } else if(event.model.pattern === 'edge-update') {  // edge  update
-                            mql = `UPDATE class_name SET ${event.model.node.title}='' WHERE ID='';`;
-                        } else if(event.model.pattern === 'edge-g') {  // edge query all
+                        } else if(pattern === 'drop-edge-type') {  // edge drop edge type
+                            mql = `DROP EDGE TYPE ${node.title};`;
+                        } else if(pattern === 'edge-insert') {  // edge  create
+                            mql = `INSERT INTO class_name id="",${node.title}=[""];`;
+                        } else if(pattern === 'edge-update') {  // edge  update
+                            mql = `UPDATE class_name SET ${node.title}='' WHERE ID='';`;
+                        } else if(pattern === 'edge-g') {  // edge query all
                             mql = GLOBAL_CONFIG.global.gremlin;
                         }
 
@@ -521,7 +522,7 @@
             };
         };
 
-        let outPut = function(id, bid, node){
+        let outPut = function(id, type, pattern, node){
 
             let _dataset = [];
             let _columns = [];
@@ -530,22 +531,20 @@
             if(!_.isEmpty(node)) {
                 _dataset = node.data[_.keys(node.columns)[0]];
                 _columns = node.columns[_.keys(node.columns)[0]];
+                _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
+				                        return meta.row + meta.settings._iDisplayStart + 1;
+				                    }
+				                });
                 _node = node;
             }
-
-            _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
-                    return meta.row + meta.settings._iDisplayStart + 1;
-                }
-            });
 
             return {
 
                 delimiters: ['${', '}'],
                 el: '#' + id,
-                template: `#output-console-template`,
+                template: '#output-template',
                 data: {
-					id: id,
-                    bid: bid,
+					id: id + '-' + type,
 	                model: {
                         dataset: _dataset,
                         columns: _columns,
@@ -561,9 +560,6 @@
                     let self = this;
 
                     eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
-
-                    eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                    eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
 	            },
                 mounted: function() {
                     let self = this;
@@ -576,20 +572,10 @@
 					init: function(){
 					    let self = this;
 
-                        if(!_.isEmpty(node)) {
-                            self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
-                            self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
-                        }
+					    self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
+                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
 
 					},
-                    setData: function(event){
-                        let self = this;
-
-	                    self.model.dataset = event.data[_.keys(event.columns)[0]];
-                        self.model.columns = event.columns[_.keys(event.columns)[0]];
-                        self.result = event;
-
-                    },
                     setScrollY: function(event){
 					    let self = this;
 
@@ -599,7 +585,8 @@
             };
         };
 
-        let graph = function(id, bid, type, pattern, node){
+
+        var graph = function(id, type, pattern, node){
 
 	        let _data = {nodes:[], edges:[]};
 
@@ -618,7 +605,6 @@
                 template: '#graph-template',
                 data: {
                     id: id + '-' + type,
-                    bid: bid,
                     model: _data,
                 },
                 mounted: function () {
@@ -638,16 +624,15 @@
             };
         };
 
-        let logConsole = function(id, bid, template, model){
+        var logConsole = function(id, type, node){
 
             return {
 
                 delimiters: ['${', '}'],
                 el: '#' + id,
-                template: `#${template}-template`,
+                template: '#log-console-template',
                 data: {
-                    id: id,
-                    bid: bid,
+                    id: id + '-' + type,
                     model: [],
 	                theme: 'light',
 	                debug: {
@@ -901,7 +886,8 @@
             };
         };
 
-        let trigger = function(id, bid, type, pattern, node){
+
+        var trigger = function(id, type, pattern, node){
 
             let _readOnly = false;
             let _node = null;
@@ -916,7 +902,6 @@
                 template: "#trigger-template",
                 data: {
                     id: id + '-' + type,
-                    bid: bid,
                     list: [],
                     selected: []
                 },
@@ -1046,6 +1031,7 @@
             };
         };
 
+
         let appVue = new Vue({
             delimiters: ['${', '}'],
             el: '#app',
@@ -1058,9 +1044,6 @@
                         showCloseIcon: false,
                         selectionEnabled: false,
                         constrainDragToContainer: false
-                    },
-                    dimensions:{
-                        borderWidth:3
                     },
                     content: [{
                         type: 'row',
@@ -1076,68 +1059,65 @@
                                     isClosable: false,
                                     componentState: {
                                         id: 'class-tree',
-                                        type: 'class-tree',
-                                        pattern: null,
-                                        model: { pattern: '', node: null, pnode: null }
+                                        type: 'tree'
                                     }
                                 }]
                             },
-	                        {
-	                            type: 'stack',
-	                            content: [
+                            {
+                                type: 'column',
+                                content:[
                                     {
-                                        type: 'column',
-                                        title: '查询',
+                                        type: 'stack',
                                         content:[{
+                                            id: 'query-console',
                                             type: 'component',
-                                            title: '',
+	                                        height:55,
                                             componentName: 'omdbComponent',
+                                            title: '查询',
                                             componentState: {
-                                                id: `div_query_000000`,
-                                                bid: `batch_000000`,
-	                                            type: 'query-console',
-                                                model: { pattern: '', node: null, pnode: null }
+                                                id: 'query-console',
+                                                type: 'console',
+                                                pattern: 'select'
                                             }
-                                        },
-										{
-                                            type: 'stack',
-                                            activeItemIndex: 1,
-                                            content: [
-											{
-                                                type: 'component',
-                                                title: '日志',
-                                                componentName: 'omdbComponent',
-                                                componentState: {
-                                                    id: `div_log_000000`,
-                                                    bid: `batch_000000`,
-                                                    type: 'log-console',
-                                                    model: null
-                                                }
-                                            },
-											{
-                                                type: 'component',
-                                                title: '结果',
-                                                componentName: 'omdbComponent',
-                                                componentState: {
-                                                    id: `div_output_000000`,
-                                                    bid: `batch_000000`,
-                                                    type: 'output-console',
-                                                    model: null
-                                                }
-                                            }]
                                         }]
-                                    }]
-	                        }
+                                    },
+                                    {
+                                        type: 'stack',
+                                        content:[{
+                                            id: 'log-console',
+                                            type: 'component',
+                                            height:45,
+                                            componentName: 'omdbComponent',
+                                            title:'日志',
+                                            componentState: {
+                                                id: 'log-console',
+                                                type: 'log',
+                                                pattern: ''
+                                            }
+                                        }]
+                                    }
+                                ]
+                            }
                         ]
                     }]
+                },
+                newItemConfig: {
+                    id: null,
+                    title: null,
+                    type: 'component',
+                    componentName: 'omdbComponent',
+                    componentState: {
+                        id: null,
+                        type: null,
+                    }
                 }
 
             },
             created: function(){
                 let self = this;
 
-                eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
-                eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
+                eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addConsole);
+                eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.setQueryResult);
             },
             mounted: function() {
                 let self = this;
@@ -1161,28 +1141,7 @@
 
                     });
 
-                    /*self.layout.on( 'initialised', function(){
-                        var noDropStack = myLayout.root.getItemsById( 'no-drop-target' )[ 0 ];
-                        var originalGetArea = noDropStack._$getArea;
-                        noDropStack._$getArea = function() {
-                            var area = originalGetArea.call( noDropStack );
-                            delete noDropStack._contentAreaDimensions.header;
-                            return area;
-                        };
-                    });
-*/
                     self.layout.on( 'stackCreated', function( stack ){
-                        //console.log('stack',stack)
-
-                    });
-
-                    self.layout.on( 'itemCreated', function( item ){
-                        //console.log('item',item.config)
-
-                    });
-
-                    self.layout.on( 'columnCreated', function( column ){
-                        //console.log('column',column)
 
                     });
 
@@ -1190,43 +1149,54 @@
 
                         let _state = component.config;
                         let _id = _state.componentState.id;
-                        let _bid = _state.componentState.bid;
-
-                        let html = `<div id="${_id}"></div>`;
+                        let _pattern = _state.componentState.pattern || '';
+                        let _node = _state.componentState.node;
+                        let _pnode = _state.componentState.pnode;
+                        let html = `<div id="` + _id + `"></div>`;
                         let _comp = null;
 
-                        component.container.getElement().html(html);
 
-                        if(_state.componentState.type === 'class-tree'){
+                        if(!_.isEmpty(_state.componentState.template)){
+                            // Only Show Info
+                            html = _state.componentState.template;
+                            component.container.getElement().html(html);
 
-                            _comp = classTree(_id, _bid, _state.componentState.type, _state.componentState);
+                            return false;
+                        } else {
 
-                        } else if(_state.componentState.type === 'class-edit'){
-
-                            _comp = classEdit(_id, _bid, _state.componentState.type, _state.componentState);
-
-                        } else if(_state.componentState.type === 'query-console'){
-
-                            _comp = queryConsole(_id, _bid, _state.componentState.type, _state.componentState);
-
-                        } else if(_state.componentState.type === 'output-console'){
-
-                            _comp = outPut(_id, _bid, _state.componentState.model);
+                            // Add Template
+                            component.container.getElement().html(html);
+                        }
 
 
-                        } else if(_state.componentState.type === 'graph'){
+                        if(_state.componentState.type == 'tree'){
 
-                            _comp = graph(_id, _bid, _state.componentState.type, _state.componentState);
-
-
-                        } else if(_state.componentState.type === 'log-console'){
-
-                            _comp = logConsole(_id, _bid, _state.componentState.type, _state.componentState);
+                            _comp = classTree(_id, _state.componentState.type, _pattern, _node);
 
 
-                        } else if(_state.componentState.type === 'trigger'){
+                        } else if(_state.componentState.type == 'classEdit'){
 
-                            _comp = trigger(_id, _bid, _state.componentState.type, _state.componentState);
+                            _comp = classEdit(_id, _state.componentState.type, _pattern, _node, _pnode);
+
+                        } else if(_state.componentState.type == 'console'){
+
+                            _comp = queryConsole(_id, _state.componentState.type, _pattern, _node, _pnode);
+
+                        } else if(_state.componentState.type == 'output'){
+
+                            _comp = outPut(_id, _state.componentState.type, _pattern, _node);
+
+                        } else if(_state.componentState.type == 'graph'){
+
+                            _comp = graph(_id, _state.componentState.type, _pattern, _node);
+
+                        } else if(_state.componentState.type == 'log'){
+
+                            _comp = logConsole(_id, _state.componentState.type, _pattern, _node);
+
+                        } else if(_state.componentState.type == 'trigger'){
+
+                            _comp = trigger(_id, _state.componentState.type, _pattern, _node);
 
                         }
 
@@ -1235,28 +1205,24 @@
                         });
 
 
-                        /*component.container.on('resize',function() {
+                        component.container.on('resize',function() {
 
                             let _scrollBody = component.container.height;//_.ceil(pxTOvh(component.container.height)*0.52);
                             let _scrollY = _scrollBody;
 
                             eventHub.$emit("LAYOUT-RESIZE-TRIGGER-EVENT", {scrollY:_scrollY, scrollBody: _scrollBody});
-                        });*/
-
-
+                        });
                     });
 
                     //
                     //	Save state in local storage
                     //
-                    /*self.layout.on('stateChanged', function () {
+                    self.layout.on('stateChanged', function () {
                         var state = JSON.stringify(self.layout.toConfig());
                         localStorage.setItem('savedState', state);
-                    });*/
-
+                    });
                     //  Initialize GL
                     self.layout.init();
-
                     //  Update GL on window resize
                     window.addEventListener('resize', function () { self.layout.updateSize(); });
 
@@ -1265,81 +1231,88 @@
                     localStorage.removeItem('savedState');
                     window.location.reload(true);
                 },
-                addStackFromTree: function( event ) {
+                addConsole: function( event ) {
                     let self = this;
+                    let _id = 'ID'+objectHash.sha1(event.type + event.pattern + JSON.stringify(event.node));
 
-                    let _bid = `batch_${_.now()}`;
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        title: event.node.name,
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+                            pattern: event.pattern,
+	                        node: event.node,
+	                        pnode: event.pnode || null
+                        }
+	                });
 
-                    let newItemConfig = {
-                        type: 'column',
-                        title: event.title,
-                        content:[{
-                            type: 'component',
-                            title: event.title,
-                            componentName: 'omdbComponent',
-                            componentState: {
-                                id: `div_query_${_.now()}`,
-	                            bid: _bid,
-	                            type: event.type,
-	                            model: event.model
-                            }
-                        },{
-                            type: 'stack',
-                            activeItemIndex: 1,
-                            content: [{
-                                type: 'component',
-                                title: '日志',
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_log_${_.now()}`,
-                                    bid: _bid,
-                                    type: 'log-console',
-                                    model: null
-                                }
-                            },{
-                                type: 'component',
-                                title: '结果',
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_output_${_.now()}`,
-                                    bid: _bid,
-                                    type: 'output-console',
-                                    model: null
-                                }
-                            }]
-                        }]
-                    };
-
-                    /*if(_.size($(`#id_${v.name}_${v.type}`)) > 0 ){
+                    if(_.size($("#"+_id+'-' + event.type)) > 0){
                         return false;
-                    }*/
-
-                    self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
-
-                },
-                addStackFromQuery: function( event ) {
-                    let self = this;
-
-                    let _bid = `batch_${_.now()}`;
-
-                    if(event.type == "table-new"){
-                        let newItemConfig =  {
-                            type: 'component',
-                            title: `结果_${moment().format("LT")}`,
-                            componentName: 'omdbComponent',
-                            componentState: {
-                                id: `div_output_${_.now()}`,
-                                bid: event.bid,
-                                type: 'output-console',
-                                model: null
-                            }
-                        };
-                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
                     }
 
-                    _.delay(function(){
-                        eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                    },500)
+                    /*if( self.layout.selectedItem === null ) {
+			            self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
+			        } else {
+			            self.layout.selectedItem.addChild(self.newItemConfig);
+			        }*/
+
+                    self.layout.root.contentItems[0].contentItems[1].contentItems[0].addChild(self.newItemConfig);
+
+                },
+                addOutput: function(event){
+                    let self = this;
+                    let _id = 'ID'+objectHash.sha1(event.type + event.pattern + JSON.stringify(event.node));
+
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        title: event.type + '-' + moment().format("LT"),
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+                            pattern: event.pattern,
+                            node: event.node
+                        }
+                    });
+
+                    if(_.size($("#"+_id+'-' + event.type)) > 0){
+                        return false;
+                    }
+
+                    /*if( self.layout.selectedItem === null ) {
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                    } else {
+                        self.layout.selectedItem.addChild(self.newItemConfig);
+                    }*/
+
+                    self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                },
+	            updateOutput: function(event){
+                    let self = this;
+                    let id = 'output-console';
+                    let _id = 'ID'+objectHash.sha1(id);
+
+                    self.newItemConfig = _.extend(self.newItemConfig, {
+                        id: id,
+                        title: '结果',
+                        componentState: {
+                            id: _id,
+                            type: event.type,
+                            pattern: event.pattern,
+                            node: event.node
+                        }
+                    });
+
+                    /*if( self.layout.selectedItem === null ) {
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
+                    } else {
+                        self.layout.selectedItem.addChild(self.newItemConfig);
+                    }*/
+
+                    if(!_.isEmpty(self.layout.root.contentItems[0].contentItems[1].contentItems[1].getItemsById(id))){
+					    let _item = self.layout.root.contentItems[0].contentItems[1].contentItems[1].getItemsById(id)[0];
+                        self.layout.root.contentItems[0].contentItems[1].contentItems[1].removeChild(_item, false);
+					}
+
+		            self.layout.root.contentItems[0].contentItems[1].contentItems[1].addChild(self.newItemConfig);
 
                 },
                 setQueryResult: function(event){
@@ -1347,10 +1320,9 @@
 
 
                     if(event.type === 'table-update'){
-                        let _comp = outPut(event.id, event.bid,event);
-
-                        setTimeout(function(){
-                            new Vue(_comp);
+                        appVue.updateOutput({
+                            type: 'output',
+                            node: event
                         });
                     } else if(event.type === 'table-new'){
                         appVue.addOutput({
@@ -1368,7 +1340,7 @@
                             node: event
                         });
                     } else if(event.type === 'trigger'){
-                        appVue.addStackFromTree({
+                        appVue.addConsole({
                             type: 'trigger',
                             node: event
                         });
@@ -1381,21 +1353,19 @@
 </script>
 
 
-
-
 <script type="text/x-template"  id="class-tree-template">
-	<omdb-class-tree-component :id="id"></omdb-class-tree-component>
+	<vue-object-tree-component :id="id"></vue-object-tree-component>
 </script>
 
-<script type="text/x-template"  id="query-console-template">
-	<omdb-editor-component :id="id" :bid="bid"
+<script type="text/x-template"  id="console-template">
+	<vue-editor-component :id="id"
 	                      :model="model"
 	                      showToolsBar="true"
-	                      showStatusBar="true"></omdb-editor-component>
+	                      showStatusBar="true"></vue-editor-component>
 </script>
 
 <script type="text/x-template"  id="class-edit-template">
-	<omdb-class-datatables-component :id="id" :bid="bid"
+	<omdb-class-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
@@ -1403,8 +1373,8 @@
 	                               :result="result"></omdb-class-datatables-component>
 </script>
 
-<script type="text/x-template"  id="output-console-template">
-	<omdb-output-datatables-component :id="id" :bid="bid"
+<script type="text/x-template"  id="output-template">
+	<omdb-output-datatables-component :id="id"
 	                               :dataset="model.dataset"
 	                               :columns="model.columns"
 	                               :options="model.options"
@@ -1412,9 +1382,9 @@
 	                               :result="result"></omdb-output-datatables-component>
 </script>
 
+
 <script type="text/x-template"  id="graph-template">
-	<vue-graph-component :id="id" :bid="bid"
-	                     :graphData="model"></vue-graph-component>
+	<vue-graph-component :id="id" :graphData="model"></vue-graph-component>
 </script>
 
 <script type="text/x-template" id="log-console-template">
