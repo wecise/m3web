@@ -175,10 +175,8 @@
 		color: #666666;
 	}
 
-	.sidebar,
-	.sidebar-bg,
-	.sidebar-toggle{
-		display:none;
+	.content {
+		padding: 0px 0px;
 	}
 
 
@@ -189,13 +187,16 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-graph-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-graph-component.html"></link>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
 
 <!-- Golden Layout container -->
-<div id="app"></div>
+<div id="content" class="content">
+	<div id="app"></div>
+</div>
 
 <script>
 
@@ -209,8 +210,8 @@
 				        "omdb-class-datatables-component",
 				        "omdb-class-tree-component",
 				        "omdb-editor-component",
+                        "omdb-graph-component",
 	                    "vue-trigger-editor-component",
-	                    "vue-graph-component",
                         "vue-ai-robot-component"], function() {
 
         let classTree = function(id, bid, template, event){
@@ -525,6 +526,8 @@
 
         let outPut = function(id, bid, node){
 
+            //if(_.isEmpty(node)) return false;
+
             let _dataset = [];
             let _columns = [];
             let _node = {};
@@ -601,12 +604,12 @@
             };
         };
 
-        let graph = function(id, bid, type, pattern, node){
+        let graph = function(id, bid, node){
 
 	        let _data = {nodes:[], edges:[]};
 
-            if(!_.isEmpty(node.data)){
-                _data.nodes = node.data;
+            if(!_.isEmpty(node)){
+                _data.nodes = node.nodes;
             };
 
             if(!_.isEmpty(node.edges)){
@@ -619,10 +622,15 @@
                 el: '#' + id,
                 template: '#graph-template',
                 data: {
-                    id: id + '-' + type,
+                    id: id,
                     bid: bid,
                     model: _data,
                 },
+	            created: function(){
+                    let self = this;
+
+                    //eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`, self.setData);
+	            },
                 mounted: function () {
                     let self = this;
 
@@ -635,7 +643,12 @@
                         let self = this;
 
 
-                    }
+                    },
+	                setData: function(event){
+                        let self = this;
+
+                        self.model = event.data;
+	                }
                 }
             };
         };
@@ -1218,7 +1231,7 @@
 
                         } else if(_state.componentState.type === 'graph'){
 
-                            _comp = graph(_id, _bid, _state.componentState.type, _state.componentState);
+                            _comp = graph(_id, _bid, _state.componentState.model);
 
 
                         } else if(_state.componentState.type === 'log-console'){
@@ -1324,7 +1337,7 @@
 
                     let _bid = `batch_${_.now()}`;
 
-                    if(event.type == "table-new"){
+                    if(event.type == "table-update"){
                         let newItemConfig =  {
                             type: 'component',
                             title: `结果_${moment().format("LT")}`,
@@ -1336,7 +1349,27 @@
                                 model: null
                             }
                         };
+                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
                         self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                    }
+
+                    if(event.type == "graph-update"){
+
+                        let newItemConfig =  {
+                            type: 'component',
+                            title: `结果_${moment().format("LT")}`,
+                            componentName: 'omdbComponent',
+                            componentState: {
+                                id: `div_output_${_.now()}`,
+                                bid: event.bid,
+                                type: 'graph',
+                                model: event.data
+                            }
+                        };
+
+                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+
                     }
 
                     _.delay(function(){
@@ -1344,7 +1377,7 @@
                     },500)
 
                 },
-                setQueryResult: function(event){
+                /*setQueryResult: function(event){
                     let self = this;
 
 
@@ -1375,7 +1408,7 @@
                             node: event
                         });
                     }
-                }
+                }*/
             }
         });
 
@@ -1415,8 +1448,8 @@
 </script>
 
 <script type="text/x-template"  id="graph-template">
-	<vue-graph-component :id="id" :bid="bid"
-	                     :graphData="model"></vue-graph-component>
+	<omdb-graph-component :id="id" :bid="bid"
+	                     :graphData="model"></omdb-graph-component>
 </script>
 
 <script type="text/x-template" id="log-console-template">

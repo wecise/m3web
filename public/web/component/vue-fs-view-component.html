@@ -295,11 +295,10 @@
 	            let _url = val.replace(/\/\//g,'/');
 
                 // system || extend || ...
-                if(_.startsWith(_url,'/extend') || _.isEqual(_url,'/')){
+                if(_.startsWith(_url,'/extend') || _.startsWith(_url,'/script') || _.isEqual(_url,'/')){
                     _url += '?issys=true';
                 }
 
-                console.log(2323,_url)
                 $('#file-upload').fileupload({url: `/fs${_url}`});
 
             }
@@ -309,7 +308,7 @@
                 let self = this;
                 let _tmp = self.rootPath.split("/");
 
-                return _tmp;
+                return _tmp;//_.remove(_tmp,null);
             }
         },
 		filters: {
@@ -382,23 +381,23 @@
                             items: {
 
                                 "download": {
-                                    name: "下载", icon: "fa-download", callback: function (key, opt) {
+                                    name: "下载", icon: "fas fa-download", callback: function (key, opt) {
                                         self.downloadIt(_item,true);
                                     }
                                 },
                                 "sep3": "---------","delete": {
-                                    name: "删除", icon: "fa-trash", callback: function (key, opt) {
+                                    name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                         self.deleteIt(_item,true);
                                     }
                                 },
                                 "sep3": "---------",
                                 "copy": {
-                                    name: "复制", icon: "fa-copy", callback: function (key, opt) {
+                                    name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
                                         self.copyIt(_item);
                                     }
                                 },
                                 "paste": {
-                                    name: "粘贴", icon: "fa-paste", callback: function (key, opt) {
+                                    name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
                                         self.pasteIt();
 
                                     }
@@ -406,7 +405,7 @@
                                 "sep4": "---------",
 
                                 "info": {
-                                    name: "属性", icon: "fa-info", callback: function (key, opt) {
+                                    name: "属性", icon: "fas fa-info", callback: function (key, opt) {
                                         self.info(_item);
                                     }
                                 }
@@ -461,7 +460,6 @@
             open: function(item, path){
                 let self = this;
 
-                console.log(JSON.stringify(item), path)
 
 	            if(_.isNull(item) || typeof(item) === 'string' || item.ftype === 'dir'){
                     self.rootPath = path;
@@ -494,7 +492,7 @@
 
                         let _wnd = newWindow('fsapp', item.name, contents, null);
 
-                    } else if(_.includes(['pptx','ppt','txt','html'], item.ftype)) {
+                    } else if(_.includes(['pptx','ppt','txt','html','js'], item.ftype)) {
 
                         window.open(`/fs${path}?type=download`, "_blank");
 

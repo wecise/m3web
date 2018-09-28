@@ -234,11 +234,43 @@ let sideMenu = {
 * */
 var toggleSideBar = function(){
 
-    var a = "page-sidebar-minified",
-        t = "#page-container";
-    $(t).hasClass(a) ? ($(t).removeClass(a), $(t).hasClass("page-sidebar-fixed") && (generateSlimScroll($('#sidebar [data-scrollbar="true"]')), $("#sidebar [data-scrollbar=true]").trigger("mouseover"), $("#sidebar [data-scrollbar=true]").stop(), $("#sidebar [data-scrollbar=true]").css("margin-top", "0"))) : ($(t).addClass(a), /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? ($('#sidebar [data-scrollbar="true"]').css("margin-top", "0"), $('#sidebar [data-scrollbar="true"]').css("overflow", "visible")) : ($(t).hasClass("page-sidebar-fixed") && ($('#sidebar [data-scrollbar="true"]').slimScroll({
-        destroy: !0
-    }), $('#sidebar [data-scrollbar="true"]').removeAttr("style")), $("#sidebar [data-scrollbar=true]").trigger("mouseover"))), $(window).trigger("resize")
+    let page = getPage();
+
+    let index = 1;
+
+    if(localStorage.getItem('PAGE_SIDEBAR_STATUS')){
+        index = _.last(localStorage.getItem('PAGE_SIDEBAR_STATUS').split("_"));
+    }
+
+    if(index == 0){
+        $("#sidebar").css('display','none');
+        $("#sidebar-bg").css('display','none');
+
+        $("#content").css("margin-left","0px");
+
+        index = 1;
+
+    } else {
+        $("#sidebar").css('display','');
+        $("#sidebar-bg").css('display','');
+
+        var a = "page-sidebar-minified",
+            t = "#page-container";
+        $(t).hasClass(a) ? ($(t).removeClass(a), $(t).hasClass("page-sidebar-fixed") && (generateSlimScroll($('#sidebar [data-scrollbar="true"]')), $("#sidebar [data-scrollbar=true]").trigger("mouseover"), $("#sidebar [data-scrollbar=true]").stop(), $("#sidebar [data-scrollbar=true]").css("margin-top", "0"))) : ($(t).addClass(a), /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? ($('#sidebar [data-scrollbar="true"]').css("margin-top", "0"), $('#sidebar [data-scrollbar="true"]').css("overflow", "visible")) : ($(t).hasClass("page-sidebar-fixed") && ($('#sidebar [data-scrollbar="true"]').slimScroll({
+            destroy: !0
+        }), $('#sidebar [data-scrollbar="true"]').removeAttr("style")), $("#sidebar [data-scrollbar=true]").trigger("mouseover"))), $(window).trigger("resize")
+
+        if($(t).hasClass(a)){
+            $("#content").css("margin-left","60px");
+        } else {
+            $("#content").css("margin-left","220px");
+        }
+
+        index = 0;
+
+    }
+
+    localStorage.setItem('PAGE_SIDEBAR_STATUS',`${page}_${index}`);
 
 };
 
@@ -419,13 +451,6 @@ var initPlugIn = function () {
     // Theme
     let _theme = localStorage.getItem("MATRIX_THEME");
     toggleTheme(_theme);
-
-    // Robot
-    $(".ai.ai-robot").removeClass("ai-robot");
-
-    if(_.includes(['home',''],getPage())){
-        $(".ai").addClass("ai-robot");
-    }
 
     _.delay(function(){
         new Vue(sideMenu);

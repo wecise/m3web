@@ -10,7 +10,7 @@ var SqlHighlightRules = function() {
         "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|" +
         "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant|" +
-        "alter|class|add|column|indexes|key|/|matrix|alias|autosearch|child|cid|fields|fieldsObj|keymethod|keymode|keys|loption|mtime|name|pid|remedy|subclass|tags|ttl|vtimebase|largepartition|edge|into"
+        "alter|class|add|column|indexes|key|/|matrix|alias|autosearch|child|cid|fields|fieldsObj|keymethod|keymode|keys|loption|mtime|name|pid|remedy|subclass|tags|ttl|vtimebase|largepartition|edge|into|match"
     );
 
     var builtinConstants = (

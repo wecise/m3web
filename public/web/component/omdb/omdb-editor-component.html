@@ -62,6 +62,9 @@
 			height: 100%;
 		}
 
+		#statusBar {
+
+		}
 
 		
 	</style>
@@ -72,12 +75,15 @@
 		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary cache" @click="cacheToLocal" title="缓存"><i class="fa fa-file-upload"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromLocal" title="加载"><i class="fa fa-file-download"></i></a>
+
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fa fa-paste"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-check"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行"><i class="fa fa-play"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>
+					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fa fa-forward"></i></a>
 				</div>
 			</div>
@@ -119,16 +125,6 @@
                     self.editor.setValue(val);
                 },
                 deep:true
-            },
-            result: {
-                handler:function(val,oldVal){
-                    let self = this;
-
-                    if(val != oldVal) {
-                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                    }
-                },
-                deep:true
             }
 
         },
@@ -148,7 +144,7 @@
                     autoScrollEditorIntoView: true,
                     enableBasicAutocompletion: true,
                     enableSnippets: true,
-                    enableLiveAutocompletion: false
+                    enableLiveAutocompletion: true
                 });
                 //self.editor.$blockScrolling = Infinity;
                 self.editor.setShowPrintMargin(self.model.printMargin);
@@ -327,16 +323,20 @@
                 let _columns = columnsParse(_list.meta);
 
                 // Graph
-                if(_list.meta.type === 'gremlin'){
+                if(_list.meta.type === 'graph'){
 
-                    self.result = {type: 'graph-update', data: _data[0].graph};
+                    self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
+
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
 
                     return false;
                 }
 
+
+
                 self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
 
-
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
             },
@@ -413,15 +413,17 @@
 
 
                 // Graph
-                if(_list.meta.type === 'gremlin'){
+                if(_list.meta.type === 'graph'){
 
-                    self.result = {type: 'graph-new', data: _data[0].graph};
+                    self.result = {id:self.id, bid: self.bid, type: 'graph-new', data: _data[0].graph};
+
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
 
                     return false;
                 }
 
                 self.result = {id:self.id, bid: self.bid, type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
-
+                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
             },
@@ -437,6 +439,9 @@
                 if( self.editor.getSelectedText().length > 0 ) {
                     _mql = self.editor.getSelectedText();
                 }
+
+                //CAHCE MQL
+                self.cacheToLocal();
 
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
@@ -459,6 +464,25 @@
                 let _url = fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
 
                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download" target="_blank">点击查看</a>`);
+            },
+            cacheToLocal: function(){
+                let self = this;
+
+                let mql = self.editor.getValue();
+
+                localStorage.setItem(`MQL-CACHE-${self.id}`,mql);
+            },
+            loadFromLocal: function(){
+                let self = this;
+
+                let mql = null;
+
+                if(!_.isEmpty(localStorage.getItem(`MQL-CACHE-${self.id}`))){
+                    mql = localStorage.getItem(`MQL-CACHE-${self.id}`);
+                };
+
+                self.editor.setValue(mql);
+
             }
         }
     

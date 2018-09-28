@@ -26,7 +26,7 @@ var fsCheck = function(path, name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=check`;
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _url += '&issys=true';
     }
 
@@ -72,7 +72,7 @@ var fsNew = function(ftype, path, name, content, attr){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -131,7 +131,7 @@ var fsList = function(path){
     let _issys = false;
     let parent = path.replace(/\/\//g,'/');
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _issys = true;
     }
 
@@ -180,7 +180,7 @@ var fsDelete = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -232,7 +232,7 @@ var fsContent = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -277,10 +277,17 @@ var fsRename = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/fs/extend') || _.isEqual(dstpath,'/')){
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(parent,'/script') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
+    // Root
+    srcpath = srcpath.replace(/\/\//g,'/');
+    dstpath = dstpath.replace(/\/\//g,'/');
+
+    if(_.lastIndexOf(srcpath,"/") === 0){
+        _issys = true;
+    }
 
     jQuery.ajax({
         url: '/fs/rename',
@@ -330,7 +337,7 @@ var fsCopy = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/fs/extend') || _.isEqual(dstpath,'/')){
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(parent,'/script') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
@@ -383,7 +390,7 @@ var fsUpdateAttr = function(path, name, attr) {
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=attr`;
 
-    if(_.startsWith(parent,'/extend') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
         _url += '&issys=true';
     }
 

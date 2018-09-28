@@ -119,8 +119,7 @@
 
         $(function() {
         
-            $(".current-active-item").html(`<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}"><i class="fa fa-cogs"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-            
+
             Vue.component('bootstrap-table', {
                 template: `<table :id="id" class="table table-striped" data-locale="zh-CN"></table>`,
                 props:{
@@ -1936,24 +1935,24 @@
                     remove: function(event) {
                         let self = this;
 
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: `#/matrix/portal/tools:| name=` + event + `| delete`,
-                                flag: false
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
+                        swal({
+                            title: '',
+                            text: "确定要删除？",
+                            type: "info",
+                            showCancelButton: true,
+                            closeOnConfirm: false,
+                            cancelButtonText: "取消",
+                            confirmButtonText: "确定",
+                            confirmButtonColor: "#ff0000"
+                        }).then((result) => {
+                            if (result.value) {
+                                let _mql = `delete from /matrix/portal/tools where name='${event}'`;
+                                let _rtn = fetchDataByMql(_mql);
+
                                 self.init();
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
                             }
                         })
+
                     },
                     resetForm: function(){
                         let self = this;
@@ -3077,7 +3076,7 @@
                                                     </h4>
                                                 </div>
                                                 <div class="stats-link">
-                                                    <a href="#" @click="remove(item.name)" class="btn btn-xs"><i class="fa fa-remove fa-fw" style="color:#efefef;"></i></a>    
+                                                    <a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
                                                 </div>
                                             </div>
                                             <div class="collapse block__list_collapse" :id="'collapse'+item.name">

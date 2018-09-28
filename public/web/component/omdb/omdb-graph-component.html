@@ -1,13 +1,13 @@
 <code>
 
-	<style>
+	<style scoped>
 		/*----------  style  ----------*/
 		#outlineContainer {
 			z-index:1;
 			position:absolute;
 			overflow:hidden;
-			top:0px;
-			left:5px;
+			top:40px;
+			right:75px;
 			width: 80px;
 			height:80px;
 			background:transparent;
@@ -15,15 +15,40 @@
 			border: 1px solid rgb(195, 195, 195);
 		}
 
+		#tools {
+			position: absolute;
+			overflow: hidden;
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 30px;
+			padding: 2px 4px;
+			background: rgb(246, 246, 246);
+		}
+
+		#tools > img {
+			width:24px;
+			height:24px;
+		}
+
+		svg{
+			overflow: auto!important;
+			width: 100%!important;
+			height: 100vh!important;
+		}
+
+		#container {
+			cursor:pointer;
+		}
 		
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="vue-graph-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="omdb-graph-component"  ----------*/
 	<template>
 		<div>
 			<div :id="id" style="position:relative;overflow:auto;padding:10px;"></div>
-			<div id="container" style="top:0px;"></div>
+			<div id="container"></div>
 			<div id="nav">
 				<div id="tools"></div>
 				<div id="outlineContainer"></div>
@@ -32,7 +57,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="vue-graph-component">
+	<script id="omdb-graph-component">
 	{
 		
 	    delimiters: ['${', '}'],
@@ -86,7 +111,7 @@
                     self.model.graph.container.style.position = 'releative';
                     self.model.graph.container.style.overflow = 'hidden';
                     self.model.graph.container.style.left = '0px';
-                    self.model.graph.container.style.top = '0px';
+                    self.model.graph.container.style.top = '30px';
                     self.model.graph.container.style.right = '0px';
                     self.model.graph.container.style.bottom = '0px';
                     document.getElementById(self.id).appendChild(self.model.graph.container);
@@ -124,6 +149,7 @@
                         }
                     }
 
+
                     // Displays a popupmenu when the user clicks
                     // on a cell (using the left mouse button) but
                     // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
@@ -131,14 +157,28 @@
                     self.model.graph.graph.panningHandler.popupMenuHandler = false;
 
 
-                    // Creates a layout algorithm to be used
-                    // with the graph
+                    // Creates a layout algorithm to be used with the graph
                     self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
-                    let organic = new mxFastOrganicLayout(self.model.graph.graph);
-                    organic.forceConstant = 120;
+                    //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
+                    self.model.graph.layout.forceConstant = 120;
+
+                    /*self.model.graph.layout = new mxCompactTreeLayout(self.model.graph.graph, false);
+                    self.model.graph.layout.useBoundingBox = true;
+                    self.model.graph.layout.edgeRouting = true;
+                    self.model.graph.layout.levelDistance = 80;
+                    self.model.graph.layout.nodeDistance = 20;
+
+                    var layoutMgr = new mxLayoutManager(self.model.graph.graph);
+
+                    layoutMgr.getLayout = function(cell)
+                    {
+                        if (cell.getChildCount() > 0)
+                        {
+                            return self.model.graph.layout;
+                        }
+                    };*/
 
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
-
 
                     self.initGraph();
 
@@ -150,11 +190,16 @@
 
                             if(_.isEmpty(cell)) return;
 
-                            let _value = cell.getValue();
+                            let id = cell.getId();
 
+                            // copy to copyboard
+                            let clipboard2 = new Clipboard('g image',{
+                                text: function(trigger) {
+                                    return id;
+                                }
+                            });
 
-
-                            self.tip(cell.getValue());
+                            self.tip(`ID：${id} 已复制到剪切板！`);
 
                         });
                     },500)
@@ -168,18 +213,28 @@
 
                 try
                 {
+                    self.model.graph.graph.getModel()
+
                     let nodes = {};
                     _.forEach(self.graphData.nodes,function(v){
-                        let node = self.model.graph.graph.insertVertex(self.model.graph.parent, null, v.id, 50, 50, 120, 50,
-                            'shape=image;image=/fs/home/assets/iflow.png?type=download;verticalLabelPosition=bottom;verticalAlign=top');
+                        let _type = v.class || 'matrix';
+                        let _name =  _.last(v.id.split(":")) || '';
+                        let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
+                            `shape=image;image=/fs/home/assets/entity/png/${_type}.png?type=download;verticalLabelPosition=bottom;verticalAlign=top;`);
 
                         nodes[v.id] = node;
                     })
 
                     _.forEach(self.graphData.edges,function(k){
-                        let source = nodes[k.data.source];
-                        let target = nodes[k.data.target];
-                        let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, '', k.classes, source, target, 'startArrow=block;endArrow=block;edgeStyle=orthogonalEdgeStyle;');
+                        let source = nodes[k.source];
+                        let target = nodes[k.target];
+						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;spacing=100;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+                        let direction = '';
+                        if(k.twoway){
+                            direction = 'startArrow=block;endArrow=block;endFill=1;';
+                        }
+
+                        let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                     })
 
                     // Executes the layout
@@ -197,6 +252,7 @@
                 let self = this;
 
                 self.initOutline();
+                self.initToolBars();
 
             },
             tip: function(event){
@@ -212,11 +268,43 @@
                 self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
 
             },
+            initToolBars: function () {
+                let self = this;
+
+                let content = document.getElementById('tools');
+                content.style.padding = '4px';
+
+                let tb = new mxToolbar(content);
+
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/iflow/zoom_in.png',function(evt)
+                {
+                    self.model.graph.graph.zoomIn();
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/iflow/zoom_out.png',function(evt)
+                {
+                    self.model.graph.graph.zoomOut();
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
+                {
+                    var preview = new mxPrintPreview(self.model.graph.graph, 1);
+                    preview.open();
+
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
+                {
+                    toggleFullScreen();
+
+                },null,'tools-item');
+
+            },
             toCenter: function(){
                 let self = this;
 
                 self.model.graph.graph.fit();
-                self.model.graph.graph.center(true,true,0.5,0.5);
+                self.model.graph.graph.center(true,true,0.5,0.1);
 
             }
 	    }
