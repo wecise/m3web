@@ -53,6 +53,7 @@ var fsCheck = function(path, name){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -113,6 +114,7 @@ var fsNew = function(ftype, path, name, content, attr){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -162,6 +164,7 @@ var fsList = function(path){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
         }
     });
+
     return rtn;
 };
 
@@ -213,6 +216,7 @@ var fsDelete = function(path,name){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -262,6 +266,7 @@ var fsContent = function(path,name){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -277,7 +282,7 @@ var fsRename = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(parent,'/script') || _.isEqual(dstpath,'/')){
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
@@ -322,6 +327,7 @@ var fsRename = function(srcpath,dstpath){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -337,7 +343,11 @@ var fsCopy = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(parent,'/script') || _.isEqual(dstpath,'/')){
+    // Root
+    srcpath = srcpath.replace(/\/\//g,'/');
+    dstpath = dstpath.replace(/\/\//g,'/');
+
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
@@ -373,6 +383,7 @@ var fsCopy = function(srcpath,dstpath){
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -424,6 +435,7 @@ var fsUpdateAttr = function(path, name, attr) {
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
+
     return rtn;
 };
 
@@ -443,6 +455,110 @@ var fsTemp = function(ftype, name, content, attr){
     if(_tmp === 1){
         rtn = `/home/temp/${name}`;
     }
+
+    return rtn;
+};
+
+
+
+/*
+*   文件系统
+*
+*   打包zip
+*
+*
+*/
+var fsZip = function(srcpath){
+    let rtn = 0;
+
+    let _srcpath = srcpath.replace(/\/\//g,'/');
+
+    let fm = new FormData();
+
+    fm.append("srcpath",_srcpath);
+
+    jQuery.ajax({
+        url: '/fs/export?issys=true',
+        processData: false,
+        contentType: false,
+        mimeType: "multipart/form-data",
+        type: 'POST',
+        data: fm,
+        async:false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            download(data, `fs${srcpath.replace(/\//g,'_')}.zip`, "application/zip");
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("打包成功" + srcpath);
+            } else {
+                rtn = 0;
+                alertify.error("打包失败" + srcpath);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
+        }
+    })
+
+    return rtn;
+};
+
+
+/*
+*   文件系统
+*
+*   解压zip
+*
+*
+*/
+var fsUnZip = function(zippack){
+    let rtn = 0;
+
+    let _srcpath = srcpath.replace(/\/\//g,'/');
+
+    jQuery.ajax({
+        url: '/fs/export?issys=true',
+        processData: false,
+        contentType: false,
+        mimeType: "multipart/form-data",
+        dataType: 'json',
+        type: 'POST',
+        data: {
+            uploadfile: zippack
+        },
+        async:false,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("解压成功" + srcpath);
+            } else {
+                rtn = 0;
+                alertify.error("解压失败" + srcpath);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
 
     return rtn;
 };

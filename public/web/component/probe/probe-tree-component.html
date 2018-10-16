@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="../../vendor/zTree/css/omdbStyle/zTreeStyle.css"><code>
 
 	<style scoped>
 		/*----------  style  ----------*/
@@ -53,11 +52,27 @@
 			border-radius: 0;
 		}
 
-		.ztree li span.button.add {margin-right:2px; background:url(../../img/new.png); vertical-align:middle; *vertical-align:middle}
-		.ztree li span.button.edit {margin-right:2px; background:url(../../img/edit.png); vertical-align:middle; *vertical-align:middle}
-		.ztree li span.button.console {margin-right:2px; background:url(../../img/console.png); vertical-align:middle; *vertical-align:middle}
-		.ztree li span.button.remove {margin-right:2px; background:url(../../img/trash.png); vertical-align:middle; *vertical-align:middle}
-		.ztree li span.button.more {margin-right:2px; background:url(../../img/more.png); vertical-align:middle; *vertical-align:middle}
+
+		.ztree li span.blank {
+			width: 16px;
+			height: 16px;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+        .probe-tree-component .navbar-form .form-control {
+            width: 100%;
+        }
+
+
+		/* For x-editable */
+		.editable-click, a.editable-click, a.editable-click:hover{
+			border-bottom:unset;
+		}
+
+		.editable-unsaved {
+			font-weight: normal;
+		}
 
 	</style>
 
@@ -69,7 +84,6 @@
 			<form class="navbar-form full-width">
 				<div class="form-group">
 					<input type="text" class="form-control" placeholder="搜索">
-					<button type="submit" class="btn btn-search"><i class="fa fa-search"></i></button>
 				</div>
 			</form>
 			<ul class="ztree" :id="id"></ul>
@@ -82,6 +96,7 @@
         delimiters: ['${', '}'],
 		props: {
             id: String,
+			system: String
         },
         data: function(){
             return {
@@ -97,7 +112,8 @@
                         enable: false
                     },
                     callback: {
-                        onClick: this.onClick
+                        onClick: this.onClick,
+                        onExpand: this.onExpand
                     },
                     data: {
                         simpleData: {
@@ -112,14 +128,7 @@
                         enable: false
                     }
                 },
-                zNodes: [
-                            {cid:'A1', parent:null, rtype:'A1', isParent:true, name: '/探针列表', title: '探针列表', children:[
-                                    {cid:'A21', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Linux', title: 'Linux', children:[]},
-                                    {cid:'A22', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Windows', title: 'Windows', children:[]},
-                                    {cid:'A23', parent:'A1', rtype:'A1', isParent:true, name: '/探针列表/Unix', title: 'Unix', children:[]}
-	                            ], open:true},
-	                        {cid:'A2', parent:null, rtype:'A2', isParent:true, name: '/标签', title: '标签', children:[]}
-                        ],
+                zNodes: self.loadTreeData(),//callFsJScript(`${this.system}_tree_data.js`).message,
                 selectedNode: null,
 
 
@@ -128,8 +137,6 @@
         created: function(){
             let self = this;
 
-
-
         },
         mounted: function () {
             let self =  this;
@@ -137,7 +144,9 @@
             self.$nextTick(function () {
 
                 self.init();
-                self.initPlugIn();
+                _.delay(function(){
+                    self.initPlugIn();
+                },1500);
 
             })
         },
@@ -146,7 +155,21 @@
                 let self = this;
 
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+
+                console.log(111, JSON.stringify(getTagDir(self.system)))
+
             },
+	        loadTreeData: function(){
+                let self = this;
+
+                let rtn = getTagDir(self.system);
+
+                return _.map(rtn,function(v,k){
+                    return  
+                });
+
+
+	        },
 	        initPlugIn: function(){
                 let self = this;
 
@@ -190,12 +213,24 @@
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
 
 	        },
+            onExpand: function(event, treeId, treeNode) {
+                let self = this;
+
+                if(treeNode.cid === 'A2' && treeNode.parent == null){
+
+                    let rtn = _.groupBy(callFsJScript(`${self.system}_tree_data.js`).message,'cid');
+
+                    self.zTree.removeChildNodes(treeNode);
+
+                    self.zTree.addNodes(treeNode, rtn["A2"][0].children);
+                }
+            },
             onClick: function (event, treeId, treeNode, clickFlisParentag) {
                 let self = this;
 
                 self.selectedNode = treeNode;
 
-                if(treeNode.cid === 'A1') {
+                if(treeNode.rtype === 'A1') {
 
                     // 右键菜单
                     let sObj = $("#" + treeNode.tId + "_span");
@@ -219,17 +254,52 @@
                     return;
                 }
 
-                if(treeNode.cid === 'A2'){
+                if(treeNode.cid === 'A2' && treeNode.parent == null){
                     // 右键菜单
                     let sObj = $("#" + treeNode.tId + "_span");
                     let scObj = $("#" + treeNode.tId + "_a").find(".count");
 
-                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
+                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
+										<span class='blank'></span>
+										<span class='blank'></span>
+										<span class='button add' id='addBtn_${treeNode.tId}' title='新建标签'></span>
+								</div>`;
+
+                    if(scObj.length > 0){
+                        scObj.after(addStr);
+                    } else {
+                        sObj.after(addStr);
+                    }
+
+                    // add
+                    let btnAdd = $("#addBtn_"+treeNode.tId);
+                    if (btnAdd) btnAdd.bind("click", function(event){
+
+                        event.stopPropagation();
+
+                        alertify.prompt("标签名称", function (e, str) {
+                            // str is the input text
+                            if (e) {
+                                self.addTagDir(str,treeNode);
+                            } else {
+                                // user clicked "cancel"
+                            }
+                        }, "新建标签");
+
+                    });
+
+                    return;
+                }
+
+                if(treeNode.rtype === 'A2'){
+                    // 右键菜单
+                    let sObj = $("#" + treeNode.tId + "_span");
+                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
 
                     let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
-										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
-										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
-										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+										<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑标签'></span>
+										<span class='button add' id='addBtn_${treeNode.tId}' title='新建标签'></span>
+										<span class='button remove' id='deleteBtn_${treeNode.tId}' title='删除标签' ></span>
 								</div>`;
 
 
@@ -238,6 +308,60 @@
                     } else {
                         sObj.after(addStr);
                     }
+
+                    // edit
+                    let btnEdit = $("#editBtn_"+treeNode.tId);
+                    if (btnEdit) btnEdit.bind("click", function(event){
+
+                        event.stopPropagation();
+
+                        $(`#${treeNode.tId}_span`).editable({
+                            container: 'body',
+                            success: function(response, newValue) {
+
+                                let rtn = delTagDir(self.system, treeNode.name);
+
+                                if(rtn === 1){
+                                    updateTagDir(self.system, newValue);
+                                }
+                            }
+                        });
+
+                        $(`#${treeNode.tId}_span`).editable('show');
+
+                        $(`#${treeNode.tId}_span`).on('hidden', function (e, reason) {
+                            $(`#${treeNode.tId}_span`).editable('destroy');
+                        });
+
+                    });
+
+                    // add
+                    let btnAdd = $("#addBtn_"+treeNode.tId);
+                    if (btnAdd) btnAdd.bind("click", function(event){
+
+                        event.stopPropagation();
+
+                        alertify.prompt("标签名称", function (e, str) {
+                            // str is the input text
+                            if (e) {
+                                self.addTagDir(str,treeNode);
+                            } else {
+                                // user clicked "cancel"
+                            }
+                        }, "新建标签");
+
+                    });
+
+                    // delete
+                    let btnDel = $("#deleteBtn_"+treeNode.tId);
+                    if (btnDel) btnDel.bind("click", function(event){
+
+                        event.stopPropagation();
+
+                        self.delTagDir(treeNode);
+
+                    });
+
                     return;
                 }
 
@@ -274,6 +398,38 @@
                 _.delay(function(){
                     self.zTree.expandNode(_node, false, false, true);
                 },2500);
+
+            },
+	        addTagDir: function(newName,treeNode){
+                let self = this;
+
+				let _uuid = callFsJScript("uuid.js").message;
+
+				console.log(treeNode.name, newName)
+
+                let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
+
+                let rtn = updateTagDir(self.system, _name);
+
+                if(rtn === 1){
+                    self.zTree.addNodes(treeNode, {cid: `tag_${_uuid}`, pId:treeNode.cid, rtype: treeNode.rtype, name: _name, title: newName, iconSkin: treeNode.iconSkin});
+                }
+
+            },
+            delTagDir: function(treeNode){
+                let self = this;
+
+                alertify.confirm("确认删除", function (e) {
+                    if (e) {
+                        let rtn = delTagDir(self.system, treeNode.name);
+
+                        if(rtn === 1) {
+                            self.zTree.removeNode(treeNode);
+                        }
+                    } else {
+                        // user clicked "cancel"
+                    }
+                });
 
             }
         }

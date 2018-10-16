@@ -99,7 +99,7 @@
 	                    
 	                },
 	                success: function(data, textStatus, xhr) {
-	                    console.log(123,JSON.stringify(data))
+
 	                    if(_.isEmpty(data.message)) return false;
 	                    
 	                    self.nodes = _.map(data.message[0].tree,function(v,k){

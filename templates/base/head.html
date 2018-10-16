@@ -77,6 +77,9 @@
 	<!--Later Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/later/later.js"></script>
 
+    <!--Download Core JS-->
+    <script src="{{AppSubUrl}}/web/vendor/download/download.js"></script>
+
 	<!-- localForage Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/localForage/dist/localforage.min.js"></script>
 
@@ -138,6 +141,7 @@
 	<script src="{{AppSubUrl}}/web/js/jscript.js"></script>
 	<script src="{{AppSubUrl}}/web/js/search.js"></script>
 	<script src="{{AppSubUrl}}/web/js/sign.js"></script>
+    <script src="{{AppSubUrl}}/web/js/tag.js"></script>
 	<script src="{{AppSubUrl}}/web/js/trigger.js"></script>
 	<script src="{{AppSubUrl}}/web/js/user.js"></script>
 	<script src="{{AppSubUrl}}/web/js/websocket.js"></script>
@@ -220,267 +224,15 @@
 	<!-- DataTables JS & CSS -->
 	<script src="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
+    <script src="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.min.js"></script>
+    <link href="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.css" rel="stylesheet" type="text/css" />
 	<script src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
+
+    <!-- App CSS -->
+    <link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet">
 
 	<title> {{.SignedUser.Company.Fullname}}</title>
 
-	<style>
-
-		body {
-			font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-			background-color: #ffffff;
-			overflow-x: hidden;
-		}
-
-		.container-fluid {
-		    margin-bottom: 45px;
-		    margin: 8px -10px;
-		}
-
-		#company_logo::selection {
-			background: #fff;
-			color: white;
-		}
-
-		#company_logo {
-			margin-right:5px;
-		}
-		
-		/* For mxWindwoPane Start*/
-		div.mxWindowPane {
-			overflow: auto!important;
-			background-color: #ffffff;
-		}
-		div.mxWindow{
-			z-index: 1000!important;
-
-		    /*-webkit-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
-		    -moz-box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);
-		    box-shadow: 10px 10px 5px 0px rgba(0,0,0,0.65);*/
-		}
-
-		.navbar.navbar-default.navbar-fixed-top {
-			z-index: 999;
-			border-color: transparent!important;
-			background-color: #2195f4;
-			-webkit-box-shadow: none;
-			box-shadow: none;
-		}
-
-		
-		.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:focus {
-		    background-color: #03A9F4;
-		    color: #666;
-		}
-
-		.navbar-default .navbar-nav > li > a:hover, .navbar-default .navbar-nav > li > a:hover {
-		    background-color: #1db7fc;
-		    color: #666;
-		}
-
-		.navbar-default .navbar-nav > li > a.item.active {
-		    background-color: #fff;
-		    color: #666;
-		}
-
-		.navbar-default .navbar-nav > li > a.item {
-		    color: #fff;
-		}
-
-		.navbar-default .navbar-brand {
-			display: flex;
-			color: rgb(255, 255, 255);
-			font-size: 22px;
-			width:auto;
-		}
-
-		.navbar-default .navbar-brand > span{
-			color: rgb(255, 255, 255)!important;
-			font-weight: 400;
-		}
-
-		.modal-header{
-			background-color: #2195f4;/*#348fe2;*/
-    		color: #ffffff;
-		}
-
-		.img-responsive{
-			max-width: 120px;
-			height: auto;
-		}
-
-	    /* For Table */
-
-	    .bootstrap-table > .fixed-table-toolbar > .columns > .btn-group > .dropdown-menu {
-	    	width: 220px;
-	    }
-
-	    .table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
-			vertical-align: middle;
-		}
-
-		.bootstrap-table .table:not(.table-condensed), .bootstrap-table .table:not(.table-condensed) > tbody > tr > th, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > th, .bootstrap-table .table:not(.table-condensed) > thead > tr > td, .bootstrap-table .table:not(.table-condensed) > tbody > tr > td, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
-	        padding: 4px!important;
-	        white-space: wrap;
-	    }
-
-	    /* For Table Click Change Cell Style */
-	    .cell-style-selected {
-			/*background-color: #b6c2ca!important;*/
-	    }
-
-		/* For Button default Style */
-	    .btn.btn-default.dropdown-toggle{
-	    	font-size: 12px;
-	    }
-
-	    /*----------  Pace Loading  ----------*/
-	    .btn.btn-primary {
-	    	background-color: rgb(33, 149, 244);
-	    }
-		
-		/*----------  mxWindow ----------*/
-	    html td.mxWindowTitle {
-			background-color: rgb(238, 238, 238);
-			background-image: linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224));
-		    background-repeat: repeat-x;
-	    }
-
-	    div.mxWindowPane {
-	        border-top: 1px solid rgb(221, 221, 221);
-	    }
-		
-		div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
-	    	min-height: calc(100vh - 330px);
-	    	max-height: calc(100vh - 140px);
-	    	overflow: auto;
-	    }
-		
-		/* dropdown-menu */
-	    .dropdown-menu {
-		    border: none;
-		    -webkit-box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
-		    box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
-		    font-size: 12px;
-		}
-
-		.dropdown-menu>li>a {
-		    padding: 5px 5px;
-		}
-
-	    .dropdown-menu > li > a > .fa,
-	    .dropdown-menu > li > a > .fab,
-	    .dropdown-menu > li > a > .fas {
-	    	color: rgb(33, 148, 245);
-	    }
-		
-		.dropdown-menu > li.context-menu-separator {
-	    	padding: 0;
-		    margin: .25em 0;
-		    border-bottom: 1px solid rgb(230, 230, 230);
-	    }
-
-	    .context-menu-icon.context-menu-icon--fa::before {
-		    color: rgb(33, 148, 245)!important;
-		}
-
-		.context-menu-item {
-		    padding: 0.25em 2em!important;
-		    color: rgb(71, 71, 71)!important;
-		    /*line-height: 1.428571;*/
-		}
-		.context-menu-hover {
-		    background-color: rgb(237, 240, 246)!important;
-		}
-
-		.pace .pace-progress {
-			background: transparent;
-		}
-
-		.pace .pace-activity {
-			border-top-color: rgb(33, 148, 245);
-			border-left-color: rgb(33, 148, 245);
-		}
-
-		.navbar-right .dropdown-menu {
-			padding:3px 0px!important;
-		}
-
-		.navbar-right .dropdown-menu .divider{
-			margin: 0.25em 0;
-		}
-		.navbar-right .dropdown-menu>li>a{
-			padding: 5px;
-		}
-
-		.navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
-			color: rgb(255, 255, 255)!important
-		}
-
-		ul .nav-menu-level1,
-		ul .nav-menu-user {
-			margin: 5px 10px 0px 10px!important
-		}
-
-		ul .nav-menu-level1,
-		ul .nav-menu-user {
-			width: 27.4em;
-		}
-
-		ul .nav-menu-level1> li,
-		ul .nav-menu-user> li{
-			float: inherit;
-			width: 9em;
-			height: 90px;
-			padding: 15px 10px;
-			margin: 0px;
-			font-size: 12px;
-			line-height: 1.4;
-			text-align: center;
-			background-color: rgb(255, 255, 255);
-			border: 1px solid rgb(255, 255, 255);
-		}
-
-		ul .nav-menu-level1,
-		ul .nav-menu-user{
-			padding: 1px 0px!important;
-		}
-
-
-		/*
-	        Style
-	    */
-
-		.sidebar .nav > li > a,
-		.sidebar .nav > li > a:hover{
-			color: rgb(255, 255, 255);
-		}
-
-		.sidebar .nav>li.expand>a, .sidebar .nav>li>a:focus, .sidebar .nav>li>a:hover {
-			background: rgb(77, 170, 245);
-			color: rgb(255, 255, 255);
-		}
-
-
-		.sidebar-toggle > i {
-			padding: 15px 0px;
-			color: rgb(166, 211, 248);
-		}
-
-		.topbar.navbar-form {
-			margin: 12px 45px;
-		}
-
-		.topbar.navbar-form > .form-group > input{
-			width: 300px;
-		}
-
-		.topbar.navbar-form > .form-group > button{
-			right: 60px;
-			top: 12px;
-		}
-
-	</style>
 </head>
 
 <body onload="initPlugIn()">
@@ -497,7 +249,7 @@
 						<span>{{.title}}</span>
 					</a>
 
-					<a class="sidebar-toggle" href="javascript:toggleSideBar();" title="切换导航栏"><i class="fas fa-bars fa-2x"></i></a>
+					<a class="sidebar-toggle" href="javascript:toggleSideBar();" title="切换导航栏"><i class="fas fa-indent fa-2x"></i></a>
 
 			    </div>
 				<div class="navbar-collapse collapse">

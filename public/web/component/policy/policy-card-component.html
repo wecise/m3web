@@ -1,0 +1,82 @@
+<code>
+
+    <style scoped>
+        /*----------  style  ----------*/
+        .policy-card-component{
+            width: auto;
+            height: 100%;
+            margin-right: 0px;
+        }
+
+        /* Flexbox stuff */
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            align-content: space-around;
+            justify-content: space-between;
+        }
+
+        .card {
+            flex: 0 1 18%;
+        }
+
+
+    </style>
+
+
+    /*----------  最外层element会自动增加组件同名 class="policy-card-component"  ----------*/
+    <template>
+        <ul class="cards">
+            <li class="card"
+                style="cursor: pointer;"
+                v-for="item in model">
+                <div class="widget widget-stats bg-blue">
+                    <div class="stats-icon"><i class="fa fa-desktop"></i></div>
+                    <div class="stats-info">
+                        <h4>${item.name}</h4>
+                        <p>${item.count}</p>
+                    </div>
+                    <div class="stats-link">
+                        <a href="javascript:;"
+                           style="text-align: left; margin: 15px -15px -15px; padding: 5px;">
+                            更多
+                        </a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </template>
+
+    /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+    <script id="policy-card-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                model:Object
+            },
+            created: function(){
+                let self = this;
+
+            },
+            mounted: function(){
+                let self = this;
+
+                self.$nextTick(function(){
+                    self.init();
+                })
+            },
+            destroyed: function(){
+                let self = this;
+
+            },
+            methods: {
+                init: function(event) {
+                    let self = this;
+
+                }
+            }
+
+        }
+    </script>
+
+</code>

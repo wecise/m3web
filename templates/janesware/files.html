@@ -27,10 +27,6 @@
 
 <link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 
-<!-- Contextmenu core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/contextmenu/contextmenu.css"  rel="stylesheet" >
-
-<link href="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.min.css" rel="stylesheet" />
 
 <style>
 
@@ -95,21 +91,25 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
-<script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js" ></script>
-<script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.ui.position.min.js" ></script>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-view-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-view-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-output-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <script type="text/javascript">
 
     var eventHub = new Vue();
     
     VueLoader.onloaded(["vue-base-datatables-component",
-                        "vue-fs-tree-component",
-                        "vue-fs-view-component",
-                        "vue-ai-robot-component"
+                        "fs-tree-component",
+                        "fs-view-component",
+                        "fs-editor-component",
+                        "fs-output-component",
+                        "ai-robot-component"
                         ],function() {
 
         $(function() {
@@ -119,7 +119,7 @@
             let treeVue = {
                 delimiters: ['${', '}'],
                 el: '#layout-tree-template',
-                template: `<vue-fs-tree-component id="file-fs-tree" :root="root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>`,
+                template: `<fs-tree-component id="file-fs-tree" :root="root" :checkEnable="false" :contextMenu="null"></fs-tree-component>`,
                 data: {
                     root: "/",
                 },
@@ -135,7 +135,7 @@
             let consoleVue = {
                 delimiters: ['${', '}'],
                 el: '#layout-console-template',
-                template: `<vue-fs-view-component id="file-fs-view" :root="root"></vue-fs-view-component>`,
+                template: `<fs-view-component id="file-fs-view" :root="root"></fs-view-component>`,
                 data: {
                     model: [],
                     root: "/",

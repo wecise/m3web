@@ -272,40 +272,11 @@ var toggleSideBar = function(){
 
     localStorage.setItem('PAGE_SIDEBAR_STATUS',`${page}_${index}`);
 
+    // Emit container layout resize event
+    eventHub.$emit("CONTAINER-LAYOUT-RESIZE-EVENT");
+
 };
 
-
-/* App Box in Home
-*
-* */
-var appsBox = function(){
-    $(".apps-box").html(`<div style="position:absolute;right:10px;top:65px;z-index:100;">
-                            <i class="fa fa-th fa-2x" style="color:rgb(182, 194, 202);cursor:pointer;"></i>
-                          </div>`).click(function(){
-        let _win = null;
-
-        _win = localStorage.getItem("mx-window");
-
-        if(!_.isEmpty(_win)){
-            $(".mxWindow").remove();
-        }
-
-        _win = newWindow("appsbox","∷", '<div class="animated slideInDown" id="apps-box-win"></div>',null);
-        _win.setMaximizable(false);
-
-        let _robotVue = new Vue({
-            el: '#apps-box-win',
-            template: '<vue-apps-box-component id="THIS-IS-MY-APPS"></vue-apps-box-component>',
-            mounted:function(){
-                let me = this;
-
-                me.$nextTick(function() {
-
-                })
-            }
-        });
-    });
-}
 
 /*	Robot
 *
@@ -313,33 +284,37 @@ var appsBox = function(){
  */
 var robot = function(){
 
-    $("#ai-robot").html(`<div style="position: absolute;right:0px;top: -38px;cursor: pointer;" class="animated fadeIn">
-                            <img src="/web/assets/images/robot.svg" style="width:120px;height:120px;transform: scale(0.5);">
-                         </div>
-                         <span class="badge badge-danger" style="margin: 15px 15px;">5</span>`).click(function(){
-        let _win = null;
+    $.get('/web/assets/images/robot.svg',function(svg){
 
-        _win = localStorage.getItem("mx-window");
+        $("#ai-robot").empty();
 
-        if(!_.isEmpty(_win)){
-            $(".mxWindow").remove();
-        }
+        $("#ai-robot").append(`<div style="position: absolute;right:30px;top: -10px;cursor: pointer;" class="animated fadeIn">
+                                ${svg}
+                             </div>
+                             <span class="badge badge-danger" style="margin: 15px 15px;">5</span>`).find('svg').click(function(){
 
-        _win = newWindow("robot", "∵", '<div class="animated slideInDown" id="robot-active-win"></div>', null);
-        _win.setMaximizable(false);
-
-        let _robotVue = new Vue({
-            el: '#robot-active-win',
-            template: '<vue-ai-robot-component id="THIS-IS-ROBOT"></vue-ai-robot-component>',
-            mounted:function(){
-                let me = this;
-
-                me.$nextTick(function() {
-
-                })
+            if($("#jsPanel-robot")){
+                $("#jsPanel-robot").remove();
             }
+
+            let win = newWindow("fsrobot", "∵", '<div class="animated slideInDown" id="robot-active-win"></div>', null);
+
+            let robotVue = {
+                el: '#robot-active-win',
+                template: '<ai-robot-component id="THIS-IS-ROBOT"></ai-robot-component>',
+                mounted: function () {
+
+                    this.$nextTick(function () {
+
+
+                    })
+                }
+            };
+
+            new Vue(robotVue);
         });
-    });
+
+    },'text');
 };
 
 
@@ -458,7 +433,7 @@ var initPlugIn = function () {
         new Vue(searchVue);
 
         robot();
-        //appsBox();
+
     },1000)
 
 

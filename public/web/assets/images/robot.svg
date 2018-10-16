@@ -44,7 +44,7 @@
         transform:scale(1,1); 
     }}
 
-        @keyframes shadow{
+        <!--@keyframes shadow{
 
         0%{
         transform:scale(1.5,1.2); 
@@ -52,7 +52,7 @@
 
         100%{
         transform:scale(1,1); 
-        opacity:0.2}}
+        opacity:0.2}}-->
 
         @-webkit-keyframes arms_bounce_left{
 
@@ -136,12 +136,12 @@
         animation:eyes_blink 2s ease-out 0s infinite alternate}
 
         #hover ellipse{
-        transform-origin:center center; 
+        transform-origin:center center;
         animation:shadow 1.1s ease-in-out 0s infinite alternate}
 </style>
-<g id="hover">
+<!--<g id="hover">
 	<ellipse id="shadow_2_" class="st0" cx="150" cy="255.9" rx="39.1" ry="13.4"/>
-</g>
+</g>-->
 <g id="arms">
 	<g id="left">
 		<path id="arm_1_" class="st1" d="M99.1,136.3c-22.1-9.5-42.3,13-42.2,23.9c0,2.1,3.4,5,5.1,3.1c5.3-6.3,16.2-15.7,24.4-7.2

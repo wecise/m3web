@@ -238,7 +238,7 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-apps-box-component.html"></link>
 <!--<link rel="vc" href="{{AppSubUrl}}/web/component/vue-home-component.html"></link>-->
 
@@ -249,7 +249,7 @@
     
     VueLoader.onloaded(["vue-editor-component",
                         "vue-search-preset-component",
-                        "vue-ai-robot-component",
+                        "ai-robot-component",
                         "vue-apps-box-component"],function() {
         
         $(function() {
@@ -334,7 +334,7 @@
 
                         self.initContextMenu();
 
-                        App.init();
+                        //App.init();
                     },
                     initContextMenu: function(){
                         let self = this;
@@ -661,7 +661,7 @@
         </div>
         <!-- /.row -->
         <div class="row">
-            <div class="col-lg-offset-3 col-lg-6">
+            <div class="col-xs-offset-1 col-xs-10 col-lg-offset-3 col-lg-6">
                 <div>
                     <div id="multi" style="margin-left: 30px;margin-top: 30px">
                         <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">

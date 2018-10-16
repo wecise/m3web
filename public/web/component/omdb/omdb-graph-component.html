@@ -2,20 +2,22 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
+
 		#outlineContainer {
 			z-index:1;
 			position:absolute;
 			overflow:hidden;
 			top:40px;
-			right:75px;
+			right:5px;
 			width: 80px;
 			height:80px;
-			background:transparent;
+			background: #ffffff;
 			box-shadow: 3px 3px 12px #C0C0C0;
 			border: 1px solid rgb(195, 195, 195);
 		}
 
 		#tools {
+			z-index: 100;
 			position: absolute;
 			overflow: hidden;
 			top: 0px;
@@ -27,27 +29,17 @@
 		}
 
 		#tools > img {
-			width:24px;
-			height:24px;
+			width:18px;
+			height:18px;
+			margin: 0px 5px;
 		}
 
-		svg{
-			overflow: auto!important;
-			width: 100%!important;
-			height: 100vh!important;
-		}
-
-		#container {
-			cursor:pointer;
-		}
-		
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-graph-component"  ----------*/
 	<template>
-		<div>
-			<div :id="id" style="position:relative;overflow:auto;padding:10px;"></div>
+		<div :id="id">
 			<div id="container"></div>
 			<div id="nav">
 				<div id="tools"></div>
@@ -59,7 +51,6 @@
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
 	<script id="omdb-graph-component">
 	{
-		
 	    delimiters: ['${', '}'],
 	    props: {
 	        id: String,
@@ -73,6 +64,20 @@
                         model: null,
                         graph: null,
 	                    layout: null,
+	                    layers: {
+                            root: null,
+		                    layer1: null,
+                            layer2: null,
+                            layer3: null,
+                            layer4: null,
+                            layer5: null,
+                            layer6: null,
+                            layer7: null
+	                    },
+                        orientation: {
+                            value:0,
+	                        list:['north','south']
+                        },
 	                    parent: null,
                         theme: "",
                         outline: null
@@ -127,7 +132,17 @@
                     }
 
                     // Creates the graph inside the given container
-                    self.model.graph.model = new mxGraphModel();
+                    self.model.graph.layers.root = new mxCell();
+                    self.model.graph.layers.layer0 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer1 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer2 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer3 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer4 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer5 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer6 = self.model.graph.layers.root.insert(new mxCell());
+                    self.model.graph.layers.layer7 = self.model.graph.layers.root.insert(new mxCell());
+
+	                self.model.graph.model = new mxGraphModel(self.model.graph.layers.root);
                     self.model.graph.graph = new mxGraph(self.model.graph.container, self.model.graph.model);
 
                     // Enables automatic sizing for vertices after editing and
@@ -160,6 +175,7 @@
                     // Creates a layout algorithm to be used with the graph
                     self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
                     //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
+                    self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
                     self.model.graph.layout.forceConstant = 120;
 
                     /*self.model.graph.layout = new mxCompactTreeLayout(self.model.graph.graph, false);
@@ -216,7 +232,10 @@
                     self.model.graph.graph.getModel()
 
                     let nodes = {};
-                    _.forEach(self.graphData.nodes,function(v){
+                    let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
+
+                    _.forEach(orderNodes,function(v){
+
                         let _type = v.class || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
@@ -228,7 +247,7 @@
                     _.forEach(self.graphData.edges,function(k){
                         let source = nodes[k.source];
                         let target = nodes[k.target];
-						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;spacing=100;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
                         if(k.twoway){
                             direction = 'startArrow=block;endArrow=block;endFill=1;';
@@ -276,35 +295,97 @@
 
                 let tb = new mxToolbar(content);
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/iflow/zoom_in.png',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', '/web/assets/images/graph/svg/refresh.svg',function(evt)
+                {
+                    $(self.$el).find("#container").empty();
+
+                    self.init();
+
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/graph/svg/zoom_out.svg',function(evt)
                 {
                     self.model.graph.graph.zoomIn();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/iflow/zoom_out.png',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/graph/svg/zoom_in.svg',function(evt)
                 {
                     self.model.graph.graph.zoomOut();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/graph/svg/print.svg',function(evt)
                 {
                     var preview = new mxPrintPreview(self.model.graph.graph, 1);
                     preview.open();
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/graph/svg/fullscreen.svg',function(evt)
                 {
                     toggleFullScreen();
 
                 },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', '/web/assets/images/graph/svg/direction.svg',function(evt)
+                {
+
+
+                    self.model.graph.graph.getModel().beginUpdate();
+
+                    try
+                    {
+                        if(self.model.graph.orientation.value == 0){
+                            self.model.graph.orientation.value = 1;
+                        } else {
+                            self.model.graph.orientation.value = 0;
+                        }
+
+                        self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
+
+                        // Executes the layout
+                        self.model.graph.layout.execute(self.model.graph.parent);
+                    }
+                    finally
+                    {
+                        self.model.graph.graph.getModel().endUpdate();
+
+                        self.toCenter();
+
+                    }
+
+
+                },null,'tools-item-direction');
+
+
+                /*$("#tools").contextMenu({
+                    selector: '.tools-item-direction',
+                    trigger: 'left',
+                    items: {
+
+                        "utd": {
+                            name: "上下", icon: "fas fa-angle-double-down", callback: function (key, opt) {
+                                console.log(1,self.model.graph.layout.orientation)
+                                self.model.graph.layout.orientation = 'north';
+                                self.model.graph.layout.execute(self.model.graph.parent);
+                            }
+                        },
+                        "dtu": {
+                            name: "下上", icon: "fas fa-angle-double-up", callback: function (key, opt) {
+                                console.log(2,self.model.graph.layout.orientation)
+                                self.model.graph.layout.orientation = 'south';
+                                self.model.graph.layout.execute(self.model.graph.parent);
+                            }
+                        }
+                    }
+                });*/
+
 
             },
             toCenter: function(){
                 let self = this;
 
                 self.model.graph.graph.fit();
-                self.model.graph.graph.center(true,true,0.5,0.1);
+                self.model.graph.graph.center(true,true,0.5,0.5);
 
             }
 	    }

@@ -178,6 +178,60 @@ var newWindow = function (type, title, template, position) {
         return win;
     }
 
+    if(type === 'fsedit'){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
+
+        let _position = { my: "center", at: "center" };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        lrwh[2] = $( window ).width()*0.6;
+        lrwh[3] = 480;//$( window ).height()*0.55;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-FSEDIT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
     if(type === 'fsapp'){
         lrwh[2] = $( window ).width()*0.55;
         lrwh[3] = $( window ).height()*0.55;
@@ -208,6 +262,67 @@ var newWindow = function (type, title, template, position) {
                 });
                 $(".jsPanel-content",this).css({
                     "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsrobot'){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
+
+        let _position = { top: 60, right: 160 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        lrwh[2] = $( window ).width()*0.3;
+        lrwh[3] = $( window ).height()*0.7;
+
+        win = $.jsPanel({
+            id: 'jsPanel-robot',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    console.log(111,position)
+                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
@@ -591,3 +706,8 @@ var newWindow = function (type, title, template, position) {
 
     return win;
 };
+
+
+$(document).on('jspanelstatuschange', function (event, id) {
+    eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT",null);
+});

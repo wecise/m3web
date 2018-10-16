@@ -155,7 +155,9 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-chinamap-2-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-script-manager-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-dispatch-manager-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
 <script type="text/javascript">
 
@@ -178,7 +180,8 @@
                         "cmdb-datatables-component",
                         "vue-script-manager-component",
                         "vue-dispatch-manager-component",
-                        "vue-ai-robot-component"
+                        "ai-robot-component",
+                        "probe-tree-component"
                         ],function() {
 
         $(function(){
@@ -1925,6 +1928,7 @@
                                 <div class="col-lg-2" id="nav">
                                     <div class="panel" style="border-radius: 0px;">
                                         <div class="panel-body">
+                                            <!--<probe-tree-component id="entity-tree" system="entity"></-tree-component>-->
                                             <vue-entity-tree-component id="ciview-entity-tree" :list="search.result.data"></vue-entity-tree-component>
                                         </div>
                                     </div>

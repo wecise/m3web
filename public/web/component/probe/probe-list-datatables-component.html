@@ -1,6 +1,6 @@
 <code>
 
-	<style>
+	<style scoped>
 		/*----------  style  ----------*/
 		.probe-list-datatables-component thead tr th, .probe-list-datatables-component tbody tr td{
 			line-height: 10px;
@@ -87,6 +87,44 @@
 			color: rgb(51, 51, 51);
 		}
 
+		progress {
+			width: 100px;
+			height: 12px;
+			margin: auto;
+			display: -webkit-inline-box;
+			/* Important Thing */
+			-webkit-appearance: none;
+			border: none;
+		}
+
+		/* All good till now. Now we'll style the background */
+		progress::-webkit-progress-bar {
+			background: #efefef;
+			border-radius: 50px;
+			padding: 2px;
+			box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 1);
+		}
+
+		/* Now the value part */
+		progress::-webkit-progress-value {
+			border-radius: 50px;
+			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
+			background: #ff0000
+
+			/* Looks great, now animating it */
+			background-size: 25px 14px, 100% 100%, 100% 100%;
+			-webkit-animation: move 5s linear 0 infinite;
+		}
+
+		/* That's it! Now let's try creating a new stripe pattern and animate it using animation and keyframes properties  */
+
+		@-webkit-keyframes move {
+			0% {background-position: 0px 0px, 0 0, 0 0}
+			100% {background-position: -100px 0px, 0 0, 0 0}
+		}
+
+		/* Prefix-free was creating issues with the animation */
+
         
 	</style>
 
@@ -134,7 +172,7 @@
                 
                 _.delay(function() {
                     self.redraw();
-                },3000);
+                },1000);
 
             })
         },
@@ -146,13 +184,13 @@
 
                             //  data & time render
                             if(_.includes(['day','vtime','mtime','ctime'],v.field)){
-                                return { "data": v.field, "title": _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
                                         return moment(data).format("LLL");
 	                                }};
                             }
 
 		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
-                                return { "data": v.field, "title": _.camelCase(v.field), visible: v.visible, render: function(data, type, row){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, render: function(data, type, row){
 		                                if(_.isNull(data) || _.isEmpty(data)) {
                                             return '';
 		                                } else{
@@ -161,10 +199,14 @@
 		                            }};
 		                    }
 
-	                        return { "data": v.field, "title": v.title, visible: v.visible, orderable: true, render: v.render};
+		                    if(!v.render){
+                                return v;
+		                    } else {
+                                return { data: v.data, title: v.title, visible: v.visible, orderable: true, className: v.className, render: eval(v.render) };
+		                    }
 
 
-						});
+                });
 
                 return _cols;
 			}
@@ -226,6 +268,7 @@
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
+                                rowReorder: true,
                                 colReorder: true,
 								paging: false,
 								info: false,
@@ -267,7 +310,7 @@
                                 },
                                 dom: `<"${self.id}-datatables-tool-bars">frtip`,
 			                    fixedColumns:   {
-			                        leftColumns: 3
+			                        leftColumns: 2
 			                    },
 	                            fixedHeader: {
 			                        header: true,

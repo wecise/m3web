@@ -1,0 +1,586 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.policy-list-datatables-component thead tr th, .policy-list-datatables-component tbody tr td{
+			line-height: 10px;
+			white-space: nowrap;
+		}
+
+		/*.policy-list-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
+			background: rgb(196, 235, 253)!important;
+		}*/
+
+		div.dataTables_wrapper div.dataTables_info {
+			padding-top: 4px;
+		}
+
+		td.highlight {
+			background-color: whitesmoke !important;
+		}
+
+		table.policy-list-datatables-component tbody tr:nth-child(even):hover td{
+			background-color: rgba(227, 239, 244, 0.5) !important;
+		}
+
+		.dataTables_wrapper table.dataTable {
+			margin: 0px 0!important;
+		}
+
+		.context-menu-list {
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
+			padding:5px;
+            border: none;
+		}
+            
+        .context-menu-list>li>a{
+            padding: 5px 5px;
+            color:rgb(102, 102, 102)!important;
+        }
+
+		div.toolbar i {
+			color: rgb(218, 224, 231);
+			cursor: pointer;
+			margin: 10px 0px 0px 5px;
+		}
+
+		div[id*="classEdit"].dataTables_info{
+			position: absolute;
+			bottom: 0px;
+			height: 28px;
+			background-color: rgb(255, 255, 255);
+			width: 100%;
+			text-align: left;
+			border-top: 1px solid rgb(226, 231, 236)
+		}
+
+		div[id*="output"].dataTables_info {
+			position: fixed;
+			bottom: 32px;
+			height: 28px;
+			background-color: rgb(255, 255, 255);
+			width: 100%;
+			text-align: left;
+			border-top: 1px solid rgb(226, 231, 236)
+		}
+
+		.datatables-toolbars {
+			height: 30px;
+			background-color: rgb(246, 246, 246);
+			width: 100%;
+		}
+
+		.datatables-toolbars .btn-primary,
+		.datatables-toolbars .btn-primary:hover{
+			background-color: rgb(246, 246, 246);
+			border:none;
+			color: #333333;
+		}
+
+		.datatables-toolbars .btn-group > a > i{
+			color: #666666;
+		}
+
+
+		.dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
+			background: rgb(239, 239, 239);
+			color: rgb(51, 51, 51);
+		}
+
+		progress {
+			width: 100px;
+			height: 12px;
+			margin: auto;
+			display: -webkit-inline-box;
+			/* Important Thing */
+			-webkit-appearance: none;
+			border: none;
+		}
+
+		/* All good till now. Now we'll style the background */
+		progress::-webkit-progress-bar {
+			background: #efefef;
+			border-radius: 50px;
+			padding: 2px;
+			box-shadow: 0 1px 0px 0 rgba(255, 255, 255, 1);
+		}
+
+		/* Now the value part */
+		progress::-webkit-progress-value {
+			border-radius: 50px;
+			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, .4);
+			background: #ff0000
+
+			/* Looks great, now animating it */
+			background-size: 25px 14px, 100% 100%, 100% 100%;
+			-webkit-animation: move 5s linear 0 infinite;
+		}
+
+		/* That's it! Now let's try creating a new stripe pattern and animate it using animation and keyframes properties  */
+
+		@-webkit-keyframes move {
+			0% {background-position: 0px 0px, 0 0, 0 0}
+			100% {background-position: -100px 0px, 0 0, 0 0}
+		}
+
+		/* Prefix-free was creating issues with the animation */
+
+        
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="policy-list-datatables-component"  ----------*/
+	<template>
+		<table :id="id" class="table table-bordered pageResize" width="100%">
+		</table>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="policy-list-datatables-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+        	id: String,
+            bid: String,
+			columns: Array,
+			dataset: Array,
+			options: Object,
+            contextmenu: String,
+			result: Object,
+		},
+		data: function(){
+          	return {
+                datatable: null,
+				selectedRow: null,
+				selectedCell: null
+			}
+		},
+        created: function(){
+            let self = this;
+
+            eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
+        },
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                _.delay(function() {
+                    self.init();
+                },500);
+                
+                _.delay(function() {
+                    self.redraw();
+                },1000);
+
+            })
+        },
+		computed: {
+            _columns: function(){
+                let self = this;
+
+                let _cols = _.map(self.columns,function(v,k){
+
+                            //  data & time render
+                            if(_.includes(['day','vtime','mtime','ctime'],v.field)){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
+                                        return moment(data).format("LLL");
+	                                }};
+                            }
+
+		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, render: function(data, type, row){
+		                                if(_.isNull(data) || _.isEmpty(data)) {
+                                            return '';
+		                                } else{
+                                            return JSON.stringify(data,null,2);
+		                                }
+		                            }};
+		                    }
+
+		                    if(!v.render){
+                                return v;
+		                    } else {
+                                return { data: v.data, title: v.title, visible: v.visible, orderable: true, className: v.className, render: eval(v.render) };
+		                    }
+
+
+                });
+
+                return _cols;
+			}
+		},
+		watch: {
+          	dataset: {
+                handler: function(val,oldVal){
+                      	    let self = this;
+
+                      	    if(val === oldVal) return false;
+
+                            if( !_.isEmpty(self.datatable) ) {
+                                self.datatable.destroy(); 
+                                self.init();
+                            }
+
+                            self.datatable.clear();
+                            self.datatable.draw();
+                            self.datatable.rows.add(val); // Add new data
+                            self.datatable.columns.adjust().draw(); // Redraw the DataTable*/
+
+                },
+                deep:true
+			}/*,
+            columns: function(val,oldVal){
+                let self = this;
+
+                if(self.datatable){
+                    self.datatable.clear().draw();
+                    self.datatable.draw();
+                    //self.datatable.rows.add(val); // Add new data
+                    self.datatable.columns.adjust().draw(); // Redraw the DataTable
+                }
+
+            }*/,
+            options: {
+                handler: function(val,oldVal){
+                    let self = this;
+
+                    //if(val == oldVal) return false;
+
+	                //self.datatable.destroy();
+                    //self.init();
+
+                },
+                deep:true
+            }
+
+		},
+		methods: {
+            init: function(){
+                let self = this;
+
+                self.datatable = $(self.$el).DataTable( _.extend({
+                    			data: self.dataset,
+                                columns: self._columns,
+                                responsive: false,
+                                searching: false,
+                                aDataSort: true,
+	                            bSort: true,
+			                    bAutoWidth: true,
+                                rowReorder: true,
+                                colReorder: true,
+								paging: false,
+								info: false,
+                    			scrollX: true,
+								scrollY: '300px',
+								scrollCollapse: true,
+                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                language : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    },
+                                    buttons: {
+                                        copyTitle: '已拷贝到剪切板',
+                                        copyKeys: '已拷贝',
+                                        copySuccess: {
+                                            _: '已拷贝 %d 项',
+                                            1: '1 已拷贝'
+                                        }
+                                    }
+                                },
+                                dom: `<"${self.id}-datatables-tool-bars">frtip`,
+			                    fixedColumns:   {
+			                        leftColumns: 2
+			                    },
+	                            fixedHeader: {
+			                        header: true,
+			                        footer: true
+			                    },
+                                select: {
+			                        style: 'multi'
+
+			                    },
+			                    lengthChange: false,
+			                    stateSave: true,
+			                    buttons: [
+			                        {
+			                            extend: 'copy',
+			                            text: '',
+			                            copyTitle: '已复制',
+			                            className: 'btn btn-sm btn-primary fas fa-copy',
+			                        },
+			                        {
+			                            extend: 'excel',
+			                            text: '',
+			                            className: 'btn btn-sm btn-primary fas fa-download',
+                                        title: function(){
+			                                return `${self.result.name.split("/").join("_").replace("_","")}_class_export_${moment().format("LLL")}`
+                                        },
+                                        messageTop: null
+			                        },
+			                        {
+			                            extend: 'colvis',
+			                            text: '',
+			                            className: 'btn btn-sm btn-primary fas fa-columns',
+			                            collectionLayout: 'fixed four-column',
+                                        columns: ':not(.noVis)',
+			                            columnText: function ( dt, idx, title ) {
+			                                return `<input type="checkbox" name="${title}" checked="checked"> `+title;
+			                            }
+			                        }
+			                    ]
+                    },self.options)).columns.adjust().draw();
+
+	            _.delay(function(){
+                    self.datatable.buttons().container().appendTo( `.datatables-toolbars` );
+                },200)
+
+				self.initPlugin();
+
+			},
+			initPlugin: function(){
+                let self = this;
+
+                self.initClassMenu();
+
+                // init selected row's status
+                $(self.$el).find("tbody").on("mouseenter", "tr", function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                /*$(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
+					var colIdx = self.datatable.cell(this).index().column;
+
+					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
+					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
+				} );*/
+
+                // selected row
+                $(self.$el).on( 'click', 'tr', function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                // selected row
+                $(self.$el).on( 'dblclick', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
+
+                    _.delay(function(){
+
+                        let cardVue = new Vue({
+                            el: '#panel-card',
+                            data: function(){
+                                return {
+                                    model: self.selectedRow
+                                }
+                            },
+                            template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
+                        });
+
+
+                    },100);
+                } );
+
+                // selected cell
+                $(self.$el).on( 'click', 'td', function () {
+                    self.selectedCell = self.datatable.cell( this ).data();
+                } );
+
+                // init context menu
+                $.contextMenu({
+                    selector: "#"+self.id,
+                    trigger: "right",
+                    delay: 300,
+                    autoHide: true,
+                    build: function ($trigger, e) {
+                        return {
+                            callback: function (key, options) {
+                                //self.initModules(key, options.items[key]);
+                            },
+                            items: self.items[self.contextmenu]
+                        };
+                    }
+                });
+
+
+			},
+            redraw: function(){
+                let self = this;
+
+                self.datatable.columns.adjust().draw(); // Redraw the DataTable
+            },
+			refresh: function(event){
+                let self = this;
+
+                self.columns = self.result.columns[event];
+                self.dataset = self.result.data[event];
+
+                if( !_.isEmpty(self.datatable) ) {
+                    self.datatable.destroy();
+                    self.init();
+                }
+
+			},
+			toolBars: function(){
+                let self = this;
+                let _keys = _.keys(self.result.columns);
+                let _items = {};
+
+                _.forEach(_keys, function (v) {
+
+                    let o = {};
+
+                    o.name = v;
+                    o.icon = "fa-bars";
+                    o.callback = function (key, opt) {
+                        eventHub.$emit("DATATABLES-REFRESH-DATA-EVENT", v);
+                    };
+                    _.merge(_items, {[v]: o});
+                })
+
+				return {
+                    delimiters: ['${', '}'],
+                    el: `#${self.id}-datatables-tool-bars`,
+                    template: `<div class="datatables-toolbars">
+									<div class="btn-group" role="group" aria-label="...">
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除"><i class="fas fa-trash"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑"><i class="fas fa-edit"></i></a>
+									</div>
+								</div>`,
+                    data: {
+                        keys: _keys
+	                },
+                    created: function(){
+                        let me = this;
+
+                        me.initMenu();
+                    },
+                    mounted: function () {
+                        let me = this;
+
+                        me.$nextTick(function () {
+
+                        })
+                    },
+                    methods: {
+                        initMenu: function () {
+                            let me = this;
+
+                            $.contextMenu({
+                                selector: `.${self.id}-datatables-tool-bars`,
+                                trigger: 'left',
+                                build: function ($trigger, e) {
+
+                                    return {
+                                        items: _items
+
+                                    }
+                                }
+                            });
+                        },
+                        selectAll: function () {
+                            let self = this;
+
+                            self.datatable.rows({ page: 'current' }).nodes();
+
+                        },
+                        deleteIt: function () {
+                            let me = this;
+
+                            if(_.isEmpty(self.datatable.rows( { selected: true } ).data())){
+								alertify.log("选择删除数据！");
+								return false;
+                            }
+
+                            swal({
+                                title: "",
+                                text: "确定要删除?",
+                                type: "warning",
+                                showCancelButton: true,
+                                closeOnConfirm: false,
+                                cancelButtonText: "取消",
+                                confirmButtonText: "删除",
+                                confirmButtonColor: "#ff0000"
+                            }).then((result) => {
+                                if (result.value) {
+
+                                    let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
+
+                                    let _rtn = fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+
+                                    if(_rtn.status === 'ok') {
+                                        self.datatable.rows( { selected: true } ).remove().draw(false);
+                                    }
+                                }
+                            })
+
+
+                        },
+                        editIt: function () {
+
+                        },
+	                    exportIt: function(){
+                            let self = this;
+
+                            self.datatable.buttons('.buttons-excel').trigger();
+	                    }
+                    }
+                };
+
+			},
+			initClassMenu: function(){
+                let self = this;
+
+                if(_.isEmpty(self.result)) return false;
+
+				let toolBarsVue = self.toolBars();
+
+				$(`div.${self.id}-datatables-tool-bars`).attr('id',`${self.id}-datatables-tool-bars`).ready(function(){
+				    new Vue(toolBarsVue);
+                });
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>

@@ -71,14 +71,35 @@ website:	http://code.google.com/p/jquerytree/
 .ztree li span.button.bottom_docu{background-position:-56px -36px}
 .ztree li span.button.noline_docu{ background:none;}
 
+/*
 .ztree li span.button.ico_open{margin-right:2px; background:url(./img/diy/icon/folder_16.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.ico_close{margin-right:2px; background:url(./img/diy/icon/folder_16.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.ico_docu{margin-right:2px; background:url(./img/diy/icon/class_16.png); vertical-align:top; *vertical-align:middle}
+
 .ztree li span.button.add {margin-right:2px; background:url(./img/diy/icon/new.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.edit {margin-right:2px; background:url(./img/diy/icon/edit.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.console {margin-right:2px; background:url(./img/diy/icon/console.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.remove {margin-right:2px; background:url(./img/diy/icon/trash.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.more {margin-right:2px; background:url(./img/diy/icon/more.png); vertical-align:middle; *vertical-align:middle}
+*/
+
+.ztree li span.button.ico_open{margin-right:2px; background:url(./img/diy/icon/folder.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.ico_close{margin-right:2px; background:url(./img/diy/icon/folder.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.ico_docu{margin-right:2px; background:url(./img/diy/icon/properties.png); vertical-align:top; *vertical-align:middle}
+
+.ztree li span.button.add {margin-right:2px; background:url(./img/diy/icon/new.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.edit {margin-right:2px; background:url(./img/diy/icon/edit.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.console {margin-right:2px; background:url(./img/diy/icon/console.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.remove {margin-right:2px; background:url(./img/diy/icon/trash.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.more {margin-right:2px; background:url(./img/diy/icon/more.png); vertical-align:middle; *vertical-align:middle}
+
+.ztree li span.button.esx_ico_open{margin-right:2px; background: url(./img/diy/icon/esx.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.esx_ico_close{margin-right:2px; background: url(./img/diy/icon/esx.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.esx_ico_docu{margin-right:2px; background: url(./img/diy/icon/esx.png); vertical-align:middle; *vertical-align:middle}
+
+.ztree li span.button.sandswitch_ico_open{margin-right:2px; background: url(./img/diy/icon/sandswitch.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.sandswitch_ico_close{margin-right:2px; background: url(./img/diy/icon/sandswitch.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.sandswitch_ico_docu{margin-right:2px; background: url(./img/diy/icon/sandswitch.png); vertical-align:middle; *vertical-align:middle}
 
 .ztree li span.button.ico_loading{margin-right:2px; background:url(./img/loading.gif) no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
 

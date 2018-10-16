@@ -44,7 +44,25 @@
 	}
 
 	.lm_header{
-		height: 25px!important;
+		height: 26px!important;
+	}
+
+	.lm_header .lm_tab {
+		border: none;
+		height: 15px;
+	}
+
+	.lm_tab {
+		height: 18px !important;
+		line-height:20px;
+	}
+
+	.lm_close_tab {
+		height: 16px !important;
+	}
+
+	.lm_controls {
+		top:5px;
 	}
 
 	.lm_item .lm_column > .lm_stack:nth-child(1) > .lm_header{
@@ -63,27 +81,24 @@
 		color: rgb(119, 119, 119);
 	}
 
-	.lm_header .lm_tab {
-		border: none;
-		height: 15px;
-		padding: 4px 25px 0px 15px;
-	}
 
 	.lm_selected .lm_header {
 		background-color: rgb(230, 230, 230);
 	}
 
-	.lm_header .lm_tab .lm_close_tab {
+	/*.lm_header .lm_tab .lm_close_tab {
 		top: 7px!important;
-	}
+	}*/
 
+
+	.lm_tabs > li[title^="结果"] .lm_close_tab,
 	.lm_tabs > li[title=查询] .lm_close_tab,
-	.lm_tabs > li[title=日志] .lm_close_tab{
+	.lm_tabs > li[title=日志] .lm_close_tab {
 		display:none;
 	}
 
 	[id="app"] {
-		width: 100vw;
+		width: 100%;
 		height: 100vh;
 	}
 
@@ -191,7 +206,7 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-ai-robot-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <!-- Golden Layout container -->
 <div id="content" class="content">
@@ -212,7 +227,7 @@
 				        "omdb-editor-component",
                         "omdb-graph-component",
 	                    "vue-trigger-editor-component",
-                        "vue-ai-robot-component"], function() {
+                        "ai-robot-component"], function() {
 
         let classTree = function(id, bid, template, event){
 
@@ -1153,6 +1168,8 @@
 
                 eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
                 eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
+
+                eventHub.$on("CONTAINER-LAYOUT-RESIZE-EVENT",self.resizeLayout);
             },
             mounted: function() {
                 let self = this;
@@ -1280,6 +1297,11 @@
                     localStorage.removeItem('savedState');
                     window.location.reload(true);
                 },
+	            resizeLayout: function(){
+		           let self = this;
+
+                    self.layout.updateSize();
+			    },
                 addStackFromTree: function( event ) {
                     let self = this;
 

@@ -13,14 +13,16 @@
 *
 */
 
-var callFsJScript =  function(name){
+var callFsJScript =  function(name,term){
 
     let rtn = null;
 
     jQuery.ajax({
-        url: "/script/exec/js?input=HELLO&isfile=true",
+        url: `/script/exec/js?input=${term}&isfile=true`,
         type: "POST",
         data: name,
+        async: false,
+        dataType: 'json',
         contentType: false,
         beforeSend: function(xhr) {
         },
@@ -31,10 +33,9 @@ var callFsJScript =  function(name){
             ifSignIn(data);
 
             rtn = data;
-
-            console.log(data);
         },
         error: function(xhr, textStatus, errorThrown) {
+            rtn = xhr.responseJSON;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

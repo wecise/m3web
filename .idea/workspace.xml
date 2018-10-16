@@ -3,15 +3,76 @@
   <component name="ChangeListManager">
     <list default="true" id="3a91b7fe-4f2d-4d3f-bd0f-e039ca7152bd" name="Default" comment="remove vue-timeinlie-component.html">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_en-US.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" beforeDir="false" afterPath="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/assets/images/robot.svg" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/assets/images/robot.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/omdb/omdb-class-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/omdb/omdb-class-datatables-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/component/vue-graph-component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/omdb/omdb-output-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/omdb/omdb-output-datatables-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-tree-component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-kpi-manager-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-kpi-manager-component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/component/vue-kpi-tree-component.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/component/vue-kpi-tree-component.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/js/fs.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/fs.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/init.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/init.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/init.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/init.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/jscript.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/jscript.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/js/window.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/js/window.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/jscript/hello.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/public/web/vendor/ace-builds/src-noconflict/mode-mql.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/ace-builds/src-noconflict/mode-mql.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/about.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/bg.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/bootstrap.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/grad.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/prettify.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/prettify.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/about/red.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/contextmenu.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/contextmenu.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/license.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/readme.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/repeat-x.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/repeat-y.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/contextmenu/test.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/LICENSE.TXT" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/LICENSE.TXT" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/_jsglyph.sass" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/_jsglyph.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/_themes.sass" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/_themes.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/_themes_mdl_styles.sass" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/_themes_mdl_styles.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel-compiled.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel-compiled.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel-compiled.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel-compiled.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.min.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.sass" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/jsPanel/jquery.jspanel.sass" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/entityStyle/zTreeStyle.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/entityStyle/zTreeStyle.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/edit.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/edit.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/folder_table.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/folder_table.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/server.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/server.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/servers.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/table.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/img/diy/icon/table.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/zTreeStyle.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/zTreeStyle.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/base/head.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/base/head.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/ciview.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/ciview.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/creative.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/creative.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/event.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/event.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/files.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/files.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/job.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/job.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/log.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/log.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/omdb.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/omdb.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/omdb.html.backup.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/omdb.html.backup.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/performance.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/performance.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/probe.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/probe.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/janesware/search.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/search.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/janesware/system.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/janesware/system.html" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -26,11 +87,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="omdb-class-datatables-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-class-datatables-component.html">
+      <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/base/head.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1260">
-              <caret line="105" column="12" selection-start-line="105" selection-start-column="12" selection-end-line="105" selection-end-column="24" />
+            <state relative-caret-position="528">
+              <caret line="137" column="57" selection-start-line="137" selection-start-column="57" selection-end-line="137" selection-end-column="57" />
             </state>
           </provider>
         </entry>
@@ -38,17 +99,17 @@
       <file leaf-file-name="vue-entity-tree-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="24">
+            <state relative-caret-position="-2412">
               <caret line="2" column="17" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="17" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="head.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <file leaf-file-name="app.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/css/app.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-2160">
-              <caret line="453" column="31" lean-forward="true" selection-start-line="453" selection-start-column="31" selection-end-line="453" selection-end-column="31" />
+            <state relative-caret-position="3288">
+              <caret line="274" selection-start-line="274" selection-end-line="274" />
             </state>
           </provider>
         </entry>
@@ -56,8 +117,8 @@
       <file leaf-file-name="omdb-class-tree-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-class-tree-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="732">
-              <caret line="61" column="34" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
+            <state relative-caret-position="408">
+              <caret line="579" column="24" selection-start-line="579" selection-start-column="24" selection-end-line="580" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -65,33 +126,8 @@
       <file leaf-file-name="mode-mql.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/vendor/ace-builds/src-noconflict/mode-mql.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="12" column="208" selection-start-line="12" selection-start-column="208" selection-end-line="12" selection-end-column="208" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="omdb-editor-component.html" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="146" column="50" selection-start-line="146" selection-start-column="50" selection-end-line="146" selection-end-column="50" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="omdb.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5892">
-              <caret line="178" column="8" selection-start-line="178" selection-start-column="8" selection-end-line="178" selection-end-column="8" />
-              <folding>
-                <element signature="e#5194#9202#0" />
-                <element signature="e#9266#18500#0" />
-                <element signature="e#22095#32001#0" />
-                <element signature="e#32064#37586#0" />
-                <element signature="e#50094#51241#0" />
-              </folding>
+            <state relative-caret-position="132">
+              <caret line="12" column="215" selection-start-line="12" selection-start-column="215" selection-end-line="12" selection-end-column="215" />
             </state>
           </provider>
         </entry>
@@ -99,20 +135,35 @@
       <file leaf-file-name="omdb-graph-component.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="696">
-              <caret line="196" column="57" lean-forward="true" selection-start-line="196" selection-start-column="57" selection-end-line="196" selection-end-column="57" />
+            <state relative-caret-position="300">
+              <caret line="305" column="125" lean-forward="true" selection-start-line="305" selection-start-column="125" selection-end-line="305" selection-end-column="125" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="iflow.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
+      <file leaf-file-name="omdb.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="655">
-              <caret line="733" column="41" selection-start-line="733" selection-start-column="36" selection-end-line="733" selection-end-column="41" />
-              <folding>
-                <element signature="e#36713#41224#0" />
-              </folding>
+            <state relative-caret-position="288">
+              <caret line="93" column="29" selection-start-line="93" selection-start-column="29" selection-end-line="93" selection-end-column="29" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tag.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/js/tag.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="816">
+              <caret line="159" column="63" selection-start-line="159" selection-start-column="63" selection-end-line="159" selection-end-column="63" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="fs-editor-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-editor-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1127">
+              <caret line="153" column="62" selection-start-line="153" selection-start-column="62" selection-end-line="153" selection-end-column="62" />
             </state>
           </provider>
         </entry>
@@ -120,26 +171,52 @@
       <file leaf-file-name="probe.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/janesware/probe.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2172">
-              <caret line="1324" column="4" selection-start-line="1324" selection-start-column="4" selection-end-line="1324" selection-end-column="4" />
+            <state relative-caret-position="1128">
+              <caret line="207" column="97" lean-forward="true" selection-start-line="207" selection-start-column="24" selection-end-line="207" selection-end-column="97" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="probe-tree-component.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="probe-tree-component.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="948">
-              <caret line="79" column="38" selection-start-line="79" selection-start-column="38" selection-end-line="79" selection-end-column="38" />
+            <state relative-caret-position="-324">
+              <caret line="167" column="27" selection-start-line="167" selection-start-column="27" selection-end-line="167" selection-end-column="27" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="probe-list-datatables-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html">
+      <file leaf-file-name="ciview.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1392">
-              <caret line="116" column="34" selection-start-line="116" selection-start-column="34" selection-end-line="116" selection-end-column="34" />
+            <state relative-caret-position="204">
+              <caret line="1931" column="44" selection-start-line="1931" selection-start-column="44" selection-end-line="1931" selection-end-column="150" />
+              <folding>
+                <element signature="e#7050#41646#0" />
+                <element signature="e#41701#42800#0" />
+                <element signature="e#42856#45112#0" />
+                <element signature="e#45166#45808#0" />
+                <element signature="e#45861#59791#0" />
+                <element signature="e#59820#60657#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="probe-card-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-card-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-660">
+              <caret line="7" column="24" selection-start-line="7" selection-start-column="24" selection-end-line="7" selection-end-column="24" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="system.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="611">
+              <caret line="516" column="44" selection-start-line="516" selection-start-column="36" selection-end-line="516" selection-end-column="44" />
             </state>
           </provider>
         </entry>
@@ -147,8 +224,26 @@
       <file leaf-file-name="init.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="600">
-              <caret line="346" column="47" selection-start-line="346" selection-start-column="30" selection-end-line="346" selection-end-column="47" />
+            <state relative-caret-position="504">
+              <caret line="445" column="33" selection-start-line="445" selection-start-column="33" selection-end-line="445" selection-end-column="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="zTreeStyle.css" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/entityStyle/zTreeStyle.css">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="468">
+              <caret line="99" selection-start-line="99" selection-end-line="101" selection-end-column="154" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="probe-list-datatables-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="384">
+              <caret line="270" column="49" selection-start-line="270" selection-start-column="49" selection-end-line="270" selection-end-column="49" />
             </state>
           </provider>
         </entry>
@@ -156,35 +251,30 @@
       <file leaf-file-name="fs.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/js/fs.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="203">
-              <caret line="88" column="27" selection-start-line="88" selection-start-column="8" selection-end-line="88" selection-end-column="27" />
+            <state relative-caret-position="804">
+              <caret line="561" selection-start-line="561" selection-end-line="561" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/home.html">
+      <file leaf-file-name="fs-view-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-view-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="444" column="65" selection-start-line="444" selection-start-column="56" selection-end-line="444" selection-end-column="65" />
+            <state relative-caret-position="432">
+              <caret line="132" column="32" selection-start-line="132" selection-start-column="32" selection-end-line="132" selection-end-column="32" />
+              <folding>
+                <element signature="e#25335#35829#0" />
+                <element signature="e#39403#40357#0" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vue-fs-view-component.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
+      <file leaf-file-name="fs-output-component.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-output-component.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="422">
-              <caret line="855" column="22" lean-forward="true" selection-start-line="836" selection-start-column="20" selection-end-line="855" selection-end-column="22" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="app.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/public/web/js/app.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="480">
-              <caret line="260" column="47" selection-start-line="260" selection-start-column="24" selection-end-line="260" selection-end-column="47" />
+            <state relative-caret-position="361">
+              <caret line="121" column="20" selection-start-line="121" selection-start-column="20" selection-end-line="121" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -192,8 +282,8 @@
       <file leaf-file-name="jscript.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/web/js/jscript.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="468">
-              <caret line="39" column="7" selection-start-line="39" selection-start-column="7" selection-end-line="39" selection-end-column="7" />
+            <state relative-caret-position="180">
+              <caret line="20" column="22" lean-forward="true" selection-start-line="20" selection-start-column="22" selection-end-line="20" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -211,52 +301,38 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>remove</find>
-      <find>确定</find>
-      <find>tools-manage-template</find>
-      <find>addStackFromQuery</find>
-      <find>self.result</find>
-      <find>self.model</find>
-      <find>robot</find>
-      <find>ppt</find>
-      <find>pickIcon</find>
-      <find>currentView</find>
-      <find>config-manage</find>
-      <find>QUERY-RESULT-TRIGGER-EVENT</find>
-      <find>orthogonalEdgeStyle</find>
-      <find>self.model.graph.theme</find>
-      <find>localStorage</find>
-      <find>edgeStyle</find>
-      <find>{{AppSubUrl}}</find>
-      <find>sharp</find>
-      <find>styleOption</find>
-      <find>curved</find>
-      <find>styleSelect</find>
-      <find>curved=1;</find>
-      <find>round=1</find>
-      <find>rounded=1</find>
-      <find>organic</find>
-      <find>statusBar</find>
-      <find>toggleStatusBar</find>
-      <find>ClipboardJS</find>
-      <find>state</find>
-      <find>JSON.parse</find>
+      <find>component/ai-robot-component</find>
+      <find>_.a</find>
+      <find>probe-list-datatables-component</find>
+      <find>initScriptList</find>
+      <find>ai-robot-component</find>
+      <find>FS-EDITOR-RUN-EVENT</find>
+      <find>setData</find>
+      <find>setValue</find>
+      <find>content</find>
+      <find>formDa</find>
+      <find>&amp;download=true</find>
+      <find>console.log(param)</find>
+      <find>console.log(123,JSON.stringify(data))</find>
+      <find>cacheToLocal</find>
+      <find>systemStyle/zTreeStyle.css</find>
+      <find>.editable(</find>
+      <find>addNodes</find>
+      <find>exportIt</find>
+      <find>fs-name</find>
+      <find>stats-title</find>
+      <find>pickName</find>
+      <find>alertify</find>
+      <find>probe-tree-component</find>
+      <find>probe-card-component</find>
+      <find>probe-</find>
+      <find>probe</find>
+      <find>policy</find>
+      <find>addTagDir</find>
+      <find>script</find>
+      <find>call</find>
     </findStrings>
     <replaceStrings>
-      <replace>file-upload</replace>
-      <replace>type</replace>
-      <replace>self.model.graph.theme</replace>
-      <replace>self.model.graph.graph</replace>
-      <replace>self.model.graph.model</replace>
-      <replace>self.model.graph.container</replace>
-      <replace>.rootPath</replace>
-      <replace>open</replace>
-      <replace>&quot;</replace>
-      <replace>&quot;, &quot;</replace>
-      <replace>&quot;: &quot;</replace>
-      <replace>vue-omdb-datatables-component</replace>
-      <replace>alter</replace>
-      <replace>ALTER</replace>
       <replace>mql</replace>
       <replace>class</replace>
       <replace>omdb-class-datatables-component</replace>
@@ -273,6 +349,20 @@
       <replace>probe-list-datatables-component</replace>
       <replace>_.startsWith(parent,'/extend') || _.startsWith(parent,'/script')</replace>
       <replace>omdb-graph-component</replace>
+      <replace>MATRIX-THEME</replace>
+      <replace>fs-editor-component</replace>
+      <replace>fs-tree-component</replace>
+      <replace>fs-view-component</replace>
+      <replace>ai-robot-component</replace>
+      <replace>component/ai/ai-robot-component</replace>
+      <replace>fs-output-component</replace>
+      <replace>policy-card-component</replace>
+      <replace>policy-</replace>
+      <replace>policy</replace>
+      <replace>log</replace>
+      <replace>script</replace>
+      <replace>probe-card-component</replace>
+      <replace>probe</replace>
     </replaceStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
@@ -297,57 +387,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/templates/janesware/creative.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/job.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/files.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/performance.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/log.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/event.html" />
-        <option value="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/zTreeStyle.css" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-kpi-manager-component.html" />
-        <option value="$PROJECT_DIR$/public/web/js/file.js" />
-        <option value="$PROJECT_DIR$/public/web/js/probe.js" />
-        <option value="$PROJECT_DIR$/public/web/js/class.js" />
-        <option value="$PROJECT_DIR$/public/web/js/context.js" />
-        <option value="$PROJECT_DIR$/public/web/js/job.js" />
-        <option value="$PROJECT_DIR$/public/web/js/trigger.js" />
-        <option value="$PROJECT_DIR$/public/web/js/search.js" />
-        <option value="$PROJECT_DIR$/public/web/js/object.js" />
-        <option value="$PROJECT_DIR$/public/web/js/company.js" />
-        <option value="$PROJECT_DIR$/public/web/js/window.js" />
-        <option value="$PROJECT_DIR$/public/web/js/schgroup.js" />
-        <option value="$PROJECT_DIR$/public/web/js/rule.js" />
-        <option value="$PROJECT_DIR$/public/web/js/grok.js" />
-        <option value="$PROJECT_DIR$/public/web/js/websocket.js" />
-        <option value="$PROJECT_DIR$/public/web/js/user.js" />
-        <option value="$PROJECT_DIR$/public/web/js/sign.js" />
-        <option value="$PROJECT_DIR$/public/web/js/init.js" />
-        <option value="$PROJECT_DIR$/public/web/js/dispatch.js" />
-        <option value="$PROJECT_DIR$/templates/janesware/search.html" />
-        <option value="$PROJECT_DIR$/templates/home.html" />
-        <option value="$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html" />
-        <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-class-tree-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/temp.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/user.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/diagnosis.html" />
-        <option value="$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html" />
-        <option value="$PROJECT_DIR$/templates/janesware/probe.html" />
         <option value="$PROJECT_DIR$/templates/base/alert.html" />
-        <option value="$PROJECT_DIR$/public/web/js/fs.js" />
         <option value="$PROJECT_DIR$/public/web/component/vue-graph-component.html" />
         <option value="$PROJECT_DIR$/templates/janesware/system.html" />
         <option value="$PROJECT_DIR$/public/web/js/script.js" />
-        <option value="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" />
-        <option value="$PROJECT_DIR$/public/web/js/jscript.js" />
-        <option value="$PROJECT_DIR$/public/web/jscript/hello.js" />
-        <option value="$PROJECT_DIR$/templates/janesware/omdb.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html" />
-        <option value="$PROJECT_DIR$/public/web/js/app.js" />
-        <option value="$PROJECT_DIR$/templates/base/head.html" />
-        <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html" />
         <option value="$PROJECT_DIR$/public/web/vendor/ace-builds/src-noconflict/mode-mql.js" />
+        <option value="$PROJECT_DIR$/public/web/assets/images/robot.svg" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-ai-robot-component.html" />
+        <option value="$PROJECT_DIR$/templates/home.html" />
+        <option value="$PROJECT_DIR$/public/web/js/app.js" />
+        <option value="$PROJECT_DIR$/conf/locale/locale_en-US.ini" />
+        <option value="$PROJECT_DIR$/conf/locale/locale_zh-CN.ini" />
+        <option value="$PROJECT_DIR$/public/web/component/vue-fs-view-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/fsys/fs-editor-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/fs/fs-tree-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/fs/vue-fs-view-component.html" />
+        <option value="$PROJECT_DIR$/public/web/jscript/hello.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/files.html" />
+        <option value="$PROJECT_DIR$/public/web/jscript/Hello World.js" />
+        <option value="$PROJECT_DIR$/public/web/component/ai/ai-robot-component.html" />
+        <option value="$PROJECT_DIR$/public/web/js/jscript.js" />
+        <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-class-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-output-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/css/app.css" />
+        <option value="$PROJECT_DIR$/public/web/js/window.js" />
+        <option value="$PROJECT_DIR$/public/web/component/fs/fs-output-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/fs/fs-editor-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/probe/probe-card-component.html" />
         <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/zTreeStyle.css" />
+        <option value="$PROJECT_DIR$/public/web/jscript/probe_tree_data.js" />
+        <option value="$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/js/fs.js" />
+        <option value="$PROJECT_DIR$/templates/janesware/omdb.html" />
+        <option value="$PROJECT_DIR$/public/web/jscript/probe_summary_by_probe.js" />
+        <option value="$PROJECT_DIR$/public/web/component/fs/fs-view-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html" />
+        <option value="$PROJECT_DIR$/templates/base/head.html" />
+        <option value="$PROJECT_DIR$/public/web/js/tag.js" />
+        <option value="$PROJECT_DIR$/public/web/js/init.js" />
+        <option value="$PROJECT_DIR$/public/web/component/policy/probe-card-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/policy/policy-list-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/policy/policy-tree-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/log/log-list-datatables-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/log/log-tree-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/script/script-tree-component.html" />
+        <option value="$PROJECT_DIR$/public/web/component/script/script-list-datatables-component.html" />
+        <option value="$PROJECT_DIR$/templates/janesware/probe.html" />
+        <option value="$PROJECT_DIR$/public/web/vendor/zTree/css/entityStyle/zTreeStyle.css" />
+        <option value="$PROJECT_DIR$/templates/janesware/ciview.html" />
+        <option value="$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html" />
       </list>
     </option>
   </component>
@@ -377,122 +467,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="jscript" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard" type="462c0819:PsiDirectoryNode" />
-              <item name="dist" type="462c0819:PsiDirectoryNode" />
-              <item name="clipboard.js" type="620a8d5e:NestingTreeNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="vendor" type="462c0819:PsiDirectoryNode" />
-              <item name="mxgraph" type="462c0819:PsiDirectoryNode" />
-              <item name="graph" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="base" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="janesware" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="status" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="user" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="web" type="b2602c69:ProjectViewProjectNode" />
-              <item name="web" type="462c0819:PsiDirectoryNode" />
-              <item name="templates" type="462c0819:PsiDirectoryNode" />
-              <item name="user" type="462c0819:PsiDirectoryNode" />
-              <item name="auth" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="Scope">
         <subPane subId="Project Files">
           <expand>
@@ -517,6 +491,117 @@
               <item name="templates" type="cbb8eebc:String" user="templates" />
               <item name="user" type="cbb8eebc:String" user="user" />
               <item name="auth" type="cbb8eebc:String" user="auth" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="conf" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="conf" type="462c0819:PsiDirectoryNode" />
+              <item name="locale" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="cmdb" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="script" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="entityStyle" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="systemStyle" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="web" type="b2602c69:ProjectViewProjectNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="public" type="462c0819:PsiDirectoryNode" />
+              <item name="web" type="462c0819:PsiDirectoryNode" />
+              <item name="vendor" type="462c0819:PsiDirectoryNode" />
+              <item name="zTree" type="462c0819:PsiDirectoryNode" />
+              <item name="css" type="462c0819:PsiDirectoryNode" />
+              <item name="systemStyle" type="462c0819:PsiDirectoryNode" />
+              <item name="img" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -548,15 +633,18 @@
       <recent name="http://www.alpacajs.org/demos/bootstrap/multi-column-layouts/data/customer-profile-options.json" />
       <recent name="https://github.com/jclulow/jsondiff/blob/master/jsondiff.js" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public/web/component/cmdb" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/public/web/component/probe" />
-      <recent name="$PROJECT_DIR$/public/web/component/omdb" />
-      <recent name="$PROJECT_DIR$/templates/janesware" />
-      <recent name="$PROJECT_DIR$/public/web/component/cmdb" />
       <recent name="$PROJECT_DIR$/public/web/component" />
+      <recent name="$PROJECT_DIR$/public/web/js" />
+      <recent name="$PROJECT_DIR$/public/web/jscript" />
+      <recent name="$PROJECT_DIR$/public/web/component/fs" />
+      <recent name="$PROJECT_DIR$/public/web/component/fsys" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/web/component/probe" />
+      <recent name="$PROJECT_DIR$/public/web/component/ai" />
+      <recent name="$PROJECT_DIR$/public/web/component/fsys" />
+      <recent name="$PROJECT_DIR$/public/web/component/cmdb" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -624,20 +712,21 @@
       <workItem from="1534732166286" duration="45646000" />
       <workItem from="1535941775802" duration="44638000" />
       <workItem from="1536633971878" duration="68201000" />
-      <workItem from="1537408355399" duration="47417000" />
+      <workItem from="1537408355399" duration="81439000" />
+      <workItem from="1538918667832" duration="104162000" />
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1750188000" />
+    <option name="totallyTimeSpent" value="1888372000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1920" y="-100" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Remote Host" order="3" weight="0.32956383" />
-      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.24068157" />
+      <window_info active="true" content_ui="combo" x="480" y="67" width="320" height="685" id="Project" order="0" visible="true" weight="0.24494143" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.3283582" />
@@ -665,14 +754,14 @@
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32965517" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.32935324" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.3283582" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32965517" />
+      <window_info anchor="bottom" id="Message" order="0" />
       <window_info id="Favorites" order="2" side_tool="true" />
     </layout-to-restore>
   </component>
@@ -730,365 +819,357 @@
           <url>file://$PROJECT_DIR$/templates/janesware/object.html</url>
           <line>2430</line>
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/templates/janesware/ciview.html</url>
+          <line>977</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="4" />
+      <option name="time" value="5" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/public/web/js/class.js">
+    <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-tree-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" lean-forward="true" selection-start-line="11" selection-end-line="11" selection-end-column="13" />
+        <state relative-caret-position="444">
+          <caret line="37" column="4" selection-start-line="37" selection-start-column="4" selection-end-line="37" selection-end-column="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/context.js">
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Actions.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="263">
+          <caret line="184" column="9" selection-start-line="182" selection-start-column="8" selection-end-line="184" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/jscript/Hello World.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="24">
+          <caret line="2" column="37" lean-forward="true" selection-end-line="2" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/ai/ai-robot-component.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
-          <caret line="10" selection-start-line="10" selection-end-line="10" selection-end-column="13" />
+          <caret line="10" lean-forward="true" selection-end-line="224" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/job.js">
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-editor-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+        <state relative-caret-position="315">
+          <caret line="194" column="36" selection-start-line="194" selection-start-column="28" selection-end-line="194" selection-end-column="36" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/trigger.js">
+    <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-class-datatables-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="156">
-          <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/company.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="12" column="13" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/search.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" selection-start-line="11" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/window.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/rule.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/grok.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/websocket.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/schgroup.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/user.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="12" column="13" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/sign.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/dispatch.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="132">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/flow.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-84" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-search-preset-component_en-US.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="372">
-          <caret line="223" column="186" lean-forward="true" selection-start-line="223" selection-start-column="32" selection-end-line="223" selection-end-column="186" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/search.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="636">
-          <caret line="905" column="36" selection-start-line="905" selection-start-column="36" selection-end-line="905" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/object.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4692">
-          <caret line="391" column="30" selection-start-line="391" selection-start-column="30" selection-end-line="391" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-object-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="3" column="11" selection-start-line="3" selection-start-column="11" selection-end-line="3" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/omdbStyle/zTreeStyle.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="73" selection-start-line="73" selection-end-line="80" selection-end-column="133" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-class-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="732">
-          <caret line="61" column="34" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/temp.html" />
-    <entry file="file://$PROJECT_DIR$/templates/janesware/user.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1236">
-          <caret line="103" column="5" selection-start-line="103" selection-start-column="5" selection-end-line="103" selection-end-column="5" />
+        <state relative-caret-position="324">
+          <caret line="172" selection-start-line="172" selection-end-line="172" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-output-datatables-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2424">
-          <caret line="202" selection-start-line="202" selection-end-line="202" />
+        <state relative-caret-position="-518">
+          <caret line="184" column="93" selection-start-line="184" selection-start-column="93" selection-end-line="184" selection-end-column="93" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/diagnosis.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3833">
-          <caret line="45" column="26" lean-forward="true" selection-start-line="45" selection-start-column="26" selection-end-line="45" selection-end-column="26" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-dispatch-manager-component.html">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="948">
-          <caret line="79" column="38" selection-start-line="79" selection-start-column="38" selection-end-line="79" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1392">
-          <caret line="116" column="34" selection-start-line="116" selection-start-column="34" selection-end-line="116" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/base/alert.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-graph-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="408">
-          <caret line="34" column="36" selection-start-line="34" selection-start-column="36" selection-end-line="34" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/probe.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2172">
-          <caret line="1324" column="4" selection-start-line="1324" selection-start-column="4" selection-end-line="1324" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/object.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="18" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/script.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="27" column="2" lean-forward="true" selection-start-line="27" selection-start-column="2" selection-end-line="27" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/fs.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="88" column="27" selection-start-line="88" selection-start-column="8" selection-end-line="88" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/jscript.js">
+    <entry file="file://$PROJECT_DIR$/templates/janesware/files.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="468">
-          <caret line="39" column="7" selection-start-line="39" selection-start-column="7" selection-end-line="39" selection-end-column="7" />
+          <caret line="98" column="85" selection-start-line="98" selection-start-column="85" selection-end-line="98" selection-end-column="85" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/jscript/hello.js">
+    <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-output-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="5" column="37" lean-forward="true" selection-start-line="5" selection-start-column="37" selection-end-line="5" selection-end-column="37" />
+        <state relative-caret-position="361">
+          <caret line="121" column="20" selection-start-line="121" selection-start-column="20" selection-end-line="121" selection-end-column="20" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-fs-view-component.html">
+    <entry file="file://$PROJECT_DIR$/public/web/css/app.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="422">
-          <caret line="855" column="22" lean-forward="true" selection-start-line="836" selection-start-column="20" selection-end-line="855" selection-end-column="22" />
+        <state relative-caret-position="3288">
+          <caret line="274" selection-start-line="274" selection-end-line="274" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
+    <entry file="file://$PROJECT_DIR$/public/web/js/grok.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/omdbStyle/zTreeStyle.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="642">
-          <caret line="1208" column="49" lean-forward="true" selection-start-line="1208" selection-start-column="49" selection-end-line="1208" selection-end-column="49" />
+        <state relative-caret-position="564">
+          <caret line="80" column="133" lean-forward="true" selection-start-line="76" selection-end-line="80" selection-end-column="133" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/event.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-7080" />
-      </provider>
+    <entry file="file://$PROJECT_DIR$/public/web/js/job.js">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
+    <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5892">
-          <caret line="178" column="8" selection-start-line="178" selection-start-column="8" selection-end-line="178" selection-end-column="8" />
-          <folding>
-            <element signature="e#5194#9202#0" />
-            <element signature="e#9266#18500#0" />
-            <element signature="e#22095#32001#0" />
-            <element signature="e#32064#37586#0" />
-            <element signature="e#50094#51241#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="24">
-          <caret line="2" column="17" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/EditorUi.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="740" column="73" selection-start-line="740" selection-start-column="65" selection-end-line="740" selection-end-column="73" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="220" column="77" lean-forward="true" selection-start-line="220" selection-start-column="77" selection-end-line="220" selection-end-column="77" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/vendor/mxgraph/graph/js/Format.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="402">
-          <caret line="4563" column="39" selection-start-line="4563" selection-start-column="33" selection-end-line="4563" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="346" column="47" selection-start-line="346" selection-start-column="30" selection-end-line="346" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2160">
-          <caret line="453" column="31" lean-forward="true" selection-start-line="453" selection-start-column="31" selection-end-line="453" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/home.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="444" column="65" selection-start-line="444" selection-start-column="56" selection-end-line="444" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/janesware/iflow.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="655">
-          <caret line="733" column="41" selection-start-line="733" selection-start-column="36" selection-end-line="733" selection-end-column="41" />
-          <folding>
-            <element signature="e#36713#41224#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/js/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="260" column="47" selection-start-line="260" selection-start-column="24" selection-end-line="260" selection-end-column="47" />
+        <state relative-caret-position="336">
+          <caret line="74" column="156" selection-start-line="74" selection-start-column="156" selection-end-line="74" selection-end-column="156" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/vendor/ace-builds/src-noconflict/mode-mql.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="12" column="208" selection-start-line="12" selection-start-column="208" selection-end-line="12" selection-end-column="208" />
+        <state relative-caret-position="132">
+          <caret line="12" column="215" selection-start-line="12" selection-start-column="215" selection-end-line="12" selection-end-column="215" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-editor-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1127">
+          <caret line="153" column="62" selection-start-line="153" selection-start-column="62" selection-end-line="153" selection-end-column="62" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/object.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="276">
+          <caret line="23" column="17" lean-forward="true" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/system.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="611">
+          <caret line="516" column="44" selection-start-line="516" selection-start-column="36" selection-end-line="516" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-list-datatables-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="384">
+          <caret line="270" column="49" selection-start-line="270" selection-start-column="49" selection-end-line="270" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/window.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6252">
+          <caret line="711" column="4" selection-start-line="711" selection-start-column="4" selection-end-line="711" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-class-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="579" column="24" selection-start-line="579" selection-start-column="24" selection-end-line="580" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/jscript/probe_summary_by_probe.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="36" column="42" lean-forward="true" selection-start-line="36" selection-start-column="42" selection-end-line="36" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/jscript/probe_tree_data.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="240">
+          <caret line="20" column="13" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/creative.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="358">
+          <caret line="111" column="32" selection-start-line="109" selection-start-column="12" selection-end-line="111" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/fs/fs-view-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="132" column="32" selection-start-line="132" selection-start-column="32" selection-end-line="132" selection-end-column="32" />
+          <folding>
+            <element signature="e#25335#35829#0" />
+            <element signature="e#39403#40357#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/alertifyjs/lib/alertify.js">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/base/head.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="137" column="57" selection-start-line="137" selection-start-column="57" selection-end-line="137" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-card-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-660">
+          <caret line="7" column="24" selection-start-line="7" selection-start-column="24" selection-end-line="7" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/tag.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="159" column="63" selection-start-line="159" selection-start-column="63" selection-end-line="159" selection-end-column="63" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/imap.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-876" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/policy/policy-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2046">
+          <caret line="208" lean-forward="true" selection-start-line="208" selection-end-line="208" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/policy/policy-list-datatables-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="137" column="48" lean-forward="true" selection-start-line="137" selection-start-column="48" selection-end-line="137" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/policy/policy-card-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="45" column="17" lean-forward="true" selection-start-line="45" selection-start-column="17" selection-end-line="45" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/log/log-card-component.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/script/policy-card-component.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/script/script-list-datatables-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="534">
+          <caret line="154" column="34" lean-forward="true" selection-start-line="154" selection-start-column="34" selection-end-line="154" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/log/log-list-datatables-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1266">
+          <caret line="138" column="19" selection-start-line="138" selection-start-column="16" selection-end-line="138" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/log/log-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="209" column="58" selection-start-line="209" selection-start-column="58" selection-end-line="209" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="107" column="52" lean-forward="true" selection-start-line="107" selection-start-column="52" selection-end-line="107" selection-end-column="52" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-graph-component.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="696">
-          <caret line="196" column="57" lean-forward="true" selection-start-line="196" selection-start-column="57" selection-end-line="196" selection-end-column="57" />
+        <state relative-caret-position="300">
+          <caret line="305" column="125" lean-forward="true" selection-start-line="305" selection-start-column="125" selection-end-line="305" selection-end-column="125" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/web/component/omdb/omdb-editor-component.html">
+    <entry file="file://$PROJECT_DIR$/public/web/js/fs.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="146" column="50" selection-start-line="146" selection-start-column="50" selection-end-line="146" selection-end-column="50" />
+        <state relative-caret-position="804">
+          <caret line="561" selection-start-line="561" selection-end-line="561" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/jscript.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="20" column="22" lean-forward="true" selection-start-line="20" selection-start-column="22" selection-end-line="20" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/omdb.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="93" column="29" selection-start-line="93" selection-start-column="29" selection-end-line="93" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/systemStyle/zTreeStyle.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="89" column="146" lean-forward="true" selection-start-line="73" selection-end-line="89" selection-end-column="146" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/js/init.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="445" column="33" selection-start-line="445" selection-start-column="33" selection-end-line="445" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/vue-entity-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2412">
+          <caret line="2" column="17" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/vendor/zTree/css/entityStyle/zTreeStyle.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="99" selection-start-line="99" selection-end-line="101" selection-end-column="154" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/ciview.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="1931" column="44" selection-start-line="1931" selection-start-column="44" selection-end-line="1931" selection-end-column="150" />
+          <folding>
+            <element signature="e#7050#41646#0" />
+            <element signature="e#41701#42800#0" />
+            <element signature="e#42856#45112#0" />
+            <element signature="e#45166#45808#0" />
+            <element signature="e#45861#59791#0" />
+            <element signature="e#59820#60657#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/janesware/probe.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1128">
+          <caret line="207" column="97" lean-forward="true" selection-start-line="207" selection-start-column="24" selection-end-line="207" selection-end-column="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/web/component/probe/probe-tree-component.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-324">
+          <caret line="167" column="27" selection-start-line="167" selection-start-column="27" selection-end-line="167" selection-end-column="27" />
         </state>
       </provider>
     </entry>

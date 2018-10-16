@@ -1,0 +1,322 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.fs-editor-component {
+			background-color: rgb(246, 246, 246);
+			width:100%;
+			height: 100%;
+			position: relative;
+		}
+
+		.fs-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.lm_maximised .fs-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height:calc(100% - 50px)!important;
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.ace_keyword {
+			color: #a70909!important;
+		}
+
+		.editorToolBar{
+			height: 30px;
+			background-color: rgb(246, 246, 246);/*rgb(33, 149, 243);*/
+			width: 100%;
+		}
+
+		.editorToolBar .btn-primary,
+		.editorToolBar .btn-primary:hover{
+			background-color: rgb(246, 246, 246);
+			color: #333333;
+			border:none;
+		}
+
+		.editorToolBar > .btn-group {
+			top: 1px;
+		}
+
+		.editorToolBar .btn-group > a > i{
+			color: #666666;
+		}
+
+		.scrollmargin {
+			height: 500px;
+			text-align: center;
+		}
+
+		.editor-container{
+			width: 100%;
+			height: 100%;
+		}
+
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="fs-editor-component"  ----------*/
+	<template>
+		<div class="editor-container">
+			<div class="editorToolBar" id="editorToolBar">
+				<div class="btn-group" role="group">
+					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary cache" @click="cacheToLocal" title="缓存"><i class="fa fa-file-upload"></i></a>-->
+					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromLocal" title="加载"><i class="fa fa-file-download"></i></a>-->
+
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fa fa-paste"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-check"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="runIt"  title="运行"><i class="fa fa-play"></i></a>
+					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
+					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fa fa-forward"></i></a>-->
+				</div>
+			</div>
+			<div :id="id" ></div>
+			<div id="statusBar"></div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="fs-editor-component">
+	{
+	    delimiters: ['${', '}'],
+        props: {
+            id: String,
+			bid: String,
+            model: Object,
+            showToolsBar: Boolean,
+			showStatusBar: Boolean
+        },
+        data: function(){
+            return {
+                langTools:null,
+                editor: null,
+                inputText: "",
+	            result: null
+            }
+        },
+        mounted: function(){
+            var self = this;
+
+            self.$nextTick(function(){
+                self.init();
+            })
+        },
+        watch: {
+            'model.newInput': {
+            	handler:function(val,oldVal){
+                    let self = this;
+                    
+                    self.editor.setValue(val);
+                },
+                deep:true
+            }
+
+        },
+        created: function () {
+            let self = this;
+
+            eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",self.refresh);
+        },
+        methods: {
+            init: function() {
+                let self = this;
+
+                self.langTools = ace.require("ace/ext/language_tools");
+                self.editor = ace.edit(self.id);
+                
+                self.editor.setOptions({
+                    // maxLines: 1000,
+                    // minLines: 20,
+                    autoScrollEditorIntoView: true,
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: false
+                });
+                //self.editor.$blockScrolling = Infinity;
+                self.editor.setShowPrintMargin(self.model.printMargin);
+                self.editor.setReadOnly(self.model.readOnly);
+                self.editor.getSession().setUseSoftTabs(true);
+
+                self.editor.getSession().setTabSize(2);
+                self.editor.getSession().setUseWrapMode(true);
+
+                self.setTheme();
+                self.setMode();
+                self.setOptions();
+
+				self.toggleToolsBar();
+
+				//self.toggleStatusBar();
+
+                // Customer Auto Completer
+	            let customerCompleter = {
+                    getCompletions: function(editor, session, pos, prefix, callback) {
+
+                        if (prefix.length === 0) {
+                            callback(null, []);
+                            return
+                        }
+
+                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+
+                        if(_.isEmpty(rtn)) return;
+
+                        let word = _.attempt(JSON.parse.bind(null, rtn.message));
+
+                        callback(null,_.map(word,function(ea) {
+                            console.log(ea)
+                            return {
+                                name: ea.name,
+                                value: ea.name,
+                                score: 300,
+                                meta: ea.class
+                            }
+                        }));
+
+                    }
+                };
+
+                self.langTools.addCompleter(customerCompleter);
+                
+            },
+	        refresh: function(){
+                let self = this;
+
+                if(self.editor){
+                    self.editor.resize();
+                }
+	        },
+            setOptions: function(){
+                let self = this;
+
+                if(!_.isEmpty(self.model.options)){
+                    self.editor.setOptions(self.model.options);
+                } 
+            },
+            setTheme: function(){
+                let self = this;
+
+                if(_.isEmpty(self.model.theme)){
+                	self.editor.setTheme("ace/theme/tomorrow");
+                } else {
+                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                }
+                
+            },
+            setMode: function(){
+                let self = this;
+
+                if(_.isEmpty(self.model.mode)){
+                	self.editor.getSession().setMode("ace/mode/json");
+                } else {
+                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                }
+                
+            },
+            setValue: function(){
+                let self = this;
+
+                self.editor.setValue(self.model.oldInput);
+            },
+            getSelected: function(){
+                let self = this;
+                var temp = self.editor.getSelectedText();
+
+                if(_.isEmpty(temp)){
+                    self.inputText = self.editor.getValue();
+                } else {
+                    self.inputText = temp;
+                }
+            },
+            toggleToolsBar: function(){
+                let self = this;
+
+                if(self.showToolsBar){
+                    $(".editorToolBar").show();
+                } else {
+                    $(".editorToolBar").hide();
+                }
+            },
+	        toggleStatusBar: function(){
+                let self = this;
+
+                if(self.showStatusBar) {
+                    let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+                }
+	        },
+	        copyIt: function(){
+		        let self = this;
+
+                new Clipboard(".copy", {
+                    text: function(trigger) {
+                        alertify.log("已复制");
+                        return self.editor.getValue();
+                    }
+                });
+
+	        },
+            pasteIt: function(){
+                let self = this;
+
+                document.execCommand("paste");
+                alertify.log("已粘贴");
+            },
+	        selectAll: function(){
+                let self = this;
+
+                self.editor.selection.selectAll();
+            },
+            clearIt: function(){
+                let self = this;
+
+                self.editor.setValue();
+                alertify.log("已清空");
+            },
+            runIt: function(){
+                let self = this;
+
+                let sc = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    sc = self.editor.getSelectedText();
+                }
+
+                // save
+				let sRtn = fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+
+                if(sRtn == 0){
+                    alertify.log("请确认脚本！");
+                    return false;
+                }
+
+	            // run
+                let rRtn = callFsJScript(self.model.fs.name, '');
+
+                eventHub.$emit("FS-EDITOR-RUN-EVENT", rRtn)
+
+            }
+        }
+    
+	
+	}
+	</script>
+
+</code>

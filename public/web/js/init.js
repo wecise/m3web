@@ -438,4 +438,9 @@ var syntaxHighlight = function(json) {
         }
         return '<span class="' + cls + '">' + match + '</span>';
     });
-}
+};
+
+/*
+*  alertify setup
+* */
+alertify.set({ labels : { ok: "确认", cancel: "取消" } });
