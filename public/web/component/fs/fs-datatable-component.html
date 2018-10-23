@@ -1,0 +1,261 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+
+		.fs-datatable-component thead tr th, .fs-datatable-component tbody tr td{
+			line-height: 10px;
+			white-space: nowrap;
+		}
+
+		.fs-datatable-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
+			background: rgb(196, 235, 253)!important;
+		}
+
+		td.highlight {
+			background-color: whitesmoke !important;
+		}
+
+		table.fs-datatable-component tbody tr:nth-child(even):hover td{
+			background-color: rgba(227, 239, 244, 0.5) !important;
+		}
+
+		div #container {
+			width: 100%;
+			padding: 0px;
+		}
+
+
+        
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="fs-datatable-component"  ----------*/
+	<template>
+		<div id="container">
+			<table :id="id" class="display animated fadeIn" width="100%"></table>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="fs-datatable-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+        	id: String,
+            bid: String,
+			columns: Array,
+			dataset: Array,
+			options: Object,
+            contextmenu: String,
+			result: Object,
+		},
+		data: function(){
+          	return {
+                datatable: null,
+				selectedRow: null,
+				selectedCell: null
+			}
+		},
+        created: function(){
+            let self = this;
+
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
+        },
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+                _.delay(function() {
+                    self.init();
+                },500);
+
+            })
+        },
+		computed: {
+            _columns: function(){
+                let self = this;
+
+                let _cols = _.map(self.columns,function(v,k){
+
+                            //  data & time render
+                            if(_.includes(['day','vtime','mtime','ctime'],v.field)){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
+                                        return moment(data).format("LLL");
+	                                }};
+                            }
+
+		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                                return { data: v.data, title: _.camelCase(v.field), visible: v.visible, render: function(data, type, row){
+		                                if(_.isNull(data) || _.isEmpty(data)) {
+                                            return '';
+		                                } else{
+                                            return JSON.stringify(data,null,2);
+		                                }
+		                            }};
+		                    }
+
+		                    if(!v.render){
+                                return v;
+		                    } else {
+                                return { data: v.data, title: v.title, visible: v.visible, orderable: true, className: v.className, render: eval(v.render) };
+		                    }
+
+
+                });
+
+                return _cols;
+			}
+		},
+		watch: {
+          	dataset: {
+                handler: function(val,oldVal){
+                      	    let self = this;
+
+		                    if(val == oldVal) return false;
+
+		                    self.datatable.destroy();
+		                    //$(self.$el).empty();
+		                    self.init();
+
+                },
+                deep:true
+			}
+
+		},
+		methods: {
+            init: function(){
+                let self = this;
+
+                self.datatable = $("#"+self.id).DataTable( _.extend({
+                    			data: self.dataset,
+                                columns: self._columns,
+                                responsive: true,
+                                searching: false,
+                                aDataSort: true,
+                                bSort: true,
+			                    bAutoWidth: true,
+                                rowReorder: false,
+                                colReorder: false,
+								paging: false,
+								info: false,
+                    			scrollX: 'auto',
+								scrollY: 'auto',
+								scrollCollapse: true,
+                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                language : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    },
+                                    buttons: {
+                                        copyTitle: '已拷贝到剪切板',
+                                        copyKeys: '已拷贝',
+                                        copySuccess: {
+                                            _: '已拷贝 %d 项',
+                                            1: '1 已拷贝'
+                                        }
+                                    }
+                                },
+	                            fixedHeader: {
+			                        header: true,
+			                        footer: true
+			                    },
+                                select: {
+			                        style: 'os',
+                                    selector: 'td:first-child'
+
+			                    },
+			                    lengthChange: true,
+			                    stateSave: false,
+			                    initComplete: function(settings, json) {
+
+			                    },
+			                    drawCallback: function( settings ) {
+			                        console.log('表格重绘了' );
+			                    }
+                    },self.options));
+
+				self.initPlugin();
+
+			},
+			initPlugin: function(){
+                let self = this;
+
+                // init selected row's status
+                $("#"+self.id).find("tbody").on("mouseenter", "tr", function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                /*$("#"+self.id).find("tbody").on( 'mouseenter', 'td', function () {
+					var colIdx = self.datatable.cell(this).index().column;
+
+					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
+					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
+				} );*/
+
+                // selected row
+                $("#"+self.id).on( 'click', 'tr', function () {
+
+                    /*if ( $(this).hasClass('selected') ) {
+                        $(this).removeClass('selected');
+                    }
+                    else {
+                        self.datatable.$("tr.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                    }*/
+
+                    self.selectedRow = self.datatable.row( this ).data();
+                } );
+
+                // selected row
+                $("#"+self.id).on( 'dblclick', 'tr', function () {
+                    self.selectedRow = self.datatable.row( this ).data();
+
+                } );
+
+                // selected cell
+                $("#"+self.id).on( 'click', 'td', function () {
+                    self.selectedCell = self.datatable.cell( this ).data();
+                } );
+
+
+			},
+            redraw: function(){
+                let self = this;
+
+                self.datatable.columns.adjust().draw(); // Redraw the DataTable
+            }
+		}
+	
+	}
+	</script>
+
+</code>

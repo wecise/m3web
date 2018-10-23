@@ -471,14 +471,20 @@ var fsTemp = function(ftype, name, content, attr){
 var fsZip = function(srcpath){
     let rtn = 0;
 
+    let _issys = false;
+
     let _srcpath = srcpath.replace(/\/\//g,'/');
+
+    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.isEqual(_srcpath,'/')){
+        _issys = true;
+    }
 
     let fm = new FormData();
 
     fm.append("srcpath",_srcpath);
 
     jQuery.ajax({
-        url: '/fs/export?issys=true',
+        url: `/fs/export?issys=${_issys}`,
         processData: false,
         contentType: false,
         mimeType: "multipart/form-data",
@@ -493,15 +499,22 @@ var fsZip = function(srcpath){
 
             ifSignIn(data);
 
-            download(data, `fs${srcpath.replace(/\//g,'_')}.zip`, "application/zip");
+            let zip = new JSZip();
+            let name = _srcpath.replace(/\//g,'_').replace(/^_/g,'');
+            zip.file(`${name}.txt`, data);
+            zip.generateAsync({type:"blob"}).then(function (data) {
+                saveAs(data, `${name}.zip`);
+            }, function (err) {
+                console.log(err);
+            });
 
-            if( _.lowerCase(data.status) == "ok"){
+            /*if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("打包成功" + srcpath);
             } else {
                 rtn = 0;
                 alertify.error("打包失败" + srcpath);
-            }
+            }*/
 
         },
         error: function(xhr, textStatus, errorThrown) {
@@ -524,10 +537,16 @@ var fsZip = function(srcpath){
 var fsUnZip = function(zippack){
     let rtn = 0;
 
+    let _issys = false;
+
     let _srcpath = srcpath.replace(/\/\//g,'/');
 
+    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.isEqual(_srcpath,'/')){
+        _issys = true;
+    }
+
     jQuery.ajax({
-        url: '/fs/export?issys=true',
+        url: `/fs/export?issys=${_issys}`,
         processData: false,
         contentType: false,
         mimeType: "multipart/form-data",
@@ -561,4 +580,32 @@ var fsUnZip = function(zippack){
     })
 
     return rtn;
+};
+
+
+var genFsUrl = function(item,cfg){
+
+    let app = function(ext,action){
+        let list = {
+                    "imap":  {
+                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "run": "/janesware/imap"
+                    },
+                    "iflow": {
+                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "run": "/janesware/iflow"
+                    },
+                    "ishow": {
+                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "run": "/janesware/ishow"
+                    }
+        };
+        return list[ext][action];
+    };
+
+    let _cfg = _.extend({ header:false, sidebar:false, footbar:false },cfg);
+
+    let url = app(item.ftype,item.action) + `?item=${window.btoa(encodeURIComponent(JSON.stringify(item)))}&cfg=${window.btoa(encodeURIComponent(JSON.stringify(_cfg)))}`;
+
+    return url;
 };

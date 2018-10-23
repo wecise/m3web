@@ -7,9 +7,9 @@
 			white-space: nowrap;
 		}
 
-		/*.probe-list-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
+		.probe-list-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
-		}*/
+		}
 
 		div.dataTables_wrapper div.dataTables_info {
 			padding-top: 4px;
@@ -131,8 +131,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="probe-list-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-bordered pageResize" width="100%">
-		</table>
+		<table :id="id" class="table table-bordered pageResize" width="100%"></table>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -158,7 +157,7 @@
         created: function(){
             let self = this;
 
-            eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
         },
 		mounted: function () {
@@ -230,30 +229,7 @@
 
                 },
                 deep:true
-			}/*,
-            columns: function(val,oldVal){
-                let self = this;
-
-                if(self.datatable){
-                    self.datatable.clear().draw();
-                    self.datatable.draw();
-                    //self.datatable.rows.add(val); // Add new data
-                    self.datatable.columns.adjust().draw(); // Redraw the DataTable
-                }
-
-            }*/,
-            options: {
-                handler: function(val,oldVal){
-                    let self = this;
-
-                    //if(val == oldVal) return false;
-
-	                //self.datatable.destroy();
-                    //self.init();
-
-                },
-                deep:true
-            }
+			}
 
 		},
 		methods: {

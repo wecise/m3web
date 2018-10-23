@@ -120,7 +120,7 @@
         created: function(){
             let self = this;
 
-            eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
         },
 		mounted: function () {
@@ -147,7 +147,7 @@
                             //  data & time render
                             if(_.includes(['day','vtime','mtime','ctime'],v.field)){
                                 return { "data": v.field, "title": _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
-                                        return moment(data).format("LLL");
+                                        return moment(data).format("YYYY-MM-DD HH:mm:ss");
 	                                }};
                             }
 

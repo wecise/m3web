@@ -485,29 +485,29 @@
                                 return {
 
                                     items: {
-                                        "edit": {name: "编辑", icon: "fa-edit", callback: function(key, opt) {
+                                        "edit": {name: "编辑", icon: "fas fa-edit", callback: function(key, opt) {
                                                 self.forwardCreative('edit', _item);
                                             }
                                         },
                                         "sep2": "---------",
 
-                                        "delete": {name: "删除", icon: "fa-trash", callback: function(key, opt) {
+                                        "delete": {name: "删除", icon: "fas fa-trash", callback: function(key, opt) {
                                                 self.remove(_item);
                                             }
                                         },
                                         "sep3": "---------",
-                                        "copy": {name: "复制", icon: "fa-copy", callback: function(key, opt) {
+                                        "copy": {name: "复制", icon: "fas fa-copy", callback: function(key, opt) {
                                                 self.copyIt(_item);
                                             }
                                         },
-                                        "paste": {name: "粘贴", icon: "fa-paste", callback: function(key, opt) {
+                                        "paste": {name: "粘贴", icon: "fas fa-paste", callback: function(key, opt) {
                                                 self.pasteIt();
 
                                             }
                                         },
                                         "sep4": "---------",
 
-                                        "info": {name: "属性", icon: "fa-info", callback: function(key, opt, rootMenu, originalEvent) {
+                                        "info": {name: "属性", icon: "fas fa-info", callback: function(key, opt, rootMenu, originalEvent) {
                                                 self.info(_item);
                                             }
                                         }
@@ -607,7 +607,7 @@
                             data: {
                                 model: {
                                     project: {
-                                        value: "流程设计",
+                                        value: "IT地图",
                                         extName: {
                                             "流程设计": "iflow",
                                             "仪表盘": "ishow",
@@ -720,7 +720,7 @@
                             data: {
                                 model: {
                                     name: "",
-                                    type: "iflow",
+                                    type: "imap",
                                     tags: [],
                                     info: {
                                         remark: ""
@@ -857,47 +857,21 @@
                     },
                     forwardCreative: function(action,item){
                         let self = this;
-                        let _lang = `{{.Lang}}`;
-                        let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
 
-                        let obj = {};
-                        obj.lang = lang;
-                        obj.action = action;
-                        obj.type = item.ftype;
-                        obj.name = item.name;
-                        obj.parent = item.parent;
-                        obj.fsExtension = item.name.split(".")[1] || "ishow";
-                        obj.attr = item.attr;
+                        if(item.ftype === 'dir'){
 
-                        localStorage.setItem("graph-object",JSON.stringify(obj));
-
-                        if(item.ftype === 'ishow'){
-                            let _obj = {};
-
-                            _obj.name = item.name;
-                            _obj.parent = "/home/dashboard";
-
-                            localStorage.setItem("dashboard-object", JSON.stringify(_obj));
-
-                            window.open(
-                                "/janesware/" + obj.fsExtension,
-                                "_blank"
-                            );
-                        } else if(item.ftype === 'dir'){
                             self.model.root = item.parent+"/"+item.name.replace(/\/home\/admin/g,"");
                             self.load();
+
                         } else {
-                            if (action == 'edit'){
-                                window.open(
-                                    "/web/vendor/mxgraph/graph/index.html",
-                                    "_blank"
-                                );
-                            } else {
-                                window.open(
-                                    "/janesware/" + obj.fsExtension,
-                                    "_blank"
-                                );
-                            }
+                            let _lang = `{{.Lang}}`;
+                            let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
+
+                            item = _.merge(item,{lang: lang, action:action});
+
+                            let url = genFsUrl(item,null);
+
+                            window.open(url, "_blank");
                         }
                     },
                     remove: function(event) {
@@ -1215,7 +1189,7 @@
                                             <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
                                                 <i class="fa fa-wrench"></i>
                                             </div>
-                                            <div @click="forwardCreative('show',item)">
+                                            <div @click="forwardCreative('run',item)">
                                                 <div class="stats-title">
                                                     <i class="fa fa-braille fa-fw"></i>
                                                     <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
@@ -1297,16 +1271,19 @@
                             <ul class="dropdown-menu">
                                 <li>
                                     <label style="padding:5px;">
-                                        <input type="radio" v-model="model.project.value" value="流程设计" checked> 流程设计
+                                        <input type="radio" v-model="model.project.value" value="IT地图" checked> IT地图
                                     </label>
+                                </li>
+                                <li>
+                                    <label style="padding:5px;">
+                                        <input type="radio" v-model="model.project.value" value="流程设计"> 流程设计
+                                    </label>
+                                </li>
                                 <li>
                                     <label style="padding:5px;">
                                         <input type="radio" v-model="model.project.value" value="仪表盘"> 仪表盘
                                     </label>
-                                <li>
-                                    <label style="padding:5px;">
-                                        <input type="radio" v-model="model.project.value" value="IT地图"> IT地图
-                                    </label>
+                                </li>
                             </ul>
                         </div>
                         <input type="text" class="form-control" id="title" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="height:33px;">
@@ -1366,21 +1343,20 @@
 
                     <div class="form-group">
                         <div class="col-lg-12">
-
-                            <label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="iflow" checked>&nbsp;流程设计
-                                <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
-                            </label>
                             {{if ne .SignedUser.Company.OSpace "oneswitch"}}
+                            <label class="radio-inline">
+                                <input type="radio" v-model="model.type" value="imap" checked>&nbsp;IT地图
+                                <p><img src="{{AppSubUrl}}/web/assets/images/imap.png" class="img-fluid img-thumbnail"></p>
+                            </label>
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
                                 <p><img src="{{AppSubUrl}}/web/assets/images/ishow.png" class="img-fluid img-thumbnail"></p>
                             </label>
-                            <label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="imap">&nbsp;IT地图
-                                <p><img src="{{AppSubUrl}}/web/assets/images/imap.png" class="img-fluid img-thumbnail"></p>
-                            </label>
                             {{end}}
+                            <label class="radio-inline">
+                                <input type="radio" v-model="model.type" value="iflow">&nbsp;流程设计
+                                <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
+                            </label>
                         </div>
                     </div>
 

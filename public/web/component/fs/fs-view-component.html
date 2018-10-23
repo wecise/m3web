@@ -118,13 +118,11 @@
 			display: block;
 		}
 
-		.fs-view-component #grid{
+		.fs-view-component #grid,
+		.fs-view-component .dataTables_scroll{
 			height: 75vh;
 			overflow: auto;
-		}
-
-		.fs-view-component .toolbars{
-			margin: 0px 60px 0px -5px;
+			padding: 0 10px;
 		}
 
 		.fs-name {
@@ -139,86 +137,72 @@
 	/*----------  最外层element会自动增加组件同名 class="fs-view-component"  ----------*/
 	<template>
 
-		<div>
-			<div class="row toolbars">
-					<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-						<ul style="list-style: none;display:  flex;margin-left: -40px;">
-							<li style="padding:5px 0px;">
-								<a href="javascript:void(0);" @click="open(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 我的文件 </a>
-							</li>
-							<li>
-								<ol class="breadcrumb">
-									<li v-for="(item,index) in filePath" :style="index<2 ? 'display:none;':'display:;'">
-										<a href="javascript:void(0);" @click="open(item,_.slice(filePath,0,index+1).join('/'))">${item}</a>
-									</li>
-								</ol>
-							</li>
-						</ul>
-					</div>
-					<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-						<div class="btn-group" role="group" aria-label="..." style="float: right;">
-							<!--<a href="javascript:void(0)" class="btn btn-xs btn-default btn-noborder" @click="toggleLeft" style="margin-right: 5px;">
-								<i class="fa fa-caret-right navtoggle"></i>
-							</a>-->
-							<a href="#" class="btn btn-sm btn-default" @click="selectAll"><i class="fas fa-check"></i></a>
-							<a href="#" class="btn btn-sm btn-default" @click="pasteIt"><i class="fas fa-paste"></i></a>
-							<a href="#" class="btn btn-sm btn-danger" @click="deleteThem"><i class="fas fa-trash"></i></a>
-							<a href="#" class="btn btn-sm btn-default btn-noborder" @click="newDir"><i class="fas fa-folder""></i></a>
-							<!--<a href="#" class="btn btn-sm btn-default btn-noborder" @click="newFile"><i class="fa fa-file"></i></a>-->
-							<a href="javascript:void(0);" class="btn btn-sm btn-success btn-noborder fileinput-button">
-								<i class="fa fa-upload"></i>
-								<input id="file-upload" type="file" name="uploadfile" multiple>
-							</a>
-							<a href="#grid" role="tab" data-toggle="tab" class="btn btn-sm btn-default btn-noborder file-view-icon-component active">
-								<i class="fas fa-th" aria-hidden="true"></i>
-							</a>
-							<a href="#table" role="tab" data-toggle="tab" class="btn btn-sm btn-default btn-noborder file-view-table-component">
-								<i class="fas fa-bars" aria-hidden="true"></i>
-							</a>
-							<a href="#" class="btn btn-sm btn-default btn-noborder" @click="exportIt"><i class="fas fa-file-export""></i></a>
-							<a href="#" class="btn btn-sm btn-default btn-noborder" @click="loadIt"><i class="fas fa-retweet""></i></a>
-						</div>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<ul style="list-style: none;display:  flex;padding:0 8px;">
+						<li style="padding:5px 0px;">
+							<a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 我的文件 </a>
+						</li>
+						<li>
+							<ol class="breadcrumb">
+								<li v-for="(item,index) in filePath" >
+									<a href="javascript:void(0);" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" :title="_.slice(filePath,0,index+1).join('/')">${item}</a>
+								</li>
+							</ol>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<div class="btn-group" style="padding:0 11px;float:right;">
+
+						<a href="#" class="btn btn-link" @click="newDir" title="新建目录">
+							<i class="fas fa-folder-plus"></i>
+						</a>
+
+						<a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
+							<i class="fas fa-check"></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="pasteIt" title="粘贴">
+							<i class="fas fa-paste"></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="deleteThem" title="删除">
+							<i class="fas fa-trash"></i>
+						</a>
+						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传">
+							<i class="fas fa-upload"></i>
+							<input id="file-upload" type="file" name="uploadfile" multiple>
+						</a>
+						<a href="#" class="btn btn-link" @click="downloadThem" title="下载">
+							<i class="fas fa-download""></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示">
+							<i class="fas fa-th"></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示">
+							<i class="fas fa-bars"></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="exportIt" title="导出">
+							<i class="fas fa-file-export""></i>
+						</a>
+						<a href="#" class="btn btn-link" @click="loadIt" title="导入">
+							<i class="fas fa-retweet""></i>
+						</a>
 					</div>
 				</div>
+			</div>
 			<div class="row">
-				<!-- TAB CONTENT -->
-				<div class="tab-content">
-				  <div class="active tab-pane fade in" id="grid">
-					  <ul>
-						  <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-						       :id="'fs_node_'+item.id"
-						       @mouseover="mouseOver(item)"
-						       @mouseout="mouseOut(item)"
-						       style="cursor: pointer;"
-						       :title="item.name"
-						       v-for="item in model">
-							  <div class="widget widget-stats bg-silver animated flipInX">
-								  <div class="stats-info" @click="open(item, item.parent+'/'+item.name);" >
-									  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/dir.png?type=download';"></p>
-								  </div>
-								  <div class="stats-link">
-									  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
-										  ${item.name}
-									  </a>
-								  </div>
-								  <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-									  <i class="fa fa-bars"></i>
-								  </div>
-							  </div>
-						  </li>
-					  </ul>
-				  </div>
-					<div class="tab-pane fade" id="table">
-						<vue-base-datatables-component id="files-list-datatable"
-						                               :columns="table.columns"
-						                               :dataset="model"></vue-base-datatables-component>
-				  </div>
+
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="view-container">
+					<component v-bind:is="currentView" :model.sync="model"></component>
 				</div>
 
 			</div>
 			<div class="row fs-footer">
 	            <div class="col-lg-12">
-		            <small>数量：${model.length} <i class="fa fa-clock"></i> ${moment().format("LLL")}</small>
+		            <small>数量：${model.length}  <i class="fa fa-clock"></i> ${moment().format("LLL")}</small>
 	            </div>
 			</div>
 		</div>
@@ -234,23 +218,96 @@
 			root: String
 		},
 		data: function () {
-			return {
+            Vue.component('grid-view',{
+                delimiters: ['#{', '}#'],
+                props: {
+                    model: Array
+                },
+                template: `<div id="grid"><ul>
+								  <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
+								       :id="'fs_node_'+item.id"
+								       @mouseover="$parent.mouseOver(item)"
+								       @mouseout="$parent.mouseOut(item)"
+								       style="cursor: pointer;"
+								       :title="item.name"
+								       v-for="item in model">
+									  <div class="widget widget-stats bg-silver animated flipInX">
+										  <div class="stats-info" @click="$parent.openIt(item, item.parent+'/'+item.name);" >
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/dir.png?type=download';"></p>
+										  </div>
+										  <div class="stats-link">
+											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
+												  #{item.name}#
+											  </a>
+										  </div>
+										  <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+											  <i class="fa fa-bars"></i>
+										  </div>
+									  </div>
+								  </li>
+							  </ul></div>`,
+                filters: {
+                    pickName: function(item){
+
+                        if (_.isEmpty(item)) return '';
+
+                        let _name = _.head(item.name.split("."));
+
+                        if(!_.isEmpty(_name)){
+                            _name = _.truncate(_name, {
+                                'length': 9
+                            });
+                        }
+
+                        return _name;
+                    },
+                    pickIcon: function(item){
+
+                        if (_.isEmpty(item.attr) || _.isEqual(item.attr, 'null')) {
+
+                            // system || extend || ...
+                            if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
+                                return `/fs/home/assets/dir-lock.png?type=download`;
+                            } else {
+                                return `/fs/home/assets/${item.ftype}.png?type=download`;
+                            }
+
+                        }
+
+                        return JSON.parse(item.attr).icon;
+                    }
+                }
+            });
+            Vue.component('table-view',{
+                delimiters: ['#{', '}#'],
+                props: {
+                    model: Array
+                },
+                template: `<fs-datatable-component id="files-list-datatable"
+					                         :columns="datatable.columns"
+					                         :dataset="datatable.dataset"
+					                         :options="datatable.options"></fs-datatable-component>`,
+                computed: {
+                    datatable: function(){
+
+                        let _list = callFsJScript(`fs_data.js`, '').message;
+
+                        _list.dataset =  this.model;
+
+                        return _list;
+                    }
+                }
+            });
+            return {
                 rootPath: this.root,
                 model: [],
                 selectedNode: {},
-			    table: {
-                    columns: [
-                        {field: "name", title: "Name"},
-                        {field: "ftype", title: "Type"},
-                        {field: "parent", title: "Parent"},
-                        {field: "vtime", title: "Create Time"}
-                    ]
-				},
+			    datatable: {},
                 upload:{
                     option: {
                         url: '/fs/home',
                         dataType: 'json',
-                        autoUpload: false,
+                        autoUpload: true,
                         acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt)$/i,
                         maxFileSize: 999000,
                         disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
@@ -263,7 +320,9 @@
 				action: {
                     from: null,
                     to: null
-                }
+                },
+                signedUserName: '',
+                currentView: 'grid-view'
 			}
 		},
         created: function() {
@@ -271,7 +330,8 @@
 
             self.init();
 
-            eventHub.$on("FS-FORWARD-EVENT", self.open);
+            eventHub.$on("FS-FORWARD-EVENT", self.openIt);
+            eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
         },
 		mounted: function () {
             let self = this;
@@ -318,43 +378,13 @@
                 return _tmp;//_.remove(_tmp,null);
             }
         },
-		filters: {
-            pickName: function(item){
-
-                if (_.isEmpty(item)) return '';
-
-                let _name = _.head(item.name.split("."));
-
-                if(!_.isEmpty(_name)){
-                    _name = _.truncate(_name, {
-		                        'length': 9
-		                    });
-                }
-
-				return _name;
-	        },
-            pickIcon: function(item){
-                let self = this;
-
-                if (_.isEmpty(item.attr) || _.isEqual(item.attr, 'null')) {
-
-                    // system || extend || ...
-	                if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
-                        return `/fs/home/assets/dir-lock.png?type=download`;
-	                } else {
-                        return `/fs/home/assets/${item.ftype}.png?type=download`;
-	                }
-
-                }
-
-                return JSON.parse(item.attr).icon;
-            }
-	    },
 		methods: {
 			init: function(){
                 let self = this;
 
                 self.load();
+
+                self.signedUserName = $("#signed-user-name").val();
 
 			},
 			initPlugIn: function(){
@@ -364,6 +394,12 @@
                 self.initFileUpload();
 
                 self.initContextMenu();
+
+			},
+			toggleView: function(view){
+			    let self = this;
+
+			    self.currentView = view;
 
 			},
 			initContextMenu: function(){
@@ -389,21 +425,16 @@
                                 items: {
 
                                     "read": {
-                                        name: "下载", icon: "fas fa-edit", callback: function (key, opt) {
+                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
                                             self.downloadIt(_item,true);
                                         }
                                     },
                                     "run": {
-                                        name: "运行", icon: "fas fa-play", callback: function (key, opt) {
-                                            self.runIt(_item);
+                                        name: "编辑/运行", icon: "fas fa-play", callback: function (key, opt) {
+                                            self.editIt(_item);
                                         }
                                     },
-                                    "sep3": "---------","delete": {
-                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                            self.deleteIt(_item,true);
-                                        }
-                                    },
-                                    "sep3": "---------",
+                                    "sep1": "---------",
                                     "copy": {
                                         name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
                                             self.copyIt(_item);
@@ -415,8 +446,55 @@
 
                                         }
                                     },
-                                    "sep4": "---------",
+                                    "sep2": "---------",
+	                                "delete": {
+                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
+                                            self.deleteIt(_item,true);
+                                        }
+                                    },
+                                    "sep3": "---------",
+                                    "info": {
+                                        name: "属性", icon: "fas fa-info", callback: function (key, opt) {
+                                            self.info(_item);
+                                        }
+                                    }
+                                }
 
+                            }
+                        } else if(_.includes(['imap','iflow','ishow'], _item.ftype)){
+                            return {
+
+                                items: {
+
+                                    "read": {
+                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
+                                            self.downloadIt(_item,true);
+                                        }
+                                    },
+                                    "run": {
+                                        name: "编辑", icon: "fas fa-edit", callback: function (key, opt) {
+                                            self.editIt(_item);
+                                        }
+                                    },
+                                    "sep1": "---------",
+                                    "copy": {
+                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
+                                            self.copyIt(_item);
+                                        }
+                                    },
+                                    "paste": {
+                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
+                                            self.pasteIt();
+
+                                        }
+                                    },
+                                    "sep2": "---------",
+                                    "delete": {
+                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
+                                            self.deleteIt(_item,true);
+                                        }
+                                    },
+                                    "sep3": "---------",
                                     "info": {
                                         name: "属性", icon: "fas fa-info", callback: function (key, opt) {
                                             self.info(_item);
@@ -435,12 +513,7 @@
                                             self.downloadIt(_item,true);
                                         }
                                     },
-                                    "sep3": "---------","delete": {
-                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                            self.deleteIt(_item,true);
-                                        }
-                                    },
-                                    "sep3": "---------",
+                                    "sep1": "---------",
                                     "copy": {
                                         name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
                                             self.copyIt(_item);
@@ -452,8 +525,13 @@
 
                                         }
                                     },
-                                    "sep4": "---------",
-
+                                    "sep2": "---------",
+                                    "delete": {
+                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
+                                            self.deleteIt(_item,true);
+                                        }
+                                    },
+                                    "sep3": "---------",
                                     "info": {
                                         name: "属性", icon: "fas fa-info", callback: function (key, opt) {
                                             self.info(_item);
@@ -509,148 +587,9 @@
                 });
 
 			},
-            open: function(item, path){
-                let self = this;
-
-
-	            if(_.isNull(item) || typeof(item) === 'string' || item.ftype === 'dir'){
-                    self.rootPath = path;
-                }
-
-                if(!_.isEmpty(item)){
-
-                    if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
-
-
-                        let contents = `<img src="/fs${path}?type=download" class="preview-img-responsive center-block" alt="Image">`;
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
-
-                    } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
-
-                        let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <video src="/fs${path}?type=download" controls="controls" autoplay>
-												your browser does not support the video tag
-											</video>
-										</div>
-										`;
-
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
-
-                    } else if(_.includes(['pdf'], item.ftype)) {
-
-                        let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <iframe class="embed-responsive-item" src="/fs${path}?type=download"></iframe>
-										</div>`;
-
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
-
-                    } else if(_.includes(['pptx','ppt','txt','html'], item.ftype)) {
-
-                        window.open(`/fs${path}?type=download`, "_blank");
-
-                    } else if(_.includes(['js'], item.ftype)) {
-
-                       self.runIt(item);
-
-                    } else if(_.includes(['ltsv'], item.ftype)) {
-
-                        //window.open(`/fs${path}?type=download&issys=true`, "_blank");
-	                    let _content = fsContent(item.parent, item.name);
-
-                        let contents = `<div style="height:100%;">
-                                            <pre style="border:none;background-color:#ffffff;">${_content}</pre>
-										</div>`;
-
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
-
-                    } else if(_.includes(['swf'], item.ftype)) {
-                        let contents = `<div class="embed-responsive embed-responsive-16by9">
-											<video src="/fs${path}?type=download" width="100%" height="100%" controls="controls" autoplay>
-												Your browser does not support the video tag.
-											</video>
-										</div>`;
-
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
-                    }
-                }
-
-            },
-            openByApp: function(item){
-                let self = this;
-
-                if(item.ftype === 'ishow'){
-                    let _obj = {};
-
-                    _obj.name = item.name;
-                    _obj.parent = "/home/dashboard";
-
-                    localStorage.setItem("dashboard-object", JSON.stringify(_obj));
-
-                    window.open(
-                        "/janesware/" + item.ftype,
-                        "_blank"
-                    );
-                } else if(item.ftype === 'dir'){
-                    self.rootPath = item.parent+"/"+item.name.replace(/\/home\/admin/g,"");
-                    self.load();
-                } else {
-                    window.open(
-                        "/janesware/" + item.ftype,
-                        "_blank"
-                    );
-                }
-            },
-            load: function() {
-                let self = this;
-
-                let _rtn = fsList(self.rootPath);
-
-                self.model = _.orderBy(_.map(_rtn,function(v,k){
-
-				                    return _.merge(v, {"username": `{{.SignedUser.Name}}`});
-
-				                }),['vtime','name'],['desc','asc']);
-
-
-                _.delay(function(){
-                    self.refresh();
-
-                    //self.initEditName();
-
-                },300);
-
-
-            },
-            refresh: function() {
-                let self = this;
-
-                $(".tagsLabel").tagsinput({
-                    tagClass: function(item) {
-                        return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
-                    }
-                });
-
-                $(".tagsLabel").on('itemAdded', function(event) {
-
-                    let _id = $(this).data("index");
-                    let _item = _.find(self.model.list,{id:_id});
-
-                    fetchData(_item.id + ' | tags +' + event.item);
-
-                });
-
-                $(".tagsLabel").on('itemRemoved', function(event) {
-
-                    let _id = $(this).data("index");
-                    let _item = _.find(self.model.list,{id:_id});
-
-                    fetchData(_item.id + ' | tags -' + event.item);
-
-                });
-            },
             initFileUpload: function(){
                 let self = this;
-                var uploadButton = $('<button/>')
+                let uploadButton = $('<button/>')
                     .addClass('btn btn-xs btn-primary')
                     .prop('disabled', true)
                     .text('准备中...')
@@ -687,8 +626,8 @@
 
                             var node = $('<li/>')
                                 .append($(`<a href="#" class="thumbnail" style="border:none;"/>`)
-								.text(_name))
-	                            .attr("title",file.name)
+                                    .text(_name))
+                                .attr("title",file.name)
                                 .append($(`<div id="progress_${objectHash.sha1(file.name)}" class="progress">
 										        <div class="progress-bar progress-bar-success"></div>
 	                                       </div>`));
@@ -719,12 +658,13 @@
                         if (index + 1 === data.files.length) {
                             data.context.find('button')
                                 .text('上传')
+	                            .css('display','none')
                                 .prop('disabled', !!data.files.error);
                         }
                     })
                     .on('fileuploadprogress', function (e, data) {
-	                    let _name = objectHash.sha1(data.files[0].name);
-	                    let progress = parseInt(data.loaded / data.total * 100, 10);
+                        let _name = objectHash.sha1(data.files[0].name);
+                        let progress = parseInt(data.loaded / data.total * 100, 10);
                         $(`#progress_${_name} .progress-bar`).css(
                             'width',
                             progress + '%'
@@ -765,7 +705,115 @@
                     .prop('disabled', !$.support.fileInput)
                     .parent().addClass($.support.fileInput ? undefined : 'disabled');
             },
-            mouseOver: function(item){
+            openIt: function(item, path){
+                let self = this;
+
+                if(_.isNull(item) || typeof(item) === 'string' || item.ftype === 'dir'){
+                    self.rootPath = path.replace(/\/\//g,'/');;
+                }
+
+                if(!_.isEmpty(item)){
+
+                    if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
+
+
+                        let contents = `<img src="/fs${path}?type=download" class="preview-img-responsive center-block" alt="Image">`;
+                        let _wnd = newWindow('fsapp', item.name, contents, null);
+
+                    } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
+
+                        let contents = `<div class="embed-responsive embed-responsive-16by9">
+                                            <video src="/fs${path}?type=download" controls="controls" autoplay>
+												your browser does not support the video tag
+											</video>
+										</div>
+										`;
+
+                        let _wnd = newWindow('fsapp', item.name, contents, null);
+
+                    } else if(_.includes(['pdf'], item.ftype)) {
+
+                        let contents = `<div class="embed-responsive embed-responsive-16by9">
+                                            <iframe class="embed-responsive-item" src="/fs${path}?type=download"></iframe>
+										</div>`;
+
+                        let _wnd = newWindow('fsapp', item.name, contents, null);
+
+                    } else if(_.includes(['pptx','ppt','txt','html'], item.ftype)) {
+
+                        window.open(`/fs${path}?type=download`, "_blank");
+
+                    } else if(_.includes(['js','ltsv'], item.ftype)) {
+
+                       self.editIt(item);
+
+                    } else if(_.includes(['swf'], item.ftype)) {
+                        let contents = `<div class="embed-responsive embed-responsive-16by9">
+											<video src="/fs${path}?type=download" width="100%" height="100%" controls="controls" autoplay>
+												Your browser does not support the video tag.
+											</video>
+										</div>`;
+
+                        let _wnd = newWindow('fsapp', item.name, contents, null);
+                    } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
+
+                        _.merge(item,{action:'run'});
+
+                        let url = genFsUrl(item,null);
+
+                        console.log(item,url)
+
+                        window.open(url,'_blank');
+                    }
+                }
+
+            },
+            load: function() {
+                let self = this;
+
+                let _rtn = fsList(self.rootPath);
+
+                self.model = _.orderBy(_.map(_rtn,function(v,k){
+
+				                    return _.merge(v, {"username": `${self.signedUserName}`});
+
+				                }),['vtime','name'],['desc','asc']);
+
+
+                _.delay(function(){
+                    self.refresh();
+                },300);
+
+
+            },
+            refresh: function() {
+                let self = this;
+
+                $(".tagsLabel").tagsinput({
+                    tagClass: function(item) {
+                        return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
+                    }
+                });
+
+                $(".tagsLabel").on('itemAdded', function(event) {
+
+                    let _id = $(this).data("index");
+                    let _item = _.find(self.model.list,{id:_id});
+
+                    fetchData(_item.id + ' | tags +' + event.item);
+
+                });
+
+                $(".tagsLabel").on('itemRemoved', function(event) {
+
+                    let _id = $(this).data("index");
+                    let _item = _.find(self.model.list,{id:_id});
+
+                    fetchData(_item.id + ' | tags -' + event.item);
+
+                });
+            },
+			mouseOver: function(item){
                 let self = this;
 
                 $(self.$el).find('.fs-node-selected').removeClass('fs-node-selected');
@@ -782,7 +830,7 @@
 
                 let _name = '新文件夹_' + _.now();
                 let _type = 'dir';
-                let _attr = {remark: '', ctime: _.now(), author: '{{.SignedUser.Name}}', type: _type, icon: "/fs/home/assets/dir.png?type=download"};
+                let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
 
                 let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
 
@@ -983,14 +1031,7 @@
                 })
 
             },
-			selectAll: function(){
-			    let self = this;
-
-			    $(".fs-node").find('.widget').addClass('fs-node-selected');
-
-
-			},
-            copyIt: function(item){
+			copyIt: function(item){
                 let self = this;
 
                 self.action.from = item.parent + "/" + item.name;
@@ -1027,7 +1068,7 @@
 
                 swal({
                     title: "",
-                    text: "确定要删除?",
+                    text: `确定要删除 ${self.rootPath}?`,
                     type: "warning",
                     showCancelButton: true,
                     closeOnConfirm: false,
@@ -1083,8 +1124,13 @@
                 }
 
             },
-            runIt: function(item){
+            editIt: function(item){
                 let self = this;
+
+                let mode = function(){
+	                let list = {js:'javascript', ltsv: 'toml'};
+                    return list[item.ftype] || 'javascript';
+                };
 
                 let content = `	<div class="row" style="width:100%;height:100%;">
 									<div class="col-lg-12" style="height:55%;">
@@ -1109,7 +1155,7 @@
                         model: {
                             oldInput: "",
                             newInput: "",
-                            mode: "javascript",
+                            mode: mode(),
                             theme: "tomorrow",
                             printMargin: false,
                             readOnly: false,
@@ -1190,16 +1236,52 @@
             downloadIt: function(item, prompt) {
                 let self = this;
 
+                if(item.ftype == 'dir'){
+                    let rtn = fsList(item.parent);
 
-                let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
-                let _target = '_blank';
 
-                // system || extend || ...
-                if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script')){
-                    _url += '&issys=true';
+                } else {
+                    if(_.includes(['zip','gz','tar','exe','png','gif','svg','doc','ppt','file'],item.ftype)){
+                        let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
+                        let _target = '_blank';
+                        // system || extend || ...
+                        if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script')){
+                            _url += '&issys=true';
+                        }
+                        window.open(_url, _target);
+                    } else {
+                        let rtn = fsContent(item.parent, item.name);
+                        let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
+
+                        saveAs(blob, `${item.name}`);
+                    }
                 }
 
-                window.open(_url, _target);
+
+            },
+            downloadThem: function(){
+			    let self = this;
+
+                let _them = $(".fs-node-selected .list-context-menu");
+
+                if(_.isEmpty(_them)) {
+                    alertify.log("选择需要下载的对象！");
+                    return false;
+                }
+
+                let zip = new JSZip();
+                _.forEach(_them, function(v,k){
+                    let item = $(v).data("item");
+                    let rtn = fsContent(item.parent, item.name);
+                    let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
+                    zip.file(`${item.name}`,rtn);
+                })
+
+                zip.generateAsync({type:"blob"})
+                    .then(function(content) {
+                        saveAs(content, `${self.rootPath}.zip`);
+                    });
+
 
             },
 			exportIt: function(){
@@ -1209,6 +1291,20 @@
 			},
 			loadIt: function(){
                 let self = this;
+
+			},
+            selectAll: function(){
+                let self = this;
+
+                $(".fs-node").find('.widget').addClass('fs-node-selected');
+
+
+            },
+			setRootPath: function(item) {
+			    let self = this;
+                let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
+
+                self.openIt(_item, [_item.parent,_item.name].join("/"));
 
 			},
             toggleLeft: function() {

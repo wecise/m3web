@@ -24,7 +24,7 @@
 	<link href="/web/css/color/style.min.css" rel="stylesheet">
 
 	<!-- Bootstrap ICON  CSS -->
-	<link href="/web/vendor/font-awesome/4.7.1/css/font-awesome.min.css" rel="stylesheet" >
+	<link href="/web/vendor/font-awesome/5.4.1/css/all.min.css" rel="stylesheet" >
 
 	<!-- animate core CSS -->
 	<link href="/web/vendor/animate/animate.css" rel="stylesheet" >
@@ -178,7 +178,7 @@
 	<script src="/web/vendor/moment/min/moment-with-locales.min.js"></script>
 
 	<!--VUE Core JS-->
-	<script src="/web/vendor/vue/2.5.13/dist/vue.min.js"></script>
+	<script src="/web/vendor/vue/2.5.17/dist/vue.min.js"></script>
 
 	<!--localforage Core JS -->
 	<script src="/web/vendor/localForage/dist/localforage.min.js"></script>
@@ -208,6 +208,7 @@
 	<script src="/web/js/jscript.js"></script>
 	<script src="/web/js/search.js"></script>
 	<script src="/web/js/sign.js"></script>
+	<script src="/web/js/tag.js"></script>
 	<script src="/web/js/trigger.js"></script>
 	<script src="/web/js/user.js"></script>
 	<script src="/web/js/websocket.js"></script>
@@ -236,10 +237,10 @@
     // Extends EditorUi to update I/O action states based on availability of backend
     (function()
     {
-        let tmp = localStorage.getItem("graph-object");
-        let graphObject = _.attempt(JSON.parse.bind(null, tmp));
+        const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
+        const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
 
-        window.mxLanguage = graphObject.lang;
+        window.mxLanguage = URL_PARAMS_ITEM.lang;
 
         var editorUiInit = EditorUi.prototype.init;
 
@@ -290,13 +291,13 @@
             mgr.save = function()
             {
                 let _xml = mxUtils.getXml(editorUi.editor.getGraphXml());
-                let _attr = _.attempt(JSON.parse.bind(null, graphObject.attr));
+                let _attr = _.attempt(JSON.parse.bind(null, URL_PARAMS_ITEM.attr));
 
-                let _rtn = fsNew('file',graphObject.parent, graphObject.name, _xml, _attr);
+                let _rtn = fsNew('file',URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name, _xml, _attr);
 
             };
 
-            let _list = fsContent(graphObject.parent, graphObject.name);
+            let _list = fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
 
             editorUi.editor.graph.model.beginUpdate();
             try
@@ -348,21 +349,10 @@
             });
 
             $("a[title='Preview Panel']").click(function(event){
+	            let item = _.merge(_.cloneDeep(URL_PARAMS_ITEM),{action: 'run'});
+                let url = genFsUrl(item,null);
 
-                let obj = {};
-                obj.lang = graphObject.lang;
-                obj.type = 'show';
-                obj.name = graphObject.name;
-                obj.parent = graphObject.parent;
-                obj.fsExtension = graphObject.name.split(".")[1] || "ishow";
-                obj.attr = graphObject.attr;
-
-                localStorage.setItem("graph-object",JSON.stringify(obj));
-
-                window.open(
-                    "/janesware/" + obj.fsExtension,
-                    "_blank"
-                );
+                window.open(url, "_blank");
             });
 
             $("a[title='Format Panel (Ctrl+Shift+P)']").click(function(event){

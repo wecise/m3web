@@ -128,7 +128,7 @@
                         enable: false
                     }
                 },
-                zNodes: self.loadTreeData(),//callFsJScript(`${this.system}_tree_data.js`).message,
+                zNodes: callFsJScript(`${this.system}_tree_data.js`).message,
                 selectedNode: null,
 
 
@@ -159,17 +159,6 @@
                 console.log(111, JSON.stringify(getTagDir(self.system)))
 
             },
-	        loadTreeData: function(){
-                let self = this;
-
-                let rtn = getTagDir(self.system);
-
-                return _.map(rtn,function(v,k){
-                    return  
-                });
-
-
-	        },
 	        initPlugIn: function(){
                 let self = this;
 

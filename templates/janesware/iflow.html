@@ -261,11 +261,19 @@
 
         moment.locale({{.Lang}});
 
-        $(".navbar.navbar-default.navbar-fixed-top").fadeOut();
-        $(".navbar.navbar-default.navbar-fixed-bottom").fadeOut();
+        const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
+        const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
 
+        let init = function(){
 
-        $(".current-active-item").html('<a class="active item" href="{{AppSubUrl}}/janesware/creative"><i class="fa fa-sitemap"></i>&nbsp;{{.i18n.Tr .ActiveView }}</a>');
+            _.forEach(URL_PARAMS_CFG,function(v,k){
+
+                if(!v){
+                    $(`#${k}`).hide();
+                }
+            })
+
+        }();
 
         $(function() {
 
@@ -358,7 +366,6 @@
                             let self = this;
 
                             if(val != oldVal){
-                                console.log(self.model.object.param.parent, val)
                                 self.model.graph.data = fsContent(self.model.object.param.parent, val);
                                 self.initGraph();
                             }

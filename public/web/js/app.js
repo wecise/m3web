@@ -273,7 +273,11 @@ var toggleSideBar = function(){
     localStorage.setItem('PAGE_SIDEBAR_STATUS',`${page}_${index}`);
 
     // Emit container layout resize event
-    eventHub.$emit("CONTAINER-LAYOUT-RESIZE-EVENT");
+    eventHub.$emit("LAYOUT-RESIZE-EVENT");
+
+    _.delay(function(){
+        eventHub.$emit("DATATABLE-RESIZE-EVENT");
+    },500);
 
 };
 

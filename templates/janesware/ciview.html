@@ -1029,7 +1029,7 @@
                         let self = this;
 
                         $("a[data-toggle='tab']").on("shown.bs.tab",function(){
-                            eventHub.$emit("datatable-resize-event",null);
+                            eventHub.$emit("DATATABLE-RESIZE-EVENT",null);
                         })
                     },  
                     setPresetDefault: function(event){
@@ -1440,7 +1440,7 @@
 
                         /* toggle tab trigger DATATABLES resize */
                         $("a[data-toggle='tab']").on("shown.bs.tab",function(){
-                            eventHub.$emit("datatable-resize-event", null);
+                            eventHub.$emit("DATATABLE-RESIZE-EVENT", null);
                         })
 
                     },
@@ -1792,7 +1792,7 @@
                             self.ifShowNav = true;
                         }
 
-                        eventHub.$emit("datatable-resize-event", null);
+                        eventHub.$emit("DATATABLE-RESIZE-EVENT", null);
                     },
                     view: function (event) {
                         eventHub.$emit("ci-view-toggle-event", event);

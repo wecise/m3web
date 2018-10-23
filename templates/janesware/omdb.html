@@ -86,6 +86,10 @@
 		background-color: rgb(230, 230, 230);
 	}
 
+	.lm_splitter {
+		z-index: 1;
+	}
+
 	/*.lm_header .lm_tab .lm_close_tab {
 		top: 7px!important;
 	}*/
@@ -195,6 +199,41 @@
 	}
 
 
+	/* Trigger toolbar */
+	.trigger-toolbar{
+		height: 30px;
+		background-color: rgb(246, 246, 246);
+		width: 100%;
+		float: right;
+		display: -webkit-box;
+	}
+
+	.trigger-toolbar .trigger-list{
+		padding: 5px;
+	}
+
+	.trigger-toolbar .trigger-list > a {
+		cursor:pointer;
+		color: #666666;
+	}
+
+
+	.trigger-toolbar .btn-primary,
+	.trigger-toolbar .btn-primary:hover{
+		background-color: rgb(246, 246, 246);
+		color: #333333;
+		border:none;
+	}
+
+	.trigger-toolbar > .btn-group {
+		top: 1px;
+	}
+
+	.trigger-toolbar .btn-group > a > i{
+		color: #666666;
+	}
+
+
 </style>
 
 
@@ -203,8 +242,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-graph-component.html"></link>
-
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-trigger-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-trigger-editor-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
@@ -226,7 +264,7 @@
 				        "omdb-class-tree-component",
 				        "omdb-editor-component",
                         "omdb-graph-component",
-	                    "vue-trigger-editor-component",
+	                    "omdb-trigger-editor-component",
                         "ai-robot-component"], function() {
 
         let classTree = function(id, bid, template, event){
@@ -931,13 +969,13 @@
             };
         };
 
-        let trigger = function(id, bid, type, pattern, node){
+        let triggerConsole = function(id, bid, node){
 
             let _readOnly = false;
             let _node = null;
 
-            if(!_.isEmpty(node.result) && !_.isEmpty(node.result.message)){
-                _node = node.result.message;
+            if(!_.isEmpty(node.result)){
+                _node = node.result;
             }
 
             return {
@@ -945,7 +983,7 @@
                 el: '#' + id,
                 template: "#trigger-template",
                 data: {
-                    id: id + '-' + type,
+                    id: id,
                     bid: bid,
                     list: [],
                     selected: []
@@ -953,13 +991,13 @@
 	            created: function(){
                     let self = this;
 
-                    self.init();
+
 	            },
                 mounted: function() {
                     let self = this;
 
                     self.$nextTick(function () {
-
+                        self.init();
                     })
                 },
                 methods: {
@@ -1000,6 +1038,9 @@
                         }
 
                         self.selected = _.head(self.list);
+
+
+
                     },
                     toggle: function(item) {
                         let self = this;
@@ -1008,13 +1049,18 @@
                     },
                     add: function() {
                         let self = this;
-                        let _name = $("#trigger_name").val();
 
-                        let _rtn = triggerNew({class:node.name, name:_name, script:''});
+                        alertify.prompt("新增触发器", function (e, str) {
+                            if (e) {
+                                let _rtn = triggerNew({class:node.name, name: str, script:''});
 
-                        if(_rtn === 1) {
-                            self.refresh();
-                        }
+                                if(_rtn === 1) {
+                                    self.refresh();
+                                }
+                            } else {
+
+                            }
+                        }, "触发器名称");
                     },
                     save: function() {
                         let self = this;
@@ -1026,7 +1072,7 @@
                         let _rtn = triggerNew({class: _class, name:_name, script: _script});
 
                         if(_rtn === 1) {
-                            self.refresh();
+                            // self.refresh();
                         }
                     },
                     refresh: function() {
@@ -1034,7 +1080,7 @@
 
                         let _list = triggerList(node.name);
 
-                        if( _.isEmpty(_list.message)) {
+                        if( _.isEmpty(_list)) {
                             self.list = [{  name: "",
                                 time: moment().format("LLL"),
                                 class: node.name,
@@ -1045,7 +1091,7 @@
                                 }
                             }];
                         } else {
-                            self.list = _.values(_.map(_list.message,function(v){
+                            self.list = _.values(_.map(_list,function(v){
                                 return _.map(v.script,function(val,key){
                                     return   {    name: key,
                                         time: v.vtime,
@@ -1059,7 +1105,9 @@
                                 })
                             }))[0];
                         }
+
                         self.selected = _.head(self.list);
+
                     },
                     remove: function(name) {
                         let self = this;
@@ -1169,7 +1217,7 @@
                 eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
                 eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
 
-                eventHub.$on("CONTAINER-LAYOUT-RESIZE-EVENT",self.resizeLayout);
+                eventHub.$on("LAYOUT-RESIZE-EVENT",self.resizeLayout);
             },
             mounted: function() {
                 let self = this;
@@ -1184,25 +1232,13 @@
                 init: function(){
                     let self = this;
 
-                    //var savedState = localStorage.getItem('savedState');
-                    //self.config = savedState !== null ? JSON.parse(savedState) : self.config;
-
                     self.layout = new GoldenLayout(self.config, self.$el);
 
                     self.layout.registerComponent('omdbComponent', function (container, state) {
 
                     });
 
-                    /*self.layout.on( 'initialised', function(){
-                        var noDropStack = myLayout.root.getItemsById( 'no-drop-target' )[ 0 ];
-                        var originalGetArea = noDropStack._$getArea;
-                        noDropStack._$getArea = function() {
-                            var area = originalGetArea.call( noDropStack );
-                            delete noDropStack._contentAreaDimensions.header;
-                            return area;
-                        };
-                    });
-*/
+
                     self.layout.on( 'stackCreated', function( stack ){
                         //console.log('stack',stack)
 
@@ -1256,9 +1292,9 @@
                             _comp = logConsole(_id, _bid, _state.componentState.type, _state.componentState);
 
 
-                        } else if(_state.componentState.type === 'trigger'){
+                        } else if(_state.componentState.type === 'trigger-console'){
 
-                            _comp = trigger(_id, _bid, _state.componentState.type, _state.componentState);
+                            _comp = triggerConsole(_id, _bid, _state.componentState.model.node);
 
                         }
 
@@ -1267,24 +1303,7 @@
                         });
 
 
-                        /*component.container.on('resize',function() {
-
-                            let _scrollBody = component.container.height;//_.ceil(pxTOvh(component.container.height)*0.52);
-                            let _scrollY = _scrollBody;
-
-                            eventHub.$emit("LAYOUT-RESIZE-TRIGGER-EVENT", {scrollY:_scrollY, scrollBody: _scrollBody});
-                        });*/
-
-
                     });
-
-                    //
-                    //	Save state in local storage
-                    //
-                    /*self.layout.on('stateChanged', function () {
-                        var state = JSON.stringify(self.layout.toConfig());
-                        localStorage.setItem('savedState', state);
-                    });*/
 
                     //  Initialize GL
                     self.layout.init();
@@ -1347,6 +1366,39 @@
                         }]
                     };
 
+                    if(event.type == 'trigger-console'){
+                        newItemConfig = {
+                            type: 'column',
+                            title: event.title,
+                            content:[{
+                                type: 'component',
+                                title: event.title,
+	                            height:60,
+                                componentName: 'omdbComponent',
+                                componentState: {
+                                    id: `div_query_${_.now()}`,
+                                    bid: _bid,
+                                    type: event.type,
+                                    model: event.model
+                                }
+                            },{
+                                type: 'stack',
+                                height:40,
+                                content: [{
+                                    type: 'component',
+                                    title: '日志',
+                                    componentName: 'omdbComponent',
+                                    componentState: {
+                                        id: `div_log_${_.now()}`,
+                                        bid: _bid,
+                                        type: 'log-console',
+                                        model: null
+                                    }
+                                }]
+                            }]
+                        };
+                    }
+
                     /*if(_.size($(`#id_${v.name}_${v.type}`)) > 0 ){
                         return false;
                     }*/
@@ -1398,39 +1450,7 @@
                         eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
                     },500)
 
-                },
-                /*setQueryResult: function(event){
-                    let self = this;
-
-
-                    if(event.type === 'table-update'){
-                        let _comp = outPut(event.id, event.bid,event);
-
-                        setTimeout(function(){
-                            new Vue(_comp);
-                        });
-                    } else if(event.type === 'table-new'){
-                        appVue.addOutput({
-                            type: 'output',
-                            node: event
-                        });
-                    } else if(event.type === 'graph-update'){
-			            appVue.updateOutput({
-			                type: 'graph',
-			                node: event
-			            });
-			        } else if(event.type === 'graph-new'){
-                        appVue.addOutput({
-                            type: 'graph',
-                            node: event
-                        });
-                    } else if(event.type === 'trigger'){
-                        appVue.addStackFromTree({
-                            type: 'trigger',
-                            node: event
-                        });
-                    }
-                }*/
+                }
             }
         });
 
@@ -1492,80 +1512,44 @@
 </script>
 
 <script type="text/x-template" id="trigger-template">
-	<div>
+	<div style="width:100%;height:100%;">
 
-		<div style="background-color:#F7F7F7;margin-bottom:0px;border-radius:0px;border:none;font-size:12px;padding: 5px 0px 5px 10px;;">
-
-			<div class="btn-group">
-				<a style="cursor:pointer;" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					选择触发器：${selected.name} <i class="fa fa-angle-down"></i>
+		<div class="btn-group trigger-toolbar">
+			<div class="trigger-list">
+				<a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					选择触发器：${selected.name} <i class="fas fa-angle-down"></i>
 				</a>
 				<ul class="dropdown-menu">
 					<li v-for="item in list" style="display: flex;">
 						<a href="javascript:void(0)" style="cursor:pointer;width:90%;"
 						   @click="toggle(item)">
-							<i class="fa fa-tasks"></i> ${item.name}
+							<i class="fas fa-tasks"></i> ${item.name}
 						</a>
 						<a  href="javascript:void(0)" style="float:right;color:#ddd;float:right;"
-						    @click="remove(item.name)"><i class="fa fa-remove"></i></a>
+						    @click="remove(item.name)"><i class="fas fa-times"></i></a>
 					</li>
 				</ul>
 			</div>
 
-			<div class="btn-group pull-right" style="margin:-7px 0px;">
-				<a  href="#modal-trigger-add"
-				    class="btn btn-sm btn-default"
-				    title="新建触发器"
-				    data-toggle="modal">
-					<i class="fa fa-plus"></i>
-				</a>
-				<a  href="javascript:void(0)"
-				    class="btn btn-sm btn-success"
-				    title="提交"
-				    @click="save">
-					<i class="fa fa-save"></i>
-				</a>
-			</div>
-
-			<span class="pull-right">
-            <a id="btn_agent_filter_fullscreen" style="cursor:pointer;">
-                <i class="fa fa-fullscreen"></i>
-            </a>
-          </span>
+			<a  href="#javascript:void(0)"
+			    class="btn btn-sm btn-primary"
+			    title="新建触发器"
+			    @click="add">
+				<i class="fas fa-plus"></i>
+			</a>
+			<a  href="javascript:void(0)"
+			    class="btn btn-sm btn-primary"
+			    title="提交"
+			    @click="save">
+				<i class="fas fa-save"></i>
+			</a>
 		</div>
 
 		<div class="vertical-box">
-			<div v-if="list[0].name.length > 0">
-				<vue-trigger-editor-component :id="id"
-				                      :model="selected.model"
-				                      showToolsBar="true"
-				                      showStatusBar="true"></vue-trigger-editor-component>
-			</div>
-			<div v-else>
-
-			</div>
-		</div>
-
-
-		<div class="modal fade" id="modal-trigger-add" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-			<div class="modal-dialog" role="document">
-				<div class="modal-content">
-					<div class="modal-header">
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-						<h4 class="modal-title" id="myModalLabel">新增触发器</h4>
-					</div>
-					<div class="modal-body">
-
-						<label for="">名称</label>
-						<input type="text" class="form-control" id="trigger_name" >
-
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-						<button type="button" class="btn btn-primary" data-dismiss="modal" @click="add()">确定</button>
-					</div>
-				</div>
-			</div>
+			<omdb-trigger-editor-component :id="id"
+			                               :model="selected.model"
+			                               showToolsBar="true"
+			                               showStatusBar="false"></omdb-trigger-editor-component>
 		</div>
 
 	</div>

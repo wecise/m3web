@@ -12,6 +12,40 @@
 
 "use strict";
 
+
+
+/*
+*  认证管理
+*
+*/
+/*
+var signIn = function(keyspace, username, password) {
+    let rtn = null;
+
+    jQuery.ajax({
+        url: "/user/signin",
+        dataType: 'json',
+        type: 'POST',
+        async: false,
+        data: {
+            company: keyspace,
+            username: username,
+            password: password
+        },
+        beforeSend:function(xhr){
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+            rtn = data;
+        },
+        error: function(xhr, textStatus, errorThrown) {
+        }
+    });
+    return rtn;
+}('wecise','admin','admin');
+*/
+
 /*
 *  用户管理
 *

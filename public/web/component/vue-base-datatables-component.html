@@ -590,7 +590,7 @@
         created: function(){
             let self = this;
 
-            eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.resize);
         },
 		mounted: function () {

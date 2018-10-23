@@ -158,7 +158,7 @@
         created: function(){
             let self = this;
 
-            eventHub.$on("datatable-resize-event", self.redraw);
+            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
         },
 		mounted: function () {

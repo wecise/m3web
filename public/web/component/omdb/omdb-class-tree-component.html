@@ -291,7 +291,12 @@
 
                                 let _result = {name: self.selectedNode.name, result: _list};
 
-                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'trigger', pattern: 'trigger-list', node: _result});
+                                //eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'trigger-console', pattern: 'trigger-list', node: _result});
+                                eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'trigger-console',
+											                                    name: self.selectedNode.name,
+											                                    title: self.selectedNode.name,
+											                                    model: { pattern: 'trigger', node: _result }
+											                                });
                             }
                         },
                         "sep4": "---------",
