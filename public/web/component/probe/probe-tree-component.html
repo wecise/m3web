@@ -156,8 +156,6 @@
 
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
 
-                console.log(111, JSON.stringify(getTagDir(self.system)))
-
             },
 	        initPlugIn: function(){
                 let self = this;
@@ -205,13 +203,47 @@
             onExpand: function(event, treeId, treeNode) {
                 let self = this;
 
-                if(treeNode.cid === 'A2' && treeNode.parent == null){
+                let result = [];
 
-                    let rtn = _.groupBy(callFsJScript(`${self.system}_tree_data.js`).message,'cid');
+                let recursiveTraverse = function (node, result) {
 
-                    self.zTree.removeChildNodes(treeNode);
+                    if (!node || !node.nodes) {
+                        return;
+                    }
 
-                    self.zTree.addNodes(treeNode, rtn["A2"][0].children);
+                    let obj = {};
+
+                    obj = {cid: node.name, parent:'A2', rtype:'A2', name: node.name, title: node.name, children: [], iconSkin: 'tag'};
+
+                    if(node.nodes.length === 0){
+                        //result.push(obj);
+                    } else {
+                        node.nodes.forEach(function (item, index) {
+                            obj.children.push({cid:item.name, parent:node.name, rtype: 'A2', name: item.name, title: item.name, children:[], iconSkin: 'tag'});
+                            result.push(obj);
+                            recursiveTraverse(item, result);
+                        });
+                    }
+                };
+
+	            if(treeNode.cid === 'A2' && treeNode.parent == null){
+
+	                //let rtn = _.groupBy(callFsJScript(`${self.system}_tree_data.js`).message,'cid');
+
+	                self.zTree.removeChildNodes(treeNode);
+
+	                //self.zTree.addNodes(treeNode, rtn["A2"][0].children);
+
+	                let rtn = getTagDir("probe");
+
+                    console.log(JSON.stringify(rtn))
+
+	                let nodes = recursiveTraverse(rtn, result);
+
+	                console.log(JSON.stringify(result))
+
+	                self.zTree.addNodes(treeNode, result);//rtn["A2"][0].children);
+
                 }
             },
             onClick: function (event, treeId, treeNode, clickFlisParentag) {

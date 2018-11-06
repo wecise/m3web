@@ -26,6 +26,11 @@
 
 <style type="text/css">
 
+    /* For Body */
+    body{
+        overflow:hidden;
+    }
+
     /* For content */
     #content.content{
         padding: 0px 5px;
@@ -57,18 +62,7 @@
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-script-manager-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-table-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-dispatch-manager-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-kpi-manager-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-kpi-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
@@ -81,21 +75,15 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/script/script-list-datatables-component.html"></link>
 
+<script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
+
+<script src="{{AppSubUrl}}/web/css/color/apps.min.js"></script>
+
 <SCRIPT type="text/javascript">
 
     'use static';
 
-    VueLoader.onloaded(["vue-base-tree-component",
-                        "vue-search-preset-component",
-                        "vue-search-input-component",
-                        "vue-script-manager-component",
-                        "vue-bootstrap-table",
-                        "vue-base-table-component",
-                        "vue-dispatch-manager-component",
-                        "vue-kpi-manager-component",
-                        "vue-kpi-tree-component",
-                        "vue-object-detail-component",
-                        "ai-robot-component",
+    VueLoader.onloaded(["ai-robot-component",
                         "probe-tree-component",
                         "probe-card-component",
                         "probe-list-datatables-component",
@@ -105,6 +93,70 @@
 
 
         moment.locale(`{{.Lang}}`);
+
+        Vue.component("probe-view",{
+            props: {
+                model: Object
+            },
+            template: `<div class="row">
+                            <div class="col-lg-2">
+                                <probe-tree-component id="probe-tree" system="probe"></probe-tree-component>
+                            </div>
+
+                            <div class="col-lg-10 probe-container">
+                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 探针列表</h3 class="page-header">
+                                <probe-card-component :model="model.summary"></probe-card-component>
+                                <probe-list-datatables-component :model="model" id="probe-list-table"></probe-list-datatables-component>
+                            </div>
+                        </div>`
+        });
+
+        Vue.component("policy-view",{
+            props: {
+                model: Object
+            },
+            template: `<div class="row">
+                            <div class="col-lg-2">
+                                <probe-tree-component id="policy-tree" system="policy"></-tree-component>
+                            </div>
+
+                            <div class="col-lg-10 policy-container">
+                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 策略管理</h3 class="page-header">
+                                <policy-list-datatables-component :model="model" id="policy-list-table"></policy-list-datatables-component>
+                            </div>
+                        </div>`
+        });
+
+        Vue.component("log-view",{
+            props: {
+                model: Object
+            },
+            template: `<div class="row">
+                          <div class="col-lg-2">
+                            <probe-tree-component id="log-tree" system="log"></-tree-component>
+                          </div>
+
+                          <div class="col-lg-10 log-container">
+                            <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 日志管理</h3 class="page-header">
+                            <log-list-datatables-component :model="model" id="log-list-table"></log-list-datatables-component>
+                          </div>
+                       </div>`
+        });
+
+        Vue.component("script-view",{
+            props: {
+                model: Object
+            },
+            template: `<div class="row">
+                            <div class="col-lg-2">
+                                <probe-tree-component id="script-tree" system="script"></-tree-component>
+                            </div>
+                            <div class="col-lg-10 script-container">
+                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 脚本管理</h3 class="page-header">
+                                <script-list-datatables-component :model="model" id="script-list-table"></script-list-datatables-component>
+                            </div>
+                        </div>`
+        });
 
         $(function () {
 
@@ -118,6 +170,11 @@
                     log: {},
                     script: {}
                 },
+                created:function(){
+                    let self = this;
+
+                    eventHub.$on("PROBE-REFRESH-EVENT", self.initData);
+                },
                 mounted: function () {
                     let self = this;
 
@@ -125,41 +182,43 @@
                         
                         self.init();
 
-                        /* enable tooltip for all A tag */
-                        $("a").tooltip({
-                            enable: true,
-                            position: { my: "left+15 center", at: "right center" }
-                        });
+                        _.delay(function(){
+                            self.initPlug();
+                        },3000)
                     })
                 },
                 methods: {
                     init: function () {
                         let self = this;
 
-                        let rtnProbe = callFsJScript('probe_summary_by_probe.js','');
+                        self.initData(['probe','policy','script','log']);
+                    },
+                    initPlug: function(){
+                        let self = this;
 
-                        if(rtnProbe.status == 'ok'){
-                            self.probe = rtnProbe.message;
-                        }
+                        /* enable tooltip for all A tag */
+                        $("a").tooltip({
+                            enable: true,
+                            position: { my: "left+15 center", at: "right center" }
+                        });
 
+                        /* toggle tab trigger Echart resize */
+                        $("a[data-toggle='tab']").on("shown.bs.tab",function(){
+                            eventHub.$emit("COMPONENT-REDRAW-EVENT",null);
+                        })
+                    },
+                    initData: function(event){
+                        let self = this;
 
-                        let rtnPolicy = callFsJScript('probe_summary_by_policy.js','');
+                        _.forEach(event,function(v){
+                            window[v] = callFsJScript(`probe_summary_by_${v}.js`,'');
 
-                        if(rtnPolicy.status == 'ok'){
-                            self.policy = rtnPolicy.message;
-                        }
-
-                        let rtnLog = callFsJScript('probe_summary_by_log.js','');
-
-                        if(rtnLog.status == 'ok'){
-                            self.log = rtnLog.message;
-                        }
-
-                        let rtnScript = callFsJScript('probe_summary_by_script.js','');
-
-                        if(rtnScript.status == 'ok'){
-                            self.script = rtnScript.message;
-                        }
+                            if(window[v].status == 'ok'){
+                                self[v] = window[v].message;
+                            } else {
+                                self[v] = [];
+                            }
+                        })
 
                     }
                 }
@@ -183,77 +242,16 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane fade in active" id="tab1">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <probe-tree-component id="probe-tree" system="probe"></probe-tree-component>
-                    </div>
-
-                    <div class="col-lg-10">
-                        <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 探针列表</h3 class="page-header">
-                        <probe-card-component :model="probe.summary"></probe-card-component>
-                        <probe-list-datatables-component :columns="probe.list.columns"
-                                                  :dataset="probe.list.dataset"
-                                                  :options="probe.list.options"
-                                                  id="probe-list-table"></probe-list-datatables-component>
-                        <div class="object-footer">
-                            Count: 0 | ${moment().format("LLL")}
-                        </div>
-
-                    </div>
-                </div>
+                <probe-view :model="probe"></probe-view>
             </div>
             <div class="tab-pane fade" id="tab2">
-                <div class="row">
-                    <div class="col-lg-2">
-                        <probe-tree-component id="policy-tree" system="policy"></-tree-component>
-                    </div>
-
-                    <div class="col-lg-10">
-                        <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 策略管理</h3 class="page-header">
-                        <policy-list-datatables-component :columns="policy.list.columns"
-                                                         :dataset="policy.list.dataset"
-                                                         :options="policy.list.options"
-                                                         id="policy-list-table"></policy-list-datatables-component>
-                        <div class="object-footer">
-                            Count: 0 | ${moment().format("LLL")}
-                        </div>
-
-                    </div>
-                </div>
+                <policy-view :model="policy"></policy-view>
             </div>
             <div class="tab-pane fade in" id="tab3">
-                <div class="col-lg-2">
-                    <probe-tree-component id="log-tree" system="log"></-tree-component>
-                </div>
-
-                <div class="col-lg-10">
-                    <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 日志管理</h3 class="page-header">
-                    <log-list-datatables-component :columns="log.list.columns"
-                                                      :dataset="log.list.dataset"
-                                                      :options="log.list.options"
-                                                      id="log-list-table"></log-list-datatables-component>
-                    <div class="object-footer">
-                        Count: 0 | ${moment().format("LLL")}
-                    </div>
-
-                </div>
+                <log-view :model="log"></log-view>
             </div>
             <div class="tab-pane fade in" id="tab4">
-                <div class="col-lg-2">
-                    <probe-tree-component id="script-tree" system="script"></-tree-component>
-                </div>
-
-                <div class="col-lg-10">
-                    <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 脚本管理</h3 class="page-header">
-                    <script-list-datatables-component :columns="script.list.columns"
-                                                      :dataset="script.list.dataset"
-                                                      :options="script.list.options"
-                                                      id="script-list-table"></script-list-datatables-component>
-                    <div class="object-footer">
-                        Count: 0 | ${moment().format("LLL")}
-                    </div>
-
-                </div>
+                <script-view :model="script"></script-view>
             </div>
         </div>
     </div>

@@ -19,9 +19,6 @@
 			background-color: whitesmoke !important;
 		}
 
-		table.probe-list-datatables-component tbody tr:nth-child(even):hover td{
-			background-color: rgba(227, 239, 244, 0.5) !important;
-		}
 
 		.dataTables_wrapper table.dataTable {
 			margin: 0px 0!important;
@@ -125,13 +122,25 @@
 
 		/* Prefix-free was creating issues with the animation */
 
+
+		.dataTables_wrapper{
+			width:100%;
+			margin: 0 auto;
+		}
+
+		.tagify{
+			border:none;
+		}
         
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="probe-list-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-bordered pageResize" width="100%"></table>
+		<div class="container-fluid">
+			<input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
+			<table :id="id" class="display" width="100%"></table>
+		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -140,25 +149,59 @@
         delimiters: ['${', '}'],
 		props: {
         	id: String,
-            bid: String,
-			columns: Array,
-			dataset: Array,
-			options: Object,
-            contextmenu: String,
-			result: Object,
+			model: Object
 		},
 		data: function(){
           	return {
                 datatable: null,
 				selectedRow: null,
-				selectedCell: null
+				selectedCell: null,
+	            tagify: null
 			}
 		},
+        watch: {
+            'model.list.dataset': {
+                handler: function(val,oldVal){
+                    let self = this;
+
+                    if(val === oldVal) return false;
+
+                    if(self.datatable){
+                        self.datatable.destroy();
+                        $(`#${self.id}`).empty();
+                        self.init();
+                    }
+                },
+                deep:true
+            },
+            'model.tags':{
+                handler:function(val,oldVal){
+                    let self = this;
+
+                    if(val === oldVal) return false;
+
+                    if(_.isEmpty(self.tagify))  return false;
+
+                    self.tagify.removeAllTags();
+                    self.tagify.addTags(val);
+                },
+                deep:true
+            }
+
+        },
+        filters: {
+            pickTags: function(item){
+                if(item.tags){
+                    return item.tags.join(",") || [];
+                } else {
+                    return null;
+                }
+            }
+        },
         created: function(){
             let self = this;
 
-            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
-            eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
+            eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
         },
 		mounted: function () {
             let self = this;
@@ -167,11 +210,8 @@
 
                 _.delay(function() {
                     self.init();
+                    self.initPlugin();
                 },500);
-                
-                _.delay(function() {
-                    self.redraw();
-                },1000);
 
             })
         },
@@ -179,7 +219,7 @@
             _columns: function(){
                 let self = this;
 
-                let _cols = _.map(self.columns,function(v,k){
+                let _cols = _.map(self.model.list.columns,function(v,k){
 
                             //  data & time render
                             if(_.includes(['day','vtime','mtime','ctime'],v.field)){
@@ -210,46 +250,25 @@
                 return _cols;
 			}
 		},
-		watch: {
-          	dataset: {
-                handler: function(val,oldVal){
-                      	    let self = this;
-
-                      	    if(val === oldVal) return false;
-
-                            if( !_.isEmpty(self.datatable) ) {
-                                self.datatable.destroy(); 
-                                self.init();
-                            }
-
-                            self.datatable.clear();
-                            self.datatable.draw();
-                            self.datatable.rows.add(val); // Add new data
-                            self.datatable.columns.adjust().draw(); // Redraw the DataTable*/
-
-                },
-                deep:true
-			}
-
-		},
 		methods: {
             init: function(){
                 let self = this;
 
-                self.datatable = $(self.$el).DataTable( _.extend({
-                    			data: self.dataset,
+                self.datatable = $("#"+self.id).DataTable( _.extend({
+                    			data: self.model.list.dataset,
                                 columns: self._columns,
+                                //stripeClasses: [],
                                 responsive: false,
                                 searching: false,
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
-                                rowReorder: true,
+                                rowReorder: false,
                                 colReorder: true,
 								paging: false,
-								info: false,
+								info: true,
                     			scrollX: true,
-								scrollY: '300px',
+								scrollY: '37vh',
 								scrollCollapse: true,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                                 language : {
@@ -284,157 +303,186 @@
                                         }
                                     }
                                 },
-                                dom: `<"${self.id}-datatables-tool-bars">frtip`,
-			                    fixedColumns:   {
-			                        leftColumns: 2
-			                    },
-	                            fixedHeader: {
-			                        header: true,
-			                        footer: true
-			                    },
                                 select: {
-			                        style: 'multi'
+			                        style: 'multi',
+                                    selector: 'td:first-child'
 
+			                    },
+			                    fixedColumns:   {
+			                        leftColumns: 1
 			                    },
 			                    lengthChange: false,
-			                    stateSave: true,
-			                    buttons: [
-			                        {
-			                            extend: 'copy',
-			                            text: '',
-			                            copyTitle: '已复制',
-			                            className: 'btn btn-sm btn-primary fas fa-copy',
-			                        },
-			                        {
-			                            extend: 'excel',
-			                            text: '',
-			                            className: 'btn btn-sm btn-primary fas fa-download',
-                                        title: function(){
-			                                return `${self.result.name.split("/").join("_").replace("_","")}_class_export_${moment().format("LLL")}`
-                                        },
-                                        messageTop: null
-			                        },
-			                        {
-			                            extend: 'colvis',
-			                            text: '',
-			                            className: 'btn btn-sm btn-primary fas fa-columns',
-			                            collectionLayout: 'fixed four-column',
-                                        columns: ':not(.noVis)',
-			                            columnText: function ( dt, idx, title ) {
-			                                return `<input type="checkbox" name="${title}" checked="checked"> `+title;
-			                            }
-			                        }
-			                    ]
+			                    stateSave: false,
+	                            initComplete: function(event, settings, json){
+
+                                    // init ContextMenu
+                                    self.initMenu();
+
+
+                                    // init effect for table
+                                    $("#"+self.id).find("tbody").on("mouseover","tr", function(event) {
+
+                                        $(this).css('background-color', '#ddd');
+
+                                        $(this).bind("mouseout", function() {
+                                            $(this).css('background-color', '');
+                                        });
+                                    });
+
+                                    // get clicked tr
+                                    $("#"+self.id).on('click', 'tr', function () {
+                                        self.selectedRow = self.datatable.row( this ).data();
+                                    });
+
+	                            },
+                                drawCallback:function(settings){
+
+
+
+                                    //self.redraw();
+                                }
                     },self.options)).columns.adjust().draw();
-
-	            _.delay(function(){
-                    self.datatable.buttons().container().appendTo( `.datatables-toolbars` );
-                },200)
-
-				self.initPlugin();
 
 			},
 			initPlugin: function(){
                 let self = this;
 
-                self.initClassMenu();
-
-                // init selected row's status
-                $(self.$el).find("tbody").on("mouseenter", "tr", function () {
-
-                    /*if ( $(this).hasClass('selected') ) {
-                        $(this).removeClass('selected');
-                    }
-                    else {
-                        self.datatable.$("tr.selected").removeClass("selected");
-                        $(this).addClass("selected");
-                    }*/
-                    self.selectedRow = self.datatable.row( this ).data();
-                } );
-
-                /*$(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
-					var colIdx = self.datatable.cell(this).index().column;
-
-					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
-					$( self.datatable.column( colIdx ).nodes() ).addClass( 'highlight' );
-				} );*/
-
-                // selected row
-                $(self.$el).on( 'click', 'tr', function () {
-
-                    /*if ( $(this).hasClass('selected') ) {
-                        $(this).removeClass('selected');
-                    }
-                    else {
-                        self.datatable.$("tr.selected").removeClass("selected");
-                        $(this).addClass("selected");
-                    }*/
-
-                    self.selectedRow = self.datatable.row( this ).data();
-                } );
-
-                // selected row
-                $(self.$el).on( 'dblclick', 'tr', function () {
-                    self.selectedRow = self.datatable.row( this ).data();
-
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
-
-                    _.delay(function(){
-
-                        let cardVue = new Vue({
-                            el: '#panel-card',
-                            data: function(){
-                                return {
-                                    model: self.selectedRow
-                                }
-                            },
-                            template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
-                        });
-
-
-                    },100);
-                } );
-
-                // selected cell
-                $(self.$el).on( 'click', 'td', function () {
-                    self.selectedCell = self.datatable.cell( this ).data();
-                } );
-
-                // init context menu
-                $.contextMenu({
-                    selector: "#"+self.id,
-                    trigger: "right",
-                    delay: 300,
-                    autoHide: true,
-                    build: function ($trigger, e) {
-                        return {
-                            callback: function (key, options) {
-                                //self.initModules(key, options.items[key]);
-                            },
-                            items: self.items[self.contextmenu]
-                        };
-                    }
-                });
-
+				self.tagsInput();
 
 			},
+            initMenu: function(){
+                let self = this;
+
+                let items = callFsJScript('toolbar.js', '').message.probe.probe;
+                let id = self.id;
+
+                $.contextMenu({
+                    selector: `#${id} tr`,
+                    trigger: 'left',
+                    delay: 10,
+                    position: function(opt, x, y){
+                        opt.$menu.position({ of: this, offset: "0 5"});
+                    },
+                    hideOnSecondTrigger: true,
+                    className: `animated slideIn ${id}`,
+                    build: function($trigger, e) {
+
+                        let row = self.datatable.row($trigger[0].rowIndex).data();
+
+                        return {
+                            callback: function(key, opt) {
+                                if(key === 'add'){
+
+                                } else if(key === 'delete') {
+
+                                } else if(key === 'export') {
+
+                                } else if(key === 'load') {
+
+                                }
+                            },
+                            items: items,
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+
+                            let $this = this;
+
+                            new Vue(self.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRow.tags));
+                        },
+                        hide: function(opt) {
+
+                            let $this = this;
+
+                        }
+                    }
+                });
+            },
             redraw: function(){
                 let self = this;
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
             },
-			refresh: function(event){
+			tagsInput: function(){
+
                 let self = this;
 
-                self.columns = self.result.columns[event];
-                self.dataset = self.result.data[event];
+                let input = document.querySelector(`#${self.id}_tags_input`);
 
-                if( !_.isEmpty(self.datatable) ) {
-                    self.datatable.destroy();
-                    self.init();
+                // init Tagify script on the above inputs
+                self.tagify = new Tagify(input, { whitelist : [], blacklist : [], duplicates: false});
+
+                let onAddTag = function(){
+
                 }
 
+                let onRemoveTag = function(){
+
+                };
+
+                self.tagify.on('add', onAddTag)
+                    .on('remove', onRemoveTag);
 			},
+            tagInput: function(className,container,tags){
+                let self = this;
+
+                let tag = {
+                    el: container,
+                    template: `<input class="${className}" name='tags' placeholder='' :value='value|pickTags' autofocus>`,
+	                data: {
+                        tagify: null,
+                        value: tags
+	                },
+                    filters: {
+                        pickTags: function(item){
+                            if(item){
+                                return item.join(",") || [];
+                            } else {
+                                return null;
+                            }
+                        }
+                    },
+                    mounted: function(){
+
+                        let me = this;
+						let input = document.querySelector(`.${className}`);
+
+                        // init Tagify script on the above inputs
+                        me.tagify = new Tagify(input, { whitelist : [], blacklist : [] });
+
+                        me.tagify.on('add', me.onAddTag)
+                            .on('remove', me.onRemoveTag);
+
+                    },
+	                methods: {
+
+                        onAddTag: function(event){
+
+	                        let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
+                            let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                            if(rtn.status == 'ok'){
+                                eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
+                            }
+
+                        },
+                        onRemoveTag: function(event){
+
+                            let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
+                            let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                            if(rtn.status == 'ok'){
+                                eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
+                            }
+
+                        }
+
+	                }
+                };
+
+                return tag;
+            },
 			toolBars: function(){
                 let self = this;
                 let _keys = _.keys(self.result.columns);
@@ -540,18 +588,6 @@
 	                    }
                     }
                 };
-
-			},
-			initClassMenu: function(){
-                let self = this;
-
-                if(_.isEmpty(self.result)) return false;
-
-				let toolBarsVue = self.toolBars();
-
-				$(`div.${self.id}-datatables-tool-bars`).attr('id',`${self.id}-datatables-tool-bars`).ready(function(){
-				    new Vue(toolBarsVue);
-                });
 
 			}
 		}

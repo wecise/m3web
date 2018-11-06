@@ -1,24 +1,24 @@
 <code>
 
-	<style>
+	<style scoped>
 		/*----------  style  ----------*/
-		#tab-history > div > .vue-search-preset-component > .dropdown-menu-right {
+		.vue-bootstrap-table #tab-history > div > .vue-search-preset-component > .dropdown-menu-right {
 			position: inherit;
 		}
 
-		.baseline > .btn-default {
+		.vue-bootstrap-table .baseline > .btn-default {
 			/*background-color: transparent!important;*/
 		}
-		
-		.table-panel-tab-ul> li.active {
+
+		.vue-bootstrap-table .table-panel-tab-ul> li.active {
 			border-bottom: 3px solid rgb(218, 224, 232);
 		}
 
-		.table-panel-tab-ul> li.active > a:hover,a:active,a:focus,a:visited {
+		.vue-bootstrap-table .table-panel-tab-ul> li.active > a:hover,a:active,a:focus,a:visited {
 			background-color: transparent!important;
 		}
 
-		.table-panel-tab-content {
+		.vue-bootstrap-table .table-panel-tab-content {
 			border-top: 1px solid rgb(204, 204, 204);
 		}
 	</style>
@@ -231,7 +231,7 @@
             openPanel: function(row, menu, tabnum){
                 let self = this;
 
-                newWindow("配置卡片 " + row.name, self.templates[menu.app] || self.templates.default,null);
+                newWindow("配置卡片 " + row.name, self.templates[menu.app] || self.templates.default,null,null);
 
                 _.delay(function(){
 
@@ -251,7 +251,7 @@
 	        openDetailsPanel: function(row, menu, tabnum){
 	            let self = this;
 
-                newWindow('large', row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default,null);
+                newWindow('large', row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default,null,null);
 
 	            _.delay(function(){
 	            	

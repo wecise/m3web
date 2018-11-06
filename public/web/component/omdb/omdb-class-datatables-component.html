@@ -2,6 +2,12 @@
 
 	<style>
 		/*----------  style  ----------*/
+        .omdb-class-datatables-component,
+        .dataTables_wrapper{
+            width:100%;
+            margin: 0 auto;
+        }
+
 		.omdb-class-datatables-component thead tr th, .omdb-class-datatables-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
@@ -93,8 +99,9 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-class-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-bordered pageResize" width="100%">
-		</table>
+        <section class="omdb-class-datatables-component">
+            <table :id="id" class="table table-bordered" width="100%"></table>
+        </section>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -179,15 +186,9 @@
 
                       	    if(val === oldVal) return false;
 
-                            if( !_.isEmpty(self.datatable) ) {
-                                self.datatable.destroy(); 
-                                self.init();
-                            }
-
-                            self.datatable.clear();
-                            self.datatable.draw();
-                            self.datatable.rows.add(val); // Add new data
-                            self.datatable.columns.adjust().draw(); // Redraw the DataTable*/
+		                    self.datatable.destroy();
+		                    $(`#${self.id}`).empty();
+		                    self.init();
 
                 },
                 deep:true
@@ -221,20 +222,20 @@
             init: function(){
                 let self = this;
 
-                self.datatable = $(self.$el).DataTable( _.extend({
+                self.datatable = $("#"+self.id).DataTable( _.extend({
                     			data: self.dataset,
                                 columns: self._columns,
                                 responsive: false,
-                                searching: true,
+                                searching: false,
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
                                 colReorder: true,
-								paging: false,
-								info: false,
-                    			scrollX: true,
-								scrollY: '300px',
+                                scrollX: true,
+                                scrollY: 'auto',
 								scrollCollapse: true,
+	                            paging: false,
+                                info: false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                                 language : {
                                     "sProcessing" : "处理中...",
@@ -270,11 +271,11 @@
                                 },
                                 dom: `<"${self.id}-datatables-tool-bars">frtip`,
 			                    fixedColumns:   {
-			                        leftColumns: 3
+			                        leftColumns: 4
 			                    },
 	                            fixedHeader: {
-			                        header: true,
-			                        footer: true
+			                        header: false,
+			                        footer: false
 			                    },
                                 select: {
 			                        style: 'multi'
@@ -282,7 +283,7 @@
 			                    },
 			                    lengthChange: false,
 			                    stateSave: true,
-			                    buttons: [
+			                    /*buttons: [
 			                        {
 			                            extend: 'copy',
 			                            text: '',
@@ -308,12 +309,12 @@
 			                                return `<input type="checkbox" name="${title}" checked="checked"> `+title;
 			                            }
 			                        }
-			                    ]
+			                    ]*/
                     },self.options)).columns.adjust().draw();
 
-	            _.delay(function(){
+	            /*_.delay(function(){
                     self.datatable.buttons().container().appendTo( `.datatables-toolbars` );
-                },200)
+                },200)*/
 
 				self.initPlugin();
 
@@ -321,10 +322,10 @@
 			initPlugin: function(){
                 let self = this;
 
-                self.initClassMenu();
+                //self.initClassMenu();
 
                 // init selected row's status
-                $(self.$el).find("tbody").on("mouseenter", "tr", function () {
+                $("#"+self.id).find("tbody").on("mouseenter", "tr", function () {
 
                     /*if ( $(this).hasClass('selected') ) {
                         $(this).removeClass('selected');
@@ -336,7 +337,7 @@
                     self.selectedRow = self.datatable.row( this ).data();
                 } );
 
-                /*$(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
+                /*$("#"+self.id).find("tbody").on( 'mouseenter', 'td', function () {
 					var colIdx = self.datatable.cell(this).index().column;
 
 					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
@@ -344,7 +345,7 @@
 				} );*/
 
                 // selected row
-                $(self.$el).on( 'click', 'tr', function () {
+                $("#"+self.id).on( 'click', 'tr', function () {
 
                     /*if ( $(this).hasClass('selected') ) {
                         $(this).removeClass('selected');
@@ -358,29 +359,12 @@
                 } );
 
                 // selected row
-                $(self.$el).on( 'dblclick', 'tr', function () {
+                $("#"+self.id).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
-
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
-
-                    _.delay(function(){
-
-                        let cardVue = new Vue({
-                            el: '#panel-card',
-                            data: function(){
-                                return {
-                                    model: self.selectedRow
-                                }
-                            },
-                            template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
-                        });
-
-
-                    },100);
                 } );
 
                 // selected cell
-                $(self.$el).on( 'click', 'td', function () {
+                $("#"+self.id).on( 'click', 'td', function () {
                     self.selectedCell = self.datatable.cell( this ).data();
                 } );
 

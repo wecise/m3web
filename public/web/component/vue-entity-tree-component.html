@@ -402,9 +402,7 @@
 								    <div id="entity-create-template"></div>
 								  </div>
 								</div>`;
-                let _wnd = newWindow('fsentity', `${item.title} ${item.node.alias}`, contents, null);
-
-	            console.log(JSON.stringify(item))
+                let _wnd = newWindow('fsentity', `${item.title} ${item.node.alias}`, contents, null, null);
 
 	            let cVue = new Vue({
                     delimiters: ['$', '$'],

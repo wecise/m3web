@@ -18,7 +18,7 @@
 *  认证管理
 *
 */
-/*
+
 var signIn = function(keyspace, username, password) {
     let rtn = null;
 
@@ -44,7 +44,6 @@ var signIn = function(keyspace, username, password) {
     });
     return rtn;
 }('wecise','admin','admin');
-*/
 
 /*
 *  用户管理

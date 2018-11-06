@@ -444,7 +444,7 @@
                     pickIcon: function(item){
                         let self = this;
 
-                        if (_.isEmpty(item.attr)) return `/fs/home/assets/${item.ftype}.png?type=download`;
+                        if (_.isEmpty(item.attr)) return `/fs/home/assets/images/files/png/${item.ftype}.png?type=download`;
 
                         return JSON.parse(item.attr).icon;
                     },
@@ -598,7 +598,7 @@
                     newDir: function() {
                         let self = this;
 
-                        let win = newWindow('small','{{.i18n.Tr "creative-new-project"}}',`<div id="creative-starting"></div>`, null);
+                        let win = newWindow('small','{{.i18n.Tr "creative-new-project"}}',`<div id="creative-starting"></div>`, null,null);
 
                         let _vue  = new Vue({
                             delimiters: ['#{', '}#'],
@@ -662,7 +662,7 @@
 
                                     let _name = me.model.name;
                                     let _type = me.model.type;
-                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
 
                                     let _check = fsCheck(_root, _name);
                                     if(_check) {
@@ -693,7 +693,7 @@
 
                                         let _name = "PAGE_" + _.now();
                                         let _type = me.model.project.extName[me.model.project.value];
-                                        let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
+                                        let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
                                         let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
 
                                         if(_rtn == 1){
@@ -711,7 +711,7 @@
                     newFile: function() {
                         let self = this;
 
-                        let win = newWindow('large','{{.i18n.Tr "creative-new-file"}}',`<div id="creative-starting"></div>`, null);
+                        let win = newWindow('large','{{.i18n.Tr "creative-new-file"}}',`<div id="creative-starting"></div>`, null,null);
 
                         let _vue  = new Vue({
                             delimiters: ['#{', '}#'],
@@ -792,7 +792,7 @@
                                     let _name = me.model.name;
                                     let _type = me.model.type;
 
-                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/iflow.png?type=download"};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/iflow.png?type=download"};
 
                                     if(me.model.astemplate){
                                         _name = me.model.name;
@@ -899,7 +899,7 @@
                     info: function(node){
                         let self = this;
 
-                        let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null);
+                        let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null,null);
 
                         let _infoVue = new Vue({
                             delimiters: ['#{', '}#'],
@@ -1019,7 +1019,7 @@
                                 init: function(){
                                     let me = this;
 
-                                    me.model.icon.list = fsList('/home/assets');
+                                    me.model.icon.list = fsList('/home/assets/images/files/png');
                                 },
                                 triggerInput: function(id){
                                     let self = this;
@@ -1346,16 +1346,16 @@
                             {{if ne .SignedUser.Company.OSpace "oneswitch"}}
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="imap" checked>&nbsp;IT地图
-                                <p><img src="{{AppSubUrl}}/web/assets/images/imap.png" class="img-fluid img-thumbnail"></p>
+                                <p><img src="/fs/home/assets/images/files/png/imap.png?type=download" class="img-fluid img-thumbnail"></p>
                             </label>
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
-                                <p><img src="{{AppSubUrl}}/web/assets/images/ishow.png" class="img-fluid img-thumbnail"></p>
+                                <p><img src="/fs/home/assets/images/files/png/ishow.png?type=download" class="img-fluid img-thumbnail"></p>
                             </label>
                             {{end}}
                             <label class="radio-inline">
                                 <input type="radio" v-model="model.type" value="iflow">&nbsp;流程设计
-                                <p><img src="{{AppSubUrl}}/web/assets/images/iflow.png" class="img-fluid img-thumbnail"></p>
+                                <p><img src="/fs/home/assets/images/files/png/iflow.png?type=download" class="img-fluid img-thumbnail"></p>
                             </label>
                         </div>
                     </div>

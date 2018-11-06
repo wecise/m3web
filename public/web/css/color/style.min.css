@@ -320,12 +320,12 @@ label{
     top:0;
     bottom:0;
     padding-top:54px;
-    background:#2d353c;
+    background:rgb(33, 149, 244);/*#2d353c;*/
     z-index:10;
     -webkit-transform:translateZ(0)
 }
 .sidebar-bg{
-    background:#2d353c;
+    background:rgb(33, 149, 244);/*#2d353c;*/
     position:fixed;
     top:0;
     left:0;

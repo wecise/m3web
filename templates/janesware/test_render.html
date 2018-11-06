@@ -1,0 +1,83 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+
+<style type="text/css">
+
+    #page-container{
+        padding: 130px;
+    }
+
+</style>
+
+<div id="app">
+
+</div>
+
+
+<SCRIPT type="text/javascript">
+
+    'use static';
+
+    VueLoader.onloaded([],function() {
+
+
+        $(function () {
+
+            Vue.component('anchored-heading', {
+                render: function (createElement) {
+                    return createElement('h' + this.level,  this.$slots.default)
+                },
+                props: {
+                    level: {
+                        type: Number,
+                        required: true
+                    }
+                }
+            })
+
+            var vm = new Vue({
+                delimiters: ['#{', '}#'],
+                el: "#app",
+                template: "#app-template",
+            });
+
+
+        });
+
+
+    })
+
+</script>
+
+<script type="text/x-template" id="app-template">
+    <div>
+        <anchored-heading :level="3">jjjj</anchored-heading>
+        <anchored-heading :level="1">jjjj</anchored-heading>
+    </div>
+
+</script>
+
+
+{{template "base/footer" .}}

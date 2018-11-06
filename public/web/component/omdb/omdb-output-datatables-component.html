@@ -2,6 +2,12 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
+		.omdb-output-datatables-component,
+		.dataTables_wrapper{
+			width:100%;
+			margin: 0 auto;
+		}
+
 		.omdb-output-datatables-component thead tr th, .omdb-output-datatables-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
@@ -13,18 +19,6 @@
 
 		div.dataTables_wrapper div.dataTables_info {
 			padding-top: 4px;
-		}
-
-		td.highlight {
-			background-color: whitesmoke !important;
-		}
-
-		table.omdb-output-datatables-component tbody tr:nth-child(even):hover td{
-			background-color: rgba(227, 239, 244, 0.5) !important;
-		}
-
-		.dataTables_wrapper table.dataTable {
-			margin: 0px 0!important;
 		}
 
 		.context-menu-list {
@@ -98,8 +92,9 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-output-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-striped table-bordered pageResize" width="100%">
-		</table>
+		<div>
+			<table :id="id" class="display" width="100%"></table>
+		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -177,7 +172,7 @@
 		                            }};
 		                    }
 
-	                        return { "data": v.field, "title": v.title, visible: v.visible, orderable: true, render: v.render};
+	                        return { "data": v.field, "title": v.title || v.field, visible: v.visible, orderable: true, render: v.render};
 
 
 						});
@@ -195,13 +190,8 @@
                       	    if(val == oldVal) return false;
 
                             self.datatable.destroy();
-                            $(self.$el).empty();
+                            $("#"+self.id).empty();
                             self.init();
-
-							/*self.datatable.clear();
-                            self.datatable.draw();
-                            self.datatable.rows.add(val); // Add new data
-                            self.datatable.columns.adjust().draw(); // Redraw the DataTable*!/*/
 
                 },
                 deep:true
@@ -212,10 +202,8 @@
             init: function(){
                 let self = this;
 
-                self.datatable = $(self.$el).DataTable( _.extend({
-                                retrieve: true,
-                                destroy: true,
-                    			data: self.dataset,
+                self.datatable = $("#"+self.id).DataTable( _.extend({
+                                data: self.dataset,
                                 columns: _.uniqBy(self._columns,'data'),
                                 responsive: false,
                                 searching: true,
@@ -223,11 +211,11 @@
 	                            bSort: true,
 			                    bAutoWidth: true,
                                 colReorder: true,
-								paging: false,
-								info: false,
-                    			scrollX: true,
-								scrollY: '54vh',
-								scrollCollapse: true,
+								info: true,
+                                scrollX: true,
+                                scrollY: 200,
+			                    scrollCollapse: true,
+			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                                 language : {
                                     "sProcessing" : "处理中...",
@@ -333,7 +321,7 @@
                 self.initClassMenu();
 
                 // init selected row's status
-                $(self.$el).find("tbody").on("mouseenter", "tr", function () {
+                $("#"+self.id).find("tbody").on("mouseenter", "tr", function () {
 
                     /*if ( $(this).hasClass('selected') ) {
                         $(this).removeClass('selected');
@@ -345,7 +333,7 @@
                     self.selectedRow = self.datatable.row( this ).data();
                 } );
 
-                /*$(self.$el).find("tbody").on( 'mouseenter', 'td', function () {
+                /*$("#"+self.id).find("tbody").on( 'mouseenter', 'td', function () {
 					var colIdx = self.datatable.cell(this).index().column;
 
 					$( self.datatable.cells().nodes() ).removeClass( 'highlight' );
@@ -353,7 +341,7 @@
 				} );*/
 
                 // selected row
-                $(self.$el).on( 'click', 'tr', function () {
+                $("#"+self.id).on( 'click', 'tr', function () {
 
                     /*if ( $(this).hasClass('selected') ) {
                         $(this).removeClass('selected');
@@ -367,10 +355,10 @@
                 } );
 
                 // selected row
-                $(self.$el).on( 'dblclick', 'tr', function () {
+                $("#"+self.id).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                     _.delay(function(){
 
@@ -389,7 +377,7 @@
                 } );
 
                 // selected cell
-                $(self.$el).on( 'click', 'td', function () {
+                $("#"+self.id).on( 'click', 'td', function () {
                     self.selectedCell = self.datatable.cell( this ).data();
                 } );
 
@@ -434,7 +422,6 @@
                 let _items = {};
 
                 _.forEach(_keys, function (v) {
-                    console.log(v)
                     let o = {};
 
                     o.name = v;

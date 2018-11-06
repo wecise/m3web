@@ -596,6 +596,7 @@
                         event.stopPropagation();
                         event.preventDefault();
 
+                        console.log(JSON.stringify(treeNode))
                         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'class-edit',
 											                            name: treeNode.name,
 											                            title: treeNode.name,

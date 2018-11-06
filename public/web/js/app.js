@@ -14,7 +14,6 @@
 
 var eventHub = new Vue();
 
-
 var GLOBAL_OBJECT=  {
     company: {
         name: "",
@@ -275,9 +274,7 @@ var toggleSideBar = function(){
     // Emit container layout resize event
     eventHub.$emit("LAYOUT-RESIZE-EVENT");
 
-    _.delay(function(){
-        eventHub.$emit("DATATABLE-RESIZE-EVENT");
-    },500);
+    eventHub.$emit("DATATABLE-RESIZE-EVENT");
 
 };
 
@@ -288,7 +285,7 @@ var toggleSideBar = function(){
  */
 var robot = function(){
 
-    $.get('/web/assets/images/robot.svg',function(svg){
+    $.get('/fs/home/assets/images/robot/robot.svg?type=download',function(svg){
 
         $("#ai-robot").empty();
 
@@ -301,7 +298,7 @@ var robot = function(){
                 $("#jsPanel-robot").remove();
             }
 
-            let win = newWindow("fsrobot", "∵", '<div class="animated slideInDown" id="robot-active-win"></div>', null);
+            let win = newWindow("fsrobot", "∵", '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
 
             let robotVue = {
                 el: '#robot-active-win',

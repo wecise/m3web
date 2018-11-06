@@ -71,7 +71,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="cmdb-datatables-component"  ----------*/
 	<template>
-		<table :id="id" class="table table-striped table-bordered pageResize" width="100%">
+		<table :id="id" class="display" width="100%">
 		</table>
 	</template>
 
@@ -101,7 +101,7 @@
 
                                                                                                         eventHub.$emit("ci-view-toggle-event", {view: 'ci-view-card-component', model: _selectedRow});
                                                                                                         
-                                                                                                        /*newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null);
+                                                                                                        /*newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                                                                                                         _.delay(function(){
 
@@ -127,7 +127,7 @@
 
 
 
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null);
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -334,10 +334,10 @@
                                 responsive: false,
                                 aDataSort: true,
                                 bAutoWidth: true,
-								searching: true,
+								searching: false,
 								bSort: true,
 								paging: false,
-								info: false,
+								info: true,
                     			scrollX: true,
 								scrollY: '54vh',
 								scrollCollapse: true,
@@ -420,7 +420,7 @@
                 $(self.$el).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                     _.delay(function(){
 

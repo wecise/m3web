@@ -22,6 +22,19 @@
 -->
 {{template "base/head" .}}
 
+<!--MXClient JS & CSS-->
+<script>
+    mxBasePath = '{{AppSubUrl}}/web/vendor/mxgraph/src';
+    mxLanguage = '{{.Lang}}'.replace(/"/g,"").replace(/en/g,"eg").split("-")[0];
+</script>
+
+<script src="{{AppSubUrl}}/web/vendor/mxgraph/src/js/mxClient.js" type="text/javascript"></script>
+<link href="{{AppSubUrl}}/web/vendor/mxgraph/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+
+<script>
+    mxResources.add('{{AppSubUrl}}/web/vendor/mxgraph/graph/resources/grapheditor');
+</script>
+
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/omdbStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
@@ -72,7 +85,7 @@
 	.lm_header .lm_tab.lm_active {
 		border-bottom: none;
 		box-shadow: none;
-		padding-bottom: 5px;
+		padding-bottom: 6px;
 		border-bottom: 1px solid rgb(255, 0, 0);
 	}
 
@@ -304,13 +317,16 @@
                     }
                 },
                 {"field": "icon", "title": "Inherit", render: function (data, type, row) {
-                        return `<img src="/web/assets/images/${data}.svg" style="width:22px;height:22px;">`;
+                        return `<img src="/fs/home/assets/images/tools/png/${data}.png?type=download" style="width:22px;height:22px;">`;
                     }
                 },
                 {"field": "name", "title": "Name"},
                 {"field": "title", "title": "Title"},
-                {"field": "colname", "title": "ColName"},
-                {"field": "ftype", "title": "Ftype"},
+                {"field": "colname", "title": "ColName", visible: false},
+                {"field": "ftype", "title": "Ftype",render: function (data, type, row) {
+                        return data==='smallint'?'enum':data;
+                    }
+                },
                 {"field": "loption", "title": "Loption"},
                 {"field": "fparam", "title": "Fparam"},
                 {"field": "isindex", "title": "Index",render: function (data, type, row) {
@@ -334,14 +350,28 @@
             ];
 
             if(!_.isEmpty(event.model.node.fieldsObj) && !_.isEmpty(event.model.pnode.fieldsObj)) {
-                let _diff = _.map(_.differenceBy(event.model.node.fieldsObj, event.model.pnode.fieldsObj, 'name'), function (v) {
-                    return _.merge(v, {icon: 'child'});
-                });
-                let _pnode = _.map(event.model.pnode.fieldsObj, function (v) {
-                    return _.merge(v, {icon: 'parent'});
-                });
-                _dataset = _.merge(_diff, _pnode);
-            } else {
+
+                let _node = _.cloneDeep(event.model.node.fieldsObj);
+                let _pnode = _.cloneDeep(event.model.pnode.fieldsObj);
+
+                if(event.model.node.fieldsObj == event.model.pnode.fieldsObj) {
+                    _dataset = _.map(event.model.node.fieldsObj, function (v) {
+                        return _.merge(v, {icon: 'parent'});
+                    });
+                } else {
+                    let _diff =  _.differenceWith(event.model.node.fieldsObj, event.model.pnode.fieldsObj, function(v1,v2){return v1.name === v2.name;});
+
+                    if(_.isEmpty(_diff)){
+                        _dataset = _.map(_node, function (v) {
+                            return _.merge(v, {icon: 'parent'});
+                        });
+
+                    } else {
+                        _dataset = _.concat(_.map(_pnode,function(v){return _.merge(v, {icon: 'parent'});}), _.map(_diff,function(v){return _.merge(v, {icon: 'child'});}));
+
+                    }
+                }
+            } else{
                 _dataset = _.map(event.model.node.fieldsObj, function (v) {
                     return _.merge(v, {icon: 'parent'});
                 });
@@ -969,6 +999,21 @@
             };
         };
 
+        let textConsole = function(id, bid, model){
+
+            return {
+
+                delimiters: ['${', '}'],
+                el: '#' + id,
+                template: `#text-console-template`,
+                data: {
+                    id: id,
+                    bid: bid,
+                    output: model
+                }
+            };
+        };
+
         let triggerConsole = function(id, bid, node){
 
             let _readOnly = false;
@@ -1236,6 +1281,8 @@
 
                     self.layout.registerComponent('omdbComponent', function (container, state) {
 
+                         // console.log(state)
+
                     });
 
 
@@ -1245,7 +1292,7 @@
                     });
 
                     self.layout.on( 'itemCreated', function( item ){
-                        //console.log('item',item.config)
+                        // console.log('item',item.config)
 
                     });
 
@@ -1281,6 +1328,10 @@
 
                             _comp = outPut(_id, _bid, _state.componentState.model);
 
+
+                        } else if(_state.componentState.type === 'text-console'){
+
+                            _comp = textConsole(_id, _bid, _state.componentState.model);
 
                         } else if(_state.componentState.type === 'graph'){
 
@@ -1331,6 +1382,7 @@
                         title: event.title,
                         content:[{
                             type: 'component',
+                            height:50,
                             title: event.title,
                             componentName: 'omdbComponent',
                             componentState: {
@@ -1341,6 +1393,7 @@
                             }
                         },{
                             type: 'stack',
+                            height:50,
                             activeItemIndex: 1,
                             content: [{
                                 type: 'component',
@@ -1366,14 +1419,14 @@
                         }]
                     };
 
-                    if(event.type == 'trigger-console'){
+                    if(_.includes(['trigger-console','class-edit'],event.type)){
                         newItemConfig = {
                             type: 'column',
                             title: event.title,
                             content:[{
                                 type: 'component',
                                 title: event.title,
-	                            height:60,
+	                            height:55,
                                 componentName: 'omdbComponent',
                                 componentState: {
                                     id: `div_query_${_.now()}`,
@@ -1383,7 +1436,7 @@
                                 }
                             },{
                                 type: 'stack',
-                                height:40,
+                                height:45,
                                 content: [{
                                     type: 'component',
                                     title: '日志',
@@ -1399,9 +1452,9 @@
                         };
                     }
 
-                    /*if(_.size($(`#id_${v.name}_${v.type}`)) > 0 ){
-                        return false;
-                    }*/
+                    if(_.size($(`li[title="${event.title}"]`)) > 0 ){
+                        //return false;
+                    }
 
                     self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
 
@@ -1446,6 +1499,23 @@
 
                     }
 
+                    if(event.type == "text-console"){
+
+                        let newItemConfig =  {
+                            type: 'component',
+                            title: `结果_${moment().format("LT")}`,
+                            componentName: 'omdbComponent',
+                            componentState: {
+                                id: `div_output_${_.now()}`,
+                                bid: event.bid,
+                                type: 'text-console',
+                                model: event.data
+                            }
+                        };
+                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                        self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                    }
+
                     _.delay(function(){
                         eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
                     },500)
@@ -1456,7 +1526,6 @@
 
     })
 </script>
-
 
 
 
@@ -1508,6 +1577,19 @@
 			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] <span v-if="_.isEmpty(item[2].content)">${item[2].short}</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">${item[2].short}</a><span class="collapse animated fadeInUp" :id="item[2].id">${item[2].content}</span></span>
 			</p>
 		</div>
+	</div>
+</script>
+
+<script type="text/x-template" id="text-console-template">
+	<div class="container-fluid">
+		<p>
+			<div v-for="item in output">
+				<div v-for="(v,k) in item">
+					<dt>${k}：${v}</dt>
+				</div>
+			</div>
+		</p>
+		<p>输出时间：${moment().format("LLL")}</p>
 	</div>
 </script>
 

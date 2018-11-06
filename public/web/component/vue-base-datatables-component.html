@@ -171,7 +171,7 @@
                                                                                                         let _table = $('#'+opt.$trigger.attr("id")).DataTable();
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null);
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                                                                                                         _.delay(function(){
 
@@ -196,7 +196,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null);
+                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -312,7 +312,7 @@
                     grok: {
                                 "new": { app:"grok", name: "新建", icon: "fa-paste", callback: function(key, opt) {
 
-                                                                                                        newWindow('small', '新建', `<div id="grok-new-template"></div>`,null);
+                                                                                                        newWindow('small', '新建', `<div id="grok-new-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -428,7 +428,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('small', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`,null);
+                                                                                                        newWindow('small', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -764,7 +764,7 @@
                 $(self.$el).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null);
+                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                     _.delay(function(){
 

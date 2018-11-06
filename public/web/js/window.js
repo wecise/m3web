@@ -18,7 +18,7 @@
 *   title: 标题
 *   template: 模板（Vue渲染用）
 */
-var newWindow = function (type, title, template, position) {
+var newWindow = function (type, title, template, position, container) {
     let win = null;
     let w = $( window ).width();//document.body.clientWidth;
     let h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
@@ -301,7 +301,6 @@ var newWindow = function (type, title, template, position) {
             content:        template,
             dragit: {
                 drag: function (panel, position) {
-                    console.log(111,position)
                     localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
                 }
             },
@@ -329,6 +328,60 @@ var newWindow = function (type, title, template, position) {
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsProbe'){
+
+        let _position = { top: 0, right: 0 };
+
+        lrwh[2] = $(`.${container}`).width() + 20;
+        lrwh[3] = $(`.${container}`).height() + 40;
+
+        win = $.jsPanel({
+            id: `jsPanel-${container}`,
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: _position,
+            container: $(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  true
+            },
+            callback: function(){
+                $(".jsPanel").addClass("animated fadeInDown");
+
+                $(".jsPanel").css({
+                    "left":"0px",
+                    "box-shadow":"none"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "none",
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "16px",
+                    "color": "#999999"
                 });
 
             }
@@ -700,7 +753,6 @@ var newWindow = function (type, title, template, position) {
     });
 
     win.addListener(mxEvent.MOVE_END, function(event){
-        console.log(win.getX(),win.getY())
         localStorage.setItem(_.upperCase(type+"_window_position"),JSON.stringify({x: win.getX(),y:win.getY()}));
     });
 

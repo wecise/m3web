@@ -71,8 +71,8 @@
 		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary cache" @click="cacheToLocal" title="缓存"><i class="fas fa-save"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromLocal" title="加载缓存"><i class="fas fa-arrow-circle-down"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统"><i class="fas fa-save"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载"><i class="fas fa-arrow-circle-down"></i></a>
 
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fas fa-copy"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fas fa-paste"></i></a>
@@ -189,6 +189,19 @@
                 };
 
                 self.langTools.addCompleter(customerCompleter);
+
+
+                // Add commands
+                self.editor.commands.addCommand({
+	                    name: "query",
+                        bindKey: {mac: "cmd-enter", win: "ctrl-enter"},
+	                    exec: self.query
+	                },
+                    {
+                        name: "save",
+                        bindKey: {mac: "cmd-S", win: "ctrl-S"},
+                        exec: self.saveToFs
+                    });
                 
             },
             setOptions: function(){
@@ -349,6 +362,7 @@
 
                 let _columns = columnsParse(_list.meta);
 
+
                 // Graph
                 if(_list.meta.type === 'graph'){
 
@@ -359,7 +373,12 @@
                     return false;
                 }
 
+                // for Select count pattern
+                if(!_.has(_list.message[0],'class')) {
 
+                    _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
+
+                }
 
                 self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
 
@@ -467,15 +486,12 @@
                     _mql = self.editor.getSelectedText();
                 }
 
-                //CAHCE MQL
-                self.cacheToLocal();
-
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
                 let _list = fetchDataByMql(_mql);
                 let _content = JSON.stringify({mql: _mql, result: {message: _.attempt(JSON.parse.bind(null,_list.message)), meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
-                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _ftype, icon: "/fs/home/assets/"+_ftype+".png?type=download"};
+                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _ftype, icon: "/fs/home/assets/images/files/png/"+_ftype+".png?type=download"};
 				let _name = '查询_' + moment().format("LLL");
 				let _html = `<!DOCTYPE html>
 							<html>
@@ -492,23 +508,22 @@
 
                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download" target="_blank">点击查看</a>`);
             },
-            cacheToLocal: function(){
+            saveToFs: function(){
                 let self = this;
 
                 let mql = self.editor.getValue();
 
                 if(_.isEmpty(mql)) return false;
 
-                localStorage.setItem(`MQL-CACHE-${self.id}`,mql);
+                let user = $("#signed-user-name").val();
+                let attr = {remark: '', ctime: _.now(), author: user, type: 'txt', icon: `/fs/home/assets/images/files/png/txt.png?type=download`};
+                let rtn = fsNew('file', `/home/${user}/temp`, 'cache_mql_script.txt', mql, attr);
             },
-            loadFromLocal: function(){
+            loadFromFs: function(){
                 let self = this;
 
-                let mql = null;
-
-                if(!_.isEmpty(localStorage.getItem(`MQL-CACHE-${self.id}`))){
-                    mql = localStorage.getItem(`MQL-CACHE-${self.id}`);
-                };
+                let user = $("#signed-user-name").val();
+                let mql = fsContent(`/home/${user}/temp`, 'cache_mql_script.txt');
 
                 self.editor.setValue(mql);
 

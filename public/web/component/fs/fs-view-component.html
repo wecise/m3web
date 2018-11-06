@@ -161,6 +161,10 @@
 						<a href="#" class="btn btn-link" @click="newDir" title="新建目录">
 							<i class="fas fa-folder-plus"></i>
 						</a>
+						<a href="#" class="btn btn-link" @click="newFile" title="新建文件">
+							<i class="fas fa-file"></i>
+						</a>
+
 
 						<a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
 							<i class="fas fa-check"></i>
@@ -233,7 +237,7 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX">
 										  <div class="stats-info" @click="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/dir.png?type=download';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/images/files/png/dir.png?type=download';"></p>
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
@@ -267,9 +271,9 @@
 
                             // system || extend || ...
                             if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
-                                return `/fs/home/assets/dir-lock.png?type=download`;
+                                return `/fs/home/assets/images/files/png/dir-lock.png?type=download`;
                             } else {
-                                return `/fs/home/assets/${item.ftype}.png?type=download`;
+                                return `/fs/home/assets/images/files/png/${item.ftype}.png?type=download`;
                             }
 
                         }
@@ -612,7 +616,7 @@
                     .on('fileuploadadd', function (e, data) {
 
                         let _wnd = newWindow('fsupload','上传', `<div id="files" class="files">
-																</div>`, null);
+																</div>`, null,null);
 
                         data.context = $('<ul/>').appendTo('#files');
 
@@ -718,7 +722,7 @@
 
 
                         let contents = `<img src="/fs${path}?type=download" class="preview-img-responsive center-block" alt="Image">`;
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
+                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
 
                     } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
 
@@ -729,7 +733,7 @@
 										</div>
 										`;
 
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
+                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
 
                     } else if(_.includes(['pdf'], item.ftype)) {
 
@@ -737,13 +741,13 @@
                                             <iframe class="embed-responsive-item" src="/fs${path}?type=download"></iframe>
 										</div>`;
 
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
+                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
 
-                    } else if(_.includes(['pptx','ppt','txt','html'], item.ftype)) {
+                    } else if(_.includes(['pptx','ppt','html'], item.ftype)) {
 
                         window.open(`/fs${path}?type=download`, "_blank");
 
-                    } else if(_.includes(['js','ltsv'], item.ftype)) {
+                    } else if(_.includes(['js','ltsv','txt','csv'], item.ftype)) {
 
                        self.editIt(item);
 
@@ -754,7 +758,7 @@
 											</video>
 										</div>`;
 
-                        let _wnd = newWindow('fsapp', item.name, contents, null);
+                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
                     } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
 
                         _.merge(item,{action:'run'});
@@ -830,7 +834,7 @@
 
                 let _name = '新文件夹_' + _.now();
                 let _type = 'dir';
-                let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: "/fs/home/assets/dir.png?type=download"};
+                let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
 
                 let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
 
@@ -838,12 +842,32 @@
                     self.load();
                 }
             },
+            newFile: function() {
+                let self = this;
+
+                alertify.prompt("文件类型", function (e, str) {
+                    // str is the input text
+                    if (e) {
+                        let _name = `新文件_${_.now()}.${str}`;
+                        let _type = 'file';
+                        let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: `/fs/home/assets/images/files/png/${str}.png?type=download`};
+
+                        let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
+
+                        if(_rtn == 1){
+                            self.load();
+                        }
+                    } else {
+                        // user clicked "cancel"
+                    }
+                }, "文件类型");
+            },
             info: function(node){
                 let self = this;
 
-                let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null);
+                let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null,null);
 
-                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.Name}}", "type": "${node.ftype}", "icon": "/fs/home/assets/${node.ftype}.png?type=download"}`};
+                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.Name}}", "type": "${node.ftype}", "icon": "/fs/home/assets/images/files/png/${node.ftype}.png?type=download"}`};
 
                 if(_.isEmpty(node.attr)){
                     node = _.merge(node, _attr);
@@ -967,7 +991,7 @@
                         init: function(){
                             let me = this;
 
-                            me.model.icon.list = fsList('/home/assets');
+                            me.model.icon.list = fsList('/home/assets/images/files/png');
                         },
                         triggerInput: function(id){
                             let self = this;
@@ -1128,7 +1152,7 @@
                 let self = this;
 
                 let mode = function(){
-	                let list = {js:'javascript', ltsv: 'toml'};
+	                let list = {js:'javascript', ltsv: 'toml', file: 'text'};
                     return list[item.ftype] || 'javascript';
                 };
 
@@ -1141,7 +1165,7 @@
 									</div>
 								</div>`;
 
-                let win = newWindow('fsedit', `${item.parent}/${item.name}`, content, null);
+                let win = newWindow('fsedit', `${item.parent}/${item.name}`, content, null,null);
 
                 let editor = {
                     el: '#fs-editor',

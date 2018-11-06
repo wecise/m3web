@@ -140,7 +140,7 @@ Sidebar.prototype.init = function()
                         tags[val.name] = _.values(val).join(" ");
                     })
 
-                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', 'icon_laptop', '.svg', _data, _data, tags, false);
+                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', _.last(_.split(v.name,"/")), '.png', _data, _data, tags, false);
                 })
 
             }
@@ -1020,7 +1020,7 @@ Sidebar.prototype.addEntitiesMatrixPalette = function(id, title, prefix, type, p
                 name = item.split(":")[0];
             }
 
-            fns.push(this.createVertexTemplateEntry('image;html=1;labelBackgroundColor=#ffffff;image=' + prefix + name + postfix,
+            fns.push(this.createVertexTemplateEntry('image;html=1;labelBackgroundColor=#ffffff;image=/fs/home/assets/images/entity/png/' + name + postfix + '?type=download',
                 this.defaultImageWidth, this.defaultImageHeight, title, title, title != null, null, this.filterTags(tmpTags)));
         }))(items[i].name, (titles != null) ? titles[i].name : null, (tags != null) ? tags[items[i].name] : null);
     }

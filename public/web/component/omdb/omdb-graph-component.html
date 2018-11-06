@@ -80,7 +80,9 @@
                         },
 	                    parent: null,
                         theme: "",
-                        outline: null
+                        outline: null,
+	                    directory: null,
+                        contextMenuItem: null
                     }
                 }
 	        }
@@ -200,6 +202,8 @@
 
                     _.delay(function(){
 
+                        let rtnItems = null;
+
                         self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
 
                             let cell = evt.getProperty('cell');
@@ -207,17 +211,84 @@
                             if(_.isEmpty(cell)) return;
 
                             let id = cell.getId();
+                            let value = cell.getValue();
+
+                            let state = self.model.graph.graph.view.getState(cell);
+                            state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")}`);
 
                             // copy to copyboard
                             let clipboard2 = new Clipboard('g image',{
                                 text: function(trigger) {
+                                    console.log(trigger)
+
+	                                $.contextMenu({
+                                        selector: `.${id.replace(/:/g,"_")}`,
+                                        trigger: 'left',
+                                        delay: 10,
+                                        hideOnSecondTrigger: true,
+                                        className: `animated slideIn`,
+                                        build: function($trigger, e) {
+
+                                            console.log($trigger, e.target)
+
+                                            let _items = rtnItems();//_.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+
+                                            return {
+                                                callback: function(key, opt) {
+
+                                                    if(key === 'copy'){
+
+                                                    } else if(key === 'tags') {
+
+                                                    } else if(key === 'export') {
+
+                                                    } else if(key === 'load') {
+
+                                                    }
+                                                },
+                                                items:_items
+                                            }
+                                        },
+                                        events: {
+                                            show: function(opt) {
+
+                                                let $this = this;
+
+
+                                            },
+                                            hide: function(opt) {
+
+                                                let $this = this;
+
+                                                $(".context-menu-list animated slideIn").remove();
+                                            }
+                                        }
+                                    });
+
                                     return id;
                                 }
                             });
+                            //self.tip(`ID：${id} 已复制到剪切板！`);
 
-                            self.tip(`ID：${id} 已复制到剪切板！`);
+                            rtnItems = function(){
+                                let items = null;
+
+                                for (var member in self.model.graph.contextMenuItem) delete self.model.graph.contextMenuItem[member];
+
+                                _.forEach(self.model.graph.directory[id],function(val){
+                                    _.forEach(val,function(v,k){
+                                        items = _.merge(items, {[k]: {name:k, type: 'text', value: v.toString(), icon:'fas fa-tags'}} );
+                                    })
+                                });
+                                //console.log(items)
+                                return items;
+                            };
 
                         });
+
+
+
+
                     },500)
 
                 }
@@ -234,12 +305,15 @@
                     let nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
 
+                    self.model.graph.directory = [];
+                    self.model.graph.directory = _.groupBy(orderNodes,'id');
+
                     _.forEach(orderNodes,function(v){
 
                         let _type = v.class || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                            `shape=image;image=/fs/home/assets/entity/png/${_type}.png?type=download;verticalLabelPosition=bottom;verticalAlign=top;`);
+                            `shape=image;html=1;image=/fs/home/assets/images/entity/png/${_type}.png?type=download;verticalLabelPosition=bottom;verticalAlign=top;`);
 
                         nodes[v.id] = node;
                     })
@@ -295,7 +369,7 @@
 
                 let tb = new mxToolbar(content);
 
-                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', '/web/assets/images/graph/svg/refresh.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', '/fs/home/assets/images/tools/png/refresh.png?type=download',function(evt)
                 {
                     $(self.$el).find("#container").empty();
 
@@ -303,30 +377,30 @@
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/graph/svg/zoom_out.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/fs/home/assets/images/tools/png/zoom_out.png?type=download',function(evt)
                 {
                     self.model.graph.graph.zoomIn();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/graph/svg/zoom_in.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/fs/home/assets/images/tools/png/zoom_in.png?type=download',function(evt)
                 {
                     self.model.graph.graph.zoomOut();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/graph/svg/print.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/fs/home/assets/images/tools/png/print.png?type=download',function(evt)
                 {
                     var preview = new mxPrintPreview(self.model.graph.graph, 1);
                     preview.open();
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/graph/svg/fullscreen.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/fs/home/assets/images/tools/png/fullscreen.png?type=download',function(evt)
                 {
                     toggleFullScreen();
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', '/web/assets/images/graph/svg/direction.svg',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', '/fs/home/assets/images/tools/png/direction.png?type=download',function(evt)
                 {
 
 
@@ -355,29 +429,6 @@
 
 
                 },null,'tools-item-direction');
-
-
-                /*$("#tools").contextMenu({
-                    selector: '.tools-item-direction',
-                    trigger: 'left',
-                    items: {
-
-                        "utd": {
-                            name: "上下", icon: "fas fa-angle-double-down", callback: function (key, opt) {
-                                console.log(1,self.model.graph.layout.orientation)
-                                self.model.graph.layout.orientation = 'north';
-                                self.model.graph.layout.execute(self.model.graph.parent);
-                            }
-                        },
-                        "dtu": {
-                            name: "下上", icon: "fas fa-angle-double-up", callback: function (key, opt) {
-                                console.log(2,self.model.graph.layout.orientation)
-                                self.model.graph.layout.orientation = 'south';
-                                self.model.graph.layout.execute(self.model.graph.parent);
-                            }
-                        }
-                    }
-                });*/
 
 
             },

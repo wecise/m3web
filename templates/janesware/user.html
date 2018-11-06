@@ -318,7 +318,7 @@
                 changeLogo: function(){
                     let self = this;
 
-                    let _win = newWindow("fsinfo","更改Logo",'<div id="fs-info"></div>',null);
+                    let _win = newWindow("fsinfo","更改Logo",'<div id="fs-info"></div>',null,null);
 
                     let _infoVue = new Vue({
                         delimiters: ['#{', '}#'],
@@ -390,7 +390,7 @@
                             init: function(){
                                 let me = this;
 
-                                me.model.icon.list = fsList('/home/assets');
+                                me.model.icon.list = fsList('/home/assets/images/files/png');
                             },
                             triggerInput: function(id){
                                 let self = this;

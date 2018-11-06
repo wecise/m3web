@@ -163,6 +163,10 @@
 
         const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
         const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
+        const URL_PARAMS_SESSIONID = urlParams['sessionid'];
+
+        //matrixCookies.set('MatrixSession', URL_PARAMS_SESSIONID);
+
 
         let init = function(){
 
@@ -600,35 +604,35 @@
 
                         let tb = new mxToolbar(content);
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/web/assets/images/iflow/zoom_in.png',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/fs/home/assets/images/tools/png/zoom_in.png?type=download',function(evt)
                         {
                             self.model.graph.graph.zoomIn();
                         },null,'tools-item');
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/web/assets/images/iflow/zoom_out.png',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/fs/home/assets/images/tools/png/zoom_out.png?type=download',function(evt)
                         {
                             self.model.graph.graph.zoomOut();
                         },null,'tools-item');
 
-                        /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/web/assets/images/iflow/actual_size.png',function(evt)
+                        /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', '/fs/home/assets/images/tools/png/actual_size.png?type=download',function(evt)
                         {
                             self.model.graph.graph.zoomActual();
                         },null,'tools-item');*/
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/web/assets/images/iflow/print.png',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/fs/home/assets/images/tools/png/print.png?type=download',function(evt)
                         {
                             var preview = new mxPrintPreview(self.model.graph.graph, 1);
                             preview.open();
 
                         },null,'tools-item');
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/web/assets/images/iflow/exit-fullscreen.png',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/fs/home/assets/images/tools/png/fullscreen.png?type=download',function(evt)
                         {
                             toggleFullScreen();
 
                         },null,'tools-item');
 
-                        self.win.toolbars = newWindow('toolbars','{{.i18n.Tr "creative-tools"}}',content,[5,220]);
+                        self.win.toolbars = newWindow('toolbars','{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
 
                     },
                     navToggle: function(){
@@ -663,4 +667,4 @@
     </div>
 </script>
 
-{{template "base/footer" .}}
+<!--{{template "base/footer" .}}-->

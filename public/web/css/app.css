@@ -16,6 +16,7 @@ body {
 
 #company_logo {
     margin-right:5px;
+    max-width: 32px;
 }
 
 /* For mxWindwoPane Start*/
@@ -107,9 +108,9 @@ div.mxWindow{
 }
 
 /*----------  Pace Loading  ----------*/
-.btn.btn-primary {
+/*.btn.btn-primary {
     background-color: rgb(33, 149, 244);
-}
+}*/
 
 /*----------  mxWindow ----------*/
 html td.mxWindowTitle {

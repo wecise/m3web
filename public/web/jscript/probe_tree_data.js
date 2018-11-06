@@ -1,4 +1,4 @@
-var _tags = odb.mql("select name from /matrix/tagdir limit -1");
+var _tags = odb.mql("select name from /matrix/tagdir where domain='probe' limit -1");
 
 var _tagsList = _.map(_tags, function(v,k){
     return {cid: v.id, parent: 'A2', rtype:'A2', isParent:true, name: v.name, title: v.title, children:[], iconSkin: 'tag'};
