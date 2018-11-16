@@ -80,6 +80,7 @@ website:	http://code.google.com/p/jquerytree/
 .ztree li span.button.console {margin-right:2px; background:url(./img/diy/icon/console.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.remove {margin-right:2px; background:url(./img/diy/icon/trash.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.more {margin-right:2px; background:url(./img/diy/icon/more.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.refresh {margin-right:2px; background:url(./img/diy/icon/refresh.png); vertical-align:middle; *vertical-align:middle}
 
 .ztree li span.button.platform_ico_open{margin-right:2px; background: url(./img/diy/icon/platform.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.platform_ico_close{margin-right:2px; background: url(./img/diy/icon/platform.png); vertical-align:middle; *vertical-align:middle}

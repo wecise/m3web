@@ -185,7 +185,6 @@ var companyUpdate = function(com) {
     jQuery.ajax({
         url: '/companys',
         dataType: 'json',
-        contentType: 'application/json',
         type: 'PUT',
         async: false,
         data: JSON.stringify(com),
@@ -200,13 +199,11 @@ var companyUpdate = function(com) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
+            rtn = 0;
             alertify.error("失败" + " " + JSON.stringify(xhr));
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }

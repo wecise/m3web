@@ -40,14 +40,40 @@
 * */
 var cmdPolicyAdd = function(event) {
 
-    let rtn = null;
+    let rtn = 0;
+
+    /*let fm = new FormData();
+
+    fm.append("name", event.name);
+    fm.append("command", event.command);
+    fm.append("depotname", event.depot.name);
+    fm.append("depotversion", event.depot.version);
+    fm.append("ctype", event.ctype);
+    fm.append("interval", event.interval);
+    fm.append("unit", event.unit);
+    fm.append("rule", event.rule);
+
+    _.forEach(event.hosts,function(v){
+        fm.append("hosts", v);
+    })
+
+    fm.append("split", event.split);
+    fm.append("delimiter", event.delimiter);
+    fm.append("delimitereol", event.delimitereol);
+
+    _.forEach(event.tags,function(v){
+        fm.append("tags", v);
+    })
+
+    fm.append("attrs", event.attrs);*/
 
     jQuery.ajax({
         url: '/monitoring/policy',
         dataType: 'json',
         type: 'POST',
         processData: false,
-        data: event,
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(event),
         async: false,
         beforeSend: function (xhr) {
         },
@@ -58,11 +84,14 @@ var cmdPolicyAdd = function(event) {
             ifSignIn(data);
 
             if( _.lowerCase(data.status) == "ok"){
-                rtn = data;
+                rtn = 1;
+                alertify.success("添加成功" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("添加失败" + " " + xhr.responseJSON.message);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -94,14 +123,35 @@ var cmdPolicyAdd = function(event) {
 * */
 var logPolicyAdd = function(event) {
 
-    let rtn = null;
+    let rtn = 0;
+
+    let fm = new FormData();
+
+    fm.append("name", event.name);
+    fm.append("rule", event.rule);
+    fm.append("dir", event.dir);
+    fm.append("match", event.match);
+    fm.append("delimiter", event.delimiter);
+    fm.append("delimitereol", event.delimitereol);
+
+    _.forEach(event.hosts,function(v){
+        fm.append("hosts", v);
+    })
+
+    _.forEach(event.tags,function(v){
+        fm.append("tags", v);
+    })
+
+    fm.append("attrs", event.attrs);
 
     jQuery.ajax({
         url: '/monitoring/policy/log',
-        dataType: 'json',
         type: 'POST',
+        dataType: 'json',
         processData: false,
-        data: event,
+        contentType: false,
+        mimeType: 'multipart/form-data',
+        data: fm,
         async: false,
         beforeSend: function (xhr) {
         },
@@ -112,11 +162,14 @@ var logPolicyAdd = function(event) {
             ifSignIn(data);
 
             if( _.lowerCase(data.status) == "ok"){
-                rtn = data;
+                rtn = 1;
+                alertify.success("添加成功" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("添加失败" + " " + xhr.responseJSON.message);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -136,7 +189,7 @@ var policyDeploy = function(event) {
     let rtn = 1;
 
     jQuery.ajax({
-        url: '/monitoring/policy/deploy/test',
+        url: '/monitoring/policy/deploy/${event}',
         dataType: 'json',
         type: 'POST',
         processData: false,
@@ -173,11 +226,11 @@ var policyDeploy = function(event) {
 *  Undeploy Policy
 *
 * */
-var ruleDelete = function(event) {
+var policyDelete = function(event) {
     let rtn = 1;
 
     jQuery.ajax({
-        url: '/monitoring/policy/undeploy/test',
+        url: `/monitoring/policy/undeploy/${event}`,
         dataType: 'json',
         type: 'POST',
         processData: false,
@@ -194,14 +247,12 @@ var ruleDelete = function(event) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
+            alertify.error("失败" + " " + xhr.responseJSON);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

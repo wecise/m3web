@@ -34,6 +34,10 @@
 			margin: 0px 5px;
 		}
 
+		.node-menu{
+			width:20vw;
+		}
+
 	</style>
 
 	
@@ -81,8 +85,6 @@
 	                    parent: null,
                         theme: "",
                         outline: null,
-	                    directory: null,
-                        contextMenuItem: null
                     }
                 }
 	        }
@@ -200,96 +202,7 @@
 
                     self.initGraph();
 
-                    _.delay(function(){
-
-                        let rtnItems = null;
-
-                        self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
-
-                            let cell = evt.getProperty('cell');
-
-                            if(_.isEmpty(cell)) return;
-
-                            let id = cell.getId();
-                            let value = cell.getValue();
-
-                            let state = self.model.graph.graph.view.getState(cell);
-                            state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")}`);
-
-                            // copy to copyboard
-                            let clipboard2 = new Clipboard('g image',{
-                                text: function(trigger) {
-                                    console.log(trigger)
-
-	                                $.contextMenu({
-                                        selector: `.${id.replace(/:/g,"_")}`,
-                                        trigger: 'left',
-                                        delay: 10,
-                                        hideOnSecondTrigger: true,
-                                        className: `animated slideIn`,
-                                        build: function($trigger, e) {
-
-                                            console.log($trigger, e.target)
-
-                                            let _items = rtnItems();//_.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
-
-                                            return {
-                                                callback: function(key, opt) {
-
-                                                    if(key === 'copy'){
-
-                                                    } else if(key === 'tags') {
-
-                                                    } else if(key === 'export') {
-
-                                                    } else if(key === 'load') {
-
-                                                    }
-                                                },
-                                                items:_items
-                                            }
-                                        },
-                                        events: {
-                                            show: function(opt) {
-
-                                                let $this = this;
-
-
-                                            },
-                                            hide: function(opt) {
-
-                                                let $this = this;
-
-                                                $(".context-menu-list animated slideIn").remove();
-                                            }
-                                        }
-                                    });
-
-                                    return id;
-                                }
-                            });
-                            //self.tip(`ID：${id} 已复制到剪切板！`);
-
-                            rtnItems = function(){
-                                let items = null;
-
-                                for (var member in self.model.graph.contextMenuItem) delete self.model.graph.contextMenuItem[member];
-
-                                _.forEach(self.model.graph.directory[id],function(val){
-                                    _.forEach(val,function(v,k){
-                                        items = _.merge(items, {[k]: {name:k, type: 'text', value: v.toString(), icon:'fas fa-tags'}} );
-                                    })
-                                });
-                                //console.log(items)
-                                return items;
-                            };
-
-                        });
-
-
-
-
-                    },500)
+                    self.dispatchNodeEvent();
 
                 }
             },
@@ -304,9 +217,6 @@
 
                     let nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
-
-                    self.model.graph.directory = [];
-                    self.model.graph.directory = _.groupBy(orderNodes,'id');
 
                     _.forEach(orderNodes,function(v){
 
@@ -348,6 +258,100 @@
                 self.initToolBars();
 
             },
+            dispatchNodeEvent: function(){
+                let self = this;
+
+                self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+
+                    let cell = evt.getProperty('cell');
+
+                    if(_.isEmpty(cell)) return;
+
+                    let id = cell.getId();
+                    let value = cell.getValue();
+
+                    let state = self.model.graph.graph.view.getState(cell);
+                    let nodeDic = _.groupBy(self.graphData.nodes,'id');
+
+                    state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                    state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic[id]));
+
+                    // copy to copyboard
+                    let clipboard2 = new Clipboard('g image',{
+                        text: function(trigger) {
+
+                            $.contextMenu({
+                                selector: `.${id.replace(/:/g,"_")}`,
+                                trigger: 'left',
+                                delay: 10,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn node-menu`,
+                                build: function($trigger, e) {
+
+                                    let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+                                    let items = null;
+                                    _.forEach(temp,function(val){
+                                        _.forEach(val,function(v,k){
+
+	                                        let value = null;
+
+                                            if(typeof v == "object") {
+                                                if(_.includes(['depend','runon','connect','refer','contain'],k)){
+
+                                                    if(v==null || !v['_all']) return;
+                                                    let _options = {};
+                                                    _.map(v['_all'],function(w,y){
+                                                        return _.merge(_options,{[y]:w});
+                                                    })
+
+                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                                } else {
+                                                    value = JSON.stringify(v,null,2);
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
+                                                }
+
+                                            } else {
+                                                value = v.toString();
+                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                            }
+
+                                        })
+                                    });
+
+                                    return {
+                                        callback: function(key, opt) {
+
+                                            if(key === 'copy'){
+
+                                            } else if(key === 'tags') {
+
+                                            } else if(key === 'export') {
+
+                                            } else if(key === 'load') {
+
+                                            }
+                                        },
+                                        items:items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                                        let $this = this;
+                                    },
+                                    hide: function(opt) {
+                                        let $this = this;
+                                        $(".context-menu-list animated slideIn").remove();
+                                    }
+                                }
+                            });
+
+                            return id;
+                        }
+                    });
+                    //self.tip(`ID：${id} 已复制到剪切板！`);
+
+                });
+            },
             tip: function(event){
                 let self = this;
 
@@ -361,6 +365,38 @@
                 self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
 
             },
+		    saveas: function(){
+				let self = this;
+
+                let encoder = new mxCodec();
+                let node = encoder.encode(self.model.graph.graph.getModel());
+                let xml = mxUtils.getPrettyXml(node);
+
+                alertify.prompt("文件名称", function (e, str) {
+                    // str is the input text
+                    if (e) {
+                        // user clicked "ok"
+	                    let parent = '/home/creative/admin';
+	                    let ftype = 'imap';
+	                    let name = `${str}.${ftype}`;
+	                    let attr = {remark: null, ctime: _.now(), author: $("#signed-user-name").val(), type: 'imap', icon: "/fs/home/assets/images/files/png/imap.png?type=download"};
+                        let rtn = fsNew('file', parent, name, xml, attr);
+	                    if(rtn == 1){
+
+	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
+
+                            let url = genFsUrl(item,null);
+
+                            alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
+	                    }
+                    } else {
+                        // user clicked "cancel"
+                    }
+                }, "");
+
+
+
+		    },
             initToolBars: function () {
                 let self = this;
 
@@ -368,6 +404,13 @@
                 content.style.padding = '4px';
 
                 let tb = new mxToolbar(content);
+
+                tb.addItem('{{.i18n.Tr "creative-saveas"}}', '/fs/home/assets/images/tools/png/saveas.png?type=download',function(evt)
+                {
+                    self.saveas();
+
+                },null,'tools-item');
+
 
                 tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', '/fs/home/assets/images/tools/png/refresh.png?type=download',function(evt)
                 {
@@ -389,7 +432,8 @@
 
                 tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/fs/home/assets/images/tools/png/print.png?type=download',function(evt)
                 {
-                    var preview = new mxPrintPreview(self.model.graph.graph, 1);
+                    var scale = mxUtils.getScaleForPageCount(1, self.model.graph.graph);
+                    var preview = new mxPrintPreview(self.model.graph.graph, scale);
                     preview.open();
 
                 },null,'tools-item');

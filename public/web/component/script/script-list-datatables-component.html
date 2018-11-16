@@ -7,9 +7,14 @@
 			white-space: nowrap;
 		}
 
-		.script-list-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
-			background: rgb(196, 235, 253)!important;
+		.script-list-datatables-component table.dataTable tbody td.select-checkbox:before, table.dataTable tbody th.select-checkbox:before {
+			border: none;
 		}
+
+		.script-list-datatables-component table.dataTable tr.selected td.select-checkbox:after, table.dataTable tr.selected th.select-checkbox:after {
+			content: none;
+		}
+
 
 		div.dataTables_wrapper div.dataTables_info {
 			padding-top: 4px;
@@ -127,6 +132,7 @@
 		.dataTables_wrapper{
 			width:100%;
 			margin: 0 auto;
+			min-height: 60vh;
 		}
 
 		.tagify{
@@ -140,6 +146,7 @@
 	<template>
 		<div class="container-fluid">
 			<input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
+			<hr/>
 			<table :id="id" class="display" width="100%"></table>
 		</div>
 	</template>
@@ -148,7 +155,7 @@
 	<script id="script-list-datatables-component">
         {
             delimiters: ['${', '}'],
-                props: {
+			props: {
 		            id: String,
 	                model: Object
             },
@@ -260,7 +267,7 @@
                         columns: self._columns,
                         //stripeClasses: [],
                         responsive: false,
-                        searching: false,
+                        searching: true,
                         aDataSort: true,
                         bSort: true,
                         bAutoWidth: true,
@@ -269,7 +276,7 @@
                         paging: false,
                         info: true,
                         scrollX: true,
-                        scrollY: '400px',
+                        scrollY: '55vh',
                         scrollCollapse: true,
                         aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                         language : {
@@ -304,16 +311,74 @@
                                 }
                             }
                         },
-                        select: {
+	                    select: {
                             style: 'multi',
                             selector: 'td:first-child'
 
                         },
                         fixedColumns:   {
-                            leftColumns: 1
+                            leftColumns: 2
                         },
                         lengthChange: false,
                         stateSave: false,
+                        dom: 'Bfrtip',
+                        buttons: {
+                            dom: {
+                                button: {
+                                    tag: 'button'
+                                }
+                            },
+                            buttons: [
+                                {
+                                    text: '刷新',
+                                    action: function (e, dt, node, config) {
+                                        self.refresh();
+                                    },
+                                    enabled: true,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '添加',
+                                    action: function (e, dt, node, config) {
+                                        self.add();
+                                    },
+                                    enabled: true,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '删除',
+                                    action: function (e, dt, node, config) {
+                                        self.delete();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '编辑',
+                                    action: function (e, dt, node, config) {
+                                        self.edit();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '导出',
+                                    action: function (e, dt, node, config) {
+                                        self.scriptEdit();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '导入',
+                                    action: function (e, dt, node, config) {
+                                        self.scriptEdit();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                }
+                            ]
+                        },
                         initComplete: function(event, settings, json){
 
 
@@ -335,6 +400,10 @@
                             $("#"+self.id).on('click', 'tr', function () {
                                 self.selectedRow = self.datatable.row( this ).data();
                             });
+
+                            // dispatch event to checkbox for all
+                            //self.dispatchSelectAll();
+
                         },
                         drawCallback:function(settings){
 
@@ -342,7 +411,7 @@
 
                             //self.redraw();
                         }
-                    },self.options)).columns.adjust().draw();
+                    },self.options));
 
                 },
                 initPlugin: function(){
@@ -352,20 +421,25 @@
 
                     self.baseDatatable();
 
+                    // Buttons enable/disable
+                    self.datatable.on( 'select deselect', function () {
+                        var selectedRows = self.datatable.rows( { selected: true } ).count();
+
+                        self.datatable.buttons( [2,3,4,5] ).enable( selectedRows > 0 );
+                    } );
+
                 },
                 initMenu: function(){
                     let self = this;
 
-                    let items = callFsJScript('toolbar.js', '').message.probe.script;
+                    let items = callFsJScript('/probe/toolbar.js', '').message.probe.script;
                     let id = self.id;
 
                     $.contextMenu({
-                        selector: `#${id} tr`,
+                        selector: `#${id} tr td:not(:nth-child(1))`,
                         trigger: 'left',
                         delay: 10,
-                        position: function(opt, x, y){
-                            opt.$menu.position({ of: this, offset: "0 5"});
-                        },
+
                         hideOnSecondTrigger: true,
                         className: `animated slideIn ${id}`,
                         build: function($trigger, e) {
@@ -374,20 +448,8 @@
 
                             return {
                                 callback: function(key, opt) {
-                                    if(key === 'add'){
-                                        let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 添加`, `<div id="script-add-container"></div>`, null, 'script-container');
-
-                                        self.addWizard(wnd);
-
-                                    } else if(key === 'delete') {
-
-                                        alertify.confirm("确认删除", function (e) {
-                                            if (e) {
-
-                                            } else {
-                                                // user clicked "cancel"
-                                            }
-                                        });
+                                    if(key === 'delete') {
+                                        self.delete();
 
                                     } else if(key === 'export') {
 
@@ -413,6 +475,11 @@
                         }
                     });
                 },
+                refresh: function(){
+                    let self = this;
+
+                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+	            },
                 redraw: function(){
                     let self = this;
 
@@ -474,7 +541,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -484,7 +551,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -496,123 +563,6 @@
                     };
 
                     return tag;
-                },
-                addWizard: function(wnd){
-                    let self = this;
-
-                    let conf = callFsJScript('probe_summary_script_conf.js', '').message;
-
-                    let wizard = {
-                        el: "#script-add-container",
-                        data: {
-                            model: {
-                                conf: conf,
-                                item: {
-                                    name: null,
-				                    version: null,
-				                    remark: null,
-				                    uploadfile: null,
-				                    tags: null
-                                },
-                                handler: {
-                                    tagify: null
-                                }
-                            }
-                        },
-                        created: function(){
-                            let me = this;
-
-                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
-                        },
-                        methods: {
-                            tagInput: function(className,container, tags){
-                                let me = this;
-
-                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-	                                .on("add",function(event, tagName){
-                                        me.model.item.tags = tagName.value;
-                                    })
-                                    .on("remove",function(event,tagName){
-                                        me.model.item.tags = tagName.value;
-                                    });
-
-                            },
-                            save: function(){
-                                let me = this;
-
-                                console.log(JSON.stringify(me.model.item))
-
-                                let rtn = depotAdd(me.model.item);
-                            },
-                            delete: function(){},
-                            resize:function(){
-                                wnd.resize($(wnd.content).parent().parent().width()+20,$(wnd.content).parent().parent().height()+60);
-                            }
-                        },
-                        mounted: function(){
-                            let me = this;
-
-                            me.$nextTick(function () {
-                                FormWizard.init("script-wizard");
-                                me.tagInput();
-                            })
-                        },
-                        template: `<form>
-										<div id="script-wizard">
-											<ol>
-												<li>
-													基本配置
-													<small>运行策略，环境变量设置。</small>
-												</li>
-												<li>
-													选择对象
-													<small>选择部署对象。</small>
-												</li>
-											</ol>
-
-											<div>
-												<fieldset class="form-horizontal">
-
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本名称：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.name"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本版本：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control"  v-model="model.item.version"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本说明：</label>
-														<div class="col-sm-10"><textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">添加标签：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">选择脚本：</label>
-														<div class="col-sm-10"><input type="file" placeholder="" class="form-control"  v-model="model.item.uploadfile"/></div>
-													</div>
-
-												</fieldset>
-											</div>
-											<div>
-												<fieldset>
-													<div class="row">
-														<div class="col-md-12">
-															<script-base-datatable id="script-servers-datatable" :model="model.conf.servers"></script-base-datatable>
-															<hr/>
-															<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
-														</div>
-													</div>
-												</fieldset>
-											</div>
-
-										</div>
-									</form>`
-                    };
-
-                    new Vue(wizard);
                 },
                 baseDatatable: function(){
 
@@ -628,22 +578,42 @@
                                 datatable: null
                             }
                         },
+                        created: function(){
+                            let me = this;
+
+                            eventHub.$on("COMPONENT-REDRAW-EVENT", me.redraw);
+                        },
+                        watch: {
+                            'model.servers.dataset': {
+                                handler: function(val,oldVal){
+                                    let me = this;
+
+                                    if(val === oldVal) return false;
+
+                                    if(me.datatable){
+                                        me.datatable.destroy();
+                                        $(`#${me.id}`).empty();
+                                        me.init();
+                                    }
+                                },
+                                deep:true
+                            }
+
+                        },
                         mounted: function () {
                             let me = this;
 
                             me.$nextTick(function () {
 
-                                _.delay(function() {
-                                    me.init();
-                                },1000);
-
+                                me.init();
+                                me.initPlug();
                             })
                         },
                         computed: {
                             _columns: function(){
                                 let me = this;
 
-                                let _cols = _.map(me.model.columns,function(v,k){
+                                let _cols = _.map(me.model.servers.columns,function(v,k){
 
                                     if(!v.render){
                                         return v;
@@ -662,7 +632,7 @@
                                 let me = this;
 
                                 me.datatable = $("#" + me.id).DataTable(_.extend({
-                                    data: me.model.dataset,
+                                    data: me.model.servers.dataset,
                                     columns: me._columns,
                                     //stripeClasses: [],
                                     responsive: false,
@@ -675,7 +645,7 @@
                                     paging: false,
                                     info: true,
                                     scrollX: true,
-                                    scrollY: 'auto',
+                                    scrollY: '300px',
                                     scrollCollapse: true,
                                     aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}],
                                     language: {
@@ -717,32 +687,256 @@
                                     },
                                     lengthChange: true,
                                     stateSave: false,
+                                    dom: {
+                                        button: {
+                                            tag: 'button',
+                                            className: 'datatables-toolbars-button'
+                                        }
+                                    },
+                                    dom: 'Bfrtip',
+                                    buttons: {
+                                        dom: {
+                                            button: {
+                                                tag: 'button'
+                                            }
+                                        },
+                                        buttons: [
+                                            {
+                                                text: '部署',
+                                                action: function (e, dt, node, config) {
+													me.deploy(dt.row( { selected: true } ).data());
+                                                },
+                                                enabled: false,
+                                                className: 'btn btn-sm btn-success'
+                                            },
+                                            {
+                                                text: '去除',
+                                                action: function (e, dt, node, config) {
+
+                                                },
+                                                enabled: false,
+                                                className: 'btn btn-sm btn-default'
+                                            },
+                                            {
+                                                text: '查看',
+                                                action: function (e, dt, node, config) {
+
+                                                },
+                                                enabled: false,
+                                                className: 'btn btn-sm btn-default'
+                                            }
+                                        ]
+                                    },
                                     initComplete: function (event, settings, json) {
 
-                                        // init effect for table
-                                        $("#" + me.id).find("tbody").on("mouseover", "tr", function (event) {
-
-                                            $(this).css('background-color', '#ddd');
-
-                                            $(this).bind("mouseout", function () {
-                                                $(this).css('background-color', '');
-                                            });
-                                        });
 
                                     },
                                     drawCallback: function (settings) {
                                         //me.redraw();
                                     }
-                                }, me.options)).columns.adjust().draw();
+                                }, me.model.servers.options)).columns.adjust().draw();
 
                             },
+	                        initPlug: function(){
+                                let me = this;
+
+                                // Buttons enable/disable
+                                me.datatable.on( 'select deselect', function () {
+                                    let selectedRows = me.datatable.rows( { selected: true } ).count();
+
+                                    me.datatable.buttons( [0,1,2] ).enable( selectedRows > 0 );
+                                } );
+	                        },
                             redraw: function () {
                                 let me = this;
 
-                                me.datatable.columns.adjust().draw();
+                                _.delay(function(){
+                                    me.datatable.columns.adjust().draw();
+                                },500);
+                            },
+                            deploy: function(event){
+                                let me = this;
+
+                                let depot = {depots: me.model.name,versions: me.model.version, hosts: event.host};
+
+                                let rtn = depotDeploy(depot);
+
+                                if(rtn === 1){
+                                    me.model.wnd.close();
+                                }
                             }
                         }
                     });
+                },
+                add: function(){
+                    let self = this;
+
+                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 添加`, `<div id="script-add-container"></div>`, null, 'script-container');
+
+                    let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
+
+                    let wizard = {
+                        el: "#script-add-container",
+                        data: {
+                            model: {
+                                item: {
+                                    name: null,
+                                    version: null,
+                                    remark: null,
+                                    uploadfile: null,
+                                    tags: null,
+	                                servers: conf.servers,
+									wnd: wnd
+                                },
+                                handler: {
+                                    tagify: null
+                                }
+                            }
+                        },
+                        created: function(){
+                            let me = this;
+
+                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
+                        },
+                        methods: {
+                            tagInput: function(className,container, tags){
+                                let me = this;
+
+                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
+                                    .on("add",function(event, tagName){
+                                        me.model.item.tags = tagName.value;
+                                    })
+                                    .on("remove",function(event,tagName){
+                                        me.model.item.tags = tagName.value;
+                                    });
+
+                            },
+                            save: function(){
+                                let me = this;
+
+                                let rtn = depotAdd(me.model.item);
+
+                                if(rtn === 1){
+
+                                    alertify.confirm("是否需要部署该脚本？", function (e) {
+                                        if (e) {
+                                            // user clicked "ok"
+                                        } else {
+                                            wnd.close();
+                                        }
+                                    });
+
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                }
+                            },
+                            resize:function(){
+                                wnd.resize($(wnd.content).parent().parent().width()+20, $(wnd.content).parent().parent().height()+60 );
+                            },
+                            onFileChange(e) {
+                                let me = this;
+
+                                let file = e.target.files[0];
+
+                                me.model.item.uploadfile = file;
+
+                            }
+                        },
+                        mounted: function(){
+                            let me = this;
+
+                            me.$nextTick(function () {
+                                FormWizard.init("script-wizard");
+                                me.tagInput();
+
+                                $(me.$el).find("li").on("click",function(){
+                                    eventHub.$emit("COMPONENT-REDRAW-EVENT");
+                                })
+                            })
+                        },
+                        template: `<form>
+										<div id="script-wizard">
+											<ol>
+												<li>
+													基本配置
+													<small>运行策略，环境变量设置。</small>
+												</li>
+												<li>
+													选择对象
+													<small>如果需要部署，选择部署对象，开始部署。</small>
+												</li>
+											</ol>
+
+											<div>
+												<fieldset class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本名称：</label>
+														<div class="col-sm-10">
+															<input type="text" placeholder="" class="form-control" v-model="model.item.name" required="required" />
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本版本：</label>
+														<div class="col-sm-10">
+															<input type="number" placeholder="" class="form-control"  v-model="model.item.version" required="required" />
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本说明：</label>
+														<div class="col-sm-10">
+															<textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"></textarea>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加标签：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">选择脚本：</label>
+														<div class="col-sm-10"><input type="file" placeholder="" class="form-control" @change="onFileChange" required="required" /></div>
+													</div>
+													<hr/>
+													<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<script-base-datatable id="script-servers-datatable" :model="model.item"></script-base-datatable>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+
+										</div>
+									</form>`
+                    };
+
+                    new Vue(wizard);
+                },
+                delete: function(){
+                    let self = this;
+
+                    let selected = _.map(self.datatable.rows(".selected").data(),'name');
+
+                    alertify.confirm(`确认删除：${selected.join(",")}`, function (e) {
+                        if (e) {
+                            if(selected.length > 0) {
+                                _.forEach(selected, function(v){
+                                    depotDelete(v);
+                                })
+
+                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                            } else {
+                                alertify.log("请选择脚本。")
+                                return false;
+                            }
+
+                        } else {
+                            // user clicked "cancel"
+                        }
+                    });
+
                 }
             }
 

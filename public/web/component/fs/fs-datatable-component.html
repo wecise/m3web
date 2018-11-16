@@ -4,20 +4,11 @@
 		/*----------  style  ----------*/
 
 		.fs-datatable-component thead tr th, .fs-datatable-component tbody tr td{
-			line-height: 10px;
 			white-space: nowrap;
 		}
 
 		.fs-datatable-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
-		}
-
-		td.highlight {
-			background-color: whitesmoke !important;
-		}
-
-		table.fs-datatable-component tbody tr:nth-child(even):hover td{
-			background-color: rgba(227, 239, 244, 0.5) !important;
 		}
 
 		div #container {
@@ -137,7 +128,7 @@
                                 bSort: true,
 			                    bAutoWidth: true,
                                 rowReorder: false,
-                                colReorder: false,
+                                colReorder: true,
 								paging: false,
 								info: false,
                     			scrollX: 'auto',
@@ -176,11 +167,7 @@
                                         }
                                     }
                                 },
-	                            fixedHeader: {
-			                        header: true,
-			                        footer: true
-			                    },
-                                select: {
+	                            select: {
 			                        style: 'os',
                                     selector: 'td:first-child'
 
@@ -193,7 +180,7 @@
 			                    drawCallback: function( settings ) {
 			                        console.log('表格重绘了' );
 			                    }
-                    },self.options));
+                    },self.options)).columns.adjust().draw();
 
 				self.initPlugin();
 

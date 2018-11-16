@@ -71,14 +71,13 @@
 		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
-					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary cache" @click="cacheToLocal" title="缓存"><i class="fa fa-file-upload"></i></a>-->
-					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromLocal" title="加载"><i class="fa fa-file-download"></i></a>-->
-
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fa fa-paste"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-check"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="runIt"  title="运行"><i class="fa fa-play"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary save" @click="saveIt"  title="保存"><i class="fa fa-save"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="runIt"  title="保存并运行"><i class="fa fa-play"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary deploy" @click="deployIt"  title="发布为应用"><i class="fab fa-codepen"></i></a>
 					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
 					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fa fa-forward"></i></a>-->
 				</div>
@@ -286,6 +285,47 @@
                 self.editor.setValue();
                 alertify.log("已清空");
             },
+	        deployIt: function(){
+				let self = this;
+
+				let app = {
+				            cnname: _.head(self.model.fs.name.split(".")),
+							enname: _.head(self.model.fs.name.split(".")),
+							seat: _.random(100,10000),
+							icon: 'fa fa-globe',
+							url: `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=download`
+
+				};
+
+				let rtn = callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                if( _.lowerCase(rtn.status) == "ok"){
+                    eventHub.$emit("APP-REFRESH-EVENT");
+                    alertify.success("应用发布成功");
+                }
+
+	        },
+            saveIt: function(){
+                let self = this;
+
+                let sc = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                /*if( self.editor.getSelectedText().length > 0 ) {
+                    sc = self.editor.getSelectedText();
+                }*/
+
+                // save
+                let sRtn = fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+
+                if(sRtn == 0){
+                    alertify.log("请确认脚本！");
+                    return false;
+                }
+
+            },
             runIt: function(){
                 let self = this;
 
@@ -295,9 +335,9 @@
                     return false;
                 }
 
-                if( self.editor.getSelectedText().length > 0 ) {
+                /*if( self.editor.getSelectedText().length > 0 ) {
                     sc = self.editor.getSelectedText();
-                }
+                }*/
 
                 // save
 				let sRtn = fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
@@ -307,10 +347,14 @@
                     return false;
                 }
 
-	            // run
-                let rRtn = callFsJScript(self.model.fs.name, '');
+	            // run depend ftype: js/html
+	            if(_.includes(['html','html'],self.model.fs.ftype)){
+                    eventHub.$emit("FS-EDITOR-RUN-EVENT", `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=download`);
+	            } else {
+                    let rRtn = callFsJScript([self.model.fs.parent,self.model.fs.name].join("/").replace(/\/script/g,""), '');
 
-                eventHub.$emit("FS-EDITOR-RUN-EVENT", rRtn)
+                    eventHub.$emit("FS-EDITOR-RUN-EVENT", rRtn)
+	            }
 
             }
         }

@@ -353,7 +353,7 @@
             initMenu: function(){
                 let self = this;
 
-                let items = callFsJScript('toolbar.js', '').message.probe.probe;
+                let items = callFsJScript('/probe/toolbar.js', '').message.probe.probe;
                 let id = self.id;
 
                 $.contextMenu({
@@ -460,7 +460,7 @@
                         onAddTag: function(event){
 
 	                        let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -470,7 +470,7 @@
                         onRemoveTag: function(event){
 
                             let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);

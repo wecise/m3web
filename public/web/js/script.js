@@ -20,13 +20,13 @@
 var depotAdd = function(event) {
 
     let rtn = 0;
-console.log(event.tags)
-    var  form = new FormData();
-    form.append("name", event.name);
-    form.append("version", event.version);
-    form.append("remark", event.remark);
-    form.append("uploadfile", event.uploadfile);
-    form.append("tags", event.tags);
+
+    var  fm = new FormData();
+    fm.append("name", event.name);
+    fm.append("version", event.version);
+    fm.append("remark", event.remark);
+    fm.append("uploadfile", event.uploadfile);
+    fm.append("tags", event.tags);
 
     jQuery.ajax({
         url: '/monitoring/depot',
@@ -35,7 +35,7 @@ console.log(event.tags)
         processData: false,
         contentType: false,
         mimeType: "multipart/form-data",
-        data: form,
+        data: fm,
         async: false,
         beforeSend: function (xhr) {
         },
@@ -47,16 +47,14 @@ console.log(event.tags)
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
+                alertify.success("脚本添加成功" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
-            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+            alertify.error("脚本添加失败" + " " + xhr.responseJSON.message);
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.message);
         }
     });
     return rtn;
@@ -69,12 +67,12 @@ console.log(event.tags)
 *  Delete depot
 *
 * */
-var depotDelete = function(event) {
+var depotDelete = function(name) {
 
     let rtn = 0;
 
     jQuery.ajax({
-        url: '/monitoring/depot/test',
+        url: `/monitoring/depot/${name}`,
         dataType: 'json',
         type: 'DELETE',
         async: false,
@@ -89,14 +87,12 @@ var depotDelete = function(event) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("删除失败" + " " + xhr.responseJSON.message);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -238,9 +234,13 @@ var depotDeploy = function(event) {
     let rtn = 0;
 
     var form = new FormData();
-    form.append("hosts", "mxsvr221");
-    form.append("depots", "test");
-    form.append("versions", "1.0");
+
+    _.forEach(event.hosts,function(v){
+        form.append("hosts", v);
+    })
+
+    form.append("depots", event.name);
+    form.append("versions", event.version);
 
     jQuery.ajax({
         url: '/monitoring/deploy',
@@ -259,15 +259,13 @@ var depotDeploy = function(event) {
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
+                alertify.success("脚本部署成功" + " " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
+            alertify.error("脚本部署失败" + " " + xhr.responseJSON.message);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

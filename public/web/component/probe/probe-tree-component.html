@@ -103,7 +103,6 @@
                 zTree: Object,
                 zSetting: {
                     view: {
-                        showTitle: true,
                         dblClickExpand: this.onDblClickExpand,
                         addDiyDom: this.addCountDom,
                         removeHoverDom: this.removeHoverDom,
@@ -121,14 +120,14 @@
                         },
                         key: {
                             name: 'name',
-                            title: 'name'
+                            title: 'title'
                         }
                     },
                     check: {
                         enable: false
                     }
                 },
-                zNodes: callFsJScript(`${this.system}_tree_data.js`).message,
+                zNodes: callFsJScript(`/probe/${this.system}_tree_data.js`).message,
                 selectedNode: null,
 
 
@@ -203,46 +202,26 @@
             onExpand: function(event, treeId, treeNode) {
                 let self = this;
 
-                let result = [];
+                let recursiveTraverse = function (node) {
 
-                let recursiveTraverse = function (node, result) {
+                    let rtn = null;
 
-                    if (!node || !node.nodes) {
-                        return;
-                    }
+                    rtn = _.map(node, function(v,k){
+                        return {cid: v.name, parent:'A2', rtype:'A2', name: v.name, title: v.name, children: recursiveTraverse(v.nodes), iconSkin: 'tag'};
+                    });
 
-                    let obj = {};
-
-                    obj = {cid: node.name, parent:'A2', rtype:'A2', name: node.name, title: node.name, children: [], iconSkin: 'tag'};
-
-                    if(node.nodes.length === 0){
-                        //result.push(obj);
-                    } else {
-                        node.nodes.forEach(function (item, index) {
-                            obj.children.push({cid:item.name, parent:node.name, rtype: 'A2', name: item.name, title: item.name, children:[], iconSkin: 'tag'});
-                            result.push(obj);
-                            recursiveTraverse(item, result);
-                        });
-                    }
+                    return rtn;
                 };
 
-	            if(treeNode.cid === 'A2' && treeNode.parent == null){
+	            if(treeNode.rtype === 'A2' && treeNode.parent == null){
 
-	                //let rtn = _.groupBy(callFsJScript(`${self.system}_tree_data.js`).message,'cid');
+	                let tagDir = getTagDir(self.system);
+
+	                // 忽略第一层
+	                let tree = recursiveTraverse(tagDir.nodes);
 
 	                self.zTree.removeChildNodes(treeNode);
-
-	                //self.zTree.addNodes(treeNode, rtn["A2"][0].children);
-
-	                let rtn = getTagDir("probe");
-
-                    console.log(JSON.stringify(rtn))
-
-	                let nodes = recursiveTraverse(rtn, result);
-
-	                console.log(JSON.stringify(result))
-
-	                self.zTree.addNodes(treeNode, result);//rtn["A2"][0].children);
+		            self.zTree.addNodes(treeNode, tree);
 
                 }
             },
@@ -282,8 +261,8 @@
 
                     let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
 										<span class='blank'></span>
-										<span class='blank'></span>
 										<span class='button add' id='addBtn_${treeNode.tId}' title='新建标签'></span>
+										<span class='button refresh' id='refreshBtn_${treeNode.tId}' title='刷新'></span>
 								</div>`;
 
                     if(scObj.length > 0){
@@ -291,6 +270,16 @@
                     } else {
                         sObj.after(addStr);
                     }
+
+                    // refresh
+                    let btnRefresh = $("#refreshBtn_"+treeNode.tId);
+                    if (btnRefresh) btnRefresh.bind("click", function(event){
+
+                        event.stopPropagation();
+
+                        self.refreshTagDir();
+
+                    });
 
                     // add
                     let btnAdd = $("#addBtn_"+treeNode.tId);
@@ -424,11 +413,9 @@
 	        addTagDir: function(newName,treeNode){
                 let self = this;
 
-				let _uuid = callFsJScript("uuid.js").message;
+				let _uuid = callFsJScript("/utils/uuid.js").message;
 
-				console.log(treeNode.name, newName)
-
-                let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
+				let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
 
                 let rtn = updateTagDir(self.system, _name);
 

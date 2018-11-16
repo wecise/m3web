@@ -190,18 +190,33 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
     color: rgb(255, 255, 255)!important
 }
 
-ul .nav-menu-level1,
-ul .nav-menu-user {
+.nav-menu-level1,
+.nav-menu-user {
     margin: 5px 10px 0px 10px!important
 }
 
-ul .nav-menu-level1,
-ul .nav-menu-user {
+.nav-menu-level1{
+    width: 100%;
+    padding-left: 0;
+    list-style: none;
+}
+.nav-menu-user {
     width: 27.4em;
 }
 
-ul .nav-menu-level1> li,
-ul .nav-menu-user> li{
+.nav-menu-level1> li {
+    float: left;
+    width: 25%;
+    height: 90px;
+    padding: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.nav-menu-user> li{
     float: inherit;
     width: 9em;
     height: 90px;
@@ -214,8 +229,8 @@ ul .nav-menu-user> li{
     border: 1px solid rgb(255, 255, 255);
 }
 
-ul .nav-menu-level1,
-ul .nav-menu-user{
+.nav-menu-level1,
+.nav-menu-user{
     padding: 1px 0px!important;
 }
 
@@ -272,4 +287,11 @@ ul .nav-menu-user{
 
 .jsPanel-headerbar, .jsPanel-hdr-toolbar{
     font-size: 12px;
+}
+
+
+/* For Datatable th bottom border*/
+table.dataTable thead th, table.dataTable thead td,
+.dataTables_wrapper.no-footer .dataTables_scrollBody {
+    border-bottom: 1px solid rgb(221, 221, 221);
 }

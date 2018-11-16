@@ -20,16 +20,22 @@
     form.append("uploadfile", "wecise.lic");
 *
 * */
-var licenseImport = function() {
+var licenseImport = function(event) {
 
     let rtn = 0;
+
+    var fm = new FormData();
+    fm.append("uploadfile", event);
 
     jQuery.ajax({
         url: '/license/import',
         dataType: 'json',
+        processData: false,
+        contentType: false,
+        mimeType: "multipart/form-data",
         type: 'POST',
+        data: fm,
         async: false,
-        data: form,
         beforeSend: function (xhr) {
         },
         complete: function (xhr, textStatus) {
@@ -38,15 +44,13 @@ var licenseImport = function() {
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
+                alertify.log("导入成功" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("导入失败" + " " + xhr.responseJSON.error);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

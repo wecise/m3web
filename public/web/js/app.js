@@ -130,9 +130,10 @@ var appBox = {
 	delimiters: ['#{', '}#'],
 	el: '#nav-menu-level1',
 	data: {
-		model: null
+		model: [],
+        selectedApps: []
 	},
-	template: `<ul class="dropdown-menu top-bar animated fadeInDown nav-menu-level1">
+	template: `<ul class="top-bar animated fadeInDown nav-menu-level1">
 					<li>
 						<a href="/">
 							<i class="fa fa-home fa-3x"></i> <p>首页</p>
@@ -140,30 +141,76 @@ var appBox = {
 					</li>
 					<!--<li role="separator" class="divider"></li>-->
 					<li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
-						<a href="javascript:void(0);" :target="item.target" @click="triggerInput(item.name)">
+						<a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname">
 							<i :class="item.icon + ' fa-3x'"></i> 
-							<p><input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)"> #{item.cnname}#</p>
+							<p>
+							    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
+							</p>
+						</a>
+					</li>
+					<li>
+						<a href="/janesware/system?view=app">
+							<i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
 						</a>
 					</li>
 				</ul>`,
 	created: function(){
-		let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
-		this.model = _list.message;
-		this.model.push({icon:'fa fa-plus', url:'/janesware/system?view=app', cnname:'应用管理', enname: 'App Console', target: '_parent'});
+
+	    this.init();
+
+        eventHub.$on("APP-REFRESH-EVENT",this.refresh);
 	},
 	mounted: function () {
 		this.$nextTick(function () {
-			//$(".slot-li-divider").after(`<li role="separator" class="divider"></li>`);
+		    //$(".slot-li-divider").after(`<li role="separator" class="divider"></li>`);
 		})
 	},
     methods: {
-        toggle: function(item){
+	    init: function(){
+            let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
+            let user = $("#signed-user-name").val();
+
+            this.selectedApps = callFsJScript("/user/user.js",user).message.split(",");
+            let _selectedApps = this.selectedApps;
+
+            this.model = _.map(_list.message,function(v){
+                if(_.includes(_selectedApps,v.id)){
+                    v.selected = 1;
+                }
+                return v;
+            });
+            /*this.model.push({icon:'fa fa-plus', url:'/janesware/system?view=app', cnname:'应用管理', enname: 'App Console', target: '_parent'});*/
 
         },
-        triggerInput: function(name){
-            let self = this;
+        refresh: function(){
+            this.model = [];
+	        this.init();
+        },
+        toggle: function(item){
 
-            $(self.$refs[name]).click();
+	        let ldap = new Object();
+            ldap.class = "/matrix/ldap";
+            ldap.fullname = $("#signed-user-fullname").val();
+
+            if(_.indexOf(this.selectedApps, item.id) > -1){
+                _.pull(this.selectedApps,item.id);
+            } else {
+                this.selectedApps.push(item.id);
+            }
+
+            ldap.remark = this.selectedApps.join(",");
+
+            let _rtn = putDataToClass(ldap);
+
+            if(_rtn == 1){
+                this.init();
+                eventHub.$emit("APP-REFRESH-EVENT");
+            }
+        },
+        triggerInput: function(event,name){
+            event.stopPropagation();
+	        event.preventDefault();
+            $(this.$refs[name]).click();
         }
     }
 
@@ -181,17 +228,13 @@ let sideMenu = {
     },
     template: `<ul class="nav animated bounceIn">
                         <li class="dropdown top-bar">
-							<a  class="dropdown-toggle" 
-								href="{{AppSubUrl}}/"  
-								data-toggle="dropdown" 
+							<a  href="javascript:void(0);"  
 								role="button" 
-								aria-haspopup="true" 
-								aria-expanded="false"
-								title="应用">
+								title="应用"
+								@click="initWnd">
 								<i class="fa fa-th fa-2x"></i> <span class="nav-label">应用</span>
 							</a>
-							<div id="nav-menu-level1">
-							</div>
+							<!--<div id="nav-menu-level1"></div>-->
 						</li>
                         <li>
                             <a href="/" title="首页">
@@ -205,16 +248,8 @@ let sideMenu = {
                         </li>
                     </ul>`,
     created: function(){
-        let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
-        this.model = _.map(_list.message,function(v){
-            let _page = _.last(getPage().split("/"));
-
-            if(_.endsWith(v.url,_page)){
-                return _.merge(v, {status: "active"});
-            }
-
-            return _.merge(v, {status: ""});
-        });
+        this.init();
+        eventHub.$on("APP-REFRESH-EVENT",this.refresh);
     },
     mounted: function () {
 
@@ -223,7 +258,27 @@ let sideMenu = {
         })
     },
 	methods: {
+        init: function(){
+            let user = $("#signed-user-name").val();
+            let selectedApps = callFsJScript("/user/user.js",user).message.replace(/,/g,";");
+            let _list = fetchData(`#/matrix/portal/tools/: | ${selectedApps}| sort by seat asc`);
+            this.model = _.map(_list.message,function(v){
+                let _page = _.last(getPage().split("/"));
 
+                if(_.endsWith(v.url,_page)){
+                    return _.merge(v, {status: "active"});
+                }
+
+                return _.merge(v, {status: ""});
+            });
+        },
+        initWnd: function(){
+            let wnd = newWindow('fsApps', `工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
+            new Vue(appBox);
+        },
+        refresh: function(){
+            this.init();
+        }
 	}
 };
 
@@ -430,11 +485,8 @@ var initPlugIn = function () {
 
     _.delay(function(){
         new Vue(sideMenu);
-        new Vue(appBox);
         new Vue(searchVue);
-
         robot();
-
     },1000)
 
 

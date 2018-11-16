@@ -96,6 +96,19 @@
     }
 
 
+    /* svg path dash effect */
+    path {
+        stroke-dasharray: 10;
+        stroke-dashoffset: 100;
+        animation: dash 5s linear infinite;
+    }
+
+    @keyframes dash {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
 
 </style>
 
@@ -170,12 +183,14 @@
 
         let init = function(){
 
+            $(".geDiagramContainer").css("background-color","#000000");
             _.forEach(URL_PARAMS_CFG,function(v,k){
 
                 if(!v){
                     $(`#${k}`).hide();
                 }
             })
+            $(".geDiagramContainer").css("background-color","#ffffff");
 
         }();
 
@@ -248,8 +263,8 @@
                     toCenter: function(){
                         let self = this;
 
-                        self.model.graph.graph.fit();//自适应
-                        self.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
+                        //self.model.graph.graph.fit();//自适应
+                        self.model.graph.graph.center(true,true,0.5,0);//将画布放到容器中间
                         // var sc = self.model.graph.graph.getView().getScale();//获取当前的缩放比例
                         // self.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
 
@@ -319,6 +334,8 @@
 
                             self.initGraph();
 
+                            self.dispatchNodeEvent();
+
                             _.delay(function(){
 
                                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
@@ -344,8 +361,10 @@
 
                         try
                         {
-                            var doc = mxUtils.parseXml(self.model.graph.data);
-                            var codec = new mxCodec(doc);
+                            let doc = mxUtils.parseXml(self.model.graph.data);
+                            let svgBgColor = doc.getElementsByTagName("mxGraphModel")[0].getAttribute("background") || "#ffffff";
+                            $("svg").css("background-color",svgBgColor);
+                            let codec = new mxCodec(doc);
 
                             codec.decode(doc.documentElement, self.model.graph.graph.getModel());
                         }
@@ -366,11 +385,109 @@
                         self.initToolBars();
                         self.model.graph.container.style.top = "0px";
 
-                        self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
-                        self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
+                        //self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
+                        //self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
 
                         $("#nav").find("div").hide();
                         self.win.toolbars.hide();
+                    },
+                    dispatchNodeEvent: function(){
+                        let self = this;
+
+                        self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+
+                            let cell = evt.getProperty('cell');
+
+                            if(_.isEmpty(cell)) return;
+
+                            let id = cell.getId();
+                            let value = cell.getValue();
+
+                            let state = self.model.graph.graph.view.getState(cell);
+                            let nodeDic = callFsJScript("/graph/graph_entity_attribute.js",encodeURIComponent(id)).message;
+                            console.log(1,id,value,JSON.stringify(nodeDic))
+
+                            state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                            state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic));
+
+                            // copy to copyboard
+                            let clipboard2 = new Clipboard('g image',{
+                                text: function(trigger) {
+
+                                    
+
+                                    $.contextMenu({
+                                        selector: `.${id.replace(/:/g,"_")}`,
+                                        trigger: 'left',
+                                        delay: 10,
+                                        hideOnSecondTrigger: true,
+                                        className: `animated fadeIn node-menu`,
+                                        build: function($trigger, e) {
+
+                                            let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+                                            console.log(2,JSON.stringify(temp))
+                                            let items = null;
+                                            _.forEach(temp,function(val){
+                                                _.forEach(val,function(v,k){
+
+                                                    let value = null;
+
+                                                    if(typeof v == "object") {
+                                                        if(_.includes(['depend','runon','connect','refer','contain'],k)){
+
+                                                            if(v==null || !v['_all']) return;
+                                                            let _options = {};
+                                                            _.map(v['_all'],function(w,y){
+                                                                return _.merge(_options,{[y]:w});
+                                                            })
+
+                                                            items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                                        } else {
+                                                            value = JSON.stringify(v,null,2);
+                                                            items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
+                                                        }
+
+                                                    } else {
+                                                        value = v.toString();
+                                                        items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                                    }
+
+                                                })
+                                            });
+
+                                            return {
+                                                callback: function(key, opt) {
+
+                                                    if(key === 'copy'){
+
+                                                    } else if(key === 'tags') {
+
+                                                    } else if(key === 'export') {
+
+                                                    } else if(key === 'load') {
+
+                                                    }
+                                                },
+                                                items:items
+                                            }
+                                        },
+                                        events: {
+                                            show: function(opt) {
+                                                let $this = this;
+                                            },
+                                            hide: function(opt) {
+                                                let $this = this;
+                                                $(".context-menu-list animated slideIn").remove();
+                                            }
+                                        }
+                                    });
+
+                                    return id;
+                                }
+                            });
+                            //self.tip(`ID：${id} 已复制到剪切板！`);
+
+                        });
                     },
                     initData: function(){
                         let self = this;
@@ -382,7 +499,7 @@
 
                         let input = "('" + `${cells.join("','")}` + "')";
 
-                        self.model.graph.appData = callFsJScript('graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
+                        self.model.graph.appData = callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
                     },
                     reset: function(){
                         let self = this;
@@ -516,7 +633,7 @@
                                 } else {
 
                                     if(state && state.shape.node){
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffc107', [_cell]);
+                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffc107', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffc107', [_cell]);
                                         self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
                                         //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
@@ -604,12 +721,12 @@
 
                         let tb = new mxToolbar(content);
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/fs/home/assets/images/tools/png/zoom_in.png?type=download',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/fs/home/assets/images/tools/png/zoom_out.png?type=download',function(evt)
                         {
                             self.model.graph.graph.zoomIn();
                         },null,'tools-item');
 
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/fs/home/assets/images/tools/png/zoom_out.png?type=download',function(evt)
+                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/fs/home/assets/images/tools/png/zoom_in.png?type=download',function(evt)
                         {
                             self.model.graph.graph.zoomOut();
                         },null,'tools-item');

@@ -1182,20 +1182,20 @@
                                                     align: 'center',
                                                     valign: 'middle'
                                                 },
-                                                {"field":"email",title:"Email", sortable: true, formatter: function(v){
+                                                {"field":"email",title:"邮件", sortable: true, formatter: function(v){
                                                     return v.join("\n");
                                                 }},
-                                                {"field":"username",title:"UserName", sortable: true},
-                                                {"field":"passwd",title:"Password", sortable: true, formatter:function(v){
+                                                {"field":"username",title:"用户名", sortable: true},
+                                                {"field":"passwd",title:"口令", sortable: true, formatter:function(v){
                                                     return v.substr(-10);
                                                 }},
-                                                {"field":"parent",title:"Group", sortable: true},
-                                                {"field":"isactive",title:"Status", 
+                                                {"field":"parent",title:"组", sortable: true},
+                                                {"field":"isactive",title:"状态",
                                                  "align":"center", sortable: true, 
                                                  formatter:function(v){
                                                     return v?`<i class='fa fa-check-square-o' style='color:#1ab394'></i>`:`<i class='fa fa-square-o'></i>`;
                                                 }},
-                                                {"field":"fullname", title:"Actions", align: 'center', formatter: function(v,r){
+                                                {"field":"fullname", title:"操作", align: 'center', formatter: function(v,r){
                                                     return `<a href='#' onClick='removeUser("`+r.fullname+`")'><i class='fa fa-trash'></i></a>`;
                                                 }},
                                             ];
@@ -1210,23 +1210,23 @@
                         };
 
                         self.byObjectTreeModel.columns = self.byPropertyTreeModel.columns = [
-                                                        {"field":"name",title:"Name"},
-                                                        {"field":"add",title:"Add", align: 'center',
+                                                        {"field":"name",title:"动作"},
+                                                        {"field":"add",title:"添加", align: 'center',
                                                             formatter:function(v){
                                                                 return `<input type="checkbox" value="" checked="checked">`;
                                                             }
                                                         },
-                                                        {"field":"remove",title:"Delete", align: 'center',
+                                                        {"field":"remove",title:"删除", align: 'center',
                                                             formatter:function(v){
                                                                 return `<input type="checkbox" value="" checked="checked">`;
                                                             }
                                                         },
-                                                        {"field":"update",title:"Modify", align: 'center',
+                                                        {"field":"update",title:"修改", align: 'center',
                                                             formatter:function(v){
                                                                 return `<input type="checkbox" value="" checked="checked">`;
                                                             }
                                                         },
-                                                        {"field":"search",title:"Search", align: 'center',
+                                                        {"field":"search",title:"搜索", align: 'center',
                                                             formatter:function(v){
                                                                 return `<input type="checkbox" value="" checked="checked">`;
                                                             }
@@ -2818,7 +2818,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <span style="">
-                    <b>User Info</b>
+                    <b>用户信息</b>
                 </span>
                 <span class="pull-right">
                     <button class="btn btn-xs btn-info" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> Save</button>
@@ -2829,16 +2829,16 @@
             </div>
         </div>
 
-        <h5>Authority</h5>
+        <h5>授权</h5>
         <hr>
         <div role="tabpanel">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs">
                 <li role="presentation" class="active">
-                    <a href="#byObject" aria-controls="byObject" role="tab" data-toggle="tab">By Object</a>
+                    <a href="#byObject" aria-controls="byObject" role="tab" data-toggle="tab">按对象授权</a>
                 </li>
                 <li role="presentation">
-                    <a href="#byProperty" aria-controls="byProperty" role="tab" data-toggle="tab">By Attributes</a>
+                    <a href="#byProperty" aria-controls="byProperty" role="tab" data-toggle="tab">按属性授权</a>
                 </li>
             </ul>
         

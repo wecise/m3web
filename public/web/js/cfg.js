@@ -275,7 +275,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         {field:"param",title: "Param", visible: true},
                         {field:"value",title: "Value", visible: true, formatter:function(value,row,index){
                                 if(!_.isNull(value) && !_.isUndefined(value)){
-                                    if ('usedpercent' == row.param || 'response rate' == row.param || 'success rate' == row.param || 'cpu' == row.param){
+                                    if (_.includes(['usedpercent','response rate','success rate','cpu','cpu_usedpercent','memory_usedpercent','disk_usedpercent'],row.param)){
                                         if ( value > 60 ){
                                             return "<span class='pull-right' style='color:#FF0000;' title='超过阈值｛60％｝'><b>" + value + " %</b> <i class='fa fa-sort-up'></i></span>"
                                         } else {

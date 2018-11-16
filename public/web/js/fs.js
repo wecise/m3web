@@ -26,7 +26,7 @@ var fsCheck = function(path, name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=check`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _url += '&issys=true';
     }
 
@@ -73,7 +73,7 @@ var fsNew = function(ftype, path, name, content, attr){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -133,7 +133,7 @@ var fsList = function(path){
     let _issys = false;
     let parent = path.replace(/\/\//g,'/');
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _issys = true;
     }
 
@@ -183,7 +183,7 @@ var fsDelete = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -236,7 +236,7 @@ var fsContent = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _url += '?issys=true';
     }
 
@@ -282,7 +282,7 @@ var fsRename = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.isEqual(dstpath,'/')){
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
@@ -347,7 +347,7 @@ var fsCopy = function(srcpath,dstpath){
     srcpath = srcpath.replace(/\/\//g,'/');
     dstpath = dstpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.isEqual(dstpath,'/')){
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
         _issys = true;
     }
 
@@ -372,14 +372,67 @@ var fsCopy = function(srcpath,dstpath){
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("复制成功" + " " + srcpath);
-            } else {
-                rtn = 0;
-                alertify.error("复制失败" + " " + srcpath);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("复制失败" + " " + xhr.responseJSON);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+        }
+    })
+
+    return rtn;
+};
+
+
+/*
+*   文件系统
+*
+*   移动文件
+*
+*
+*/
+var fsMove = function(srcpath,dstpath){
+    let rtn = 0;
+
+    let _issys = false;
+
+    // Root
+    srcpath = srcpath.replace(/\/\//g,'/');
+    dstpath = dstpath.replace(/\/\//g,'/');
+
+    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dspath,'/app') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }
+
+    jQuery.ajax({
+        url: '/fs/move',
+        type: 'POST',
+        dataType: 'json',
+        async:false,
+        data: {
+            srcpath: srcpath,
+            dstpath: dstpath,
+            issys: _issys
+        },
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("移动成功" + " " + srcpath);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("复制失败" + " " + xhr.responseJSON);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
@@ -401,7 +454,7 @@ var fsUpdateAttr = function(path, name, attr) {
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=attr`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.isEqual(parent,'/')){
+    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
         _url += '&issys=true';
     }
 
@@ -476,22 +529,64 @@ var fsZip = function(srcpath){
 
     let _srcpath = srcpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.isEqual(_srcpath,'/')){
+    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
         _issys = true;
     }
 
     let fm = new FormData();
+    fm.append("srcpath", _srcpath);
 
-    fm.append("srcpath",_srcpath);
+    let stringToArrayBuffer = function (str) {
+        var buf = new ArrayBuffer(str.length);
+        var bufView = new Uint8Array(buf);
 
-    jQuery.ajax({
+        for (var i=0, strLen=str.length; i<strLen; i++) {
+            bufView[i] = str.charCodeAt(i);
+        }
+
+        return buf;
+    };
+
+    let xhr = new XMLHttpRequest();
+    let params = fm;
+
+    xhr.open('POST', `/fs/export?issys=${_issys}`, false);
+
+    xhr.onload = function() {
+
+        if (xhr.status === 200) {
+            let a = document.createElement('a');
+            a.href = window.URL.createObjectURL(xhr.response);
+            // Give filename you wish to download
+            a.download = "temp.zip";
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+        } else {
+            console.log('Something bad happen!\n(' + xhr.status + ') ' + xhr.statusText);
+        }
+    };
+
+
+
+
+
+
+    xhr.send(params);
+
+
+
+    var form = new FormData();
+    form.append("srcpath", _srcpath);
+
+    /*jQuery.ajax({
         url: `/fs/export?issys=${_issys}`,
+        type: 'POST',
         processData: false,
         contentType: false,
-        mimeType: "multipart/form-data",
-        type: 'POST',
-        data: fm,
-        async:false,
+        mimeType: 'multipart/form-data',
+        data: form,
+        async:true,
         beforeSend: function (xhr) {
         },
         complete: function (xhr, textStatus) {
@@ -500,29 +595,77 @@ var fsZip = function(srcpath){
 
             ifSignIn(data);
 
-            let zip = new JSZip();
-            let name = _srcpath.replace(/\//g,'_').replace(/^_/g,'');
-            zip.file(`${name}.txt`, data);
-            zip.generateAsync({type:"blob"}).then(function (data) {
-                saveAs(data, `${name}.zip`);
-            }, function (err) {
-                console.log(err);
-            });
+            /!*let filename = "";
+            let disposition = xhr.getResponseHeader('Content-Disposition');
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                    try {
+                        let isFileSaverSupported = !!new Blob;
+                        console.log(typeof data,_.size(data))
+                        var zip = new JSZip();
+                        zip.generateAsync({type:"blob"}).then(function(zip) {
+                            saveAs(zip, filename);
+                        });
 
-            /*if( _.lowerCase(data.status) == "ok"){
-                rtn = 1;
-                alertify.success("打包成功" + srcpath);
+                    } catch (e) {
+
+                    }
+
+                }
+            }*!/
+
+            var filename = "";
+            var disposition = xhr.getResponseHeader('Content-Disposition');
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
+            }
+
+            var type = xhr.getResponseHeader('Content-Type');
+            var blob = new Blob([data], { type: type });
+
+            console.log(blob)
+
+            if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
+                window.navigator.msSaveBlob(blob, filename);
             } else {
-                rtn = 0;
-                alertify.error("打包失败" + srcpath);
-            }*/
+                var URL = window.URL || window.webkitURL;
+                var downloadUrl = URL.createObjectURL(blob);
+
+                if (filename) {
+                    // use HTML5 a[download] attribute to specify filename
+                    var a = document.createElement("a");
+                    // safari doesn't support this yet
+                    if (typeof a.download === 'undefined') {
+                        window.location = downloadUrl;
+                    } else {
+                        a.href = downloadUrl;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                    }
+                } else {
+                    window.location = downloadUrl;
+                }
+
+                console.log(downloadUrl)
+
+                setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
+            }
+
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.log("导出失败");
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
         }
-    })
+    })*/
 
     return rtn;
 };
@@ -535,27 +678,28 @@ var fsZip = function(srcpath){
 *
 *
 */
-var fsUnZip = function(zippack){
+var fsUnZip = function(srcpath, zippack){
     let rtn = 0;
 
     let _issys = false;
 
     let _srcpath = srcpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.isEqual(_srcpath,'/')){
+    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
         _issys = true;
     }
 
+    var form = new FormData();
+    form.append("uploadfile", zippack); // file
+
     jQuery.ajax({
-        url: `/fs/export?issys=${_issys}`,
+        url: `/fs/import?issys=${_issys}`,
         processData: false,
         contentType: false,
         mimeType: "multipart/form-data",
         dataType: 'json',
         type: 'POST',
-        data: {
-            uploadfile: zippack
-        },
+        data: form,
         async:false,
         beforeSend: function (xhr) {
         },
@@ -568,15 +712,13 @@ var fsUnZip = function(zippack){
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("解压成功" + srcpath);
-            } else {
-                rtn = 0;
-                alertify.error("解压失败" + srcpath);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            alertify.error("解压失败" + xhr);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
         }
     })
 

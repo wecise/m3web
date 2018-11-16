@@ -38,8 +38,13 @@
 
     .page-header {
         margin: 0px 0px 5px 0px;
-        font-size: 18px;
+        font-size: 16px;
         color: #888888;
+    }
+
+    hr{
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
 
     /* For Nav tabs style */
@@ -66,6 +71,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-dropdown-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-card-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-list-datatables-component.html"></link>
 
@@ -85,6 +91,7 @@
 
     VueLoader.onloaded(["ai-robot-component",
                         "probe-tree-component",
+                        "probe-dropdown-tree-component",
                         "probe-card-component",
                         "probe-list-datatables-component",
                         "policy-list-datatables-component",
@@ -104,7 +111,7 @@
                             </div>
 
                             <div class="col-lg-10 probe-container">
-                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 探针列表</h3 class="page-header">
+                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 探针列表</h4 class="page-header">
                                 <probe-card-component :model="model.summary"></probe-card-component>
                                 <probe-list-datatables-component :model="model" id="probe-list-table"></probe-list-datatables-component>
                             </div>
@@ -121,7 +128,7 @@
                             </div>
 
                             <div class="col-lg-10 policy-container">
-                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 策略管理</h3 class="page-header">
+                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 策略管理</h4 class="page-header">
                                 <policy-list-datatables-component :model="model" id="policy-list-table"></policy-list-datatables-component>
                             </div>
                         </div>`
@@ -137,7 +144,7 @@
                           </div>
 
                           <div class="col-lg-10 log-container">
-                            <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 日志管理</h3 class="page-header">
+                            <h4 class="page-header"><i class="fas fa-angle-right"></i> 日志管理</h4 class="page-header">
                             <log-list-datatables-component :model="model" id="log-list-table"></log-list-datatables-component>
                           </div>
                        </div>`
@@ -152,7 +159,7 @@
                                 <probe-tree-component id="script-tree" system="script"></-tree-component>
                             </div>
                             <div class="col-lg-10 script-container">
-                                <h3 class="page-header"><i class="fas fa-angle-double-right"></i> 脚本管理</h3 class="page-header">
+                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 脚本管理</h4 class="page-header">
                                 <script-list-datatables-component :model="model" id="script-list-table"></script-list-datatables-component>
                             </div>
                         </div>`
@@ -211,7 +218,7 @@
                         let self = this;
 
                         _.forEach(event,function(v){
-                            window[v] = callFsJScript(`probe_summary_by_${v}.js`,'');
+                            window[v] = callFsJScript(`/probe/probe_summary_by_${v}.js`,'');
 
                             if(window[v].status == 'ok'){
                                 self[v] = window[v].message;

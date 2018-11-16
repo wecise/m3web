@@ -158,6 +158,7 @@
 	<template>
 		<div>
 			<input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
+			<hr/>
 			<table :id="id" class="display" width="100%"></table>
 		</div>
 	</template>
@@ -279,7 +280,7 @@
                         columns: self._columns,
                         //stripeClasses: [],
                         responsive: false,
-                        searching: false,
+                        searching: true,
                         aDataSort: true,
                         bSort: true,
                         bAutoWidth: true,
@@ -288,7 +289,7 @@
                         paging: false,
                         info: true,
                         scrollX: true,
-                        scrollY: '60vh',
+                        scrollY: '55vh',
                         scrollCollapse: true,
                         aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                         language : {
@@ -333,6 +334,64 @@
                         },
                         lengthChange: false,
                         stateSave: false,
+                        dom: 'Bfrtip',
+                        buttons: {
+                            dom: {
+                                button: {
+                                    tag: 'button'
+                                }
+                            },
+                            buttons: [
+                                {
+                                    text: '刷新',
+                                    action: function (e, dt, node, config) {
+                                        self.refresh();
+                                    },
+                                    enabled: true,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '添加',
+                                    action: function (e, dt, node, config) {
+                                        self.add();
+                                    },
+                                    enabled: true,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '删除',
+                                    action: function (e, dt, node, config) {
+                                        self.delete();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '编辑',
+                                    action: function (e, dt, node, config) {
+                                        self.edit(dt.row( { selected: true } ).data());
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '导出',
+                                    action: function (e, dt, node, config) {
+                                        self.scriptEdit();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '导入',
+                                    action: function (e, dt, node, config) {
+                                        self.scriptEdit();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                }
+                            ]
+                        },
                         initComplete: function(event, settings, json){
 
 
@@ -353,6 +412,8 @@
                             $("#"+self.id).on('click', 'tr', function () {
                                 self.selectedRow = self.datatable.row( this ).data();
                             });
+
+
                         },
                         drawCallback:function(settings){
 	                        //self.redraw();
@@ -366,18 +427,26 @@
                     self.tagsInput();
 
                     self.baseDatatable();
+                    self.serversDatatable();
 
                     self.baseEditor();
+
+                    // Buttons enable/disable
+                    self.datatable.on( 'select deselect', function () {
+                        var selectedRows = self.datatable.rows( { selected: true } ).count();
+
+                        self.datatable.buttons( [2,3,4,5] ).enable( selectedRows > 0 );
+                    } );
 
                 },
                 initMenu: function(){
                     let self = this;
 
-                    let items = callFsJScript('toolbar.js', '').message.probe.policy;
+                    let items = callFsJScript('/probe/toolbar.js', '').message.probe.policy;
                     let id = self.id;
 
                     $.contextMenu({
-                        selector: `#${id} tr`,
+                        selector: `#${id} tr td:not(:nth-child(1))`,
                         trigger: 'left',
                         delay: 10,
                         position: function(opt, x, y){
@@ -392,19 +461,8 @@
                             return {
                                 callback: function(key, opt) {
                                     if(key === 'add'){
-                                        let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
-
-                                        self.addWizard(wnd);
 
                                     } else if(key === 'delete') {
-
-                                        alertify.confirm("确认删除", function (e) {
-                                            if (e) {
-
-                                            } else {
-                                                // user clicked "cancel"
-                                            }
-                                        });
 
                                     } else if(key === 'export') {
 
@@ -430,6 +488,11 @@
                         }
                     });
 	            },
+                refresh: function(){
+                    let self = this;
+
+                    eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
+                },
                 redraw: function(){
                     let self = this;
 
@@ -491,7 +554,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
@@ -501,7 +564,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
@@ -514,165 +577,7 @@
 
                     return tag;
                 },
-	            addWizard: function(wnd){
-                    let self = this;
-
-                    let conf = callFsJScript('probe_summary_policy_conf.js', '').message;
-
-                    let wizard = {
-                        el: "#policy-add-container",
-	                    data: {
-                            model: {
-                                conf: conf,
-	                            item: {
-                                    name: null, // required
-			                        rule: null, // required
-			                        command: null,  // required
-			                        depotname: null, // if ctype = 0, not empty
-			                        depotversion: null, // if ctype = 0, not empty
-			                        ctype: null,  // required
-			                        interval: null, // required
-			                        unit: null,//"year | month | day | hour | minute | second", // required
-			                        split: null, //true | false,
-			                        delimiter: null, //"Regular expression",
-			                        delimitereol: null, //true | false,
-			                        tags: null, //["string"...],
-			                        hosts: null, //["string"...], // If not empty, then auto deploy
-			                        attrs: null //{"attrname1":"attrvalue", "attrname2":"attrvalue2"...} // toe protocol attrs
-                                },
-	                            handler: {
-                                    tagify: null
-                                }
-                            }
-	                    },
-	                    created: function(){
-                            let me = this;
-
-                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
-	                    },
-	                    methods: {
-                            tagInput: function(className,container, tags){
-                                let me = this;
-
-                                me.model.handler.tagify = $(me.$el).find(".tags").tagify();
-                            },
-                            save: function(){},
-                            envDelete: function(){},
-                            resize:function(){
-                                wnd.resize($(wnd.content).parent().parent().width()+20,$(wnd.content).parent().parent().height()+60);
-                            }
-	                    },
-	                    mounted: function(){
-                            let me = this;
-
-                            me.$nextTick(function () {
-                                FormWizard.init("wizard");
-                                me.tagInput();
-                            })
-	                    },
-	                    template: `<form>
-										<div id="wizard">
-											<ol>
-												<li>
-													基本配置
-													<small>运行策略，环境变量设置。</small>
-												</li>
-												<li>
-													解析策略
-													<small>数据处理规则，KPI选择。</small>
-												</li>
-												<li>
-													选择对象
-													<small>选择部署对象。</small>
-												</li>
-											</ol>
-
-											<div>
-												<fieldset class="form-horizontal">
-
-													<div class="form-group">
-														<label class="col-sm-2 control-label">策略名称：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.name"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">执行脚本：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.depotname"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">解析策略：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.rule"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">添加标签：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">监控周期：</label>
-														<div class="col-sm-10">
-															<div class="input-group">
-														      <input type="number" class="form-control"  v-model="model.item.interval">
-														      <div class="input-group-btn">
-																<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">秒 <span class="caret"></span></button>
-																<ul class="dropdown-menu dropdown-menu-right">
-																	<li><a href="#">秒</a></li>
-																	<li><a href="#">分</a></li>
-																	<li><a href="#">小时</a></li>
-																	<li><a href="#">天</a></li>
-																	<li><a href="#">月</a></li>
-																</ul>
-														      </div>
-														    </div>
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">监控周期：</label>
-														<div class="col-sm-10">
-															<div class="radio-inline">
-															  <label>
-															    <input type="radio" name="optionsRadios" value="1"  v-model="model.item.ctype" checked>
-															    <a href="javascript:;" class="btn btn-danger btn-sm m-r-5">启用</a>
-															  </label>
-															</div>
-															<div class="radio-inline">
-															  <label>
-															    <input type="radio" name="optionsRadios" value="0" v-model="model.item.ctype" >
-															    <a href="javascript:;" class="btn btn-default btn-sm">停止</a>
-															  </label>
-															</div>
-														</div>
-													</div>
-													<policy-base-datatable id="policy-base-datatable" :model="model.conf.base"></policy-base-datatable>
-
-												</fieldset>
-											</div>
-											<div>
-												<fieldset>
-													<div class="row">
-														<div class="col-md-12">
-															<policy-base-editor id="policy-base-editor" :model="model.conf.editor"></policy-base-editor>
-														</div>
-													</div>
-												</fieldset>
-											</div>
-											<div>
-												<fieldset>
-													<div class="row">
-														<div class="col-md-12">
-															<policy-base-datatable id="policy-servers-datatable" :model="model.conf.servers"></policy-base-datatable>
-															<hr/>
-															<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
-														</div>
-													</div>
-												</fieldset>
-											</div>
-
-										</div>
-									</form>`
-                    };
-
-                    new Vue(wizard);
-	            },
-                baseEditor: function(){
+	            baseEditor: function(){
                     return Vue.component("policy-base-editor", {
                         delimiters: ['${', '}'],
                         props: {
@@ -984,6 +889,37 @@
                                     },
                                     lengthChange: true,
                                     stateSave: false,
+                                    dom: {
+                                        button: {
+                                            tag: 'button',
+                                            className: 'datatables-toolbars-button'
+                                        }
+                                    },
+                                    dom: 'Bfrtip',
+                                    buttons: {
+                                        dom: {
+                                            button: {
+                                                tag: 'button'
+                                            }
+                                        },
+                                        buttons: [
+                                            {
+                                                text: '启用',
+                                                action: function (e, dt, node, config) {
+                                                },
+                                                enabled: false,
+                                                className: 'btn btn-sm btn-danger'
+                                            },
+                                            {
+                                                text: '停止',
+                                                action: function (e, dt, node, config) {
+
+                                                },
+                                                enabled: false,
+                                                className: 'btn btn-sm btn-default'
+                                            }
+                                        ]
+                                    },
                                     initComplete: function (event, settings, json) {
 
                                         // init effect for table
@@ -1010,7 +946,608 @@
                             }
                         }
                     });
-	            }
+	            },
+                serversDatatable: function(){
+
+                    return Vue.component("policy-servers-datatable", {
+                        delimiters: ['#{', '}#'],
+                        props: {
+                            id: String,
+                            model: Object
+                        },
+                        template:`<table :id="id" class="display" style="width:100%;"></table>`,
+                        data: function(){
+                            return {
+                                datatable: null
+                            }
+                        },
+                        mounted: function () {
+                            let me = this;
+
+                            me.$nextTick(function () {
+
+                                _.delay(function() {
+                                    me.init();
+                                },500);
+
+                            })
+                        },
+                        computed: {
+                            _columns: function(){
+                                let me = this;
+
+                                let _cols = _.map(me.model.columns,function(v,k){
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        v.render = eval(v.render);
+                                        return v;
+                                    }
+
+                                });
+
+                                return _cols;
+                            }
+                        },
+                        methods: {
+                            init: function () {
+                                let me = this;
+
+                                me.datatable = $("#" + me.id).DataTable(_.extend({
+                                    data: me.model.dataset,
+                                    columns: me._columns,
+                                    //stripeClasses: [],
+                                    responsive: false,
+                                    searching: false,
+                                    aDataSort: true,
+                                    bSort: true,
+                                    bAutoWidth: true,
+                                    rowReorder: false,
+                                    colReorder: false,
+                                    paging: false,
+                                    info: true,
+                                    scrollX: true,
+                                    scrollY: 'auto',
+                                    scrollCollapse: true,
+                                    aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}],
+                                    language: {
+                                        "sProcessing": "处理中...",
+                                        "sLengthMenu": "显示 _MENU_ 项结果",
+                                        "sZeroRecords": "没有匹配结果",
+                                        "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                        "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                                        "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                                        "sInfoPostFix": "",
+                                        "sSearch": "过滤:",
+                                        "sUrl": "",
+                                        "sEmptyTable": "表中数据为空",
+                                        "sLoadingRecords": "载入中...",
+                                        "sInfoThousands": ",",
+                                        "oPaginate": {
+                                            "sFirst": "首页",
+                                            "sPrevious": "上页",
+                                            "sNext": "下页",
+                                            "sLast": "末页"
+                                        },
+                                        "oAria": {
+                                            "sSortAscending": ": 以升序排列此列",
+                                            "sSortDescending": ": 以降序排列此列"
+                                        },
+                                        buttons: {
+                                            copyTitle: '已拷贝到剪切板',
+                                            copyKeys: '已拷贝',
+                                            copySuccess: {
+                                                _: '已拷贝 %d 项',
+                                                1: '1 已拷贝'
+                                            }
+                                        }
+                                    },
+                                    select: true,
+                                    /*select: {
+                                        style: 'multi',
+                                        selector: 'td:first-child'
+
+                                    },*/
+                                    lengthChange: true,
+                                    stateSave: false,
+                                    initComplete: function (event, settings, json) {
+
+
+										me.initPlug();
+
+                                    },
+                                    drawCallback: function (settings) {
+                                        //me.redraw();
+                                    }
+                                }, me.options)).columns.adjust().draw();
+
+                            },
+                            redraw: function () {
+                                let me = this;
+
+                                me.datatable.columns.adjust().draw();
+                            },
+	                        initPlug: function(){
+                                let me = this;
+
+                                // init effect for table
+                                $("#" + me.id).find("tbody").on("mouseover", "tr", function (event) {
+
+                                    $(this).css('background-color', '#ddd');
+
+                                    $(this).bind("mouseout", function () {
+                                        $(this).css('background-color', '');
+                                    });
+                                });
+
+                                //
+                                me.datatable.on( 'select deselect', function () {
+                                    let selectedRows = me.datatable.rows( { selected: true } ).count();
+
+                                    me.datatable.button( 0 ).enable( selectedRows === 1 );
+                                    me.datatable.button( 1 ).enable( selectedRows > 0 );
+                                } );
+
+                                //
+                                $("li").on("click",function(){
+                                    me.redraw();
+                                });
+
+                            }
+                        }
+                    });
+                },
+                add: function(){
+                    let self = this;
+
+                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+
+                    let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
+
+                    let wizard = {
+                        delimiters: ['#{', '}#'],
+                        el: "#policy-add-container",
+                        props: {
+                          item: Object
+                        },
+                        data: {
+                            model: {
+                                conf: conf,
+                                depot: null,
+                                item: {
+                                    name: null, // required
+                                    rule: null, // required
+                                    command: null,  // required
+                                    depotname: null,
+                                    depotversion:null,
+                                    ctype: 1,  // required
+                                    interval: 5, // required
+                                    unit: 'second',//"year | month | day | hour | minute | second", // required
+                                    split: false, //true | false,
+                                    delimiter: null, //"Regular expression",
+                                    delimitereol: false, //true | false,
+                                    tags: [], //["string"...],
+                                    hosts: [], //["string"...], // If not empty, then auto deploy
+                                    attrs: {} //{"attrname1":"attrvalue", "attrname2":"attrvalue2"...} // toe protocol attrs
+                                },
+                                handler: {
+                                    tagify: null
+                                }
+                            }
+                        },
+                        watch: {
+                            'model.depot':{
+                                handler:function(val,oldVal){
+                                    let me = this;
+
+                                    me.model.item.depotname = val.name;
+                                    me.model.item.depotversion = val.version;
+
+                                },
+                                deep:true
+                            }
+                        },
+                        created: function(){
+                            let me = this;
+
+                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
+                        },
+                        methods: {
+                            tagInput: function(className,container, tags){
+                                let me = this;
+
+                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
+                                    .on("add",function(event, tagName){
+                                        me.model.item.tags.push(tagName.value);
+                                    })
+                                    .on("remove",function(event,tagName){
+                                        _.pull(me.model.item.tags,tagName.value);
+                                    });
+
+                            },
+                            save: function(){
+                                let me = this;
+
+                                let rtn = cmdPolicyAdd(me.model.item);
+
+                                if(rtn === 1){
+                                    wnd.close();
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
+                                }
+                            },
+                            envDelete: function(){},
+                            resize:function(){
+                                wnd.resize($(wnd.content).parent().parent().width()+20,$(wnd.content).parent().parent().height()+60);
+                            }
+                        },
+                        mounted: function(){
+                            let me = this;
+
+                            me.$nextTick(function () {
+                                FormWizard.init("wizard");
+                                me.tagInput();
+
+                                //
+                                $("li").on("click",function(){
+                                    if(me.$refs.childRefRule.selectedNode){
+                                        me.model.item.rule = me.$refs.childRefRule.selectedNode.key;
+                                        me.model.conf.editor.newInput = me.$refs.childRefRule.selectedNode.value;
+                                    }
+                                });
+                            })
+                        },
+                        template: `<form>
+										<div id="wizard">
+											<ol>
+												<li>
+													基本配置
+													<small>运行策略，环境变量设置。</small>
+												</li>
+												<li>
+													解析策略
+													<small>数据处理规则，KPI选择。</small>
+												</li>
+												<li>
+													选择对象
+													<small>选择部署对象。</small>
+												</li>
+											</ol>
+
+											<div>
+												<fieldset class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">策略名称：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model.trim="model.item.name" required/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">解析规则：</label>
+														<div class="col-sm-10">
+														    <probe-dropdown-tree-component id="policy-select-rule" :value="model.item.rule" ref="childRefRule"></probe-dropdown-tree-component>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">类型(#{model.item.ctype == 1?'一般策略':'日志策略'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model="model.item.ctype" true-value="1" false-value="0" required/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">执行命令：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.command" required/></div>
+													</div>
+													<div class="form-group animated fadeInDown" v-if="model.item.ctype==1">
+														<label class="col-sm-2 control-label">执行脚本及版本：</label>
+														<div class="col-sm-10">
+														    <select class="form-control" v-model="model.depot">
+                                                                <option v-for="item in model.conf.script" :value="item">#{item.name}# <small>#{item.version}#</small></option>
+                                                             </select>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">监控周期：</label>
+														<div class="col-sm-10">
+															<div class="input-group">
+														      <input type="number" class="form-control"  v-model="model.item.interval" required>
+														      <div class="input-group-addon">
+																<select v-model="model.item.unit" style="width:40px;" required>
+                                                                    <option value="second" selected="selected">秒</option>
+                                                                    <option value="minute">分</option>
+                                                                    <option value="hour">小时</option>
+                                                                    <option value="day">天</option>
+                                                                    <option value="month">月</option>
+                                                                 </select>
+														      </div>
+														    </div>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">Split(#{model.item.split?'是':'否'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model="model.item.split"/></div>
+													</div>
+													<div class="form-group" :style="model.type">
+														<label class="col-sm-2 control-label">表达式：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.delimiter"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">Delimitereol(#{model.item.delimitereol?'是':'否'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model="model.item.delimitereol"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加标签：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加属性：</label>
+														<div class="col-sm-10">
+														    <input type="text" placeholder="" class="form-control"  v-model="model.item.attrs"/>
+														</div>
+													</div>
+
+													<hr/>
+													<policy-base-datatable id="policy-base-datatable" :model="model.conf.base"></policy-base-datatable>
+
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<policy-base-editor id="policy-base-editor" :model="model.conf.editor"></policy-base-editor>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<policy-servers-datatable id="policy-servers-datatable" :model="model.conf.servers"></policy-servers-datatable>
+															<hr/>
+															<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+
+										</div>
+									</form>`
+                    };
+
+                    new Vue(wizard);
+                },
+                edit: function(event){
+                    let self = this;
+
+                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+
+                    let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
+
+                    let node = _.cloneDeep(event);
+
+                    let wizard = {
+                        delimiters: ['#{', '}#'],
+                        el: "#policy-add-container",
+                        data: {
+                            model: {
+                                conf: conf,
+                                depot: null,
+                                item: {
+                                    name: node.name, // required
+                                    rule: node.policy.rule,
+                                    command: node.policy.command,  // required
+                                    depotname: node.branch,
+                                    depotversion: node.version,
+                                    ctype: Number(node.policy.ctype),  // required
+                                    interval: Number(node.policy.interval), // required
+                                    unit: node.policy.unit,
+                                    split: Boolean(node.policy.split),
+                                    delimiter: node.policy.delimiter,
+                                    delimitereol: Boolean(node.policy.delimitereol),
+                                    tags: node.tags,
+                                    hosts: [],
+                                    attrs: {}
+                                },
+                                handler: {
+                                    tagify: null
+                                }
+                            }
+                        },
+                        watch: {
+                            'model.depot':{
+                                handler:function(val,oldVal){
+                                    let me = this;
+
+                                    me.model.item.depotname = val.name;
+                                    me.model.item.depotversion = val.version;
+                                },
+                                deep:true
+                            }
+                        },
+                        created: function(){
+                            let me = this;
+
+                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
+                        },
+                        methods: {
+                            tagInput: function(className,container, tags){
+                                let me = this;
+
+                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
+                                    .on("add",function(event, tagName){
+                                        me.model.item.tags.push(tagName.value);
+                                    })
+                                    .on("remove",function(event,tagName){
+                                        _.pull(me.model.item.tags,tagName.value);
+                                    });
+
+                            },
+                            save: function(){
+                                let me = this;
+
+                                me.model.item.rule = me.$refs.childRefRule.value;
+
+                                let rtn = cmdPolicyAdd(me.model.item);
+
+                                if(rtn === 1){
+                                    wnd.close();
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
+                                }
+                            },
+                            envDelete: function(){},
+                            resize:function(){
+                                wnd.resize($(wnd.content).parent().parent().width()+20,$(wnd.content).parent().parent().height()+60);
+                            }
+                        },
+                        mounted: function(){
+                            let me = this;
+
+                            me.$nextTick(function () {
+                                FormWizard.init("wizard");
+                                me.tagInput();
+                            })
+                        },
+                        template: `<form>
+										<div id="wizard">
+											<ol>
+												<li>
+													基本配置
+													<small>运行策略，环境变量设置。</small>
+												</li>
+												<li>
+													解析策略
+													<small>数据处理规则，KPI选择。</small>
+												</li>
+												<li>
+													选择对象
+													<small>选择部署对象。</small>
+												</li>
+											</ol>
+
+											<div>
+												<fieldset class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">策略名称：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model.trim="model.item.name" required/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">解析规则：</label>
+														<div class="col-sm-10">
+														    <probe-dropdown-tree-component id="policy-select-rule" :value="model.item.rule" ref="childRefRule"></probe-dropdown-tree-component>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">类型(#{model.item.ctype == 1?'一般策略':'日志策略'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model.number="model.item.ctype" true-value="1" false-value="0" required/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">执行命令：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.command" required/></div>
+													</div>
+													<div class="form-group animated fadeInDown" v-if="model.item.ctype==1">
+														<label class="col-sm-2 control-label">执行脚本及版本：</label>
+														<div class="col-sm-10">
+														    <select class="form-control" v-model="model.depot">
+                                                                <option v-for="item in model.conf.script" :value="item">#{item.name}# <small>#{item.version}#</small></option>
+                                                             </select>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">监控周期：</label>
+														<div class="col-sm-10">
+															<div class="input-group">
+														      <input type="number" class="form-control"  v-model.number="model.item.interval" required>
+														      <div class="input-group-addon">
+																<select v-model="model.item.unit" style="width:40px;" required>
+                                                                    <option value="second" selected="selected">秒</option>
+                                                                    <option value="minute">分</option>
+                                                                    <option value="hour">小时</option>
+                                                                    <option value="day">天</option>
+                                                                    <option value="month">月</option>
+                                                                 </select>
+														      </div>
+														    </div>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">Split(#{model.item.split?'是':'否'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model="model.item.split"/></div>
+													</div>
+													<div class="form-group" :style="model.type">
+														<label class="col-sm-2 control-label">表达式：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control" v-model="model.item.delimiter"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">Delimitereol(#{model.item.delimitereol?'是':'否'}#)：</label>
+														<div class="col-sm-10"><input type="checkbox" placeholder="" class="form-control" v-model="model.item.delimitereol"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加标签：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags" :value="model.item.tags"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加属性：</label>
+														<div class="col-sm-10">
+														    <input type="text" placeholder="" class="form-control"  v-model="model.item.attrs"/>
+														</div>
+													</div>
+
+													<hr/>
+													<policy-base-datatable id="policy-base-datatable" :model="model.conf.base"></policy-base-datatable>
+
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<policy-base-editor id="policy-base-editor" :model="model.conf.editor"></policy-base-editor>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<policy-servers-datatable id="policy-servers-datatable" :model="model.conf.servers"></policy-servers-datatable>
+															<hr/>
+															<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+
+										</div>
+									</form>`
+                    };
+
+                    console.log(JSON.stringify(node))
+
+                    new Vue(wizard);
+                },
+                delete: function(){
+                    let self = this;
+
+                    let selected = _.map(self.datatable.rows(".selected").data(),'name');
+
+                    alertify.confirm(`确认删除：${selected.join(",")}`, function (e) {
+                        if (e) {
+                            if(selected.length > 0) {
+                                _.forEach(selected, function(v){
+                                    depotDelete(v.name);
+                                })
+
+                                eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
+                            } else {
+                                alertify.log("请选择!")
+                                return false;
+                            }
+
+                        } else {
+                            // user clicked "cancel"
+                        }
+                    });
+
+                },
 
             }
 

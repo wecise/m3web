@@ -180,15 +180,15 @@
                 return {
                     company:{
                         name: {{.company}},
-                fullname: {{.company_fullname}},
-                icon: {{.icon}},
-                logo: {{.logo}},
-                ospace: {{.ospace}},
-                title: {{.title}},
-                web: {{.website}},
-                config: null
-            }
-            }
+                        fullname: {{.company_fullname}},
+                        icon: {{.icon}},
+                        logo: {{.logo}},
+                        ospace: {{.ospace}},
+                        title: {{.title}},
+                        web: {{.website}}
+                    },
+                    license: null
+                }
             },
             mounted: function(){
                 let self = this;
@@ -205,21 +205,17 @@
                     $(self.$el).find("#icon").attr("src",{{.icon}});
                     $(self.$el).find("#logo").attr("src",{{.logo}});
 
-                    let _config = _.attempt(JSON.parse.bind(null, `{{.config}}`));;
+                    let _license = _.attempt(JSON.parse.bind(null, `{{.license}}`));
 
-                    if(_.isEmpty(_config)){
-                        self.company.config = "";
+                    if(_.isEmpty(_license)){
+                        self.license = "未经授权用户";
                     } else {
-                        self.company.config = _config.license;
+                        self.license = `截止日期：${_license.expire} 服务器数量：${_license.server} 代理数量：${_license.agent}`;
                     }
 
                 },
                 update: function(){
                     let self = this;
-
-                    let _config = {config:{license: self.company.config}};
-
-                    self.company = _.merge(self.company, _config);
 
                     let _rtn = companyUpdate(self.company);
 
@@ -229,6 +225,20 @@
                 },
                 cancel: function(){
                     appVue.currentView = 'user-info';
+                },
+                importLicense: function(event){
+                    let self = this;
+
+                    let file = event.target.files[0];
+
+                    console.log(file,file.name)
+
+                    let rtn = licenseImport(file);
+
+                    if(rtn == 1){
+                        document.location.href = getPage();
+                    }
+
                 }
             }
         });
@@ -241,9 +251,7 @@
                 currentView: 'user-info',
                 logo: null,
                 ifShow: true,
-                company: {
-                    config: null
-                }
+                license: null
             },
             created:function(){
                 let self = this;
@@ -273,12 +281,12 @@
 
                     self.logo = _logo.replace(/"/g,"");
 
-                    let _config = _.attempt(JSON.parse.bind(null, `{{.config}}`));;
+                    let _license = _.attempt(JSON.parse.bind(null, `{{.license}}`));
 
-                    if(_.isEmpty(_config)){
-                        self.company.config = "";
+                    if(_.isEmpty(_license)){
+                        self.license = "未经授权用户";
                     } else {
-                        self.company.config = _config.license;
+                        self.license = `${_license.expire}`;
                     }
                 },
                 update: function(){
@@ -437,7 +445,7 @@
                         <p>{{.i18n.Tr "company_icon"}}：{{.icon}}</p>
                         <p>{{.i18n.Tr "company_ospace"}}：{{.ospace}}</p>
                         <p>{{.i18n.Tr "company_title"}}：{{.title}}</p>
-                        <p>{{.i18n.Tr "company_license"}}：${company.config}</p>
+                        <p>{{.i18n.Tr "company_license"}}：${license}</p>
                         <p>{{.i18n.Tr "company_product"}}：{{.i18n.Tr "app_desc"}}</p>
                         <div class="text-right">
                             <a class="btn btn-xs btn-white" href="http://{{.website}}" target="_blank"><i class="fa fa-thumbs-up"></i> {{.i18n.Tr "company_web"}} </a>
@@ -580,7 +588,14 @@
 
             <div class="form-group">
                 <label for="config">{{.i18n.Tr "company_license"}}</label>
-                <textarea id="config" class="form-control" v-model="company.config" rows="3" required></textarea>
+                <div class="input-group">
+                    <input id="config" class="form-control" :value="license" required disabled/>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default fileinput-button" title="导入License">
+                            <input type="file" name="loadfile" @change="importLicense">
+                        </button>
+                    </span>
+                </div>
             </div>
 
             <!--<div class="form-group">-->

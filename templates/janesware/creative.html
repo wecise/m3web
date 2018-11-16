@@ -482,20 +482,21 @@
                                 // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
                                 let _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
 
-                                return {
+                                if(_.includes(['dir'], _item.ftype)){
+                                    return {
 
                                     items: {
                                         "edit": {name: "编辑", icon: "fas fa-edit", callback: function(key, opt) {
                                                 self.forwardCreative('edit', _item);
                                             }
                                         },
-                                        "sep2": "---------",
+                                        "sep1": "---------",
 
                                         "delete": {name: "删除", icon: "fas fa-trash", callback: function(key, opt) {
                                                 self.remove(_item);
                                             }
                                         },
-                                        "sep3": "---------",
+                                        "sep2": "---------",
                                         "copy": {name: "复制", icon: "fas fa-copy", callback: function(key, opt) {
                                                 self.copyIt(_item);
                                             }
@@ -505,14 +506,62 @@
 
                                             }
                                         },
+                                        "sep3": "---------",
+                                        "share": {
+                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
+                                                self.shareIt(_item);
+                                            }
+                                        },
                                         "sep4": "---------",
-
                                         "info": {name: "属性", icon: "fas fa-info", callback: function(key, opt, rootMenu, originalEvent) {
                                                 self.info(_item);
                                             }
                                         }
                                     }
                                 };
+                                } else {
+                                    return {
+
+                                        items: {
+                                            "edit": {name: "编辑", icon: "fas fa-edit", callback: function(key, opt) {
+                                                    self.forwardCreative('edit', _item);
+                                                }
+                                            },
+                                            "sep1": "---------",
+
+                                            "delete": {name: "删除", icon: "fas fa-trash", callback: function(key, opt) {
+                                                    self.remove(_item);
+                                                }
+                                            },
+                                            "sep2": "---------",
+                                            "copy": {name: "复制", icon: "fas fa-copy", callback: function(key, opt) {
+                                                    self.copyIt(_item);
+                                                }
+                                            },
+                                            "paste": {name: "粘贴", icon: "fas fa-paste", callback: function(key, opt) {
+                                                    self.pasteIt();
+
+                                                }
+                                            },
+                                            "sep3": "---------",
+                                            "runUrl": {
+                                                name: "运行链接", icon: "fas fa-map-marker-alt", callback: function (key, opt) {
+                                                    self.copyUrl(_item);
+                                                }
+                                            },
+                                            "share": {
+                                                name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
+                                                    self.shareIt(_item);
+                                                }
+                                            },
+                                            "sep4": "---------",
+                                            "info": {name: "属性", icon: "fas fa-info", callback: function(key, opt, rootMenu, originalEvent) {
+                                                    self.info(_item);
+                                                }
+                                            }
+                                        }
+                                    };
+                                }
                             }
                         });
 
@@ -540,8 +589,6 @@
                         let self = this;
 
                         let _rtn = fsList(self.model.root);
-
-                        console.log(JSON.stringify(_rtn))
 
                         self.model.list = _.orderBy(_.map(_rtn,function(v,k){
 
@@ -1108,6 +1155,48 @@
                             self.model.action.from = null;
                             self.model.action.to = null;
                         }
+                    },
+                    copyUrl: function(item){
+                        let self = this;
+
+                        let _lang = `{{.Lang}}`;
+                        let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
+
+                        item = _.merge(item,{lang: lang, action:'run'});
+
+                        let url = genFsUrl(item,null);
+
+                        alertify.set({ labels: {
+                                ok     : "复制地址",
+                                cancel : "取消"
+                            }});
+
+                        alertify.prompt("运行链接地址", function (e, str) {
+                            // str is the input text
+                            if (e) {
+                                // user clicked "ok"
+                                let clipboard = new Clipboard('.alertify-button-ok', {
+                                    text: function (trigger) {
+                                        return str;
+                                    }
+                                });
+                            } else {
+                                // user clicked "cancel"
+                            }
+                        }, url);
+
+                    },
+                    shareIt: function(item){
+                        let self = this;
+
+                        alertify.prompt("共享设置", function (e, str) {
+                            // str is the input text
+                            if (e) {
+                                // user clicked "ok"
+                            } else {
+                                // user clicked "cancel"
+                            }
+                        }, "admin;");
                     },
                     toggleLeft: function() {
                         let self = this;

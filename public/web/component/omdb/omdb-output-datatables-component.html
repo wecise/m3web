@@ -155,15 +155,22 @@
 
                 let _cols = _.map(self.columns,function(v,k){
 
+		                    //  msg
+		                    if(_.includes(['msg'],v.field)){
+		                        return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
+		                                return  _.truncate(data, {'length': 100});
+		                            }};
+		                    }
+
                             //  data & time render
                             if(_.includes(['day','vtime','mtime','ctime'],v.field)){
-                                return { "data": v.field, "title": _.camelCase(v.field), visible: v.visible, orderable: true, render: function(data, type, row){
+                                return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
                                         return moment(data).format("YYYY-MM-DD HH:mm:ss");
 	                                }};
                             }
 
 		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
-                                return { "data": v.field, "title": _.camelCase(v.field), visible: v.visible, render: function(data, type, row){
+                                return { "data": v.field, "title": v.field, visible: v.visible, render: function(data, type, row){
 		                                if(_.isNull(data) || _.isEmpty(data)) {
                                             return '';
 		                                } else{
@@ -172,7 +179,7 @@
 		                            }};
 		                    }
 
-	                        return { "data": v.field, "title": v.title || v.field, visible: v.visible, orderable: true, render: v.render};
+	                        return { "data": v.field, "title": v.field || v.title, visible: v.visible, orderable: true, render: v.render};
 
 
 						});
@@ -312,7 +319,9 @@
                     self.datatable.buttons().container().appendTo( `.${self.id}` );
                 },500)
 
-				self.initPlugin();
+                _.delay(function(){
+                    self.initPlugin();
+                },1000)
 
 			},
 			initPlugin: function(){
@@ -357,23 +366,6 @@
                 // selected row
                 $("#"+self.id).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
-
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
-
-                    _.delay(function(){
-
-                        let cardVue = new Vue({
-                            el: '#panel-card',
-                            data: function(){
-                                return {
-                                    model: self.selectedRow
-                                }
-                            },
-                            template: '<vue-ci-card-component :row="model"></vue-ci-card-component>'
-                        });
-
-
-                    },100);
                 } );
 
                 // selected cell

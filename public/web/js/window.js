@@ -178,7 +178,7 @@ var newWindow = function (type, title, template, position, container) {
         return win;
     }
 
-    if(type === 'fsedit'){
+    if(type === 'fsEditor'){
 
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
 
@@ -302,6 +302,116 @@ var newWindow = function (type, title, template, position, container) {
             dragit: {
                 drag: function (panel, position) {
                     localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsApps'){
+
+        lrwh[2] = $( window ).width()*0.4;
+        lrwh[3] = $( window ).height()*0.6;
+
+        win = $.jsPanel({
+            id: 'jsPanel-robot',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                left: 59,
+                top: 54,
+            },
+            //container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsEntity'){
+
+        lrwh[2] = $( window ).width()*0.4;
+        lrwh[3] = $( window ).height()*0.6;
+
+        win = $.jsPanel({
+            id: 'jsPanel-entity',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                left: 59,
+                top: 54,
+            },
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+
                 }
             },
             callback: function(){
@@ -717,7 +827,7 @@ var newWindow = function (type, title, template, position, container) {
     }
 
     let tb = document.createElement('div');
-    console.log(title, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true)
+
     $(tb).append(template);
     win = new mxWindow(title, tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
     win.hide();
