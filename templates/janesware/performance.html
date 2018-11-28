@@ -551,8 +551,8 @@
 
                             $("#nav").hide();
 
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12");
+                            $("#mainview").removeClass("col-lg-10");
+                            $("#mainview").addClass("col-lg-12");
                             //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
 
                             $(".navtoggle").removeClass("fa fa-caret-left");
@@ -563,8 +563,8 @@
                             $("#nav").slideDown(500);
                             $("#nav").show();
 
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10");
+                            $("#mainview").removeClass("col-lg-12");
+                            $("#mainview").addClass("col-lg-10");
                             //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
 
                             $(".navtoggle").removeClass("fa fa-caret-right");
@@ -683,7 +683,7 @@
                             //"_all": JSON.stringify(tags)
                         };
                         data.star = 0;
-                        data.username = '{{.SignedUser.Name}}';
+                        data.username = '{{.SignedUser.UserName}}';
                         data.ispublic = ispublic;
 
                         var options = $.map($(self.target).bootstrapTable('getSelections'), function (row) {
@@ -882,7 +882,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-12" id="content" style="padding-left:10px;">
+                                <div class="col-lg-12" id="mainview" style="padding-left:10px;">
                                     <div class="panel" style="border-radius: 0px;">
                                         <div class="panel-body" style="padding:0px 15px;">
                                             <div id="custom-toolbar1">

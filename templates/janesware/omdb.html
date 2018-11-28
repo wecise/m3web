@@ -667,14 +667,17 @@
                         if(!_.isEmpty(node)) {
                             self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
                             self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+                        } else {
+                            self.model.dataset = [];
+                            self.model.columns = [];
                         }
 
 					},
                     setData: function(event){
                         let self = this;
 
-	                    self.model.dataset = event.data[_.keys(event.columns)[0]];
-                        self.model.columns = event.columns[_.keys(event.columns)[0]];
+	                    self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
+                        self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
                         self.result = event;
 
                     },

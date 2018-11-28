@@ -10,6 +10,10 @@
 			margin: 12px -15px;
 		}
 
+		.probe-tree-component .navbar-form .form-control {
+			width: 100%;
+		}
+
 		.navbar-form .form-control:focus{
 			width: 200px;
 			animation:none;
@@ -60,10 +64,6 @@
 			vertical-align: middle;
 		}
 
-        .probe-tree-component .navbar-form .form-control {
-            width: 100%;
-        }
-
 
 		/* For x-editable */
 		.editable-click, a.editable-click, a.editable-click:hover{
@@ -96,7 +96,7 @@
         delimiters: ['${', '}'],
 		props: {
             id: String,
-			system: String
+			model: Object,
         },
         data: function(){
             return {
@@ -127,7 +127,7 @@
                         enable: false
                     }
                 },
-                zNodes: callFsJScript(`/probe/${this.system}_tree_data.js`).message,
+                zNodes: callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
 
 
@@ -215,7 +215,7 @@
 
 	            if(treeNode.rtype === 'A2' && treeNode.parent == null){
 
-	                let tagDir = getTagDir(self.system);
+	                let tagDir = getTagDir(self.model.domain);
 
 	                // 忽略第一层
 	                let tree = recursiveTraverse(tagDir.nodes);
@@ -329,10 +329,10 @@
                             container: 'body',
                             success: function(response, newValue) {
 
-                                let rtn = delTagDir(self.system, treeNode.name);
+                                let rtn = delTagDir(self.model.domain, treeNode.name);
 
                                 if(rtn === 1){
-                                    updateTagDir(self.system, newValue);
+                                    updateTagDir(self.model.domain, newValue);
                                 }
                             }
                         });
@@ -417,7 +417,7 @@
 
 				let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
 
-                let rtn = updateTagDir(self.system, _name);
+                let rtn = updateTagDir(self.model.domain, _name);
 
                 if(rtn === 1){
                     self.zTree.addNodes(treeNode, {cid: `tag_${_uuid}`, pId:treeNode.cid, rtype: treeNode.rtype, name: _name, title: newName, iconSkin: treeNode.iconSkin});
@@ -429,7 +429,7 @@
 
                 alertify.confirm("确认删除", function (e) {
                     if (e) {
-                        let rtn = delTagDir(self.system, treeNode.name);
+                        let rtn = delTagDir(self.model.domain, treeNode.name);
 
                         if(rtn === 1) {
                             self.zTree.removeNode(treeNode);

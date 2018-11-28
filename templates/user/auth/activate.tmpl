@@ -23,7 +23,7 @@
 						{{else if .IsActivateFailed}}
 							<p>{{.i18n.Tr "auth.invalid_code"}}</p>
 						{{else}}
-							<p>{{.i18n.Tr "auth.has_unconfirmed_mail" .SignedUser.Name .SignedUser.Email | Str2html}}</p>
+							<p>{{.i18n.Tr "auth.has_unconfirmed_mail" .SignedUser.UserName .SignedUser.Email | Str2html}}</p>
 							<div class="ui divider"></div>
 							<div class="text right">
 								<button class="ui blue button">{{.i18n.Tr "auth.resend_mail"}}</button>

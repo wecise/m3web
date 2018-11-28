@@ -45,9 +45,15 @@
 
         $(function () {
 
-            Vue.component('anchored-heading', {
+            Vue.component('hello', {
+                delimiters: ['${', '}'],
                 render: function (createElement) {
-                    return createElement('h' + this.level,  this.$slots.default)
+                    return createElement('div',
+                        Array.apply(null, { length: 20 }).map(function () {
+                            return createElement('button', 'hi')
+                        })
+                    )
+                    //return createElement('h' + this.level,  this.$slots.default)
                 },
                 props: {
                     level: {
@@ -58,13 +64,30 @@
             })
 
             var vm = new Vue({
-                delimiters: ['#{', '}#'],
+                delimiters: ['${', '}'],
                 el: "#app",
                 template: "#app-template",
+                data: {
+                    title: new Date()
+                }
             });
 
 
         });
+
+
+        var groups = {};
+        var sections = document.getElementsByClassName('cheatsheet-set');
+        for (const section of sections) {
+            const names = [];
+            groups[section.id] = names;
+            var icons = section.getElementsByClassName('icon');
+            for (const icon of icons) {
+                const name = icon.getElementsByTagName('dd')[0].innerText;
+                names.push(name);
+            }
+        }
+        console.log(1111,groups); // Feel free to stringify/
 
 
     })
@@ -73,8 +96,9 @@
 
 <script type="text/x-template" id="app-template">
     <div>
-        <anchored-heading :level="3">jjjj</anchored-heading>
-        <anchored-heading :level="1">jjjj</anchored-heading>
+        <hello :level="1">${title}</hello>
+        <hello :level="2">${title}</hello>
+        <hello :level="3">${title}</hello>
     </div>
 
 </script>

@@ -594,15 +594,15 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         {field:"app",title: "App", visible: true},
                         {field:"host",title: "Host", visible: true},
                         {field:"severity",title: "Severity", visible: true, formatter: function(value, row, index) {
-                                return row.severityalias;
+                            return row.severity;
                             },
                             cellStyle: function(value,row,index){
-                                if(!_.isEmpty(value)){
+                                console.log(value, _.isEmpty(value))
+                                if(value){
                                     return {classes: 'severity'+value};
                                 } else {
                                     return {classes: 'severity_other'};
                                 }
-
                             }
                         },
                         {field:"ctime",title: "Ctime", visible: true, formatter: function(value, row, index) {

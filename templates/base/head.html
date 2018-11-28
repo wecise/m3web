@@ -15,6 +15,11 @@
 	
 	<!--Jquery JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jquery/jquery-3.3.1.min.js"></script>
+
+	<!--Panel JS & CSS -->
+	<script src="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.js" type="text/javascript"></script>
+	<link href="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
+
 	<!--Jquery UI JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
 
@@ -78,15 +83,18 @@
 	<!--Later Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/later/later.js"></script>
 
+	<!--localforage Core JS -->
+	<script src="{{AppSubUrl}}/web/vendor/localForage/dist/localforage.min.js"></script>
+
 	<!-- ACE JS-->
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ace.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-language_tools.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-split.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-settings_menu.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/ext-statusbar.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/theme-tomorrow.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/mode-mql.js"></script>
-	<script src="{{AppSubUrl}}/web/vendor/ace-builds/src-noconflict/snippets/mql.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/ace.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/ext-language_tools.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/ext-split.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/ext-settings_menu.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/ext-statusbar.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/theme-tomorrow.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/mode-mql.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/ace-builds-1.4.2/src-min-noconflict/snippets/mql.js"></script>
 
 	<!-- Object-Hash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/object-hash/dist/object_hash.js"></script>
@@ -110,19 +118,14 @@
 	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.core.css" type="text/css" rel="stylesheet" />
 	<link href="{{AppSubUrl}}/web/vendor/alertifyjs/themes/alertify.bootstrap.css" type="text/css" rel="stylesheet" />
 
-	<!--Panel JS & CSS -->
-	<script src="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.js" type="text/javascript"></script>
-	<link href="{{AppSubUrl}}/web/vendor/jsPanel/jquery.jspanel.min.css" type="text/css" rel="stylesheet" />
-
 	<!--IScroll JS -->
-	<script src="{{AppSubUrl}}/web/vendor/iscroll/build/iscroll.js" type="text/javascript"></script>
+	<!--<script src="{{AppSubUrl}}/web/vendor/iscroll/build/iscroll.js" type="text/javascript"></script>-->
 
 	<!--Tagify JS -->
 	<script src="{{AppSubUrl}}/web/vendor/tagify/dist/tagify.polyfills.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/tagify/dist/tagify.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/tagify/dist/jQuery.tagify.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/tagify/dist/tagify.css" rel="stylesheet" />
-
 
 	<!-- App JS-->
 	<script src="{{AppSubUrl}}/web/js/init.js" type="text/javascript"></script>
@@ -152,8 +155,6 @@
 	<script src="{{AppSubUrl}}/web/js/window.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/app.js" type="text/javascript"></script>
 
-	<!--Pace Progress JS & CSS-->	
-	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js" type="text/javascript"></script>
 	<script>
 
 		let lang = `{{.Lang}}`;
@@ -232,11 +233,6 @@
 	<script src="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.min.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.css" rel="stylesheet" type="text/css" />
 
-	<!--<link href="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.css" rel="stylesheet" type="text/css" />
-	<link href="{{AppSubUrl}}/web/vendor/DataTables/DataTables-1.10.16/css/dataTables.jqueryui.min.css" rel="stylesheet" type="text/css" />
-	<script src="{{AppSubUrl}}/web/vendor/DataTables/datatables.min.js"></script>-->
-
-
 	<!--jszip Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jszip/dist/jszip.min.js"></script>
 	<!--<script src="{{AppSubUrl}}/web/vendor/jszip/lib/object.js"></script>-->
@@ -245,9 +241,12 @@
 	<!--Download JS-->
 	<script src="{{AppSubUrl}}/web/vendor/download/download.min.js"></script>
 
+	<!--Pace Progress JS & CSS-->
+	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js" data-pace-options='{"restartOnRequestAfter": true, "ajax": {"trackMethods":["GET","PUT","POST","DELETE"]}}' type="text/javascript"></script>
 
-    <!-- App CSS -->
-    <link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet">
+	<!-- App CSS -->
+	<link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet">
+
 
 	<title> {{.SignedUser.Company.Fullname}}</title>
 
@@ -303,7 +302,7 @@
 
 							<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 								<!--img class="ui mini image" src="{{.SignedUser.AvatarLink}}"-->
-								<i class="fa fa-user"></i> {{.SignedUser.Name}}
+								<i class="fa fa-user"></i> {{.SignedUser.UserName}}
 								<i class="caret"></i>
 							</a>
 
@@ -341,15 +340,6 @@
 									</a>
 								</li>
 
-
-								{{if ne .company "oneswitch"}}
-								<li>
-									<a target="_blank" href="/janesware/api">
-										<i class="fab fa-amilia"></i> REST API
-									</a>
-								</li>
-
-								{{end}}
 
 								<li class="divider"></li>
 
@@ -414,7 +404,7 @@
 			</div>
 		</div>
 		<div id="sidebar-bg" class="sidebar-bg"></div>
-		<input id="signed-user-name" type="hidden" value="{{.SignedUser.Name}}">
+		<input id="signed-user-name" type="hidden" value="{{.SignedUser.UserName}}">
 		<input id="signed-user-fullname" type="hidden" value="{{.SignedUser.FullName}}">
 
 

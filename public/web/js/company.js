@@ -39,13 +39,12 @@ var companyNew = function(event){
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
 
@@ -156,13 +155,12 @@ var companyDelete = function(name) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function (xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("失败" + " " + xhr.responseJSON.error);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
 
@@ -185,6 +183,8 @@ var companyUpdate = function(com) {
     jQuery.ajax({
         url: '/companys',
         dataType: 'json',
+        processData: false,
+        contentType: 'application/json; charset=utf-8',
         type: 'PUT',
         async: false,
         data: JSON.stringify(com),

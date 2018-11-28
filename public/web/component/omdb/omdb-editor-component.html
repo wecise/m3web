@@ -309,16 +309,24 @@
                 if(_list.status === 'ok'){
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
                 } else {
+
+                    // 设置表格为空
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: [], columns: [] };
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                    // 输出日志
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+	                return false;
                 }
 
 
                 if(_.isEmpty(_list)) {
 
                     alertify.log("查询结果为空");
-
                     return false;
                 }
+
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
@@ -491,7 +499,7 @@
                 let _list = fetchDataByMql(_mql);
                 let _content = JSON.stringify({mql: _mql, result: {message: _.attempt(JSON.parse.bind(null,_list.message)), meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
-                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _ftype, icon: "/fs/home/assets/images/files/png/"+_ftype+".png?type=download"};
+                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype, icon: "/fs/home/assets/images/files/png/"+_ftype+".png?type=download"};
 				let _name = '查询_' + moment().format("LLL");
 				let _html = `<!DOCTYPE html>
 							<html>

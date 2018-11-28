@@ -371,6 +371,7 @@
                 // selected cell
                 $("#"+self.id).on( 'click', 'td', function () {
                     self.selectedCell = self.datatable.cell( this ).data();
+                    alertify.log(self.selectedCell)
                 } );
 
                 // init context menu
@@ -387,6 +388,10 @@
                             items: self.items[self.contextmenu]
                         };
                     }
+                });
+
+                $("#"+self.id).on('draw.dt', function () {
+                    $('[data-toggle="tooltip"]').tooltip();
                 });
 
 

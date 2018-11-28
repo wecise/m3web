@@ -135,21 +135,21 @@ var appBox = {
 	},
 	template: `<ul class="top-bar animated fadeInDown nav-menu-level1">
 					<li>
-						<a href="/">
-							<i class="fa fa-home fa-3x"></i> <p>首页</p>
+						<a href="/" title="首页" data-toggle='tooltip'>
+							<img src="/fs/home/assets/images/apps/png/home.png?type=download"></img> <p>首页</p>
 						</a>
 					</li>
 					<!--<li role="separator" class="divider"></li>-->
 					<li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
-						<a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname">
-							<i :class="item.icon + ' fa-3x'"></i> 
+						<a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname" data-toggle='tooltip'>
+							<img :src="item.icon" style="width:48px;"></img> 
 							<p>
 							    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
 							</p>
 						</a>
 					</li>
 					<li>
-						<a href="/janesware/system?view=app">
+						<a href="/janesware/system?view=app"  title="应用管理" data-toggle='tooltip'>
 							<i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
 						</a>
 					</li>
@@ -229,21 +229,21 @@ let sideMenu = {
     template: `<ul class="nav animated bounceIn">
                         <li class="dropdown top-bar">
 							<a  href="javascript:void(0);"  
-								role="button" 
 								title="应用"
+								data-toggle='tooltip'
 								@click="initWnd">
-								<i class="fa fa-th fa-2x"></i> <span class="nav-label">应用</span>
+								<img src="/fs/home/assets/images/apps/png/app.png?type=download" style="width:17px;"></img> <span class="nav-label">应用</span>
 							</a>
 							<!--<div id="nav-menu-level1"></div>-->
 						</li>
                         <li>
-                            <a href="/" title="首页">
-                                <i class="fas fa-home fa-2x"></i> <span class="nav-label">首页</span>
+                            <a href="/" title="首页" data-toggle='tooltip'>
+                                <img src="/fs/home/assets/images/apps/png/home.png?type=download" style="width:17px;"></img> <span class="nav-label">首页</span>
                             </a>
                         </li>
                         <li v-for="(item,index) in model" :class="item.status">
-                            <a :href="item.url" :target="item.target" :title="item.cnname">
-                                <i :class="item.icon + ' fa-2x'"></i> <span class="nav-label">#{item.cnname}#</span>
+                            <a :href="item.url" :target="item.target" :title="item.cnname" data-toggle='tooltip'>
+                                <img :src="item.icon" style="width:17px;"></img> <span class="nav-label">#{item.cnname}#</span>
                             </a>
                         </li>
                     </ul>`,
@@ -273,8 +273,12 @@ let sideMenu = {
             });
         },
         initWnd: function(){
-            let wnd = newWindow('fsApps', `工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
-            new Vue(appBox);
+
+            setTimeout(() => {
+                let wnd = newWindow('fsApps', `工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
+                new Vue(appBox);
+            }, 50);
+
         },
         refresh: function(){
             this.init();
@@ -490,6 +494,13 @@ var initPlugIn = function () {
     },1000)
 
 
+    /* enable tooltip for all A tag */
+    setTimeout(() => {
+        $("a[data-toggle='tooltip']").tooltip({
+            container: 'body',
+            template: `<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`
+        });
+    }, 3000);
 };
 
 

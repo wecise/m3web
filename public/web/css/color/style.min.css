@@ -5091,7 +5091,7 @@ body.flat-black{
 .flat-black .error-desc{
     color:#888
 }
-.pace-inactive{
+/*.pace-inactive{
     opacity:0
 }
 .ie8 .pace .pace-activity,.ie8 .pace-inactive{
@@ -5203,7 +5203,7 @@ body.flat-black{
 }
 .pace-top .pace .pace-activity{
     top:11px
-}
+}*/
 .tab-overflow{
     position:relative;
     overflow:hidden;

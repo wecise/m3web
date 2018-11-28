@@ -969,11 +969,24 @@
                     alertify.confirm(`确认删除：${selected.join(",")}`, function (e) {
                         if (e) {
                             if(selected.length > 0) {
+                                var rtn = true;
+
                                 _.forEach(selected, function(v){
-                                    policyDelete(v.name);
+                                    console.log(selected,v)
+                                    let _rtn = policyDelete(v);
+
+                                    if(_rtn==1){
+                                        rtn = true
+                                    } else {
+                                        rtn = false;
+                                    }
+
                                 })
 
-                                eventHub.$emit("PROBE-REFRESH-EVENT", ['log']);
+	                            if(rtn){
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['log']);
+	                            }
+
                             } else {
                                 alertify.log("请选择!")
                                 return false;

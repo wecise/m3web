@@ -290,10 +290,10 @@
                     }
                 },
                 update: function(){
-                    var self = this;
-                    var fullname = `{{.SignedUser.FullName}}.replace(/"/g,"")`;
-                    var email = $("#email").val().split(",");
-                    var password = $("#password").val();
+                    let self = this;
+                    let fullname = `{{.SignedUser.FullName}}.replace(/"/g,"")`;
+                    let email = $("#email").val().split(",");
+                    let password = $("#password").val();
 
                     jQuery.ajax({
                         url: '/admin/users/15305020520705546474',

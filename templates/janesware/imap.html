@@ -19,13 +19,6 @@
         height: 28px;
     }
 
-    html td.mxWindowTitle {
-        background-color: rgb(33, 148, 245);
-        background-image: linear-gradient(180deg,rgb(33, 148, 245),rgb(33, 148, 245));
-        background-repeat: repeat-x;
-        color: #ffffff;
-    }
-
     #outlineContainer {
         top: 0px;
         left: 5px;
@@ -109,6 +102,20 @@
         }
     }
 
+    /* nav-tabs */
+    .nav-tabs {
+        background-color: #ffffff !important;
+        background-image: none !important;
+    }
+
+    ul.nav-tabs > li.active {
+        border-bottom: 2px solid rgb(3, 169, 244)!important;
+    }
+
+    /* For Table */
+    thead th {
+        white-space: nowrap;
+    }
 
 </style>
 
@@ -164,8 +171,6 @@
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Menus.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Toolbar.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Dialogs.js"></script>
-
-
 
 
 <script type="text/javascript">
@@ -405,7 +410,6 @@
 
                             let state = self.model.graph.graph.view.getState(cell);
                             let nodeDic = callFsJScript("/graph/graph_entity_attribute.js",encodeURIComponent(id)).message;
-                            console.log(1,id,value,JSON.stringify(nodeDic))
 
                             state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
                             state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic));
@@ -414,9 +418,180 @@
                             let clipboard2 = new Clipboard('g image',{
                                 text: function(trigger) {
 
-                                    
+                                    if(window.jsPanel.activePanels.list.length>1){
+                                        if(window.jsPanel.activePanels.getPanel('jsPanel-entity')) {
+                                            window.jsPanel.activePanels.getPanel('jsPanel-entity').close();
+                                        }
+                                    }
 
-                                    $.contextMenu({
+                                    let wnd = newWindow('fsEntity', id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
+
+                                    let config = {
+                                        delimiters: ['#{', '}#'],
+                                        el: '#entity-container',
+                                        template: nodeDic.component.performance.template,
+                                        data: {
+                                            model:{
+                                                profile:[],
+                                                event:[],
+                                                performance:[],
+                                                log:[]
+                                            }
+                                        },
+                                        mounted:function(){
+                                            let me = this;
+
+                                            me.initProfile();
+                                            _.delay(function(){
+                                                me.initEvent();
+                                                me.initPerformance();
+                                                me.initLog();
+                                                me.initFiles();
+                                            },1000);
+                                        },
+                                        methods: {
+                                            initProfile:function(){
+                                                let me = this;
+
+                                                _.forEach(nodeDic.dataset,function(val){
+                                                    _.forEach(val,function(v,k){
+                                                        if(typeof v == "object") {
+                                                            value = JSON.stringify(v,null,2);
+                                                            me.model.profile.push({name:k, value: value});
+
+                                                        } else {
+                                                            value = v.toString();
+                                                            me.model.profile.push({name:k, value: value});
+                                                        }
+                                                    })
+                                                })
+                                            },
+                                            initEvent:function(){
+                                                let me = this;
+
+                                                let event = {
+                                                    el: "#event-table",
+                                                    template: nodeDic.component.event.template,
+                                                    data: {
+                                                        id: "event-table",
+                                                        datatable:null,
+                                                        model:nodeDic.component.event.table
+                                                    },
+                                                    mounted:function(){
+                                                        let ev = this;
+
+                                                        _.delay(ev.init,500);
+                                                    },
+                                                    computed: {
+                                                        columns:function(){
+                                                            let ev = this;
+
+                                                            return _.map(ev.model.columns,function(v){
+                                                                        if(v.render){
+                                                                            v.render = eval(v.render);
+                                                                            return v;
+                                                                        } else {
+                                                                            return v;
+                                                                        }
+                                                                    });
+                                                        }
+                                                    },
+                                                    methods:{
+                                                        init:function(){
+                                                            let ev = this;
+
+                                                            ev.datatable = $("#"+ev.id).DataTable( _.extend(ev.model.options, {
+                                                                data: ev.model.dataset,
+                                                                columns: ev.columns})).columns.adjust().draw();
+                                                        }
+                                                    }
+                                                };
+
+                                                new Vue(event);
+                                            },
+                                            initPerformance:function(){
+                                                let me = this;
+
+                                                _.forEach([1,2,3,4],function(v){
+                                                    nodeDic.component.performance.gauge.renderTo = `gauge-ps${v}`;
+                                                    new RadialGauge(nodeDic.component.performance.gauge).draw();
+                                                })
+                                            },
+                                            initLog: function(){
+                                                let me = this;
+
+                                                let log = {
+                                                    el: "#log-table",
+                                                    template: '<table id="log-table" class="display" cellspacing="0"  width="100%"></table>',
+                                                    data:{
+                                                        dataset:[],
+                                                        columns:[
+                                                                    {'data':'host','title':'服务器','visible':true, className: 'text-left'},
+                                                                    {'data':'severity','title':'级别','visible':true, className: 'dt-nowrap text-left'},
+                                                                    {'data':'vtime','title':'告警时间','visible':true, className: 'dt-nowrap text-right',render:function(data, type, row){return
+                                                                            moment(data).format('YYYY-MM-DD HH:mm:ss')}},
+                                                                    {'data':'msg','title':'告警描述','visible':true, className: 'text-left'},
+                                                                    {'data':'status','title':'状态','visible':true, className: 'text-left'},
+                                                                    {'data':'class','title':'Class','visible':false, className: 'text-left'},
+                                                                    {'data':'id','title':'ID','visible':false, className: 'text-left'}
+                                                                ],
+                                                        options: {
+                                                            destroy: true,
+                                                            responsive: false,
+                                                            searching: false,
+                                                            aDataSort: true,
+                                                            bSort: true,
+                                                            bAutoWidth: true,
+                                                            rowReorder: false,
+                                                            colReorder: false,
+                                                            paging: false,
+                                                            info: false,
+                                                            scrollX: true,
+                                                            scrollY: '55vh',
+                                                            scrollCollapse: true,
+                                                            aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}]
+                                                        },
+                                                    },
+                                                    mounted:function(){
+                                                        let me = this;
+                                                        _.delay(me.init,1000);
+                                                    },
+                                                    methods:{
+                                                        init:function(){
+                                                            let me = this;
+
+                                                            me.datatable = $('#log-table').DataTable( _.extend(me.options, {
+                                                                data: me.dataset,
+                                                                columns: me.columns})).columns.adjust().draw();
+                                                        }
+                                                    }
+                                                };
+                                                log.data.dataset = nodeDic.component.log;
+                                                new Vue(log);
+                                            },
+                                            initFiles:function(){
+                                                let me = this;
+
+                                                let files = {
+                                                    delimiters: ['#{', '}#'],
+                                                    el: "#files-container",
+                                                    template: nodeDic.component.files.template,
+                                                    data:{
+                                                        model: _.values(nodeDic.component.files.data[0].files)
+                                                    },
+                                                    methods:{
+                                                        open: function(item){
+                                                            window.open(`/fs/home/temp/${item}?type=download`,'_blank');
+                                                        }
+                                                    }
+                                                };
+
+                                                new Vue(files);
+                                            }
+                                        }
+                                    };
+                                    new Vue(config);
+                                    /*$.contextMenu({
                                         selector: `.${id.replace(/:/g,"_")}`,
                                         trigger: 'left',
                                         delay: 10,
@@ -480,7 +655,7 @@
                                                 $(".context-menu-list animated slideIn").remove();
                                             }
                                         }
-                                    });
+                                    });*/
 
                                     return id;
                                 }
@@ -783,5 +958,11 @@
         <div id="info"></div>
     </div>
 </script>
+
+</div>
+
+</body>
+
+</html>
 
 <!--{{template "base/footer" .}}-->

@@ -292,6 +292,17 @@
         white-space: nowrap;
     }
 
+    /* For Button group*/
+    .btn-group .btn-link,
+    .btn-group .btn-link:hover{
+        color: #333333;
+        border:none;
+    }
+
+    .btn-group .btn-group > a > i{
+        color: #666666;
+    }
+
 
 </style>
 <div id="app"></div>
@@ -545,7 +556,7 @@
                                             },
                                             "sep3": "---------",
                                             "runUrl": {
-                                                name: "运行链接", icon: "fas fa-map-marker-alt", callback: function (key, opt) {
+                                                name: "复制链接", icon: "fas fa-map-marker-alt", callback: function (key, opt) {
                                                     self.copyUrl(_item);
                                                 }
                                             },
@@ -592,7 +603,7 @@
 
                         self.model.list = _.orderBy(_.map(_rtn,function(v,k){
 
-                                            return _.merge(v, {"username": {{.SignedUser.Name}}, "project": self.model.project });
+                                            return _.merge(v, {"username": {{.SignedUser.UserName}}, "project": self.model.project });
 
                                         }),['fullname'],['asc']);
 
@@ -709,7 +720,7 @@
 
                                     let _name = me.model.name;
                                     let _type = me.model.type;
-                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
 
                                     let _check = fsCheck(_root, _name);
                                     if(_check) {
@@ -740,7 +751,7 @@
 
                                         let _name = "PAGE_" + _.now();
                                         let _type = me.model.project.extName[me.model.project.value];
-                                        let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
+                                        let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
                                         let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
 
                                         if(_rtn == 1){
@@ -822,7 +833,7 @@
                                     
                                     me.model.templates = _.map(_list.message,function(v,k){
                                                         v.parent = v.parent.replace(/\/home\/admin/,"");
-                                                        return _.merge(v, {"username": `{{.SignedUser.Name}}`, "star": ""});
+                                                        return _.merge(v, {"username": `{{.SignedUser.UserName}}`, "star": ""});
                                                     });
 
                                     _.delay(self.refresh,100);
@@ -839,7 +850,7 @@
                                     let _name = me.model.name;
                                     let _type = me.model.type;
 
-                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.Name}}`, type: _type, icon: "/fs/home/assets/images/files/png/iflow.png?type=download"};
+                                    let _info = {remark: me.model.info.remark, ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _type, icon: "/fs/home/assets/images/files/png/iflow.png?type=download"};
 
                                     if(me.model.astemplate){
                                         _name = me.model.name;
@@ -1262,11 +1273,11 @@
 
                                 </div>
                                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                    <div class="btn-group-action pull-right">
+                                    <div class="btn-group pull-right">
                                         <!--a href="#" class="btn btn-sm btn-default" @click="toggleLeft"><i class="fa fa-caret-right navtoggle"></i> </a-->
-                                        <a href="#" class="btn btn-sm btn-primary" @click="pasteIt"><i class="fa fa-paste"></i> 粘贴</a>
-                                        <a href="#" class="btn btn-sm btn-primary" @click="newDir"><i class="fa fa-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
-                                        <a href="#" class="btn btn-sm btn-primary" @click="newFile"><i class="fa fa-plus"></i> {{.i18n.Tr "creative-new-file"}}</a>
+                                        <a href="#" class="btn btn-sm btn-link" @click="pasteIt" title="粘贴" data-toggle="tooltip"><i class="fa fa-paste"></i> 粘贴</a>
+                                        <a href="#" class="btn btn-sm btn-link" @click="newDir" title="{{.i18n.Tr "creative-new-project"}}" data-toggle="tooltip"><i class="fas fa-folder-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
+                                        <a href="#" class="btn btn-sm btn-link" @click="newFile" title="{{.i18n.Tr "creative-new-file"}}" data-toggle="tooltip"><i class="fas fa-file-medical"></i> {{.i18n.Tr "creative-new-file"}}</a>
                                     </div>
                                 </div>
                             </div>

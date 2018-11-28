@@ -2,6 +2,26 @@
 
 	<style>
 		/*----------  style  ----------*/
+
+		/* For search */
+		.navbar-form {
+			margin: 12px -15px;
+		}
+
+		.navbar-form .form-control,
+		.navbar-form .form-control:focus{
+			width: 100%;
+			animation:none;
+			-webkit-animation: none;
+		}
+
+		.navbar-form .btn-search {
+			right: -3px;
+			top: 2px;
+		}
+
+
+		/* For Tree */
 		.ztree li {
 			padding:3px;
 		}
@@ -28,9 +48,14 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-tree-component"  ----------*/
 	<template>
-
-		<ul class="ztree" :id="id" style="overflow:auto;"></ul>
-
+		<div>
+			<form class="navbar-form full-width">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="搜索">
+				</div>
+			</form>
+			<ul class="ztree" :id="id" style="overflow:auto;"></ul>
+		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -156,7 +181,7 @@
 		methods: {
 			init: function(){
                 let self = this;
-                let _rtn = fsList('/');
+                let _rtn = fsList(self.root);
 
                 if(_.isEmpty(_rtn)){
                     self.treeNodes = [];
@@ -171,7 +196,7 @@
 			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
 			                        });
                 }
-				self.treeObj = $.fn.zTree.init($(self.$el), self.setting, self.treeNodes);
+				self.treeObj = $.fn.zTree.init($(self.$el).find($("#" + self.id)), self.setting, self.treeNodes);
 
 
 			},

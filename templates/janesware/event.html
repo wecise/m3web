@@ -171,6 +171,11 @@
 	  text-align: center;
 	  color: #ffffff;
 	}
+	td.severity_other {
+		background-color: #808080!important; /*Unknown*/
+		text-align: center;
+		color: #ffffff;
+	}
 
 
 	/*----------  Event Severity For Cell Color  ----------*/
@@ -446,11 +451,6 @@
                         /* copy selected word to search */
                         self.copyWordToSearch();
 
-                        /* enable tooltip for all A tag */
-                        $("a").tooltip({
-                            placement: 'auto'
-                        });
-
                     },
 					setPresetDefault: function(event){
 	                    let self = this;
@@ -589,6 +589,8 @@
 
                         self.search.result.columns = window.GLOBAL_OBJECT.company.object.event.columns;//_columns;
                         self.search.result.data = _list.message;
+
+                        console.log(self.search.result.columns)
 
                         _.delay(function () {
                             self.summary.data.list = self.search.result.data;
@@ -763,9 +765,9 @@
 
 					        $("#nav").hide();
 
-					        $("#content").removeClass("col-lg-10");
-					        $("#content").addClass("col-lg-12");
-							//$("#content").find(".panel-default").css("border-left","1px #ddd solid");
+					        $("#mainview").removeClass("col-lg-10");
+					        $("#mainview").addClass("col-lg-12");
+							//$("#mainview").find(".panel-default").css("border-left","1px #ddd solid");
 
 					        $(".navtoggle").removeClass("fa fa-caret-left");
 					        $(".navtoggle").addClass("fa fa-caret-right");
@@ -775,9 +777,9 @@
 					        $("#nav").slideDown(500);
 					        $("#nav").show();
 
-					        $("#content").removeClass("col-lg-12");
-					        $("#content").addClass("col-lg-10");
-					        //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+					        $("#mainview").removeClass("col-lg-12");
+					        $("#mainview").addClass("col-lg-10");
+					        //$("#mainview").find(".panel-default").css("border-left","2px #ddd dotted");
 
 					        $(".navtoggle").removeClass("fa fa-caret-right");
 					        $(".navtoggle").addClass("fa fa-caret-left");
@@ -1011,6 +1013,7 @@
 						<div class="col-lg-12 event-top" style="padding:0px;">
 							<vue-echart-timeline-component :model="summary.data" :preconfig="preconfig"></vue-echart-timeline-component>
 						</div>
+
 						<div class="col-lg-2" id="nav" style="display: none;padding: 10px 5px 5px 0px;">
 							<div class="panel panel-default" style="border-radius: 0px;border:none;box-shadow:none;">
 				                <div class="panel-body" style="padding: 5px 0px;min-height:300px;max-height:500px;overflow:auto;">
@@ -1019,7 +1022,7 @@
 							</div>
 				  		</div>
 
-					  	<div class="col-lg-12" id="content" style="padding:0px;">
+					  	<div class="col-lg-12" id="mainview" style="padding:0px;">
 
 							<div id="custom-toolbar1">
 								<span @click="toggleLeft"><button class="btn btn-xs btn-default"><i class="fa fa-caret-right navtoggle"></i></button></span>

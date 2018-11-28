@@ -60,13 +60,13 @@ Website: http://www.seantheme.com/color-admin-v3.0/admin/html/
     background: linear-gradient(to bottom,  rgba(0,210,210,1) 0%,rgba(0,172,172,1) 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00d2d2', endColorstr='#00acac',GradientType=0 ); /* IE6-8 */
 }
-.pace-progress {
+/*.pace-progress {
     background: #00acac;
 }
 .pace .pace-activity {
     border-top-color: #00acac;
     border-left-color: #00acac;
-}
+}*/
 
 
 /* Added in v1.7 */

@@ -459,10 +459,6 @@
 
                         self.initFilter();
 
-                        _.delay(function () {
-                            $("a").tooltip("enable");
-                        }, 3000)
-
                         /* copy selected word to search */
                         self.copyWordToSearch();
 
@@ -752,8 +748,8 @@
 
                             $("#nav").hide();
 
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12");
+                            $("#mainview").removeClass("col-lg-10");
+                            $("#mainview").addClass("col-lg-12");
                             //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
 
                             $(".navtoggle").removeClass("fa fa-caret-left");
@@ -764,8 +760,8 @@
                             $("#nav").slideDown(500);
                             $("#nav").show();
 
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10");
+                            $("#mainview").removeClass("col-lg-12");
+                            $("#mainview").addClass("col-lg-10");
                             //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
 
                             $(".navtoggle").removeClass("fa fa-caret-right");
@@ -962,7 +958,7 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-12" id="content" style="padding:0px;">
+                        <div class="col-lg-12" id="mainview" style="padding:0px;">
                             <div id="custom-toolbar1">
                                 <span id="title-path" @click="toggleLeft"><button class="btn btn-xs btn-default"><i
                                         class="fa fa-caret-right navtoggle"></i></button></span>

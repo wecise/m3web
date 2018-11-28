@@ -1084,7 +1084,7 @@
 
                         self.model = _.map(_list.message,function(v,k){
                                         v.parent = v.parent.replace(/\/home\/admin/,"");
-                                        return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": ""});
+                                        return _.merge(v, {"username": '{{.SignedUser.UserName}}', "star": ""});
                                     });
                         _.delay(self.refresh,100);
                     },
@@ -1108,7 +1108,7 @@
                                 var data = data.message;
 
                                 self.model = _.map(data,function(v,k){
-                                    return _.merge(v, {"username": '{{.SignedUser.Name}}', "star": ""});
+                                    return _.merge(v, {"username": '{{.SignedUser.UserName}}', "star": ""});
                                 });
 
                                 _.delay(self.refresh, 500);
@@ -1654,7 +1654,7 @@
                             "_all": JSON.stringify(tags)
                         };
                         data.star = 0;
-                        data.username = '{{.SignedUser.Name}}';
+                        data.username = '{{.SignedUser.UserName}}';
                         data.ispublic = ispublic;
                         data.portlet = null;
                         data.theme = new Array(JSON.stringify(theme[skin]));

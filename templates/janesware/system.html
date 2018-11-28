@@ -29,8 +29,6 @@
 <link href='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.css' rel='stylesheet' />
 <!--<link href='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.print.min.css' rel='stylesheet' />-->
 
-<!-- SCO CSS-->
-<link href="{{AppSubUrl}}/web/vendor/sco/css/scojs.css" rel="stylesheet">
 
 <style type="text/css">
 
@@ -88,8 +86,6 @@
 <!-- Jquery Timer JS-->
 <script src="{{AppSubUrl}}/web/vendor/timer/jquery.timer.js"></script>
 
-<!-- SCO JS-->
-<script src="{{AppSubUrl}}/web/vendor/sco/js/sco.tooltip.js"></script>
 <!-- Sortable JS-->
 <script src="{{AppSubUrl}}/web/vendor/Sortable/Sortable.min.js"></script>
 
@@ -932,9 +928,9 @@
                         self.etcdKey = event.key;
                         self.editor.setValue(event.value);
                         self.editor.setValue(self.editor.getValue(), 1);
-                        self.editor.getSession().on('change', function() {
+                        /*self.editor.getSession().on('change', function() {
                             $(".config-editor-save").css("display", "");
-                        });
+                        });*/
 
                         /**
                          * @todo  当前节点为目录，隐藏键值输入框并显示节点［添加］按钮
@@ -960,7 +956,7 @@
                         self.etcd.ttl = event.ttl;
                         self.etcd.expiration = event.expiration;
 
-                        $(".config-editor-save").css("display","none");
+                        // $(".config-editor-save").css("display","none");
                     },
                     addNode:function() {
                         let self = this;
@@ -2705,30 +2701,30 @@
                 <div class="panel-heading" role="tab" id="headingOne" style="padding: 5px 15px;">
                     <div class="panel-heading-btn">
                         <div class="btn-group">
-                            <a class="btn btn-xs btn-success" data-toggle="modal" data-target="#configAddModal">
+                            <a class="btn btn-xs btn-link" data-target="#configAddModal" title="新增目录或节点" data-toggle="modal">
                                 <i class="fa fa-plus"></i>
-                                New&nbsp;
+                                新增&nbsp;
                             </a>
                             <a  href="#"
-                                class="btn btn-xs btn-success config-editor-save"
-                                data-trigger="tooltip"
-                                data-content="保存新增目录或节点"
+                                class="btn btn-xs btn-link config-editor-save"
+                                title="保存新增目录或节点"
                                 @click="saveNode"
-                                style="display:none;">
-                                <i class="fa fa-save"></i> Submit
+                                style="display:;"
+                                data-toggle="tooltip">
+                                <i class="fa fa-save"></i> 保存
                             </a>
-                            <a href="#" class="btn btn-xs btn-danger" readonly @click="removeNode">
+                            <a href="#" class="btn btn-xs btn-link" readonly @click="removeNode" title="删除目录或节点" data-toggle="tooltip">
                                 <i class="fa fa-trash"></i>
-                                Delete&nbsp;
+                                删除&nbsp;
                             </a>
-                            <a href="javascript:void(0)" @click="debug" class="btn btn-xs btn-default">
+                            <a href="javascript:void(0)" @click="debug" class="btn btn-xs btn-link">
                                 <i class="fas fa-tv"></i>
                             </a>
                         </div>
                     </div>
                     <div style="display:-webkit-inline-box;">
                         <span>
-                            <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigInfo">
+                            <a data-parent="#accordionContent" href="#collapseConfigInfo" title="调试窗口"  data-toggle="tooltip">
                                 <i class="fa fa-home" style="padding:7px 0px;"></i>
                             </a>
                         </span>
@@ -2780,13 +2776,13 @@
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 class="modal-title" id="myModalLabel">New Config</h4>
+                        <h4 class="modal-title" id="myModalLabel">新增</h4>
                     </div>
                     <div class="modal-body">
-                        <label for="">Node Name</label>
+                        <label for="">节点名称</label>
                         <input type="text" class="form-control" id="config_key" :value="etcdKey">
                         <BR/>
-                        <label for="">Dir</label>
+                        <label for="">目录</label>
                         <div class="input-group">
                             <span class="input-group-addon">
                             <input type="checkbox" id="config_dir" value="true"></span>
@@ -2794,7 +2790,7 @@
                         </div>
                         <BR/>
                         <div id="modal_config_value">
-                            <label for="">Value</label>
+                            <label for="">值</label>
                             <pre id="config_value"></pre>
                         </div>
                         <BR/>
@@ -2802,8 +2798,8 @@
                         <input type="number" class="form-control" id="config_ttl">
                     </div>
                     <div class="modal-footer">
-                        <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal">Cancel</a>
-                        <a href="javascript:void(0)" class="btn btn-primary" data-dismiss="modal" @click="addNode">Submit</button>
+                        <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal">取消</a>
+                        <a href="javascript:void(0)" class="btn btn-primary" data-dismiss="modal" @click="addNode">保存</button>
                     </div>
                 </div>
             </div>
@@ -2961,11 +2957,11 @@
                             <i class="icon-plus"></i>
                             添加&nbsp;
                         </a>
-                        <a href="#" class="btn btn-xs btn-default" data-trigger="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
+                        <a href="#" class="btn btn-xs btn-default" data-toggle="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
                             <i class="icon-save"></i>
                             提交
                         </a>
-                        <a id="config_btn_help" class="btn btn-xs btn-default">
+                        <a id="config_btn_help" class="btn btn-xs btn-default" data-toggle="tooltip" >
                             <i class="icon-question-sign"></i> 帮助
                         </a>
                         <a href="#" class="btn btn-xs btn-danger" readonly  @click="removeNode">
@@ -3067,7 +3063,7 @@
                                     <transition-group id="ul-li" type="transition" tag="ul">
                                         <li class="col-lg-3" v-for="(item,index) in model" :key="index">
                                             <div class="widget widget-stats bg-blue">
-                                                <div class="stats-icon drag-handle"><i :class="item.icon"></i></div>
+                                                <div class="stats-icon drag-handle"><img :src="item.icon" style="width:48px;"></img></div>
                                                 <div class="stats-info">
                                                     <h4>
                                                         <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">

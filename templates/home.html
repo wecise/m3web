@@ -255,8 +255,6 @@
         $(function() {
 
             var timeoutId = 0;
-         
-            $('[data-toggle="tooltip"]').tooltip();
 
             var appVue = new Vue({
                 delimiters: ['${', '}'],
@@ -667,7 +665,7 @@
                         <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
                             <a :href="item.url" :target="item.target" style="color:#ffffff;">
                                 <div class="tile_name">
-                                    <i :class="item.icon" style="font-size:22px;"></i>
+                                    <img style="width:30px" :src="item.icon"></img>
                                     <p class="small">${item.{{.i18n.Tr "mxhome_portlet_name"}}}</p>
                                 </div>
                             </a>
@@ -695,7 +693,7 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <a href="javascript:void(0);" :target="item.target" class="layer select btn btn-primary" v-for="item in user.appList" @click="triggerInput(item.name)">
-                                    <i :class="item.icon"></i> 
+                                    <img :src="item.icon" style="width:28px;"></img>
                                     <p class="small">
                                         ${item.{{.i18n.Tr "mxhome_portlet_name"}}}
                                     </p>

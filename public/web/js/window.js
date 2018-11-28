@@ -188,8 +188,8 @@ var newWindow = function (type, title, template, position, container) {
             _position = _tmp;
         }
 
-        lrwh[2] = $( window ).width()*0.6;
-        lrwh[3] = 480;//$( window ).height()*0.55;
+        lrwh[2] = $( window ).width() * 0.8;
+        lrwh[3] = $( window ).height() * 0.8;
 
         win = $.jsPanel({
             theme:          'filledlight',
@@ -200,6 +200,9 @@ var newWindow = function (type, title, template, position, container) {
             headerControls: { controls: '' },
             headerRemove:  false,
             content:        template,
+            onresized: function(){
+                eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
+            },
             dragit: {
                 drag: function (panel, position) {
                     localStorage.setItem("WINDOW-FSEDIT-POSITION",JSON.stringify(position));
@@ -211,13 +214,14 @@ var newWindow = function (type, title, template, position, container) {
                     "z-index": "1000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
+                    "background-color": "rgb(246, 246, 246)",
+                    /*"background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",*/
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd",
+                    "border-top": "1px solid #dddddd",
+                    "overflow":"hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
@@ -385,6 +389,10 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+                this.mouseleave(function(){
+                    win.close();
+                })
+
             }
         });
 
@@ -393,25 +401,31 @@ var newWindow = function (type, title, template, position, container) {
 
     if(type === 'fsEntity'){
 
-        lrwh[2] = $( window ).width()*0.4;
-        lrwh[3] = $( window ).height()*0.6;
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW_ENTITY_POSITION")));
+
+        let _position = { top: 0, left: 0 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        lrwh[2] = $( window ).width()*0.3;
+        lrwh[3] = $( window ).height()*0.7;
 
         win = $.jsPanel({
             id: 'jsPanel-entity',
             theme:          'filledlight',
             headerTitle:   title,
             contentSize:    {width: lrwh[2], height: lrwh[3]},
-            position: {
-                left: 59,
-                top: 54,
-            },
+            position: _position,
             container: 'body',
             headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
             dragit: {
                 drag: function (panel, position) {
-
+                    console.log(panel,position)
+                    localStorage.setItem("WINDOW_ENTITY_POSITION",JSON.stringify(position));
                 }
             },
             callback: function(){
@@ -500,7 +514,55 @@ var newWindow = function (type, title, template, position, container) {
         return win;
     }
 
-    if(type === 'fsentity'){
+    if(type === 'fsDeployApp'){
+
+        let _position = { my: "center", at: "center" };
+
+        lrwh[2] = $( window ).width()*0.3;
+        lrwh[3] = $( window ).height()*0.5;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: _position,
+            container: $(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  false
+            },
+            callback: function(){
+                this.addClass("animated fadeInDown");
+
+                this.find(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                this.find(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                });
+                this.find(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+                this.find(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                this.find(".jsPanel-titlebar h3").css({
+                    "font-size": "14px",
+                    "color": "#999999"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    /*if(type === 'fsentity'){
         lrwh[2] = $( window ).width()*0.55;
         lrwh[3] = $( window ).height()*0.55;
 
@@ -544,7 +606,7 @@ var newWindow = function (type, title, template, position, container) {
         });
 
         return win;
-    }
+    }*/
 
     if(type === 'small'){
         lrwh[2] = $( window ).width()*0.55;
@@ -621,7 +683,8 @@ var newWindow = function (type, title, template, position, container) {
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd"
+                    "border": "1px solid #dddddd",
+                    "overflow": "auto"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
@@ -636,7 +699,7 @@ var newWindow = function (type, title, template, position, container) {
         return win;
     }
 
-    if(type === 'properties'){
+    if(type === 'fsProperties'){
 
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-PROPERTIES-POSITION")));
 

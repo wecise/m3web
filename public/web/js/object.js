@@ -133,7 +133,8 @@ var fetchDataByMql = function (param) {
 
         },
         error: function(xhr, textStatus, errorThrown){
-            rtn = xhr.responseJSON;
+            rtn = {message:[],status:"error"};
+            alertify.error("失败" + " " + moment().format("LLL") + " " +  xhr.responseText);
             mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + JSON.stringify(xhr.responseJSON));
         }
     });

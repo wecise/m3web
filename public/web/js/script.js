@@ -239,8 +239,8 @@ var depotDeploy = function(event) {
         form.append("hosts", v);
     })
 
-    form.append("depots", event.name);
-    form.append("versions", event.version);
+    form.append("depots", event.depots);
+    form.append("versions", event.versions);
 
     jQuery.ajax({
         url: '/monitoring/deploy',
@@ -265,7 +265,7 @@ var depotDeploy = function(event) {
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
-            alertify.error("脚本部署失败" + " " + xhr.responseJSON.message);
+            alertify.error("脚本部署失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

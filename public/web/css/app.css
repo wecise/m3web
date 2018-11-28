@@ -190,11 +190,6 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
     color: rgb(255, 255, 255)!important
 }
 
-.nav-menu-level1,
-.nav-menu-user {
-    margin: 5px 10px 0px 10px!important
-}
-
 .nav-menu-level1{
     width: 100%;
     padding-left: 0;
@@ -206,14 +201,25 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
 
 .nav-menu-level1> li {
     float: left;
-    width: 25%;
-    height: 90px;
+    width: 20%;
+    height: 80px;
     padding: 10px;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 2.4;
     text-align: center;
-    background-color: rgb(255, 255, 255);
+    background-color: rgb(245, 245, 245);
     border: 1px solid rgb(255, 255, 255);
+}
+
+.nav-menu-level1> li > a {
+    color: rgba(0,0,0,0.4);
+}
+
+.nav-menu-level1> li > a > img {
+    width: 36px;
+    height: 36px;
+    -webkit-filter: opacity(1) invert(0.5);
+    filter: opacity(1) invert(0.5);
 }
 
 .nav-menu-user> li{
@@ -295,3 +301,51 @@ table.dataTable thead th, table.dataTable thead td,
 .dataTables_wrapper.no-footer .dataTables_scrollBody {
     border-bottom: 1px solid rgb(221, 221, 221);
 }
+
+
+/*!* tooltip *!
+.tooltip > .tooltip-inner {
+    background-color: #CCCCCC;
+    color: rgba(0,0,0,0.8);
+}
+
+.tooltip > .tooltip-arrow {
+    border-top-color: #CCCCCC;
+    border-right-color: #CCCCCC;
+    border-bottom-color: #CCCCCC;
+    border-left-color: #CCCCCC;
+}*/
+
+
+/* pace loading status*/
+
+:root {
+    /*--pace-bg-color: rgb(33, 149, 243);*/
+    --pace-bg-color: rgb(255, 255, 255);
+    --pace-font-color: #333333;
+}
+
+.pace {
+    -webkit-pointer-events: none;
+    pointer-events: none;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.pace-inactive {
+    display: none;
+}
+
+.pace .pace-progress {
+    background: var(--pace-bg-color);
+    position: fixed;
+    z-index: 2000;
+    top: 0;
+    right: 100%;
+    width: 100%;
+    height: 2px;
+}
+
+

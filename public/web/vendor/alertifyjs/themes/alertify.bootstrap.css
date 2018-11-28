@@ -112,20 +112,18 @@
 				}
 
 .alertify-log {
-	background: #D9EDF7;
+	background: #1F1F1F;
+	background: rgba(0,0,0,.9);
 	padding: 8px 14px;
 	border-radius: 4px;
-	color: #3A8ABF;
-	text-shadow: 0 1px 0 rgba(255,255,255,.5);
-	border: 1px solid #BCE8F1;
+	color: #FFF;
+	text-shadow: -1px -1px 0 rgba(0,0,0,.5);
 }
 	.alertify-log-error {
-		color: #B94A48;
-		background: #F2DEDE;
-		border: 1px solid #EED3D7;
+		background: #FF3300;
+		background: rgba(254,26,0,.9);
 	}
 	.alertify-log-success {
-		color: #468847;
-		background: #DFF0D8;
-		border: 1px solid #D6E9C6;
+		background: #5CB811;
+		background: rgba(92,184,17,.9);
 	}

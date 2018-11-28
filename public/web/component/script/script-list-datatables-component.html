@@ -356,7 +356,7 @@
                                 {
                                     text: '编辑',
                                     action: function (e, dt, node, config) {
-                                        self.edit();
+                                        self.edit(dt.row( { selected: true } ).data());
                                     },
                                     enabled: false,
                                     className: 'btn btn-sm btn-white'
@@ -757,7 +757,7 @@
                             deploy: function(event){
                                 let me = this;
 
-                                let depot = {depots: me.model.name,versions: me.model.version, hosts: event.host};
+                                let depot = {depots: me.model.name,versions: me.model.version, hosts: new Array(event.host)};
 
                                 let rtn = depotDeploy(depot);
 
@@ -787,6 +787,154 @@
                                     tags: null,
 	                                servers: conf.servers,
 									wnd: wnd
+                                },
+                                handler: {
+                                    tagify: null
+                                }
+                            }
+                        },
+                        created: function(){
+                            let me = this;
+
+                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
+                        },
+                        methods: {
+                            tagInput: function(className,container, tags){
+                                let me = this;
+
+                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
+                                    .on("add",function(event, tagName){
+                                        me.model.item.tags = tagName.value;
+                                    })
+                                    .on("remove",function(event,tagName){
+                                        me.model.item.tags = tagName.value;
+                                    });
+
+                            },
+                            save: function(){
+                                let me = this;
+
+                                let rtn = depotAdd(me.model.item);
+
+                                if(rtn === 1){
+
+                                    alertify.confirm("是否需要部署该脚本？", function (e) {
+                                        if (e) {
+                                            // user clicked "ok"
+                                        } else {
+                                            wnd.close();
+                                        }
+                                    });
+
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                }
+                            },
+                            resize:function(){
+                                wnd.resize($(wnd.content).parent().parent().width()+20, $(wnd.content).parent().parent().height()+60 );
+                            },
+                            onFileChange(e) {
+                                let me = this;
+
+                                let file = e.target.files[0];
+
+                                me.model.item.uploadfile = file;
+
+                            }
+                        },
+                        mounted: function(){
+                            let me = this;
+
+                            me.$nextTick(function () {
+                                FormWizard.init("script-wizard");
+                                me.tagInput();
+
+                                $(me.$el).find("li").on("click",function(){
+                                    eventHub.$emit("COMPONENT-REDRAW-EVENT");
+                                })
+                            })
+                        },
+                        template: `<form>
+										<div id="script-wizard">
+											<ol>
+												<li>
+													基本配置
+													<small>运行策略，环境变量设置。</small>
+												</li>
+												<li>
+													选择对象
+													<small>如果需要部署，选择部署对象，开始部署。</small>
+												</li>
+											</ol>
+
+											<div>
+												<fieldset class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本名称：</label>
+														<div class="col-sm-10">
+															<input type="text" placeholder="" class="form-control" v-model="model.item.name" required="required" />
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本版本：</label>
+														<div class="col-sm-10">
+															<input type="number" placeholder="" class="form-control"  v-model="model.item.version" required="required" />
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">脚本说明：</label>
+														<div class="col-sm-10">
+															<textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"></textarea>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">添加标签：</label>
+														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-2 control-label">选择脚本：</label>
+														<div class="col-sm-10"><input type="file" placeholder="" class="form-control" @change="onFileChange" required="required" /></div>
+													</div>
+													<hr/>
+													<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
+												</fieldset>
+											</div>
+											<div>
+												<fieldset>
+													<div class="row">
+														<div class="col-md-12">
+															<script-base-datatable id="script-servers-datatable" :model="model.item"></script-base-datatable>
+														</div>
+													</div>
+												</fieldset>
+											</div>
+
+										</div>
+									</form>`
+                    };
+
+                    new Vue(wizard);
+                },
+                edit: function(event){
+                    let self = this;
+
+                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
+
+                    let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
+
+                    let node = _.cloneDeep(event);
+
+                    let wizard = {
+                        el: "#script-add-container",
+                        data: {
+                            model: {
+                                item: {
+                                    name: node.name,
+                                    version: node.version,
+                                    remark: node.remark,
+                                    uploadfile: null,
+                                    tags: node.tags,
+                                    servers: conf.servers,
+                                    wnd: wnd
                                 },
                                 handler: {
                                     tagify: null

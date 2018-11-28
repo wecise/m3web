@@ -53,7 +53,7 @@
     }
 
     .lm_tab:hover, .lm_tab.lm_active {
-        background: rgb(255, 255, 255);
+        background: rgb(249, 249, 249);
         color: rgb(119, 119, 119);
     }
 
@@ -132,7 +132,7 @@
             let consoleVue = {
                 delimiters: ['${', '}'],
                 el: '#layout-console-template',
-                template: `<fs-view-component id="file-fs-view" :root="root"></fs-view-component>`,
+                template: `<fs-view-component id="file-fs-view" :root="root" defaultView="grid-view"></fs-view-component>`,
                 data: {
                     model: [],
                     root: "/",
@@ -216,7 +216,7 @@
                             "_all": JSON.stringify(tags)
                         };
                         data.star = 0;
-                        data.username = '{{.SignedUser.Name}}';
+                        data.username = '{{.SignedUser.UserName}}';
                         data.ispublic = ispublic;
                         data.portlet = null;
                         data.theme = new Array(JSON.stringify(theme[skin]));
@@ -458,10 +458,6 @@
                     initPlugin: function(){
                         let self = this;
 
-                        /* enable tooltip for all A tag */
-                        $("a").tooltip({
-                            placement: 'auto'
-                        });
                     },
                     resetLayout: function () {
                         localStorage.removeItem('savedState');

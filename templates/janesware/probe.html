@@ -107,7 +107,7 @@
             },
             template: `<div class="row">
                             <div class="col-lg-2">
-                                <probe-tree-component id="probe-tree" system="probe"></probe-tree-component>
+                                <probe-tree-component id="probe-tree" :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}"></probe-tree-component>
                             </div>
 
                             <div class="col-lg-10 probe-container">
@@ -124,7 +124,7 @@
             },
             template: `<div class="row">
                             <div class="col-lg-2">
-                                <probe-tree-component id="policy-tree" system="policy"></-tree-component>
+                                <probe-tree-component id="policy-tree" :model="{parent:'/probe',name:'policy_tree_data.js',domain:'policy'}"></-tree-component>
                             </div>
 
                             <div class="col-lg-10 policy-container">
@@ -140,7 +140,7 @@
             },
             template: `<div class="row">
                           <div class="col-lg-2">
-                            <probe-tree-component id="log-tree" system="log"></-tree-component>
+                            <probe-tree-component id="log-tree" :model="{parent:'/probe',name:'log_tree_data.js',domain:'log'}"></-tree-component>
                           </div>
 
                           <div class="col-lg-10 log-container">
@@ -156,7 +156,7 @@
             },
             template: `<div class="row">
                             <div class="col-lg-2">
-                                <probe-tree-component id="script-tree" system="script"></-tree-component>
+                                <probe-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}"></-tree-component>
                             </div>
                             <div class="col-lg-10 script-container">
                                 <h4 class="page-header"><i class="fas fa-angle-right"></i> 脚本管理</h4 class="page-header">
@@ -202,12 +202,6 @@
                     },
                     initPlug: function(){
                         let self = this;
-
-                        /* enable tooltip for all A tag */
-                        $("a").tooltip({
-                            enable: true,
-                            position: { my: "left+15 center", at: "right center" }
-                        });
 
                         /* toggle tab trigger Echart resize */
                         $("a[data-toggle='tab']").on("shown.bs.tab",function(){

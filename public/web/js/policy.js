@@ -91,7 +91,7 @@ var cmdPolicyAdd = function(event) {
         },
         error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
-            alertify.error("添加失败" + " " + xhr.responseJSON.message);
+            alertify.error("添加失败" + " " + xhr.responseText);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -169,7 +169,7 @@ var logPolicyAdd = function(event) {
         },
         error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
-            alertify.error("添加失败" + " " + xhr.responseJSON.message);
+            alertify.error("添加失败" + " " + xhr.responseText);
             console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -186,7 +186,7 @@ var logPolicyAdd = function(event) {
 *
 */
 var policyDeploy = function(event) {
-    let rtn = 1;
+    let rtn = 0;
 
     jQuery.ajax({
         url: '/monitoring/policy/deploy/${event}',
@@ -206,14 +206,12 @@ var policyDeploy = function(event) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -227,7 +225,7 @@ var policyDeploy = function(event) {
 *
 * */
 var policyDelete = function(event) {
-    let rtn = 1;
+    let rtn = 0;
 
     jQuery.ajax({
         url: `/monitoring/policy/undeploy/${event}`,
@@ -252,7 +250,7 @@ var policyDelete = function(event) {
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
-            alertify.error("失败" + " " + xhr.responseJSON);
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -287,6 +285,7 @@ var policyExtendList = function() {
 
         },
         error: function(xhr, textStatus, errorThrown){
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -323,14 +322,12 @@ var policyExtendUpdate = function(event) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + data.message);
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + data.message);
             }
 
         },
         error: function(xhr, textStatus, errorThrown){
             rtn = 0;
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

@@ -187,7 +187,7 @@ Actions.prototype.init = function()
         if (cell != null)
         {
 
-        	let wnd = newWindow("properties", cell.getId(), '<div id="properties"></div>', null,null);
+        	let wnd = newWindow("fsProperties", cell.getId(), '<div id="properties"></div>', null,null);
 
             let div = document.getElementById('properties');
 
