@@ -41,9 +41,6 @@ var putDataToClass = function (param) {
             if( _.lowerCase(data.status) === "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + moment().format("LLL"));
             }
 
         },
@@ -84,8 +81,6 @@ var putDataByMql = function (event) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("成功" + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
             }
 
         },
@@ -127,8 +122,8 @@ var fetchDataByMql = function (param) {
 
             // MQL for CRUD
             if(_.lowerCase(data.status) == "ok"){
-                alertify.success("成功" + " " + moment().format("LLL"));
                 rtn = data;
+                alertify.success("成功" + " " + moment().format("LLL"));
             }
 
         },

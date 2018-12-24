@@ -1241,7 +1241,7 @@
                     newUser: function(){
                         let self = this;
 
-                        let win = newWindow('small', `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = mxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1351,7 +1351,7 @@
                     newGroup: function(){
                         let self = this;
 
-                        let win = newWindow('small', `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = mxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1837,6 +1837,11 @@
                         self.$nextTick( function(){
                             self.delayedDragging = false;
                         })
+                    }
+                },
+                filters:{
+                    pickIcon:function(icon){
+                        return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
                     }
                 },
                 methods: {
@@ -2710,10 +2715,10 @@
                                 title="保存新增目录或节点"
                                 @click="saveNode"
                                 style="display:;"
-                                data-toggle="tooltip">
+                                data-tooltip="tooltip">
                                 <i class="fa fa-save"></i> 保存
                             </a>
-                            <a href="#" class="btn btn-xs btn-link" readonly @click="removeNode" title="删除目录或节点" data-toggle="tooltip">
+                            <a href="#" class="btn btn-xs btn-link" readonly @click="removeNode" title="删除目录或节点" data-tooltip="tooltip">
                                 <i class="fa fa-trash"></i>
                                 删除&nbsp;
                             </a>
@@ -2724,7 +2729,7 @@
                     </div>
                     <div style="display:-webkit-inline-box;">
                         <span>
-                            <a data-parent="#accordionContent" href="#collapseConfigInfo" title="调试窗口"  data-toggle="tooltip">
+                            <a data-parent="#accordionContent" href="#collapseConfigInfo" title="调试窗口"  data-tooltip="tooltip">
                                 <i class="fa fa-home" style="padding:7px 0px;"></i>
                             </a>
                         </span>
@@ -2957,11 +2962,11 @@
                             <i class="icon-plus"></i>
                             添加&nbsp;
                         </a>
-                        <a href="#" class="btn btn-xs btn-default" data-toggle="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
+                        <a href="#" class="btn btn-xs btn-default" data-tooltip="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
                             <i class="icon-save"></i>
                             提交
                         </a>
-                        <a id="config_btn_help" class="btn btn-xs btn-default" data-toggle="tooltip" >
+                        <a id="config_btn_help" class="btn btn-xs btn-default" data-tooltip="tooltip" >
                             <i class="icon-question-sign"></i> 帮助
                         </a>
                         <a href="#" class="btn btn-xs btn-danger" readonly  @click="removeNode">
@@ -3063,7 +3068,7 @@
                                     <transition-group id="ul-li" type="transition" tag="ul">
                                         <li class="col-lg-3" v-for="(item,index) in model" :key="index">
                                             <div class="widget widget-stats bg-blue">
-                                                <div class="stats-icon drag-handle"><img :src="item.icon" style="width:48px;"></img></div>
+                                                <div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
                                                 <div class="stats-info">
                                                     <h4>
                                                         <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">

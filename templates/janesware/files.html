@@ -39,11 +39,20 @@
         background-color: rgb(249, 249, 249);
     }
 
-    .lm_content {
+    #app .lm_goldenlayout:nth-child(1){
+        margin: -20px 0px 0px -20px;
+    }
+
+    .lm_column .lm_content {
         background: rgb(255, 255, 255);
         border: 1px solid rgb(255, 255, 255);
         overflow: auto;
         padding: 5px 15px 5px 0px;
+        width: calc(100% + 60px)!important;
+    }
+
+    .lm_row .lm_content{
+        width: 100%;
     }
 
     .lm_header .lm_tab.lm_active {
@@ -68,7 +77,6 @@
     [id="app"] {
         width: 100%;
         height: 100vh;
-        margin: -20px 0px 0px -20px;
     }
 
 </style>

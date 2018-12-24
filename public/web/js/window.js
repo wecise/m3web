@@ -1,15 +1,750 @@
-
 /*
-        #     # ### #     # ######  ####### #     #
-        #  #  #  #  ##    # #     # #     # #  #  #
-        #  #  #  #  # #   # #     # #     # #  #  #
-        #  #  #  #  #  #  # #     # #     # #  #  #
-        #  #  #  #  #   # # #     # #     # #  #  #
-        #  #  #  #  #    ## #     # #     # #  #  #
-         ## ##  ### #     # ######  #######  ## ##
- */
+*Copyright (c) 20015-2022, Wecise Ltd
+*        #     # ### #     # ######  ####### #     #
+*        #  #  #  #  ##    # #     # #     # #  #  #
+*        #  #  #  #  # #   # #     # #     # #  #  #
+*        #  #  #  #  #  #  # #     # #     # #  #  #
+*        #  #  #  #  #   # # #     # #     # #  #  #
+*        #  #  #  #  #    ## #     # #     # #  #  #
+*         ## ##  ### #     # ######  #######  ## ##
+*
+*  新建一个窗体
+*  参数：
+*   size: 大小 [mini,small,large]
+*   title: 标题
+*   template: 模板（Vue渲染用）
+*/
 
-"use strict";
+class Window {
+    constructor() {
+        this.width = $(window).width();//document.body.clientWidth;
+        this.height = $(window).height();//(document.body.clientHeight || document.documentElement.clientHeight);
+
+        this.wW = this.width * 0.7;
+        this.hH = this.height * 0.7;
+        this.lrwh = [(this.width - this.wW)/2, (this.height - this.hH)/2, this.wW, this.hH];
+    }
+
+    init(){
+        $(document).on('jspanelstatuschange', function (event, id) {
+            eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT",null);
+        });
+    }
+
+    winUpload(title, template, position, container) {
+
+        this.lrwh[2] = this.width * 0.6;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: `jsPanel-upload-${objectHash.sha1(title)}`,
+            headerTitle: title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            show: 'animated fadeInDownBig',
+            headerRemove:  false,
+            theme:          'filledlight',
+            content:        template,
+            container: 'body',
+            dragit: {
+                containment: 'parent',
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div id="jsPanel-upload-footer-${objectHash.sha1(title)}"></div>`;
+            }
+        });
+
+        return win;
+
+    }
+
+    winModal(title, template, position, container) {
+
+        this.lrwh[2] = this.width * 0.5;
+        this.lrwh[3] = this.width * 0.5;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-'+title,
+            paneltype: 'modal',
+            headerTitle: title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            show: 'animated fadeInDownBig',
+            headerRemove:  true,
+            theme:          'filledlight',
+            content:        template,
+            callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+
+    }
+
+    winToolBars(title, template, position, container){
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            contentSize:    {width: 35, height: 230},
+            position: {
+                left: position[0],
+                top:  position[1]
+            },
+            headerRemove:  true,
+            dragit:         {handles: 'div.jsPanel-content'},
+            content:        template,
+            callback:       function(){
+
+            }
+        });
+
+        return win;
+
+    }
+
+    winCmd(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[3] = this.height * 0.125;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                my: "left-top",
+                at: "right-bottom",
+                of: $(position),
+                offsetX: 10,
+            },
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winEditor(title, template, position, container){
+
+        let id = `jsPanel-editor-${objectHash.sha1(title)}`;
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
+
+        let _position = "center 0 0";
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width * 0.7;
+        this.lrwh[3] = this.height * 0.7;
+
+        let win = $.jsPanel({
+            id: id,
+            theme:          'filledlight',
+            headerTitle:   `<img src="${window.ASSETS_ICON}/apps/png/matrix.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:12px;"></img> ${title}`,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            onresized: function(){
+                eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
+            },
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-FSEDIT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(246, 246, 246)",
+                    /*"background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",*/
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none",
+                    "overflow":"hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winApp(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.55;
+        this.lrwh[3] = this.height * 0.55;
+
+        let win = $.jsPanel({
+            theme:        'filledlight',
+            headerTitle:  title,
+            contentSize:  {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winRobot(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
+
+        let _position = { top: 60, right: 160 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width * 0.3;
+        this.lrwh[3] = this.height * 0.7;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-robot',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winApps(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-robot',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                left: 59,
+                top: 54,
+            },
+            //container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+                this.mouseleave(function(){
+                    win.close();
+                })
+
+            }
+        });
+
+        return win;
+    }
+
+    winEntity(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW_ENTITY_POSITION")));
+
+        let _position = { top: 0, left: 0 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width() * 0.3;
+        this.lrwh[3] = this.height() * 0.7;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-entity',
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    console.log(panel,position)
+                    localStorage.setItem("WINDOW_ENTITY_POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "1px solid rgb(221, 221, 221)",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winProbe(title, template, position, container){
+
+        let _position = { top: 0, right: 0 };
+
+        this.lrwh[2] = $(`.${container}`).width() + 20;
+        this.lrwh[3] = $(`.${container}`).height() + 40;
+
+        let win = $.jsPanel({
+            id: `jsPanel-${container}`,
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: $(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  true
+            },
+            callback: function(){
+                $(".jsPanel").addClass("animated fadeInDown");
+
+                $(".jsPanel").css({
+                    "left":"0px",
+                    "box-shadow":"none"
+                });
+                $(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                    "border": "none",
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "16px",
+                    "color": "#999999"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winDeployApp(title, template, position, container){
+
+        let _position = { my: "center", at: "center" };
+
+        this.lrwh[2] = this.width * 0.3;
+        this.lrwh[3] = this.height * 0.5;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: $(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  false
+            },
+            callback: function(){
+                this.addClass("animated fadeInDown");
+
+                this.find(".jsPanel-hdr").css({
+                    "background-color": "rgb(255,255,255)",
+                });
+                this.find(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(255,255,255)",
+                    "background-image": "none",
+                    "min-height": "28px",
+                });
+                this.find(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+                this.find(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                this.find(".jsPanel-titlebar h3").css({
+                    "font-size": "14px",
+                    "color": "#999999"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
+    winFile(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.7;
+        this.lrwh[3] = this.height * 0.8;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winProperties(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-PROPERTIES-POSITION")));
+
+        let _position = { top: 60, left: 60 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = 300; //$( window ).width()*0.2;
+        this.lrwh[3] = 340; //$( window ).height()*0.55;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-PROPERTIES-POSITION",JSON.stringify(position));
+                }
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winInfo(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-INFO-POSITION")));
+
+        let _position = { top: 10, left: 60 };
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width * 0.3;
+        this.lrwh[3] = this.height * 0.7;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-INFO-POSITION",JSON.stringify(position));
+                }
+            },
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+
+}
+
+let mxWindow = new Window();
+
 
 /*
 *  新建一个窗体
@@ -18,7 +753,7 @@
 *   title: 标题
 *   template: 模板（Vue渲染用）
 */
-var newWindow = function (type, title, template, position, container) {
+/*var newWindow = function (type, title, template, position, container) {
     let win = null;
     let w = $( window ).width();//document.body.clientWidth;
     let h = $( window ).height();//(document.body.clientHeight || document.documentElement.clientHeight);
@@ -28,13 +763,13 @@ var newWindow = function (type, title, template, position, container) {
     let lrwh = [(w-wW)/2, (h-hH)/2, wW, hH];
 
 
-    if(type === 'fsupload'){
+    if(type === 'fsUpload'){
 
-        lrwh[2] = $( window ).width()*0.60;
-        lrwh[3] = $( window ).height()*0.60;
+        lrwh[2] = $( window ).width()*0.6;
+        lrwh[3] = $( window ).height()*0.6;
 
         win = $.jsPanel({
-            id: 'jsPanel-'+title,
+            id: `jsPanel-upload-${objectHash.sha1(title)}`,
             headerTitle: title,
             contentSize:    {width: lrwh[2], height: lrwh[3]},
             show: 'animated fadeInDownBig',
@@ -67,6 +802,10 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                console.log(footer)
+                return `<div id="jsPanel-upload-footer-${objectHash.sha1(title)}"></div>`;
             }
         });
 
@@ -180,20 +919,23 @@ var newWindow = function (type, title, template, position, container) {
 
     if(type === 'fsEditor'){
 
+        let id = `jsPanel-editor-${objectHash.sha1(title)}`;
+
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
 
-        let _position = { my: "center", at: "center" };
+        let _position = "center 0 0";
 
         if(!_.isEmpty(_tmp)){
             _position = _tmp;
         }
 
-        lrwh[2] = $( window ).width() * 0.8;
-        lrwh[3] = $( window ).height() * 0.8;
+        lrwh[2] = $( window ).width() * 0.7;
+        lrwh[3] = $( window ).height() * 0.7;
 
         win = $.jsPanel({
+            id: id,
             theme:          'filledlight',
-            headerTitle:   title,
+            headerTitle:   `<img src="${window.ASSETS_ICON}/apps/png/matrix.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:12px;"></img> ${title}`,
             contentSize:    {width: lrwh[2], height: lrwh[3]},
             position: _position,
             container: 'body',
@@ -215,12 +957,12 @@ var newWindow = function (type, title, template, position, container) {
                 });
                 $(".jsPanel-headerbar",this).css({
                     "background-color": "rgb(246, 246, 246)",
-                    /*"background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",*/
+                    /!*"background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",*!/
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border-top": "1px solid #dddddd",
+                    "border-top": "none",
                     "overflow":"hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
@@ -230,6 +972,9 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
@@ -562,7 +1307,7 @@ var newWindow = function (type, title, template, position, container) {
         return win;
     }
 
-    /*if(type === 'fsentity'){
+    /!*if(type === 'fsentity'){
         lrwh[2] = $( window ).width()*0.55;
         lrwh[3] = $( window ).height()*0.55;
 
@@ -606,9 +1351,9 @@ var newWindow = function (type, title, template, position, container) {
         });
 
         return win;
-    }*/
+    }*!/
 
-    if(type === 'small'){
+    if(type === 'fsSmall'){
         lrwh[2] = $( window ).width()*0.55;
         lrwh[3] = $( window ).height()*0.55;
 
@@ -646,13 +1391,66 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
         return win;
     }
 
-    if(type === 'large'){
+    if(type === 'fsFile'){
+        lrwh[2] = $( window ).width()*0.7;
+        lrwh[3] = $( window ).height()*0.8;
+
+        win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: lrwh[2], height: lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    if(type === 'fsLarge'){
         lrwh[2] = $( window ).width()*0.7;
         lrwh[3] = $( window ).height()*0.8;
 
@@ -693,6 +1491,9 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
@@ -747,15 +1548,18 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
         return win;
     }
 
-    if(type === 'fsinfo'){
+    if(type === 'fsInfo'){
 
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem(_.upperCase(type)+"-WINDOW-POSITION")));
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-INFO-POSITION")));
 
         let _position = { top: 10, left: 60 };
 
@@ -763,8 +1567,8 @@ var newWindow = function (type, title, template, position, container) {
             _position = _tmp;
         }
 
-        lrwh[2] = 400;//$( window ).width()*0.25;
-        lrwh[3] = 600;//$( window ).height()* 0.85 > 600 ? 620: $( window ).height()* 0.85;
+        lrwh[2] = $( window ).width()*0.3;
+        lrwh[3] = $( window ).height()* 0.7;
 
         win = $.jsPanel({
             theme:          'filledlight',
@@ -777,8 +1581,7 @@ var newWindow = function (type, title, template, position, container) {
             content:        template,
             dragit: {
                 drag: function (panel, position) {
-                    console.log(panel,position)
-                    localStorage.setItem(_.upperCase(type)+"-WINDOW-POSITION",JSON.stringify(position));
+                    localStorage.setItem("WINDOW-INFO-POSITION",JSON.stringify(position));
                 }
             },
             callback:       function(){
@@ -803,6 +1606,9 @@ var newWindow = function (type, title, template, position, container) {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
@@ -837,7 +1643,7 @@ var newWindow = function (type, title, template, position, container) {
     }
 
 
-    /*if(type === 'narrow'){
+    /!*if(type === 'narrow'){
         lrwh[2] = $( window ).width()*0.6/3;
         lrwh[3] = $( window ).height()*1.45/3;
 
@@ -848,7 +1654,7 @@ var newWindow = function (type, title, template, position, container) {
             lrwh[0] = _p.x || (w-wW)/2;
             lrwh[1] = _p.y || (h-hH)/2;
         }
-    }*/
+    }*!/
 
     if(type === 'mini'){
         lrwh[2] = $( window ).width()*0.7/3;
@@ -930,9 +1736,4 @@ var newWindow = function (type, title, template, position, container) {
     });
 
     return win;
-};
-
-
-$(document).on('jspanelstatuschange', function (event, id) {
-    eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT",null);
-});
+};*/

@@ -26,7 +26,11 @@ var fsCheck = function(path, name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=check`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _url += '&issys=true';
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _url += '&issys=true';
     }
 
@@ -73,9 +77,15 @@ var fsNew = function(ftype, path, name, content, attr){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _url += '?issys=true';
     }
+
+    console.log(_url)
 
     let fm = new FormData();
 
@@ -103,14 +113,12 @@ var fsNew = function(ftype, path, name, content, attr){
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("创建成功 " + name + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("创建失败 " + name + " " + moment().format("LLL"));
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("创建失败 " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
@@ -133,12 +141,18 @@ var fsList = function(path){
     let _issys = false;
     let parent = path.replace(/\/\//g,'/');
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _issys = true;
+    }*/
+
+    let url = `/fs${parent}`.replace(/\/fs\/fs/,"/fs");
+
     jQuery.ajax({
-        url: '/fs' + parent,
+        url: url,
         type: 'GET',
         dataType: 'text json',
         contentType: "application/text; charset=utf-8",
@@ -183,7 +197,11 @@ var fsDelete = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _url += '?issys=true';
     }
 
@@ -236,7 +254,11 @@ var fsContent = function(path,name){
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _url += '?issys=true';
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _url += '?issys=true';
     }
 
@@ -282,7 +304,11 @@ var fsRename = function(srcpath,dstpath){
 
     let _issys = false;
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
+    /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
@@ -315,9 +341,6 @@ var fsRename = function(srcpath,dstpath){
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("编辑成功" + " " + srcpath);
-            } else {
-                rtn = 0;
-                alertify.error("编辑失败" + " " + data.message);
             }
 
         },
@@ -347,7 +370,11 @@ var fsCopy = function(srcpath,dstpath){
     srcpath = srcpath.replace(/\/\//g,'/');
     dstpath = dstpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
+    /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
@@ -359,7 +386,7 @@ var fsCopy = function(srcpath,dstpath){
         data: {
             srcpath: srcpath,
             dstpath: dstpath,
-            issys: _issys
+            issys: window.SignedUser_IsAdmin
         },
         beforeSend: function (xhr) {
         },
@@ -402,7 +429,11 @@ var fsMove = function(srcpath,dstpath){
     srcpath = srcpath.replace(/\/\//g,'/');
     dstpath = dstpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dspath,'/app') || _.isEqual(dstpath,'/')){
+    /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
+        _issys = true;
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
@@ -454,7 +485,11 @@ var fsUpdateAttr = function(path, name, attr) {
     let parent = path.replace(/\/\//g,'/');
     let _url = `/fs${parent}/${name}?type=attr`;
 
-    if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+    /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
+        _url += '&issys=true';
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _url += '&issys=true';
     }
 
@@ -477,14 +512,12 @@ var fsUpdateAttr = function(path, name, attr) {
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
                 alertify.success("编辑成功" + " " + parent + "/" + name);
-            } else {
-                rtn = 0;
-                alertify.error("编辑失败" + " " + parent + "/" + name);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("编辑失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })
@@ -503,10 +536,10 @@ var fsTemp = function(ftype, name, content, attr){
     let rtn = null;
 
 
-    let _tmp = fsNew(ftype, '/home/temp', name, content, attr);
+    let _tmp = fsNew(ftype, '/temp', name, content, attr);
 
     if(_tmp === 1){
-        rtn = `/home/temp/${name}`;
+        rtn = `/temp/${name}`;
     }
 
     return rtn;
@@ -529,64 +562,22 @@ var fsZip = function(srcpath){
 
     let _srcpath = srcpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
-    let fm = new FormData();
-    fm.append("srcpath", _srcpath);
-
-    let stringToArrayBuffer = function (str) {
-        var buf = new ArrayBuffer(str.length);
-        var bufView = new Uint8Array(buf);
-
-        for (var i=0, strLen=str.length; i<strLen; i++) {
-            bufView[i] = str.charCodeAt(i);
-        }
-
-        return buf;
-    };
-
-    let xhr = new XMLHttpRequest();
-    let params = fm;
-
-    xhr.open('POST', `/fs/export?issys=${_issys}`, false);
-
-    xhr.onload = function() {
-
-        if (xhr.status === 200) {
-            let a = document.createElement('a');
-            a.href = window.URL.createObjectURL(xhr.response);
-            // Give filename you wish to download
-            a.download = "temp.zip";
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-        } else {
-            console.log('Something bad happen!\n(' + xhr.status + ') ' + xhr.statusText);
-        }
-    };
-
-
-
-
-
-
-    xhr.send(params);
-
-
-
-    var form = new FormData();
+    let form = new FormData();
     form.append("srcpath", _srcpath);
 
-    /*jQuery.ajax({
+    jQuery.ajax({
         url: `/fs/export?issys=${_issys}`,
         type: 'POST',
+        dataType: 'binary',
         processData: false,
         contentType: false,
         mimeType: 'multipart/form-data',
         data: form,
-        async:true,
+        async: true,
         beforeSend: function (xhr) {
         },
         complete: function (xhr, textStatus) {
@@ -595,77 +586,18 @@ var fsZip = function(srcpath){
 
             ifSignIn(data);
 
-            /!*let filename = "";
-            let disposition = xhr.getResponseHeader('Content-Disposition');
-            if (disposition && disposition.indexOf('attachment') !== -1) {
-                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                var matches = filenameRegex.exec(disposition);
-                if (matches != null && matches[1]) {
-                    filename = matches[1].replace(/['"]/g, '');
-                    try {
-                        let isFileSaverSupported = !!new Blob;
-                        console.log(typeof data,_.size(data))
-                        var zip = new JSZip();
-                        zip.generateAsync({type:"blob"}).then(function(zip) {
-                            saveAs(zip, filename);
-                        });
+            let header = xhr.getResponseHeader('Content-Disposition');
 
-                    } catch (e) {
-
-                    }
-
-                }
-            }*!/
-
-            var filename = "";
-            var disposition = xhr.getResponseHeader('Content-Disposition');
-            if (disposition && disposition.indexOf('attachment') !== -1) {
-                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                var matches = filenameRegex.exec(disposition);
-                if (matches != null && matches[1]) filename = matches[1].replace(/['"]/g, '');
-            }
-
-            var type = xhr.getResponseHeader('Content-Type');
-            var blob = new Blob([data], { type: type });
-
-            console.log(blob)
-
-            if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. These URLs will no longer resolve as the data backing the URL has been freed."
-                window.navigator.msSaveBlob(blob, filename);
-            } else {
-                var URL = window.URL || window.webkitURL;
-                var downloadUrl = URL.createObjectURL(blob);
-
-                if (filename) {
-                    // use HTML5 a[download] attribute to specify filename
-                    var a = document.createElement("a");
-                    // safari doesn't support this yet
-                    if (typeof a.download === 'undefined') {
-                        window.location = downloadUrl;
-                    } else {
-                        a.href = downloadUrl;
-                        a.download = filename;
-                        document.body.appendChild(a);
-                        a.click();
-                    }
-                } else {
-                    window.location = downloadUrl;
-                }
-
-                console.log(downloadUrl)
-
-                setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
-            }
-
+            let blob = new Blob([atob(data)], {type: "application/zip;charset=utf-8"});
+            FileSaver.saveAs(blob, header.split("=")[1]);
 
         },
-        error: function(xhr, textStatus, errorThrown) {
+        error: function (xhr, textStatus, errorThrown) {
             rtn = 0;
-            alertify.log("导出失败");
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
+            alertify.log("导出失败 " + xhr.responseJSON);
+            console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON);
         }
-    })*/
+    });
 
     return rtn;
 };
@@ -685,7 +617,11 @@ var fsUnZip = function(srcpath, zippack){
 
     let _srcpath = srcpath.replace(/\/\//g,'/');
 
-    if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
+    /*if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
+        _issys = true;
+    }*/
+
+    if(window.SignedUser_IsAdmin){
         _issys = true;
     }
 
@@ -700,7 +636,7 @@ var fsUnZip = function(srcpath, zippack){
         dataType: 'json',
         type: 'POST',
         data: form,
-        async:false,
+        async: true,
         beforeSend: function (xhr) {
         },
         complete: function (xhr, textStatus) {
@@ -726,21 +662,25 @@ var fsUnZip = function(srcpath, zippack){
 };
 
 
-var genFsUrl = function(item,cfg){
+var genFsUrl = function(item,cfg,data){
 
     let app = function(ext,action){
         let list = {
                     "imap":  {
-                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "edit": "/web/creative/graph/index.html",
                         "run": "/janesware/imap"
                     },
                     "iflow": {
-                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "edit": "/web/creative/graph/index.html",
                         "run": "/janesware/iflow"
                     },
                     "ishow": {
-                        "edit": "/web/vendor/mxgraph/graph/index.html",
+                        "edit": "/web/creative/graph/index.html",
                         "run": "/janesware/ishow"
+                    },
+                    "md": {
+                        "edit": "/janesware/md",
+                        "run": "/janesware/md"
                     }
         };
         return list[ext][action];
@@ -748,7 +688,9 @@ var genFsUrl = function(item,cfg){
 
     let _cfg = _.extend({ header:false, sidebar:false, footbar:false },cfg);
 
-    let url = app(item.ftype,item.action) + `?item=${window.btoa(encodeURIComponent(JSON.stringify(item)))}&cfg=${window.btoa(encodeURIComponent(JSON.stringify(_cfg)))}`;
+    let _data = (data!=null)?`&data=${window.btoa(encodeURIComponent(data))}`:'';
+
+    let url = app(item.ftype,item.action) + `?item=${window.btoa(encodeURIComponent(JSON.stringify(item)))}&cfg=${window.btoa(encodeURIComponent(JSON.stringify(_cfg)))}${_data}`;
 
     return url;
 };

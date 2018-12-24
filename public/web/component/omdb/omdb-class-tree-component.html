@@ -274,7 +274,7 @@
                                     return false;
                                 }
 
-                                _data = _.attempt(JSON.parse.bind(null,_list.message));
+                                _data = _list.message;
 
                                 _columns = columnsParse(_list.meta);
 
@@ -287,15 +287,15 @@
                         "触发器": {
                             name: "触发器", icon: "fas fa-toggle-on", callback: function (key, opt) {
 
-                                let _list = triggerList(self.selectedNode.name);
+                                // let _list = triggerList(self.selectedNode.name);
+                                //
+                                // let _result = {name: self.selectedNode.name, result: _list};
 
-                                let _result = {name: self.selectedNode.name, result: _list};
-
-                                //eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {type:'trigger-console', pattern: 'trigger-list', node: _result});
+                                // 触发器组件 node=类名称
                                 eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'trigger-console',
 											                                    name: self.selectedNode.name,
 											                                    title: self.selectedNode.name,
-											                                    model: { pattern: 'trigger', node: _result }
+											                                    model: { pattern: 'trigger', node: self.selectedNode.name }
 											                                });
                             }
                         },
@@ -511,7 +511,7 @@
 
                     let _list = self.ruleList();
 
-                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+                    let _tmp = _list.message;
 
                     let _nodes = _.map(_.keys(_tmp),function(v){
                         return {cid: _.now(), parent:'A2', rtype: 'A2', isParent:false, name: v, title: v, children:[]};
@@ -535,7 +535,7 @@
 
                     let _list = self.edgeList();
 
-                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+                    let _tmp = _list.message;
 
 					let _nodes = _.map(_tmp,function(v){
 					    return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};

@@ -752,7 +752,7 @@
                         tb.addItem('{{.i18n.Tr "creative-tools-play"}}', '/web/assets/images/iflow/play.svg',function(evt)
                         {
 
-                            self.win.cmd = newWindow('cmd', '>₋', `<div id="cmd_window"></div>`, evt.target,null);
+                            self.win.cmd = mxWindow.winCmd('>₋', `<div id="cmd_window"></div>`, evt.target,null);
 
                             if(!_.isEmpty(self.win.cmd)){
                                 self.cmdVue(evt);
@@ -761,7 +761,7 @@
                         },null,'tools-item');
 
 
-                        self.win.toolbars = newWindow('toolbars','{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
+                        self.win.toolbars = mxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
 
                         _.delay(function(){
                             self.model.graph.theme = localStorage.getItem("CREATIVE-THEME");

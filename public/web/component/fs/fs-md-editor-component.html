@@ -1,0 +1,708 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.editor-container.fs-md-editor-component{
+			background-color: rgb(246, 246, 246);
+			width:100%;
+			height: 100%;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.fs-md-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			height: 100%;
+			/*height:calc(100% - 50px)!important;*/
+			/*position: relative !important;*/
+			overflow: auto;
+		}
+
+		.editor-toolbar {
+            border: none;
+	        border-bottom: 1px solid rgb(228, 228, 228);
+            margin: auto;
+            width: 100%;
+            position: relative;
+            background-color: rgb(246, 246, 246);
+        }
+
+		.editor-toolbar .btn-link,
+		.editor-toolbar .btn-link:hover{
+            background-color: rgb(246, 246, 246);
+            color: #333333;
+            border:none;
+        }
+
+		.editor-toolbar .btn-group > a > i{
+            color: #666666;
+        }
+
+
+        .lm_maximised .fs-md-editor-component .ace_editor{
+			border: none;
+			margin: 0px 0px 10px 0px;
+			width: 100%;
+			/*height:calc(100% - 50px)!important;*/
+			position: relative !important;
+			overflow: auto;
+		}
+
+		.lm_header {
+			background-color: rgb(246, 246, 246);
+		}
+
+		.fs-md-editor-component .ace_keyword {
+			color: #a70909!important;
+		}
+
+		.fs-md-editor-component .editor-content{
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+		}
+
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="fs-md-editor-component"  ----------*/
+	<template>
+		<div class="editor-container">
+			<div class="editor-toolbar"></div>
+            <div class="editor-content">
+				<div :id="id"></div>
+			</div>
+			<div id="statusBar"></div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="fs-md-editor-component">
+	{
+	    delimiters: ['${', '}'],
+        props: {
+            id: String,
+			bid: String,
+            model: Object,
+            showToolsBar: Boolean,
+			showStatusBar: Boolean
+        },
+        data: function(){
+            return {
+                langTools:null,
+                editor: null,
+                inputText: "",
+	            result: null,
+                refs: {}
+            }
+        },
+        mounted: function(){
+            var self = this;
+
+            self.$nextTick(function(){
+                self.init();
+            })
+        },
+        watch: {
+            'model.newInput': {
+            	handler:function(val,oldVal){
+                    let self = this;
+                    
+                    self.editor.setValue(val);
+                },
+                deep:true
+            }
+
+        },
+        created: function () {
+            let self = this;
+
+            eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",self.refresh);
+        },
+        methods: {
+            init: function() {
+                let self = this;
+
+                self.langTools = ace.require("ace/ext/language_tools");
+                self.editor = ace.edit(self.id);
+
+                self.editor.setOptions({
+                    maxLines: Infinity,
+                    minLines: 50,
+                    autoScrollEditorIntoView: true,
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: false
+                });
+                self.editor.$blockScrolling = Infinity;
+                self.editor.setShowPrintMargin(self.model.printMargin);
+                self.editor.setReadOnly(self.model.readOnly);
+                self.editor.getSession().setUseSoftTabs(true);
+
+                self.editor.getSession().setTabSize(4);
+                self.editor.getSession().setUseWrapMode(true);
+
+                self.setTheme();
+                self.setMode();
+                self.setOptions();
+
+				self.toggleToolsBar();
+
+				//self.toggleStatusBar();
+
+
+                // Customer Auto Completer
+	            let customerCompleter = {
+                    getCompletions: function(editor, session, pos, prefix, callback) {
+
+                        if (prefix.length === 0) {
+                            callback(null, []);
+                            return
+                        }
+
+                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+
+                        if(_.isEmpty(rtn)) return;
+
+                        let word = rtn.message;
+
+                        callback(null,_.map(word,function(ea) {
+                            return {
+                                name: ea.name,
+                                value: ea.name,
+                                score: 300,
+                                meta: ea.class
+                            }
+                        }));
+
+                    }
+                };
+
+                self.langTools.addCompleter(customerCompleter);
+
+
+                self.editor.on("input", self.updateToolbar);
+
+                self.editor.getSession().on('change', function() {
+                    // 生成预览内容 到对应预览窗体
+                    let pID = objectHash.sha1([self.model.fs.parent,self.model.fs.name].join("/"));
+                    eventHub.$emit(`OUTPUT-CHANGE-EVENT-${pID}`, self.editor.getValue())
+                });
+
+                self.editor.commands.addCommand({
+                    name: "save",
+                    exec: self.saveIt,
+                    bindKey: { win: "ctrl-s", mac: "cmd-s" }
+                });
+
+                /*ToolBar*/
+                self.editorDom = ace.require("ace/lib/dom");
+                self.editorDom.buildDom(["div", { class: "editor-toolbar btn-group" },
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: "undoButton",
+	                    title: "重新加载",
+                        onclick: function() {
+                            self.reload();
+                        }
+                    }, ["i",{class:"fas fa-sync"},""]],
+	                ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: "undoButton",
+                        title: "撤销",
+		                onclick: function() {
+                            self.editor.undo();
+                        }
+                    }, ["i",{class:"fas fa-undo"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: "redoButton",
+                        title: "重做",
+                        onclick: function() {
+                            self.editor.redo();
+                        }
+                    }, ["i",{class:"fas fa-redo"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: ""
+                    }, "|"],
+                    /*["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "粗体",
+                        onclick: function() {
+                            self.editor.insertSnippet("**${1:$SELECTION}**");
+                            self.editor.renderer.scrollCursorIntoView()
+                        }
+                    }, ["i",{class:"fas fa-bold"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "斜体",
+                        onclick: function() {
+                            self.editor.insertSnippet("*${1:$SELECTION}*");
+                            self.editor.renderer.scrollCursorIntoView()
+                        }
+                    }, ["i",{class:"fas fa-italic"},""]],*/
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "复制",
+                        onclick: function() {
+                            self.copyIt();
+                        }
+                    }, ["i",{class:"fas fa-copy"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "粘贴",
+                        onclick: function() {
+                            self.pasteIt();
+                        }
+                    }, ["i",{class:"fas fa-paste"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "选择",
+                        onclick: function() {
+                            self.selectAll();
+                        }
+                    }, ["i",{class:"fas fa-check"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "清除",
+                        onclick: function() {
+                            self.clearIt();
+                        }
+                    }, ["i",{class:"fas fa-trash"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: ""
+                    }, "|"],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        ref: "saveButton",
+                        title: "保存",
+                        onclick: function() {
+                            self.saveIt();
+                        }
+                    }, ["i",{class:"fas fa-save"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "保存并运行",
+                        onclick: function() {
+                            self.runIt();
+                        }
+                    }, ["i",{class:"fas fa-play"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: "btn btn-sm btn-link",
+                        title: "发布为应用",
+                        onclick: function() {
+                            self.deployIt(self.model.fs);
+                        }
+                    }, ["i",{class:"fab fa-codepen"},""]],
+                    ["a", {
+                        href: "javascript:void(0)",
+                        class: `btn btn-sm btn-link pull-right editor-select-theme-${self.id}`,
+                        title: "主题",
+                    }, ["i",{class:"fas fa-tshirt"},""]]
+                ], $(`#jsPanel-${self.id}`).find(".jsPanel-hdr")[0], self.refs);
+
+
+                // 增加工具提示标签
+                _.delay(function(){
+                    $("a").attr("data-tooltip","tooltip");
+
+                    $('a[data-tooltip="tooltip"]').tooltip({
+                        container: 'body'
+                    });
+
+                    self.initTheme();
+                },500);
+
+            },
+            updateToolbar:function () {
+                let self = this;
+
+                self.refs.saveButton.disabled = self.editor.session.getUndoManager().isClean();
+                self.refs.undoButton.disabled = !self.editor.session.getUndoManager().hasUndo();
+                self.refs.redoButton.disabled = !self.editor.session.getUndoManager().hasRedo();
+
+            },
+	        refresh: function(){
+                let self = this;
+
+                if(self.editor){
+                    self.editor.resize();
+                }
+	        },
+            setOptions: function(){
+                let self = this;
+
+                if(!_.isEmpty(self.model.options)){
+                    self.editor.setOptions(self.model.options);
+                } 
+            },
+            setTheme: function(){
+                let self = this;
+
+                let localTheme = localStorage.getItem(`editor-select-theme-${self.id}`);
+
+                if(localTheme){
+                    self.editor.setTheme("ace/theme/" + localTheme);
+                    return false;
+                }
+
+
+                if(_.isEmpty(self.model.theme)){
+                	self.editor.setTheme("ace/theme/terminal");
+                } else {
+                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                }
+                
+            },
+            setMode: function(){
+                let self = this;
+
+                if(_.isEmpty(self.model.mode)){
+                	self.editor.getSession().setMode("ace/mode/md");
+                } else {
+                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                }
+                
+            },
+            setValue: function(){
+                let self = this;
+
+                self.editor.setValue(self.model.oldInput);
+            },
+            getSelected: function(){
+                let self = this;
+                var temp = self.editor.getSelectedText();
+
+                if(_.isEmpty(temp)){
+                    self.inputText = self.editor.getValue();
+                } else {
+                    self.inputText = temp;
+                }
+            },
+            toggleToolsBar: function(){
+                let self = this;
+
+                if(self.showToolsBar){
+                    $(".editorToolBar").show();
+                } else {
+                    $(".editorToolBar").hide();
+                }
+            },
+	        toggleStatusBar: function(){
+                let self = this;
+
+                if(self.showStatusBar) {
+                    let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+                }
+	        },
+	        copyIt: function(){
+		        let self = this;
+
+                new Clipboard(".copy", {
+                    text: function(trigger) {
+                        alertify.log("已复制");
+                        return self.editor.getValue();
+                    }
+                });
+
+	        },
+            pasteIt: function(){
+                let self = this;
+
+                document.execCommand("paste");
+                alertify.log("已粘贴");
+            },
+	        selectAll: function(){
+                let self = this;
+
+                self.editor.selection.selectAll();
+            },
+            clearIt: function(){
+                let self = this;
+
+                self.editor.setValue();
+                alertify.log("已清空");
+            },
+            reload: function(){
+				let self = this;
+
+                let rtn = fsContent(self.model.fs.parent,self.model.fs.name);
+
+                self.editor.setValue(rtn);
+            },
+	        initTheme: function(){
+                let self = this;
+
+                $.contextMenu({
+                    selector: `.editor-select-theme-${self.id}`,
+	                trigger: 'left',
+                    callback: function (key, options) {
+                        if(key !== 'bright' && key !== 'dark'){
+                            self.editor.setTheme("ace/theme/"+key);
+
+                            localStorage.setItem(`editor-select-theme-${self.id}`,key);
+                        }
+                    },
+                    items: {
+                        "bright": { name: "亮色", items: {
+                                "chrome": { name: "chrome"},
+                                "clouds": { name: "clouds"},
+                                "crimson_editor": { name: "crimson_editor"},
+                                "dawn": { name: "dawn"},
+                                "dreamweaver": { name: "dreamweaver"},
+                                "eclipse": { name: "eclipse"},
+                                "github": { name: "github"},
+                                "iplastic": { name: "iplastic"},
+                                "solarized_light": { name: "solarized_light"},
+                                "textmate": { name: "textmate"},
+                                "tomorrow": { name: "tomorrow"},
+                                "xcode": { name: "xcode"},
+                                "kuroir": { name: "kuroir"},
+                                "katzenmilch": { name: "katzenmilch"},
+                                "sqlserver": { name: "sqlserver"}
+	                        }
+                        },
+						"dark": { name: "暗色", items: {
+                                "ambiance": { name: "ambiance"},
+                                "chaos": { name: "chaos"},
+                                "clouds_midnight": { name: "clouds_midnight"},
+                                "dracula": { name: "dracula"},
+                                "cobalt": { name: "cobalt"},
+                                "gruvbox": { name: "gruvbox"},
+                                "gob": { name: "gob"},
+                                "idle_fingers": { name: "idle_fingers"},
+                                "kr_theme": { name: "kr_theme"},
+                                "merbivore": { name: "merbivore"},
+                                "merbivore_soft": { name: "merbivore_soft"},
+                                "mono_industrial": { name: "mono_industrial"},
+                                "monokai": { name: "monokai"},
+                                "pastel_on_dark": { name: "pastel_on_dark"},
+                                "solarized_dark": { name: "solarized_dark"},
+                                "terminal": { name: "terminal"},
+                                "tomorrow_night": { name: "tomorrow_night"},
+                                "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                                "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                                "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                                "twilight": { name: "twilight"},
+                                "vibrant_ink": { name: "vibrant_ink"}
+							}
+                        }
+                    }
+                });
+	        },
+            deployIt: function(item){
+                let self = this;
+
+                let wnd = mxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
+
+                let form = {
+                    el: `#fs-app-deploy-${self.bid}`,
+                    template:`<div class="tab-content">
+		                        <div role="tabpanel" class="tab-pane active" id="fs-deploy-home">
+		                            <form class="form-horizontal">
+		                              <div class="form-group">
+		                                <label class="col-sm-2 control-label">应用名称</label>
+		                                <div class="col-sm-10">
+		                                  <input type="text" class="form-control" placeholder="" v-model="app.cnname" required autofocus>
+		                                </div>
+		                              </div>
+		                              <div class="form-group">
+		                                <label class="col-sm-2 control-label">英文名称</label>
+		                                <div class="col-sm-10">
+		                                  <input type="text" class="form-control" placeholder="" v-model="app.enname" required>
+		                                </div>
+		                              </div>
+		                              <div class="form-group">
+		                                <label class="col-sm-2 control-label">图标</label>
+		                                <div class="col-sm-10">
+		                                    <a href="#fs-deploy-icon-list" aria-controls="fs-deploy-icon-list" role="tab" data-toggle="tab">
+		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;background-color:rgb(33, 149, 244)" >
+		                                    </a>
+		                                </div>
+		                              </div>
+		                              <div class="form-group">
+		                                <div class="col-sm-offset-2 col-sm-10">
+		                                  <a class="btn btn-sm btn-primary" @click="deploy">发布</a>
+		                                  <a class="btn btn-sm btn-default" @click="cancel">取消</a>
+		                                </div>
+		                              </div>
+		                            </form>
+		                        </div>
+		                        <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list">
+		                            <div class="row">
+		                              <div class="col-md-12" style="display: list-item;height: 35vh;overflow: auto;">
+		                                <ul>
+		                                    <li v-for="icon in app.icon.list">
+		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(33, 149, 243);" @click="triggerInput(icon.id)">
+		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
+		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="icon.name" v-model="app.icon.value" >
+		                                        </a>
+		                                    </li>
+		                                </ul>
+		                              </div>
+		                            </div>
+		                            <div class="row" style="margin-top:15px;">
+		                                <div class="col-md-12" style="text-align:center;">
+		                                    <a class="btn btn-sm btn-default" href="#fs-deploy-home" aria-controls="fs-deploy-home" role="tab" data-toggle="tab">返回</a></li>
+		                                </div>
+		                            </div>
+		                        </div>
+
+		                    </div>`,
+                    data: {
+                        app: {
+                            cnname: _.head(item.name.split(".")),
+                            enname: _.head(item.name.split(".")),
+                            seat: _.random(100, 10000),
+                            url: `/fs${[item.parent, item.name].join("/")}?issys=${window.SignedUser_IsAdmin}&type=download`,
+                            icon: {
+                                value: '',
+                                list: []
+                            },
+                            preFixIcon: `${window.ASSETS_ICON}/apps/png/`,
+                            postFixIcon: `?type=download&issys=${window.SignedUser_IsAdmin}`
+
+                        }
+                    },
+                    filters:{
+                        pickIcon: function(icon) {
+                            return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        }
+                    },
+                    mounted: function() {
+                        let me = this;
+
+                        me.$nextTick(function() {
+                            me.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+
+                            me.init();
+                        })
+                    },
+                    methods: {
+                        init: function(){
+                            let me = this;
+
+                            me.app.icon.list = fsList(`${window.ASSETS_ICON}/apps/png`);
+
+                        },
+                        triggerInput: function(id){
+                            let me = this;
+
+                            $(me.$refs[id]).click()
+                        },
+                        deploy: function(){
+                            let me = this;
+
+                            let check = callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
+
+                            if(check==1){
+                                alertify.log("应用已经发布，请确认。")
+                                return false;
+                            }
+
+                            let app = {
+                                cnname: me.app.cnname,
+                                enname: me.app.enname,
+                                icon: me.app.icon.value,
+                                seat: me.app.seat,
+                                url: me.app.url
+                            };
+
+                            let rtn = callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                            if( _.lowerCase(rtn.status) == "ok"){
+                                alertify.success("应用发布成功");
+                                eventHub.$emit("APP-REFRESH-EVENT");
+
+                                $("ul.nav").find("li>a[data-original-title='应用']").popover({
+                                    container: "body",
+	                                title: "",
+	                                content: `${me.app.cnname} 应用发布成功！`
+                                }).popover('show');
+
+                                _.delay(function(){
+                                    $("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
+                                },8000)
+
+                                wnd.close();
+                            }
+                        },
+                        cancel:function(){
+                            wnd.close();
+                        }
+                    }
+                };
+                new Vue(form);
+
+            },
+	        saveIt: function(){
+                let self = this;
+
+                let sc = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                /*if( self.editor.getSelectedText().length > 0 ) {
+                    sc = self.editor.getSelectedText();
+                }*/
+
+                // save
+                let sRtn = fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+
+                if(sRtn == 0){
+                    alertify.log("请确认脚本！");
+                    return false;
+                }
+
+                self.editor.session.getUndoManager().markClean();
+                self.updateToolbar();
+
+            },
+            runIt: function(){
+                let self = this;
+
+                $(".fas.fa-play").addClass("fa-spin");
+
+                // 先保存
+                self.saveIt();
+
+	            // 后运行 depend ftype: js/html
+	            if(_.includes(['html','html'],self.model.fs.ftype)){
+                    eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=download`);
+	            } else {
+                    let rRtn = callFsJScript([self.model.fs.parent,self.model.fs.name].join("/").replace(/\/script/g,""), '');
+
+                    eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, rRtn)
+	            }
+
+                $(".fas.fa-play.fa-spin").removeClass("fa-spin");
+
+            }
+        }
+    
+	
+	}
+	</script>
+
+</code>

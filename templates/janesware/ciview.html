@@ -161,8 +161,6 @@
 
 <script type="text/javascript">
 
-    var eventHub = new Vue();
-
     VueLoader.onloaded(["vue-editor-component",
                         "vue-base-tree-component",
                         "vue-entity-tree-component",
@@ -629,10 +627,10 @@
                         if (item.type === 'dir') {
                             self.dblClick(item);
                         } else {
-                            var contents = '/fs' + item.parent + '/' + item.name + '?type=download';
+                            let contents = `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
 
                             if (item.type === 'png') {
-                                contents = `<img src="/fs` + item.parent + `/` + item.name + `?type=download" class="img-responsive" alt="Image">`;
+                                contents = '<img src=`/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}` class="img-responsive" alt="Image">';
                             }
 
                             layer.open({
@@ -651,7 +649,7 @@
 
                         if (_.isEmpty(item.name)) return false;
 
-                        window.location = '/fs' + item.parent + '/' + item.name + '?type=download';
+                        window.location = `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
                     },
                     delete: function (item) {
                         let self = this;

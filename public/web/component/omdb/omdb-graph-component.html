@@ -223,7 +223,7 @@
                         let _type = v.class || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                            `shape=image;html=1;image=/fs/home/assets/images/entity/png/${_type}.png?type=download;verticalLabelPosition=bottom;verticalAlign=top;`);
+                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
 
                         nodes[v.id] = node;
                     })
@@ -376,16 +376,16 @@
                     // str is the input text
                     if (e) {
                         // user clicked "ok"
-	                    let parent = '/home/creative/admin';
+	                    let parent = '/opt/creative/admin';
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
-	                    let attr = {remark: null, ctime: _.now(), author: $("#signed-user-name").val(), type: 'imap', icon: "/fs/home/assets/images/files/png/imap.png?type=download"};
+	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};
                         let rtn = fsNew('file', parent, name, xml, attr);
 	                    if(rtn == 1){
 
 	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
 
-                            let url = genFsUrl(item,null);
+                            let url = genFsUrl(item,null,null);
 
                             alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
 	                    }
@@ -405,14 +405,14 @@
 
                 let tb = new mxToolbar(content);
 
-                tb.addItem('{{.i18n.Tr "creative-saveas"}}', '/fs/home/assets/images/tools/png/saveas.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_ICON}/tools/png/saveas.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     self.saveas();
 
                 },null,'tools-item');
 
 
-                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', '/fs/home/assets/images/tools/png/refresh.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_ICON}/tools/png/refresh.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     $(self.$el).find("#container").empty();
 
@@ -420,17 +420,17 @@
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', '/fs/home/assets/images/tools/png/zoom_out.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     self.model.graph.graph.zoomIn();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', '/fs/home/assets/images/tools/png/zoom_in.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_ICON}/tools/png/zoom_in.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     self.model.graph.graph.zoomOut();
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', '/fs/home/assets/images/tools/png/print.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_ICON}/tools/png/print.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     var scale = mxUtils.getScaleForPageCount(1, self.model.graph.graph);
                     var preview = new mxPrintPreview(self.model.graph.graph, scale);
@@ -438,13 +438,13 @@
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', '/fs/home/assets/images/tools/png/fullscreen.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
                     toggleFullScreen();
 
                 },null,'tools-item');
 
-                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', '/fs/home/assets/images/tools/png/direction.png?type=download',function(evt)
+                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
 
 
@@ -473,6 +473,8 @@
 
 
                 },null,'tools-item-direction');
+
+                //$(self.$el).find("#tools img").attr("data-tooltip","tooltip");
 
 
             },

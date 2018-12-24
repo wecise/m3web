@@ -1,0 +1,187 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.search-base-component {
+
+		}
+
+		.search-base-component.input-group > input {
+			padding-left: 15px;
+		}
+
+		.search-base-component .btn-sm,
+		.search-base-component .btn-group-sm > .btn{
+			padding: 7px 10px;
+		}
+
+		.search-base-component .history{
+			position: absolute;
+			left: 4px;
+			top: 10px;
+			z-index: 1000;
+			cursor: pointer;
+		}
+
+		.search-base-component .context-menu-list {
+			-webkit-box-shadow: none;
+			box-shadow: none;
+		}
+
+		.search-base-component .context-menu-list.history {
+			min-width: 45em;
+			max-width: 26em;
+			padding: .25em 0;
+			margin: 15px -8px;
+			border-top: none;
+			-webkit-box-shadow: none;
+			box-shadow: none;
+			border-radius: 0px;
+			top: 93px!important;
+			left:93px!important;
+		}
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="search-base-component"  ----------*/
+	<template>
+		<div class="input-group">
+			<a href="javascript:;" :class="'history history_'+id" @click="fromCache"><i class="fas fa-caret-down"></i></a>
+			<!--搜索框-->
+			<input type="text" class="form-control" v-model.trim="options.term" placeholder="搜索" autofocus="autofocus">
+			<!--搜索条件预设置-->
+			<div class="input-group-btn">
+				<search-preset-component :id="id+'-preset'"
+				                         :options='options'
+				                         ref="preSetRef">
+				</search-preset-component>
+			</div>
+			<!--快速过滤条件设置-->
+			<div class="input-group-btn">
+				<a href="javascript:void(0);" class="btn btn-sm btn-default"><i class="fas fa-filter"></i>筛选</a>
+				<a href="javascript:void(0);" class="btn btn-sm btn-default"><i class="caret"></i></a>
+			</div>
+			<!--搜索按钮-->
+			<div class="input-group-btn">
+				<a href="javascript:void(0);" class="btn btn-sm btn-primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</span></a>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="search-base-component">
+	{
+	   	delimiters: ['${', '}'],
+	    props:{
+			id: String,
+			// 搜索设置
+			options: Object
+	    },
+	    data: function(){
+	        return {
+	            //搜索返回结构
+	            result: {
+	                // 预设值
+	                preset: null,
+                    // 输入
+		            term: null,
+		            // class
+		            class: null,
+		            // 返回消息
+			        message: null,
+		        },
+		        cacheID: "TERM-CACHE"
+	        }
+	    },
+	    created: function(){
+			// 预设值
+
+	    },
+	    mounted: function () {
+	   	    const self = this;
+
+	   	    // 自动搜索
+	   	    this.$refs.searchNowRef.click();
+
+	   	    // 搜索Button Enter事件
+            $(document).keypress(function(event) {
+                var keycode = (event.keyCode ? event.keyCode : event.which);
+                if (keycode == 13) {
+                    self.$refs.searchNowRef.click();
+                } else if (keycode == 27) {
+
+                }
+            })
+
+		    // 设置body class
+			$("body").addClass("search-base-component");
+
+	    },
+	    watch: {
+	   	    // 搜索结果变化，更新view
+            'result.message': function (val,oldVal) {
+                // 通知页面刷新
+                eventHub.$emit(`SEARCH-RESPONSE-EVENT-${this.id}`);
+            }
+	    },
+	    methods: {
+			search: function(){
+
+			    // 预设值
+			    this.result.preset = this.$refs.preSetRef.preset.default;
+                let ifHistory = this.result.preset.others.ifHistory?"":"#";
+                let ifDebug = this.result.preset.others.ifDebug?"debug> ":"";
+                let forTime = this.result.preset.others.forTime;
+
+                this.result.class = this.result.preset.class;
+
+                // 一键搜索结构
+                this.result.term = (ifDebug + ifHistory + _.without([this.options.class, this.options.term, this.result.preset.value],'').join(" | ")).replace(/##/g,"#");
+
+                // 缓存搜索
+                this.toCache(this.options.term);
+
+			    // 搜索
+				let rtn = callFsJScript('/event/event_list.js', encodeURIComponent(this.result.term)).message;
+				// 结果
+				this.result.message = rtn;
+			},
+		    toCache: function(event){
+			    let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
+
+			    localStorage.setItem(this.cacheID, JSON.stringify(_.uniq(_.concat(cacheTerm, [event]))));
+		    },
+		    fromCache: function(){
+                let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
+
+                let items = {};
+
+                const self = this;
+
+                // 整理为 jquery contextMenu items结构
+                _.map(cacheTerm,function(v,k){
+                    return _.merge(items, {[v]:{name: `${k+1}. ${v}`}});
+                })
+                // 清除历史
+			    _.merge(items, {"清除历史":{name: "清除历史", icon:"fas fa-trash", callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            self.removeCache();
+                        }}});
+
+			    let setTerm = function(event){
+                      self.options.term = event;
+			    };
+
+                contextMenu.build(this.id, {select:'history', items: items, handle: setTerm});
+		    },
+		    removeCache: function(){
+                localStorage.setItem(this.cacheID, '[]');
+		    }
+
+	    }
+	
+	}
+	</script>
+
+</code>
+

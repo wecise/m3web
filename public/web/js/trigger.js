@@ -18,11 +18,11 @@
 *  列表
 */
 
-var triggerList = function(event){
+var triggerList = function(className){
     let rtn = null;
 
     jQuery.ajax({
-        url: '/mxobject/trigger?class=' + event,
+        url: `/mxobject/trigger?class=${encodeURIComponent(className)}`,
         dataType: 'json',
         type: 'GET',
         async: false,
@@ -53,14 +53,15 @@ var triggerList = function(event){
 *  添加
 */
 var triggerNew = function(event){
-    let rtn = 1;
+    let rtn = 0;
 
     jQuery.ajax({
         url: '/mxobject/trigger',
-        dataType: 'json',
         type: 'PUT',
+        dataType: 'json',
+        contentType: 'application/json',
         async: false,
-        data: event,
+        data: JSON.stringify(event),
         beforeSend:function(xhr){
         },
         complete: function(xhr, textStatus) {
@@ -71,15 +72,13 @@ var triggerNew = function(event){
 
             if( _.lowerCase(data.status) === "ok"){
                 rtn = 1;
-                alertify.success("成功" + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + moment().format("LLL"));
+                alertify.success(`${event.name}： 保存成功 ${moment().format("LLL")}`);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
@@ -93,11 +92,11 @@ var triggerNew = function(event){
 *  删除
 */
 
-var triggerDelete = function(event,name){
-    let rtn = 1;
+var triggerDelete = function(className,name){
+    let rtn = 0;
 
     jQuery.ajax({
-        url: `/mxobject/trigger?class=${event}&name=${name}`,
+        url: `/mxobject/trigger?class=${encodeURIComponent(className)}&name=${name}`,
         dataType: 'json',
         type: 'DELETE',
         async: false,
@@ -111,15 +110,13 @@ var triggerDelete = function(event,name){
 
             if( _.lowerCase(data.status) === "ok"){
                 rtn = 1;
-                alertify.success("成功" + " " + moment().format("LLL"));
-            } else {
-                rtn = 0;
-                alertify.error("失败" + " " + moment().format("LLL"));
+                alertify.success(`${event.name}： 删除成功 ${moment().format("LLL")}`);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
+            alertify.error("失败" + " " + xhr.responseText);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });

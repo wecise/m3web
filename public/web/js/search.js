@@ -41,8 +41,8 @@ var fetchData = function (param) {
 
         },
         error: function(xhr, textStatus, errorThrown) {
+            rtn = xhr.responseJSON;
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            mxLog.writeln("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     });
 

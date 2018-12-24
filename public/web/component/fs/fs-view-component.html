@@ -27,9 +27,52 @@
 			color: rgb(144, 144, 144);
 		}
 
+		/* For note-view */
+		#note {
+			padding-left:0px;
+			flex-flow: nowrap;
+			display: flex;
+			flex-direction: column;
+		}
+
+		#note ul{
+			padding-left: 0;
+			list-style: none;
+		}
+
+		#note ul > li{
+			width: 20em;
+			float: left;
+			height: 250px;
+			padding: 5px;
+			font-size: 10px;
+			line-height: 1;
+			text-align: center;
+		}
+
+		#note .bg-silver {
+			background: rgb(255, 255, 255) !important;
+			border: 1px solid rgb(221, 221, 221);
+		}
+
+		#note .widget-stats.bg-silver .stats-link a{
+			background: rgb(249, 249, 249);
+		}
+
+		#note .tags{
+			border: none;
+		}
+
+		#note .fs-name i {
+			color: rgb(153, 153, 153);
+		}
+
 		/* For list-view */
 		#list {
-			padding-left:30px;
+			padding-left:0px;
+			flex-flow: nowrap;
+			display: flex;
+			flex-direction: column;
 		}
 
 		#list ul{
@@ -38,10 +81,10 @@
 		}
 
 		#list ul > li{
-			width: 25em;
+			width: 20em;
 			float: left;
 			height: 250px;
-			padding: 5px 5px;
+			padding: 5px;
 			font-size: 10px;
 			line-height: 1;
 			text-align: center;
@@ -112,11 +155,20 @@
 		*   File Upload
 		*/
 		.progress {
-			height: 8px;
+			height: 18px;
 			border-radius: 0px;
 			display: block;
 			position: relative;
 			bottom: 16px;
+		}
+
+		.progress small {
+			color: #444444;
+			width: 100%;
+			position: absolute;
+			z-index: 10;
+			top: 0;
+			left: 0;
 		}
 
 		#files ul{
@@ -135,7 +187,7 @@
 			background-color: rgb(249, 249, 249);
 			border: 1px solid rgb(255, 255, 255);
 			padding-top: 5px;
-			margin-bottom: 45px
+			margin: 5px 0px 20px 5px;
 		}
 
 		#files ul > li > canvas {
@@ -182,7 +234,7 @@
 		/* For layout */
 		.lm_goldenlayout {
 			background: none;
-			background-color: rgb(249, 249, 249);
+			background-color: rgb(246, 246, 246)!important;
 		}
 
 		.lm_content {
@@ -219,6 +271,7 @@
 			box-shadow: none;
 			padding-bottom: 6px;
 			border-bottom: 1px solid rgb(255, 0, 0);
+			background-color: rgb(246, 246, 246);
 		}
 
 		.lm_tab:hover, .lm_tab.lm_active {
@@ -232,17 +285,19 @@
 		}
 
 		.lm_splitter {
-			background: rgb(255, 255, 255);
+			background: rgb(153, 153, 153);
 			z-index: 1;
 		}
 
 		.lm_tabs > li[title=编辑] .lm_close_tab,
-		.lm_tabs > li[title=结果] .lm_close_tab {
+		.lm_tabs > li[title=结果] .lm_close_tab,
+		.lm_tabs > li[title=预览] .lm_close_tab {
 			display:none;
 		}
 
 
 		/* For view-container */
+		.note-view,
 		.list-view,
 		.grid-view,
 		.table-view{
@@ -277,48 +332,56 @@
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 					<div class="btn-group" style="padding:0 11px;float:right;">
 
-						<a href="#" class="btn btn-link" @click="newDir" title="新建目录" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="load" title="刷新" data-tooltip="tooltip">
+							<i class="fas fa-sync-alt"></i>
+						</a>
+
+						<a href="#" class="btn btn-link fs-order" title="排序" data-tooltip="tooltip">
+							<i class="fas fa-list-ol"></i>
+						</a>
+
+						<a href="#" class="btn btn-link" @click="newDir" title="新建目录" data-tooltip="tooltip">
 							<i class="fas fa-folder-plus"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="newFile" title="新建文件" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="newFile" title="新建文件" data-tooltip="tooltip">
 							<i class="fas fa-file"></i>
 						</a>
 
 
-						<a href="#" class="btn btn-link" @click="selectAll" title="选择所有" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="selectAll" title="选择所有" data-tooltip="tooltip">
 							<i class="fas fa-check"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到当前目录" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到当前目录" data-tooltip="tooltip">
 							<i class="fas fa-paste"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="moveIt" title="移动到当前目录" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="moveIt" title="移动到当前目录" data-tooltip="tooltip">
 							<i class="fas fa-people-carry"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="deleteThem" title="删除" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="deleteThem" title="删除" data-tooltip="tooltip">
 							<i class="fas fa-trash"></i>
 						</a>
-						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" data-toggle='tooltip'>
+						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" data-tooltip="tooltip">
 							<i class="fas fa-upload"></i>
 							<input id="file-upload" type="file" name="uploadfile" multiple>
 						</a>
 						<!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
 							<i class="fas fa-download""></i>
 						</a>-->
-						<a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
 							<i class="fas fa-th"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
 							<i class="fas fa-bars"></i>
 						</a>
-						<a href="#" class="btn btn-link" @click="exportIt" title="导出备份" data-toggle='tooltip'>
+						<a href="#" class="btn btn-link" @click="exportIt" title="导出备份" data-tooltip="tooltip">
 							<i class="fas fa-cloud-download-alt""></i>
 						</a>
-						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复" data-toggle='tooltip'>
+						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复" data-tooltip="tooltip">
 							<i class="fas fa-cloud-upload-alt" style=""></i>
 							<input type="file" name="loadfile" multiple @change="importIt">
 						</a>
-						<a href="#" class="btn btn-link" @click="syncIt" title="版本同步" data-toggle='tooltip'>
-							<i class="fas fa-sync-alt""></i>
+						<a href="#" class="btn btn-link" @click="syncIt" title="版本同步" data-tooltip="tooltip">
+							<i class="fas fa-retweet""></i>
 						</a>
 					</div>
 				</div>
@@ -350,6 +413,155 @@
 		},
 		data: function () {
 
+            Vue.component('note-view',{
+                delimiters: ['#{', '}#'],
+                props: {
+                    model: Array
+                },
+                template: `<div id="note">
+							   <ul>
+								  <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
+								       :id="'fs_node_'+item.id"
+								       @mouseover="$parent.mouseOver(item)"
+								       @mouseout="$parent.mouseOut(item)"
+								       style="cursor: pointer;"
+								       :title="item.name"
+								       v-for="item in model">
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
+										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
+										  </div>
+										  <div class="stats-link">
+											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
+												  <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
+												  <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
+												  <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
+												  <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
+												  <p><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+												  <p><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
+											  </a>
+										  </div>
+										  <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+											  <i class="fa fa-bars"></i>
+										  </div>
+									  </div>
+								  </li>
+							  </ul></div>`,
+                data:function(){
+                    return {}
+                },
+                filters: {
+                    pickName: function(item){
+
+                        if (_.isEmpty(item)) return '';
+
+                        let _name = _.head(item.name.split("."));
+
+                        if(!_.isEmpty(_name)){
+                            _name = _.truncate(_name, {
+                                'length': 9
+                            });
+                        }
+
+                        return _name;
+                    },
+                    pickIcon: function(item){
+
+                        // extend || ...
+                        if( item.fullname === '/extend' ){
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        } else {
+
+                            try{
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
+                            catch(error){
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
+                        }
+
+                    },
+                    pickTags: function(item){
+
+                        if(item.tags){
+                            return item.tags.join(",");
+                        } else {
+                            return "";
+                        }
+                    },
+                    pickAuthor: function(item){
+                        if (!_.isEmpty(item.attr) && !_.isEqual(item.attr, 'null')) {
+                            return _.attempt(JSON.parse.bind(null, item.attr)).author;
+                        } else {
+                            return "";
+                        }
+                    },
+                    pickRemark: function(item){
+                        if (!_.isEmpty(item.attr) && !_.isEqual(item.attr, 'null')) {
+                            return _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                watch:{
+                    model:{
+                        handler:function(val,oldVal){
+                            let me = this;
+
+                            let _tagify = $('input[name=tags]').data("tagify");
+
+                            _tagify.removeAllTags.bind(_tagify);
+                            me.init();
+
+                        },
+                        deep:true
+                    }
+                },
+                mounted: function(){
+
+                    let me = this;
+
+                    me.init();
+
+                },
+                methods: {
+                    init:function(){
+                        let me = this;
+
+                        // init Tagify script on the above inputs
+                        $('input[name=tags]').tagify()
+                            .on('add', me.onAddTag)
+                            .on('remove', me.onRemoveTag);
+                    },
+                    onAddTag: function(event,tagName){
+                        let me = this;
+
+                        let item = $(event.currentTarget).parent().parent().data("info");
+
+                        let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
+                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                        if(rtn.status == 'ok'){
+                            me.$parent.init();
+                        }
+
+                    },
+                    onRemoveTag: function(event,tagName){
+                        let me = this;
+                        let item = $(event.currentTarget).parent().parent().data("info");
+                        let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
+                        console.log(input)
+                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                        if(rtn.status == 'ok'){
+                            me.$parent.init();
+                        }
+
+                    }
+
+                }
+            });
             Vue.component('list-view',{
                 delimiters: ['#{', '}#'],
                 props: {
@@ -366,13 +578,13 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
 										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/images/files/png/dir.png?type=download';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
 												  <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
 												  <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
-												  <p><i class="fas fa-clock"></i> 创建时间：#{moment(item.vtime).format("LLL")}# </p>
+												  <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
 												  <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
 												  <p><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
 												  <p><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
@@ -404,18 +616,19 @@
                     },
                     pickIcon: function(item){
 
-                        if (_.isEmpty(item.attr) || _.isEqual(item.attr, 'null')) {
+                        // extend || ...
+                        if( item.fullname === '/extend' ){
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        } else {
 
-                            // system || extend || ...
-                            if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
-                                return `/fs/home/assets/images/files/png/dir-lock.png?type=download`;
-                            } else {
-                                return `/fs/home/assets/images/files/png/${item.ftype}.png?type=download`;
+                            try{
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
                             }
-
+                            catch(error){
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
                         }
 
-                        return JSON.parse(item.attr).icon;
                     },
                     pickTags: function(item){
 
@@ -510,10 +723,10 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
 										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='/fs/home/assets/images/files/png/dir.png?type=download';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
-											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.title" :data-info="JSON.stringify(item)">
+											  <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name" :data-info="JSON.stringify(item)">
 												  #{item.name}#
 											  </a>
 										  </div>
@@ -540,27 +753,18 @@
                     },
                     pickIcon: function(item){
 
-                        if (_.isEmpty(item.attr) || _.isEqual(item.attr, 'null')) {
+                        // extend || ...
+                        if( item.fullname === '/extend' ){
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        } else {
 
-                            // system || extend || ...
-                            if(_.isEqual(item.parent,'/') && _.isEqual(item.name,'extend')){
-                                return `/fs/home/assets/images/files/png/dir-lock.png?type=download`;
-                            } else {
-								let rtn = null;
-								console.log(item)
-
-	                            //如果是图片，实时预览
-                                if(_.includes(['png','gif'],item.ftype)){
-                                    rtn = `/fs${item.parent}/${item.name}?type=download`;
-                                } else {
-                                    rtn = `/fs/home/assets/images/files/png/${item.ftype}.png?type=download`;
-                                }
-                                return rtn;
+                            try{
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
                             }
-
+                            catch(error){
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
                         }
-
-                        return JSON.parse(item.attr).icon;
                     }
                 }
             });
@@ -592,11 +796,11 @@
 			    datatable: {},
                 upload:{
                     option: {
-                        url: '/fs/home',
+                        url: '/fs/temp',
                         dataType: 'json',
                         autoUpload: true,
-                        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt)$/i,
-                        maxFileSize: 999000,
+                        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt|iso|mp3|mp4)$/i,
+                        //maxFileSize: 999*000,
                         disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
                         previewMaxWidth: 100,
                         previewMaxHeight: 100,
@@ -648,10 +852,10 @@
 
 	            let _url = val.replace(/\/\//g,'/');
 
-                // system || extend || ...
-                if(_.startsWith(_url,'/extend') || _.startsWith(_url,'/script') || _.startsWith(_url,'/app') || _.isEqual(_url,'/')){
+                // system || extend || ... 判断第一级
+	            if(window.SignedUser_IsAdmin){
                     _url += '?issys=true';
-                }
+	            }
 
                 $('#file-upload').fileupload({url: `/fs${_url}`});
 
@@ -682,7 +886,7 @@
 
                 self.load();
 
-                self.signedUserName = $("#signed-user-name").val();
+                self.signedUserName = window.SignedUser_UserName;//$("#signed-user-name").val();
 
 			},
 			initPlugIn: function(){
@@ -692,14 +896,16 @@
 
                 self.initContextMenu();
 
-
                 if(!_.isEmpty(self.defaultView)){
                     self.currentView = self.defaultView;
                 }
 
+                self.orderIt();
+
 			},
 			toggleView: function(view){
 			    let self = this;
+
 
 			    self.currentView = view;
 
@@ -795,6 +1001,63 @@
                                     },
                                     "runUrl": {
                                         name: "运行链接", icon: "fas fa-map-marker-alt", callback: function ($element,key, opt) {
+                                            self.copyUrl(_item);
+                                        }
+                                    },
+                                    "sep1": "---------",
+                                    "copy": {
+                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
+                                            self.copyIt(_item);
+                                        }
+                                    },
+                                    "paste": {
+                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
+                                            self.pasteIt();
+
+                                        }
+                                    },
+                                    "sep2": "---------",
+                                    "delete": {
+                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
+                                            self.deleteIt(_item,true);
+                                        }
+                                    },
+                                    "sep3": "---------",
+                                    "share": {
+                                        name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
+                                            self.shareIt(_item);
+                                        }
+                                    },
+                                    "sep4": "---------",
+                                    "info": {
+                                        name: "属性", icon: "fas fa-info", callback: function (key, opt) {
+                                            self.info(_item);
+                                        }
+                                    }
+                                }
+
+                            }
+                        } else if(_.includes(['md'], _item.ftype)){
+                            return {
+
+                                items: {
+                                    "read": {
+                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
+                                            self.downloadIt(_item,true);
+                                        }
+                                    },
+                                    "edit": {
+                                        name: "编辑", icon: "fas fa-edit", callback: function (key, opt) {
+                                            self.editIt(_item);
+                                        }
+                                    },
+                                    "run": {
+                                        name: "打开", icon: "fas fa-play", callback: function (key, opt) {
+                                            self.openIt(_item,null);
+                                        }
+                                    },
+                                    "runUrl": {
+                                        name: "打开链接", icon: "fas fa-map-marker-alt", callback: function ($element,key, opt) {
                                             self.copyUrl(_item);
                                         }
                                     },
@@ -930,8 +1193,10 @@
 			initEditName: function(){
 			    let self = this;
 
-                $(".fs-name").editable('destroy').editable({
-                    type: "text",
+                $(".fs-name[data-edit='true']").editable({
+                    title: "重命名",
+	                type: "text",
+	                pk: $(this).data("pk"),
                     container: 'body',
                     validate: function (value) {
                         if (!$.trim(value)) {
@@ -993,8 +1258,43 @@
                 $('#file-upload').fileupload(self.upload.option)
                     .on('fileuploadadd', function (e, data) {
 
-                        let _wnd = newWindow('fsupload','上传', `<div id="files" class="files">
-																</div>`, null,null);
+                        let title = "上传";
+
+                        let wnd = mxWindow.winUpload(title, '<div id="files" class="files"></div>', null,null);
+
+                        // 更新信息栏信息
+                        new Vue({
+                            delimiters: ['#{', '}#'],
+                            el: `#jsPanel-upload-footer-${objectHash.sha1(title)}`,
+	                        template: `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> #{stime}# | 上传文件：#{total}# </div>`,
+	                        data: {
+                                stime: moment().format("LLL"),
+                                utime: '',
+								upload: 0,
+		                        total: data.originalFiles.length,
+		                        interval: null
+                            },
+	                        created: function(){
+                                //eventHub.$on("UPLOAD-UPDATE-STATUS-EVENT",this.update);
+
+                                /*this.interval = setInterval(function(){
+                                    this.utime = moment(this.stime).fromNow();
+                                },1000)*/
+                            },
+	                        methods: {
+                                update: function(event){
+
+                                    if(event.stop){
+                                        //clearInterval(this.interval);
+                                    }
+
+                                    if(event.upload){
+                                        this.upload += event.upload;
+                                    }
+
+                                }
+                            }
+                        });
 
                         data.context = $('<ul/>').appendTo('#files');
 
@@ -1044,24 +1344,31 @@
 	                            .css('display','none')
                                 .prop('disabled', !!data.files.error);
                         }
+
+                        //更新底部状态信息
+                        //eventHub.$emit("UPLOAD-UPDATE-STATUS-EVENT",{total: null, etime: null, upload: index + 1})
                     })
                     .on('fileuploadprogress', function (e, data) {
+
                         let _name = objectHash.sha1(data.files[0].name);
                         let progress = parseInt(data.loaded / data.total * 100, 10);
                         $(`#progress_${_name} .progress-bar`).css(
                             'width',
                             progress + '%'
-                        );
+                        ).html(`<small>${parseInt(data.loaded/1024,10)} KB / ${parseInt(data.total/1024,10)} KB</small>`);
 
                     })
                     .on('fileuploaddone', function (e, data) {
+
                         $.each(data.result.files, function (index, file) {
+
                             if (file.url) {
                                 var link = $('<a>')
                                     .attr('target', '_blank')
                                     .prop('href', file.url);
                                 $(data.context.children()[index])
                                     .wrap(link);
+
                             } else if (file.error) {
                                 var error = $('<span class="text-danger"/>').text(file.error);
                                 $(data.context.children()[index])
@@ -1071,6 +1378,9 @@
                         });
 
                         self.load();
+
+                        //更新底部状态信息
+                        //eventHub.$emit("UPLOAD-UPDATE-STATUS-EVENT",{total: null, etime: _.now(), upload: 0, stop: true})
 
                         // close upload win
 
@@ -1093,6 +1403,35 @@
 
                 self.selectedItem = [];
             },
+			orderIt: function(){
+			    let self = this;
+
+                $.contextMenu({
+                    selector: '.fs-order',
+                    trigger: 'left',
+                    callback: function (key, options) {
+						if(key == 'byNameAsc'){
+                            self.model = _.orderBy(self.model,['name'],['asc']);
+						} else if(key == 'byNameDesc'){
+							self.model = _.orderBy(self.model,['name'],['desc']);
+						} else if(key == 'byTimeAsc'){
+                            self.model = _.orderBy(self.model,['vtime'],['asc']);
+                        } else if(key == 'byTimeDesc'){
+                            self.model = _.orderBy(self.model,['vtime'],['desc']);
+                        } else {
+                            self.model = _.orderBy(self.model,['ftype'],['asc']);
+						}
+                    },
+                    items: {
+                        "byNameAsc": { name: "按名称升序",icon: "fas fa-sort-alpha-up" },
+                        "byNameDesc": { name: "按名称降序",icon: "fas fa-sort-alpha-down" },
+                        "byTimeAsc": { name: "按时间升序",icon: "fas fa-sort-alpha-up" },
+                        "byTimeDesc": { name: "按时间降序",icon: "fas fa-sort-alpha-down" },
+                        "byFtype": { name: "按类型排序",icon: "fas fa-sort-alpha-down" },
+                    }
+                });
+
+			},
 			openIt: function(item, path){
                 let self = this;
 
@@ -1112,31 +1451,31 @@
                     if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
 
 
-                        let contents = `<img src="/fs${path}?type=download" class="preview-img-responsive center-block" alt="Image">`;
-                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
+                        let contents = `<img src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
+                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
 
                     } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
 
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <video src="/fs${path}?type=download" controls="controls" autoplay>
+                                            <video src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
 												your browser does not support the video tag
 											</video>
 										</div>
 										`;
 
-                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
+                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
 
                     } else if(_.includes(['pdf'], item.ftype)) {
 
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <iframe class="embed-responsive-item" src="/fs${path}?type=download"></iframe>
+                                            <iframe class="embed-responsive-item" src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}"></iframe>
 										</div>`;
 
                         let _wnd = newWindow('fsapp', item.name, contents, null,null);
 
                     } else if(_.includes(['pptx','ppt'], item.ftype)) {
 
-                        window.open(`/fs${path}?type=download`, "_blank");
+                        window.open(`/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}`, "_blank");
 
                     } else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
 
@@ -1144,17 +1483,23 @@
 
                     } else if(_.includes(['swf'], item.ftype)) {
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-											<video src="/fs${path}?type=download" width="100%" height="100%" controls="controls" autoplay>
+											<video src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
 												Your browser does not support the video tag.
 											</video>
 										</div>`;
 
-                        let _wnd = newWindow('fsapp', item.name, contents, null,null);
+                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
                     } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
 
                         _.merge(item,{action:'run'});
 
-                        let url = genFsUrl(item,null);
+                        let url = genFsUrl(item,null,null);
+
+                        window.open(url,'_blank');
+                    } else if(_.includes(['md'], item.ftype)){
+                        _.merge(item,{action:'run'});
+
+                        let url = genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
 
                         window.open(url,'_blank');
                     }
@@ -1165,12 +1510,17 @@
 			    let self = this;
 
                 let file = [item.parent, item.name].join("/");
-                window.open(`/fs${file}?issys=true&type=download`,'_blank');
+                window.open(`/fs${file}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`,'_blank');
 			},
 			copyUrl: function(item){
 			    let self = this;
 
-                let file = `/fs${[item.parent, item.name].join("/")}?issys=true&type=download`;
+                let file = `/fs${[item.parent, item.name].join("/")}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`;
+
+                if(_.includes(['md','imap','iflow','ishow'],item.ftype)){
+                    _.merge(item,{action:'run'});
+                    file = genFsUrl(item,{ header:true, sidebar:false, footbar:true },null);
+                }
 
                 alertify.set({ labels: {
                         ok     : "复制地址",
@@ -1196,51 +1546,37 @@
             load: function() {
                 let self = this;
 
-                // 重置选择
-                self.selectedItem = [];
+                // 临时解决view刷新问题 & destroy editable
+	            self.currentView = '';
 
-                let _rtn = fsList(self.rootPath);
+	            _.delay(function(){
 
-                self.model = _.orderBy(_.map(_rtn,function(v,k){
+	                // 临时解决view刷新问题
+	                self.currentView = self.defaultView;
 
-				                    return _.merge(v, {"username": `${self.signedUserName}`});
+                    // 重置选择
+                    self.selectedItem = [];
 
-				                }),['vtime','name'],['desc','asc']);
+                    let _rtn = fsList(self.rootPath);
 
+                    self.model = _.orderBy(_.map(_rtn,function(v,k){
 
-                _.delay(function(){
-                    // 刷新
-                    self.refresh();
-                },300);
+                        return _.merge(v, {"username": `${self.signedUserName}`});
 
+                    }),['vtime','name'],['desc','asc']);
+
+                    _.delay(function(){
+                        // 刷新
+                        self.refresh();
+                    },100);
+	            },100)
 
             },
             refresh: function() {
                 let self = this;
 
-                $(".tagsLabel").tagsinput({
-                    tagClass: function(item) {
-                        return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
-                    }
-                });
-
-                $(".tagsLabel").on('itemAdded', function(event) {
-
-                    let _id = $(this).data("index");
-                    let _item = _.find(self.model.list,{id:_id});
-
-                    fetchData(_item.id + ' | tags +' + event.item);
-
-                });
-
-                $(".tagsLabel").on('itemRemoved', function(event) {
-
-                    let _id = $(this).data("index");
-                    let _item = _.find(self.model.list,{id:_id});
-
-                    fetchData(_item.id + ' | tags -' + event.item);
-
-                });
+                // 重新实例化 editable
+                self.initEditName();
             },
 			mouseOver: function(item){
                 let self = this;
@@ -1259,7 +1595,7 @@
 
                 let _name = '新文件夹_' + _.now();
                 let _type = 'dir';
-                let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: "/fs/home/assets/images/files/png/dir.png?type=download"};
+                let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
 
                 let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
 
@@ -1274,8 +1610,8 @@
                     // str is the input text
                     if (e) {
                         let _name = `新文件_${_.now()}.${str}`;
-                        let _type = 'file';
-                        let _attr = {remark: '', ctime: _.now(), author: self.signedUserName, type: _type, icon: `/fs/home/assets/images/files/png/${str}.png?type=download`};
+                        let _type = str || 'file';
+                        let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
 
                         let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
 
@@ -1290,9 +1626,9 @@
             info: function(node){
                 let self = this;
 
-                let _win = newWindow("fsinfo","属性",'<div id="fs-info"></div>',null,null);
+                let _win = mxWindow.winInfo("属性",'<div id="fs-info"></div>',null,null);
 
-                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.UserName}}", "type": "${node.ftype}", "icon": "/fs/home/assets/images/files/png/${node.ftype}.png?type=download"}`};
+                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.UserName}}", "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
 
                 if(_.isEmpty(node.attr)){
                     node = _.merge(node, _attr);
@@ -1301,63 +1637,65 @@
                 let _infoVue = new Vue({
                     delimiters: ['#{', '}#'],
                     el: "#fs-info",
-                    template: `<div class="tab-content">
-                                            <div role="tabpanel" class="tab-pane active" id="home">
-                                                    <form>
-                                                        <div class="form-group">
-                                                            <label for="name">项目名称</label>
-                                                            <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName" autofocus @keyup.enter="save">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="remark">项目备注</label>
-                                                            <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="ctime">更新时间</label>
-                                                            <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="parent">目录</label>
-                                                            <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="type">类型</label>
-                                                            <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="author">作者</label>
-                                                            <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="icon">图标</label>
-                                                            <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
-                                                                <img class="media-object" :src="model.icon.value" style="width:15%;">
-                                                            </a>
-                                                        </div>
+                    template: `<div class="tab-content" style="height:100%;">
+                                            <div role="tabpanel" class="tab-pane active" id="home"  style="height:100%;">
+                                                <form  style="height:95%;overflow:auto;">
+                                                    <div class="form-group">
+                                                        <label for="name">名称</label>
+                                                        <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName" autofocus @keyup.enter="save">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="remark">备注</label>
+                                                        <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="ctime">更新时间</label>
+                                                        <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="parent">目录</label>
+                                                        <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="type">类型</label>
+                                                        <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="type">大小</label>
+                                                        <input type="text" class="form-control" id="size" placeholder="" value="${bytesToSize(node.size)}" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="author">作者</label>
+                                                        <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="icon">图标</label>
+                                                        <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
+                                                            <img class="media-object" :src="model.icon.value" style="width:15%;">
+                                                        </a>
+                                                    </div>
 
-                                                        <div class="form-group" style="text-align: center;">
-                                                            <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
-                                                            <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
-                                                            <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
-                                                        </div>
-
-
-                                                </form>
+                                               </form>
+                                                <div class="form-group" style="text-align: center;padding-top:3px;">
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
+                                                    <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
+                                                </div>
                                             </div>
-                                            <div role="tabpanel" class="tab-pane" id="icon-list">
-                                                <div class="row">
-                                                  <div class="col-md-12" style="display: list-item;height: 75vh;overflow: auto;">
+                                            <div role="tabpanel" class="tab-pane" id="icon-list" style="height:100%;">
+                                                <div class="row" style="height:95%;">
+                                                  <div class="col-md-12" style="display: list-item;height: 95%;overflow: auto;">
                                                     <ul>
                                                         <li v-for="icon in model.icon.list">
                                                             <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
                                                               <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-                                                              <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download'" v-model="model.icon.value" >
+                                                              <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="model.icon.value" >
                                                             </a>
                                                         </li>
                                                     </ul>
                                                   </div>
                                                 </div>
-                                                <div class="row" style="margin-top:15px;">
+                                                <div class="row">
                                                     <div class="col-md-12" style="text-align:center;">
                                                         <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
                                                     </div>
@@ -1373,7 +1711,7 @@
                             type: node.ftype,
                             attr: {remark:''},
                             icon: {
-                                value: '',
+                                value: null,
                                 list: []
                             }
                         }
@@ -1398,7 +1736,7 @@
                             return _attr.name;
                         },
                         pickIcon: function(item) {
-                            return "/fs" + item.parent + "/" + item.name + "?type=download";
+                            return `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
                         },
                         readMore: function (text, length, suffix) {
                             return text.substring(0, length) + suffix;
@@ -1416,7 +1754,7 @@
                         init: function(){
                             let me = this;
 
-                            me.model.icon.list = fsList('/home/assets/images/files/png');
+                            me.model.icon.list = fsList('/assets/images/files/png');
                         },
                         triggerInput: function(id){
                             let self = this;
@@ -1463,7 +1801,7 @@
                         saveAttr: function(){
                             let me = this;
 
-                            me.model.attr.icon = me.model.icon.value;
+                            me.model.attr = me.model.icon.value?_.extend(me.model.attr, {icon: me.model.icon.value}):me.model.attr;
 
                             let _rtn = fsUpdateAttr(node.parent, node.name, me.model.attr);
 
@@ -1527,6 +1865,11 @@
             deleteThem: function() {
                 let self = this;
 
+                if(_.includes([['app','extend','assets','opt','script']],self.selectedItem[0].name)){
+                    alertify.error("系统目录，不允许删除!");
+                    return false;
+                }
+
                 if(_.isEmpty(self.selectedItem)) {
                     alertify.log("选择需要删除的对象！");
                     return false;
@@ -1553,6 +1896,11 @@
             },
 			deleteIt: function(event, prompt) {
                 let self = this;
+
+                if(_.includes(['app','extend','assets','opt','script'],event.name)){
+                    alertify.error("系统目录，不允许删除!");
+                    return false;
+                }
 
                 if(_.isEmpty(event)) {
                     alertify.log("选择需要删除的对象！");
@@ -1603,7 +1951,7 @@
             deployIt: function(item){
                 let self = this;
 
-                let wnd = newWindow('fsDeployApp', `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
+                let wnd = mxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
 
                 let form = {
                     el: "#fs-app-deploy",
@@ -1645,7 +1993,7 @@
 		                                    <li v-for="icon in app.icon.list">
 		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(33, 149, 243);" @click="triggerInput(icon.id)">
 		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download'" v-model="app.icon.value" >
+		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value" >
 		                                        </a>
 		                                    </li>
 		                                </ul>
@@ -1664,7 +2012,7 @@
                             cnname: _.head(item.name.split(".")),
                             enname: _.head(item.name.split(".")),
                             seat: _.random(100, 10000),
-                            url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=download`,
+                            url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`,
                             icon: {
                                 value: '',
                                 list: []
@@ -1673,14 +2021,14 @@
                     },
                     filters:{
                         pickIcon: function(icon) {
-                            return "/fs" + icon.parent + "/" + icon.name + "?type=download";
+                            return `/fs${icon.parent}/${icon.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
                         }
 	                },
                     mounted: function() {
                         let me = this;
 
                         me.$nextTick(function() {
-                            me.app.icon.value = '/fs/home/assets/images/apps/png/creative.png?type=download';
+                            me.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
 
                             me.init();
                         })
@@ -1689,7 +2037,7 @@
                         init: function(){
                             let me = this;
 
-                            me.app.icon.list = fsList('/home/assets/images/apps/png');
+                            me.app.icon.list = fsList(`${window.ASSETS_ICON}/apps/png`);
 
                         },
                         triggerInput: function(id){
@@ -1745,239 +2093,438 @@
 			editIt: function(item){
                 let self = this;
 
-                let mode = function(){
-	                let list = {js:'javascript', ltsv: 'toml', file: 'text', html: 'html'};
-                    return list[item.ftype] || 'javascript';
-                };
+                // 不同窗体对应各自的ID，由窗体ID生成各窗体组件的子ID
+                // 子ID：
+                //      fs-editor-main-top-${ID}
+                //      fs-editor-main-bottom-${ID}
+                let pID = objectHash.sha1([item.parent,item.name].join("/"));
 
-                let content = `<div id="wnd-editor-container" style="width: 100%;height: 100%;"></div>`;
+                // 模板，作为vue组件容器
+                let content = `<div id="fs-editor-template-${pID}" style="width: 100%;height: 100%;"></div>`;
 
-                let win = newWindow('fsEditor', `${item.parent}/${item.name}`, content, null,null);
+				// 判断是否已有窗体打开
+                try {
+                    if( window.jsPanel.activePanels.getPanel(`jsPanel-editor-${pID}`) ){
+                        window.jsPanel.activePanels.getPanel(`jsPanel-editor-${pID}`).front();
+                        alertify.log("该内容窗体已经打开");
+                    }
+                }
+                catch(err){
+                    // 打开窗体
+                    let win = mxWindow.winEditor(`${item.parent}/${item.name}`, content, null,null);
 
-                let layout = {
-                    el: "#wnd-editor-container",
-	                data: {
-                        layout: null,
-		                config: {
-		                    settings:{
-                                hasHeaders: true,
-		                        showPopoutIcon: false,
-								showCloseIcon: false,
-								selectionEnabled: false,
-								constrainDragToContainer: false
-		                    },
-		                    dimensions:{
-		                        borderWidth:3
-		                    },
-                            content: [{
-                                type: 'column',
-                                content: [{
-                                    type: 'component',
-                                    title: '编辑',
-                                    height: 95,
-                                    componentName: 'fsEditorComponent',
-                                    componentState: {
-                                        id: 'editor-main-top',
-                                        div: '<div id="fs-editor-main-top"></div>'
-                                    }
-                                }, {
-                                    type: 'component',
-                                    title: '结果',
-                                    height: 5,
-                                    componentName: 'fsEditorComponent',
-                                    componentState: {
-                                        id: 'editor-main-bottom',
-                                        div: '<div id="fs-editor-main-bottom"></div>'
-                                    }
-                                }]
-                            }]
-		                },
-		                editor: {
-                            el: '#fs-editor-main-top',
-                            template: `<fs-editor-component :id="id" :bid="id"
+                    // 应用扩展名影射不同的编辑模式
+                    let mode = function(){
+                        let list = {js:'javascript', ltsv: 'toml', file: 'text', html: 'html', md: 'markdown'};
+                        return list[item.ftype] || 'javascript';
+                    };
+
+                    // 生成布局、vue组件配置，根据不同的文件类型，需要对应不同的编辑器
+                    let editor = {
+                        normal: {
+                            el: `#fs-editor-template-${pID}`,
+                            data: {
+                                layout: null,
+                                config: {
+                                    settings: {
+                                        hasHeaders: true,
+                                        showPopoutIcon: false,
+                                        showCloseIcon: false,
+                                        selectionEnabled: false,
+                                        constrainDragToContainer: false
+                                    },
+                                    dimensions: {
+                                        borderWidth: 3
+                                    },
+                                    content: [{
+                                        type: 'column',
+                                        content: [{
+                                            type: 'component',
+                                            title: '编辑',
+                                            height: 85,
+                                            componentName: 'fsEditorComponent',
+                                            componentState: {
+                                                id: 'editor-main-top',
+                                                div: `<div id="fs-editor-main-top-${pID}"></div>`
+                                            }
+                                        }, {
+                                            type: 'component',
+                                            title: '结果',
+                                            height: 15,
+                                            componentName: 'fsEditorComponent',
+                                            componentState: {
+                                                id: 'editor-main-bottom',
+                                                div: `<div id="fs-editor-main-bottom-${pID}"></div>`
+                                            }
+                                        }]
+                                    }]
+                                },
+                                editor: {
+                                    el: `#fs-editor-main-top-${pID}`,
+                                    template: `<fs-editor-component :id="id" :bid="bid"
 								                      :model="model"
 								                      showToolsBar="false"
 								                      showStatusBar="false"></fs-editor-component>`,
-                            data: {
-                                id: `${item.name}_editor_${_.now()}`,
-                                bid: `${item.name}${_.now()}`,
-                                model: {
-                                    oldInput: "",
-                                    newInput: "",
-                                    mode: mode(),
-                                    theme: "tomorrow",
-                                    printMargin: false,
-                                    readOnly: false,
-                                    fs: item
+                                    data: {
+                                        id: `editor-${pID}`,
+                                        bid: `${pID}`,
+                                        model: {
+                                            oldInput: "",
+                                            newInput: "",
+                                            mode: mode(),
+                                            theme: "tomorrow",
+                                            printMargin: false,
+                                            readOnly: false,
+                                            fs: item
+                                        }
+                                    },
+                                    mounted: function () {
+                                        let me = this;
+
+                                        me.$nextTick(function () {
+                                            me.init();
+                                        })
+                                    },
+                                    methods: {
+                                        init: function () {
+                                            let me = this;
+
+                                            let rtn = fsContent(item.parent, item.name);
+
+                                            me.model.newInput = rtn;
+
+                                            $("li[title='编辑']").parent().parent().css("display", "none");
+                                        }
+                                    }
+
+                                },
+                                output: {
+                                    html: {
+                                        el: `#fs-editor-main-bottom-${pID}`,
+                                        template: `<div class="embed-responsive embed-responsive-16by9" style="overflow-y:auto;">
+												  <iframe class="embed-responsive-item" :id="id+'_iframe'" :src="src"></iframe>
+												</div>`,
+                                        data: {
+                                            id: `editor-output-${pID}`,
+                                            src: ""
+                                        },
+                                        watch: {
+                                            src: function (val, oldVal) {
+                                                let me = this;
+
+                                                document.getElementsByTagName('iframe')[0].src = val;
+                                            }
+                                        },
+                                        created: function () {
+                                            let me = this;
+
+                                            eventHub.$on(`FS-EDITOR-RUN-EVENT-${pID}`, me.setSrc)
+                                        },
+                                        methods: {
+                                            setSrc: function (event) {
+                                                let me = this;
+
+                                                me.src = event;
+                                            }
+                                        }
+                                    },
+                                    other: {
+                                        el: `#fs-editor-main-bottom-${pID}`,
+                                        template: `<fs-output-component :id="id" :bid="bid"
+								                      :model="model"
+								                      showToolsBar="false"
+								                      showStatusBar="false"></fs-output-component>`,
+                                        data: {
+                                            id: `editor-output-${pID}`,
+                                            bid: `${pID}`,
+                                            model: {
+                                                oldInput: "",
+                                                newInput: "",
+                                                mode: "json",
+                                                theme: "tomorrow",
+                                                printMargin: false,
+                                                readOnly: false,
+                                            },
+                                            keys: []
+                                        },
+                                        created: function () {
+                                            let me = this;
+
+                                            eventHub.$on(`FS-EDITOR-RUN-EVENT-${me.bid}`, me.setData)
+                                        },
+                                        mounted: function () {
+                                            let me = this;
+
+                                            me.$nextTick(function () {
+                                                // self.init();
+                                            })
+                                        },
+                                        methods: {
+                                            init: function () {
+                                                let me = this;
+
+                                                let rtn = callFsJScript(item.name, '');
+
+                                                me.model.newInput = JSON.stringify(rtn.message, null, 4);
+                                            },
+                                            setData: function (event) {
+                                                let me = this;
+
+												if(event.message) {
+
+                                                    if (typeof event.message === 'object') {
+                                                        me.model.newInput = JSON.stringify(event.message, null, 2);
+                                                    } else {
+                                                        me.model.newInput = JSON.stringify(event.message, null, 4);
+                                                    }
+
+                                                } else {
+                                                    me.model.newInput = event;
+												}
+                                            }
+                                        }
+
+                                    }
                                 }
+                            },
+                            created: function () {
+                                let me = this;
+
+                                eventHub.$on("WINDOW-STATUS-CHANGE-EVENT", me.resizeLayout);
                             },
                             mounted: function () {
                                 let me = this;
 
                                 me.$nextTick(function () {
-                                    me.init();
+                                    setTimeout(function () {
+                                        me.init();
+                                    });
                                 })
                             },
                             methods: {
-                                init: function() {
+                                init: function () {
                                     let me = this;
 
-                                    let rtn = fsContent(item.parent,item.name);
+                                    me.layout = new GoldenLayout(me.config, me.$el);
 
-                                    me.model.newInput = rtn;
+                                    me.layout.registerComponent('fsEditorComponent', function (container, state) {
+                                        // console.log(state)
+                                    });
 
-                                    $("li[title='编辑']").parent().parent().css("display","none");
-                                }
-                            }
+                                    me.layout.on('componentCreated', function (component) {
 
-                        },
-		                output:{
-                            html: {
-                                el: '#fs-editor-main-bottom',
-                                template: `<div class="embed-responsive embed-responsive-16by9" style="overflow-y:auto;">
-									  <iframe class="embed-responsive-item" :id="id+'_iframe'" :src="src"></iframe>
-									</div>`,
-                                data: {
-                                    id: `${item.name}_output_${_.now()}`,
-                                    src: ""
+                                        let state = component.config;
+                                        let id = state.componentState.id;
+                                        let html = state.componentState.div;
+
+                                        component.container.getElement().html(html);
+                                    });
+
+                                    //  Initialize GL
+                                    me.layout.init();
+
+                                    //  Update GL on window resize
+                                    window.addEventListener('resize', function () {
+                                        me.layout.updateSize();
+                                    });
+
+                                    _.delay(function () {
+                                        me.fsEditor();
+                                        me.fsOutput();
+                                    }, 300);
+
                                 },
-                                watch:{
-                                    src:function(val,oldVal){
-                                        let me = this;
+                                fsEditor: function () {
+                                    let me = this;
 
-                                        document.getElementsByTagName('iframe')[0].src=val;
+                                    new Vue(me.editor);
+                                },
+                                fsOutput: function () {
+                                    let me = this;
+
+                                    if (me.output[item.ftype]) {
+                                        new Vue(me.output[item.ftype]);
+                                    } else {
+                                        new Vue(me.output["other"]);
                                     }
                                 },
-                                created: function () {
+                                resizeLayout: function () {
                                     let me = this;
 
-                                    eventHub.$on("FS-EDITOR-RUN-EVENT", me.setSrc)
+                                    me.layout.updateSize();
+                                }
+                            }
+                        },
+                        md: {
+                            el: `#fs-editor-template-${pID}`,
+                            data: {
+                                layout: null,
+                                config: {
+                                    settings: {
+                                        hasHeaders: true,
+                                        showPopoutIcon: false,
+                                        showCloseIcon: false,
+                                        selectionEnabled: false,
+                                        constrainDragToContainer: false
+                                    },
+                                    dimensions: {
+                                        borderWidth: 3
+                                    },
+                                    content: [{
+                                        type: 'row',
+                                        content: [{
+                                            type: 'component',
+                                            title: '编辑',
+                                            height: 50,
+                                            componentName: 'fsEditorComponent',
+                                            componentState: {
+                                                id: 'editor-main-top',
+                                                div: `<div id="fs-editor-main-top-${pID}"></div>`
+                                            }
+                                        }, {
+                                            type: 'component',
+                                            title: '预览',
+                                            height: 50,
+                                            componentName: 'fsEditorComponent',
+                                            componentState: {
+                                                id: 'editor-main-bottom',
+                                                div: `<div id="fs-editor-main-bottom-${pID}"></div>`
+                                            }
+                                        }]
+                                    }]
                                 },
-                                methods: {
-                                    setSrc: function(event){
+                                editor: {
+                                    delimiters: ['#{', '}#'],
+                                    el: `#fs-editor-main-top-${pID}`,
+                                    template: `<fs-md-editor-component :id="id" :bid="bid"
+								                      :model="model"
+								                      showToolsBar="false"
+								                      showStatusBar="false"
+								                      ref="editor"></fs-md-editor-component>`,
+                                    data: {
+                                        id: `editor-${pID}`,
+                                        bid: `${pID}`,
+                                        model: {
+                                            oldInput: "",
+                                            newInput: "",
+                                            mode: mode(),
+                                            theme: "tomorrow",
+                                            printMargin: false,
+                                            readOnly: false,
+                                            fs: item
+                                        }
+                                    },
+                                    mounted: function () {
                                         let me = this;
 
-                                        me.src = event;
+                                        me.$nextTick(function () {
+                                            me.init();
+                                        })
+                                    },
+                                    methods: {
+                                        init: function () {
+                                            let me = this;
+
+                                            let rtn = fsContent(item.parent, item.name);
+
+	                                        me.model.newInput = rtn;
+
+                                        }
+                                    }
+
+                                },
+                                output: {
+                                    el: `#fs-editor-main-bottom-${pID}`,
+                                    template:
+	                                    `<div :id="id" v-html="compiledMarkdown" style="display: inline-block; overflow:auto; width: 100%;height: 100%;vertical-align: top;box-sizing: border-box;padding: 0 20px;"></div>`,
+                                    data: {
+                                        id: `editor-output-${pID}`,
+                                        compiledMarkdown: ""
+                                    },
+                                    created: function () {
+                                        eventHub.$on(`OUTPUT-CHANGE-EVENT-${pID}`, this.setContent)
+                                    },
+                                    methods: {
+                                        setContent: function (event) {
+                                           this.compiledMarkdown = marked(event, { sanitize: true });
+                                        }
                                     }
                                 }
                             },
-                            other: {
-                                el: '#fs-editor-main-bottom',
-                                template: `<fs-output-component :id="id" :bid="id"
-								                      :model="model"
-								                      showToolsBar="false"
-								                      showStatusBar="false"></fs-output-component>`,
-                                data: {
-                                    id: `${item.name}_output_${_.now()}`,
-                                    bid: `${item.name}${_.now()}`,
-                                    model: {
-                                        oldInput: "",
-                                        newInput: "",
-                                        mode: "json",
-                                        theme: "tomorrow",
-                                        printMargin: false,
-                                        readOnly: false,
-                                    },
-                                    keys: []
-                                },
-                                created: function () {
+                            created: function () {
+                                let me = this;
+
+                                eventHub.$on("WINDOW-STATUS-CHANGE-EVENT", me.resizeLayout);
+                            },
+                            mounted: function () {
+                                let me = this;
+
+                                me.$nextTick(function () {
+                                    setTimeout(function () {
+                                        me.init();
+                                    });
+                                })
+                            },
+                            methods: {
+                                init: function () {
                                     let me = this;
 
-                                    eventHub.$on("FS-EDITOR-RUN-EVENT", me.setData)
+                                    me.layout = new GoldenLayout(me.config, me.$el);
+
+                                    me.layout.registerComponent('fsEditorComponent', function (container, state) {
+                                        // console.log(state)
+                                    });
+
+                                    me.layout.on('componentCreated', function (component) {
+
+                                        let state = component.config;
+                                        let id = state.componentState.id;
+                                        let html = state.componentState.div;
+
+                                        component.container.getElement().html(html);
+                                    });
+
+                                    //  Initialize GL
+                                    me.layout.init();
+
+                                    //  Update GL on window resize
+                                    window.addEventListener('resize', function () {
+                                        me.layout.updateSize();
+                                    });
+
+                                    _.delay(function () {
+                                        me.fsEditor();
+                                        me.fsOutput();
+                                    }, 300);
+
                                 },
-                                mounted: function () {
+                                fsEditor: function () {
                                     let me = this;
 
-                                    me.$nextTick(function () {
-                                        // self.init();
-                                    })
+                                    new Vue(me.editor);
                                 },
-                                methods: {
-                                    init: function () {
-                                        let me = this;
+                                fsOutput: function () {
+                                    let me = this;
 
-                                        let rtn = callFsJScript(item.name, '');
+                                    new Vue(me.output);
+                                },
+                                resizeLayout: function () {
+                                    let me = this;
 
-                                        me.model.newInput = JSON.stringify(rtn.message, null, 4);
-                                    },
-                                    setData: function (event) {
-                                        let me = this;
-
-                                        me.model.newInput = JSON.stringify(event.message, null, 2);
-                                    }
+                                    me.layout.updateSize();
                                 }
-
                             }
                         }
-	                },
-	                created: function(){
-                        let me = this;
+                    };
 
-                        eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",me.resizeLayout);
-	                },
-	                mounted: function() {
-                        let me = this;
+                    // vue组件实例化
+	                let ed = item.ftype==='md' ? editor[item.ftype] : editor['normal'];
 
-                        me.$nextTick(function() {
-                            setTimeout(function () {
-                                me.init();
-                            });
-                        })
-                    },
-                    methods: {
-                        init: function () {
-                            let me = this;
+                    new Vue(ed);
+                }
+                finally {
 
-                            me.layout = new GoldenLayout(me.config, me.$el);
-
-                            me.layout.registerComponent('fsEditorComponent', function (container, state) {
-                                // console.log(state)
-                            });
-
-                            me.layout.on( 'componentCreated', function( component ){
-
-                                let state = component.config;
-                                let id = state.componentState.id;
-                                let html = state.componentState.div;
-
-                                component.container.getElement().html(html);
-                            });
-
-                            //  Initialize GL
-                            me.layout.init();
-
-                            //  Update GL on window resize
-                            window.addEventListener('resize', function () { me.layout.updateSize(); });
-
-                            _.delay(function(){
-                                me.fsEditor();
-                                me.fsOutput();
-                            },300);
-
-                        },
-	                    fsEditor: function(){
-                            let me = this;
-
-                            new Vue(me.editor);
-	                    },
-	                    fsOutput: function(){
-                            let me = this;
-
-                            if(me.output[item.ftype]){
-                                new Vue(me.output[item.ftype]);
-                            } else {
-                                new Vue(me.output["other"]);
-                            }
-	                    },
-                        resizeLayout:function(){
-                            let me = this;
-
-                            me.layout.updateSize();
-                        }
-                    }
-                };
-
-                new Vue(layout);
+                }
 
             },
             downloadIt: function(item, prompt) {
@@ -1988,7 +2535,8 @@
 
 
                 } else {
-                    if(_.includes(['zip','gz','tar','exe','png','gif','svg','doc','ppt','file'],item.ftype)){
+
+                    /*if(_.includes(['zip','gz','tar','exe','png','gif','svg','doc','ppt','file'],item.ftype)){
                         let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
                         let _target = '_blank';
                         // system || extend || ...
@@ -1996,12 +2544,29 @@
                             _url += '&issys=true';
                         }
                         window.open(_url, _target);
+                    } else if(_.includes(['mp3','mp4'],item.ftype)){
+                        let _url = `/fs/${item.parent}/${item.name}?type=download`.replace(/\/\//g,'/');
+                        let _target = '_blank';
+                        // system || extend || ...
+                        if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script') || _.startsWith(item.parent,'/app')){
+                            _url += '&issys=true';
+                        }
+                        window.location.href=_url;
                     } else {
                         let rtn = fsContent(item.parent, item.name);
                         let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
 
                         saveAs(blob, `${item.name}`);
-                    }
+                    }*/
+
+                    let _url = `/fs/${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`.replace(/\/\//g,'/');
+                    let _target = '_blank';
+                    // system || extend || ...
+                    //if(_.startsWith(item.parent,'/extend') || _.startsWith(item.parent,'/script') || _.startsWith(item.parent,'/app')){
+	                /*if(item.parent === "/"){
+                        _url += '&issys=true';
+                    }*/
+                    window.open(_url, _target);
                 }
 
 
@@ -2092,6 +2657,8 @@
 			setRootPath: function(item) {
 			    let self = this;
                 let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
+
+                console.log(123,_item)
 
                 self.openIt(_item, [_item.parent,_item.name].join("/"));
 

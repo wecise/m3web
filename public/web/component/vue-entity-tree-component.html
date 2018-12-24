@@ -402,7 +402,7 @@
 								    <div id="entity-create-template"></div>
 								  </div>
 								</div>`;
-                let _wnd = newWindow('fsentity', `${item.title} ${item.node.alias}`, contents, null, null);
+                let _wnd = mxWindow.winEntity(`${item.title} ${item.node.alias}`, contents, null, null);
 
 	            let cVue = new Vue({
                     delimiters: ['$', '$'],

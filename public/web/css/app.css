@@ -16,7 +16,9 @@ body {
 
 #company_logo {
     margin-right:5px;
-    max-width: 32px;
+    max-width: 64px;
+    min-width: 32px;
+    height: 32px;
 }
 
 /* For mxWindwoPane Start*/
@@ -35,7 +37,7 @@ div.mxWindow{
 .navbar.navbar-default.navbar-fixed-top {
     z-index: 999;
     border-color: transparent!important;
-    background-color: #2195f4;
+    background-color: #083e6a;/*#2195f4;*/
     -webkit-box-shadow: none;
     box-shadow: none;
 }
@@ -73,7 +75,7 @@ div.mxWindow{
 }
 
 .modal-header{
-    background-color: #2195f4;/*#348fe2;*/
+    background-color: #083e6a;/*#2195f4;*/
     color: #ffffff;
 }
 
@@ -245,6 +247,10 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
     Style
 */
 
+.sidebar,
+.sidebar-bg {
+    background-color: #083e6a;/*#2195f4;*/
+}
 .sidebar .nav > li > a,
 .sidebar .nav > li > a:hover{
     color: rgb(255, 255, 255);
@@ -303,18 +309,62 @@ table.dataTable thead th, table.dataTable thead td,
 }
 
 
-/*!* tooltip *!
-.tooltip > .tooltip-inner {
-    background-color: #CCCCCC;
-    color: rgba(0,0,0,0.8);
+/* 自定义Tabs border-bottom */
+.nav-tabs.nav-tabs-line-2px {
+    background-color: rgba(0, 0, 0, 0) !important;
+    background-image: none!important;
+    background-repeat: repeat-x;
+    border-radius: 0px!important;
+    margin-bottom:10px;
 }
 
-.tooltip > .tooltip-arrow {
-    border-top-color: #CCCCCC;
-    border-right-color: #CCCCCC;
-    border-bottom-color: #CCCCCC;
-    border-left-color: #CCCCCC;
-}*/
+ul.nav-tabs-line-2px > li.active {
+    border-bottom: 2px solid rgb(3, 169, 244)!important;
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.nav-tabs.nav-tabs-line-2px > li.active > a,
+.nav-tabs.nav-tabs-line-2px > li.active > a:hover,
+.nav-tabs.nav-tabs-line-2px > li.active > a:focus,
+.nav-tabs.nav-tabs-line-2px > li.active > a:active,
+.nav-tabs.nav-tabs-line-2px > li.active > a:visited {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+/* 自定义Tabs before-content */
+.nav-tabs.nav-tabs-content {
+    background-color: rgba(0, 0, 0, 0) !important;
+    background-image: none!important;
+    background-repeat: repeat-x;
+    border-radius: 0px!important;
+}
+
+ul.nav-tabs-content > li.active {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+
+ul.nav-tabs-content > li.active > a:before {
+    content: "\25BA";
+    font-size: 8px;
+    float: left;
+    color: rgb(129, 143, 151);
+}
+
+ul.nav-tabs-content > li > a {
+    padding: 7px 15px!important;
+}
+
+ul.nav-tabs-content > li > a:before {
+    content: "";
+}
+
+.nav-tabs.nav-tabs-content > li.active > a,
+.nav-tabs.nav-tabs-content > li.active > a:hover,
+.nav-tabs.nav-tabs-content > li.active > a:focus,
+.nav-tabs.nav-tabs-content > li.active > a:active,
+.nav-tabs.nav-tabs-content > li.active > a:visited {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
 
 
 /* pace loading status*/
@@ -349,3 +399,121 @@ table.dataTable thead th, table.dataTable thead td,
 }
 
 
+
+/* For Event Console Severity */
+td.severity6 {
+    background-color: #333333!important; /*Fatal*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity5 {
+    background-color: #FF0000!important; /*Critical*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity4 {
+    background-color: #FFA500!important; /*Major*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity3 {
+    background-color: #FFD700!important; /*Minor*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity2 {
+    background-color: #0000FF!important; /*Warning*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity1 {
+    background-color: #800080!important; /*Indeterminate*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity0 {
+    background-color: #008000!important; /*Clear*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity_1 {
+    background-color: #808080!important; /*Unknown*/
+    text-align: center;
+    color: #ffffff;
+}
+td.severity_other {
+    background-color: #808080!important; /*Unknown*/
+    text-align: center;
+    color: #ffffff;
+}
+
+
+/* For JOB Console Status */
+td.status16 {
+    background-color: #333333!important; /*Fatal*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status15 {
+    background-color: #FF0000!important; /*Critical*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status14 {
+    background-color: #FFA500!important; /*Major*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status13 {
+    background-color: #FFD700!important; /*Minor*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status12 {
+    background-color: #0000FF!important; /*Warning*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status11 {
+    background-color: #800080!important; /*Indeterminate*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status10 {
+    background-color: #008000!important; /*Clear*/
+    text-align: center;
+    color: #ffffff;
+}
+td.status_1 {
+    background-color: #808080!important; /*Unknown*/
+    text-align: center;
+    color: #ffffff;
+}
+
+
+/* Matrix row & column extend from bootstrap3 grid layout */
+
+.mx-row {
+    width: 100%;
+}
+
+.mx-row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.mx-column-2 {
+    float: left;
+    width: 16.6%;
+}
+
+.mx-column-10 {
+    float: left;
+    width: 83.4%;
+}
+
+.mx-column-12 {
+    float: left;
+    width: 100%;
+}

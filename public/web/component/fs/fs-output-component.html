@@ -102,8 +102,8 @@
                 self.editor = ace.edit(self.id);
                 
                 self.editor.setOptions({
-                    maxLines: 100000,
-                    // minLines: 20,
+                    maxLines: Infinity,
+                    minLines: 20,
                     autoScrollEditorIntoView: true,
                     enableBasicAutocompletion: true,
                     enableSnippets: true,
@@ -138,7 +138,7 @@
 
                         if(_.isEmpty(rtn)) return;
 
-                        let word = _.attempt(JSON.parse.bind(null, rtn.message));
+                        let word = rtn.message;
 
                         callback(null,_.map(word,function(ea) {
                             console.log(ea)

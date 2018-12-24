@@ -35,8 +35,8 @@ var callFsJScript =  function(name,term){
             rtn = data;
         },
         error: function(xhr, textStatus, errorThrown) {
-            rtn = xhr.responseJSON;
-            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            rtn = xhr.responseText;
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
         }
     });
 

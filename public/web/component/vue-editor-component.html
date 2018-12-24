@@ -316,7 +316,7 @@
                 }
 
 
-                let _data = _.attempt(JSON.parse.bind(null,_list.message));
+                let _data = _list.message;
 
                 let _columns = columnsParse(_list.meta);
 
@@ -398,7 +398,7 @@
                 }
 
 
-                let _data = _.attempt(JSON.parse.bind(null,_list.message));
+                let _data = _list.message;
 
                 let _columns = columnsParse(_list.meta);
 
@@ -430,9 +430,9 @@
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
                 let _list = fetchDataByMql(_mql);
-                let _content = JSON.stringify({mql: _mql, result: {message: _.attempt(JSON.parse.bind(null,_list.message)), meta: _list.meta}},null,4).replace(/   /g, ' ');
+                let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
-                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype, icon: "/fs/home/assets/images/files/png/"+_ftype+".png?type=download"};
+                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype, icon: `${window.ASSETS_ICON}/files/png/${_ftype}.png?type=download`};
 				let _name = '查询_' + moment().format("LLL");
 				let _html = `<!DOCTYPE html>
 							<html>

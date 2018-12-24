@@ -46,6 +46,7 @@
 
 		.editorToolBar > .btn-group {
 			top: 1px;
+			width: 100%;
 		}
 
 		.editorToolBar .btn-group > a > i{
@@ -62,6 +63,15 @@
 			height: 100%;
 		}
 
+		.omdb-editor-component .statusBar {
+			display: -webkit-box;
+			position: fixed;
+			width: 100%;
+			height: 30px;
+			padding: 7px;
+			background: rgb(246, 246, 246);
+		}
+
 		
 	</style>
 
@@ -71,20 +81,21 @@
 		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统"><i class="fas fa-save"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载"><i class="fas fa-arrow-circle-down"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统" data-tooltip="tooltip"><i class="fas fa-save"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载" data-tooltip="tooltip"><i class="fas fa-arrow-circle-down"></i></a>
 
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制"><i class="fas fa-copy"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴"><i class="fas fa-paste"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fas fa-check"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空"><i class="fas fa-trash"></i></a>
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行"><i class="fas fa-play"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fas fa-copy"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fas fa-paste"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fas fa-check"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fas fa-trash"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行" data-tooltip="tooltip"><i class="fas fa-play"></i></a>
 					<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
-					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fas fa-forward"></i></a>
+					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件" data-tooltip="tooltip"><i class="fas fa-forward"></i></a>
+					<a href="javascript:void(0)" :class="'btn btn-sm btn-link pull-right editor-select-theme-'+objectHash.sha1(id)" title="主题" data-tooltip="tooltip"><i class="fas fa-tshirt"></i></a>
 				</div>
 			</div>
 			<div :id="id" ></div>
-			<div id="statusBar"></div>
+			<div :id="id+'_statusBar'" class="statusBar"></div>
 		</div>
 	</template>
 
@@ -158,7 +169,7 @@
 
 				self.toggleToolsBar();
 
-				//self.toggleStatusBar();
+				self.toggleStatusBar();
 
                 // Customer Auto Completer
 	            let customerCompleter = {
@@ -173,10 +184,9 @@
 
                         if(_.isEmpty(rtn)) return;
 
-                        let word = _.attempt(JSON.parse.bind(null, rtn.message));
+                        let word = rtn.message;
 
                         callback(null,_.map(word,function(ea) {
-                            console.log(ea)
                             return {
                                 name: ea.name,
                                 value: ea.name,
@@ -202,6 +212,12 @@
                         bindKey: {mac: "cmd-S", win: "ctrl-S"},
                         exec: self.saveToFs
                     });
+
+                // init Theme
+                _.delay(function(){
+                    self.initTheme();
+                },3000)
+
                 
             },
             setOptions: function(){
@@ -213,6 +229,13 @@
             },
             setTheme: function(){
                 let self = this;
+
+                let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(self.id)}`);
+
+                if(localTheme){
+                    self.editor.setTheme("ace/theme/" + localTheme);
+                    return false;
+                }
 
                 if(_.isEmpty(self.model.theme)){
                 	self.editor.setTheme("ace/theme/tomorrow");
@@ -260,7 +283,7 @@
 
                 if(self.showStatusBar) {
                     let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-                    let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
+                    let statusBar = new StatusBar(self.editor, document.getElementById(`${self.id}_statusBar`));
                 }
 	        },
 	        copyIt: function(){
@@ -366,7 +389,7 @@
                 }
 
 
-                let _data = _.attempt(JSON.parse.bind(null,_list.message));
+                let _data = _list.message;
 
                 let _columns = columnsParse(_list.meta);
 
@@ -381,8 +404,11 @@
                     return false;
                 }
 
-                // for Select count pattern
-                if(!_.has(_list.message[0],'class')) {
+                // For Select count Pattern
+	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
+	            let temp = _list.message;
+
+                if(!_.has(temp[0],'class')) {
 
                     _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
 
@@ -461,7 +487,7 @@
                 }
 
 
-                let _data = _.attempt(JSON.parse.bind(null,_list.message));
+                let _data = _list.message;
 
                 let _columns = columnsParse(_list.meta);
 
@@ -497,9 +523,9 @@
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
                 let _list = fetchDataByMql(_mql);
-                let _content = JSON.stringify({mql: _mql, result: {message: _.attempt(JSON.parse.bind(null,_list.message)), meta: _list.meta}},null,4).replace(/   /g, ' ');
+                let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
-                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype, icon: "/fs/home/assets/images/files/png/"+_ftype+".png?type=download"};
+                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype};
 				let _name = '查询_' + moment().format("LLL");
 				let _html = `<!DOCTYPE html>
 							<html>
@@ -514,7 +540,7 @@
 
                 let _url = fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
 
-                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download" target="_blank">点击查看</a>`);
+                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
             },
             saveToFs: function(){
                 let self = this;
@@ -523,18 +549,79 @@
 
                 if(_.isEmpty(mql)) return false;
 
-                let user = $("#signed-user-name").val();
-                let attr = {remark: '', ctime: _.now(), author: user, type: 'txt', icon: `/fs/home/assets/images/files/png/txt.png?type=download`};
-                let rtn = fsNew('file', `/home/${user}/temp`, 'cache_mql_script.txt', mql, attr);
+                let user = window.SignedUser_UserName;//$("#signed-user-name").val();
+                let attr = {remark: '', ctime: _.now(), author: user, type: 'txt'};
+                let rtn = fsNew('file', `/${user}/temp`, 'cache_mql_script.txt', mql, attr);
             },
             loadFromFs: function(){
                 let self = this;
 
-                let user = $("#signed-user-name").val();
-                let mql = fsContent(`/home/${user}/temp`, 'cache_mql_script.txt');
+                let user = window.SignedUser_UserName;//$("#signed-user-name").val();
+                let mql = fsContent(`/${user}/temp`, 'cache_mql_script.txt');
 
                 self.editor.setValue(mql);
 
+            },
+            initTheme: function(){
+                let self = this;
+				let id = objectHash.sha1(self.id);
+
+                $.contextMenu({
+                    selector: `.editor-select-theme-${id}`,
+                    trigger: 'left',
+                    callback: function (key, options) {
+                        if(key !== 'bright' && key !== 'dark'){
+                            self.editor.setTheme("ace/theme/"+key);
+
+                            localStorage.setItem(`editor-select-theme-${id}`,key);
+                        }
+                    },
+                    items: {
+                        "bright": { name: "亮色", items: {
+                                "chrome": { name: "chrome"},
+                                "clouds": { name: "clouds"},
+                                "crimson_editor": { name: "crimson_editor"},
+                                "dawn": { name: "dawn"},
+                                "dreamweaver": { name: "dreamweaver"},
+                                "eclipse": { name: "eclipse"},
+                                "github": { name: "github"},
+                                "iplastic": { name: "iplastic"},
+                                "solarized_light": { name: "solarized_light"},
+                                "textmate": { name: "textmate"},
+                                "tomorrow": { name: "tomorrow"},
+                                "xcode": { name: "xcode"},
+                                "kuroir": { name: "kuroir"},
+                                "katzenmilch": { name: "katzenmilch"},
+                                "sqlserver": { name: "sqlserver"}
+                            }
+                        },
+                        "dark": { name: "暗色", items: {
+                                "ambiance": { name: "ambiance"},
+                                "chaos": { name: "chaos"},
+                                "clouds_midnight": { name: "clouds_midnight"},
+                                "dracula": { name: "dracula"},
+                                "cobalt": { name: "cobalt"},
+                                "gruvbox": { name: "gruvbox"},
+                                "gob": { name: "gob"},
+                                "idle_fingers": { name: "idle_fingers"},
+                                "kr_theme": { name: "kr_theme"},
+                                "merbivore": { name: "merbivore"},
+                                "merbivore_soft": { name: "merbivore_soft"},
+                                "mono_industrial": { name: "mono_industrial"},
+                                "monokai": { name: "monokai"},
+                                "pastel_on_dark": { name: "pastel_on_dark"},
+                                "solarized_dark": { name: "solarized_dark"},
+                                "terminal": { name: "terminal"},
+                                "tomorrow_night": { name: "tomorrow_night"},
+                                "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                                "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                                "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                                "twilight": { name: "twilight"},
+                                "vibrant_ink": { name: "vibrant_ink"}
+                            }
+                        }
+                    }
+                });
             }
         }
     

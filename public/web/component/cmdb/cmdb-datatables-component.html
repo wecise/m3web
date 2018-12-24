@@ -101,7 +101,7 @@
 
                                                                                                         eventHub.$emit("ci-view-toggle-event", {view: 'ci-view-card-component', model: _selectedRow});
                                                                                                         
-                                                                                                        /*newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
+                                                                                                        /*newWindow('fsLarge', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                                                                                                         _.delay(function(){
 
@@ -127,7 +127,7 @@
 
 
 
-                                                                                                        newWindow('large', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
+                                        mxWindow.winLarge(opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -420,7 +420,7 @@
                 $(self.$el).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    newWindow('large', "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
+                    mxWindow.winLarge( "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                     _.delay(function(){
 

@@ -131,6 +131,29 @@
 		.tagify{
 			border:none;
 		}
+
+
+		/* Drag & Drop For Tr */
+		*[draggable=true] {
+			-moz-user-select:none;
+			-khtml-user-drag: element;
+			cursor: move;
+		}
+
+		*:-khtml-drag {
+			background-color: rgba(238,238,238, 0.5);
+		}
+
+		tr.selected:hover:after {
+			content: '拖到到左边树打标签';
+			background-color: #efefef;
+			border: 2px dashed #ddd;
+			position: absolute;
+			top: 8px;
+			left: 50px;
+			padding: 0 5px;
+		}
+
         
 	</style>
 
@@ -334,11 +357,23 @@
                                         self.selectedRow = self.datatable.row( this ).data();
                                     });
 
+                                    // init draggable for tr
+                                    let elFrom = $("#"+self.id).find("tbody tr");
+                                    elFrom.attr("draggable","true");
+
+                                    addEvent(elFrom, 'dragstart', function (e) {
+                                        e.dataTransfer.effectAllowed = 'copy';
+
+                                        let sendList = [];
+
+                                        _.forEach(self.datatable.rows('.selected').data(), function(v) {
+                                            sendList.push(v);
+                                        });
+
+                                        e.dataTransfer.setData("item", JSON.stringify(sendList));
+                                    });
 	                            },
                                 drawCallback:function(settings){
-
-
-
                                     //self.redraw();
                                 }
                     },self.options)).columns.adjust().draw();
@@ -348,6 +383,49 @@
                 let self = this;
 
 				self.tagsInput();
+
+                // init drop for tree
+                var treeName = "probe-tree";
+                let elTo = $(`#${treeName} li`);
+
+                addEvent(elTo, 'dragleave', function (e) {
+                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                    $(`#${tId}`).removeClass("curSelectedNode");
+                });
+
+
+                addEvent(elTo, 'dragover', function (e) {
+                    e.preventDefault();
+                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                    $(`#${tId}`).addClass("curSelectedNode");
+                });
+
+                addEvent(elTo, 'drop', function (e) {
+                    e.preventDefault();
+                    // 接收数据
+                    let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
+
+                    e.dataTransfer.clearData();
+
+                    // 获取tree tID
+                    let tId = $(e.target).attr("id").replace(/_span/g,"");
+                    let treeObj = $.fn.zTree.getZTreeObj(treeName);
+                    let node = treeObj.getNodeByTId(tId);
+
+                    // 打标签
+	                let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
+                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                    if(rtn.status == 'ok'){
+                        eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
+                    }
+
+
+                    $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
+
+                });
 
 			},
             initMenu: function(){

@@ -3,9 +3,17 @@
 	<style scoped>
 		/*----------  style  ----------*/
 		.omdb-output-datatables-component,
-		.dataTables_wrapper{
+		.omdb-output-datatables-component .dataTables_wrapper{
 			width:100%;
 			margin: 0 auto;
+		}
+
+		.omdb-output-datatables-component .dataTables_wrapper table.dataTable{
+			margin: 0!important
+		}
+
+		.omdb-output-datatables-component .dataTables_scrollHead{
+			background: rgb(241, 241, 241);
 		}
 
 		.omdb-output-datatables-component thead tr th, .omdb-output-datatables-component tbody tr td{
@@ -13,73 +21,63 @@
 			white-space: nowrap;
 		}
 
-		.omdb-output-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
+		.omdb-output-datatables-component table.dataTable tbody>tr.selected,
+		.omdb-output-datatables-component table.dataTable tbody>tr.selected td,
+		.omdb-output-datatables-component table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
 		}
 
-		div.dataTables_wrapper div.dataTables_info {
-			padding-top: 4px;
-		}
-
-		.context-menu-list {
+		.omdb-output-datatables-component .context-menu-list {
             box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
 			padding:5px;
             border: none;
 		}
-            
-        .context-menu-list>li>a{
+
+		.omdb-output-datatables-component .context-menu-list>li>a{
             padding: 5px 5px;
             color:rgb(102, 102, 102)!important;
         }
 
-		div.toolbar i {
+		.omdb-output-datatables-component div.toolbar i {
 			color: rgb(218, 224, 231);
 			cursor: pointer;
 			margin: 10px 0px 0px 5px;
 		}
 
-		div[id*="classEdit"].dataTables_info{
-			position: absolute;
-			bottom: 0px;
-			height: 28px;
-			background-color: rgb(255, 255, 255);
-			width: 100%;
-			text-align: left;
-			border-top: 1px solid rgb(226, 231, 236)
-		}
-
-		div[id*="output"].dataTables_info {
+		.omdb-output-datatables-component .dataTables_info {
 			position: fixed;
 			bottom: 32px;
 			height: 28px;
 			background-color: rgb(255, 255, 255);
 			width: 100%;
 			text-align: left;
-			border-top: 1px solid rgb(226, 231, 236)
+			border-top: 1px solid rgb(226, 231, 236);
+			padding:5px;
+
 		}
 
-		.datatables-toolbars {
+		.omdb-output-datatables-component .datatables-toolbars {
 			height: 30px;
 			background-color: rgb(246, 246, 246);
 			width: 100%;
 		}
 
-		.datatables-toolbars .btn-primary,
-		.datatables-toolbars .btn-primary:hover{
+		.omdb-output-datatables-component .datatables-toolbars .btn-primary,
+		.omdb-output-datatables-component .datatables-toolbars .btn-primary:hover{
 			background-color: rgb(246, 246, 246);
 			border:none;
 			color: #333333;
 		}
 
-		.dataTables_scrollBody{
+		/*.dataTables_scrollBody{
 			padding-bottom: 135px;
-		}
+		}*/
 
-		.datatables-toolbars > .btn-group {
+		.omdb-output-datatables-component .datatables-toolbars > .btn-group {
 			top: 1px;
 		}
 
-		.datatables-toolbars-button {
+		.omdb-output-datatables-component .datatables-toolbars-button {
 			border: none;
 			padding: 8px 10px;
 			background-color: rgba(0, 0, 0, 0);
@@ -135,6 +133,7 @@
         created: function(){
             let self = this;
 
+            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT-${self.id}`, self.resize);
             eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
         },
@@ -192,13 +191,13 @@
 		watch: {
           	dataset: {
                 handler: function(val,oldVal){
-                      	    let self = this;
-
                       	    if(val == oldVal) return false;
 
-                            self.datatable.destroy();
-                            $("#"+self.id).empty();
-                            self.init();
+		                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                                this.datatable.destroy();
+		                        $("#" + this.id).empty();
+		                    }
+                            this.init();
 
                 },
                 deep:true
@@ -210,7 +209,8 @@
                 let self = this;
 
                 self.datatable = $("#"+self.id).DataTable( _.extend({
-                                data: self.dataset,
+                                destroy: true,
+	                            data: self.dataset,
                                 columns: _.uniqBy(self._columns,'data'),
                                 responsive: false,
                                 searching: true,
@@ -220,7 +220,7 @@
                                 colReorder: true,
 								info: true,
                                 scrollX: true,
-                                scrollY: 200,
+                                scrollY: '200px',
 			                    scrollCollapse: true,
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
@@ -315,8 +315,11 @@
 			                    },
                     },self.options)).columns.adjust().draw();
 
+                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192);
+
 	            _.delay(function(){
                     self.datatable.buttons().container().appendTo( `.${self.id}` );
+                    self.redraw();
                 },500)
 
                 _.delay(function(){
@@ -391,7 +394,7 @@
                 });
 
                 $("#"+self.id).on('draw.dt', function () {
-                    $('[data-toggle="tooltip"]').tooltip();
+                    $('[data-tooltip="tooltip"]').tooltip();
                 });
 
 
@@ -400,7 +403,13 @@
                 let self = this;
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
+
             },
+			resize: function(event){
+                let self = this;
+
+                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192);
+			},
 			refresh: function(event){
                 let self = this;
 
@@ -434,10 +443,10 @@
                     el: `#${self.id}-datatables-tool-bars`,
                     template: `<div class="${self.id} datatables-toolbars">
 									<div class="btn-group" role="group" aria-label="...">
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary toolbars ${self.id}-datatables-tool-bars" title="选择类"><i class="fa fa-bars"></i></a>
-										<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选"><i class="fa fa-square-o"></i></a>-->
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除"><i class="fa fa-trash"></i></a>
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑"><i class="fa fa-edit"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary toolbars ${self.id}-datatables-tool-bars" title="选择类" data-tooltip="tooltip"><i class="fa fa-bars"></i></a>
+										<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fa fa-square-o"></i></a>-->
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑" data-tooltip="tooltip"><i class="fa fa-edit"></i></a>
 									</div>
 								</div>`,
                     data: {

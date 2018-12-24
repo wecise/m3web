@@ -1,0 +1,136 @@
+<code>
+
+    <style scoped>
+        /*----------  style  ----------*/
+
+
+    </style>
+
+
+    /*----------  最外层element会自动增加组件同名 class="event-summary-component"  ----------*/
+    <template>
+        <div :id="id" style="width:100%;height:20vh;"></div>
+    </template>
+
+    /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+    <script id="event-summary-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                id: String,
+                model: Object
+            },
+            data: function(){
+                return {
+                    chart:null,
+                    option: {
+                        tooltip : {
+                            trigger: 'axis',
+                            axisPointer : {
+                                type : 'shadow'
+                            }
+                        },
+                        grid: {
+                            top: '1%',
+                            left: '3%',
+                            right: '3%',
+                            bottom: '1%',
+                            containLabel: true
+                        },
+                        xAxis:  {
+                            type: 'value'
+                        },
+                        yAxis: {
+                            type: 'category',
+                            data: ['wecise01','wecise02','wecise03','wecise04','wecise05']
+                        },
+                        series: [
+                            {
+                                name: '重大告警',
+                                type: 'bar',
+                                stack: '总量',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'insideRight'
+                                    }
+                                },
+                                color: '#333333',
+                                data: [32, 30, 30, 34,24]
+                            },
+                            {
+                                name: '严重告警',
+                                type: 'bar',
+                                stack: '总量',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'insideRight'
+                                    }
+                                },
+                                color: '#FF0000',
+                                data: [10, 12, 11, 14,31]
+                            },
+                            {
+                                name: '主要告警',
+                                type: 'bar',
+                                stack: '总量',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'insideRight'
+                                    }
+                                },
+                                color: '#FFA500',
+                                data: [20, 12, 11, 24, 30]
+                            },
+                            {
+                                name: '一般告警',
+                                type: 'bar',
+                                stack: '总量',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'insideRight'
+                                    }
+                                },
+                                color: '#FFD700',
+                                data: [10, 22, 21, 14, 10]
+                            },
+                            {
+                                name: '未知',
+                                type: 'bar',
+                                stack: '总量',
+                                label: {
+                                    normal: {
+                                        show: true,
+                                        position: 'insideRight'
+                                    }
+                                },
+                                color: '#800080',
+                                data: [80, 82, 91, 94, 10]
+                            }
+                        ]
+                    }
+                }
+            },
+            mounted: function () {
+                const self = this;
+
+                self.$nextTick(function () {
+                    self.init();
+                });
+            },
+            methods: {
+                init: function(){
+                    this.chart = echarts.init(this.$el);
+                    this.chart.setOption(this.option);
+                    console.log(this.chart,this.option)
+                    this.chart.resize();
+                }
+            }
+
+        }
+    </script>
+
+</code>

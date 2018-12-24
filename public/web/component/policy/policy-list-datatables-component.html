@@ -413,7 +413,36 @@
                                 self.selectedRow = self.datatable.row( this ).data();
                             });
 
+                            // init effect for table
+                            $("#"+self.id).find("tbody").on("mouseover","tr", function(event) {
 
+                                $(this).css('background-color', '#ddd');
+
+                                $(this).bind("mouseout", function() {
+                                    $(this).css('background-color', '');
+                                });
+                            });
+
+                            // get clicked tr
+                            $("#"+self.id).on('click', 'tr', function () {
+                                self.selectedRow = self.datatable.row( this ).data();
+                            });
+
+                            // init draggable for tr
+                            let elFrom = $("#"+self.id).find("tbody tr");
+                            elFrom.attr("draggable","true");
+
+                            addEvent(elFrom, 'dragstart', function (e) {
+                                e.dataTransfer.effectAllowed = 'copy';
+
+                                let sendList = [];
+
+                                _.forEach(self.datatable.rows('.selected').data(), function(v) {
+                                    sendList.push(v);
+                                });
+
+                                e.dataTransfer.setData("item", JSON.stringify(sendList));
+                            });
                         },
                         drawCallback:function(settings){
 	                        //self.redraw();
@@ -437,6 +466,48 @@
 
                         self.datatable.buttons( [2,3,4,5] ).enable( selectedRows > 0 );
                     } );
+
+                    // init drop for tree
+                    var treeName = "policy-tree";
+                    let elTo = $(`#${treeName} li`);
+
+                    addEvent(elTo, 'dragleave', function (e) {
+                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                        $(`#${tId}`).removeClass("curSelectedNode");
+                    });
+
+
+                    addEvent(elTo, 'dragover', function (e) {
+                        e.preventDefault();
+                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                        $(`#${tId}`).addClass("curSelectedNode");
+                    });
+
+                    addEvent(elTo, 'drop', function (e) {
+                        e.preventDefault();
+                        // 接收数据
+                        let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
+
+                        e.dataTransfer.clearData();
+                        console.log(_.now(),data)
+                        // 获取tree tID
+                        let tId = $(e.target).attr("id").replace(/_span/g,"");
+                        let treeObj = $.fn.zTree.getZTreeObj(treeName);
+                        let node = treeObj.getNodeByTId(tId);
+
+                        // 打标签
+                        let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
+                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                        if(rtn.status == 'ok'){
+                            eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
+                        }
+
+                        $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
+
+                    });
 
                 },
                 initMenu: function(){
@@ -671,7 +742,7 @@
 
                                         if (_.isEmpty(rtn)) return;
 
-                                        let word = _.attempt(JSON.parse.bind(null, rtn.message));
+                                        let word = rtn.message;
 
                                         callback(null, _.map(word, function (ea) {
 
@@ -1101,7 +1172,7 @@
                 add: function(){
                     let self = this;
 
-                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+                    let wnd = mxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
                     let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 
@@ -1317,7 +1388,7 @@
                 edit: function(event){
                     let self = this;
 
-                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+                    let wnd = mxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
                     let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 

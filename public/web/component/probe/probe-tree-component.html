@@ -3,7 +3,7 @@
 		/*----------  style  ----------*/
 
 		.probe-tree-component{
-			margin: -12px;
+
 		}
 
 		.navbar-form {
@@ -129,8 +129,8 @@
                 },
                 zNodes: callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
-
-
+                curTarget: null,
+                curTmpTarget: null,
             }
         },
         created: function(){
@@ -241,7 +241,7 @@
                     let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
 										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
 										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
-										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
+										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'></span>
 								</div>`;
 
 

@@ -141,7 +141,7 @@
 	        refresh: function(event){
 	            var self = this;
 	            var byName = "host";
-	            var company = localStorage.getItem("uname");
+	            var company = window.COMPANY_NAME;
 
 	            if(company == "telus"){
 	                byName = "node";

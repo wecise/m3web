@@ -233,7 +233,7 @@
                                     return false;
                                 }
 
-                                _data = _.attempt(JSON.parse.bind(null,_list.message));
+                                _data = _list.message;
 
                                 _columns = columnsParse(_list.meta);
 
@@ -358,8 +358,6 @@
 
                 _.forEach(node, function(v,k){
 
-                    console.log(v,k)
-
                     let _rtn = classList(v.cid);
 
                     if (_.isEmpty(_rtn)) {
@@ -428,7 +426,7 @@
 
                     let _list = self.ruleList();
 
-                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+                    let _tmp =  _list.message;
 
                     let _nodes = _.map(_.keys(_tmp),function(v){
                         return {cid: _.now(), parent:'A2', rtype: 'A2', isParent:false, name: v, title: v, children:[]};
@@ -452,7 +450,7 @@
 
                     let _list = self.edgeList();
 
-                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+                    let _tmp = _list.message;
 
 					let _nodes = _.map(_tmp,function(v){
 					    return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};
@@ -682,7 +680,7 @@
 
                     let _list = self.edgeList();
 
-                    let _tmp = _.attempt(JSON.parse.bind(null, _list.message));
+                    let _tmp = _list.message;
 
                     let _nodes = _.map(_tmp,function(v){
                         return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};
