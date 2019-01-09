@@ -5,6 +5,13 @@
 
 <style type="text/css" media="screen">
 
+	.vue-search-input-component input{
+		height: 34px!important;
+	}
+	.vue-search-input-component .quick{
+		display: none;
+	}
+
 	.panel{
 		border-radius: 5px!important;
 	}
@@ -20,7 +27,7 @@
 	    box-shadow: inset 0 0px 0px rgba(0,0,0,.05);
 	    background-color: #ffffff;
 		margin-bottom: 10px;
-		padding: 0px 5px;
+		padding: 0px 15px;
 	}
 
 	.btn.dropdown-toggle {
@@ -116,6 +123,216 @@
 	  text-align: center;
 	  color: #ffffff;
 	}
+
+	/* For list-view */
+	#list {
+		padding-left:0px;
+		flex-flow: nowrap;
+		display: flex;
+		flex-direction: column;
+	}
+
+	#list ul{
+		padding-left: 0;
+		list-style: none;
+	}
+
+	#list ul > li{
+		width: 20em;
+		float: left;
+		height: 250px;
+		padding: 5px;
+		font-size: 10px;
+		line-height: 1;
+		text-align: center;
+	}
+
+	#list ul > li img {
+		width: 64px;
+	}
+
+	#list .bg-silver {
+		background: rgb(255, 255, 255) !important;
+		border: 1px solid rgb(221, 221, 221);
+	}
+
+	#list .widget-stats.bg-silver .stats-link a{
+		background: rgb(249, 249, 249);
+	}
+
+	#list .tags{
+		border: none;
+	}
+
+	#list .fs-name i {
+		color: rgb(153, 153, 153);
+	}
+
+	/* widget */
+	.widget-stats.bg-info:hover,.widget-stats.bg-info.active {
+        box-shadow: 2px 2px 20px 2px #999999;
+        background-color: rgb(255, 255, 255)!important;
+        /*background-image: linear-gradient(to bottom, rgb(255, 255, 255) 0%, rgb(239, 239, 239) 100%)!important;*/
+    }
+
+    .widget-stats.bg-grey:hover,.widget-stats.bg-grey.active {
+        box-shadow: 2px 2px 2px 2px #999;
+        background-color: rgb(183, 190, 208)!important;
+        background-image: linear-gradient(to bottom, rgb(182, 194, 202) 0%, rgb(244, 244, 244) 100%)!important;
+    }
+	#content .bg-info.dir {
+        background: rgb(255, 255, 255);
+        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
+        background: -webkit-linear-gradient(top, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
+        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
+    }
+
+    #content .bg-info {
+        background: rgb(255, 255, 255);
+        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
+        background: -webkit-linear-gradient(top, rgb(178, 225, 255) 0%,rgb(102, 182, 252) 100%);
+        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(201, 233, 249) 100%);
+    }
+
+    #content .col-md-3 {
+        width: 25%;
+        max-width: 350px;
+        min-width: 310px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    #content .fa-wrench{
+        color: #999999;
+    }
+
+    .widget-stats .stats-desc, .widget-stats .stats-title {
+        color: rgb(0, 0, 0);
+    }
+
+    @media screen and (max-width: 2560px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 13.5em;
+        }
+    }
+
+    @media screen and (max-width: 1960px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 13.5em;
+        }
+    }
+
+    @media screen and (max-width: 1280px) {
+
+        #content .stats-title {
+            font-family: 'microsoft yahei';
+            font-size: 22px;
+            color: rgb(0, 0, 0);
+            line-height: 25px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            max-height: 36px;
+            cursor: pointer;
+
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            width: 12em;
+        }
+    }
+
+    #content .stats-subtitle{
+        font-size:12px;
+        color: #999999;
+        line-height: 25px;
+        overflow: hidden;
+        max-height: 46px;
+        min-height: 46px;
+        cursor: pointer;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2
+    }
+
+    #content .media {
+        cursor: pointer;
+        margin-bottom: 0px;
+    }
+
+    #content .media-body{
+        color: #999999;
+    }
+
+    #content .media-body p{
+        margin: 0px 0px 3px 20px;
+    }
+
+    #content .media-object{
+        max-width:75px;
+        min-width:60px;
+    }
+
+    #content .stats-desc {
+        display: -webkit-box;
+        margin: 0px -15px -15px -15px;
+        background-color: rgb(247, 247, 247);
+        padding: 5px 10px;
+        border-top: 0.5px solid rgb(240, 243, 244);
+        color: rgb(124, 124, 124)!important;
+    }
+
+    #content .stats-desc .fa-wrench {
+        color: rgb(144, 144, 144);
+    }
+
+    #content .stats-desc .status {
+        right: -73%;
+        position: relative;
+        color: rgb(124, 124, 124)!important;
+    }
+
+	.col-lg-12 .widget-stats{
+        border: 1px solid rgb(229, 229, 229);
+        border-radius: 10px;
+        max-height: 210px;
+        min-height: 205px;
+    }
+
+    .col-lg-10 .widget-stats{
+        border: 1px solid rgb(240, 240, 240);
+        border-radius: 10px;
+        max-height: 210px;
+        min-height: 200px;
+    }
 
 </style>
 
@@ -456,6 +673,230 @@
 				    		$(this.$el).css("display","none");
 				    	}
 				    }
+				},
+				filters: {
+					pickName: function (item) {
+						let self = this;
+
+						if (_.isEmpty(item)) return '';
+
+						let _name = _.head(item.name.split("."));
+
+						/*if(!_.isEmpty(_name) && _.size(_name) > 9){
+							_name = _.split(_name,"",9).join("") + "...";
+						}*/
+
+						return _name;
+					},
+					pickRemark: function (item) {
+						let self = this;
+
+						if (_.isEmpty(item.attr)) return '';
+
+						let _remark = '';
+
+						if(_.attempt(JSON.parse.bind(null, item.attr)).remark){
+
+							_remark = _.attempt(JSON.parse.bind(null, item.attr)).remark;
+
+							/*if(_.isEmpty(_remark)) return '';
+
+
+							if($(window).width()>1280){
+								if(_.size(_remark) > 50){
+									_remark = _.split(_remark,"",49).join("") + "..."
+								}
+							} else {
+
+								if(_.size(_remark) > 44){
+									_remark = _.split(_remark,"",43).join("") + "..."
+								}
+							}*/
+
+						}
+
+						return _remark;
+					},
+					pickIcon: function(item){
+						let self = this;
+
+						return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+					},
+					readMore: function (text, length, suffix) {
+						return text.substring(0, length) + suffix;
+					},
+					toLocalTime: function (value) {
+						return moment(value).format("LLL");
+					}
+				},
+				methods: {
+					forwardCreative: function(action,item){
+						let self = this;
+
+						if(item.ftype === 'dir'){
+
+						} else {
+							let lang = window.MATRIX_LANG;
+
+							item = _.merge(item,{lang: lang, action:action});
+
+							let url = genFsUrl(item,null,null);
+
+							console.log(item,url)
+
+							window.open(url, "_blank");
+						}
+					}
+				}
+			}); 
+			
+			Vue.component('search-files', {
+				delimiters: ['#{', '}#'],
+	            template: "#search-files-template",
+	            props:{
+	                model: Array,
+	                show: false,
+	            },
+	            mounted: function(){
+					this.$nextTick(function () {
+						$(this.$el).css("display","none");
+					})
+				},
+	            watch: {
+				    show: function (val) {
+				    	if(val){
+				    		$(this.$el).css("display","");
+				    	} else {
+				    		$(this.$el).css("display","none");
+				    	}
+				    }
+				},
+				filters: {
+                    pickName: function(item){
+
+                        if (_.isEmpty(item)) return '';
+
+                        let _name = _.head(item.name.split("."));
+
+                        if(!_.isEmpty(_name)){
+                            _name = _.truncate(_name, {
+                                'length': 9
+                            });
+                        }
+
+                        return _name;
+                    },
+                    pickIcon: function(item){
+
+                        // extend || ...
+                        if( item.fullname === '/extend' ){
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                        } else {
+
+                            try{
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
+                            catch(error){
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            }
+                        }
+
+                    },
+                    pickTags: function(item){
+
+                        if(item.tags){
+                            return item.tags.join(",");
+                        } else {
+                            return "";
+                        }
+                    },
+	                pickAuthor: function(item){
+                        if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                            return _.attempt(JSON.parse.bind(null, item.attr)).author;
+                        }
+	                },
+                    pickRemark: function(item){
+                        if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                            return _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                        }
+                    }
+				},
+				methods:{
+					mouseOver: function(item){
+						let self = this;
+
+						$(self.$el).find('.fs-node-highlight').removeClass('fs-node-highlight');
+						$('#fs_node_'+item.id).find('.widget').addClass('fs-node-highlight');
+
+					},
+					mouseOut: function(item){
+						let self = this;
+
+						$('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
+					},
+					openIt: function(item, path){
+						let self = this;
+
+						if(!_.isEmpty(item)){
+
+							if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
+
+
+								let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
+								let _wnd = maxWindow.winApp(item.name, contents, null,null);
+
+							} else if(_.includes(['mov','mp4','avi'], item.ftype)) {
+
+								let contents = `<div class="embed-responsive embed-responsive-16by9">
+													<video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
+														your browser does not support the video tag
+													</video>
+												</div>
+												`;
+
+								let _wnd = maxWindow.winApp(item.name, contents, null,null);
+
+							} else if(_.includes(['pdf'], item.ftype)) {
+
+								let contents = `<div class="embed-responsive embed-responsive-16by9">
+													<iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
+												</div>`;
+
+								let _wnd = maxWindow.winApp( item.name, contents, null,null);
+
+							} else if(_.includes(['pptx','ppt'], item.ftype)) {
+
+								window.open(`/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}`, "_blank");
+
+							} else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
+
+							self.editIt(item);
+
+							} else if(_.includes(['swf'], item.ftype)) {
+								let contents = `<div class="embed-responsive embed-responsive-16by9">
+													<video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
+														Your browser does not support the video tag.
+													</video>
+												</div>`;
+
+								let _wnd = maxWindow.winApp(item.name, contents, null,null);
+							} else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
+
+								_.merge(item,{action:'run'});
+
+								let url = genFsUrl(item,null,null);
+
+								window.open(url,'_blank');
+							} else if(_.includes(['md'], item.ftype)){
+								_.merge(item,{action:'run'});
+
+								let url = genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
+
+								window.open(url,'_blank');
+							}
+						}
+
+					}
 				}
 	        }); 
 
@@ -510,6 +951,7 @@
 						options: {},
 						data: []
 					},
+					files: [],
 					graph: [],
 					hisSearch: [],
 					search: {
@@ -538,7 +980,6 @@
 
                     self.search.input.term = _searchObject.cond;
                     self.search.preset = _searchObject.preset;
-                    console.log(JSON.stringify(self.search.preset))
 
                     _.delay(function () {
                         eventHub.$on('preset-selected-event', self.setPresetDefault);
@@ -614,6 +1055,13 @@
 							return true;
 						}
 					},
+					ifShowFiles: function(){
+						if(_.isEmpty(this.files)) {
+							return false;
+						} else {
+							return true;
+						}
+					},
 					ifShowGraph: function(){
 						if(_.isEmpty(this.graph)) {
 							return false;
@@ -666,7 +1114,8 @@
                         let journal = new Array();
                         let tickets = new Array();
                         let change = new Array();
-                        let graph = new Array();
+						let files = new Array();
+						let graph = new Array();
 
                         if(_.isEmpty(_list.message)) {
                             event = [];
@@ -677,7 +1126,8 @@
                             journal = [];
                             tickets = [];
                             change = [];
-                            graph = [];
+							files = [];
+							graph = [];
                         } else {
                             _.filter(_list.message, function(d){
                                 if( _.includes(d.class, '/matrix/devops/event/omnibus/journal') ){
@@ -777,14 +1227,12 @@
                                         showExport: false,
                                     };
                                 } else if( _.includes(d.class, '/matrix/filesystem') ){
-                                    if( _.includes(d.type, 'imap') ) {
-                                        var href="/web/lib/mxgraph/graph/index.html?lang=eg&chrome=2&name="+d.name+"&parent="+d.parent.substring(11,d.parent.length);
-
-                                        graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
-                                    } else if( _.includes(d.type, 'idas') ) {
-                                        var href="/janesware/dashboard?name="+d.name;
-
-                                        graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: href }) );
+									if( _.includes(['imap','iflow','ishow','md'],d.ftype) ) {
+										d = _.merge(d,{lang: window.mxLanguage, action:'run'});
+										let url = genFsUrl(d,null,null);
+										graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: url }) );
+                                    } else {
+										files.push(d);
                                     }
                                 } else if( _.includes(d.class, '/matrix/devops/tickets') ){
                                     tickets.push( _.merge(d, { preset: JSON.stringify(self.search.default) } ));
@@ -828,20 +1276,22 @@
                         self.journal.data = journal;//self.filterByCond(journal,'serial');
                         self.tickets.data = tickets;
                         self.change.data = change;
-                        self.graph = graph;
+						self.files = files;
+						self.graph = graph;
 
                         self.all.list = _.cloneDeep(_list.message);
 
                         self.search.result = [];
-                        self.search.result.push({name:'Event', count:self.event.data.length, href:"#search-event"});
+                        self.search.result.push({name:'事件', count:self.event.data.length, href:"#search-event"});
                         self.search.result.push({name:'Syslog', count:self.syslog.data.length, href:"#search-syslog"});
-                        self.search.result.push({name:'Log', count:self.log.data.length, href:"#search-log"});
-                        self.search.result.push({name:'Raw', count:self.raw.data.length, href:"#search-raw"});
+                        self.search.result.push({name:'日志', count:self.log.data.length, href:"#search-log"});
+                        self.search.result.push({name:'报文', count:self.raw.data.length, href:"#search-raw"});
                         self.search.result.push({name:'Journal', count:self.journal.data.length, href:"#search-journal"});
-                        self.search.result.push({name:'Performance', count:self.performance.data.length, href:"#search-performance"});
-                        self.search.result.push({name:'ITMap', count:self.graph.length, href:"#search-graph"});
-                        self.search.result.push({name:'Tickets', count:self.tickets.data.length, href:"#search-tickets"});
-                        self.search.result.push({name:'Change', count:self.change.data.length, href:"#search-change"});
+                        self.search.result.push({name:'性能', count:self.performance.data.length, href:"#search-performance"});
+						self.search.result.push({name:'工单', count:self.tickets.data.length, href:"#search-tickets"});
+						self.search.result.push({name:'变更单', count:self.change.data.length, href:"#search-change"});
+						self.search.result.push({name:'文件', count:self.files.length, href:"#search-files"});
+						self.search.result.push({name:'图', count:self.graph.length, href:"#search-graph"});
 
                     },
 					filterByCond: function(data,cond){
@@ -884,7 +1334,6 @@
 			    if (keycode == 13) {
 			    	$("#btn_search").click();
 			    } else if (keycode == 27) { 
-			    	alert(27)
 			    	self.setSearchTerm("");
 			    }
 			})
@@ -955,6 +1404,8 @@
 								
 								<search-performance :model="performance" :show="ifShowPerformance"></search-performance>
 								
+								<search-files :model="files" :show="ifShowFiles"></search-files>
+
 								<search-graph :model="graph" :show="ifShowGraph"></search-graph>
 							</div>
 							<div role="tabpanel" class="tab-pane" id="search-result-timeline">
@@ -1005,7 +1456,7 @@
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list" aria-controls="list" role="tab" data-toggle="tab" style="border:none;">
+			  				<a href="#listView" aria-controls="listView" role="tab" data-toggle="tab" style="border:none;">
 			  					List
 			  				</a>
 			  			</li>
@@ -1019,7 +1470,7 @@
 			  										:data="model.data"
 			  										forward="event"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="list">
+			  			<div role="tabpanel" class="tab-pane" id="listView">
 			  				<span v-for="item in model.data">
 						    	<h6><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">${item.host}</a></h6>
 								<span class="text-muted">
@@ -1454,6 +1905,51 @@
 	</div>
 </script>
 
+<script type="text/x-template" id="search-files-template">
+	<div id="search-files">  
+		<div class="well well-default expandit">
+			<h5>
+				<span class="badge" style="background-color:#fff;"><i class="fa fa-dashboard" style="color:rgba(3,3,3,0.5);"></i></span>
+				<a data-toggle="collapse" href="#collapseFiles" aria-expanded="true" aria-controls="collapseFiles">
+					文件
+				</a>
+			</h5>
+			
+			<div class="collapse in" id="collapseFiles">
+				<div id="list">
+					<ul>
+					   <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
+							:id="'fs_node_'+item.id"
+							@mouseover="mouseOver(item)"
+							@mouseout="mouseOut(item)"
+							style="cursor: pointer;"
+							:title="item.name"
+							v-for="item in model">
+						   <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
+							   <div class="stats-info" @dblclick="openIt(item, item.parent+'/'+item.name);" >
+								   <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
+							   </div>
+							   <div class="stats-link">
+								   <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
+									   <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
+									   <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
+									   <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
+									   <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
+									   <!-- <p><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p> -->
+									   <p><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
+								   </a>
+							   </div>
+							   <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+								   <i class="fa fa-bars"></i>
+							   </div>
+						   </div>
+					   </li>
+				   </ul></div>
+		    </div>
+	    </div>
+	</div>
+</script>
+
 <script type="text/x-template" id="search-graph-template">
 	<div id="search-graph">  
 		<div class="well well-default expandit">
@@ -1466,33 +1962,35 @@
 			
 			<div class="collapse in" id="collapseITmap">
 				<div class="row">
-		            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" v-for="(item,index) in model" >
-		                <div class="well well-sm" style="margin: 0px -10px 15px 1px;min-height: 160px; border: 1px solid #f0f0f0;">
-		                    <span>
-		                        <a :href="item.href" target="_blank" style="color:rgba(0,0,0,.5);"><h4><i class='fa fa-braille' style='color:#a5771a;'></i> ${item.name}</h4></a>
-		                    </span>
-		                    <hr>
-		                    <span>
-		                        <a :href="item.href" target="_blank">
-		                            <img :src="'/web/assets/images/graph/neuro_'+_.random(0,7)+'.png'" style="width:75%;height:140px; margin: 0px 35px;">
-		                        </a>
-		                    </span>
-		                    <hr>
-		                    <span>
-		                        <i class='fa fa-tags' style='color:#337ab7;'></i> <label :id="'tagsLabel'+index" :value="item.tag._all" :data-index="index" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'></label>
-		                    </span>
-		                    <span class="pull-left" style="font-size: 10px;">
-		                        <i class='fa fa-user' style='color:#337ab7;'></i> ${item.username} &nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-clock-o' style='color:#337ab7;'></i> ${ new Date(item.vtime).toLocaleString() } &nbsp;&nbsp;&nbsp;&nbsp;
-		                        <span class="rating" v-for="data in item.star">
-		                        <span style="color:gold;">☆</span>
-		                    </span>
-		                    &nbsp;&nbsp;&nbsp;&nbsp;
-		                    <a :href="item.href" target="_blank"><i class="fa fa-television" style='color:rgba(0,0,0,.5);position: absolute;right: 10px;top: 15px;z-index: 100;'></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
-		                    </span>
-		                    <br>
-		                    <br>
-		                </div>
-		            </div>
+		            <div class="col-md-3 col-sm-6" v-for="(item,index) in model" >
+						<div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
+							<div @click="forwardCreative('run',item)">
+								<div class="stats-title">
+									<i class="fa fa-braille fa-fw"></i>
+									<span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
+								</div>
+
+								<div class="stats-subtitle">
+									${item | pickRemark}
+								</div>
+
+								<div class="media">
+									<div class="media-left">
+										<img class="media-object" :src="item | pickIcon">
+									</div>
+									<div class="media-body">
+										<p>项目作者： ${item.username}</p>
+										<p>更新日期： ${ moment(item.vtime).format("L") }</p>
+										<p>更新时间： ${ moment(item.vtime).format("LTS") }</p>
+										<p class="status">
+											项目状态： 就绪
+										</p>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
 		        </div>
 		    </div>
 	    </div>

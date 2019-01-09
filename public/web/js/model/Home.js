@@ -122,7 +122,7 @@ class Home extends Matrix {
                                     return {
 
                                         items: {
-                                            "default": {name: '{{.i18n.Tr "home_defaulthome"}}', icon: "fas fa-home", callback: function(key, opt) {
+                                            "default": {name: '设为首页', icon: "fas fa-home", callback: function(key, opt) {
                                                     setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
                                                 }
                                             }
@@ -152,8 +152,6 @@ class Home extends Matrix {
                             }
 
                             _param = _ifDebug + _ifHistory + _param;// + _forTime;
-
-                            console.log(_param);
 
                             let _list = fetchData(_param);
                             if(_.isEmpty(_list.message)){
@@ -285,8 +283,7 @@ class Home extends Matrix {
                             let ldap = new Object();
 
                             ldap.class = "/matrix/ldap";
-                            ldap.fullname = `{{.SignedUser.FullName}}`;
-                            ldap.fullname = ldap.fullname.replace(/"/g,"");
+                            ldap.fullname = window.SignedUser_FullName;
 
                             if(_.indexOf(self.user.appsId, item.id) > -1){
                                 _.pull(self.user.appsId,item.id);

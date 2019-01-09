@@ -404,18 +404,42 @@
                     return false;
                 }
 
+                // Path
+                if(_list.meta.type === 'path'){
+
+                    let dataset = [];
+                    let cols = {
+                                    "path":[
+                                        {field:"num",title:"序号"},
+                                        {field:"path",title:"路径", render:function(data,type,row){
+                                            return _.map(data.split(">"),function(v){
+                                                return `<u>${v}</u>`;
+                                            }).join("-->");
+                                        }}
+                                    ]
+                                };
+                    
+                    _.forEach(_data[0].graph.paths,function(v,index){
+                        dataset.push( {num:`路径${++index}`, path:_.values(v).join(">"), class:"path"} );
+                    })
+                    self.result = {id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(dataset,'class'), columns: cols};
+                    
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                    return false;
+                }
+
                 // For Select count Pattern
 	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
 	            let temp = _list.message;
 
                 if(!_.has(temp[0],'class')) {
-
                     _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
-
                 }
 
                 self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
-
+                
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
@@ -540,7 +564,7 @@
 
                 let _url = fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
 
-                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
+                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
             },
             saveToFs: function(){
                 let self = this;

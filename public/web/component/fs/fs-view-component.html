@@ -429,7 +429,7 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
 										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
@@ -469,14 +469,14 @@
 
                         // extend || ...
                         if( item.fullname === '/extend' ){
-                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         } else {
 
                             try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                             catch(error){
-                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                         }
 
@@ -578,7 +578,7 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
 										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
@@ -618,14 +618,14 @@
 
                         // extend || ...
                         if( item.fullname === '/extend' ){
-                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         } else {
 
                             try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                             catch(error){
-                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                         }
 
@@ -723,7 +723,7 @@
 								       v-for="item in model">
 									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
 										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
-											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
+											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name" :data-info="JSON.stringify(item)">
@@ -755,14 +755,14 @@
 
                         // extend || ...
                         if( item.fullname === '/extend' ){
-                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         } else {
 
                             try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                             catch(error){
-                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                         }
                     }
@@ -1260,7 +1260,7 @@
 
                         let title = "上传";
 
-                        let wnd = mxWindow.winUpload(title, '<div id="files" class="files"></div>', null,null);
+                        let wnd = maxWindow.winUpload(title, '<div id="files" class="files"></div>', null,null);
 
                         // 更新信息栏信息
                         new Vue({
@@ -1451,31 +1451,31 @@
                     if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
 
 
-                        let contents = `<img src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
-                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
+                        let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
+                        let _wnd = maxWindow.winApp(item.name, contents, null,null);
 
                     } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
 
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <video src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
+                                            <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
 												your browser does not support the video tag
 											</video>
 										</div>
 										`;
 
-                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
+                        let _wnd = maxWindow.winApp(item.name, contents, null,null);
 
                     } else if(_.includes(['pdf'], item.ftype)) {
 
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                            <iframe class="embed-responsive-item" src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}"></iframe>
+                                            <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
 										</div>`;
 
                         let _wnd = newWindow('fsapp', item.name, contents, null,null);
 
                     } else if(_.includes(['pptx','ppt'], item.ftype)) {
 
-                        window.open(`/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}`, "_blank");
+                        window.open(`/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}`, "_blank");
 
                     } else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
 
@@ -1483,12 +1483,12 @@
 
                     } else if(_.includes(['swf'], item.ftype)) {
                         let contents = `<div class="embed-responsive embed-responsive-16by9">
-											<video src="/fs${path}?type=download&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
+											<video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
 												Your browser does not support the video tag.
 											</video>
 										</div>`;
 
-                        let _wnd = mxWindow.winApp(item.name, contents, null,null);
+                        let _wnd = maxWindow.winApp(item.name, contents, null,null);
                     } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
 
                         _.merge(item,{action:'run'});
@@ -1510,12 +1510,12 @@
 			    let self = this;
 
                 let file = [item.parent, item.name].join("/");
-                window.open(`/fs${file}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`,'_blank');
+                window.open(`/fs${file}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,'_blank');
 			},
 			copyUrl: function(item){
 			    let self = this;
 
-                let file = `/fs${[item.parent, item.name].join("/")}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`;
+                let file = `/fs${[item.parent, item.name].join("/")}?type=open&issys=${window.SignedUser_IsAdmin}`;
 
                 if(_.includes(['md','imap','iflow','ishow'],item.ftype)){
                     _.merge(item,{action:'run'});
@@ -1626,7 +1626,7 @@
             info: function(node){
                 let self = this;
 
-                let _win = mxWindow.winInfo("属性",'<div id="fs-info"></div>',null,null);
+                let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
 
                 let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.UserName}}", "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
 
@@ -1951,7 +1951,7 @@
             deployIt: function(item){
                 let self = this;
 
-                let wnd = mxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
+                let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
 
                 let form = {
                     el: "#fs-app-deploy",
@@ -2012,7 +2012,7 @@
                             cnname: _.head(item.name.split(".")),
                             enname: _.head(item.name.split(".")),
                             seat: _.random(100, 10000),
-                            url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=download&issys=${window.SignedUser_IsAdmin}`,
+                            url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,
                             icon: {
                                 value: '',
                                 list: []
@@ -2111,7 +2111,7 @@
                 }
                 catch(err){
                     // 打开窗体
-                    let win = mxWindow.winEditor(`${item.parent}/${item.name}`, content, null,null);
+                    let win = maxWindow.winEditor(`${item.parent}/${item.name}`, content, null,null);
 
                     // 应用扩展名影射不同的编辑模式
                     let mode = function(){
@@ -2172,7 +2172,7 @@
                                             oldInput: "",
                                             newInput: "",
                                             mode: mode(),
-                                            theme: "tomorrow",
+                                            theme: "terminal",
                                             printMargin: false,
                                             readOnly: false,
                                             fs: item

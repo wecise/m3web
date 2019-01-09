@@ -13,19 +13,22 @@
         window.SignedUser_FullName = signeduser.fullname;
         window.SignedUser_IsAdmin = signeduser.isadmin;
         window.ASSETS_ICON = '/fs/assets/images';
+        window.mxLanguage = window.MATRIX_LANG;
 	</script>
 
 	<link rel="stylesheet" type="text/css" href="styles/grapheditor.css">
 
 	<script src="/web/vendor/jquery/jquery-3.3.1.min.js"></script>
 
-	<!-- Less core JavaScript-->
-	<link href="/web/css/bootstrap-3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
-	<script src="/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
+	<!-- Bootstrap core CSS -->
+	<link href="/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
+	<link href="/web/css/dist/css/theme_wecise.css" rel="stylesheet">
+	<script src="/web/css/dist/js/bootstrap.min.js"></script>
+
 
 	<!-- Color Theme core CSS -->
-	<link href="/web/css/color/color_style.min.css" rel="stylesheet">
-	<link href="/web/css/color/color_style_responsive.min.css" rel="stylesheet">
+	<!--<link href="/web/css/color/color_style.min.css" rel="stylesheet">
+	<link href="/web/css/color/color_style_responsive.min.css" rel="stylesheet">-->
 	<link href="/web/css/color/style.min.css" rel="stylesheet">
 
 	<!-- Bootstrap ICON  CSS -->
@@ -91,38 +94,6 @@
 			padding-bottom: 0px!important;
 		}
 
-		/* For Sidebar Tabs */
-		#imap-tabs > .nav-tabs {
-			border: none;
-			border-bottom: 1px solid rgba(3,3,3,.3);
-			background-color: transparent;
-		}
-
-		#imap-tabs > .nav>li>a {
-			padding: 5px 15px;
-			border-radius: 0;
-			color: rgba(3,3,3,.8);
-			font-weight: normal;
-			font-size: 12px;
-		}
-
-		#imap-tabs > .nav>li>a:hover {
-			background-color: rgba(102,204,255,1);
-			color: rgba(3,3,3,.8);
-			border: none;
-		}
-
-		#imap-tabs > .nav-tabs>li.active>a, #imap-tabs > .nav-tabs>li.active>a:focus, #imap-tabs > .nav-tabs>li.active>a:hover {
-			border: none;
-			border-bottom: 2px solid #e5e5e5!important;
-			color: rgba(3,3,3,.8);
-			font-weight:bolder;
-			font-size: 12px;
-		}
-
-		#imap-tabs > .tab-content {
-			padding: 2px;
-		}
 
 		/*----------  mxWindow ----------*/
 		html td.mxWindowTitle {
@@ -256,8 +227,6 @@
     {
         const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
         const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
-
-        window.mxLanguage = window.MATRIX_LANG;
 
         var editorUiInit = EditorUi.prototype.init;
 

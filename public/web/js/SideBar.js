@@ -113,6 +113,11 @@ class SideBar {
             },
             template: `<ul class="nav animated bounceIn">
                         <li class="dropdown top-bar">
+                            <a class="sidebar-toggle" href="javascript:sideBar.toggleSideBar();" data-tooltip="tooltip" title="切换导航栏">
+                                <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">切换</span>
+                            </a>
+                        </li>
+                        <li class="dropdown top-bar">
                             <a  href="javascript:void(0);"  
                                 title="应用"
                                 data-tooltip="tooltip"
@@ -158,7 +163,7 @@ class SideBar {
                 initWnd: function(){
 
                     setTimeout(() => {
-                        let wnd = mxWindow.winApps(`工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
+                        let wnd = maxWindow.winApps(`工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
                         new Vue(sideBar.appBox);
                     }, 50);
 
@@ -182,14 +187,21 @@ class SideBar {
         }
 
         if(index == 0){
+            $(".sidebar-toggle-play").addClass("toggle animated flash");
             $("#sidebar").css('display','none');
             $("#sidebar-bg").css('display','none');
 
             $("#content").css("margin-left","0px");
 
+            $("#content.content.toggle").on('click',function(e){
+                e.preventDefault();
+                sideBar.toggleSideBar();
+            })
+
             index = 1;
 
         } else {
+            $(".sidebar-toggle-play").removeClass("toggle animated flash");
             $("#sidebar").css('display','');
             $("#sidebar-bg").css('display','');
 

@@ -17,9 +17,7 @@ class Creative {
     }
 
     init() {
-        VueLoader.onloaded(["vue-fs-tree-component",
-            "ai-robot-component"
-        ],function() {
+        VueLoader.onloaded(["ai-robot-component"],function() {
             $(function() {
 
                 let _appVue = new Vue({
@@ -349,7 +347,7 @@ class Creative {
                         newDir: function() {
                             let self = this;
 
-                            let win = mxWindow.winSmall('{{.i18n.Tr "creative-new-project"}}',`<div id="creative-starting"></div>`, null,null);
+                            let win = maxWindow.winDir('新建项目',`<div id="creative-starting"></div>`, null,null);
 
                             let _vue  = new Vue({
                                 delimiters: ['#{', '}#'],
@@ -407,7 +405,7 @@ class Creative {
                                         let _root = _.cloneDeep(self.model.root);
 
                                         if (_.isEmpty(me.model.name)) {
-                                            swal("名称不能为空！", "", "warning");
+                                            alertify.error("名称不能为空！");
                                             return false;
                                         }
 
@@ -462,7 +460,7 @@ class Creative {
                         newFile: function() {
                             let self = this;
 
-                            let win = mxWindow.winFile('{{.i18n.Tr "creative-new-file"}}',`<div id="creative-starting"></div>`, null,null);
+                            let win = maxWindow.winFile('新建文件',`<div id="creative-starting"></div>`, null,null);
 
                             let _vue  = new Vue({
                                 delimiters: ['#{', '}#'],
@@ -536,7 +534,7 @@ class Creative {
                                         let _xml = null;
 
                                         if (_.isEmpty(me.model.name)) {
-                                            swal("名称不能为空！", "", "warning");
+                                            alertify.error("名称不能为空！");
                                             return false;
                                         }
 
@@ -559,8 +557,6 @@ class Creative {
                                         let _rtn = fsNew(_type, self.model.root, _name+"."+_type, _xml, _info);
 
                                         if(_rtn == 1){
-                                            swal("",_name,"success");
-
                                             _.delay(function(){
                                                 self.load();
                                                 win.close();
@@ -615,12 +611,13 @@ class Creative {
                                 self.load();
 
                             } else {
-                                let _lang = `{{.Lang}}`;
-                                let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
+                                let lang = window.MATRIX_LANG;
 
                                 item = _.merge(item,{lang: lang, action:action});
 
                                 let url = genFsUrl(item,null,null);
+
+                                console.log(item,url)
 
                                 window.open(url, "_blank");
                             }
@@ -650,7 +647,7 @@ class Creative {
                         info: function(node){
                             let self = this;
 
-                            let _win = mxWindow.winInfo("属性",'<div id="fs-info"></div>',null,null);
+                            let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, $('#content'));
 
                             let _infoVue = new Vue({
                                 delimiters: ['#{', '}#'],

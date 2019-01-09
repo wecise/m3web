@@ -12,7 +12,7 @@
             <a href="javascript:void(0)" @click="openHelpPanel" class="btn btn-xs btn-help" style="background-color: #dce2eb;border: 1px solid #ccc;border-right: none;width: 24px;height: 34px;border-radius: 0px;padding: 7px 5px;">
                 <i class="fa fa-question"></i>
             </a>
-            <div class="btn-group" :style="'display:'+model.quick+';'">
+            <div class="btn-group quick" :style="'display:'+model.quick+';'">
 				<a href="javascript:;" data-toggle="dropdown" class="btn btn-default dropdown-toggle" aria-expanded="true">Quick <span class="caret"></span></a>
 				<ul class="dropdown-menu">
 					<li v-for="item in quick.list" style="display:-webkit-box;">

@@ -62,7 +62,7 @@ class Matrix {
                 mx.handleDraggablePanel();
                 // mx.handleLocalStorage();
                 // mx.handleResetLocalStorage();
-                mx.handleSlimScroll();
+                //mx.handleSlimScroll();
                 mx.handleSidebarMenu();
                 // mx.handleMobileSidebarToggle();
                 mx.handleSidebarMinify();
@@ -116,6 +116,67 @@ class Matrix {
         return 'zh_CN';// ['zh_CN','en_EG']
     }
 
+    // 打标签
+    tagInput( className, container, row, fn){
+
+        let tag = {
+            el: container,
+            template: `<input class="${className}" name='tags' placeholder='' :value='value|pickTags' autofocus>`,
+            data: {
+                tagify: null,
+                value: row.tags
+            },
+            filters: {
+                pickTags: function(item){
+                    if(item){
+                        return item.join(",") || [];
+                    } else {
+                        return null;
+                    }
+                }
+            },
+            mounted: function(){
+
+                let me = this;
+                let input = document.querySelector(`.${className}`);
+
+                // init Tagify script on the above inputs
+                me.tagify = new Tagify(input, { whitelist : [], blacklist : [] });
+
+                me.tagify.on('add', me.onAddTag)
+                    .on('remove', me.onRemoveTag);
+
+            },
+            methods: {
+
+                onAddTag: function(event){
+
+
+                    let input = {class: row.class, action: "+", tag: event.detail.value, id: row.id};
+                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                    if(rtn.status == 'ok'){
+                        fn();
+                    }
+
+                },
+                onRemoveTag: function(event){
+
+                    let input = {class: row.class, action: "-", tag: event.detail.value, id: row.id};
+                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                    if(rtn.status == 'ok'){
+                        fn();
+                    }
+
+                }
+
+            }
+        };
+
+        return tag;
+    }
+
     // 全文搜索配置
     search(){
         let search = {
@@ -124,12 +185,12 @@ class Matrix {
                 term: null,
                 preset: {"default":{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},"nearest":[{"name":"最近 30秒","value":" | nearest 30 seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"最近 1分钟","value":" | nearest 1 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 5","value":" | nearest 5 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 10","value":" | nearest 10 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 15分钟","value":" | nearest 15 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 30分钟","value":" | nearest 30 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 1小时","value":" | nearest 1 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 2小时","value":" | nearest 2 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 8小时","value":" | nearest 8 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"L","filter":"YYYY/MM/DD HH"}}],"realtime":[{"name":"30秒","value":" | within 30seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"1分钟","value":" | within 1minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"5分钟","value":" | within 5minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"10分钟","value":" | within 10minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"15分钟","value":" | within 15minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"30分钟","value":" | within 30minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"1小时","value":" | within 1hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"2小时","value":" | within 2hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"8小时","value":" | within 8hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1天","value":" | within 1day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1月","value":" | within 1month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD HH"}},{"name":"所有","value":"","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM/DD HH"}}],"relative":[{"name":"今天","value":" | today ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"昨天","value":" | yesterday ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"本周","value":" | week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上周","value":" | last week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"本月","value":" | month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上个月","value":" | last month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"今年","value":" | year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}},{"name":"去年","value":" | last year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}}],"range":{"from":"","to":""},"others":{"ifHistory":false,"ifDebug":false,"forTime":" for vtime "}},
             },
-            template: `<form class="navbar-form full-width topbar">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="搜索" v-model="term">
-                                <button class="btn btn-search" @click="onSearch" @keyup.13="onSearch"><i class="fa fa-search"></i></button>
-                            </div>
-                        </form>`,
+            template: `<div class="input-group full-width topbar">
+                            <input type="text" class="form-control-transparent" placeholder="搜索" v-model="term">
+                            <span class="input-group-btn">
+                                <button class="btn btn-transparent" @click="onSearch" @keyup.13="onSearch"><i class="fa fa-search"></i></button>
+                            </span>
+                        </div>`,
             mounted:function(){
                 let me = this;
 
@@ -170,7 +231,7 @@ class Matrix {
 
             $("#ai-robot").empty();
 
-            $("#ai-robot").append(`<div style="position: absolute;right:30px;top: -10px;cursor: pointer;" class="animated fadeIn">
+            $("#ai-robot").append(`<div style="position: absolute;right:35px;top: 0px;cursor: pointer;" class="animated fadeIn">
                                 ${svg}
                              </div>
                              <span class="badge badge-danger" style="margin: 15px 15px;">5</span>`).find('svg').click(function(){
@@ -179,7 +240,7 @@ class Matrix {
                     $("#jsPanel-robot").remove();
                 }
 
-                let win = mxWindow.winRobot('∵', '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
+                let win = maxWindow.winRobot('∵', '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
 
                 let robotVue = {
                     el: '#robot-active-win',
@@ -197,6 +258,37 @@ class Matrix {
             });
 
         },'text');
+    }
+
+    // 获取当前页
+    getPage(){
+        let path = window.location.pathname;
+        let page = path.split("/").pop();
+        return page;
+    }
+
+    // 截取URL
+    urlParams(){
+        (function(url){
+            var result = new Object();
+            var idx = url.lastIndexOf('?');
+
+            if (idx > 0)
+            {
+                var params = url.substring(idx + 1).split('&');
+
+                for (var i = 0; i < params.length; i++)
+                {
+                    idx = params[i].indexOf('=');
+
+                    if (idx > 0)
+                    {
+                        result[params[i].substring(0, idx)] = params[i].substring(idx + 1);
+                    }
+                }
+            }
+            return result;
+        })(window.location.href)
     }
 
     // API菜单
@@ -231,7 +323,6 @@ class Matrix {
             }
         });
     }
-
 
 
     // 全屏控制
@@ -275,6 +366,30 @@ class Matrix {
             alwaysVisible: !0
         };
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? ($(e).css("height", a), $(e).css("overflow-x", "scroll")) : $(e).slimScroll(t)
+    }
+
+    tabs(containerClass){
+        $(`.nav-tabs.${containerClass}-ul`).on("click", "a", function (e) {
+            e.preventDefault();
+            if (!$(this).hasClass('add-tab')) {
+                $(this).tab('show');
+            }
+        })
+            .on("click", "span", function () {
+                var anchor = $(this).siblings('a');
+                $(anchor.attr('href')).remove();
+                $(this).parent().remove();
+                $(`.nav-tabs.${containerClass}-ul li`).children('a').first().click();
+            });
+
+        $(`.${containerClass}-ul .add-tab`).click(function (e) {
+            e.preventDefault();
+            var id = $(`.nav-tabs.${containerClass}-ul`).children().length;
+            var tabId = `tab_${id}`;
+            $(this).closest('li').before(`<li role="presentation"><a href="#${tabId}" aria-controls="${tabId}" role="tab" data-toggle="tab">${tabId}</a><span class="fas fa-times"></span></li>`);
+            $(`.tab-content.${containerClass}-content`).append(`<div class="tab-pane" id="${tabId}">${id}</div>`);
+            $(`.nav-tabs.${containerClass}-ul li:nth-child(${id}) a`).click();
+        });
     }
 
     handleSidebarMenu() {
@@ -387,13 +502,15 @@ class Matrix {
                     o = $(t).offset().top;
                 i = o - n
             }
-            if ($("body").hasClass("panel-expand") && $(a).hasClass("panel-expand")) $("body, .panel").removeClass("panel-expand"), $(".panel").removeAttr("style"), $(t).removeAttr("style");
-            else if ($("body").addClass("panel-expand"), $(this).closest(".panel").addClass("panel-expand"), 0 !== $(t).length && 40 != i) {
+            if ($("body").hasClass("panel-expand") && $(a).hasClass("panel-expand")) {
+                $("body, .panel").removeClass("panel-expand"),
+                $(".panel").removeAttr("style"), $(t).removeAttr("style");
+            } else if ($("body").addClass("panel-expand"), $(this).closest(".panel").addClass("panel-expand"), 0 !== $(t).length && 40 != i) {
                 var l = 40;
                 $(a).find(" > *").each(function() {
                     var e = $(this).attr("class");
                     "panel-heading" != e && "panel-body" != e && (l += $(this).height() + 30)
-                }), 40 != l && $(t).css("top", l + "px")
+                }), 40 != l && $(t).css("top", 40 + "px")
             }
             $(window).trigger("resize")
         })
@@ -661,29 +778,6 @@ class Matrix {
             return !0
         })
     }
-
-   /* App(){
-            return {
-                mx.handleDraggablePanel(),
-                // mx.handleLocalStorage(),
-                // mx.handleResetLocalStorage(),
-                mx.handleSlimScroll(),
-                mx.handleSidebarMenu(),
-                // mx.handleMobileSidebarToggle(),
-                mx.handleSidebarMinify(),
-                // mx.handleMobileSidebar(),
-                // mx.handleThemePageStructureControl(),
-                // mx.handleThemePanelExpand(),
-                mx.handleAfterPageLoadAddClass(),
-                mx.handlePanelAction(),
-                mx.handelTooltipPopoverActivation(),
-                mx.handleScrollToTopButton(),
-                mx.handlePageContentView(),
-                mx.handleIEFullHeightContent()
-                // mx.handleUnlimitedTabsRender()}
-            };
-    }*/
-
 
 }
 

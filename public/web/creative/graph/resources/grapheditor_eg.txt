@@ -353,6 +353,7 @@ mx-script=Script
 mx-menu-config=Config
 mx-menu-shape=Shape
 mx-menu-shape-map=Map
+mx-menu-shape-bim=Bim
 mx-menu-shape-flowchart=Flow Chart
 mx-menu-config-biz=Biz
 mx-menu-config-app=App

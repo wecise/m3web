@@ -506,7 +506,7 @@
             deployIt: function(item){
                 let self = this;
 
-                let wnd = mxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
+                let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
 
                 let form = {
                     el: `#fs-app-deploy-${self.bid}`,
@@ -567,7 +567,7 @@
                             cnname: _.head(item.name.split(".")),
                             enname: _.head(item.name.split(".")),
                             seat: _.random(100, 10000),
-                            url: `/fs${[item.parent, item.name].join("/")}?issys=${window.SignedUser_IsAdmin}&type=download`,
+                            url: `/fs${[item.parent, item.name].join("/")}?issys=${window.SignedUser_IsAdmin}&type=open`,
                             icon: {
                                 value: '',
                                 list: []
@@ -682,7 +682,7 @@
 
 	            // 后运行 depend ftype: js/html
 	            if(_.includes(['html','html'],self.model.fs.ftype)){
-                    eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=download`);
+                    eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=open`);
 	            } else {
 
 	                try {

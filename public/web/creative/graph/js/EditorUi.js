@@ -3061,7 +3061,7 @@ EditorUi.prototype.createUi = function()
 	{
 		// this.container.appendChild(this.sidebarContainer);
         var menu = `<div role="tabpanel" id="imap-tabs">
-						<ul class="nav nav-tabs nav-tabs-no-bg" role="tablist" style="border: none;border-bottom: 1px solid #efefef;background-color:transparent!important;">
+						<ul class="nav nav-tabs nav-tabs-bottom-2px" role="tablist" style="margin-bottom:0px!important;">
 							<li role="presentation" class="active">
 								<a href="#imap-config" aria-controls="imap-config" role="tab" data-toggle="tab" aria-expanded="true"><i class="fa fa-sitemap"></i> `+mxResources.get('mx-menu-config')+`</a>
 							</li>

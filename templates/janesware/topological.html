@@ -1,0 +1,186 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+<!--MXClient JS & CSS-->
+<script>
+	mxBasePath = '{{AppSubUrl}}/web/creative/src';
+	mxLanguage = window.MATRIX_LANG.replace(/en/g,"eg").split("-")[0];
+</script>
+
+<script src="{{AppSubUrl}}/web/creative/src/js/mxClient.js" type="text/javascript"></script>
+<link href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+
+<script>
+    mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
+</script>
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+
+<style>
+
+	/* body */
+	body {
+		overflow:hidden;
+	}
+
+	/* content */
+	#content {
+		padding: 0px 20px 0px 10px;
+	}
+
+	/* Event view */
+	.event-view .tree-view {
+		padding: 0 15px;
+	}
+
+	/* 运维模式 */
+	.event-view.view-normal .tree-view {
+		display: none;
+		width: 0%;
+	}
+	.event-view.view-normal .table-view {
+		width: 100%;
+	}
+
+	/* 标签树模式 */
+	.event-view.view-tags .tree-view {
+		width: 18%;
+	}
+	.event-view.view-tags .table-view {
+		width: 82%;
+	}
+
+	/* 全屏模式 */
+	.event-view.view-fullscreen .tree-view {
+		display: none;
+		width: 0%;
+	}
+	.event-view.view-fullscreen .table-view {
+		width: 100%;
+	}
+
+	/* timeline view */
+	.timeline-view {
+		background: rgb(250, 250, 250);
+	}
+
+	/* table view */
+	.table-view {
+		padding-top: 10px!important;
+	}
+
+
+	/* nav nav-tabs nav-tabs-line-2px li a */
+	.panel-title-btn .nav-tabs-line-2px{
+		margin: 0 -15px;
+	}
+	.panel-title-btn .nav-tabs-line-2px > li > a {
+		padding: 0px 15px
+	}
+
+	/* 自定义Panel */
+	.panel.panel-default.panel-white-border {
+		margin-bottom: 10px;
+		border: 1px solid rgb(250, 250, 250);
+	}
+
+	.panel-white-border .panel-heading .nav-tabs {
+		margin-left: -13px;
+		margin-top: -8px;
+		margin-right: -15px;
+	}
+
+	.panel-white-border .panel-title{
+		height: 18px;
+	}
+	.panel-white-border .panel-body {
+		padding:0 10px;
+	}
+
+	/* grid */
+	.masonry-column {
+		padding: 0 1px;
+	}
+
+	.masonry-grid > div .panel-white-border {
+		margin: 5px 1px;
+	}
+
+	/* 告警详情页Tab */
+	.nav-tabs.event-detail-data-ul > li {
+		position:relative;
+	}
+	.nav-tabs.event-detail-data-ul > li > a {
+		display:inline-block;
+	}
+	.nav-tabs.event-detail-data-ul > li > span {
+		display:none;
+		cursor:pointer;
+		position:absolute;
+		right: 6px;
+		top: 8px;
+		color: red;
+	}
+	.nav-tabs.event-detail-data-ul > li:hover > span {
+		display: inline-block;
+	}
+
+	.nav-tabs.event-detail-data-ul > li > span {
+	    display:none;
+	    cursor:pointer;
+	    position:absolute;
+	    right: 3px;
+	    top: 8px;
+	    color: #999;
+	}
+
+</style>
+
+<div id="app"></div>
+
+<script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Topological.js"></script>
+
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
+
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-diagnosis-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-graph-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-summary-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
+
+
+{{template "base/footer" .}}

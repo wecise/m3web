@@ -1241,7 +1241,7 @@
                     newUser: function(){
                         let self = this;
 
-                        let win = mxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = maxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1351,7 +1351,7 @@
                     newGroup: function(){
                         let self = this;
 
-                        let win = mxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = maxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1898,7 +1898,7 @@
                             success: function(data, textStatus, xhr) {
                                 self.resetForm();
                                 self.init();
-                                swal("Success","","success");
+                                alertify.success("发布成功!");
                             },
                             error: function(xhr, textStatus, errorThrown) {
                             }
@@ -1927,7 +1927,7 @@
                                 self.resetForm();
                                 self.init();
                                 $("#collapse"+event).collapse("hide");
-                                swal("Success","","success");
+                                alertify.success("更新成功!");
                             },
                             error: function(xhr, textStatus, errorThrown) {
                             }

@@ -127,7 +127,7 @@
 
 
 
-                                        mxWindow.winLarge(opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
+                                        maxWindow.winLarge(opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -420,7 +420,7 @@
                 $(self.$el).on( 'dblclick', 'tr', function () {
                     self.selectedRow = self.datatable.row( this ).data();
 
-                    mxWindow.winLarge( "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
+                    maxWindow.winLarge( "配置卡片" + " " + self.selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                     _.delay(function(){
 

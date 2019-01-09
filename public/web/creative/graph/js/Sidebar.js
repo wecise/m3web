@@ -145,6 +145,11 @@ Sidebar.prototype.init = function()
 
             }
 
+			self.addBimPalette('bim', mxResources.get('mx-menu-shape-bim'), dir + '', '.png',
+                ['bim_01', 'bim_02', 'bim_03', 'bim_04'], ['bim_01', 'bim_02', 'bim_03', 'bim_04'],
+                {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
+                    'Router_Icon': 'router switch'});
+
             self.addSvgPalette('map', mxResources.get('mx-menu-shape-map'), dir + '/map/', '.svg',
                 ['China', 'Singapore', 'UnitedKingdom', 'Usa'], ['China', 'Singapore', 'UnitedKingdom', 'Usa'],
                 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
@@ -1025,6 +1030,33 @@ Sidebar.prototype.addEntitiesMatrixPalette = function(id, title, prefix, type, p
         }))(items[i].name, (titles != null) ? titles[i].name : null, (tags != null) ? tags[items[i].name] : null);
     }
     this.addPaletteFunctions(id, title, (expand != null) ? expand : true, fns);
+};
+
+/**
+ * Adds the given Bim palette.
+ */
+Sidebar.prototype.addBimPalette = function(id, title, prefix, postfix, items, titles, tags)
+{
+    var showTitles = titles != null;
+    var fns = [];
+
+    for (var i = 0; i < items.length; i++)
+    {
+        (mxUtils.bind(this, function(item, title, tmpTags)
+        {
+            if (tmpTags == null)
+            {
+                var slash = item.lastIndexOf('/');
+                var dot = item.lastIndexOf('.');
+                tmpTags = item.substring((slash >= 0) ? slash + 1 : 0, (dot >= 0) ? dot : item.length).replace(/[-_]/g, ' ');
+            }
+
+            fns.push(this.createVertexTemplateEntry(`shape=image;html=1;labelBackgroundColor=transparent;image=/fs/assets/images/bim/png/${item}${postfix}?type=download&issys=true`,
+                this.defaultImageWidth, this.defaultImageHeight, '', title, title != null, null, this.filterTags(tmpTags)));
+        }))(items[i], (titles != null) ? titles[i] : null, (tags != null) ? tags[items[i]] : null);
+    }
+
+    this.addPaletteFunctions(id, title, false, fns);
 };
 
 /**

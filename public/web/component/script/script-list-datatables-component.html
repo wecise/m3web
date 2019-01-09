@@ -829,7 +829,7 @@
                 add: function(){
                     let self = this;
 
-                    let wnd = mxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 添加`, `<div id="script-add-container"></div>`, null, 'script-container');
+                    let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 添加`, `<div id="script-add-container"></div>`, null, 'script-container');
 
                     let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
 
@@ -975,7 +975,7 @@
                 edit: function(event){
                     let self = this;
 
-                    let wnd = newWindow('fsProbe', `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
+                    let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
 
                     let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
 

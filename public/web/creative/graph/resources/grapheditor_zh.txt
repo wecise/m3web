@@ -353,6 +353,7 @@ mx-script=脚本
 mx-menu-config=配置
 mx-menu-shape=图型
 mx-menu-shape-map=地图
+mx-menu-shape-bim=建筑
 mx-menu-shape-flowchart=流程图
 
 mx-menu-config-biz=业务

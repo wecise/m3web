@@ -1172,7 +1172,7 @@
                 add: function(){
                     let self = this;
 
-                    let wnd = mxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+                    let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
                     let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 
@@ -1388,7 +1388,7 @@
                 edit: function(event){
                     let self = this;
 
-                    let wnd = mxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
+                    let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
                     let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 

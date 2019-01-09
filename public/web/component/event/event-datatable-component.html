@@ -47,8 +47,8 @@
 
 		/*设置Table高度自适应 270px=topbarHeight + bottomHeight + toolHeight + ..Height*/
 		/* 统计图模式 */
-		.view-fullscreen .event-datatable-component .dataTables_scrollBody {
-			/*max-height: calc(100vh - 510px)!important;*/
+		.panel-expand .event-datatable-component .dataTables_scrollBody {
+			max-height: calc(100vh - 175px)!important;
 		}
 		/* 统计图模式+全屏模式 */
 		.event-datatable-component .dataTables_scrollBody {
@@ -186,13 +186,22 @@
 			padding: 0 5px;
 		}
 
+
+		table.dataTable thead th,
+		table.dataTable thead td,
+		.dataTables_wrapper.no-footer .dataTables_scrollBody,
+		table.dataTable.no-footer {
+			border-bottom: none;;
+		}
+
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="event-datatable-component"  ----------*/
 	<template>
 		<div>
-			<table :id="id" class="display" width="100%"></table>
+			<table :id="id" class="stripe row-border order-column" width="100%"></table>
 		</div>
 	</template>
 
@@ -209,7 +218,8 @@
                 datatable: null,
                 defaultClass: "",
                 rows: [],
-                columns: []
+                columns: [],
+	            selectedRows: []
 			}
 		},
 		mounted: function () {
@@ -218,10 +228,12 @@
             self.$nextTick(function () {
                 self.init();
 
-                /*$(window).resize(function() {
-                    $(".").css("max-height",self.calcDataTableHeight());
-                    $('.event-datatable-component .dataTables_scrollBody').css("max-height", self.calcDataTableHeight());
-                });*/
+                $(window).resize(function() {
+                    let contentChild1 = $(".event-view").children().first().height();
+                    let contentChild2 = $(".event-view").height() - contentChild1 - 100;
+                    
+                    $('.event-datatable-component .dataTables_scrollBody').css("max-height", contentChild2);
+                });
 
                 $(window).on('resize', function(e) {
 
@@ -309,21 +321,39 @@
 		},
 		methods: {
             calcDataTableHeight: function() {
-                console.log(123,$(".event-datatable-component").height(),$(this.$el).height())
                 return $(".event-datatable-component").height() - 60;
             },
             init: function(){
                 const self = this;
 
                 if(_.isEmpty(this.model) || _.isEmpty(this.rows) || _.isEmpty(this.columns)) return false;
+                
+                let temp = {};
+                if(self.model.template.admin){
+                    self.columns = _.map(self.columns, function(v){
+                        v.visible = false;
+                        return v;
+                    })
 
-
+                    temp = _.extend(self.columns,self.model.template.admin);
+                }
+                // 自定义checkbox、序号
+                temp.unshift( { title: "序号", visible: true, sortable: false } );
+                temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
+                
+                // 保证唯一并加入渲染函数
+                let cols = _.map(_.uniqBy(temp,'data'),function(v){
+                    if(v.render){
+                        v.render = eval(v.render);
+                    }
+                    return v;
+                });
+                
                 self.datatable = $("#"+self.id).DataTable( _.extend({
 	                            destroy: true,
-                                //retrieve: true,
-	                            data: self.rows,
-                                columns: self.columns,
-                                searching: true,
+                                data: self.rows,
+                                columns: cols,
+                                searching: false,
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
@@ -334,10 +364,13 @@
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
 	                            stateSave: true,
-			                    select: {
+                                select: {
 			                        style: 'multi',
-			                        //selector: 'td:first-child'
+			                        selector: 'td:first-child'
 
+			                    },
+			                    fixedColumns:   {
+			                        leftColumns: 2
 			                    },
                                 language : {
                                     "sProcessing" : "处理中...",
@@ -374,15 +407,17 @@
                                 },
 			                    initComplete: function(){
 
-				                    self.toolBar();
+				                    self.serial();
+	                                self.toolBar();
+	                                self.contextMenu();
+	                                self.selectRows();
 
                                     self.dragHandle();
 				                    self.dropHandle();
+
 			                    },
 			                    createdRow: function ( row, data, index ) {
-			                        //$(row).addClass('animated fadeInDown');
-
-                                    // severity 渲染
+			                        // severity 渲染
 			                        $('td',row).eq(3).addClass('severity'+data['severity']);
 
 			                        // status 渲染
@@ -393,6 +428,89 @@
                 },self.model.options)).columns.adjust().draw();
 
 			},
+            serial:function(){
+                let datatable = $("#"+this.id).DataTable();
+                datatable.on( 'order.dt search.dt', function () {
+                    datatable.column(1, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+                        cell.innerHTML = i+1;
+                    } );
+                } ).draw();
+			},
+			selectRows: function(){
+                const self = this;
+
+                var table = $("#"+self.id).DataTable();
+
+                let singleClick = function(row){
+					console.log(1)
+                    self.selectedRows = row;
+                };
+
+                let doubleClick = function(row){
+                    let position = $(".event-view").position();
+                    maxWindow.winEvent('告警详情','<div></div>',position,'event-view');
+                };
+
+                table.on('click','tr',function(e) {
+                    let that = this;
+                    setTimeout(function() {
+                        var dblclick = parseInt($(that).data('double'), 10);
+                        if (dblclick > 0) {
+                            $(that).data('double', dblclick-1);
+                        } else {
+                            singleClick.call( that, table.row( that ).data() );
+                        }
+                    }, 300);
+                }).on('dblclick','tr',function(e) {
+                    $(this).data('double', 2);
+                    doubleClick.call(this,table.row( this ).data());
+                });
+
+			},
+			refresh: function(){
+                this.$root.$refs.searchRef.search();
+			},
+			detail: function(){
+                this.$root.detail(this.selectedRows);
+			},
+            contextMenu: function(){
+                const self = this;
+
+                let items = callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let id = self.id;
+
+                $.contextMenu({
+                    selector: `#${id} tr td:not(:nth-child(1))`,
+                    trigger: 'left',
+                    delay: 10,
+                    hideOnSecondTrigger: true,
+                    className: `animated slideIn ${id}`,
+                    build: function($trigger, e) {
+
+                        return {
+                            callback: function(key, opt) {
+                                if(key === 'detail') {
+                                    self.detail();
+                                }
+                            },
+                            items: items,
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+
+                            let $this = this;
+
+                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
+                        },
+                        hide: function(opt) {
+
+                            let $this = this;
+
+                        }
+                    }
+                });
+            },
 			dragHandle: function(){
                 const self = this;
 
@@ -468,7 +586,7 @@
 				                        text: '<i class="fas fa-tags"></i>',
 				                        action: function (e, dt, node, config) {
                                             let view = ['view-normal','view-tags'];
-				                            self.$root.$refs.eventListRef.toggleModel(_.without(view,window.EVENT_VIEW).join(""));
+                                            self.$root.$refs.eventListRef.toggleModel(_.without(view,window.EVENT_VIEW).join(""));
 				                        },
 				                        enabled: true,
 				                        className: `btn-white class-group_${self.id}`,
@@ -544,15 +662,15 @@
                 });
 
                 // 更新Dom
-                if( $('.dataTables_wrapper > .dt-buttons').length ) {
-                    $('.dataTables_wrapper > .dt-buttons').empty();
+                if( $('.event-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
+                    $('.event-datatable-component .dataTables_wrapper > .dt-buttons').empty();
                 }
-                datatable.buttons().containers().prependTo( `.dataTables_wrapper` );
+                datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
 
                 // button样式调整
-                $("a.dt-button").removeClass("dt-button");
+                $(".event-datatable-component a.dt-button").removeClass("dt-button");
                 // tooltip
-                $(".dataTables_wrapper a").attr("data-tooltip","tooltip");
+                $(".event-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
 
 			},
             // Class分组menu

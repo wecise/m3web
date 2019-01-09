@@ -1,6 +1,6 @@
 {{template "base/head" .}}
 
-<link rel="stylesheet" type="text/css" href="{{AppSubUrl}}/web/vendor/mxgraph/graph/styles/grapheditor.css">
+<link rel="stylesheet" type="text/css" href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css">
 
 <style>
 
@@ -134,12 +134,12 @@
     window.MAX_AREA = window.MAX_AREA || 15000 * 15000;
 
     // URLs for save and export
-    window.RESOURCES_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/resources";
-    window.STYLE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
-    window.STENCIL_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/stencils";
-    window.IMAGE_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/images";
-    window.CSS_PATH = "{{AppSubUrl}}/web/vendor/mxgraph/graph/styles";
-    window.OPEN_FORM = "{{AppSubUrl}}/web/vendor/mxgraph/graph/open.html";
+    window.RESOURCES_PATH = "{{AppSubUrl}}/web/creative/graph/resources";
+    window.STYLE_PATH = "{{AppSubUrl}}/web/creative/graph/styles";
+    window.STENCIL_PATH = "{{AppSubUrl}}/web/creative/graph/stencils";
+    window.IMAGE_PATH = "{{AppSubUrl}}/web/creative/graph/images";
+    window.CSS_PATH = "{{AppSubUrl}}/web/creative/graph/styles";
+    window.OPEN_FORM = "{{AppSubUrl}}/web/creative/graph/open.html";
 
     window.EXPORT_URL = window.EXPORT_URL || '/export';
     window.SAVE_URL = window.SAVE_URL || '/save';
@@ -158,25 +158,25 @@
 
     window.ASSETS_ICON = '/fs/assets/images';
 
-    mxBasePath = '{{AppSubUrl}}/web/vendor/mxgraph/src';
+    mxBasePath = '{{AppSubUrl}}/web/creative/src';
     mxLanguage = '{{.Lang}}'.replace(/"/g,"").replace(/en/g,"eg").split("-")[0];
 
 </script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/pako.min.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/deflate/base64.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/jscolor/jscolor.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/sanitizer/sanitizer.min.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/src/js/mxClient.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/EditorUi.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Editor.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Sidebar.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Graph.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Format.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Shapes.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Actions.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Menus.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Toolbar.js"></script>
-<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/mxgraph/graph/js/Dialogs.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/deflate/pako.min.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/deflate/base64.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/jscolor/jscolor.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/sanitizer/sanitizer.min.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/src/js/mxClient.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/EditorUi.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Editor.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Sidebar.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Graph.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Format.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Shapes.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Actions.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Menus.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Toolbar.js"></script>
+<script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Dialogs.js"></script>
 
 
 <script type="text/javascript">
@@ -401,7 +401,7 @@
                                 let orderNodes = _.orderBy(self.model.graph.data.nodes,['level'],['asc']);
 
                                 _.forEach(orderNodes,function(v){
-                                    let _type = v.class || 'matrix';
+                                    let _type = v._icon || 'matrix';
                                     let _name =  _.last(v.id.split(":")) || '';
                                     let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                                         `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
@@ -485,7 +485,7 @@
                                         }
                                     }
 
-                                    let wnd = mxWindow.winEntity(id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
+                                    let wnd = maxWindow.winEntity(id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
 
                                     let config = {
                                         delimiters: ['#{', '}#'],
@@ -983,7 +983,7 @@
 
                         },null,'tools-item');
 
-                        self.win.toolbars = mxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
+                        self.win.toolbars = maxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
 
                     },
                     navToggle: function(){

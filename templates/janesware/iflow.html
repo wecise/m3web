@@ -651,7 +651,7 @@
                     initPrompt: function(item){
                         let self = this;
 
-                        self.model.promptWin = mxWindow.winModal('prompt', '<div id="modal-panel"></div>', null,null);
+                        self.model.promptWin = maxWindow.winModal('prompt', '<div id="modal-panel"></div>', null,null);
 
                         if(self.model.promptWin){
                             let _vue = new Vue({
@@ -936,7 +936,7 @@
                         tb.addItem('{{.i18n.Tr "creative-tools-setup"}}', '/web/assets/images/iflow/setup.svg',function(evt)
                         {
 
-                            self.win.cmd = mxWindow.winCmd('>₋', `<div id="cmd_window"></div>`, evt.target,null);
+                            self.win.cmd = maxWindow.winCmd('>₋', `<div id="cmd_window"></div>`, evt.target,null);
 
                             if(!_.isEmpty(self.win.cmd)){
                                 self.cmdVue(evt);
@@ -945,7 +945,7 @@
                         },null,'tools-item');
 
 
-                        self.win.toolbars = mxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
+                        self.win.toolbars = maxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
 
                         _.delay(function(){
                             self.model.graph.theme = localStorage.getItem("CREATIVE-THEME");

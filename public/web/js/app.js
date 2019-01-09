@@ -70,9 +70,19 @@ var MATRIX_THEME = "DARK";
 var toggleTheme = function(event){
 
     if(event == 'LIGHT'){
-
+        
         $(".navbar.navbar-default.navbar-fixed-top").css({
             "backgroundColor": "rgb(33, 149, 244)",
+           
+            "backgroundImage": "none",
+            "backgroundImage": "none",
+            "backgroundImage": "none",
+            "backgroundRepeat": "none",
+            "filter": "none",
+            "filter": "none",
+            "borderRadius": "none",
+            "-webkitBoxShadow": "none",
+            "boxShadow": "none"
         });
 
         $("#sidebar").css({
@@ -116,6 +126,16 @@ var toggleTheme = function(event){
 
         $(".navbar.navbar-default.navbar-fixed-top").css({
             "backgroundColor": "rgb(8, 62, 106)",
+
+            "backgroundImage": "-webkit-linear-gradient(top, rgb(12, 90, 153) 0%, rgb(8, 62, 106) 100%)",
+            "backgroundImage": "-o-linear-gradient(top, #0c5a99 0%, #083e6a 100%)",
+            "backgroundImage": "linear-gradient(to bottom, rgb(12, 90, 153) 0%, rgb(8, 62, 106) 100%)",
+            "backgroundRepeat": "repeat-x",
+            "filter": "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0c5a99', endColorstr='#ff083e6a', GradientType=0)",
+            "filter": "progid:DXImageTransform.Microsoft.gradient(enabled = false)",
+            "borderRadius": "2px",
+            "-webkitBoxShadow": "inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 5px rgba(0, 0, 0, 0.075)",
+            "boxShadow": "inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 5px rgba(0, 0, 0, 0.075)"
         });
 
         $("#sidebar").css({

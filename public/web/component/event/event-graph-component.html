@@ -1,0 +1,538 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.event-graph-component .container{
+			width: 100%!important;
+			height: 100%!important;
+            overflow:auto;
+            top: 40px;
+		}
+
+		.event-graph-component .outlineContainer {
+			z-index:1;
+			position:absolute;
+			overflow:hidden;
+			top:40px;
+			right:5px;
+			width: 80px;
+			height:80px;
+			background: #ffffff;
+			box-shadow: 3px 3px 12px #C0C0C0;
+			border: 1px solid rgb(195, 195, 195);
+		}
+
+		.event-graph-component .tools {
+			z-index: 100;
+			position: absolute;
+			overflow: hidden;
+			top: 0px;
+			left: 0px;
+			width: 100%;
+			height: 36px;
+			padding: 2px 4px;
+		}
+
+		.event-graph-component .tools > img {
+			width:18px;
+			height:18px;
+			margin: 0px 5px;
+		}
+
+        .event-graph-component .input-group {
+			width:50%;
+            float:right;
+		}
+
+		.event-graph-component .node-menu{
+			width:20vw;
+		}
+
+		.event-graph-component .nav{
+			background: transparent;
+			margin: 0 -10px;
+			position: relative;
+		}
+
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="event-graph-component"  ----------*/
+	<template>
+		<div :id="id">
+			<div :id="id+'-container'" class="container"></div>
+			<div :id="id+'-nav'" class="nav">
+				<div :id="id+'-tools'" class="tools">
+                    <div class="input-group">
+                        <div class="input-group-addon">拓扑搜索</div>
+                        <input type="text" class="form-control"  placeholder="节点">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">关系 <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                              <li><a href="#">包含</a></li>
+                              <li><a href="#">依赖</a></li>
+                              <li><a href="#">运行于</a></li>
+                              <li><a href="#">连接</a></li>
+                              <li><a href="#">只读共享</a></li>
+                              <li><a href="#">引用</a></li>
+                              <li><a href="#">编辑共享</a></li>
+                              <li><a href="#">拥有者</a></li>
+                            </ul>
+                        </div>
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">跳 <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                              <li><a href="#">Action</a></li>
+                              <li><a href="#">Another action</a></li>
+                              <li><a href="#">Something else here</a></li>
+                              <li role="separator" class="divider"></li>
+                              <li><a href="#">Separated link</a></li>
+                            </ul>
+                        </div>
+                        <input type="text" class="form-control"  placeholder="节点">
+                        <span class="input-group-btn">
+                            <a href="javascript:void(0);" class="btn btn-sm btn-primary">搜索</a>
+                        </span>
+                    </div>
+                </div>
+				<div :id="id+'-outlineContainer'" class="outlineContainer"></div>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="event-graph-component">
+	{
+	    delimiters: ['${', '}'],
+	    props: {
+	        id: String,
+	        graphData: Object,
+	    },
+	    data: function () {
+	        return {
+                model:{
+                    graph:{
+                        container: null,
+                        model: null,
+                        graph: null,
+	                    layout: null,
+	                    layers: {
+                            root: null,
+		                    layer1: null,
+                            layer2: null,
+                            layer3: null,
+                            layer4: null,
+                            layer5: null,
+                            layer6: null,
+                            layer7: null
+	                    },
+                        orientation: {
+                            value:0,
+	                        list:['north','south']
+                        },
+	                    parent: null,
+                        theme: "",
+                        outline: null,
+                    }
+                }
+	        }
+	    },
+	    created:function(){
+	        var self = this;
+
+	    },
+	    mounted: function() {
+	        var self = this;
+
+	        self.$nextTick(function(){
+
+                self.init();
+                self.initPlugIn();
+	            
+	        })
+	    },
+	    methods: {
+            init: function() {
+                let self = this;
+
+                if (!mxClient.isBrowserSupported())
+                {
+                    // Displays an error message if the browser is
+                    // not supported.
+                    mxUtils.error('Browser is not supported!', 200, false);
+                }
+                else
+                {
+
+                    self.model.graph.container = document.getElementById(`${self.id}-container`);
+                    // self.model.graph.container.style.position = 'releative';
+                    // self.model.graph.container.style.overflow = 'hidden';
+                    // self.model.graph.container.style.left = '0px';
+                    // self.model.graph.container.style.top = '0px';
+                    // self.model.graph.container.style.right = '0px';
+                    // self.model.graph.container.style.bottom = '0px';
+                    document.getElementById(self.id).appendChild(self.model.graph.container);
+
+
+                    //mxEvent.disableContextMenu(self.model.graph.container);
+
+                    if (mxClient.IS_QUIRKS)
+                    {
+                        document.body.style.overflow = 'hidden';
+                        new mxDivResizer(self.model.graph.container);
+                        new mxDivResizer(outline);
+                    }
+
+                    // Creates the graph inside the given container
+                    // self.model.graph.layers.root = new mxCell();
+                    //
+                    // self.model.graph.model = new mxGraphModel(self.model.graph.layers.root);
+                    self.model.graph.graph = new mxGraph(self.model.graph.container);
+                    self.model.graph.graph.resizeContainer = true;
+
+                    // Enables automatic sizing for vertices after editing and
+                    // panning by using the left mouse button.
+                    self.model.graph.graph.setEnabled(false);
+                    self.model.graph.graph.setCellsMovable(true);
+                    self.model.graph.graph.setAutoSizeCells(true);
+                    self.model.graph.graph.setPanning(true);
+                    self.model.graph.graph.centerZoom = true;
+                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                    // Disables tooltips on touch devices
+                    self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
+                    self.model.graph.graph.htmlLabels = true;
+
+
+                    self.model.graph.graph.getCursorForCell = function(cell){
+                        if (cell != null && cell.value != null && cell.vertex ==1 ){
+                            return 'pointer';
+                        }
+                    }
+
+
+                    // Displays a popupmenu when the user clicks
+                    // on a cell (using the left mouse button) but
+                    // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
+                    // is displayed
+                    self.model.graph.graph.panningHandler.popupMenuHandler = false;
+
+
+                    // Creates a layout algorithm to be used with the graph
+                    self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
+                    //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
+                    self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
+                    self.model.graph.layout.forceConstant = 120;
+
+                    /*self.model.graph.layout = new mxCompactTreeLayout(self.model.graph.graph, false);
+                    self.model.graph.layout.useBoundingBox = true;
+                    self.model.graph.layout.edgeRouting = true;
+                    self.model.graph.layout.levelDistance = 80;
+                    self.model.graph.layout.nodeDistance = 20;
+
+                    var layoutMgr = new mxLayoutManager(self.model.graph.graph);
+
+                    layoutMgr.getLayout = function(cell)
+                    {
+                        if (cell.getChildCount() > 0)
+                        {
+                            return self.model.graph.layout;
+                        }
+                    };*/
+
+                    self.model.graph.parent = self.model.graph.graph.getDefaultParent();
+
+                    self.initGraph();
+
+                    self.dispatchNodeEvent();
+
+                }
+            },
+            initGraph: function(){
+                let self = this;
+
+                self.model.graph.graph.getModel().beginUpdate();
+
+                try
+                {
+                    self.model.graph.graph.getModel()
+
+                    let nodes = {};
+                    let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
+
+                    _.forEach(orderNodes,function(v){
+
+                        let _type = v._icon || 'matrix';
+                        let _name =  _.last(v.id.split(":")) || '';
+                        let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
+                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
+
+                        nodes[v.id] = node;
+                    })
+
+                    _.forEach(self.graphData.edges,function(k){
+                        let source = nodes[k.source];
+                        let target = nodes[k.target];
+						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+                        let direction = '';
+                        if(k.twoway){
+                            direction = 'startArrow=block;endArrow=block;endFill=1;';
+                        }
+
+                        let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                    })
+
+                    // Executes the layout
+	                self.model.graph.layout.execute(self.model.graph.parent);
+                }
+                finally
+                {
+                    self.model.graph.graph.getModel().endUpdate();
+
+                    self.toCenter();
+
+                }
+            },
+            initPlugIn: function(){
+                let self = this;
+
+                self.initOutline();
+                self.initToolBars();
+
+            },
+            dispatchNodeEvent: function(){
+                let self = this;
+
+                self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+
+                    let cell = evt.getProperty('cell');
+
+                    if(_.isEmpty(cell)) return;
+
+                    let id = cell.getId();
+                    let value = cell.getValue();
+
+                    // 触发关联数据搜索
+                    eventHub.$emit("GRAPH-DIAGNOSIS-TERM-EVENT",value);
+
+                    let state = self.model.graph.graph.view.getState(cell);
+                    let nodeDic = _.groupBy(self.graphData.nodes,'id');
+
+                    state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                    state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic[id]));
+
+                    // copy to copyboard
+                    let clipboard2 = new Clipboard('g image',{
+                        text: function(trigger) {
+
+                            $.contextMenu({
+                                selector: `.${id.replace(/:/g,"_")}`,
+                                trigger: 'left',
+                                delay: 10,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn node-menu`,
+                                build: function($trigger, e) {
+
+                                    let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+                                    let items = null;
+                                    _.forEach(temp,function(val){
+                                        _.forEach(val,function(v,k){
+
+	                                        let value = null;
+
+                                            if(typeof v == "object") {
+                                                if(_.includes(['depend','runon','connect','refer','contain'],k)){
+
+                                                    if(v==null || !v['_all']) return;
+                                                    let _options = {};
+                                                    _.map(v['_all'],function(w,y){
+                                                        return _.merge(_options,{[y]:w});
+                                                    })
+
+                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                                } else {
+                                                    value = JSON.stringify(v,null,2);
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
+                                                }
+
+                                            } else {
+                                                value = v.toString();
+                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                            }
+
+                                        })
+                                    });
+
+                                    return {
+                                        callback: function(key, opt) {
+
+                                            if(key === 'copy'){
+
+                                            } else if(key === 'tags') {
+
+                                            } else if(key === 'export') {
+
+                                            } else if(key === 'load') {
+
+                                            }
+                                        },
+                                        items:items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                                        let $this = this;
+                                    },
+                                    hide: function(opt) {
+                                        let $this = this;
+                                        $(".context-menu-list animated slideIn").remove();
+                                    }
+                                }
+                            });
+
+                            return id;
+                        }
+                    });
+                    //self.tip(`ID：${id} 已复制到剪切板！`);
+
+                });
+            },
+            tip: function(event){
+                let self = this;
+
+                alertify.log(event + ' ' + moment().format("LLL"));
+            },
+            initOutline: function(){
+                let self = this;
+
+                let outline = document.getElementById(`${self.id}-outlineContainer`);
+
+                self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
+
+            },
+		    saveas: function(){
+				let self = this;
+
+                let encoder = new mxCodec();
+                let node = encoder.encode(self.model.graph.graph.getModel());
+                let xml = mxUtils.getPrettyXml(node);
+
+                alertify.prompt("文件名称", function (e, str) {
+                    // str is the input text
+                    if (e) {
+                        // user clicked "ok"
+	                    let parent = '/opt/creative/admin';
+	                    let ftype = 'imap';
+	                    let name = `${str}.${ftype}`;
+	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};
+                        let rtn = fsNew('file', parent, name, xml, attr);
+	                    if(rtn == 1){
+
+	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
+
+                            let url = genFsUrl(item,null,null);
+
+                            alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
+	                    }
+                    } else {
+                        // user clicked "cancel"
+                    }
+                }, "");
+
+
+
+		    },
+            initToolBars: function () {
+                let self = this;
+
+                let content = document.getElementById(`${self.id}-tools`);
+                content.style.padding = '4px';
+
+                let tb = new mxToolbar(content);
+
+                tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_ICON}/tools/png/saveas.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    self.saveas();
+
+                },null,'tools-item');
+
+
+                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_ICON}/tools/png/refresh.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    $(self.$el).find("#container").empty();
+
+                    self.init();
+
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    self.model.graph.graph.zoomIn();
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_ICON}/tools/png/zoom_in.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    self.model.graph.graph.zoomOut();
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_ICON}/tools/png/print.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    var scale = mxUtils.getScaleForPageCount(1, self.model.graph.graph);
+                    var preview = new mxPrintPreview(self.model.graph.graph, scale);
+                    preview.open();
+
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    mx.fullScreen();
+
+                },null,'tools-item');
+
+                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+
+
+                    self.model.graph.graph.getModel().beginUpdate();
+
+                    try
+                    {
+                        if(self.model.graph.orientation.value == 0){
+                            self.model.graph.orientation.value = 1;
+                        } else {
+                            self.model.graph.orientation.value = 0;
+                        }
+
+                        self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
+
+                        // Executes the layout
+                        self.model.graph.layout.execute(self.model.graph.parent);
+                    }
+                    finally
+                    {
+                        self.model.graph.graph.getModel().endUpdate();
+
+                        self.toCenter();
+
+                    }
+
+
+                },null,'tools-item-direction');
+
+                //$(self.$el).find("#tools img").attr("data-tooltip","tooltip");
+
+
+            },
+            toCenter: function(){
+                let self = this;
+
+                self.model.graph.graph.fit();
+                self.model.graph.graph.center(true,true,0.5,0.5);
+
+            }
+	    }
+	
+	}
+	</script>
+
+</code>

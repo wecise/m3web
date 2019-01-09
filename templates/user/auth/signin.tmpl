@@ -15,13 +15,15 @@
       <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-3.3.1.min.js"></script>
       <!-- font-awesome  CSS -->
       <link href="{{AppSubUrl}}/web/vendor/font-awesome/5.4.1/css/all.min.css" rel="stylesheet" >
-      <!-- Pro Mode -->
-      <link href="{{AppSubUrl}}/web/css/bootstrap-3.3.7/wecise_enterprise.css" rel="stylesheet">
-      <script src="{{AppSubUrl}}/web/css/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>
-      <!-- Color Theme core CSS -->
-      <link href="{{AppSubUrl}}/web/css/color/color_style.min.css" rel="stylesheet">
-      <link href="{{AppSubUrl}}/web/css/color/color_style_responsive.min.css" rel="stylesheet">
-      <link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
+
+      <!-- Bootstrap core CSS -->
+      <link href="{{AppSubUrl}}/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
+      <link href="{{AppSubUrl}}/web/css/dist/css/theme_wecise.css" rel="stylesheet">
+      <script src="{{AppSubUrl}}/web/css/dist/js/bootstrap.min.js"></script>
+
+        <!-- Color Theme core CSS -->
+        <link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
+
       <title> {{.SignedUser.Company.Fullname}}</title>
       <style>
          body {
@@ -82,7 +84,7 @@
          box-shadow: 1px 1px 1px 1px #ddd;
          }
          .login.login-v2{
-         margin: 68px 0 0 -225px;
+         margin: 68px auto;
          }
          .login-brand >  .logo {
          padding: 20px 0px 0px 30px;

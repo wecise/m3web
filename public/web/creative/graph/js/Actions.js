@@ -187,7 +187,7 @@ Actions.prototype.init = function()
         if (cell != null)
         {
 
-        	let wnd = mxWindow.winProperties(cell.getId(), '<div id="properties"></div>', null,null);
+        	let wnd = maxWindow.winProperties(cell.getId(), '<div id="properties"></div>', null,null);
 
             let div = document.getElementById('properties');
 

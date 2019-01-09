@@ -220,7 +220,7 @@
 
                     _.forEach(orderNodes,function(v){
 
-                        let _type = v.class || 'matrix';
+                        let _type = v._icon || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                             `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
