@@ -32,6 +32,10 @@
 
 <style type="text/css">
 
+    #content.content {
+        margin: -15px -30px 0px 45px;
+    }
+
     ul {
         margin: 0;
         padding: 0;
@@ -2509,9 +2513,9 @@
 
                             $("#nav").hide();
 
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12");
-                            //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
+                            $("#mainview").removeClass("col-lg-10");
+                            $("#mainview").addClass("col-lg-12");
+                            //$("#mainview").find(".panel-default").css("border-left","1px #ddd solid");
 
                             $(".navtoggle").removeClass("fa fa-caret-left");
                             $(".navtoggle").addClass("fa fa-caret-right");
@@ -2521,9 +2525,9 @@
                             $("#nav").slideDown(500);
                             $("#nav").show();
 
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10");
-                            //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
+                            $("#mainview").removeClass("col-lg-12");
+                            $("#mainview").addClass("col-lg-10");
+                            //$("#mainview").find(".panel-default").css("border-left","2px #ddd dotted");
 
                             $(".navtoggle").removeClass("fa fa-caret-right");
                             $(".navtoggle").addClass("fa fa-caret-left");
@@ -2540,7 +2544,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div id="content" class="content">
+    <div id="content" class="content container-fluid">
         <!--row-->
         <div class="row">
             <div  class="col-lg-3" id="nav">
@@ -2691,7 +2695,7 @@
                 </div>
                 <!--/Accordion view-->
             </div>
-            <div class="col-lg-9" id="content" style="padding-left:0px;">
+            <div class="col-lg-9" id="mainview" style="margin-left: -15px;">
                 <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
             </div>
         </div>

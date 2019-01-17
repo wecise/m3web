@@ -169,7 +169,7 @@
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.vue"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-diagnosis-datatable-component.html"></link>
@@ -245,7 +245,7 @@
 					</div>
 					<h4 class="panel-title"></h4>
 				</div>
-				<div class="panel-body">
+				<div class="panel-body" style="height:20vh;">
 					<div class="row">
 						<div class="col-md-12 timeline-view">
 
@@ -274,7 +274,7 @@
 					</div>
 					<h4 class="panel-title"></h4>
 				</div>
-				<div class="panel-body event-list-wrapper">
+				<div class="panel-body event-list-wrapper" style="height:42vh;">
 					<div class="row">
 						<div class="col-md-2 tree-view animated fadeInRight">
 							<probe-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>

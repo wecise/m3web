@@ -2,17 +2,17 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-        .event-graph-component{
+        .topological-graph-component{
             height: 100%;
         }
-		.event-graph-component .container{
+		.topological-graph-component .container{
 			width: 100%!important;
-			height: 100%!important;
+			height: calc(100vh - 225px)!important;
             overflow:auto;
             top: 40px;
 		}
 
-		.event-graph-component .outlineContainer {
+		.topological-graph-component .outlineContainer {
 			z-index:1;
 			position:absolute;
 			overflow:hidden;
@@ -25,34 +25,47 @@
 			border: 1px solid rgb(42, 147, 249);
 		}
 
-		.event-graph-component .tools {
+		.topological-graph-component .tools {
 			z-index: 100;
 			position: absolute;
 			overflow: hidden;
 			top: 0px;
 			left: 0px;
-			width: 100%;
+			width: 45%;
 			height: 36px;
 			padding: 2px 4px;
 		}
 
-		.event-graph-component .tools > img {
+		.topological-graph-component .tools > img {
 			width:18px;
 			height:18px;
 			margin: 0px 5px;
             filter: opacity(1) invert(0.5);
 		}
 
-        .event-graph-component .input-group {
-			width:40%;
+        .topological-graph-component .form-control-transparent{
+            border-bottom: unset;
+        }
+
+        .topological-graph-component .tools-search {
+			width:50%;
             float:right;
+            margin-right:10px;
+            border: 1px solid rgb(58, 96, 153);
 		}
 
-		.event-graph-component .node-menu{
+        .topological-graph-component .tools-search .form-control,
+        .topological-graph-component .tools-search .text-muted {
+			color: #dddddd;
+            background: unset;
+            border: unset;
+		}
+
+		.topological-graph-component .node-menu{
 			width:20vw;
 		}
 
-		.event-graph-component .nav{
+		.topological-graph-component .nav{
 			background: transparent;
 			margin: 0 -10px;
 			position: relative;
@@ -62,50 +75,20 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="event-graph-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<div :id="id">
 			<div :id="id+'-container'" class="container"></div>
 			<div :id="id+'-nav'" class="nav">
-				<div :id="id+'-tools'" class="tools">
-                    <div class="input-group">
-                        <input type="text" class="form-control-transparent"  placeholder="节点">
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">关系 <span class="caret"></span></button>
-                            <ul class="dropdown-menu">
-                              <li><a href="#">包含</a></li>
-                              <li><a href="#">依赖</a></li>
-                              <li><a href="#">运行于</a></li>
-                              <li><a href="#">连接</a></li>
-                              <li><a href="#">只读共享</a></li>
-                              <li><a href="#">引用</a></li>
-                              <li><a href="#">编辑共享</a></li>
-                              <li><a href="#">拥有者</a></li>
-                            </ul>
-                        </div>
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">跳 <span class="caret"></span></button>
-                            <ul class="dropdown-menu">
-                              <li><a href="#">Action</a></li>
-                              <li><a href="#">Another action</a></li>
-                              <li><a href="#">Something else here</a></li>
-                              <li role="separator" class="divider"></li>
-                              <li><a href="#">Separated link</a></li>
-                            </ul>
-                        </div>
-                        <input type="text" class="form-control-transparent"  placeholder="节点">
-                        <span class="input-group-btn">
-                            <a href="javascript:void(0);" class="btn btn-sm btn-primary">搜索</a>
-                        </span>
-                    </div>
-                </div>
+                <div :id="id+'-tools'" class="tools"></div>
+                <div class="tools-search"><div :id="id+'-tools-search'"></div></div>
 				<div :id="id+'-outlineContainer'" class="outlineContainer"></div>
 			</div>
 		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="event-graph-component">
+	<script id="topological-graph-component">
 	{
 	    delimiters: ['${', '}'],
 	    props: {
@@ -119,7 +102,15 @@
                         container: null,
                         model: null,
                         graph: null,
-	                    layout: null,
+	                    layout: {
+                            default: null,
+                            hierarchical:null,
+                            organic: null
+                        },
+                        nodes:null,
+                        edges:null,
+                        paths:[],
+                        colors:['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'],
 	                    layers: {
                             root: null,
 		                    layer1: null,
@@ -141,12 +132,19 @@
                 }
 	        }
 	    },
-	    created:function(){
-	        var self = this;
+	    watch:{
+	        graphData:function(val,oldVal){
+                if(val === oldVal) return false;
 
+                this.reload();
+            }
+        },
+        created:function(){
+	        const self = this;
+            eventHub.$on(`PATH-TOGGLE-EVENT-${self.id}-graph-path`,self.addPath);
 	    },
 	    mounted: function() {
-	        var self = this;
+	        const self = this;
 
 	        self.$nextTick(function(){
 
@@ -156,8 +154,8 @@
 	        })
 	    },
 	    methods: {
-            init: function() {
-                let self = this;
+            init() {
+                const self = this;
 
                 if (!mxClient.isBrowserSupported())
                 {
@@ -169,14 +167,7 @@
                 {
 
                     self.model.graph.container = document.getElementById(`${self.id}-container`);
-                    // self.model.graph.container.style.position = 'releative';
-                    // self.model.graph.container.style.overflow = 'hidden';
-                    // self.model.graph.container.style.left = '0px';
-                    // self.model.graph.container.style.top = '0px';
-                    // self.model.graph.container.style.right = '0px';
-                    // self.model.graph.container.style.bottom = '0px';
                     document.getElementById(self.id).appendChild(self.model.graph.container);
-
 
                     //mxEvent.disableContextMenu(self.model.graph.container);
 
@@ -222,21 +213,50 @@
 
 
                     // Creates a layout algorithm to be used with the graph
-                    self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
-                    //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
-                    self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
-                    self.model.graph.layout.forceConstant = 120;
+                    self.model.graph.layout.hierarchical = new mxHierarchicalLayout(self.model.graph.graph);
+                    self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
+                    self.model.graph.layout.default = self.model.graph.layout.hierarchical;
 
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
 
                     self.initGraph();
 
-                    self.dispatchNodeEvent();
+                    self.cellsEvent();
 
                 }
             },
-            initGraph: function(){
-                let self = this;
+            deleteCells(includeEdges){
+                const self = this;
+                // Cancels interactive operations
+                self.model.graph.graph.escape();
+                var cells = self.model.graph.graph.getDeletableCells(self.model.graph.graph.getSelectionCells());
+                
+                if (cells != null && cells.length > 0)
+                {
+                    var parents = self.model.graph.graph.model.getParents(cells);
+                    self.model.graph.graph.removeCells(cells, includeEdges);
+                    
+                    // Selects parents for easier editing of groups
+                    if (parents != null)
+                    {
+                        var select = [];
+                        
+                        for (var i = 0; i < parents.length; i++)
+                        {
+                            if (self.model.graph.graph.model.contains(parents[i]) &&
+                                (self.model.graph.graph.model.isVertex(parents[i]) ||
+                                self.model.graph.graph.model.isEdge(parents[i])))
+                            {
+                                select.push(parents[i]);
+                            }
+                        }
+                        
+                        self.model.graph.graph.setSelectionCells(select);
+                    }
+                }
+            },
+            initGraph(){
+                const self = this;
 
                 self.model.graph.graph.getModel().beginUpdate();
 
@@ -244,7 +264,7 @@
                 {
                     self.model.graph.graph.getModel()
 
-                    let nodes = {};
+                    self.model.graph.nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
 
                     _.forEach(orderNodes,function(v){
@@ -252,14 +272,14 @@
                         let _type = v._icon || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
+                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`);
 
-                        nodes[v.id] = node;
+                        self.model.graph.nodes[v.id] = node;
                     })
 
                     _.forEach(self.graphData.edges,function(k){
-                        let source = nodes[k.source];
-                        let target = nodes[k.target];
+                        let source =  self.model.graph.nodes[k.source];
+                        let target = self.model.graph.nodes[k.target];
 						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
                         if(k.twoway){
@@ -270,25 +290,33 @@
                     })
 
                     // Executes the layout
-	                self.model.graph.layout.execute(self.model.graph.parent);
+	                self.model.graph.layout.default.execute(self.model.graph.parent);
                 }
                 finally
                 {
                     self.model.graph.graph.getModel().endUpdate();
 
                     self.toCenter();
-
+                    
                 }
             },
-            initPlugIn: function(){
-                let self = this;
+            initPlugIn(){
+                const self = this;
 
-                self.initOutline();
-                self.initToolBars();
+                this.outline();
+                this.toolBars();
+                new Vue(topological.searchBar()).$mount(`#${this.id}-tools-search`);
 
             },
-            dispatchNodeEvent: function(){
-                let self = this;
+            reload(){
+                $(this.$el).find(`#${this.id}-container`).empty();
+                $(this.$el).find(`#${this.id}-outlineContainer`).empty();
+                this.deleteCells();
+                this.init();
+                this.outline();
+            },
+            cellsEvent(){
+                const self = this;
 
                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
 
@@ -299,15 +327,12 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    // 触发关联数据搜索
-                    eventHub.$emit("GRAPH-DIAGNOSIS-TERM-EVENT",value);
-
                     let state = self.model.graph.graph.view.getState(cell);
                     let nodeDic = _.groupBy(self.graphData.nodes,'id');
 
                     state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
                     state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic[id]));
-
+                    
                     // copy to copyboard
                     let clipboard2 = new Clipboard('g image',{
                         text: function(trigger) {
@@ -321,47 +346,44 @@
                                 build: function($trigger, e) {
 
                                     let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
-                                    let items = null;
-                                    _.forEach(temp,function(val){
-                                        _.forEach(val,function(v,k){
+                                    let items = {};
+                                    // _.forEach(temp,function(val){
+                                    //     _.forEach(val,function(v,k){
 
-	                                        let value = null;
+	                                //         let value = null;
 
-                                            if(typeof v == "object") {
-                                                if(_.includes(['depend','runon','connect','refer','contain'],k)){
+                                    //         if(typeof v == "object") {
+                                    //             if(_.includes(['depend','runon','connect','refer','contain'],k)){
 
-                                                    if(v==null || !v['_all']) return;
-                                                    let _options = {};
-                                                    _.map(v['_all'],function(w,y){
-                                                        return _.merge(_options,{[y]:w});
-                                                    })
+                                    //                 if(v==null || !v['_all']) return;
+                                    //                 let _options = {};
+                                    //                 _.map(v['_all'],function(w,y){
+                                    //                     return _.merge(_options,{[y]:w});
+                                    //                 })
 
-                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
-                                                } else {
-                                                    value = JSON.stringify(v,null,2);
-                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
-                                                }
+                                    //                 items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                    //             } else {
+                                    //                 value = JSON.stringify(v,null,2);
+                                    //                 items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
+                                    //             }
 
-                                            } else {
-                                                value = v.toString();
-                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
-                                            }
+                                    //         } else {
+                                    //             value = v.toString();
+                                    //             items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                    //         }
 
-                                        })
-                                    });
+                                    //     })
+                                    // });
 
+                                    let menu = callFsJScript('/graph/contextmenu.js', null).message;
+                                    _.forEach(menu,function(v){
+                                        return _.merge(items, v);
+                                    })
+                                    
                                     return {
                                         callback: function(key, opt) {
-
-                                            if(key === 'copy'){
-
-                                            } else if(key === 'tags') {
-
-                                            } else if(key === 'export') {
-
-                                            } else if(key === 'load') {
-
-                                            }
+                                            // 点击获取关联信息
+                                            topological.association({id:id,value:value,type:key});
                                         },
                                         items:items
                                     }
@@ -384,12 +406,11 @@
 
                 });
             },
-            tip: function(event){
-                let self = this;
-
+            tip(event){
+                const self = this;
                 alertify.log(event + ' ' + moment().format("LLL"));
             },
-            initOutline: function(){
+            outline(){
                 let self = this;
 
                 let outline = document.getElementById(`${self.id}-outlineContainer`);
@@ -397,7 +418,7 @@
                 self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
 
             },
-		    saveas: function(){
+		    saveas(){
 				let self = this;
 
                 let encoder = new mxCodec();
@@ -429,7 +450,7 @@
 
 
 		    },
-            initToolBars: function () {
+            toolBars() {
                 let self = this;
 
                 let content = document.getElementById(`${self.id}-tools`);
@@ -446,9 +467,7 @@
 
                 tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_ICON}/tools/png/refresh.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-                    $(self.$el).find("#container").empty();
-
-                    self.init();
+                    self.reload();
 
                 },null,'tools-item');
 
@@ -472,7 +491,7 @@
 
                 tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-                    mx.fullScreen();
+                    self.model.graph.graph.fit();
 
                 },null,'tools-item');
 
@@ -490,10 +509,10 @@
                             self.model.graph.orientation.value = 0;
                         }
 
-                        self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
+                        self.model.graph.layout.default.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
 
                         // Executes the layout
-                        self.model.graph.layout.execute(self.model.graph.parent);
+                        self.model.graph.layout.default.execute(self.model.graph.parent);
                     }
                     finally
                     {
@@ -506,16 +525,114 @@
 
                 },null,'tools-item-direction');
 
-                //$(self.$el).find("#tools img").attr("data-tooltip","tooltip");
+                tb.addItem('{{.i18n.Tr "creative-tools-path"}}', `${window.ASSETS_ICON}/tools/png/path.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    self.path();
 
+                },null,'tools-item');
+                
+                tb.addItem('主题', `${window.ASSETS_ICON}/tools/png/theme.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    topological.toggleTheme();
+
+                },null,'tools-item');
 
             },
-            toCenter: function(){
+            toCenter(){
                 const self = this;
 
-                //self.model.graph.graph.fit();
-                self.model.graph.graph.center(true,true,0.5,0.5);
+                self.model.graph.graph.fit();
+                self.model.graph.graph.center(true,false,0.5,0.5);
 
+            },
+            path(){
+                const self = this;
+                try{
+                    if(jsPanel.activePanels.getPanel('jsPanel-路径')){
+                        jsPanel.activePanels.getPanel('jsPanel-路径').close();
+                    }
+                }catch(error){
+
+                }
+                finally{
+                    maxWindow.winGraphPath('路径', `<div id="${self.id}-graph-path"></div>`, null, `#${self.id}`, self.pathHandle);
+                }
+            },
+            pathHandle(){
+                const self = this;
+                let dataset = [];
+                let cols = {
+                                "path":_.concat([{field:"num",title:"序号"}],_.map(self.graphData.pathtags,function(v){ return {field:v,title:v}}))
+                            };
+                
+                _.forEach(self.graphData.paths,function(v,index){
+                    dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
+                })
+                let node = { data: _.groupBy(dataset,'class'), columns: cols};
+                let path = topological.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
+                new Vue(path);
+            },
+            addPath(event){
+                const self = this;
+
+                // 过滤event
+                let paths = _.map(event,function(v){
+                                    return _.omit(v,['num','class']);
+                                });
+                
+                self.model.graph.graph.getModel().beginUpdate();
+                
+                try
+                {
+                    self.model.graph.graph.getModel()
+
+                    if(self.model.graph.paths.length){
+                        self.removePath();
+                    }
+
+                    _.forEach(paths,function(v,index){
+                        // keys
+                        var keys = _.keys(v);
+                        // values
+                        var values = _.values(v);
+                        
+                        for(var i=0;i<keys.length;i++){
+                            let source = self.model.graph.nodes[v[keys[i]]];
+                            let target = self.model.graph.nodes[v[keys[i+1]]];
+                            if(_.isUndefined(target)){
+                                return;
+                            }
+                            let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                            let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
+                            
+                            // 绘制路径
+                            let hasPath = self.model.graph.graph.getModel().getCell(`path${index+1}${i}`);
+                            if(!hasPath){
+                                let path = self.model.graph.graph.insertEdge(self.model.graph.parent, `path${index+1}${i}`, `${index+1}`, source, target, baseEdgeStyle+`strokeColor=${strokeColor};`);
+                                self.model.graph.paths.push(path);
+                            }
+                        }
+                    })
+
+                    // Executes the layout
+	                self.model.graph.layout.default.execute(self.model.graph.parent);
+                }
+                finally
+                {
+                    self.model.graph.graph.getModel().endUpdate();
+                }
+            },
+            removePath(){
+                const self = this;
+
+                // Cancels interactive operations
+                self.model.graph.graph.escape();
+                var cells = self.model.graph.paths;
+                
+                if (cells != null && cells.length > 0)
+                {
+                    self.model.graph.graph.removeCells(cells, true);
+                }
             }
 	    }
 	

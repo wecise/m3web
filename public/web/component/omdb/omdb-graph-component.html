@@ -67,7 +67,15 @@
                         container: null,
                         model: null,
                         graph: null,
-	                    layout: null,
+                        layout: {
+                            default: null,
+                            hierarchical:null,
+                            organic: null
+                        },
+                        nodes:null,
+                        edges:null,
+                        paths:[],
+                        colors:['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'],
 	                    layers: {
                             root: null,
 		                    layer1: null,
@@ -90,10 +98,10 @@
 	        }
 	    },
 	    created:function(){
-	        var self = this;
-
+	        const self = this;
+            eventHub.$on(`PATH-TOGGLE-EVENT-${self.id}-graph-path`,self.addPath);
 	    },
-	    mounted: function() {
+	    mounted() {
 	        var self = this;
 
 	        self.$nextTick(function(){
@@ -104,7 +112,7 @@
 	        })
 	    },
 	    methods: {
-            init: function() {
+            init() {
                 let self = this;
 
                 if (!mxClient.isBrowserSupported())
@@ -177,36 +185,19 @@
 
 
                     // Creates a layout algorithm to be used with the graph
-                    self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
-                    //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
-                    self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
-                    self.model.graph.layout.forceConstant = 120;
-
-                    /*self.model.graph.layout = new mxCompactTreeLayout(self.model.graph.graph, false);
-                    self.model.graph.layout.useBoundingBox = true;
-                    self.model.graph.layout.edgeRouting = true;
-                    self.model.graph.layout.levelDistance = 80;
-                    self.model.graph.layout.nodeDistance = 20;
-
-                    var layoutMgr = new mxLayoutManager(self.model.graph.graph);
-
-                    layoutMgr.getLayout = function(cell)
-                    {
-                        if (cell.getChildCount() > 0)
-                        {
-                            return self.model.graph.layout;
-                        }
-                    };*/
+                    self.model.graph.layout.hierarchical = new mxHierarchicalLayout(self.model.graph.graph);
+                    self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
+                    self.model.graph.layout.default = self.model.graph.layout.hierarchical;
 
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
 
                     self.initGraph();
 
-                    self.dispatchNodeEvent();
+                    self.cellEvent();
 
                 }
             },
-            initGraph: function(){
+            initGraph(){
                 let self = this;
 
                 self.model.graph.graph.getModel().beginUpdate();
@@ -215,7 +206,8 @@
                 {
                     self.model.graph.graph.getModel()
 
-                    let nodes = {};
+                    //let nodes = {};
+                    self.model.graph.nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
 
                     _.forEach(orderNodes,function(v){
@@ -225,12 +217,12 @@
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                             `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
 
-                        nodes[v.id] = node;
+                        self.model.graph.nodes[v.id] = node;
                     })
 
                     _.forEach(self.graphData.edges,function(k){
-                        let source = nodes[k.source];
-                        let target = nodes[k.target];
+                        let source = self.model.graph.nodes[k.source];
+                        let target = self.model.graph.nodes[k.target];
 						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
                         if(k.twoway){
@@ -241,7 +233,7 @@
                     })
 
                     // Executes the layout
-	                self.model.graph.layout.execute(self.model.graph.parent);
+	                self.model.graph.layout.default.execute(self.model.graph.parent);
                 }
                 finally
                 {
@@ -249,17 +241,21 @@
 
                     self.toCenter();
 
+                    if(self.graphData.paths.length){
+                        self.path();
+                    }
+
                 }
             },
-            initPlugIn: function(){
+            initPlugIn(){
                 let self = this;
 
-                self.initOutline();
-                self.initToolBars();
+                self.outline();
+                self.toolBars();
 
             },
-            dispatchNodeEvent: function(){
-                let self = this;
+            cellEvent(){
+                const self = this;
 
                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
 
@@ -351,13 +347,90 @@
                     //self.tip(`ID：${id} 已复制到剪切板！`);
 
                 });
+
+                /* self.model.graph.graph.addMouseListener({
+                    currentState: null,
+                    previousStyle: null,
+                    mouseDown: function (sender, me) {
+                        if (this.currentState != null) {
+                            this.dragLeave(me.getEvent(), this.currentState);
+                            this.currentState = null;
+                        }
+                    },
+                    mouseMove: function (sender, me) {
+                        if (this.currentState != null && me.getState() == this.currentState) {
+                            return;
+                        }
+
+                        var tmp = self.model.graph.graph.view.getState(me.getCell());
+
+                        // Ignores everything but vertices
+                        if (self.model.graph.graph.isMouseDown || (tmp != null && !
+                            self.model.graph.graph.getModel().isVertex(tmp.cell))) {
+                            tmp = null;
+                        }
+
+                        if (tmp != this.currentState) {
+                            if (this.currentState != null) {
+                                this.dragLeave(me.getEvent(), this.currentState);
+                            }
+
+                            this.currentState = tmp;
+
+                            if (this.currentState != null) {
+                                this.dragEnter(me.getEvent(), this.currentState);
+                            }
+                        }
+                    },
+                    mouseUp: function (sender, me) { },
+                    dragEnter: function (evt, state) {
+                        if (state != null) {
+                            this.previousStyle = state.style;
+                            state.style = mxUtils.clone(state.style);
+                            self.updateStyle(state, true);
+                            state.shape.apply(state);
+                            state.shape.redraw();
+
+                            if (state.text != null) {
+                                state.text.apply(state);
+                                state.text.redraw();
+                            }
+                        }
+                    },
+                    dragLeave: function (evt, state) {
+                        if (state != null) {
+                            state.style = this.previousStyle;
+                            self.updateStyle(state, false);
+                            state.shape.apply(state);
+                            state.shape.redraw();
+
+                            if (state.text != null) {
+                                state.text.apply(state);
+                                state.text.redraw();
+                            }
+                        }
+                    }
+                }); */
+            },
+            updateStyle(state, hover){
+                if (hover)
+                {
+                    state.style[mxConstants.STYLE_FILLCOLOR] = '#f9f9f9';
+                }
+                
+                // Sets rounded style for both cases since the rounded style
+                // is not set in the default style and is therefore inherited
+                // once it is set, whereas the above overrides the default value
+                state.style[mxConstants.STYLE_ROUNDED] = (hover) ? '1' : '0';
+                state.style[mxConstants.STYLE_STROKEWIDTH] = (hover) ? '4' : '1';
+                state.style[mxConstants.STYLE_FONTSTYLE] = (hover) ? mxConstants.FONT_BOLD : '0';
             },
             tip: function(event){
-                let self = this;
+                const self = this;
 
                 alertify.log(event + ' ' + moment().format("LLL"));
             },
-            initOutline: function(){
+            outline(){
                 let self = this;
 
                 let outline = document.getElementById('outlineContainer');
@@ -365,7 +438,7 @@
                 self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
 
             },
-		    saveas: function(){
+		    saveas(){
 				let self = this;
 
                 let encoder = new mxCodec();
@@ -397,7 +470,7 @@
 
 
 		    },
-            initToolBars: function () {
+            toolBars() {
                 let self = this;
 
                 let content = document.getElementById('tools');
@@ -440,7 +513,7 @@
 
                 tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-                    toggleFullScreen();
+                    mx.fullScreen();
 
                 },null,'tools-item');
 
@@ -458,10 +531,10 @@
                             self.model.graph.orientation.value = 0;
                         }
 
-                        self.model.graph.layout.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
+                        self.model.graph.layout.default.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
 
                         // Executes the layout
-                        self.model.graph.layout.execute(self.model.graph.parent);
+                        self.model.graph.layout.default.execute(self.model.graph.parent);
                     }
                     finally
                     {
@@ -474,16 +547,111 @@
 
                 },null,'tools-item-direction');
 
+                tb.addItem('{{.i18n.Tr "creative-tools-path"}}', `${window.ASSETS_ICON}/tools/png/path.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                {
+                    self.path();
+
+                },null,'tools-item');
+
                 //$(self.$el).find("#tools img").attr("data-tooltip","tooltip");
 
-
+                $(self.$el).find("img").eq(7).attr("ref", "pathRef");
             },
-            toCenter: function(){
+            toCenter(){
                 let self = this;
 
                 self.model.graph.graph.fit();
-                self.model.graph.graph.center(true,true,0.5,0.5);
+                self.model.graph.graph.center(true,false,0.5,0.5);
 
+            },
+            path(){
+                const self = this;
+                try{
+                    if(jsPanel.activePanels.getPanel('jsPanel-路径')){
+                        jsPanel.activePanels.getPanel('jsPanel-路径').close();
+                    }
+                }catch(error){
+
+                }
+                finally{
+                    maxWindow.winGraphPath('路径', `<div id="${self.id}-graph-path"></div>`, null, `#${self.id}`, self.pathHandle);
+                }
+            },
+            pathHandle(){
+                const self = this;
+                let dataset = [];
+                let cols = {
+                                "path":_.concat([{field:"num",title:"序号"}],_.map(self.graphData.pathtags,function(v){ return {field:v,title:v}}))
+                            };
+                
+                _.forEach(self.graphData.paths,function(v,index){
+                    dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
+                })
+                let node = { data: _.groupBy(dataset,'class'), columns: cols};
+                let path = omdb.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
+                new Vue(path);
+            },
+            addPath(event){
+                const self = this;
+
+                // 过滤event
+                let paths = _.map(event,function(v){
+                                    return _.omit(v,['num','class']);
+                                });
+                
+                self.model.graph.graph.getModel().beginUpdate();
+                
+                try
+                {
+                    self.model.graph.graph.getModel()
+
+                    if(self.model.graph.paths.length){
+                        self.removePath();
+                    }
+
+                    _.forEach(paths,function(v,index){
+                        // keys
+                        var keys = _.keys(v);
+                        // values
+                        var values = _.values(v);
+                        
+                        for(var i=0;i<keys.length;i++){
+                            let source = self.model.graph.nodes[v[keys[i]]];
+                            let target = self.model.graph.nodes[v[keys[i+1]]];
+                            if(_.isUndefined(target)){
+                                return;
+                            }
+                            let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                            let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
+                            
+                            // 绘制路径
+                            let hasPath = self.model.graph.graph.getModel().getCell(`path${index+1}${i}`);
+                            if(!hasPath){
+                                let path = self.model.graph.graph.insertEdge(self.model.graph.parent, `path${index+1}${i}`, `${index+1}`, source, target, baseEdgeStyle+`strokeColor=${strokeColor};`);
+                                self.model.graph.paths.push(path);
+                            }
+                        }
+                    })
+
+                    // Executes the layout
+	                self.model.graph.layout.default.execute(self.model.graph.parent);
+                }
+                finally
+                {
+                    self.model.graph.graph.getModel().endUpdate();
+                }
+            },
+            removePath(){
+                const self = this;
+
+                // Cancels interactive operations
+                self.model.graph.graph.escape();
+                var cells = self.model.graph.paths;
+                
+                if (cells != null && cells.length > 0)
+                {
+                    self.model.graph.graph.removeCells(cells, true);
+                }
             }
 	    }
 	

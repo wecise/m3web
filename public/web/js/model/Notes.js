@@ -47,7 +47,7 @@ class Notes {
                 let consoleVue = {
                     delimiters: ['${', '}'],
                     el: '#layout-console-template',
-                    template: `<fs-view-component id="notes-fs-view" :root="root" defaultView="note-view"></fs-view-component>`,
+                    template: `<fs-view-component id="notes-fs-view" :root="root" defaultView="note-view" rootName="我的笔记"></fs-view-component>`,
                     data: {
                         model: [],
                         root: "/notes",

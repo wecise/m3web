@@ -36,17 +36,28 @@
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
-
 <style>
 
 	/* body */
 	body {
 		overflow:hidden;
+		height: 100vh;
+	}
+	#page-container{
+		height: 100%;
+    	overflow: hidden;
 	}
 
 	/* content */
-	#content {
-		padding: 0px 20px 0px 10px;
+	#content.content {
+		margin: -15px -15px 0px 45px;
+		height: 100%;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+
+	.container-fluid {
+		margin: -4px 0px;
 	}
 
 	/* Event view */
@@ -100,32 +111,45 @@
 	}
 
 	/* 自定义Panel */
-	.panel.panel-default.panel-white-border {
-		margin-bottom: 10px;
-		border: 1px solid rgb(250, 250, 250);
+	.graphContainer.panel-default > .panel-body {
+		height: calc(100vh - 125px);
+		overflow:hidden;
+		background: #ffffff;
+		padding: 5px;
+	}
+	.graphContainer.panel-inverse > .panel-body {
+		height: calc(100vh - 125px);
+		overflow:hidden;
+		background: rgb(12, 61, 109);
+		padding: 5px;
 	}
 
-	.panel-white-border .panel-heading .nav-tabs {
-		margin-left: -13px;
-		margin-top: -8px;
-		margin-right: -15px;
+	.event.panel-default > .panel-body {
+		height: 78vh;
+		overflow:hidden;
+		background: #ffffff;
+		padding: 5px;
+	}
+	.event.panel-inverse > .panel-body {
+		height: 78vh;
+		overflow:hidden;
+		background: rgb(12, 61, 109);
+		padding: 5px;
 	}
 
-	.panel-white-border .panel-title{
-		height: 18px;
+	.association.panel-default > .panel-body {
+		height: 78vh;
+		overflow:hidden;
+		background: #ffffff;
+		padding: 5px;
 	}
-	.panel-white-border .panel-body {
-		padding:0 10px;
+	.association.panel-inverse > .panel-body {
+		height: 78vh;
+		overflow:hidden;
+		background: rgb(12, 61, 109);
+		padding: 5px;
 	}
 
-	/* grid */
-	.masonry-column {
-		padding: 0 1px;
-	}
-
-	.masonry-grid > div .panel-white-border {
-		margin: 5px 1px;
-	}
 
 	/* 告警详情页Tab */
 	.nav-tabs.event-detail-data-ul > li {
@@ -155,6 +179,18 @@
 	    color: #999;
 	}
 
+	.btn-group.dropdown.Dropdown.MultiSelect > .form-control {
+		-webkit-box-shadow: unset;
+		box-shadow: unset;
+		-webkit-transition: unset;
+		-o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+		transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+	}
+
+	.panel.graphContainer::after{
+		contemt: 'up'
+	}
+
 </style>
 
 <div id="app"></div>
@@ -170,12 +206,15 @@
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.vue"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-path-datatables-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-diagnosis-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-summary-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>

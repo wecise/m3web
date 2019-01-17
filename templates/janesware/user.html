@@ -36,6 +36,8 @@
     .user-update{
         overflow: auto;
         height: 82vh;
+        background: rgb(255, 255, 255);
+        padding: 15px;
     }
 
     .container-fluid {
@@ -337,7 +339,7 @@
                                             <li v-for="icon in model.icon.list">
                                                 <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
                                                   <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-                                                  <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download'" v-model="model.icon.value" >
+                                                  <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=true'" v-model="model.icon.value" >
                                                 </a>
                                             </li>
                                         </ul>
@@ -391,14 +393,14 @@
                         },
                         filters: {
                             pickIcon: function(item) {
-                                return "/fs" + item.parent + "/" + item.name + "?type=download";
+                                return "/fs" + item.parent + "/" + item.name + "?type=download&issys=true";
                             }
                         },
                         methods: {
                             init: function(){
                                 let me = this;
 
-                                me.model.icon.list = fsList('/home/assets/images/files/png');
+                                me.model.icon.list = fsList('/assets/images/files/png');
                             },
                             triggerInput: function(id){
                                 let self = this;

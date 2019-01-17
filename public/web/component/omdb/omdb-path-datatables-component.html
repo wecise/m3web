@@ -2,49 +2,49 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.omdb-output-datatables-component,
-		.omdb-output-datatables-component .dataTables_wrapper{
+		.omdb-path-datatables-component,
+		.omdb-path-datatables-component .dataTables_wrapper{
 			width:100%;
 			margin: 0 auto;
 		}
 
-		.omdb-output-datatables-component .dataTables_wrapper table.dataTable{
+		.omdb-path-datatables-component .dataTables_wrapper table.dataTable{
 			margin: 0!important
 		}
 
-		.omdb-output-datatables-component .dataTables_scrollHead{
+		.omdb-path-datatables-component .dataTables_scrollHead{
 			background: rgb(241, 241, 241);
 		}
 
-		.omdb-output-datatables-component thead tr th, .omdb-output-datatables-component tbody tr td{
+		.omdb-path-datatables-component thead tr th, .omdb-path-datatables-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
 		}
 
-		.omdb-output-datatables-component table.dataTable tbody>tr.selected,
-		.omdb-output-datatables-component table.dataTable tbody>tr.selected td,
-		.omdb-output-datatables-component table.dataTable tbody>tr>.selected {
+		.omdb-path-datatables-component table.dataTable tbody>tr.selected,
+		.omdb-path-datatables-component table.dataTable tbody>tr.selected td,
+		.omdb-path-datatables-component table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
 		}
 
-		.omdb-output-datatables-component .context-menu-list {
+		.omdb-path-datatables-component .context-menu-list {
             box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
 			padding:5px;
             border: none;
 		}
 
-		.omdb-output-datatables-component .context-menu-list>li>a{
+		.omdb-path-datatables-component .context-menu-list>li>a{
             padding: 5px 5px;
             color:rgb(102, 102, 102)!important;
         }
 
-		.omdb-output-datatables-component div.toolbar i {
+		.omdb-path-datatables-component div.toolbar i {
 			color: rgb(218, 224, 231);
 			cursor: pointer;
 			margin: 10px 0px 0px 5px;
 		}
 
-		.omdb-output-datatables-component .dataTables_info {
+		.omdb-path-datatables-component .dataTables_info {
 			position: fixed;
 			bottom: 32px;
 			height: 28px;
@@ -56,14 +56,14 @@
 
 		}
 
-		.omdb-output-datatables-component .datatables-toolbars {
+		.omdb-path-datatables-component .datatables-toolbars {
 			height: 30px;
 			background-color: rgb(246, 246, 246);
 			width: 100%;
 		}
 
-		.omdb-output-datatables-component .datatables-toolbars .btn-primary,
-		.omdb-output-datatables-component .datatables-toolbars .btn-primary:hover{
+		.omdb-path-datatables-component .datatables-toolbars .btn-primary,
+		.omdb-path-datatables-component .datatables-toolbars .btn-primary:hover{
 			background-color: rgb(246, 246, 246);
 			border:none;
 			color: #333333;
@@ -73,11 +73,11 @@
 			padding-bottom: 135px;
 		}*/
 
-		.omdb-output-datatables-component .datatables-toolbars > .btn-group {
+		.omdb-path-datatables-component .datatables-toolbars > .btn-group {
 			top: 1px;
 		}
 
-		.omdb-output-datatables-component .datatables-toolbars-button {
+		.omdb-path-datatables-component .datatables-toolbars-button {
 			border: none;
 			padding: 8px 10px;
 			background-color: rgba(0, 0, 0, 0);
@@ -88,7 +88,7 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="omdb-output-datatables-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="omdb-path-datatables-component"  ----------*/
 	<template>
 		<div>
 			<table :id="id" class="display" width="100%"></table>
@@ -96,7 +96,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="omdb-output-datatables-component">
+	<script id="omdb-path-datatables-component">
 	{
         delimiters: ['${', '}'],
 		props: {
@@ -183,7 +183,7 @@
 
 						});
 
-                _cols.unshift({ data: "checkbox", title: "", visible: true, orderable: false, order: null, targets: 0, checkboxes: { selectRow: true } } );
+                //_cols.unshift({ data: "checkbox", title: "", visible: true, orderable: false, order: null, targets: 0, checkboxes: { selectRow: true } } );
 
                 return _cols;
 			}
@@ -220,7 +220,7 @@
                                 colReorder: true,
 								info: true,
                                 scrollX: true,
-                                scrollY: '200px',
+                                scrollY: '25vh',
 			                    scrollCollapse: true,
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
@@ -315,9 +315,7 @@
 			                    },
                     },self.options)).columns.adjust().draw();
 
-                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192);
-
-	            _.delay(function(){
+                _.delay(function(){
                     self.datatable.buttons().container().appendTo( `.${self.id}` );
                     self.redraw();
                 },500)
@@ -330,7 +328,7 @@
 			initPlugin: function(){
                 let self = this;
 
-                self.initClassMenu();
+                //self.initClassMenu();
 
                 // init selected row's status
                 $("#"+self.id).find("tbody").on("mouseenter", "tr", function () {
@@ -364,6 +362,14 @@
                     }*/
 
                     self.selectedRow = self.datatable.row( this ).data();
+                } );
+                
+                self.datatable.on( 'select', function ( e, dt, type, indexes ) {
+                    var rowData = self.datatable.rows( '.selected' ).data().toArray();
+                    eventHub.$emit(`PATH-TOGGLE-EVENT-${self.id}`,rowData);
+                } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                    var rowData = self.datatable.rows( '.selected' ).data().toArray();
+                    eventHub.$emit(`PATH-TOGGLE-EVENT-${self.id}`,rowData);
                 } );
 
                 // selected row
@@ -407,7 +413,7 @@
 			resize: function(event){
                 let self = this;
 
-                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192);
+                //$('.omdb-path-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192);
 			},
 			refresh: function(event){
                 let self = this;

@@ -457,13 +457,12 @@ var fsMove = function(srcpath,dstpath){
 
             if( _.lowerCase(data.status) == "ok"){
                 rtn = 1;
-                alertify.success("移动成功" + " " + srcpath);
             }
 
         },
         error: function(xhr, textStatus, errorThrown) {
             rtn = 0;
-            alertify.error("复制失败" + " " + xhr.responseJSON);
+            alertify.error("移动失败" + " " + xhr.responseJSON);
             console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
         }
     })

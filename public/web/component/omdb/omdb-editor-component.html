@@ -353,37 +353,37 @@
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
-                    alertify.log("创建成功");
+                    alertify.success("创建成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
-                    alertify.log("删除成功");
+                    alertify.success("删除成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
-                    alertify.log("创建成功");
+                    alertify.success("创建成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
-                    alertify.log("删除成功");
+                    alertify.success("删除成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
-                    alertify.log("修改成功");
+                    alertify.success("修改成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
-                    alertify.log("插入成功");
+                    alertify.success("插入成功");
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                     return false;
                 }
@@ -404,31 +404,34 @@
                     return false;
                 }
 
-                // Path
+                // Graph-PATH
                 if(_list.meta.type === 'path'){
 
-                    let dataset = [];
-                    let cols = {
-                                    "path":[
-                                        {field:"num",title:"序号"},
-                                        {field:"path",title:"路径", render:function(data,type,row){
-                                            return _.map(data.split(">"),function(v){
-                                                return `<u>${v}</u>`;
-                                            }).join("-->");
-                                        }}
-                                    ]
-                                };
-                    
-                    _.forEach(_data[0].graph.paths,function(v,index){
-                        dataset.push( {num:`路径${++index}`, path:_.values(v).join(">"), class:"path"} );
-                    })
-                    self.result = {id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(dataset,'class'), columns: cols};
-                    
+                    self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
+
                     eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
                     return false;
                 }
+
+                // Path
+                // if(_list.meta.type === 'path'){
+
+                //     let dataset = [];
+                //     let cols = {
+                //                     "path":_.concat([{field:"num",title:"序号"}],_.map(_data[0].graph.pathtags,function(v){ return {field:v,title:v}}))
+                //                 };
+                    
+                //     _.forEach(_data[0].graph.paths,function(v,index){
+                //         dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
+                //     })
+                //     self.result = {id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(dataset,'class'), columns: cols};
+                    
+                //     eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                //     eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                //     return false;
+                // }
 
                 // For Select count Pattern
 	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
@@ -475,37 +478,37 @@
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
-                    alertify.log("创建成功");
+                    alertify.success("创建成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
-                    alertify.log("删除成功");
+                    alertify.success("删除成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
-                    alertify.log("创建成功");
+                    alertify.success("创建成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
-                    alertify.log("删除成功");
+                    alertify.success("删除成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
-                    alertify.log("修改成功");
+                    alertify.success("修改成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
-                    alertify.log("插入成功");
+                    alertify.success("插入成功");
                     //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                     return false;
                 }

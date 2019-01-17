@@ -1,7 +1,19 @@
 body {
     font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background-color: #ffffff;
+    background-color: #EBEBF3;
     overflow-x: hidden;
+}
+
+.page-sidebar-minified .content {
+    margin-left: 60px;
+}
+.content {
+    margin-left: 220px; 
+    padding: 20px;
+}
+
+.navbar-default {
+    border-color: rgba(0, 0, 0, 0);
 }
 
 .header.navbar.navbar-default.navbar-fixed-top{
@@ -24,7 +36,7 @@ body {
 
 #company_logo {
     margin-right:5px;
-    max-width: 64px;
+    max-width: 120px;
     min-width: 32px;
     height: 32px;
     margin: -8px 5px;
@@ -75,7 +87,7 @@ div.mxWindow{
 }
 
 .modal-header{
-    background-color: #083e6a;/*#2195f4;*/
+    background-color: #252d47;/*#2195f4;*/
     color: #ffffff;
 }
 
@@ -250,7 +262,7 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
 .sidebar,
 .sidebar-bg {
     padding-top: 50px;
-    background-color: #083e6a;/*#2195f4;*/
+    background-color: #252d47;/*#2195f4;*/
 }
 
 .sidebar-toggle-play.toggle {

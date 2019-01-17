@@ -26,22 +26,25 @@
 
 <style>
 
+    #content.content{
+        margin: -15px -10px 0px 60px;
+    }
 
-    #content .bg-info.dir {
+    #mainview .bg-info.dir {
         background: rgb(255, 255, 255);
         background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
         background: -webkit-linear-gradient(top, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
         background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
     }
 
-    #content .bg-info {
+    #mainview .bg-info {
         background: rgb(255, 255, 255);
         background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
         background: -webkit-linear-gradient(top, rgb(178, 225, 255) 0%,rgb(102, 182, 252) 100%);
         background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(201, 233, 249) 100%);
     }
 
-    #content .col-md-3 {
+    #mainview .col-md-3 {
         width: 25%;
         max-width: 350px;
         min-width: 310px;
@@ -49,7 +52,7 @@
         padding-right: 5px;
     }
 
-    #content .fa-wrench{
+    #mainview .fa-wrench{
         color: #999999;
     }
 
@@ -59,7 +62,7 @@
 
     @media screen and (max-width: 2560px) {
 
-        #content .stats-title {
+        #mainview .stats-title {
             font-family: 'microsoft yahei';
             font-size: 22px;
             color: rgb(0, 0, 0);
@@ -78,7 +81,7 @@
 
     @media screen and (max-width: 1960px) {
 
-        #content .stats-title {
+        #mainview .stats-title {
             font-family: 'microsoft yahei';
             font-size: 22px;
             color: rgb(0, 0, 0);
@@ -97,7 +100,7 @@
 
     @media screen and (max-width: 1280px) {
 
-        #content .stats-title {
+        #mainview .stats-title {
             font-family: 'microsoft yahei';
             font-size: 22px;
             color: rgb(0, 0, 0);
@@ -114,7 +117,7 @@
         }
     }
 
-    #content .stats-subtitle{
+    #mainview .stats-subtitle{
         font-size:12px;
         color: #999999;
         line-height: 25px;
@@ -130,25 +133,25 @@
         -webkit-line-clamp: 2
     }
 
-    #content .media {
+    #mainview .media {
         cursor: pointer;
         margin-bottom: 0px;
     }
 
-    #content .media-body{
+    #mainview .media-body{
         color: #999999;
     }
 
-    #content .media-body p{
+    #mainview .media-body p{
         margin: 0px 0px 3px 20px;
     }
 
-    #content .media-object{
+    #mainview .media-object{
         max-width:75px;
         min-width:60px;
     }
 
-    #content .stats-desc {
+    #mainview .stats-desc {
         display: -webkit-box;
         margin: 0px -15px -15px -15px;
         background-color: rgb(247, 247, 247);
@@ -157,11 +160,11 @@
         color: rgb(124, 124, 124)!important;
     }
 
-    #content .stats-desc .fa-wrench {
+    #mainview .stats-desc .fa-wrench {
         color: rgb(144, 144, 144);
     }
 
-    #content .stats-desc .status {
+    #mainview .stats-desc .status {
         right: -73%;
         position: relative;
         color: rgb(124, 124, 124)!important;
@@ -321,91 +324,85 @@
 
 
 <script type="text/x-template" id="app-template">
-    <div id="content" class="content">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-grey">
-                    <div class="panel-body" style="padding: 5px 0px;">
-                        <div class="col-lg-2" id="nav" style="display:none;">
-                            <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
-                        </div>
-                        <div class="col-lg-12" id="content">
-                            <div class="row" style="margin: 0px -15px;">
-                                <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                                    <ul style="font-size:16px; list-style: none;display:  flex;margin-left: -40px;">
-                                        <li style="padding:5px 0px;">
-                                            <a href="javascript:void(0);" @click="forwardDir('/opt/creative')" style="text-decoration:none;color:#333333;">
-                                                <i class="fa fa-folder-o"></i> 所有
-                                            </a>
-                                        </li>
-                                        <li style="padding-top: 2px;">
-                                            <ol class="breadcrumb">
-                                                <li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
-                                                    <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))" :title="item">${item}</a>
-                                                </li>
-                                            </ol>
-                                        </li>
-                                    </ul>
+    <div id="content" class="content container-fluid">
+        <div class="row">                
+            <div class="col-lg-2" id="nav" style="display:none;">
+                <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
+            </div>
+            <div class="col-lg-12" id="mainview">
+                <div class="row" style="margin: 0px -15px;">
+                    <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+                        <ul style="font-size:16px; list-style: none;display:  flex;margin-left: -40px;">
+                            <li style="padding:5px 0px;">
+                                <a href="javascript:void(0);" @click="forwardDir('/opt/creative')" style="text-decoration:none;color:#333333;">
+                                    <i class="fa fa-folder-o"></i> 所有
+                                </a>
+                            </li>
+                            <li style="padding-top: 2px;">
+                                <ol class="breadcrumb">
+                                    <li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
+                                        <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))" :title="item">${item}</a>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
 
-                                </div>
-                                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                    <div class="btn-group pull-right">
-                                        <!--a href="#" class="btn btn-sm btn-default" @click="toggleLeft"><i class="fa fa-caret-right navtoggle"></i> </a-->
-                                        <a href="#" class="btn btn-sm btn-link" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fa fa-paste"></i> 粘贴</a>
-                                        <a href="#" class="btn btn-sm btn-link" @click="newDir" title="{{.i18n.Tr "creative-new-project"}}" data-tooltip="tooltip"><i class="fas fa-folder-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
-                                        <a href="#" class="btn btn-sm btn-link" @click="newFile" title="{{.i18n.Tr "creative-new-file"}}" data-tooltip="tooltip"><i class="fas fa-file-medical"></i> {{.i18n.Tr "creative-new-file"}}</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-
-                                <div class="col-md-3 col-sm-6" v-for="(item,index) in model.list" >
-                                        <div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
-                                            <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                <i class="fa fa-wrench"></i>
-                                            </div>
-                                            <div @click="forwardCreative('run',item)">
-                                                <div class="stats-title">
-                                                    <i class="fa fa-braille fa-fw"></i>
-                                                    <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
-                                                </div>
-
-                                                <div class="stats-subtitle">
-                                                    ${item | pickRemark}
-                                                </div>
-
-                                                <div class="media">
-                                                    <div class="media-left">
-                                                        <img class="media-object" :src="item | pickIcon">
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <p>项目作者： ${item.username}</p>
-                                                        <p>更新日期： ${ moment(item.vtime).format("L") }</p>
-                                                        <p>更新时间： ${ moment(item.vtime).format("LTS") }</p>
-                                                        <p class="status" v-if="item.project.status==='1'">
-                                                            项目状态： 运行中 <i class='fa fa-spinner fa-spin'></i>
-                                                        </p>
-                                                        <p class="status" v-else>
-                                                            项目状态： 就绪
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                            {{if not .SignedUser.Company.OSpace}}
-                                            <div class="stats-desc">
-                                                <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
-                                            </div>
-                                            {{end}}
-                                        </div>
-
-                                </div>
-
-                            </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <div class="btn-group pull-right">
+                            <!--a href="#" class="btn btn-sm btn-default" @click="toggleLeft"><i class="fa fa-caret-right navtoggle"></i> </a-->
+                            <a href="#" class="btn btn-sm btn-link" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fa fa-paste"></i> 粘贴</a>
+                            <a href="#" class="btn btn-sm btn-link" @click="newDir" title="{{.i18n.Tr "creative-new-project"}}" data-tooltip="tooltip"><i class="fas fa-folder-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
+                            <a href="#" class="btn btn-sm btn-link" @click="newFile" title="{{.i18n.Tr "creative-new-file"}}" data-tooltip="tooltip"><i class="fas fa-file-medical"></i> {{.i18n.Tr "creative-new-file"}}</a>
                         </div>
                     </div>
-                </div>  
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-3 col-sm-6" v-for="(item,index) in model.list" >
+                            <div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
+                                <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+                                    <i class="fa fa-wrench"></i>
+                                </div>
+                                <div @click="forwardCreative('run',item)">
+                                    <div class="stats-title">
+                                        <i class="fa fa-braille fa-fw"></i>
+                                        <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
+                                    </div>
+
+                                    <div class="stats-subtitle">
+                                        ${item | pickRemark}
+                                    </div>
+
+                                    <div class="media">
+                                        <div class="media-left">
+                                            <img class="media-object" :src="item | pickIcon">
+                                        </div>
+                                        <div class="media-body">
+                                            <p>项目作者： ${item.username}</p>
+                                            <p>更新日期： ${ moment(item.vtime).format("L") }</p>
+                                            <p>更新时间： ${ moment(item.vtime).format("LTS") }</p>
+                                            <p class="status" v-if="item.project.status==='1'">
+                                                项目状态： 运行中 <i class='fa fa-spinner fa-spin'></i>
+                                            </p>
+                                            <p class="status" v-else>
+                                                项目状态： 就绪
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                {{if not .SignedUser.Company.OSpace}}
+                                <div class="stats-desc">
+                                    <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
+                                </div>
+                                {{end}}
+                            </div>
+
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>

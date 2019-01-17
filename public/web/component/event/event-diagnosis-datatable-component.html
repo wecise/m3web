@@ -28,18 +28,6 @@
 			background: rgb(196, 235, 253)!important;
 		}
 
-		.event-diagnosis-datatable-component .dataTables_info {
-			position: fixed;
-			bottom: 32px;
-			height: 28px;
-			background-color: rgb(255, 255, 255);
-			width: 100%;
-			text-align: left;
-			border-top: 1px solid rgb(226, 231, 236);
-			padding:5px;
-
-		}
-
 		/* input高度*/
 		.event-diagnosis-datatable-component .dataTables_filter input{
 			height: 24px;
@@ -178,10 +166,14 @@
 			}
 		},
 		mounted: function () {
-            let self = this;
+            const self = this;
 
             self.$nextTick(function () {
-                self.init();
+				self.init();
+				eventHub.$on("WINDOW-RESIZE-EVENT",self.resize);
+				setInterval(function(){
+					self.resize();
+				},5000)
             });
         },
 		watch: {
@@ -212,24 +204,35 @@
             init: function(){
 				const self = this;
 				
-                if(!self.model) return false;
+				if(!self.model.rows) return false;
+				if(!self.model.columns) return false;
 
                 // 自定义checkbox、序号
-                self.model.columns.unshift( { title: "", visible: true, sortable: false } );
-                self.model.columns.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
-	            let cols = _.uniqBy(self.model.columns,'data');
+                //self.model.columns.unshift( { title: "", visible: true, sortable: false } );
+                //self.model.columns.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
+				let cols = _.uniqBy(self.model.columns,'data');
+				
+				if(self.model.template.length){
+					cols = self.model.template;
+				}
+
+				cols = 	_.map(cols,function(v){
+							if(v.render){
+								v.render = eval(v.render);
+							}
+							return v;
+						});
 
                 self.datatable = $("#"+self.id).DataTable( _.extend({
 	                            destroy: true,
                                 data: self.model.rows,
                                 columns: cols,
                                 searching: false,
-                                aDataSort: true,
-	                            bSort: true,
+                                bSort: true,
 			                    bAutoWidth: true,
-                                info: false,
+                                info: true,
                                 scrollX: true,
-                                scrollY: '20vh',
+                                scrollY: '48vh',
                                 scrollCollapse: true,
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
@@ -237,7 +240,6 @@
                                 select: {
 			                        style: 'multi',
 			                        selector: 'td:first-child'
-
 			                    },
                                 language : {
                                     "sProcessing" : "处理中...",
@@ -274,7 +276,7 @@
                                 },
 			                    initComplete: function(){
 				                    self.serial();
-	                                self.toolBar();
+	                                //self.toolBar();
 	                                self.contextMenu();
 	                                self.selectRows();
 			                    }
@@ -298,6 +300,10 @@
 			},
 			detail: function(){
                 this.$root.detail(this.selectedRows);
+			},
+			resize(){
+				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
+				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
 			},
             contextMenu: function(){
                 const self = this;

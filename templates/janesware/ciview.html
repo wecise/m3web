@@ -34,8 +34,17 @@
 <link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 
 <style>
-    .ciview {
-        height: 100vh;
+    #content.content{
+        margin: 5px 5px 30px 65px;
+        background: #ffffff;
+    }
+
+    .vue-search-input-component input {
+        height:34px;
+    }
+    
+    #entity-tree{
+        height:72vh;
     }
 
     /* For zTree */
@@ -1770,8 +1779,8 @@
 
                             $("#nav").hide();
 
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12").css("padding-left", "11px");
+                            $("#mainview").removeClass("col-lg-10");
+                            $("#mainview").addClass("col-lg-12").css("padding-left", "11px");
 
                             $(".navtoggle").removeClass("fa fa-caret-left");
                             $(".navtoggle").addClass("fa fa-caret-right");
@@ -1781,8 +1790,8 @@
                             $("#nav").slideDown(500);
                             $("#nav").show();
 
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10").css("padding-left", "0px");
+                            $("#mainview").removeClass("col-lg-12");
+                            $("#mainview").addClass("col-lg-10").css("padding-left", "0px");
 
                             $(".navtoggle").removeClass("fa fa-caret-right");
                             $(".navtoggle").addClass("fa fa-caret-left");
@@ -1825,7 +1834,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div id="content" class="content ciview">
+    <div id="content" class="content container-fluid">
         <div class="row">
             <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
                 <div class="input-group searchinput">
@@ -1931,7 +1940,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-10" id="content">
+                                <div class="col-lg-10" id="mainview">
                                     <div class="panel-body context-menu-content">
 
                                         <div>

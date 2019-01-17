@@ -316,7 +316,7 @@
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 					<ul style="list-style: none;display:  flex;padding:0 8px;">
 						<li style="padding:5px 0px;">
-							<a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> 我的文件 </a>
+							<a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> ${rootName} </a>
 						</li>
 						<li>
 							<ol class="breadcrumb">
@@ -367,12 +367,12 @@
 						<!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
 							<i class="fas fa-download""></i>
 						</a>-->
-						<a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
+						<!-- <a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
 							<i class="fas fa-th"></i>
 						</a>
 						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
 							<i class="fas fa-bars"></i>
-						</a>
+						</a> -->
 						<a href="#" class="btn btn-link" @click="exportIt" title="导出备份" data-tooltip="tooltip">
 							<i class="fas fa-cloud-download-alt""></i>
 						</a>
@@ -408,7 +408,8 @@
         delimiters: ['${', '}'],
 		props: {
 			id: String,
-			root: String,
+            root: String,
+            rootName: String,
             defaultView: String
 		},
 		data: function () {
@@ -427,8 +428,8 @@
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
-										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);">
+										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
@@ -576,8 +577,8 @@
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
-										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);">
+										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
@@ -721,8 +722,8 @@
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
-										  <div class="stats-info" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
 										  <div class="stats-link">
@@ -1212,10 +1213,8 @@
 
                         let _item = $(this).data("info");
 
-                        let _extName = _item.ftype=='dir'?'':'.'+_item.ftype;
-
-                        let _old = _.trim(_item.parent + "/" + $(this).editable('getValue', true) + _extName);
-                        let _new = _.trim(_item.parent + "/" + newValue + _extName);
+                        let _old = _.trim(_item.parent + "/" + $(this).editable('getValue', true));
+                        let _new = _.trim(_item.parent + "/" + newValue);
 
                         let _check = fsCheck( _item.parent, newValue);
                         if(_check) {
@@ -1824,23 +1823,30 @@
                 self.action.from = item.parent + "/" + item.name;
                 alertify.log("已复制 " + self.action.from);
             },
-            moveIt: function(item){
-                let self = this;
-
-                if(_.isEmpty(self.action.from)){
+            moveIt: function(){
+                const self = this;
+                
+                if(!window.fsSelectedItem) {
                     alertify.log("请选择移动内容")
                     return false;
                 }
-
-                self.action.to = self.rootPath;
-                let _rtn = fsMove(self.action.from, self.action.to);
-                if(_rtn == 1){
-                    alertify.log("已移动 " + self.action.to);
-                    self.load();
-
-                    //
-                    self.action.from = null;
-                    self.action.to = null;
+                
+                try {
+                    let rtn = true;
+                    _.forEach(window.fsSelectedItem,function(v){
+                        let _rtn = fsMove([v.parent,v.name].join("/"), self.rootPath);
+                        if(_rtn===0){
+                            rtn = false;
+                        }
+                    })
+                    if(rtn){
+                        alertify.success("移动成功 " + self.rootPath);
+                        self.load();
+                    }
+                }
+                catch(error){}
+                finally{
+                    window.fsSelectedItem = [];
                 }
             },
             pasteIt: function(){
@@ -2646,12 +2652,15 @@
                 let items = $("li.fs-node").find('.fs-name');
 
                 self.selectedItem = [];
+                window.fsSelectedItem = [];
 
                 _.forEach(items,function(v){
                     let item = $(v).data("info");
 
                     self.selectedItem.push(item);
                 })
+
+                window.fsSelectedItem = self.selectedItem;
 
             },
 			setRootPath: function(item) {

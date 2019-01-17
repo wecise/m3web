@@ -15,9 +15,96 @@ class Omdb extends Matrix {
     constructor() {
         super();
     }
+    path(id, bid, node){
+
+        let _dataset = [];
+        let _columns = [];
+        let _node = {};
+
+        if(!_.isEmpty(node)) {
+            _dataset = node.data[_.keys(node.columns)[0]];
+            _columns = node.columns[_.keys(node.columns)[0]];
+            _node = node;
+        }
+
+        _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
+                return meta.row + meta.settings._iDisplayStart + 1;
+            }
+        });
+
+        return {
+
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<omdb-path-datatables-component :id="id" :bid="bid"
+                                                        :dataset="model.dataset"
+                                                        :columns="model.columns"
+                                                        :options="model.options"
+                                                        contextmenu="null"
+                                                        :result="result"></omdb-path-datatables-component>`,
+            data: {
+                id: id,
+                bid: bid,
+                model: {
+                    dataset: _dataset,
+                    columns: _columns,
+                    options: {
+                        info:false,
+                        scrollY: '25vh',
+                        searching: false,
+                    }
+                },
+                result: _node
+            },
+            created: function(){
+                let self = this;
+
+                eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
+
+                eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
+                eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
+            },
+            mounted: function() {
+                let self = this;
+
+                self.$nextTick(function() {
+                    self.init();
+                })
+            },
+            methods: {
+                init: function(){
+                    let self = this;
+
+                    if(!_.isEmpty(node)) {
+                        self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
+                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+                    } else {
+                        self.model.dataset = [];
+                        self.model.columns = [];
+                    }
+
+                },
+                setData: function(event){
+                    let self = this;
+
+                    self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
+                    self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
+                    self.result = event;
+
+                },
+                setScrollY: function(event){
+                    let self = this;
+
+                    self.model.options.scrollY = event.scrollY;
+                }
+            }
+        };
+    };
 
     init() {
-        VueLoader.onloaded(["omdb-output-datatables-component",
+        VueLoader.onloaded([
+            "omdb-path-datatables-component",
+            "omdb-output-datatables-component",
             "omdb-class-datatables-component",
             "omdb-class-tree-component",
             "omdb-editor-component",
@@ -93,7 +180,7 @@ class Omdb extends Matrix {
                     {"field": "isrel", "title": "Rel", "visible": false},
                     {"field": "btype", "title": "Btype", "visible": false}
                 ];
-
+                
                 if(!_.isEmpty(event.model.node.fieldsObj) && !_.isEmpty(event.model.pnode.fieldsObj)) {
 
                     let _node = _.cloneDeep(event.model.node.fieldsObj);
@@ -113,7 +200,6 @@ class Omdb extends Matrix {
 
                         } else {
                             _dataset = _.concat(_.map(_pnode,function(v){return _.merge(v, {icon: 'parent'});}), _.map(_diff,function(v){return _.merge(v, {icon: 'child'});}));
-
                         }
                     }
                 } else{
@@ -122,7 +208,12 @@ class Omdb extends Matrix {
                     });
                 }
 
-                _dataset = _.uniqBy(_dataset,'name');
+                _dataset = _.map(_.uniqBy(_dataset,'name'),function(v){
+                    if(_.indexOf(event.model.node.keys,v.name) > -1){
+                        _.extend(v,{iskey:1});
+                    }
+                    return v;
+                });
 
                 _columns = _.uniqBy(_columns, 'field');
 
@@ -437,7 +528,7 @@ class Omdb extends Matrix {
 
             let graph = function(id, bid, node){
 
-                let _data = {nodes:[], edges:[]};
+                let _data = {nodes:[], edges:[], paths: [], pathtags:[]};
 
                 if(!_.isEmpty(node)){
                     _data.nodes = node.nodes;
@@ -445,6 +536,14 @@ class Omdb extends Matrix {
 
                 if(!_.isEmpty(node.edges)){
                     _data.edges = node.edges;
+                };
+
+                if(!_.isEmpty(node.paths)){
+                    _data.paths = node.paths;
+                };
+
+                if(!_.isEmpty(node.pathtags)){
+                    _data.pathtags = node.pathtags;
                 };
 
                 return {

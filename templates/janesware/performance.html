@@ -8,6 +8,13 @@
 
 
 <style type="text/css" media="screen">
+    #content.content{
+        margin: -15px -15px 0px 45px;
+    }
+    
+    .vue-search-input-component input {
+        height:34px;
+    }
 
     .btn.dropdown-toggle {
         padding: 7px 12px;
@@ -135,12 +142,6 @@
         background-color: rgb(43, 142, 226);
     }
 
-    .object-footer{
-        position: fixed;
-        bottom: 30px;
-        left: 5%;
-    }
-
 </style>
 
 <div id="app"></div>
@@ -196,9 +197,9 @@
         </div>
         <div class="row">
             <div class="col-lg-12">
-                <div role="tabpanel" style="border:1px solid rgb(240, 243, 244);">
+                <div role="tabpanel" style="background:#ffffff;">
                     <!-- Nav tabs -->
-                    <ul class="nav nav-tabs nav-main" role="tablist">
+                    <ul class="nav nav-tabs nav-tabs-bottom-2px" role="tablist">
                         <li role="presentation" class="active">
                             <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Performance</a>
                         </li>

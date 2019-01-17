@@ -213,25 +213,25 @@
                                     }
                                 },
                                 "sep12": "---------",
-                                "keyNew": {
-                                    name: "新建主键", icon: "fas fa-plus", callback: function (key, opt) {
-                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
-											                                            name: self.selectedNode.name,
-											                                            title: self.selectedNode.name,
-											                                            model: { pattern: 'alter-add-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
-											                                        });
-                                    }
-                                },
-                                "keyDel": {
-                                    name: "删除主键", icon: "fas fa-trash", callback: function (key, opt) {
-                                        eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
-											                                            name: self.selectedNode.name,
-											                                            title: self.selectedNode.name,
-											                                            model: { pattern: 'alter-drop-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
-											                                        });
-                                    }
-                                },
-                                "sep13": "---------",
+                                // "keyNew": {
+                                //     name: "新建主键", icon: "fas fa-plus", callback: function (key, opt) {
+                                //         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+								// 			                                            name: self.selectedNode.name,
+								// 			                                            title: self.selectedNode.name,
+								// 			                                            model: { pattern: 'alter-add-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+								// 			                                        });
+                                //     }
+                                // },
+                                // "keyDel": {
+                                //     name: "删除主键", icon: "fas fa-trash", callback: function (key, opt) {
+                                //         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
+								// 			                                            name: self.selectedNode.name,
+								// 			                                            title: self.selectedNode.name,
+								// 			                                            model: { pattern: 'alter-drop-key', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+								// 			                                        });
+                                //     }
+                                // },
+                                // "sep13": "---------",
                                 "attributeSetup": {
                                     name: "属性设置", icon: "fas fa-wrench", callback: function (key, opt) {
                                         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
@@ -254,10 +254,49 @@
                             }
                         },
                         "sep2": "---------",
-                        "数据": {
+                        "查看数据": {
                             name: "查看数据", icon: "fas fa-table", callback: function (key, opt) {
 
-                                let _mql = `SELECT * FROM ${self.selectedNode.name} limit 50`;
+                                alertify.prompt("查看数据行数", function (e, str) {
+                                    // str is the input text
+                                    if (e) {
+                                        let count = Number(str) || 200;
+                                        let _mql = `SELECT * FROM ${self.selectedNode.name} limit ${count}`;
+                                        let _list = fetchDataByMql(_mql);
+
+                                        if(_list.status === 'ok'){
+                                            eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+                                        } else {
+                                            eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+                                        }
+
+
+                                        if(_.isEmpty(_list)) {
+
+                                            alertify.log("查询结果为空");
+
+                                            return false;
+                                        }
+
+                                        _data = _list.message;
+
+                                        _columns = columnsParse(_list.meta);
+
+                                        let result = { id:self.id, bid: self.id, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
+
+                                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`, result);
+                                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.id}`,result);
+                                    } else {
+                                        // user clicked "cancel"
+                                    }
+                                }, '200');
+                                
+                            }
+                        },
+                        "导出数据": {
+                            name: "导出数据", icon: "fas fa-file-export", callback: function (key, opt) {
+
+                                let _mql = `SELECT * FROM ${self.selectedNode.name} limit -1`;
                                 let _list = fetchDataByMql(_mql);
 
                                 if(_list.status === 'ok'){
@@ -274,13 +313,25 @@
                                     return false;
                                 }
 
-                                _data = _list.message;
-
-                                _columns = columnsParse(_list.meta);
-
-                                let _result = {type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
-
-                                eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT", _result);
+                                let _content = _.map(_list.message,function(v){
+                                    return  `INSERT INTO ${self.selectedNode.name} ` + _.map(v,function(val,key){ 
+                                                if(!val) return;
+                                                let value = val;
+                                                if(typeof val == 'object'){
+                                                    value = JSON.stringify(val);
+                                                }
+                                                if(typeof val == 'string'){
+                                                    value = JSON.stringify(val);
+                                                }
+                                                
+                                                return [key,value].join("="); 
+                                            }).join(",");
+                                }).join(";\n\n").replace(/"/g,"'");
+                                let _ftype = "sql";
+                                let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
+                                let _name = `${self.selectedNode.name}_INSERT_${moment().format("LLL")}`;
+                                let _url = fsTemp(_ftype, _name + "." + _ftype, _content, _attr);
+                                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
                             }
                         },
                         "sep3": "---------",
@@ -595,7 +646,6 @@
                         event.stopPropagation();
                         event.preventDefault();
 
-                        console.log(JSON.stringify(treeNode))
                         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'class-edit',
 											                            name: treeNode.name,
 											                            title: treeNode.name,

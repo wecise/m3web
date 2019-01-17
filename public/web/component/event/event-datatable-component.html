@@ -28,18 +28,6 @@
 			background: rgb(196, 235, 253)!important;
 		}
 
-		.event-datatable-component .dataTables_info {
-			position: fixed;
-			bottom: 32px;
-			height: 28px;
-			background-color: rgb(255, 255, 255);
-			width: 100%;
-			text-align: left;
-			border-top: 1px solid rgb(226, 231, 236);
-			padding:5px;
-
-		}
-
 		/* input高度*/
 		.event-datatable-component .dataTables_filter input{
 			height: 24px;
@@ -223,32 +211,13 @@
 			}
 		},
 		mounted: function () {
-            let self = this;
+            const self = this;
 
             self.$nextTick(function () {
                 self.init();
 
-                $(window).resize(function() {
-                    let contentChild1 = $(".event-view").children().first().height();
-                    let contentChild2 = $(".event-view").height() - contentChild1 - 100;
-                    
-                    $('.event-datatable-component .dataTables_scrollBody').css("max-height", contentChild2);
-                });
-
-                $(window).on('resize', function(e) {
-
-                    clearTimeout(resizeTimer);
-                    var resizeTimer = setTimeout(function() {
-                        // Get table context (change "TABLENAME" as required)
-                        var table = $("#"+self.id).DataTable();
-
-                        // Set new size to height -100px
-                        $('.dataTables_scrollBody').css('max-height', $(".event").height() * 0.4 +"px");
-
-                        // Force table redraw
-                        table.draw();
-
-                    }, 250);
+                $(this.$el).closest(".panel-body").on('click', function() {
+                    self.resize();
                 });
             });
         },
@@ -334,7 +303,6 @@
                         v.visible = false;
                         return v;
                     })
-
                     temp = _.extend(self.columns,self.model.template.admin);
                 }
                 // 自定义checkbox、序号
@@ -413,7 +381,9 @@
 	                                self.selectRows();
 
                                     self.dragHandle();
-				                    self.dropHandle();
+                                    self.dropHandle();
+                                    
+                                    self.resize();
 
 			                    },
 			                    createdRow: function ( row, data, index ) {
@@ -692,8 +662,11 @@
                 this.defaultClass = event;
             },
             selectColumns: function(){
-
-            }
+            },
+            resize(){
+				let parentHeight = $(this.$el).closest(".panel-body").height() - 95;
+				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
+			}
 		}
 	
 	}

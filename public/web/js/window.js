@@ -477,8 +477,8 @@ class Window {
 
         let _position = { top: 0, right: 0 };
 
-        this.lrwh[2] = $(`.${container}`).width() + 20;
-        this.lrwh[3] = $(`.${container}`).height() + 40;
+        this.lrwh[2] = $(`.${container}`).width() + 0;
+        this.lrwh[3] = $(`.${container}`).height() + 0;
 
         let win = $.jsPanel({
             id: `jsPanel-${container}`,
@@ -795,6 +795,209 @@ class Window {
         return win;
     }
 
+    winGraphPath(title, template, position, container, fn){
+
+        this.lrwh[2] = this.width * 0.35;
+        this.lrwh[3] = this.height * 0.3;
+
+        let win = $.jsPanel({
+            id: `jsPanel-${title}`,
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position:    'right-top DOWN -5 5',
+            container: container,
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "11000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    // "background-color": "rgb(238, 238, 238)",
+                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    // "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+                fn();
+
+            },
+            footerToolbar: function (footer) {
+                //return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winTopological(id, title, template, position, container, fn){
+
+        let _position = { top: 0, right: 0 };
+
+        this.lrwh[2] = $(container).width();
+        this.lrwh[3] = this.height;
+
+        let win = $.jsPanel({
+            id: `jsPanel-${id}`,
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position:   _position,
+            container: container,
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "left":"70px",
+                    "top":"60px",
+                    "box-shadow":"none"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    // "background-color": "rgb(238, 238, 238)",
+                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    // "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+                fn();
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winAssociation(id, title, template, position, container, fn){
+
+        this.lrwh[2] = $(container).width();
+        this.lrwh[3] = this.height/3;
+
+        let win = $.jsPanel({
+            id: `jsPanel-${id}`,
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position:   {
+                        my: 'left-bottom',
+                        at: 'left-bottom',
+                        offsetY: 25,
+                        offsetX: 65},
+            container: container,
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "box-shadow":"none",
+                    "border":"none"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    // "background-color": "rgb(238, 238, 238)",
+                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    // "background-repeat": "repeat-x",
+                    "background": "rgb(250, 250, 250)",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "unset",
+                    "overflow": "hidden"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+                fn();
+
+            },
+            footerToolbar: function (footer) {
+                //return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winPerformance(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.7;
+        this.lrwh[3] = this.height * 0.8;
+
+        let win = $.jsPanel({
+            theme:          'filledlight',
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            dragit: {
+                containment: 'parent',
+            },
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absolute",
+                    "z-index": "10000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "background-color": "rgb(238, 238, 238)",
+                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
+                    "background-repeat": "repeat-x",
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
 
 }
 

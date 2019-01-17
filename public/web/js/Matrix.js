@@ -324,6 +324,10 @@ class Matrix {
         });
     }
 
+    // Window RESIZE事件
+    windowResize(){
+        eventHub.$emit("WINDOW-RESIZE-EVENT");
+    }
 
     // 全屏控制
     fullScreen() {
@@ -452,7 +456,7 @@ class Matrix {
         "use strict";
         $("[data-click=panel-remove]").hover(function() {
             $(this).tooltip({
-                title: "Remove",
+                title: "删除",
                 placement: "bottom",
                 trigger: "hover",
                 container: "body"
@@ -461,7 +465,7 @@ class Matrix {
             e.preventDefault(), $(this).tooltip("destroy"), $(this).closest(".panel").remove()
         }), $("[data-click=panel-collapse]").hover(function() {
             $(this).tooltip({
-                title: "Collapse / Expand",
+                title: "最小化 / 最大化",
                 placement: "bottom",
                 trigger: "hover",
                 container: "body"
@@ -470,7 +474,7 @@ class Matrix {
             e.preventDefault(), $(this).closest(".panel").find(".panel-body").slideToggle()
         }), $("[data-click=panel-reload]").hover(function() {
             $(this).tooltip({
-                title: "Reload",
+                title: "刷新",
                 placement: "bottom",
                 trigger: "hover",
                 container: "body"
@@ -487,7 +491,7 @@ class Matrix {
             }
         }), $("[data-click=panel-expand]").hover(function() {
             $(this).tooltip({
-                title: "Expand / Compress",
+                title: "最大化 / 收起",
                 placement: "bottom",
                 trigger: "hover",
                 container: "body"
@@ -513,6 +517,7 @@ class Matrix {
                 }), 40 != l && $(t).css("top", 40 + "px")
             }
             $(window).trigger("resize")
+            mx.windowResize()
         })
     }
 

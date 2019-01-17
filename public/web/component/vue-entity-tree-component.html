@@ -25,15 +25,6 @@
 			text-decoration: none!important;
 		}
 
-
-		ul.nav-tabs-no-bg {
-    		background-color: rgba(0, 0, 0, 0)!important;
-		}
-
-		ul.nav-tabs-no-bg > li.active {
-			border-bottom: 2px solid rgb(3, 169, 244);
-		}
-
 		.tree-toolbars{
 			position: relative;
 			left: calc(100% - 68px);
@@ -68,7 +59,7 @@
 	<template>
 		<div role="tabpanel">
 			<!-- Nav tabs -->
-			<ul class="nav nav-tabs nav-tabs-no-bg" role="tablist">
+			<ul class="nav nav-tabs nav-tabs-bottom-2px" role="tablist">
 				<li role="presentation" class="active">
 					<a href="#entity-tree" aria-controls="entity-tree" role="tab" data-toggle="tab">分类</a>
 				</li>
@@ -79,7 +70,7 @@
 		
 			<!-- Tab panes -->
 			<div class="tab-content" style="padding:0px;">
-				<div role="tabpanel" class="tab-pane active" id="entity-tree" style="height:120vh;">
+				<div role="tabpanel" class="tab-pane active" id="entity-tree" >
 					<ul class="ztree" :id="id"></ul>
 				</div>
 				<div role="tabpanel" class="tab-pane" id="entity-tags" style="height:120vh;">

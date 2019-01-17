@@ -1051,7 +1051,7 @@ Sidebar.prototype.addBimPalette = function(id, title, prefix, postfix, items, ti
                 tmpTags = item.substring((slash >= 0) ? slash + 1 : 0, (dot >= 0) ? dot : item.length).replace(/[-_]/g, ' ');
             }
 
-            fns.push(this.createVertexTemplateEntry(`shape=image;html=1;labelBackgroundColor=transparent;image=/fs/assets/images/bim/png/${item}${postfix}?type=download&issys=true`,
+            fns.push(this.createVertexTemplateEntry(`shape=image;html=1;labelBackgroundColor=transparent;image=/fs/assets/images/graph/bim/png/${item}${postfix}?type=open&issys=true`,
                 this.defaultImageWidth, this.defaultImageHeight, '', title, title != null, null, this.filterTags(tmpTags)));
         }))(items[i], (titles != null) ? titles[i] : null, (tags != null) ? tags[items[i]] : null);
     }
@@ -1078,7 +1078,7 @@ Sidebar.prototype.addSvgPalette = function(id, title, prefix, postfix, items, ti
                 tmpTags = item.substring((slash >= 0) ? slash + 1 : 0, (dot >= 0) ? dot : item.length).replace(/[-_]/g, ' ');
             }
 
-            fns.push(this.createVertexTemplateEntry('image;html=1;labelBackgroundColor=transparent;image=/web/vendor/mxgraph/graph/' + prefix + item + postfix,
+            fns.push(this.createVertexTemplateEntry('shape=image;html=1;labelBackgroundColor=transparent;image=/web/vendor/mxgraph/graph/' + prefix + item + postfix,
                 this.defaultImageWidth, this.defaultImageHeight, '', title, title != null, null, this.filterTags(tmpTags)));
         }))(items[i], (titles != null) ? titles[i] : null, (tags != null) ? tags[items[i]] : null);
     }

@@ -21,6 +21,11 @@
 		.vue-bootstrap-table .table-panel-tab-content {
 			border-top: 1px solid rgb(204, 204, 204);
 		}
+
+		.timewindow > button,
+		.baseline > button {
+			border:none;
+		}
 	</style>
 
 	
@@ -53,7 +58,7 @@
 	                reorderableColumns: true
 	            },
 	            templates: {
-	            	event: `<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	            	event: `<ul class="nav nav-tabs nav-tabs-bottom-2px table-panel-tab-ul">
                                 <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
                                 <li class=""><a href="#tab-journal" data-toggle="tab">Journal</a></li>
                                 <li class=""><a href="#tab-rawcaputer" data-toggle="tab">RawCaputer</a></li>
@@ -81,7 +86,7 @@
                                     <div id="panel-timeline"></div>
                                 </div>
                             </div>`,
-                    performance: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+                    performance: `	<ul class="nav nav-tabs nav-tabs-bottom-2px table-panel-tab-ul">
 		                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
 		                                <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
 		                                <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
@@ -98,7 +103,7 @@
 		                                </div>
 		                            </div>`,
 
-                    log: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+                    log: `	<ul class="nav nav-tabs nav-tabs-bottom-2px table-panel-tab-ul">
 	                            <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
 	                            <li class=""><a href="#tab-history" data-toggle="tab">History</a></li>
 	                            <li class=""><a href="#tab-timeline" data-toggle="tab">Timeline</a></li>
@@ -115,7 +120,7 @@
 	                            </div>
 	                        </div>`,
                     ciview: `	<div id="panel-card"></div>`,
-	                default: `	<ul class="nav nav-tabs nav-tabs-no-bg table-panel-tab-ul">
+	                default: `	<ul class="nav nav-tabs nav-tabs-bottom-2px table-panel-tab-ul">
 	                                <li class="active"><a href="#tab-detail" data-toggle="tab">Detail</a></li>
 	                            </ul>
 	                            <div class="tab-content table-panel-tab-content">
@@ -251,7 +256,7 @@
 	        openDetailsPanel: function(row, menu, tabnum){
 	            let self = this;
 
-                maxWindow.winLarge( row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default,null,null);
+                maxWindow.winPerformance( row.node || row.host || row.premark || row.name || row.title, self.templates[menu.app] || self.templates.default,null,null);
 
 	            _.delay(function(){
 	            	
