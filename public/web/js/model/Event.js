@@ -18,6 +18,9 @@ class Event extends Matrix {
         // 运行模式定义
         window.EVENT_VIEW_LIST = ['view-normal','view-tags','view-fullscreen'];
         window.EVENT_VIEW = 'view-normal';
+        
+        this.app = null;
+        this.detail = null;
     }
 
     init() {
@@ -50,32 +53,50 @@ class Event extends Matrix {
                     template: "#event-view-radar-template",
                 });
 
-                // 告警主视图
-                Vue.component("event-view",{
-                    delimiters: ['${', '}'],
+                // 告警详情
+                Vue.component("event-view-detail",{
+                    delimiters: ['#{', '}#'],
                     props: {
                         id: String,
-                        model: Object
+                        model:String
                     },
-                    template: "#event-view-template",
-                    mounted:function(){
-                        $(this.$el).addClass('view-normal');
-                    },
-                    methods: {
-                        // 切换运行模式
-                        toggleModel: function(event){
-                            $(this.$el).removeClass(window.EVENT_VIEW);
-                            $(this.$el).addClass(event);
-                            window.EVENT_VIEW = event;
-                        }
+                    template: `<form style="height:calc(100vh - 180px);overflow:auto;padding:15px;">
+                                    <div class="form-group" v-for="(value,key) in model.rows[0]">
+                                        <label :for="key">#{key}#</label>
+                                        <input type="text" class="form-control" :placeholder="key" :value="value">
+                                    </div>
+                                </form>`,
+                    mounted(){
+                        $(this.$el).closest("section").css("background",'#ffffff');
                     }
                 });
+                
 
-                var app = new Vue({
+                event.app = new Vue({
                     delimiters: ['${', '}'],
                     el: "#app",
                     template: "#app-template",
                     data: {
+                        // 布局
+                        layout:{
+                            main:{
+                                index: 0,
+                                tabs:[
+                                    {title:'告警列表', type: 'main'}
+                                ],
+                                detail: {
+                                    model: [],
+                                    index: 0
+                                }
+                            },
+                            summary: {
+                                index: 0,
+                                tabs:[
+                                    {title:'告警雷达', type: 'radar'},
+                                    {title:'时间序列', type: 'timeline'}
+                                ]
+                            }
+                        },
                         // 搜索组件结构
                         model: {
                             id: "matrix-event-search",
@@ -104,113 +125,211 @@ class Event extends Matrix {
                             }
                         }
                     },
+                    filters: {
+                        pickTitle(item,model,index){
+                            try {
+                                let count = 0;
+                                count = model[item.type].rows.length;
+                                let badge = 0;
+                                let severity = _.maxBy(model[item.type].rows,'severity').severity;
+                                badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
+                                
+                                return `${item.title} ${badge}`;
+
+                            } catch(error){
+                                return `${item.title} 0`;
+                            }
+                        }
+                    },
                     created: function(){
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                     },
                     mounted: function(){
-                        
+                        $(this.$el).addClass('view-normal');
+                        $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
                     },
                     methods: {
                         setData(event){
                             this.model = _.extend(this.model, this.$refs.searchRef.result);
                         },
-                        // 告警详情页
-                        detail: function(row){
+                        // 切换运行模式
+                        toggleModel: function(event){
+                            $(this.$el).removeClass(window.EVENT_VIEW);
+                            $(this.$el).addClass(event);
+                            window.EVENT_VIEW = event;
+                        },
+                        close(index){
+                            this.layout.main.tabs.splice(index, 1);
+                            this.layout.main.detail.model.splice(this.layout.main.index - 1, 1);
+                            if (this.layout.main.index === this.layout.main.tabs.length && this.layout.main.index > 0) {
+                                --this.layout.main.index
+                            }
+                        },
+                        detail: function(event){
+                            try {
+                                // event
+                                let term = encodeURIComponent(JSON.stringify(event));
+                                // 根据event获取关联信息
+                                let model = callFsJScript('/topological/diagnosis-by-id.js',term).message;
+                                console.log(model.event.rows)
+                                // 详情数据
+                                this.layout.main.detail.model.push(model);
+                                // 添加tab
+                                let id = event.id;
+                                this.layout.main.tabs.push( {title:`告警分析 ${event.id}`, type: 'detail', child:[
+                                                                {title:'告警详情', id:`event-${id}`, type: 'event'},
+                                                                {title:'告警轨迹', id:`journal-${id}`, type: 'journal'},
+                                                                {title:'历史告警', id:`histroyEvent-${id}`, type: 'histroyEvent'},
+                                                                {title:'维度关联性告警', id:`associationEvent-${id}`, type: 'associationEvent'},
+                                                                {title:'概率相关性告警', id:`probabilityEvent-${id}`, type: 'probabilityEvent'},
+                                                                {title:'性能', id:`performance-${id}`, type: 'performance'},
+                                                                {title:'日志', id:`log-${id}`, type: 'log'},
+                                                                {title:'配置', id:`config-${id}`, type: 'config'},
+                                                                {title:'工单', id:`ticket-${id}`, type: 'ticket'},
+                                                                {title:'原始报文', id:`raw-${id}`, type: 'raw'},
+                                                                {title:'资源信息', id:`topological-${id}`, type: 'topological'},
+                                                            ]});
+                                
+                                this.layout.main.tabs.index = this.layout.main.detail.model.length - 1;
+                                $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                            } catch(error){
+                                this.layout.main.detail.model = [];
+                            }
 
+                            // let detail = new Vue({
+                            //     delimiters: ['#{', '}#'],
+                            //     template: ` <tabs v-model="index">
+                            //                     <tab :title="item | pickTitle" v-for="item in tabs" :key="item.id" html-title>
+                            //                         <event-diagnosis-datatable-component :id="item.id" :model="model[index][item.type]"></event-diagnosis-datatable-component>
+                            //                     </tab>
+                            //                 </tabs>`,
+                            //     data: {
+                            //         tabs: tabTemp,
+                            //         index: 0,
+                            //         model: [callFsJScript('/topological/diagnosis.js',event.host).message]
+                            //     },
+                            //     filters: {
+                            //         pickTitle(event){
+                            //             const self = this;
+                            //             let count = 0;
+                            //             try {
+                            //                 count = this.model[this.index][event.type].rows.length;
+                            //             } catch(error){
+                                            
+                            //             }
+                
+                            //             let badge = '0';
+                            //             try {
+                            //                 let severity = _.maxBy(this.model[this.index][event.type].rows,'severity').severity;
+                            //                 badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:0;
+                            //             } catch(error){}
+                                        
+                            //             return `${event.title} ${badge}`;
+                            //         }
+                            //     },
+                            //     mounted(){
+                            //         $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                            //     },
+                            //     methods:{
+                            //         onChange(index) {  
+                            //         }
+                            //     }
+                            // }).$mount(`#event-association`);
+                           
                             // 生成tab页的唯一ID
-                            let id = objectHash.sha1(row);
-                            let elId = `event-detail-${id}`;
+                            // let id = objectHash.sha1(row);
+                            // let elId = `event-detail-${id}`;
 
-                            $(".event-ul").find(".active").removeClass("active");
-                            $(".event-ul").append(`<li class="active">
-                                                       <a href="#${elId}" role="tab" data-toggle="tab" title="告警详情" data-tooltip="tooltip">
-                                                        告警详情 ${row.id || row.host}  
-                                                        <span class="fas fa-times" style="cursor:pointer;padding-left:5px;" data-id="${elId}"></span>
-                                                       </a>
-                                                   </li>`)
-                                .on("click", "span", function () {
-                                    var anchor = $(this).siblings('a');
-                                    $(anchor.attr('href')).remove();
-                                    $(this).parent().remove();
+                            // $(".event-ul").find(".active").removeClass("active");
+                            // $(".event-ul").append(`<li class="active">
+                            //                            <a href="#${elId}" role="tab" data-toggle="tab" title="告警详情" data-tooltip="tooltip">
+                            //                             告警详情 ${row.id || row.host}  
+                            //                             <span class="fas fa-times" style="cursor:pointer;padding-left:5px;" data-id="${elId}"></span>
+                            //                            </a>
+                            //                        </li>`)
+                            //     .on("click", "span", function () {
+                            //         var anchor = $(this).siblings('a');
+                            //         $(anchor.attr('href')).remove();
+                            //         $(this).parent().remove();
 
-                                    $(`.event-ul li`).children('a').first().click();
+                            //         $(`.event-ul li`).children('a').first().click();
 
-                                    let id = $(this).data("id");
-                                    $(`#${id}`).remove();
-                                    $(`a[href="#${id}"]`).remove();
-                                    $(`.event-div`).children("div").first().addClass("active");
+                            //         let id = $(this).data("id");
+                            //         $(`#${id}`).remove();
+                            //         $(`a[href="#${id}"]`).remove();
+                            //         $(`.event-div`).children("div").first().addClass("active");
 
-                                });
+                            //     });
 
-                            $(".event-div").find(".active").removeClass("active");
-                            $(".event-div").append(`<div id="${elId}"></div>`).ready(function(){
+                            // $(".event-div").find(".active").removeClass("active");
+                            // $(".event-div").append(`<div id="${elId}"></div>`).ready(function(){
 
-                                // 动态生成组件
-                                let view = {
-                                    delimiters: ['#{', '}#'],
-                                    el: `#${elId}`,
-                                    template: callFsJScript('/event/event_ui.js', null).message.eventDetail,
-                                    data: {
-                                        id: elId,
-                                        model: row
-                                    },
-                                    mounted:function(){
-                                        const self = this;
+                            //     // 动态生成组件
+                            //     let view = {
+                            //         delimiters: ['#{', '}#'],
+                            //         el: `#${elId}`,
+                            //         template: callFsJScript('/event/event_ui.js', null).message.eventDetail,
+                            //         data: {
+                            //             id: elId,
+                            //             model: row
+                            //         },
+                            //         mounted:function(){
+                            //             const self = this;
 
-                                        $(this.$el).closest("div .container-fluid").attr("id",`${elId}`);
-                                        $(this.$el).addClass("tab-pane fade in active");
-                                    },
-                                    destroyed: function () {
-                                        $(this.$el).off();
-                                    }
-                                };
+                            //             $(this.$el).closest("div .container-fluid").attr("id",`${elId}`);
+                            //             $(this.$el).addClass("tab-pane fade in active");
+                            //         },
+                            //         destroyed: function () {
+                            //             $(this.$el).off();
+                            //         }
+                            //     };
 
-                                // 告警详情页实例化
-                                new Vue(view);
+                            //     // 告警详情页实例化
+                            //     new Vue(view);
 
-                                _.delay(function(){
-                                    let ui = ['graphNav','performance','log','config','ticket'];
+                            //     _.delay(function(){
+                            //         let ui = ['graphNav','performance','log','config','ticket'];
 
-                                    // 告警管理拓扑页实例化
-                                    let graphElId = `${elId}-graph`;
-                                    $(`#${elId} .graph`).attr("id", graphElId);
-                                    //$(`#${elId}`).addClass("tab-pane fade in active");
+                            //         // 告警管理拓扑页实例化
+                            //         let graphElId = `${elId}-graph`;
+                            //         $(`#${elId} .graph`).attr("id", graphElId);
+                            //         //$(`#${elId}`).addClass("tab-pane fade in active");
 
-                                    new Vue(event.graph(graphElId));
+                            //         new Vue(event.graph(graphElId));
 
-                                    // 告警关联数据页实例化
-                                    mx.tabs("event-detail-data");
-                                    _.forEach(ui,function(v,index){
-                                        let cid = `${elId}-${v}`;
-                                        $(`#${elId} .${v}`).attr("id", cid);
-                                        new Vue(event[v](cid));
-                                    })
+                            //         // 告警关联数据页实例化
+                            //         mx.tabs("event-detail-data");
+                            //         _.forEach(ui,function(v,index){
+                            //             let cid = `${elId}-${v}`;
+                            //             $(`#${elId} .${v}`).attr("id", cid);
+                            //             new Vue(event[v](cid));
+                            //         })
 
-                                    // 增加tab active
-                                    $(".tab-content.event-detail-data-content").children().addClass("tab-pane fade in")
-                                    $(".tab-content.event-detail-data-content").children().first().addClass("active");
+                            //         // 增加tab active
+                            //         $(".tab-content.event-detail-data-content").children().addClass("tab-pane fade in")
+                            //         $(".tab-content.event-detail-data-content").children().first().addClass("active");
 
-                                },50)
+                            //     },50)
 
 
-                                mx.handleDraggablePanel();
-                                //mx.handleLocalStorage();
-                                //mx.handleResetLocalStorage();
-                                //mx.handleSlimScroll();
-                                mx.handleSidebarMenu();
-                                // mx.handleMobileSidebarToggle();
-                                mx.handleSidebarMinify();
-                                // mx.handleMobileSidebar();
-                                // mx.handleThemePageStructureControl();
-                                // mx.handleThemePanelExpand();
-                                mx.handleAfterPageLoadAddClass();
-                                mx.handlePanelAction();
-                                mx.handelTooltipPopoverActivation();
-                                mx.handleScrollToTopButton();
-                                mx.handlePageContentView();
-                                mx.handleIEFullHeightContent();
-                            })
+                            //     mx.handleDraggablePanel();
+                            //     //mx.handleLocalStorage();
+                            //     //mx.handleResetLocalStorage();
+                            //     //mx.handleSlimScroll();
+                            //     mx.handleSidebarMenu();
+                            //     // mx.handleMobileSidebarToggle();
+                            //     mx.handleSidebarMinify();
+                            //     // mx.handleMobileSidebar();
+                            //     // mx.handleThemePageStructureControl();
+                            //     // mx.handleThemePanelExpand();
+                            //     mx.handleAfterPageLoadAddClass();
+                            //     mx.handlePanelAction();
+                            //     mx.handelTooltipPopoverActivation();
+                            //     mx.handleScrollToTopButton();
+                            //     mx.handlePageContentView();
+                            //     mx.handleIEFullHeightContent();
+                            // })
 
 
                         }

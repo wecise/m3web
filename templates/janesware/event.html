@@ -45,38 +45,38 @@
 	}
 
 	/* content */
-	#content {
-		padding: 10px;
+	#content.content {
+		padding: 5px 10px 0px 5px;
 	}
 
 	/* Event view */
-	.event-view .tree-view {
+	.tree-view {
 		padding: 0 15px;
 	}
 
 	/* 运维模式 */
-	.event-view.view-normal .tree-view {
+	.view-normal .tree-view {
 		display: none;
 		width: 0%;
 	}
-	.event-view.view-normal .table-view {
+	.view-normal .table-view {
 		width: 100%;
 	}
 
 	/* 标签树模式 */
-	.event-view.view-tags .tree-view {
+	.view-tags .tree-view {
 		width: 18%;
 	}
-	.event-view.view-tags .table-view {
+	.view-tags .table-view {
 		width: 82%;
 	}
 
 	/* 全屏模式 */
-	.event-view.view-fullscreen .tree-view {
+	.view-fullscreen .tree-view {
 		display: none;
 		width: 0%;
 	}
-	.event-view.view-fullscreen .table-view {
+	.view-fullscreen .table-view {
 		width: 100%;
 	}
 
@@ -155,6 +155,28 @@
 	    color: #999;
 	}
 
+	/* layout */
+	/* clearfix */
+	.grid:after {
+		content: '';
+		display: block;
+		clear: both;
+	}
+
+	/* ---- grid-item ---- */
+
+	.grid-sizer,
+	.grid-item {
+		width: 100%;
+	}
+
+	.grid-item {
+		height: auto;
+		float: left;
+		border-radius: 5px;
+		margin:2px;
+	}
+
 </style>
 
 <div id="app"></div>
@@ -184,33 +206,71 @@
 
 <script type="text/x-template" id="app-template">
 	<div id="content" class="content">
-
-		<div class="row search">
-			<div class="col-md-12">
+		<div class="grid" data-masonry="{itemSelector: '.grid-item',columnWidth: '.grid-item',percentPosition: true}">
+			<div class="grid-item">
 				<search-base-component :id="model.id"
 				                       :options="options"
 				                       ref="searchRef"></search-base-component>
 			</div>
-		</div>
-
-		<div class="row event">
-			<div class="col-md-12">
-				<ul class="nav nav-tabs nav-tabs-bottom-2px event-ul" role="tablist">
-					<li class="active">
-						<a href="#event-view" role="tab" data-toggle="tab" title="告警列表" data-tooltip="tooltip" @click="toggleView($event)">告警列表</a>
-					</li>
-				</ul>
-				<div class="tab-content event-div">
-					<div class="active tab-pane fade in" id="event-view">
-						<event-view id="event-list"
-						            :model="model.message"
-						            transition="fade" transition-mode="out-in" ref="eventListRef"></event-view>
-				    </div>
-				</div>
+			<div class="grid-item">
+				<tabs v-model="layout.main.index">
+					<tab :title="item.title" v-for="(item,index) in layout.main.tabs"  html-title>
+						<div v-if="item.type==='main'">
+							<div class="panel panel-default panel-white-border" data-sortable-id="ui-modal-notification-1">
+								<div class="panel-heading">
+									<div class="panel-heading-btn">
+										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+									</div>
+									<h4 class="panel-title"></h4>
+								</div>
+								<div class="panel-body" style="height:calc(100vh - 185px);">
+									<div class="row" style="height:200px;">
+										<div class="col-md-12">
+											<tabs v-model="layout.summary.index">
+												<tab :title="item.title" v-for="item in layout.summary.tabs">
+													<div v-if="item.type=='radar'">
+															<event-view-radar id="event-radar"></event-view-radar>
+														</div>
+													<div v-if="item.type=='timeline'">
+														<event-view-timeline id="event-timeline"></event-view-timeline>
+													</div>
+												</tab>
+											</tabs>
+										</div>
+									</div>
+									<div class="row"  style="height:calc(100vh - 245px);">
+										<div class="col-md-2 tree-view animated fadeInRight">
+											<probe-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>
+										</div>
+										<div class="col-md-10 table-view animated fadeInLeft">
+											<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div v-if="item.type==='detail'">
+							<tabs v-model="layout.main.detail.index">
+								<template slot="nav-right">
+									<a href="javascript:void(0);" class="btn btn-xs btn-default" style="cursor:pointer;" @click="close(index)">
+										<span class="fas fa-times"></span>
+									</a>
+								</template>
+								<tab :title="it | pickTitle(layout.main.detail.model[index - 1],index)" v-for="it in item.child" :key="it.id" html-title>
+									<div v-if="it.type==='event'">
+										<event-view-detail :id="it.id" :model="layout.main.detail.model[index - 1][it.type]"></event-view-detail>
+									</div>
+									<div v-else>
+										<event-diagnosis-datatable-component :id="it.id" :model="layout.main.detail.model[index - 1][it.type]"></event-diagnosis-datatable-component>
+									</div>
+								</tab>
+							</tabs>
+						</div>
+					</tab>
+				</tabs>
 			</div>
-
 		</div>
-
 	</div>
 </script>
 
@@ -220,73 +280,6 @@
 
 <script type="text/x-template" id="event-view-radar-template">
 	<event-summary-component id="event-radar"></event-summary-component>
-</script>
-
-<script type="text/x-template" id="event-view-template">
-	<div style="margin:0px -15px;">
-		<div class="col-md-12 col">
-			<div class="panel panel-default panel-white-border" data-sortable-id="ui-modal-notification-1">
-				<div class="panel-heading">
-					<div class="panel-heading-btn">
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-expand"><i class="fa fa-expand"></i></a>
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-reload"><i class="fa fa-sync-alt"></i></a>
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
-						<!--<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-remove"><i class="fa fa-times"></i></a>-->
-					</div>
-					<div class="panel-title-btn">
-						<ul class="nav nav-tabs nav-tabs-content pull-left">
-							<li role="presentation">
-								<a href="#event-view-timeline" role="tab" data-toggle="tab" title="时间轴" data-tooltip="tooltip">时间序列</a>
-							</li>
-							<li role="presentation" class="active">
-								<a href="#event-view-radar" role="tab" data-toggle="tab" title="告警雷达" data-tooltip="tooltip">告警雷达</a>
-							</li>
-						</ul>
-					</div>
-					<h4 class="panel-title"></h4>
-				</div>
-				<div class="panel-body" style="height:20vh;">
-					<div class="row">
-						<div class="col-md-12 timeline-view">
-
-							<div class="tab-content">
-							  <div class="tab-pane fade in" id="event-view-timeline">
-
-							  </div>
-								<div class="tab-pane fade in active" id="event-view-radar">
-									<event-summary-component id="event-radar" ref="eventSummaryRef"></event-summary-component>
-							  </div>
-							</div>
-
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-12">
-			<div class="panel panel-default panel-white-border" data-sortable-id="ui-modal-notification-2">
-				<div class="panel-heading">
-					<div class="panel-heading-btn">
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-expand"><i class="fa fa-expand"></i></a>
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-reload"><i class="fa fa-sync-alt"></i></a>
-						<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
-						<!--<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-remove"><i class="fa fa-times"></i></a>-->
-					</div>
-					<h4 class="panel-title"></h4>
-				</div>
-				<div class="panel-body event-list-wrapper" style="height:42vh;">
-					<div class="row">
-						<div class="col-md-2 tree-view animated fadeInRight">
-							<probe-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>
-						</div>
-						<div class="col-md-10 table-view animated fadeInLeft">
-							<event-datatable-component :id="id" :model="model"></event-datatable-component>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
 </script>
 
 {{template "base/footer" .}}

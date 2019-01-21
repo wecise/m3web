@@ -216,9 +216,9 @@
             self.$nextTick(function () {
                 self.init();
 
-                $(this.$el).closest(".panel-body").on('click', function() {
+                setInterval(function(){
                     self.resize();
-                });
+                },2000);
             });
         },
 		watch: {
@@ -331,11 +331,10 @@
                                 scrollCollapse: true,
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-	                            stateSave: true,
+	                            stateSave: false,
                                 select: {
 			                        style: 'multi',
-			                        selector: 'td:first-child'
-
+			                        //selector: 'td:first-child'
 			                    },
 			                    fixedColumns:   {
 			                        leftColumns: 2
@@ -378,7 +377,11 @@
 				                    self.serial();
 	                                self.toolBar();
 	                                self.contextMenu();
-	                                self.selectRows();
+                                    self.selectRows();
+                                    
+                                    $("#"+self.id).DataTable().on( 'dblclick', 'tr', function () {
+                                        self.$root.detail(self.selectedRows);
+                                    });
 
                                     self.dragHandle();
                                     self.dropHandle();
@@ -396,7 +399,6 @@
                                     }
 			                    }
                 },self.model.options)).columns.adjust().draw();
-
 			},
             serial:function(){
                 let datatable = $("#"+this.id).DataTable();
@@ -440,10 +442,7 @@
 			refresh: function(){
                 this.$root.$refs.searchRef.search();
 			},
-			detail: function(){
-                this.$root.detail(this.selectedRows);
-			},
-            contextMenu: function(){
+			contextMenu: function(){
                 const self = this;
 
                 let items = callFsJScript('/probe/toolbar.js', '').message.probe.event;
@@ -460,7 +459,7 @@
                         return {
                             callback: function(key, opt) {
                                 if(key === 'detail') {
-                                    self.detail();
+                                    self.$root.detail(self.selectedRows);
                                 }
                             },
                             items: items,
@@ -556,7 +555,7 @@
 				                        text: '<i class="fas fa-tags"></i>',
 				                        action: function (e, dt, node, config) {
                                             let view = ['view-normal','view-tags'];
-                                            self.$root.$refs.eventListRef.toggleModel(_.without(view,window.EVENT_VIEW).join(""));
+                                            event.app.toggleModel(_.without(view,window.EVENT_VIEW).join(""));
 				                        },
 				                        enabled: true,
 				                        className: `btn-white class-group_${self.id}`,
@@ -655,8 +654,6 @@
                 })
 
                 contextMenu.build(this.id, {select:'class-group', items: items, handle: self.setDefaultClass});
-
-
 			},
 			setDefaultClass: function(event){
                 this.defaultClass = event;
@@ -664,7 +661,7 @@
             selectColumns: function(){
             },
             resize(){
-				let parentHeight = $(this.$el).closest(".panel-body").height() - 95;
+				let parentHeight = $(this.$el).closest(".row").height() - 255;
 				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
 			}
 		}

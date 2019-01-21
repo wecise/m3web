@@ -175,10 +175,10 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         time: ["vtime"]
                     },
                     columns:[
-                        {field:"biz",title: "Biz", visible: true},
-                        {field:"app",title: "App", visible: true},
-                        {field:"host",title: "Host", visible: true},
-                        {field:"severity",title: "Severity", visible: true, formatter: function(value, row, index) {
+                        {field:"biz",title: "业务", visible: true},
+                        {field:"app",title: "应用", visible: true},
+                        {field:"host",title: "服务器", visible: true},
+                        {field:"severity",title: "级别", visible: true, formatter: function(value, row, index) {
                                 return window.GLOBAL_OBJECT.company.object.event.preconfig.severity.level[row.severity].name;
                             },
                             cellStyle: function(value,row,index){
@@ -190,13 +190,13 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
 
                             }
                         },
-                        {field:"ctime",title: "Ctime", visible: true, formatter: function(value, row, index) {
+                        {field:"ctime",title: "告警时间", visible: true, formatter: function(value, row, index) {
                                 if(!_.isEmpty(value)){
                                     return `<span style="white-space: nowrap;">`+moment(value).format('YYYY/MM/DD HH:mm:ss')+`</span>`;
                                 }
                             }
                         },
-                        {field:"msg",title: "Msg", visible: true}
+                        {field:"msg",title: "摘要", visible: true}
                     ]
                 }
             },
@@ -267,13 +267,13 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         time: ["vtime"]
                     },
                     columns: [
-                        {field:"biz",title: "Biz", visible: true},
-                        {field:"host",title: "Host", visible: true},
+                        {field:"biz",title: "业务", visible: true},
+                        {field:"host",title: "服务器", visible: true},
                         {field:"ip",title: "IP", visible: true},
-                        {field:"app",title: "App", visible: true},
-                        {field:"inst",title: "Inst", visible: true},
-                        {field:"param",title: "Param", visible: true},
-                        {field:"value",title: "Value", visible: true, formatter:function(value,row,index){
+                        {field:"app",title: "应用", visible: true},
+                        {field:"inst",title: "实例", visible: true},
+                        {field:"param",title: "参数", visible: true},
+                        {field:"value",title: "值", visible: true, formatter:function(value,row,index){
                                 if(!_.isNull(value) && !_.isUndefined(value)){
                                     if (_.includes(['usedpercent','response rate','success rate','cpu','cpu_usedpercent','memory_usedpercent','disk_usedpercent'],row.param)){
                                         if ( value > 60 ){
@@ -295,7 +295,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                                 }
                             }
                         },
-                        {field:"vtime",title: "Vtime", visible: true, formatter: function(value, row, index) {
+                        {field:"vtime",title: "采集时间", visible: true, formatter: function(value, row, index) {
                                 if(!_.isEmpty(value)){
                                     return `<span style="white-space: nowrap;">`+moment(value).format('YYYY/MM/DD HH:mm:ss')+`</span>`;
                                 }
@@ -322,19 +322,19 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         time: ["vtime"]
                     },
                     columns: [
-                        {field: "vtime", title: "Vtime", sortable: true, formatter: function(value, row, index) {
+                        {field: "vtime", title: "时间", sortable: true, formatter: function(value, row, index) {
                                 if(!_.isEmpty(value)){
                                     return `<span style="white-space: nowrap;">`+moment(value).format('YYYY/MM/DD HH:mm:ss')+`</span>`;
                                 }
                             }
                         },
-                        {field: "host", title: "Host", sortable: true, formatter: function(value,row,index){
+                        {field: "host", title: "服务器", sortable: true, formatter: function(value,row,index){
                                 if(!_.isEmpty(value)){
                                     return `<a href="/janesware/log" target="_blank">`+value+`</a>`;
                                 }
                             }
                         },
-                        {field: "severity", title: "Severity", sortable: true, formatter: function(value, row, index) {
+                        {field: "severity", title: "级别", sortable: true, formatter: function(value, row, index) {
 
                                 if (value == '5'){
                                     return `Error`;
@@ -357,9 +357,9 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
 
                             }
                         },
-                        {field: "msg", title: "Msg", sortable: true},
-                        {field: "id", title: "Id", visible: false},
-                        {field: "class", title: "class", visible: false},
+                        {field: "msg", title: "内容", sortable: true},
+                        {field: "id", title: "ID", visible: false},
+                        {field: "class", title: "CLASS", visible: false},
                     ]
                 }
             },
@@ -383,19 +383,19 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         time: ["vtime"]
                     },
                     columns: [
-                        {field: "vtime", title: "Vtime", sortable: true, formatter: function(value, row, index) {
+                        {field: "vtime", title: "采集时间", sortable: true, formatter: function(value, row, index) {
                                 if(!_.isEmpty(value)){
                                     return `<span style="white-space: nowrap;">`+moment(value).format('YYYY/MM/DD HH:mm:ss')+`</span>`;
                                 }
                             }
                         },
-                        {field: "node", title: "Node", sortable: true, formatter: function(value,row,index){
+                        {field: "node", title: "服务器", sortable: true, formatter: function(value,row,index){
                                 if(!_.isEmpty(value)){
                                     return `<a href="/janesware/log?cond=`+row.id+`&preset=`+encodeURI(JSON.stringify(self.search.default))+`" target="_blank">`+value+`</a>`;
                                 }
                             }
                         },
-                        {field: "severity", title: "Severity", sortable: true, formatter: function(value,row,index){
+                        {field: "severity", title: "级别", sortable: true, formatter: function(value,row,index){
                                 if ( value >= '5') {
                                     return "<kbd style='background-color:#FF0000;'>Critical</kbd>";
                                 } else if ( value > '3' && value < '5') {
@@ -405,7 +405,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                                 }
                             }
                         },
-                        {field: "msg", title: "Msg", sortable: true},
+                        {field: "msg", title: "报文", sortable: true},
                         {field: "id", title: "Id", visible: false},
                         {field: "class", title: "class", visible: false},
                     ]
@@ -546,8 +546,8 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         time: ["firstoccurrence"]
                     },
                     columns: [
-                        {field:"servername",title: "ServerName", visible: true},
-                        {field:"serverserial",title: "ServerSerial", visible: true},
+                        {field:"servername",title: "服务器", visible: true},
+                        {field:"serverserial",title: "序列号", visible: true},
                         {field:"uid",title: "UserId", visible: true},
                         {field:"test",title: "TestN", visible: true,formatter:function(value,row,index){
                                 return row.text1 + row.text2 + row.text3 + row.text4 + row.text5 + row.text6 + row.text7 + row.text8 + row.text9;

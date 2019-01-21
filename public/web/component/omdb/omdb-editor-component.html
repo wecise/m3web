@@ -552,7 +552,7 @@
                 let _list = fetchDataByMql(_mql);
                 let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
-                let _attr = {remark: "", ctime: _.now(), author: `{{.SignedUser.UserName}}`, type: _ftype};
+                let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
 				let _name = '查询_' + moment().format("LLL");
 				let _html = `<!DOCTYPE html>
 							<html>

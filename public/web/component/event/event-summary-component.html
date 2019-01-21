@@ -119,13 +119,16 @@
 
                 self.$nextTick(function () {
                     self.init();
+
+                    setInterval(function(){
+                        self.chart.resize();
+                    },2000)
                 });
             },
             methods: {
                 init: function(){
                     this.chart = echarts.init(this.$el);
                     this.chart.setOption(this.option);
-                    console.log(this.chart,this.option)
                     this.chart.resize();
                 }
             }

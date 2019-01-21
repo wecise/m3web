@@ -5,6 +5,24 @@
 
 <style type="text/css" media="screen">
 
+	body {
+		overflow: hidden;
+		height: 100vh;
+		margin-top: 20px;
+	}
+
+	#page-container{
+		overflow: hidden;
+		height: 100%;
+	}
+
+	#content.content{
+		margin: 0px 0px 0px 60px;
+		padding: 5px;
+		overflow-y:auto;
+		height: 100%; 
+	}
+	
 	.vue-search-input-component input{
 		height: 34px!important;
 	}
@@ -22,12 +40,12 @@
 
 	.well {
 		border: 1px solid rgb(226, 231, 236);
-	    border-radius: 0px;
+	    border-radius: 2px;
 	    -webkit-box-shadow: inset 0 0px 0px rgba(0,0,0,.05);
 	    box-shadow: inset 0 0px 0px rgba(0,0,0,.05);
 	    background-color: #ffffff;
 		margin-bottom: 10px;
-		padding: 0px 15px;
+		padding: 0px 15px 10px 15px;
 	}
 
 	.btn.dropdown-toggle {
@@ -870,7 +888,7 @@
 
 							} else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
 
-							self.editIt(item);
+								window.open(`/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}`, "_blank");
 
 							} else if(_.includes(['swf'], item.ftype)) {
 								let contents = `<div class="embed-responsive embed-responsive-16by9">
@@ -895,7 +913,6 @@
 								window.open(url,'_blank');
 							}
 						}
-
 					}
 				}
 	        }); 
@@ -1310,11 +1327,11 @@
 						if($("#search-result-table").hasClass('active')){
 							$("#search-result-table").removeClass('active');
 							$("#search-result-timeline").addClass('active');
-							$(".btn-toggle-view").html("View");
+							$(".btn-toggle-view").html("视图");
 						} else {
 							$("#search-result-timeline").removeClass('active');
 							$("#search-result-table").addClass('active');
-							$(".btn-toggle-view").html("TimeLine");
+							$(".btn-toggle-view").html("时间轴");
 						}
 					},
 					forwardInView: function(href){
@@ -1322,7 +1339,8 @@
 
 						$("#search-result-timeline").removeClass('active');
 						$("#search-result-table").addClass('active');
-						$(".btn-toggle-view").html("TimeLine");
+						$(".btn-toggle-view").html("时间轴");
+						$("#content.content").css("padding-top","35px");
 
 						document.location.href = href;
 					}
@@ -1352,7 +1370,7 @@
 
 <script type="text/x-template" id="app-template">
 
-	<div id="content" class="content">
+	<div id="content" class="content container-fluid">
 
 		<div class="row">
 	  	
@@ -1370,7 +1388,7 @@
 
 			    <p>
 				
-				<div class="panel">
+				<div class="panel"  style="background-color:transparent;">
 
 					<div class="panel-body" id="div_result_view">
 							
@@ -1380,7 +1398,7 @@
 	                        	<a href="javascript:void(0)" @click="forwardInView(v.href)" v-for="(v,k) in search.result" style="margin-right:10px;"><u>${v.name}: ${v.count}</u></a>
 	                        </small>
 	                        <div class="pull-right">
-	                        	<a href="javascript:void(0)" @click="toggleView" class="btn btn-xs btn-info btn-toggle-view">TimeLine</a>
+	                        	<a href="javascript:void(0)" @click="toggleView" class="btn btn-xs btn-info btn-toggle-view">时间轴</a>
 	                        </div>
 						</div>
 						<BR/>
@@ -1436,11 +1454,11 @@
 </script>
 
 <script type="text/x-template" id="search-event-template">
-	<div id="search-event">
+	<div id="search-event" class="animated fadeIn">
 		<div class="well well-default expandit">
 						    
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-info" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-exclamation-triangle" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseEvent" aria-expanded="true" aria-controls="collapseEvent">
 			  		{{.i18n.Tr "mxsearch_search_event"}}
 				</a>
@@ -1451,26 +1469,26 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table" aria-controls="table" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#event-table" aria-controls="event-table" role="tab" data-toggle="tab" style="border:none;">
+			  					<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#listView" aria-controls="listView" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#event-list" aria-controls="event-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table">
+			  			<div role="tabpanel" class="tab-pane active" id="event-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
 			  										:data="model.data"
 			  										forward="event"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="listView">
+			  			<div role="tabpanel" class="tab-pane" id="event-list">
 			  				<span v-for="item in model.data">
 						    	<h6><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">${item.host}</a></h6>
 								<span class="text-muted">
@@ -1510,11 +1528,11 @@
 </script>
 
 <script type="text/x-template" id="search-syslog-template">
-	<div id="search-syslog">
+	<div id="search-syslog"  class="animated fadeIn">
 		<div class="well well-default expandit">
 						    
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-info" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-exclamation-triangle" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseSyslog" aria-expanded="true" aria-controls="collapseSyslog">
 			  		{{.i18n.Tr "mxsearch_search_syslog"}}
 				</a>
@@ -1525,26 +1543,26 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table" aria-controls="table" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#syslog-table" aria-controls="syslog-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list" aria-controls="list" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#syslog-list" aria-controls="syslog-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table">
+			  			<div role="tabpanel" class="tab-pane active" id="syslog-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
 			  										:data="model.data"
 			  										forward="event"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="list">
+			  			<div role="tabpanel" class="tab-pane" id="syslog-list">
 			  				<span v-for="item in model.data">
 						    	<h6><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">${item.host}</a></h6>
 								<span class="text-muted">
@@ -1584,11 +1602,11 @@
 </script>
 
 <script type="text/x-template" id="search-journal-template">
-	<div id="search-journal">
+	<div id="search-journal"  class="animated fadeIn">
 		<div class="well well-default expandit">
 
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-film" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseJournal" aria-expanded="true" aria-controls="collapseJournal">			{{.i18n.Tr "mxsearch_search_journal"}}
 				</a>
 			</h5>
@@ -1598,25 +1616,25 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table-journal" aria-controls="table-journal" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#journal-table" aria-controls="journal-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list-journal" aria-controls="list-journal" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#journal-list" aria-controls="journal-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table-journal">
+			  			<div role="tabpanel" class="tab-pane active" id="journal-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
 			  										:data="model.data"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="list-journal">
+			  			<div role="tabpanel" class="tab-pane" id="journal-list">
 			  				
 							<span v-for="item in model.data">
 
@@ -1641,11 +1659,11 @@
 </script>
 
 <script type="text/x-template" id="search-raw-template">
-	<div id="search-raw">
+	<div id="search-raw"  class="animated fadeIn">
 		<div class="well well-default expandit">
 
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-file-code" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseRaw" aria-expanded="true" aria-controls="collapseRaw">			{{.i18n.Tr "mxsearch_search_raw"}}
 				</a>
 			</h5>
@@ -1655,25 +1673,25 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table-raw" aria-controls="table-raw" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#raw-table" aria-controls="raw-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list-raw" aria-controls="list-raw" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#raw-list" aria-controls="raw-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table-raw">
+			  			<div role="tabpanel" class="tab-pane active" id="raw-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
 			  										:data="model.data"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="list-raw">
+			  			<div role="tabpanel" class="tab-pane" id="raw-list">
 			  				
 							<span v-for="item in model.data">
 
@@ -1719,11 +1737,11 @@
 </script>
 
 <script type="text/x-template" id="search-log-template">
-	<div id="search-log">
+	<div id="search-log"  class="animated fadeIn">
 		<div class="well well-default expandit">
 
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-file-code" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseLog" aria-expanded="true" aria-controls="collapseLog">			{{.i18n.Tr "mxsearch_search_log"}}
 				</a>
 			</h5>
@@ -1733,26 +1751,26 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table-log" aria-controls="table-log" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#log-table" aria-controls="log-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list-log" aria-controls="list-log" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#log-list" aria-controls="log-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table-log">
+			  			<div role="tabpanel" class="tab-pane active" id="log-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 		  											:options="model.options" 
 		  											:data="model.data"
 		  											forward="log"></bootstrap-table-search>
 			  			</div>
-			  			<div role="tabpanel" class="tab-pane" id="list-log">
+			  			<div role="tabpanel" class="tab-pane" id="log-list">
 			  				
 							<span v-for="item in model.data">
 
@@ -1798,11 +1816,11 @@
 </script>
 
 <script type="text/x-template" id="search-tickets-template">
-	<div id="search-tickets">  
+	<div id="search-tickets" class="animated fadeIn">  
 		<div class="well well-default expandit">
 
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-book" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseTickets" aria-expanded="true" aria-controls="collapseTickets">
 					{{.i18n.Tr "mxsearch_search_ticket"}}
 				</a>
@@ -1813,20 +1831,20 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table-tickets" aria-controls="table-tickets" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#tickets-table" aria-controls="tickets-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list-tickets" aria-controls="list-tickets" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#tickets-list" aria-controls="tickets-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table-tickets">
+			  			<div role="tabpanel" class="tab-pane active" id="tickets-table">
 			  				
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
@@ -1842,11 +1860,11 @@
 </script>
 
 <script type="text/x-template" id="search-change-template">
-	<div id="search-change">  
+	<div id="search-change" class="animated fadeIn">  
 		<div class="well well-default expandit">
 
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-file-text-o" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-book" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseChange" aria-expanded="true" aria-controls="collapseChange">
 					{{.i18n.Tr "mxsearch_search_change"}}
 				</a>
@@ -1857,20 +1875,20 @@
 			  		<!-- Nav tabs -->
 			  		<ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
 			  			<li role="presentation" class="active">
-			  				<a href="#table-change" aria-controls="table-change" role="tab" data-toggle="tab" style="border:none;">
-			  					Table
+			  				<a href="#change-table" aria-controls="change-table" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-table"></i>
 			  				</a>
 			  			</li>
 			  			<li role="presentation">
-			  				<a href="#list-change" aria-controls="list-change" role="tab" data-toggle="tab" style="border:none;">
-			  					List
+			  				<a href="#change-list" aria-controls="change-list" role="tab" data-toggle="tab" style="border:none;">
+								<i class="fas fa-list-ul"></i>
 			  				</a>
 			  			</li>
 			  		</ul>
 			  	
 			  		<!-- Tab panes -->
 			  		<div class="tab-content">
-			  			<div role="tabpanel" class="tab-pane active" id="table-change">
+			  			<div role="tabpanel" class="tab-pane active" id="change-table">
 			  				
 			  					<bootstrap-table-search :columns="model.columns" 
 			  											:options="model.options" 
@@ -1886,10 +1904,10 @@
 </script>
 
 <script type="text/x-template" id="search-performance-template">
-	<div id="search-performance">  
+	<div id="search-performance" class="animated fadeIn">  
 		<div class="well well-default expandit">
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-line-chart" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fab fa-creative-commons-sampling" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapsePerformance" aria-expanded="true" aria-controls="collapsePerformance">
 					{{.i18n.Tr "mxsearch_search_performance"}}
 				</a>
@@ -1906,10 +1924,10 @@
 </script>
 
 <script type="text/x-template" id="search-files-template">
-	<div id="search-files">  
+	<div id="search-files" class="animated fadeIn">  
 		<div class="well well-default expandit">
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-dashboard" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-book" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseFiles" aria-expanded="true" aria-controls="collapseFiles">
 					文件
 				</a>
@@ -1925,7 +1943,7 @@
 							style="cursor: pointer;"
 							:title="item.name"
 							v-for="item in model">
-						   <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id">
+						   <div class="widget widget-stats bg-silver animated fadeIn" :id="'fs_node_widget_'+item.id">
 							   <div class="stats-info" @dblclick="openIt(item, item.parent+'/'+item.name);" >
 								   <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
 							   </div>
@@ -1951,10 +1969,10 @@
 </script>
 
 <script type="text/x-template" id="search-graph-template">
-	<div id="search-graph">  
+	<div id="search-graph" class="animated fadeIn">  
 		<div class="well well-default expandit">
 			<h5>
-				<span class="badge" style="background-color:#fff;"><i class="fa fa-dashboard" style="color:rgba(3,3,3,0.5);"></i></span>
+				<span class="badge" style="background-color:#fff;"><i class="fas fa-book" style="color:rgba(3,3,3,0.5);"></i></span>
 				<a data-toggle="collapse" href="#collapseITmap" aria-expanded="true" aria-controls="collapseITmap">
 					{{.i18n.Tr "mxsearch_search_graph"}}
 				</a>
@@ -1963,7 +1981,7 @@
 			<div class="collapse in" id="collapseITmap">
 				<div class="row">
 		            <div class="col-md-3 col-sm-6" v-for="(item,index) in model" >
-						<div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
+						<div :class="'widget widget-stats animated fadeIn bg-info ' + item.ftype">
 							<div @click="forwardCreative('run',item)">
 								<div class="stats-title">
 									<i class="fa fa-braille fa-fw"></i>

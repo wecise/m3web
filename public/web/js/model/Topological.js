@@ -247,7 +247,9 @@ class Topological extends Event {
                             </span>
                             
                             <div class="animated fadeIn" v-if="type.selected[0]==='advanced'">
-                                <input type="text" class="form-control-transparent"  placeholder="搜索语法" v-model="advanced.input">
+                                <!--input type="text" class="form-control-transparent"  placeholder="搜索语法" v-model="advanced.input"-->
+                                <input id="topological-graph-advanced-input" class="form-control-transparent" type="text" placeholder="搜索...">
+                                <typeahead v-model="advanced.input" target="#topological-graph-advanced-input" force-select :data="advanced.data" item-key="value"/>
                             </div>
                             <div class="input-group animated fadeIn" v-else>
                                 <input type="text" class="form-control-transparent"  placeholder="节点">
@@ -287,7 +289,8 @@ class Topological extends Event {
                 },
                 // mode advanced
                 advanced: {
-                    input: ""
+                    input: "",
+                    data: null
                 },
                 // term for search
                 term: {
@@ -297,7 +300,7 @@ class Topological extends Event {
             watch:{
                 'advanced.input':function(val,oldVal){
                     if(val === oldVal) return false;
-                    _.extend(this.term,{value: encodeURIComponent(val)});
+                    _.extend(this.term, val['value']?{value: val.value}:{value:val});
                 }
             },
             mounted(){
@@ -308,10 +311,30 @@ class Topological extends Event {
                         self.search();
                     }
                 })
+
+                this.advanced.data = this.loadCache();
+                console.log(this.loadCache())
             },
             methods:{
                 search(){
-                    eventHub.$emit("TOPOLOGICAL-TERM-EVENT",this.term);
+                    this.cache();
+                    eventHub.$emit("TOPOLOGICAL-TERM-EVENT",{value: encodeURIComponent(this.term.value)});
+                },
+                loadCache(){
+                    let name = 'TOPOLOGICAL_GRAPH_SEARCH_CACHE.txt';
+
+                    // load
+                    return _.attempt(JSON.parse.bind(null, fsContent(`/${window.SignedUser_UserName}/temp`, name)));
+                },
+                cache(){
+                    let preContent = this.loadCache();
+                    console.log(preContent)
+                    // merge && save
+                    let name = 'TOPOLOGICAL_GRAPH_SEARCH_CACHE.txt';
+                    let content = JSON.stringify(_.merge(preContent,this.term));
+                    let ftype = "txt";
+                    let attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: ftype};
+                    let rtn = fsNew(ftype, `/${window.SignedUser_UserName}/temp`, name, content, attr);
                 }
             }
         };
@@ -464,8 +487,13 @@ class Topological extends Event {
         if(!topological.graphAssociation){
             topological.graphAssociation = new Vue({
                 delimiters: ['#{', '}#'],
-                template: ` <tabs @change="onChange" v-model="index">
-                                <tab :title="item.title" v-for="item in tabs" :key="item.id">
+                template: ` <tabs v-model="index">
+                                <template slot="nav-right">
+                                    <a href="javascript:void(0);" class="btn btn-xs btn-default" style="cursor:pointer;" @click="close(index)">
+                                        <span class="fas fa-times"></span>
+                                    </a>
+                                </template>
+                                <tab :title="item.title" v-for="item in tabs" :key="item.id" html-title>
                                     <tabs v-if="item.child" v-model="secIndex">
                                         <tab :title="it | pickTitle" v-for="it in item.child" :key="it.id" html-title>
                                             <event-diagnosis-datatable-component :id="it.id" :model="model[index][it.type]"></event-diagnosis-datatable-component>
@@ -482,29 +510,35 @@ class Topological extends Event {
                 filters: {
                     pickTitle(event){
                         const self = this;
-                        let count = 0;
-                        try {
-                            count = topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows.length;
-                            
-                        } catch(error){
-                            
-                        }
-
-                        let badge = '0';
-                        try {
-                            let severity = _.maxBy(topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows,'severity').severity;
-                            badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:0;
-                        } catch(error){}
                         
-                        return `${event.title} ${badge}`;
+                        try {
+                            let count = 0;
+                            count = topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows.length;
+
+                            let badge = 0;
+                            let severity = _.maxBy(topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows,'severity').severity;
+                            badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
+
+                            return `${event.title} ${badge}`;
+                        } catch(error){
+                            return `${event.title} 0`;
+                        }
                     }
                 },
                 mounted(){
-                    $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-2px");
+                    this.init();
                 },
                 methods:{
-                    onChange(index) {
-                        
+                    init(){
+                        $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                    },
+                    close(index){
+                        this.tabs.splice(index, 1);
+                        this.model.splice(index, 1);
+                        // select prev tab if the closed tab is the last one
+                        if (this.index === this.tabs.length && this.index > 0) {
+                            --this.index
+                        }
                     }
                 }
             }).$mount(".graph-association");
@@ -516,11 +550,11 @@ class Topological extends Event {
                 topological.graphAssociation.$data.model[topological.graphAssociation.$data.index] = callFsJScript('/topological/diagnosis.js',event.value).message;
                 _.delay(function(){
                     topological.graphAssociation.$data.subIndex = _.findIndex(tabTemp.child,{type:event.type});
-                    $(topological.graphAssociation.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-2px");
-                },500)
+                    $(topological.graphAssociation.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                },50)
             }
         }
-
+    
         document.location.href = "#graph-association";
         $("#content.content").css("padding-top","35px");
         mx.windowResize();

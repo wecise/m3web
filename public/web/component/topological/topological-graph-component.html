@@ -347,34 +347,6 @@
 
                                     let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
                                     let items = {};
-                                    // _.forEach(temp,function(val){
-                                    //     _.forEach(val,function(v,k){
-
-	                                //         let value = null;
-
-                                    //         if(typeof v == "object") {
-                                    //             if(_.includes(['depend','runon','connect','refer','contain'],k)){
-
-                                    //                 if(v==null || !v['_all']) return;
-                                    //                 let _options = {};
-                                    //                 _.map(v['_all'],function(w,y){
-                                    //                     return _.merge(_options,{[y]:w});
-                                    //                 })
-
-                                    //                 items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
-                                    //             } else {
-                                    //                 value = JSON.stringify(v,null,2);
-                                    //                 items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
-                                    //             }
-
-                                    //         } else {
-                                    //             value = v.toString();
-                                    //             items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
-                                    //         }
-
-                                    //     })
-                                    // });
-
                                     let menu = callFsJScript('/graph/contextmenu.js', null).message;
                                     _.forEach(menu,function(v){
                                         return _.merge(items, v);
