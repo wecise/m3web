@@ -85,8 +85,6 @@ var fsNew = function(ftype, path, name, content, attr){
         _url += '?issys=true';
     }
 
-    console.log(_url)
-
     let fm = new FormData();
 
     fm.append("data", content);
@@ -321,14 +319,13 @@ var fsRename = function(srcpath,dstpath){
     }
 
     jQuery.ajax({
-        url: '/fs/rename',
+        url: `/fs/rename?issys=${_issys}`,
         type: 'POST',
         dataType: 'json',
         async:false,
         data: {
             srcpath: srcpath,
-            dstpath: dstpath,
-            issys: _issys
+            dstpath: dstpath
         },
         beforeSend: function (xhr) {
         },
@@ -379,14 +376,13 @@ var fsCopy = function(srcpath,dstpath){
     }
 
     jQuery.ajax({
-        url: '/fs/copy',
+        url: `/fs/copy?issys=${_issys}`,
         type: 'POST',
         dataType: 'json',
         async:false,
         data: {
             srcpath: srcpath,
-            dstpath: dstpath,
-            issys: window.SignedUser_IsAdmin
+            dstpath: dstpath
         },
         beforeSend: function (xhr) {
         },
@@ -438,14 +434,13 @@ var fsMove = function(srcpath,dstpath){
     }
 
     jQuery.ajax({
-        url: '/fs/move',
+        url: `/fs/move?issys=${_issys}`,
         type: 'POST',
         dataType: 'json',
         async:false,
         data: {
             srcpath: srcpath,
-            dstpath: dstpath,
-            issys: _issys
+            dstpath: dstpath
         },
         beforeSend: function (xhr) {
         },
@@ -660,6 +655,57 @@ var fsUnZip = function(srcpath, zippack){
     return rtn;
 };
 
+/*
+*   文件系统
+*
+*   文件解析
+*
+*
+*/
+var fsParse = function(rule, file){
+    let rtn = 0;
+
+    let _issys = false;
+
+    if(window.SignedUser_IsAdmin){
+        _issys = true;
+    }
+
+    var form = new FormData();
+    form.append("uploadfile", zippack); // file
+
+    jQuery.ajax({
+        url: `/action/parsefile?$issys=${_issys}`,
+        dataType: 'json',
+        type: 'GET',
+        data: {
+            rule:'/matrix/devops/event', 
+            filename:'/home/admin/test.csv'
+        },
+        async: true,
+        beforeSend: function (xhr) {
+        },
+        complete: function (xhr, textStatus) {
+        },
+        success: function (data, textStatus, xhr) {
+
+            ifSignIn(data);
+
+            if( _.lowerCase(data.status) == "ok"){
+                rtn = 1;
+                alertify.success("文件解析成功" + srcpath);
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown) {
+            rtn = 0;
+            alertify.error("文件解析失败" + xhr);
+            console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
+        }
+    })
+
+    return rtn;
+};
 
 var genFsUrl = function(item,cfg,data){
 

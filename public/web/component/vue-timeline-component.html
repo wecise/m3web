@@ -3,19 +3,53 @@
 
 	<style>
 		/*----------  style  ----------*/
-		.timeline:before {
+
+        .timeline:before {
 			width: 3px;
-			background: #dae0e8;
+            left: 13%;
+			background: rgb(249, 249, 249);
 		}
 
-		.timeline .timeline-icon a {
-			background: #b6c2ca;
-			border: 3px solid #dae0e8;
+        .timeline .timeline-time {
+            width: 10%;
+        }
+
+        .timeline .timeline-icon {
+            left: 8%;
+            top: 0px;
+        }
+
+        .timeline .timeline-icon a {
+			background: #ddd;
+			border: 3px solid #ddd;
 			width: 30px;
 			height: 30px;
 			line-height: 22px;
 			font-size: 12px;
 		}
+
+        .timeline .timeline-body:before {
+            content: '';
+            display: block;
+            position: absolute;
+            border: 10px solid rgba(0, 0, 0, 0);
+            border-right-color: rgb(249, 249, 249);
+            left: -20px;
+            top: 2px;
+        }
+
+        .timeline .timeline-body {
+            margin-top: 1%;
+            margin-left: 16%;
+            margin-right: 2%;
+            border: 1px solid rgb(249, 249, 249);
+            background: rgb(249, 249, 249);
+        }
+
+        .timeline-footer {
+            background: rgb(255, 255, 255);
+            float: right;
+        }
 
 
 	</style>
@@ -27,8 +61,7 @@
 			<li v-for="item in list">
 				<!-- begin timeline-time -->
 				<div class="timeline-time">
-					<span class="date">${item.date}</span>
-					<span class="date">${item.time}</span>
+					<span class="date">${item.date} ${item.time}</span>
 				</div>
 				<!-- end timeline-time -->
 				<!-- begin timeline-icon -->
@@ -38,12 +71,8 @@
 				<!-- end timeline-icon -->
 				<!-- begin timeline-body -->
 				<div class="timeline-body">
-					<div>
-						<span class="username"><a href="javascript:;">${item.class}</a> <small></small></span>
-						<span class="pull-right text-muted"></span>
-					</div>
 					<div class="table-responsive" style="overflow:auto;padding:0px 0px 30px 0px;">
-                        <span v-if="!_.isEmpty(item.columns)">
+                        <span v-if="item.columns.length > 0">
                             <bootstrap-table-search :columns="item.columns"
 													:options="item.options"
 													:data="item.data"
@@ -51,24 +80,20 @@
                             </bootstrap-table-search>
                         </span>
 						<span v-else>
-                            ${item.data[0]}
+                            <a href="javascript:;" 
+                                data-toggle="collapse"
+                                :href="'#collapseData'+item.id"
+                                aria-expanded="false"
+                                aria-controls="collapseData">
+                                ${item.msg}
+                            </a>
                         </span>
 					</div>
-					<div class="timeline-footer" style="padding:10px 30px;">
-						<a  class="m-r-15"
-							role="button"
-							data-toggle="collapse"
-							:href="'#collapseData'+item.id"
-							aria-expanded="false"
-							aria-controls="collapseData">
-							More...
-						</a>
-						<div class="collapse" :id="'collapseData'+item.id">
-							<div class="well" @click="forward(item.url, item.id)" style="overflow:auto;">
-								<u>${item.data[0]}</u>
-							</div>
-						</div>
-					</div>
+					<div class="collapse" :id="'collapseData'+item.id">
+                        <div class="well" @click="forward(item.url, item.id)" style="overflow:auto;">
+                            <u>${item.data[0]}</u>
+                        </div>
+                    </div>
 				</div>
 				<!-- end timeline-body -->
 			</li>
@@ -80,19 +105,19 @@
         {
             delimiters: ['${', '}'],
                 props: {
-            id: String,
-                model: Object
-        },
+                    id: String,
+                    model: Object
+            },
             data: function(){
                 return {
                     list: []
                 }
             },
             mounted: function(){
-                var self = this;
+                const self = this;
 
                 self.$nextTick(function(){
-                    self.init(self.model.list);
+                    self.init(self.model.list || self.model);
                 })
             },
             watch: {
@@ -106,20 +131,20 @@
                 }
             },
             created: function () {
-                var self = this;
-
+                
             },
             methods: {
                 init: function() {
-                    var self = this;
+                    const self = this;
 
                     self.list = [];
 
-                    let _sorted = _.orderBy(self.model.list,['vtime'],['desc']);
+                    let _sorted = _.orderBy(self.model.list || self.model,['vtime'],['desc']);
                     _.forEach(_sorted,function(v,k){
                         let _date = moment(v.vtime).format("ll");
                         let _time = moment(v.vtime).format("LT");
                         let _class = _.isEmpty(v.host)?v.node:v.host;
+                        let _msg = `${moment(v.vtime).format("YYYY-MM-DD HH:mm:ss")} ${v.msg}`;
                         let _columns = [];
                         let _list = v;
                         let _url = "";
@@ -168,6 +193,7 @@
                         self.list.push({
                             date:_date, time:_time,
                             class:_class,
+                            msg: _msg,
                             columns:_columns,
                             data: new Array(v),
                             options:{
@@ -189,7 +215,7 @@
                     })
                 },
                 forward: function(url,id){
-                    var self = this;
+                    const self = this;
 
                     // Search For
                     localStorage.setItem("search-open-"+url.split("/")[2],JSON.stringify({

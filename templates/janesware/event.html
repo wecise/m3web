@@ -46,7 +46,7 @@
 
 	/* content */
 	#content.content {
-		padding: 5px 10px 0px 5px;
+		padding: 5px 10px 0px 5px!important;
 	}
 
 	/* Event view */
@@ -128,31 +128,8 @@
 	}
 
 	/* 告警详情页Tab */
-	.nav-tabs.event-detail-data-ul > li {
-		position:relative;
-	}
-	.nav-tabs.event-detail-data-ul > li > a {
-		display:inline-block;
-	}
-	.nav-tabs.event-detail-data-ul > li > span {
-		display:none;
-		cursor:pointer;
-		position:absolute;
-		right: 6px;
-		top: 8px;
-		color: red;
-	}
-	.nav-tabs.event-detail-data-ul > li:hover > span {
-		display: inline-block;
-	}
-
-	.nav-tabs.event-detail-data-ul > li > span {
-	    display:none;
-	    cursor:pointer;
-	    position:absolute;
-	    right: 3px;
-	    top: 8px;
-	    color: #999;
+	.detail.tab-pane.Tab{
+		min-height: 72vh;
 	}
 
 	/* layout */
@@ -177,6 +154,53 @@
 		margin:2px;
 	}
 
+	/* 告警分析 */
+	form.event-view-detail > .form-group:nth-child(even) {
+		background: rgb(249, 249, 249);
+	}
+	form.event-view-detail > .form-group:nth-child(odd) {
+		background: rgb(255, 255, 255);
+	}
+
+	section.event-diagnosis{
+		position: fixed;
+		width: 94.2%;
+		clear: both;
+		top: 123px;
+		background: #ffffff;
+	}
+
+	section.event-diagnosis > ul {
+		padding:15px 0px;
+		padding-left: 23vw;
+	}
+
+	section.event-diagnosis > ul > li > a{
+		font-size: 14px;
+		color: #333333;
+		background: transparent;
+	}
+
+	section.event-diagnosis > ul > li.active > a{
+		font-size: 14px;
+		box-shadow: 1px 1px 1px 1px #ddd;
+    	color: #ffffff!important;
+    	border-radius: 2px;
+    	background: rgb(130, 192, 255)!important;
+	}
+
+	section.event-diagnosis > div.content{
+		margin: 0px;
+		padding:0px 15px;
+		height:calc(100vh - 183px);
+		overflow:auto;
+	}
+
+	section.event-diagnosis > div.content > p{
+		border:1px solid #ddd;
+		padding:15px;
+	}
+
 </style>
 
 <div id="app"></div>
@@ -197,6 +221,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-diagnosis-datatable-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-summary-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
@@ -251,15 +277,15 @@
 							</div>
 						</div>
 						<div v-if="item.type==='detail'">
-							<tabs v-model="layout.main.detail.index">
+							<tabs v-model="layout.main.detail.index" style="background:#ffffff;">
 								<template slot="nav-right">
-									<a href="javascript:void(0);" class="btn btn-xs btn-default" style="cursor:pointer;" @click="close(index)">
+									<a href="javascript:void(0);" class="btn btn-xs btn-default" style="cursor:pointer;position:absolute;z-index:1000;right:-1px;" @click="close(index)">
 										<span class="fas fa-times"></span>
 									</a>
 								</template>
-								<tab :title="it | pickTitle(layout.main.detail.model[index - 1],index)" v-for="it in item.child" :key="it.id" html-title>
-									<div v-if="it.type==='event'">
-										<event-view-detail :id="it.id" :model="layout.main.detail.model[index - 1][it.type]"></event-view-detail>
+								<tab :title="it.title" v-for="it in item.child" :key="it.id" html-title class="detail">
+									<div v-if="it.type==='diagnosis'">
+										<event-diagnosis :id="it.id" :model="layout.main.detail.model[index - 1]"></event-diagnosis>
 									</div>
 									<div v-else>
 										<event-diagnosis-datatable-component :id="it.id" :model="layout.main.detail.model[index - 1][it.type]"></event-diagnosis-datatable-component>

@@ -266,7 +266,8 @@
 
                     self.model.graph.nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
-
+                    //let orderNodes = _.groupBy(self.graphData.edges,'source');
+                    console.log(_.groupBy(self.graphData.edges,'source'))
                     _.forEach(orderNodes,function(v){
 
                         let _type = v._icon || 'matrix';
@@ -318,6 +319,17 @@
             cellsEvent(){
                 const self = this;
 
+                self.model.graph.graph.addListener(mxEvent.DOUBLE_CLICK, function(sender, evt) {
+                    let cell = evt.getProperty('cell');
+
+                    if(_.isEmpty(cell)) return;
+
+                    let id = cell.getId();
+                    let value = cell.getValue();
+                    // 点击获取关联信息
+                    topological.association({id:id,value:value,type:'event'});
+                })
+
                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
 
                     let cell = evt.getProperty('cell');
@@ -339,7 +351,7 @@
 
                             $.contextMenu({
                                 selector: `.${id.replace(/:/g,"_")}`,
-                                trigger: 'left',
+                                trigger: 'right',
                                 delay: 10,
                                 hideOnSecondTrigger: true,
                                 className: `animated slideIn node-menu`,

@@ -1,7 +1,7 @@
 {{template "base/head" .}}
 
 <link rel="stylesheet" type="text/css" href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css">
-
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 <style>
 
     #title{
@@ -102,19 +102,124 @@
         }
     }
 
-    /* nav-tabs */
-    .nav-tabs {
-        background-color: #ffffff !important;
-        background-image: none !important;
-    }
-
-    ul.nav-tabs > li.active {
-        border-bottom: 2px solid rgb(3, 169, 244)!important;
-    }
-
     /* For Table */
     thead th {
         white-space: nowrap;
+    }
+
+    /* 分析 */
+    form.form-horizontal > .form-group:nth-child(even) {
+		background: rgb(249, 249, 249);
+	}
+	form.form-horizontal > .form-group:nth-child(odd) {
+		background: rgb(255, 255, 255);
+    }
+    
+    /* For grid-view */
+    #grid ul{
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #grid ul > li{
+        float: left;
+        width: 9em;
+        height: 90px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        margin: 5px 5px 0px 0px;
+    }
+
+    /*
+    *   File Upload
+    */
+    .progress {
+        height: 16px;
+        border-radius: 0px;
+        display: block;
+        position: relative;
+    }
+
+    .progress small {
+        color: #ffffff;
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+
+    #files ul{
+        margin: 10px;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #files ul > li{
+        float: left;
+        width: 100pt;
+        height: 100px;
+        font-size: 12px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        padding-top: 5px;
+        margin: 5px 0px 20px 5px;
+    }
+
+    #files ul > li > canvas {
+        height: 65%;
+        width: auto;
+    }
+
+    #files ul > li > a {
+        background-color: rgb(249, 249, 249);
+        border-radius: 0px;
+    }
+
+    #files ul > li > button {
+        margin-top: -50px;
+    }
+
+    #files ul > li > .preview-null {
+        width: 100px;
+        padding-top: 10px;
+        height: 64px;
+        color: rgb(221, 221, 221);
+    }
+
+    .preview-img-responsive{
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .fs-view-component #grid,
+    .fs-view-component .dataTables_scroll{
+        height: 75vh;
+        overflow: auto;
+        padding: 0 10px;
+    }
+
+    .fs-name {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    
+    /* masonry layout */
+    .grid-item {
+        width: 100%;
+    }
+    .grid-item {
+        height: auto;
+        float: left;
+        border-radius: 5px;
+        margin:10px 2px;
     }
 
 </style>
@@ -124,6 +229,20 @@
 </div>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
+
+<script src="{{AppSubUrl}}/web/js/Fss.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Imap.js"></script>
+
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
 <script type="text/javascript">
     // urlParams is null when used for embedding
@@ -178,834 +297,10 @@
 <script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Toolbar.js"></script>
 <script type="text/javascript" src="{{AppSubUrl}}/web/creative/graph/js/Dialogs.js"></script>
 
-
-<script type="text/javascript">
-
-    VueLoader.onloaded(["vue-base-datatables-component"],function() {
-
-        moment.locale({{.Lang}});
-
-        const URL_PARAMS_ITEM = urlParams['item']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item'])))):null;
-        const URL_PARAMS_CFG = urlParams['cfg']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg'])))):null;
-        const URL_PARAMS_DATA = urlParams['data']?decodeURIComponent(window.atob(urlParams['data'])):[];
-        const URL_PARAMS_SESSIONID = urlParams['sessionid'];
-
-        //matrixCookies.set('MatrixSession', URL_PARAMS_SESSIONID);
-
-        let init = function(){
-
-            $(".geDiagramContainer").css("background-color","#000000");
-            _.forEach(URL_PARAMS_CFG,function(v,k){
-
-                if(!v){
-                    $(`#${k}`).hide();
-                }
-            })
-            $(".geDiagramContainer").css("background-color","#ffffff");
-
-        }();
-
-        $(function() {
-
-            var appVue = new Vue({
-                delimiters: ['${', '}'],
-                el: '#app',
-                template: '#app-template',
-                data: {
-                    model: {
-                        object: {
-                            data: null,
-                            nodes: {},
-                            tip: []
-                        },
-                        project: {},
-                        graph:{
-                            container: null,
-                            model: null,
-                            graph: null,
-                            selectedCell: null,
-                            theme: "theme-white",
-                            data: null,
-                            prompt: null,
-                            outline: null,
-                            appData:null,
-                            layout: null,
-                            parent: null
-                        }
-
-                    },
-                    crontab: {
-                        frequency: 15,
-                        load: {
-                            sched: Object,
-                            timer: Object
-                        }
-                    },
-                    win: {
-                        toolbars: null,
-                        cmd: null,
-                        start: null,
-                        end: null,
-                    }
-                },
-                mounted: function() {
-                    let self = this;
-
-                    self.$nextTick(function() {
-                        self.init();
-                        self.initPlugIn();
-                    })
-                },
-                watch: {
-                    'model.graph.appData':  {
-                        handler:function(val,oldVal){
-                            let self = this;
-
-                            self.update();
-                        },
-                        deep:true
-                    }
-                },
-                created: function() {
-                    let self = this;
-
-                    self.load();
-
-                },
-                methods: {
-                    toCenter: function(){
-                        let self = this;
-
-                        //self.model.graph.graph.fit();//自适应
-                        self.model.graph.graph.center(true,true,0.5,0);//将画布放到容器中间
-                        // var sc = self.model.graph.graph.getView().getScale();//获取当前的缩放比例
-                        // self.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
-
-                    },
-                    load: function(){
-                        let self = this;
-
-                        // 根据查询参数获取图
-                        if( !_.isEmpty(URL_PARAMS_DATA) ){
-                            self.model.graph.data = callFsJScript('/graph/graph_service.js', encodeURIComponent(URL_PARAMS_DATA)).message[0].graph;
-                        }
-                        // 根据文件获取图
-                        else {
-                            self.model.graph.data = fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
-                        }
-                        console.log(self.model.graph.data)
-                    },
-                    init: function() {
-                        let self = this;
-
-                        if (!mxClient.isBrowserSupported())
-                        {
-                            // Displays an error message if the browser is
-                            // not supported.
-                            mxUtils.error('Browser is not supported!', 200, false);
-                        }
-                        else
-                        {
-
-                            self.model.graph.container = document.getElementById('graph');
-                            self.model.graph.container.style.position = 'absolute';
-                            self.model.graph.container.style.overflow = 'hidden';
-                            self.model.graph.container.style.left = '0px';
-                            self.model.graph.container.style.top = '55px';
-                            self.model.graph.container.style.right = '0px';
-                            self.model.graph.container.style.bottom = '0px';
-                            document.body.appendChild(self.model.graph.container);
-
-
-                            //mxEvent.disableContextMenu(self.model.graph.container);
-
-                            if (mxClient.IS_QUIRKS)
-                            {
-                                document.body.style.overflow = 'hidden';
-                                new mxDivResizer(self.model.graph.container);
-                                new mxDivResizer(outline);
-                            }
-
-                            // Creates the graph inside the given container
-                            self.model.graph.model = new mxGraphModel();
-                            self.model.graph.graph = new mxGraph(self.model.graph.container, self.model.graph.model);
-
-                            // Enables automatic sizing for vertices after editing and
-                            // panning by using the left mouse button.
-                            self.model.graph.graph.setEnabled(false);
-                            self.model.graph.graph.setCellsMovable(true);
-                            self.model.graph.graph.setAutoSizeCells(true);
-                            self.model.graph.graph.setPanning(true);
-                            self.model.graph.graph.centerZoom = true;
-                            self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
-                            // Disables tooltips on touch devices
-                            self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
-                            self.model.graph.graph.htmlLabels = true;
-
-                            self.model.graph.graph.setResizeContainer(false);
-
-
-                            self.model.graph.graph.getCursorForCell = function(cell){
-                                if (cell != null && cell.value != null && cell.vertex ==1 ){
-                                    return 'pointer';
-                                }
-                            }
-
-                            // Displays a popupmenu when the user clicks
-                            // on a cell (using the left mouse button) but
-                            // do not select the cmxCellRenderer.prototype.createLabelell when the popup menu
-                            // is displayed
-                            self.model.graph.graph.panningHandler.popupMenuHandler = false;
-
-
-                            self.initGraph();
-
-                            self.dispatchNodeEvent();
-
-                            _.delay(function(){
-
-                                self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
-
-                                    let cell = self.model.graph.selectedCell = evt.getProperty('cell');
-
-                                    if(_.isEmpty(cell)) return;
-
-                                    let _value = cell.getValue();
-
-
-                                    self.tip(cell.getValue());
-
-                                });
-                            },500)
-
-                        }
-                    },
-                    initGraph: function(){
-                        let self = this;
-
-                        self.model.graph.graph.getModel().beginUpdate();
-
-                        try
-                        {
-                            if(!_.isEmpty(URL_PARAMS_DATA)){
-
-                                // Creates a layout algorithm to be used with the graph
-                                self.model.graph.layout = new mxHierarchicalLayout(self.model.graph.graph);
-                                //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
-                                self.model.graph.layout.orientation = "north";
-                                self.model.graph.layout.forceConstant = 120;
-
-                                self.model.graph.parent = self.model.graph.graph.getDefaultParent();
-
-                                let nodes = {};
-                                let orderNodes = _.orderBy(self.model.graph.data.nodes,['level'],['asc']);
-
-                                _.forEach(orderNodes,function(v){
-                                    let _type = v._icon || 'matrix';
-                                    let _name =  _.last(v.id.split(":")) || '';
-                                    let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                                        `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
-
-                                    nodes[v.id] = node;
-                                })
-
-                                _.forEach(self.model.graph.data.edges,function(k){
-                                    let source = nodes[k.source];
-                                    let target = nodes[k.target];
-                                    let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
-                                    let direction = '';
-                                    if(k.twoway){
-                                        direction = 'startArrow=block;endArrow=block;endFill=1;';
-                                    }
-
-                                    let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
-                                })
-
-                                // Executes the layout
-                                self.model.graph.layout.execute(self.model.graph.parent);
-
-                            } else {
-                                let doc = mxUtils.parseXml(self.model.graph.data);
-                                let svgBgColor = doc.getElementsByTagName("mxGraphModel")[0].getAttribute("background") || "#ffffff";
-                                $("svg").css("background-color",svgBgColor);
-                                let codec = new mxCodec(doc);
-
-                                codec.decode(doc.documentElement, self.model.graph.graph.getModel());
-                            }
-
-                        }
-                        finally
-                        {
-                            self.model.graph.graph.getModel().endUpdate();
-
-                            self.toCenter();
-
-                            self.initData();
-
-                        }
-                    },
-                    initPlugIn: function(){
-                        let self = this;
-
-                        self.initOutline();
-                        self.initToolBars();
-                        self.model.graph.container.style.top = "0px";
-
-                        //self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
-                        //self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
-
-                        $("#nav").find("div").hide();
-                        self.win.toolbars.hide();
-                    },
-                    dispatchNodeEvent: function(){
-                        let self = this;
-
-                        self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
-
-                            let cell = evt.getProperty('cell');
-
-                            if(_.isEmpty(cell)) return;
-
-                            let id = cell.getId();
-                            let value = cell.getValue();
-
-                            let state = self.model.graph.graph.view.getState(cell);
-                            let nodeDic = callFsJScript("/graph/graph_entity_attribute.js",encodeURIComponent(id)).message;
-
-                            state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
-                            state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic));
-
-                            // copy to copyboard
-                            let clipboard2 = new Clipboard('g image',{
-                                text: function(trigger) {
-
-                                    if(window.jsPanel.activePanels.list.length>1){
-                                        if(window.jsPanel.activePanels.getPanel('jsPanel-entity')) {
-                                            window.jsPanel.activePanels.getPanel('jsPanel-entity').close();
-                                        }
-                                    }
-
-                                    let wnd = maxWindow.winEntity(id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
-
-                                    let config = {
-                                        delimiters: ['#{', '}#'],
-                                        el: '#entity-container',
-                                        template: nodeDic.component.performance.template,
-                                        data: {
-                                            model:{
-                                                profile:[],
-                                                event:[],
-                                                performance:[],
-                                                log:[]
-                                            }
-                                        },
-                                        mounted:function(){
-                                            let me = this;
-
-                                            me.initProfile();
-                                            _.delay(function(){
-                                                me.initEvent();
-                                                me.initPerformance();
-                                                me.initLog();
-                                                me.initFiles();
-                                            },1000);
-                                        },
-                                        methods: {
-                                            initProfile:function(){
-                                                let me = this;
-
-                                                _.forEach(nodeDic.dataset,function(val){
-                                                    _.forEach(val,function(v,k){
-                                                        if(typeof v == "object") {
-                                                            value = JSON.stringify(v,null,2);
-                                                            me.model.profile.push({name:k, value: value});
-
-                                                        } else {
-                                                            value = v.toString();
-                                                            me.model.profile.push({name:k, value: value});
-                                                        }
-                                                    })
-                                                })
-                                            },
-                                            initEvent:function(){
-                                                let me = this;
-
-                                                let event = {
-                                                    el: "#event-table",
-                                                    template: nodeDic.component.event.template,
-                                                    data: {
-                                                        id: "event-table",
-                                                        datatable:null,
-                                                        model:nodeDic.component.event.table
-                                                    },
-                                                    mounted:function(){
-                                                        let ev = this;
-
-                                                        _.delay(ev.init,500);
-                                                    },
-                                                    computed: {
-                                                        columns:function(){
-                                                            let ev = this;
-
-                                                            return _.map(ev.model.columns,function(v){
-                                                                        if(v.render){
-                                                                            v.render = eval(v.render);
-                                                                            return v;
-                                                                        } else {
-                                                                            return v;
-                                                                        }
-                                                                    });
-                                                        }
-                                                    },
-                                                    methods:{
-                                                        init:function(){
-                                                            let ev = this;
-
-                                                            ev.datatable = $("#"+ev.id).DataTable( _.extend(ev.model.options, {
-                                                                data: ev.model.dataset,
-                                                                columns: ev.columns})).columns.adjust().draw();
-                                                        }
-                                                    }
-                                                };
-
-                                                new Vue(event);
-                                            },
-                                            initPerformance:function(){
-                                                let me = this;
-
-                                                _.forEach([1,2,3,4],function(v){
-                                                    nodeDic.component.performance.gauge.renderTo = `gauge-ps${v}`;
-                                                    new RadialGauge(nodeDic.component.performance.gauge).draw();
-                                                })
-                                            },
-                                            initLog: function(){
-                                                let me = this;
-
-                                                let log = {
-                                                    el: "#log-table",
-                                                    template: '<table id="log-table" class="display" cellspacing="0"  width="100%"></table>',
-                                                    data:{
-                                                        dataset:[],
-                                                        columns:[
-                                                                    {'data':'host','title':'服务器','visible':true, className: 'text-left'},
-                                                                    {'data':'severity','title':'级别','visible':true, className: 'dt-nowrap text-left'},
-                                                                    {'data':'vtime','title':'告警时间','visible':true, className: 'dt-nowrap text-right',render:function(data, type, row){return
-                                                                            moment(data).format('YYYY-MM-DD HH:mm:ss')}},
-                                                                    {'data':'msg','title':'告警描述','visible':true, className: 'text-left'},
-                                                                    {'data':'status','title':'状态','visible':true, className: 'text-left'},
-                                                                    {'data':'class','title':'Class','visible':false, className: 'text-left'},
-                                                                    {'data':'id','title':'ID','visible':false, className: 'text-left'}
-                                                                ],
-                                                        options: {
-                                                            destroy: true,
-                                                            responsive: false,
-                                                            searching: false,
-                                                            aDataSort: true,
-                                                            bSort: true,
-                                                            bAutoWidth: true,
-                                                            rowReorder: false,
-                                                            colReorder: false,
-                                                            paging: false,
-                                                            info: false,
-                                                            scrollX: true,
-                                                            scrollY: '55vh',
-                                                            scrollCollapse: true,
-                                                            aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}]
-                                                        },
-                                                    },
-                                                    mounted:function(){
-                                                        let me = this;
-                                                        _.delay(me.init,1000);
-                                                    },
-                                                    methods:{
-                                                        init:function(){
-                                                            let me = this;
-
-                                                            me.datatable = $('#log-table').DataTable( _.extend(me.options, {
-                                                                data: me.dataset,
-                                                                columns: me.columns})).columns.adjust().draw();
-                                                        }
-                                                    }
-                                                };
-                                                log.data.dataset = nodeDic.component.log;
-                                                new Vue(log);
-                                            },
-                                            initFiles:function(){
-                                                let me = this;
-
-                                                let files = {
-                                                    delimiters: ['#{', '}#'],
-                                                    el: "#files-container",
-                                                    template: nodeDic.component.files.template,
-                                                    data:{
-                                                        model: _.values(nodeDic.component.files.data[0].files)
-                                                    },
-                                                    methods:{
-                                                        open: function(item){
-                                                            window.open(`/fs/temp/${item}?type=download&issys=${window.SignedUser_IsAdmin}`,'_blank');
-                                                        }
-                                                    }
-                                                };
-
-                                                new Vue(files);
-                                            }
-                                        }
-                                    };
-                                    new Vue(config);
-                                    /*$.contextMenu({
-                                        selector: `.${id.replace(/:/g,"_")}`,
-                                        trigger: 'left',
-                                        delay: 10,
-                                        hideOnSecondTrigger: true,
-                                        className: `animated fadeIn node-menu`,
-                                        build: function($trigger, e) {
-
-                                            let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
-                                            console.log(2,JSON.stringify(temp))
-                                            let items = null;
-                                            _.forEach(temp,function(val){
-                                                _.forEach(val,function(v,k){
-
-                                                    let value = null;
-
-                                                    if(typeof v == "object") {
-                                                        if(_.includes(['depend','runon','connect','refer','contain'],k)){
-
-                                                            if(v==null || !v['_all']) return;
-                                                            let _options = {};
-                                                            _.map(v['_all'],function(w,y){
-                                                                return _.merge(_options,{[y]:w});
-                                                            })
-
-                                                            items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
-                                                        } else {
-                                                            value = JSON.stringify(v,null,2);
-                                                            items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
-                                                        }
-
-                                                    } else {
-                                                        value = v.toString();
-                                                        items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
-                                                    }
-
-                                                })
-                                            });
-
-                                            return {
-                                                callback: function(key, opt) {
-
-                                                    if(key === 'copy'){
-
-                                                    } else if(key === 'tags') {
-
-                                                    } else if(key === 'export') {
-
-                                                    } else if(key === 'load') {
-
-                                                    }
-                                                },
-                                                items:items
-                                            }
-                                        },
-                                        events: {
-                                            show: function(opt) {
-                                                let $this = this;
-                                            },
-                                            hide: function(opt) {
-                                                let $this = this;
-                                                $(".context-menu-list animated slideIn").remove();
-                                            }
-                                        }
-                                    });*/
-
-                                    return id;
-                                }
-                            });
-                            //self.tip(`ID：${id} 已复制到剪切板！`);
-
-                        });
-                    },
-                    initData: function(){
-                        let self = this;
-
-                        // 图所有节点
-                        let cells = _.map(self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent()),function(v,k){
-                            return {gid: v.id, name: v.value};
-                        });
-
-                        let input = "('" + `${cells.join("','")}` + "')";
-
-                        self.model.graph.appData = callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
-                    },
-                    reset: function(){
-                        let self = this;
-
-                        self.model.graph.graph.getModel().beginUpdate();
-
-                        try {
-
-                            let _cells = self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent(),true);
-
-                            _.forEach(_cells, function (cell, k) {
-                                // Resets the fillcolor and the overlay
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#dddddd', [cell]);
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#dddddd', [cell]);
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_GRADIENTCOLOR, '#f9f9f9', [cell]);
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '12', [cell]);
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [cell]);
-                                self.model.graph.graph.removeCellOverlays(cell);
-                            })
-                        }
-                        finally {
-                            self.model.graph.graph.getModel().endUpdate();
-                        }
-                    },
-                    update: function () {
-
-                        let self = this;
-
-                        self.model.graph.graph.getModel().beginUpdate();
-
-                        try {
-
-                            _.forEach(self.model.graph.appData.dataset,function(v) {
-
-                                let _id = v.gid;
-                                let _cell = self.model.graph.graph.getModel().getCell(_id);
-
-                                let state = self.model.graph.graph.view.getState(_cell);
-
-                                self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [_cell]);
-
-                                if(v.severity >= 5){
-
-                                    if(state && state.shape.node){
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ff0000', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ff0000', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-                                    }
-
-                                    //self.tip(_id + " 跳过不执行",5);
-                                } else if(v.severity == 4){
-
-                                    if(state && state.shape.node){
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#8bc34a', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#8bc34a', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-                                    }
-
-                                    //self.tip(_id + " 运行完毕",3);
-
-                                } else {
-
-                                    if(state && state.shape.node){
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffc107', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffc107', [_cell]);
-                                        self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                        //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-
-                                        if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                            _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                if(k == 1){
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                } else {
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                    state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                }
-                                            })
-                                        }
-                                    }
-
-                                    //self.tip(_id + " 报错",4);
-
-                                }
-
-                            })
-
-                        }
-                        finally {
-                            self.model.graph.graph.getModel().endUpdate();
-                        }
-
-                    },
-                    tip: function(event,severity){
-                        let self = this;
-
-                        if (severity == 5) {
-                            alertify.log(event + ' ' + moment().format("LLL"));
-                        } else if (severity == 4) {
-                            alertify.error(event + ' ' + moment().format("LLL"));
-                        } else {
-                            alertify.success(event + ' ' + moment().format("LLL"));
-                        }
-                    },
-                    initOutline: function(){
-                        let self = this;
-
-                        let outline = document.getElementById('outlineContainer');
-
-
-                        self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
-
-                    },
-                    reload: function(){
-                        let self = this;
-
-                        self.load();
-                        self.initGraph();
-                    },
-                    initToolBars: function () {
-                        let self = this;
-
-                        let content = document.getElementById('tools');
-                        content.style.padding = '4px';
-
-                        let tb = new mxToolbar(content);
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                        {
-                            self.model.graph.graph.zoomIn();
-                        },null,'tools-item');
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_ICON}/tools/png/zoom_in.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                        {
-                            self.model.graph.graph.zoomOut();
-                        },null,'tools-item');
-
-                        /*tb.addItem('{{.i18n.Tr "creative-tools-actual_size"}}', `${window.ASSETS_ICON}/tools/png/actual_size.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                        {
-                            self.model.graph.graph.zoomActual();
-                        },null,'tools-item');*/
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_ICON}/tools/png/print.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                        {
-                            var preview = new mxPrintPreview(self.model.graph.graph, 1);
-                            preview.open();
-
-                        },null,'tools-item');
-
-                        tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                        {
-                            mx.fullScreen();
-
-                        },null,'tools-item');
-
-                        self.win.toolbars = maxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
-
-                    },
-                    navToggle: function(){
-                        let self = this;
-
-                        $("#nav").find("div").toggle(500);
-                        self.win.toolbars.toggle(500);
-
-                        self.initOutline();
-                    }
-                }
-            });
-
-        })
-    })
-
-</script>
-
 <script type="text/x-template" id="app-template">
     <div>
         <div id="title" style="position:absolute;z-index:1000;"> <small style="font-size:45%;display:none;"></small></div>
-        <div id="graph" style="top:0px;width:100%;"></div>
+        <div id="graph" style="top:0px;width:100%;background:url('/fs/assets/images/tools/png/grid.gif?type=download&issys=true');"></div>
         <div id="nav">
             <a href="javascript:void(0);" @click="navToggle();">
                 <i class="fa fa-th fa-2x" style="position: relative;left: 5px;top: -50px;z-index: 1000;color:rgb(219, 219, 219);cursor:pointer;"></i>

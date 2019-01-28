@@ -445,7 +445,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let items = callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let contextMenuItems = callFsJScript('/probe/toolbar.js', '').message.probe.event;
                 let id = self.id;
 
                 $.contextMenu({
@@ -458,11 +458,11 @@
 
                         return {
                             callback: function(key, opt) {
-                                if(key === 'detail') {
+                                if(_.endsWith(key,'diagnosis')) {
                                     self.$root.detail(self.selectedRows);
                                 }
                             },
-                            items: items,
+                            items: contextMenuItems,
                         }
                     },
                     events: {
@@ -532,8 +532,7 @@
                     let node = treeObj.getNodeByTId(tId);
 
                     // 打标签
-                    console.log(1,JSON.stringify(data))
-	                let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
+                    let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
                     let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
