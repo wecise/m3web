@@ -217,7 +217,7 @@ class Release {
                             let _id = $(this).data("index");
                             let _item = _.find(self.model.list,{id:_id});
 
-                            fetchData(_item.id + ' | tags +' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags +' + event.item);
 
                         });
 
@@ -226,7 +226,7 @@ class Release {
                             let _id = $(this).data("index");
                             let _item = _.find(self.model.list,{id:_id});
 
-                            fetchData(_item.id + ' | tags -' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     }

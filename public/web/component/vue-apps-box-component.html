@@ -82,7 +82,7 @@
             init: function(event) {
                 let self = this;
 
-                let _rtn = fetchData("#/matrix/portal/tools/");//: | " + self.appsId);
+                let _rtn = omdbHandler.fetchData("#/matrix/portal/tools/");//: | " + self.appsId);
 
                 if(!_.isEmpty(_rtn.message)){
                     self.model = _rtn.message;

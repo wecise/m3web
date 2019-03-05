@@ -86,6 +86,7 @@
 
 <div id="app"></div>
 
+<script src="{{AppSubUrl}}/web/js/handler/GrokHandler.js" type="text/javascript"></script>
 
 <!-- Jquery Timer JS-->
 <script src="{{AppSubUrl}}/web/vendor/timer/jquery.timer.js"></script>
@@ -96,7 +97,7 @@
 <!-- FullCalendar JS-->
 <script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.min.js'></script>
 <script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.js'></script>
-<script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/lang-all.js'></script>
+<script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/locale-all.js'></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
@@ -1245,7 +1246,7 @@
                     newUser: function(){
                         let self = this;
 
-                        let win = maxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1335,7 +1336,7 @@
                                         return false;
                                     }
 
-                                    let _result = ldapMaintain(me.ldap);
+                                    let _result = userHandler.ldapMaintain(me.ldap);
 
                                     if(_result===1){
                                         swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.username + " " + me.email,"success");
@@ -1355,7 +1356,7 @@
                     newGroup: function(){
                         let self = this;
 
-                        let win = maxWindow.winSmall( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
+                        let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
                         win.setMaximizable(false);
 
@@ -1408,7 +1409,7 @@
                                         return false;
                                     }
 
-                                    let _result = ldapMaintain(me.ldap);
+                                    let _result = userHandler.ldapMaintain(me.ldap);
 
                                     if(_result===1){
                                         swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.fullname,"success");
@@ -1436,7 +1437,7 @@
                             param = `#/matrix/ldap/: | ` + event.node.name;
                         }
 
-                        let _list = fetchData(param);
+                        let _list = omdbHandler.fetchData(param);
 
                         self.model.data = _list.message;
                         self.byObjectTreeNodes = [];
@@ -1538,7 +1539,7 @@
                             confirmButtonColor: "#ff0000"
                         }).then(function () {
                             
-                            let _result = ldapMaintain(_user);
+                            let _result = userHandler.ldapMaintain(_user);
                             if(_result === 1){
                                 eventHub.$emit('user-remove-node',event);    
                             }
@@ -1806,7 +1807,7 @@
                     init: function(){
                         let self = this;
                         
-                        let _list = grokList();
+                        let _list = grokHandler.grokList();
                         
                         self.model.data = _list.message;
                     }
@@ -1952,7 +1953,7 @@
                         }).then((result) => {
                             if (result.value) {
                                 let _mql = `delete from /matrix/portal/tools where name='${event}'`;
-                                let _rtn = fetchDataByMql(_mql);
+                                let _rtn = omdbHandler.fetchDataByMql(_mql);
 
                                 self.init();
                             }
@@ -2119,7 +2120,7 @@
                     load: function () {
                         let self = this;
 
-                        self.event = fetchData('#/matrix/system/calendar/: | top 200');
+                        self.event = omdbHandler.fetchData('#/matrix/system/calendar/: | top 200');
                     },
                     initCalendar: function(){
                         let _locale = `{{.Lang}}`;
@@ -2447,7 +2448,7 @@
                     },
                     initUserTreeNodes: function() {
                         let self = this;
-                        let _list = fetchData(`call user { "ftype": "query",  "object":{ "fullname": "/" } }`);
+                        let _list = omdbHandler.fetchData(`call user { "ftype": "query",  "object":{ "fullname": "/" } }`);
                         
                         self.userTreeNodes = _.map(_.attempt(JSON.parse.bind(null, _list.message[0].user)).result,function(v,k){
                                                 let _tmp = false;

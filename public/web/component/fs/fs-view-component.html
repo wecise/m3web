@@ -11,8 +11,18 @@
 		.fs-view-component .fs-node-selected {
 			-webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
 			-moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-			box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-		}
+            box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+        }
+        
+        .fs-view-component .fs-node-selected::before {
+            content: '\2713 ';
+            font-size: 16px;
+            font-weight: 600;
+            color: rgb(37, 45, 73);
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
 
 		.fs-view-component .fs-footer{
 			position:fixed;
@@ -374,7 +384,7 @@
 							<i class="fas fa-bars"></i>
 						</a> -->
 						<a href="#" class="btn btn-link" @click="exportIt" title="导出备份" data-tooltip="tooltip">
-							<i class="fas fa-cloud-download-alt""></i>
+                            <i class="fas fa-cloud-download-alt""></i>
 						</a>
 						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复" data-tooltip="tooltip">
 							<i class="fas fa-cloud-upload-alt" style=""></i>
@@ -541,7 +551,7 @@
                         let item = $(event.currentTarget).parent().parent().data("info");
 
                         let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             me.$parent.init();
@@ -552,8 +562,7 @@
                         let me = this;
                         let item = $(event.currentTarget).parent().parent().data("info");
                         let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
-                        console.log(input)
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             me.$parent.init();
@@ -686,7 +695,7 @@
                         let item = $(event.currentTarget).parent().parent().data("info");
 
 	                    let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             me.$parent.init();
@@ -697,8 +706,7 @@
                         let me = this;
                         let item = $(event.currentTarget).parent().parent().data("info");
                         let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
-                        console.log(input)
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             me.$parent.init();
@@ -781,7 +789,7 @@
                 computed: {
                     datatable: function(){
 
-                        let _list = callFsJScript(`/fs/fs_data.js`, '').message;
+                        let _list = fsHandler.callFsJScript(`/fs/fs_data.js`, '').message;
 
                         _list.dataset =  this.model;
 
@@ -818,7 +826,7 @@
 			}
 		},
         created: function() {
-            let self = this;
+            const self = this
 
             self.init();
 
@@ -826,7 +834,7 @@
             eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
         },
 		mounted: function () {
-            let self = this;
+            const self = this
 
             self.$nextTick(function () {
 
@@ -836,14 +844,14 @@
 		},
 		watch: {
 			root: function(val,oldVal){
-			    let self = this;
+			    const self = this
 
                 self.rootPath = val;
 
                 self.load();
 			},
             rootPath: function(val,oldVal){
-                let self = this;
+                const self = this
 
                 let _extName = _.split(val,'.');
 
@@ -862,7 +870,7 @@
 
             },
             selectedItem:function(val,oldVal){
-			    let self = this;
+			    const self = this
 
                 $(".fs-node-selected").removeClass("fs-node-selected");
 
@@ -875,7 +883,7 @@
 		},
         computed: {
             filePath: function(){
-                let self = this;
+                const self = this
                 let _tmp = self.rootPath.split("/");
 
                 return _tmp;//_.remove(_tmp,null);
@@ -883,7 +891,7 @@
         },
 		methods: {
 			init: function(){
-                let self = this;
+                const self = this
 
                 self.load();
 
@@ -891,7 +899,7 @@
 
 			},
 			initPlugIn: function(){
-			    let self = this;
+			    const self = this
 
                 self.initFileUpload();
 
@@ -905,14 +913,14 @@
 
 			},
 			toggleView: function(view){
-			    let self = this;
+			    const self = this
 
 
 			    self.currentView = view;
 
 			},
 			initContextMenu: function(){
-			    let self = this;
+			    const self = this
 
                 $.contextMenu({
                     selector: '.list-context-menu',
@@ -1192,7 +1200,7 @@
                 });
 			},
 			initEditName: function(){
-			    let self = this;
+			    const self = this
 
                 $(".fs-name[data-edit='true']").editable({
                     title: "重命名",
@@ -1216,13 +1224,13 @@
                         let _old = _.trim(_item.parent + "/" + $(this).editable('getValue', true));
                         let _new = _.trim(_item.parent + "/" + newValue);
 
-                        let _check = fsCheck( _item.parent, newValue);
+                        let _check = fsHandler.fsCheck( _item.parent, newValue);
                         if(_check) {
                             alertify.error("文件已存在，请确认！")
                             return false;
                         }
 
-                        let _rtn = fsRename(_old, _new);
+                        let _rtn = fsHandler.fsRename(_old, _new);
 
                         if(_rtn == 1){
                             self.load();
@@ -1234,7 +1242,7 @@
 
 			},
             initFileUpload: function(){
-                let self = this;
+                const self = this
                 let uploadButton = $('<button/>')
                     .addClass('btn btn-xs btn-primary')
                     .prop('disabled', true)
@@ -1397,12 +1405,12 @@
                     .parent().addClass($.support.fileInput ? undefined : 'disabled');
             },
             resetStatus: function(){
-				let self = this;
+				const self = this
 
                 self.selectedItem = [];
             },
 			orderIt: function(){
-			    let self = this;
+			    const self = this
 
                 $.contextMenu({
                     selector: '.fs-order',
@@ -1431,7 +1439,7 @@
 
 			},
 			openIt: function(item, path){
-                let self = this;
+                const self = this
 
                 // 点击【我的文件】返回不同的root
                 if(_.isNull(item)){
@@ -1491,13 +1499,13 @@
 
                         _.merge(item,{action:'run'});
 
-                        let url = genFsUrl(item,null,null);
+                        let url = fsHandler.genFsUrl(item,null,null);
 
                         window.open(url,'_blank');
                     } else if(_.includes(['md'], item.ftype)){
                         _.merge(item,{action:'run'});
 
-                        let url = genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
+                        let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
 
                         window.open(url,'_blank');
                     }
@@ -1505,19 +1513,19 @@
 
             },
 			runHtml: function(item){
-			    let self = this;
+			    const self = this
 
                 let file = [item.parent, item.name].join("/");
                 window.open(`/fs${file}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,'_blank');
 			},
 			copyUrl: function(item){
-			    let self = this;
+			    const self = this
 
                 let file = `/fs${[item.parent, item.name].join("/")}?type=open&issys=${window.SignedUser_IsAdmin}`;
 
                 if(_.includes(['md','imap','iflow','ishow'],item.ftype)){
                     _.merge(item,{action:'run'});
-                    file = genFsUrl(item,{ header:true, sidebar:false, footbar:true },null);
+                    file = fsHandler.genFsUrl(item,{ header:true, sidebar:false, footbar:true },null);
                 }
 
                 alertify.set({ labels: {
@@ -1542,7 +1550,7 @@
 
 			},
             load: function() {
-                let self = this;
+                const self = this
 
                 // 临时解决view刷新问题 & destroy editable
 	            self.currentView = '';
@@ -1555,7 +1563,7 @@
                     // 重置选择
                     self.selectedItem = [];
 
-                    let _rtn = fsList(self.rootPath);
+                    let _rtn = fsHandler.fsList(self.rootPath);
 
                     self.model = _.orderBy(_.map(_rtn,function(v,k){
 
@@ -1571,38 +1579,38 @@
 
             },
             refresh: function() {
-                let self = this;
+                const self = this
 
                 // 重新实例化 editable
                 self.initEditName();
             },
 			mouseOver: function(item){
-                let self = this;
+                const self = this
 
                 $(self.$el).find('.fs-node-highlight').removeClass('fs-node-highlight');
                 $('#fs_node_'+item.id).find('.widget').addClass('fs-node-highlight');
 
             },
             mouseOut: function(item){
-                let self = this;
+                const self = this
 
                 $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
             },
             newDir: function() {
-                let self = this;
+                const self = this
 
                 let _name = '新文件夹_' + _.now();
                 let _type = 'dir';
                 let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
 
-                let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
+                let _rtn = fsHandler.fsNew(_type, self.rootPath, _name, null, _attr);
 
                 if(_rtn == 1){
                     self.load();
                 }
             },
             newFile: function() {
-                let self = this;
+                const self = this
 
                 alertify.prompt("文件类型", function (e, str) {
                     // str is the input text
@@ -1611,7 +1619,7 @@
                         let _type = str || 'file';
                         let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
 
-                        let _rtn = fsNew(_type, self.rootPath, _name, null, _attr);
+                        let _rtn = fsHandler.fsNew(_type, self.rootPath, _name, null, _attr);
 
                         if(_rtn == 1){
                             self.load();
@@ -1622,7 +1630,7 @@
                 }, "文件类型");
             },
             info: function(node){
-                let self = this;
+                const self = this
 
                 let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
 
@@ -1660,7 +1668,7 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="type">大小</label>
-                                                        <input type="text" class="form-control" id="size" placeholder="" value="${bytesToSize(node.size)}" disabled>
+                                                        <input type="text" class="form-control" id="size" placeholder="" value="${mx.bytesToSize(node.size)}" disabled>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="author">作者</label>
@@ -1752,10 +1760,10 @@
                         init: function(){
                             let me = this;
 
-                            me.model.icon.list = fsList('/assets/images/files/png');
+                            me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
                         },
                         triggerInput: function(id){
-                            let self = this;
+                            const self = this
 
                             $(self.$refs[id]).click()
                         },
@@ -1784,13 +1792,13 @@
                             let _new = node.parent + "/" + me.model.newName;// + _extName;
 
 
-                            let _check = fsCheck( node.parent, me.model.newName);
+                            let _check = fsHandler.fsCheck( node.parent, me.model.newName);
                             if(_check) {
                                 alertify.error("文件已存在，请确认！")
                                 return false;
                             }
 
-                            let _rtn = fsRename(_old, _new);
+                            let _rtn = fsHandler.fsRename(_old, _new);
 
                             if(_rtn == 1){
                                 self.load();
@@ -1801,7 +1809,7 @@
 
                             me.model.attr = me.model.icon.value?_.extend(me.model.attr, {icon: me.model.icon.value}):me.model.attr;
 
-                            let _rtn = fsUpdateAttr(node.parent, node.name, me.model.attr);
+                            let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
 
                             if(_rtn == 1){
                                 self.load();
@@ -1817,7 +1825,7 @@
 
             },
 			copyIt: function(item){
-                let self = this;
+                const self = this
 
                 self.action.from = item.parent + "/" + item.name;
                 alertify.log("已复制 " + self.action.from);
@@ -1830,45 +1838,57 @@
                     return false;
                 }
                 
-                try {
-                    let rtn = true;
-                    _.forEach(window.fsSelectedItem,function(v){
-                        let _rtn = fsMove([v.parent,v.name].join("/"), self.rootPath);
-                        if(_rtn===0){
-                            rtn = false;
+                alertify.confirm(`确认要将所选文件移动到当前目录：\n ${self.root}？`, function (e) {
+                    if (e) {
+                        try {
+                            let rtn = true;
+                            _.forEach(window.fsSelectedItem,function(v){
+                                let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), self.rootPath);
+                                if(_rtn===0){
+                                    rtn = false;
+                                }
+                            })
+                            if(rtn){
+                                alertify.success("移动成功 " + self.rootPath);
+                                self.load();
+                            }
                         }
-                    })
-                    if(rtn){
-                        alertify.success("移动成功 " + self.rootPath);
-                        self.load();
+                        catch(error){}
+                        finally{
+                            window.fsSelectedItem = [];
+                        }
+                    } else {
+                        
                     }
-                }
-                catch(error){}
-                finally{
-                    window.fsSelectedItem = [];
-                }
+                });
             },
             pasteIt: function(){
-                let self = this;
+                const self = this
 
                 if(_.isEmpty(self.action.from)){
                     alertify.log("请选择复制内容")
                     return false;
                 }
 
-                self.action.to = self.rootPath;
-                let _rtn = fsCopy(self.action.from, self.action.to);
-                if(_rtn == 1){
-                    alertify.log("已粘贴 " + self.action.to);
-                    self.load();
+                alertify.confirm(`确认要将所选文件复制到当前目录：\n ${self.root}？`, function (e) {
+                    if (e) {
+                        self.action.to = self.rootPath;
+                        let _rtn = fsHandler.fsCopy(self.action.from, self.action.to);
+                        if(_rtn == 1){
+                            alertify.log("已粘贴 " + self.action.to);
+                            self.load();
 
-                    //
-                    self.action.from = null;
-                    self.action.to = null;
-                }
+                            //
+                            self.action.from = null;
+                            self.action.to = null;
+                        }     
+                    } else {
+                        
+                    }
+                });
             },
             deleteThem: function() {
-                let self = this;
+                const self = this
 
                 if(_.includes([['app','extend','assets','opt','script']],self.selectedItem[0].name)){
                     alertify.error("系统目录，不允许删除!");
@@ -1900,7 +1920,7 @@
 
             },
 			deleteIt: function(event, prompt) {
-                let self = this;
+                const self = this
 
                 if(_.includes(['app','extend','assets','opt','script'],event.name)){
                     alertify.error("系统目录，不允许删除!");
@@ -1924,7 +1944,7 @@
                         confirmButtonColor: "#ff0000"
                     }).then((result) => {
                         if (result.value) {
-                            let _rtn = fsDelete(event.parent,event.name);
+                            let _rtn = fsHandler.fsDelete(event.parent,event.name);
 
                             if (_rtn == 1){
                                 self.load();
@@ -1933,7 +1953,7 @@
                     })
                 } else {
 
-                    let _rtn = fsDelete(event.parent,event.name);
+                    let _rtn = fsHandler.fsDelete(event.parent,event.name);
 
                     if (_rtn == 1){
                         self.load();
@@ -1942,7 +1962,7 @@
 
             },
 			shareIt: function(event){
-				let self = this;
+				const self = this
 
                 alertify.prompt("共享设置", function (e, str) {
                     // str is the input text
@@ -1954,7 +1974,7 @@
                 }, "admin;");
 			},
             deployIt: function(item){
-                let self = this;
+                const self = this
 
                 let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
 
@@ -1979,7 +1999,7 @@
 		                                <label class="col-sm-2 control-label">图标</label>
 		                                <div class="col-sm-10">
 		                                    <a href="#fs-deploy-icon-list" aria-controls="fs-deploy-icon-list" role="tab" data-toggle="tab">
-		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;background-color:rgb(33, 149, 244)" >
+		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;background-color:rgb(37, 45, 73);" >
 		                                    </a>
 		                                </div>
 		                              </div>
@@ -1995,8 +2015,8 @@
 		                            <div class="row">
 		                              <div class="col-md-12" style="display: list-item;height: 35vh;overflow: auto;">
 		                                <ul>
-		                                    <li v-for="icon in app.icon.list">
-		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(33, 149, 243);" @click="triggerInput(icon.id)">
+		                                    <li v-for="icon in app.icon.list" style="width: 80px;height: 85px;padding: 0px;">
+		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(37, 45, 73);height:100%;" @click="triggerInput(icon.id)">
 		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
 		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value" >
 		                                        </a>
@@ -2042,7 +2062,7 @@
                         init: function(){
                             let me = this;
 
-                            me.app.icon.list = fsList(`${window.ASSETS_ICON}/apps/png`);
+                            me.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
 
                         },
                         triggerInput: function(id){
@@ -2053,7 +2073,7 @@
                         deploy: function(){
                             let me = this;
 
-                            let check = callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
+                            let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
 
                             if(check==1){
                                 alertify.log("应用已经发布，请确认。")
@@ -2068,7 +2088,7 @@
                                 url: me.app.url
                             };
 
-                            let rtn = callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                            let rtn = fsHandler.callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
                             if( _.lowerCase(rtn.status) == "ok"){
                                 alertify.success("应用发布成功");
                                 eventHub.$emit("APP-REFRESH-EVENT");
@@ -2096,7 +2116,7 @@
 
             },
 			editIt: function(item){
-                let self = this;
+                const self = this
 
                 // 不同窗体对应各自的ID，由窗体ID生成各窗体组件的子ID
                 // 子ID：
@@ -2194,7 +2214,7 @@
                                         init: function () {
                                             let me = this;
 
-                                            let rtn = fsContent(item.parent, item.name);
+                                            let rtn = fsHandler.fsContent(item.parent, item.name);
 
                                             me.model.newInput = rtn;
 
@@ -2268,7 +2288,7 @@
                                             init: function () {
                                                 let me = this;
 
-                                                let rtn = callFsJScript(item.name, '');
+                                                let rtn = fsHandler.callFsJScript(item.name, '');
 
                                                 me.model.newInput = JSON.stringify(rtn.message, null, 4);
                                             },
@@ -2430,7 +2450,7 @@
                                         init: function () {
                                             let me = this;
 
-                                            let rtn = fsContent(item.parent, item.name);
+                                            let rtn = fsHandler.fsContent(item.parent, item.name);
 
 	                                        me.model.newInput = rtn;
 
@@ -2533,10 +2553,10 @@
 
             },
             downloadIt: function(item, prompt) {
-                let self = this;
+                const self = this
 
                 if(item.ftype == 'dir'){
-                    let rtn = fsList(item.parent);
+                    let rtn = fsHandler.fsList(item.parent);
 
 
                 } else {
@@ -2558,7 +2578,7 @@
                         }
                         window.location.href=_url;
                     } else {
-                        let rtn = fsContent(item.parent, item.name);
+                        let rtn = fsHandler.fsContent(item.parent, item.name);
                         let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
 
                         saveAs(blob, `${item.name}`);
@@ -2577,7 +2597,7 @@
 
             },
             downloadThem: function(){
-			    let self = this;
+			    const self = this
 
                 let _them = $(".fs-node-highlight .list-context-menu");
 
@@ -2589,7 +2609,7 @@
                 let zip = new JSZip();
                 _.forEach(_them, function(v,k){
                     let item = $(v).data("item");
-                    let rtn = fsContent(item.parent, item.name);
+                    let rtn = fsHandler.fsContent(item.parent, item.name);
                     let blob = new Blob([rtn], {type: "text/plain;charset=utf-8"});
                     zip.file(`${item.name}`,rtn);
                 })
@@ -2602,22 +2622,22 @@
 
             },
 			exportIt: function(){
-				let self = this;
+				const self = this
 
 				/*console.log(self.rootPath)
 				if(_.includes(self.rootPath,["/"])){
 					    alertify.log("请选择子目录进行备份！");
 					    return false;
 				}*/
-				let rtn = fsZip(self.rootPath);
+				let rtn = fsHandler.fsZip(self.rootPath);
 
 			},
             importIt: function(event) {
-                let self = this;
+                const self = this
 
                 let file = event.target.files[0];
 
-                let rtn = fsUnZip(self.rootPath, file);
+                let rtn = fsHandler.fsUnZip(self.rootPath, file);
 
                 if(rtn == 1){
                     self.load();
@@ -2625,7 +2645,7 @@
 
             },
             syncIt: function(){
-			    let self = this;
+			    const self = this
 
 			    alertify.prompt("同步设置", function (e, str) {
                     // str is the input text
@@ -2637,16 +2657,19 @@
                 }, "url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;");
             },
             selectIt: function(item){
-                let self = this;
-
-                if(_.find(self.selectedItem,item)){
+                const self = this
+                
+                if(_.find(self.selectedItem,item)) {
                     self.selectedItem = _.filter( self.selectedItem,function(v){ return v.id != item.id} );
                 } else {
                     self.selectedItem.push(item);
                 }
+
+                window.fsSelectedItem = self.selectedItem;
+                console.log(self.selectedItem,window.fsSelectedItem)
             },
             selectAll: function(){
-                let self = this;
+                const self = this
 
                 let items = $("li.fs-node").find('.fs-name');
 
@@ -2663,7 +2686,7 @@
 
             },
 			setRootPath: function(item) {
-			    let self = this;
+			    const self = this
                 let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
 
                 console.log(123,_item)
@@ -2672,7 +2695,7 @@
 
 			},
             toggleLeft: function() {
-                let self = this;
+                const self = this
 
                 if(self.toggle.left) {
 

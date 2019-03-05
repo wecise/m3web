@@ -436,7 +436,7 @@
         methods: {
             init: function(){
                 let self = this;
-                let _list = fetchClass(self.row.class);
+                let _list = omdbHandler.fetchClass(self.row.class);
                 let _properties = {};
                 let _fields = {};
                 let _data = {};
@@ -666,13 +666,13 @@
                         me.$nextTick(function(){
 
                             me.init();
-                            FormWizard.init("ci-compare-wizard");
+                            mx.handleBootstrapWizards("ci-compare-wizard");
                         })
 					},
 					methods:{
 					    init: function() {
                             let me = this;
-                            let _list = fetchData("id=" + _row.id);
+                            let _list = omdbHandler.fetchData("id=" + _row.id);
 
                             _.forEach(_list.message, function (v, k) {
                                 me.model.list.push({
@@ -708,7 +708,7 @@
                                 let _id = v.split("&")[0];
                                 let _vtime = v.split("&")[1];
 
-                                let _tmp = fetchData("id="+_id + " | vtime="+_vtime);
+                                let _tmp = omdbHandler.fetchData("id="+_id + " | vtime="+_vtime);
 
                                 if (k == 0) {
                                     console.log(0, k)
@@ -835,7 +835,7 @@
                         	_.forEach(me.model.cmds, function(v,k){
                         		let _data = {message: {outputs:[],runid:null,sid:null}};
 
-                        		let _tmp = callJob(v.name + " " + v.params, v.host);
+                        		let _tmp = jobHandler.callJob(v.name + " " + v.params, v.host);
 
                         		if(!_.isEmpty(_tmp)){
                         			_data = _.cloneDeep(_tmp);
@@ -866,7 +866,7 @@
                         reload: function(item){
                         	let me = this;
 
-                        	let _data = callJob(item.name + " " + item.params, item.host);
+                        	let _data = jobHandler.callJob(item.name + " " + item.params, item.host);
                         	let _tmp = _.find(me.model.cmds, {name: item.name});
                         	
 
@@ -1020,7 +1020,7 @@
 
                                             iam.model.host = self.row.host;
 
-                                            let _tmp = serverGroupList();
+                                            let _tmp = groupHandler.serverGroupList();
 
                                             iam.model.server.list = _.map(_tmp.message,function(v,k){
 																		return { name:v.name, children: _.map(v.hosts,function(o,n){ if (o.host == iam.model.host){ return {name:o.host,children:[],open:true,checked:true};} return {name:o.host, children: []};}), open:true };
@@ -1034,7 +1034,7 @@
                                         call: function(){
                                         	let iam = this;
 
-                                        	let _rtn = callJob(iam.model.config.cmd+' '+iam.model.config.params, self.row.host);
+                                        	let _rtn = jobHandler.callJob(iam.model.config.cmd+' '+iam.model.config.params, self.row.host);
 
                                         	iam.model.config.result.newInput = _rtn.message.outputs.join("");
 
@@ -1061,9 +1061,9 @@
                                             _form.rule = "/matrix/rules/ciview_config_rule";
                                             _form.attrs = {"class": self.row.class, "id": self.row.id};
                                             _form.env = [];
-                                            console.log(JSON.stringify(_form))
+                                            
 	                                        return false;
-                                            let _rtn = agentDispatch(_form);
+                                            //let _rtn = agentDispatch(_form);
                                         }
                                     }
                                 });
@@ -1078,7 +1078,7 @@
 
                 _.merge(_form, {id: self.row.id, class: self.row.class});
 
-                let rtn = putDataByMql(_form);
+                let rtn = omdbHandler.putDataByMql(_form);
 
                 if(rtn === "ok"){
                 	eventHub.$emit("ci-save-event",null)

@@ -137,7 +137,15 @@
 
 		.tagify{
 			border:none;
-		}
+        }
+        
+        .display-none {
+            display: none!important;
+        }
+
+        .dataTables_filter{
+            display: none;
+        }
 
 	</style>
 
@@ -170,7 +178,7 @@
             watch: {
                 'model.list.dataset': {
                     handler: function(val,oldVal){
-                        let self = this;
+                        const self = this;
 
                         if(val === oldVal) return false;
 
@@ -178,13 +186,16 @@
                             self.datatable.destroy();
                             $(`#${self.id}`).empty();
                             self.init();
+                            
+                            let datatable = $("#"+self.id).DataTable();
+                            script.detail(self.id,datatable);
                         }
                     },
                     deep:true
                 },
                 'model.tags':{
                     handler:function(val,oldVal){
-                        let self = this;
+                        const self = this;
 
                         if(val === oldVal) return false;
 
@@ -207,12 +218,13 @@
                 }
             },
             created: function(){
-                let self = this;
+                const self = this;
 
                 eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
+                eventHub.$on(`DATATABLE-FILTER-BY-script-EVENT`, self.filterColumn);
             },
             mounted: function () {
-                let self = this;
+                const self = this;
 
                 self.$nextTick(function () {
 
@@ -225,7 +237,7 @@
             },
             computed: {
                 _columns: function(){
-                    let self = this;
+                    const self = this;
 
                     let _cols = _.map(self.model.list.columns,function(v,k){
 
@@ -260,7 +272,7 @@
             },
             methods: {
                 init: function(){
-                    let self = this;
+                    const self = this;
 
                     self.datatable = $("#"+self.id).DataTable( _.extend({
                         data: self.model.list.dataset,
@@ -330,25 +342,17 @@
                             },
                             buttons: [
                                 {
-                                    text: '刷新',
+                                    text: '上传',
                                     action: function (e, dt, node, config) {
-                                        self.refresh();
+                                        script.upload();
                                     },
                                     enabled: true,
                                     className: 'btn btn-sm btn-white'
                                 },
                                 {
-                                    text: '添加',
+                                    text: '下发',
                                     action: function (e, dt, node, config) {
-                                        self.add();
-                                    },
-                                    enabled: true,
-                                    className: 'btn btn-sm btn-white'
-                                },
-                                {
-                                    text: '删除',
-                                    action: function (e, dt, node, config) {
-                                        self.delete();
+                                        script.deploy(dt.rows( { selected: true } ).data());
                                     },
                                     enabled: false,
                                     className: 'btn btn-sm btn-white'
@@ -356,35 +360,52 @@
                                 {
                                     text: '编辑',
                                     action: function (e, dt, node, config) {
-                                        self.edit(dt.row( { selected: true } ).data());
+                                        script.update(dt.row( { selected: true } ).data());
                                     },
                                     enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '删除',
+                                    action: function (e, dt, node, config) {
+                                        script.delete(dt.rows( { selected: true } ).data());
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '刷新',
+                                    action: function (e, dt, node, config) {
+                                        script.refresh();
+                                    },
+                                    enabled: true,
                                     className: 'btn btn-sm btn-white'
                                 },
                                 {
                                     text: '导出',
                                     action: function (e, dt, node, config) {
-                                        self.scriptEdit();
+                                        script.export();
                                     },
                                     enabled: false,
-                                    className: 'btn btn-sm btn-white'
+                                    className: 'btn btn-sm btn-white display-none'
                                 },
                                 {
                                     text: '导入',
                                     action: function (e, dt, node, config) {
-                                        self.scriptEdit();
+                                        script.import();
                                     },
                                     enabled: false,
-                                    className: 'btn btn-sm btn-white'
+                                    className: 'btn btn-sm btn-white display-none'
                                 }
                             ]
                         },
+                        rowCallback: function( row, data ) {                            
+                            $(row).attr("id",data.id);
+                        },
                         initComplete: function(event, settings, json){
-
 
                             // init ContextMenu
                             self.initMenu();
-
 
                             // init effect for table
                             $("#"+self.id).find("tbody").on("mouseover","tr", function(event) {
@@ -420,30 +441,26 @@
                                 e.dataTransfer.setData("item", JSON.stringify(sendList));
                             });
 
-                        },
-                        drawCallback:function(settings){
-
-
-
-                            //self.redraw();
                         }
                     },self.options));
 
                 },
+                filterColumn(event) {
+                    $("#"+this.id).DataTable().search(event.name).draw();
+                },
                 initPlugin: function(){
-                    let self = this;
+                    const self = this;
 
                     self.tagsInput();
-
-                    self.baseDatatable();
 
                     // Buttons enable/disable
                     self.datatable.on( 'select deselect', function () {
                         var selectedRows = self.datatable.rows( { selected: true } ).count();
 
-                        self.datatable.buttons( [2,3,4,5] ).enable( selectedRows > 0 );
+                        self.datatable.buttons( [1,2,3,5,6] ).enable( selectedRows > 0 );
                     } );
 
+                    
                     // init drop for tree
                     var treeName = "script-tree";
                     let elTo = $(`#${treeName} li`);
@@ -475,8 +492,8 @@
                         let node = treeObj.getNodeByTId(tId);
 
                         // 打标签
-                        let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -486,15 +503,18 @@
 
                     });
 
+                    let datatable = $("#"+self.id).DataTable();
+                    script.detail(self.id,datatable);
+
                 },
                 initMenu: function(){
-                    let self = this;
+                    const self = this;
 
-                    let items = callFsJScript('/probe/toolbar.js', '').message.probe.script;
+                    let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.script;
                     let id = self.id;
 
                     $.contextMenu({
-                        selector: `#${id} tr td:not(:nth-child(1))`,
+                        selector: `#${id} tr td:not(:nth-child(1)):not(:nth-child(5))`,
                         trigger: 'left',
                         delay: 10,
 
@@ -533,19 +553,12 @@
                         }
                     });
                 },
-                refresh: function(){
-                    let self = this;
-
-                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-	            },
                 redraw: function(){
-                    let self = this;
-
-                    self.datatable.columns.adjust().draw(); // Redraw the DataTable
+                    $(`#${this.id}`).DataTable().draw();
                 },
                 tagsInput: function(){
 
-                    let self = this;
+                    const self = this;
 
                     let input = document.querySelector(`#${self.id}_tags_input`);
 
@@ -564,7 +577,7 @@
                         .on('remove', onRemoveTag);
                 },
                 tagInput: function(className,container,tags){
-                    let self = this;
+                    const self = this;
 
                     let tag = {
                         el: container,
@@ -599,7 +612,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -609,7 +622,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -621,529 +634,8 @@
                     };
 
                     return tag;
-                },
-                baseDatatable: function(){
-
-                    return Vue.component("script-base-datatable", {
-                        delimiters: ['#{', '}#'],
-                        props: {
-                            id: String,
-                            model: Object
-                        },
-                        template:`<table :id="id" class="display" style="width:100%;"></table>`,
-                        data: function(){
-                            return {
-                                datatable: null
-                            }
-                        },
-                        created: function(){
-                            let me = this;
-
-                            eventHub.$on("COMPONENT-REDRAW-EVENT", me.redraw);
-                        },
-                        watch: {
-                            'model.servers.dataset': {
-                                handler: function(val,oldVal){
-                                    let me = this;
-
-                                    if(val === oldVal) return false;
-
-                                    if(me.datatable){
-                                        me.datatable.destroy();
-                                        $(`#${me.id}`).empty();
-                                        me.init();
-                                    }
-                                },
-                                deep:true
-                            }
-
-                        },
-                        mounted: function () {
-                            let me = this;
-
-                            me.$nextTick(function () {
-
-                                me.init();
-                                me.initPlug();
-                            })
-                        },
-                        computed: {
-                            _columns: function(){
-                                let me = this;
-
-                                let _cols = _.map(me.model.servers.columns,function(v,k){
-
-                                    if(!v.render){
-                                        return v;
-                                    } else {
-                                        v.render = eval(v.render);
-                                        return v;
-                                    }
-
-                                });
-
-                                return _cols;
-                            }
-                        },
-                        methods: {
-                            init: function () {
-                                let me = this;
-
-                                me.datatable = $("#" + me.id).DataTable(_.extend({
-                                    data: me.model.servers.dataset,
-                                    columns: me._columns,
-                                    //stripeClasses: [],
-                                    responsive: false,
-                                    searching: false,
-                                    aDataSort: true,
-                                    bSort: true,
-                                    bAutoWidth: true,
-                                    rowReorder: false,
-                                    colReorder: false,
-                                    paging: false,
-                                    info: true,
-                                    scrollX: true,
-                                    scrollY: '300px',
-                                    scrollCollapse: true,
-                                    aoColumnDefs: [{sDefaultContent: '', aTargets: ['_all']}],
-                                    language: {
-                                        "sProcessing": "处理中...",
-                                        "sLengthMenu": "显示 _MENU_ 项结果",
-                                        "sZeroRecords": "没有匹配结果",
-                                        "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                                        "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
-                                        "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
-                                        "sInfoPostFix": "",
-                                        "sSearch": "过滤:",
-                                        "sUrl": "",
-                                        "sEmptyTable": "表中数据为空",
-                                        "sLoadingRecords": "载入中...",
-                                        "sInfoThousands": ",",
-                                        "oPaginate": {
-                                            "sFirst": "首页",
-                                            "sPrevious": "上页",
-                                            "sNext": "下页",
-                                            "sLast": "末页"
-                                        },
-                                        "oAria": {
-                                            "sSortAscending": ": 以升序排列此列",
-                                            "sSortDescending": ": 以降序排列此列"
-                                        },
-                                        buttons: {
-                                            copyTitle: '已拷贝到剪切板',
-                                            copyKeys: '已拷贝',
-                                            copySuccess: {
-                                                _: '已拷贝 %d 项',
-                                                1: '1 已拷贝'
-                                            }
-                                        }
-                                    },
-                                    select: {
-                                        style: 'multi',
-                                        selector: 'td:first-child'
-
-                                    },
-                                    lengthChange: true,
-                                    stateSave: false,
-                                    dom: {
-                                        button: {
-                                            tag: 'button',
-                                            className: 'datatables-toolbars-button'
-                                        }
-                                    },
-                                    dom: 'Bfrtip',
-                                    buttons: {
-                                        dom: {
-                                            button: {
-                                                tag: 'button'
-                                            }
-                                        },
-                                        buttons: [
-                                            {
-                                                text: '部署',
-                                                action: function (e, dt, node, config) {
-													me.deploy(dt.row( { selected: true } ).data());
-                                                },
-                                                enabled: false,
-                                                className: 'btn btn-sm btn-success'
-                                            },
-                                            {
-                                                text: '去除',
-                                                action: function (e, dt, node, config) {
-
-                                                },
-                                                enabled: false,
-                                                className: 'btn btn-sm btn-default'
-                                            },
-                                            {
-                                                text: '查看',
-                                                action: function (e, dt, node, config) {
-
-                                                },
-                                                enabled: false,
-                                                className: 'btn btn-sm btn-default'
-                                            }
-                                        ]
-                                    },
-                                    initComplete: function (event, settings, json) {
-
-
-                                    },
-                                    drawCallback: function (settings) {
-                                        //me.redraw();
-                                    }
-                                }, me.model.servers.options)).columns.adjust().draw();
-
-                            },
-	                        initPlug: function(){
-                                let me = this;
-
-                                // Buttons enable/disable
-                                me.datatable.on( 'select deselect', function () {
-                                    let selectedRows = me.datatable.rows( { selected: true } ).count();
-
-                                    me.datatable.buttons( [0,1,2] ).enable( selectedRows > 0 );
-                                } );
-	                        },
-                            redraw: function () {
-                                let me = this;
-
-                                _.delay(function(){
-                                    me.datatable.columns.adjust().draw();
-                                },500);
-                            },
-                            deploy: function(event){
-                                let me = this;
-
-                                let depot = {depots: me.model.name,versions: me.model.version, hosts: new Array(event.host)};
-
-                                let rtn = depotDeploy(depot);
-
-                                if(rtn === 1){
-                                    me.model.wnd.close();
-                                }
-                            }
-                        }
-                    });
-                },
-                add: function(){
-                    let self = this;
-
-                    let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 添加`, `<div id="script-add-container"></div>`, null, 'script-container');
-
-                    let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
-
-                    let wizard = {
-                        el: "#script-add-container",
-                        data: {
-                            model: {
-                                item: {
-                                    name: null,
-                                    version: null,
-                                    remark: null,
-                                    uploadfile: null,
-                                    tags: null,
-	                                servers: conf.servers,
-									wnd: wnd
-                                },
-                                handler: {
-                                    tagify: null
-                                }
-                            }
-                        },
-                        created: function(){
-                            let me = this;
-
-                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
-                        },
-                        methods: {
-                            tagInput: function(className,container, tags){
-                                let me = this;
-
-                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                    .on("add",function(event, tagName){
-                                        me.model.item.tags = tagName.value;
-                                    })
-                                    .on("remove",function(event,tagName){
-                                        me.model.item.tags = tagName.value;
-                                    });
-
-                            },
-                            save: function(){
-                                let me = this;
-
-                                let rtn = depotAdd(me.model.item);
-
-                                if(rtn === 1){
-
-                                    alertify.confirm("是否需要部署该脚本？", function (e) {
-                                        if (e) {
-                                            // user clicked "ok"
-                                        } else {
-                                            wnd.close();
-                                        }
-                                    });
-
-                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                }
-                            },
-                            resize:function(){
-                                wnd.resize($(wnd.content).parent().parent().width()+20, $(wnd.content).parent().parent().height()+60 );
-                            },
-                            onFileChange(e) {
-                                let me = this;
-
-                                let file = e.target.files[0];
-
-                                me.model.item.uploadfile = file;
-
-                            }
-                        },
-                        mounted: function(){
-                            let me = this;
-
-                            me.$nextTick(function () {
-                                FormWizard.init("script-wizard");
-                                me.tagInput();
-
-                                $(me.$el).find("li").on("click",function(){
-                                    eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                })
-                            })
-                        },
-                        template: `<form>
-										<div id="script-wizard">
-											<ol>
-												<li>
-													基本配置
-													<small>运行策略，环境变量设置。</small>
-												</li>
-												<li>
-													选择对象
-													<small>如果需要部署，选择部署对象，开始部署。</small>
-												</li>
-											</ol>
-
-											<div>
-												<fieldset class="form-horizontal">
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本名称：</label>
-														<div class="col-sm-10">
-															<input type="text" placeholder="" class="form-control" v-model="model.item.name" required="required" />
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本版本：</label>
-														<div class="col-sm-10">
-															<input type="number" placeholder="" class="form-control"  v-model="model.item.version" required="required" />
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本说明：</label>
-														<div class="col-sm-10">
-															<textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"></textarea>
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">添加标签：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">选择脚本：</label>
-														<div class="col-sm-10"><input type="file" placeholder="" class="form-control" @change="onFileChange" required="required" /></div>
-													</div>
-													<hr/>
-													<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
-												</fieldset>
-											</div>
-											<div>
-												<fieldset>
-													<div class="row">
-														<div class="col-md-12">
-															<script-base-datatable id="script-servers-datatable" :model="model.item"></script-base-datatable>
-														</div>
-													</div>
-												</fieldset>
-											</div>
-
-										</div>
-									</form>`
-                    };
-
-                    new Vue(wizard);
-                },
-                edit: function(event){
-                    let self = this;
-
-                    let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
-
-                    let conf = callFsJScript('/probe/probe_summary_script_conf.js', '').message;
-
-                    let node = _.cloneDeep(event);
-
-                    let wizard = {
-                        el: "#script-add-container",
-                        data: {
-                            model: {
-                                item: {
-                                    name: node.name,
-                                    version: node.version,
-                                    remark: node.remark,
-                                    uploadfile: null,
-                                    tags: node.tags,
-                                    servers: conf.servers,
-                                    wnd: wnd
-                                },
-                                handler: {
-                                    tagify: null
-                                }
-                            }
-                        },
-                        created: function(){
-                            let me = this;
-
-                            eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
-                        },
-                        methods: {
-                            tagInput: function(className,container, tags){
-                                let me = this;
-
-                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
-                                    .on("add",function(event, tagName){
-                                        me.model.item.tags = tagName.value;
-                                    })
-                                    .on("remove",function(event,tagName){
-                                        me.model.item.tags = tagName.value;
-                                    });
-
-                            },
-                            save: function(){
-                                let me = this;
-
-                                let rtn = depotAdd(me.model.item);
-
-                                if(rtn === 1){
-
-                                    alertify.confirm("是否需要部署该脚本？", function (e) {
-                                        if (e) {
-                                            // user clicked "ok"
-                                        } else {
-                                            wnd.close();
-                                        }
-                                    });
-
-                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                                }
-                            },
-                            resize:function(){
-                                wnd.resize($(wnd.content).parent().parent().width()+20, $(wnd.content).parent().parent().height()+60 );
-                            },
-                            onFileChange(e) {
-                                let me = this;
-
-                                let file = e.target.files[0];
-
-                                me.model.item.uploadfile = file;
-
-                            }
-                        },
-                        mounted: function(){
-                            let me = this;
-
-                            me.$nextTick(function () {
-                                FormWizard.init("script-wizard");
-                                me.tagInput();
-
-                                $(me.$el).find("li").on("click",function(){
-                                    eventHub.$emit("COMPONENT-REDRAW-EVENT");
-                                })
-                            })
-                        },
-                        template: `<form>
-										<div id="script-wizard">
-											<ol>
-												<li>
-													基本配置
-													<small>运行策略，环境变量设置。</small>
-												</li>
-												<li>
-													选择对象
-													<small>如果需要部署，选择部署对象，开始部署。</small>
-												</li>
-											</ol>
-
-											<div>
-												<fieldset class="form-horizontal">
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本名称：</label>
-														<div class="col-sm-10">
-															<input type="text" placeholder="" class="form-control" v-model="model.item.name" required="required" />
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本版本：</label>
-														<div class="col-sm-10">
-															<input type="number" placeholder="" class="form-control"  v-model="model.item.version" required="required" />
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">脚本说明：</label>
-														<div class="col-sm-10">
-															<textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"></textarea>
-														</div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">添加标签：</label>
-														<div class="col-sm-10"><input type="text" placeholder="" class="form-control tags"  v-model="model.item.tags"/></div>
-													</div>
-													<div class="form-group">
-														<label class="col-sm-2 control-label">选择脚本：</label>
-														<div class="col-sm-10"><input type="file" placeholder="" class="form-control" @change="onFileChange" required="required" /></div>
-													</div>
-													<hr/>
-													<a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存</a>
-												</fieldset>
-											</div>
-											<div>
-												<fieldset>
-													<div class="row">
-														<div class="col-md-12">
-															<script-base-datatable id="script-servers-datatable" :model="model.item"></script-base-datatable>
-														</div>
-													</div>
-												</fieldset>
-											</div>
-
-										</div>
-									</form>`
-                    };
-
-                    new Vue(wizard);
-                },
-                delete: function(){
-                    let self = this;
-
-                    let selected = _.map(self.datatable.rows(".selected").data(),'name');
-
-                    alertify.confirm(`确认删除：${selected.join(",")}`, function (e) {
-                        if (e) {
-                            if(selected.length > 0) {
-                                _.forEach(selected, function(v){
-                                    depotDelete(v);
-                                })
-
-                                eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                            } else {
-                                alertify.log("请选择脚本。")
-                                return false;
-                            }
-
-                        } else {
-                            // user clicked "cancel"
-                        }
-                    });
-
                 }
+                
             }
 
         }

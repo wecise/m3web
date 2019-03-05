@@ -109,6 +109,8 @@
 
 <div id="app"></div>
 
+<script src="{{AppSubUrl}}/web/js/handler/CompanyHandler.js" type="text/javascript"></script>
+
 <!-- ECharts单文件引入 -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
@@ -219,10 +221,10 @@
                 update: function(){
                     let self = this;
 
-                    let _rtn = companyUpdate(self.company);
+                    let _rtn = companyHandler.companyUpdate(self.company);
 
                     if(_rtn == 1){
-                        document.location.href = getPage();
+                        document.location.href = mx.getPage();
                     }
                 },
                 cancel: function(){
@@ -233,12 +235,10 @@
 
                     let file = event.target.files[0];
 
-                    console.log(file,file.name)
-
-                    let rtn = licenseImport(file);
+                    let rtn = licenseHandler.licenseImport(file);
 
                     if(rtn == 1){
-                        document.location.href = getPage();
+                        document.location.href = mx.getPage();
                     }
 
                 }
@@ -377,7 +377,7 @@
                                         };
                                         let _rtn = companyUpdate(_company);
                                         if(_rtn == 1){
-                                            document.location.href = getPage();
+                                            document.location.href = mx.getPage();
                                         }
                                     });
                                 },
@@ -400,7 +400,7 @@
                             init: function(){
                                 let me = this;
 
-                                me.model.icon.list = fsList('/assets/images/files/png');
+                                me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
                             },
                             triggerInput: function(id){
                                 let self = this;

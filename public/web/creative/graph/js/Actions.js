@@ -160,7 +160,7 @@ Actions.prototype.init = function()
                 let _xml = mxUtils.getXml(ui.editor.getGraphXml());
                 let _attr = _.attempt(JSON.parse.bind(null, graphObject.attr));
 
-                let _rtn = fsNew('file',graphObject.parent, graphObject.name, _xml, _attr);
+                let _rtn = fsHandler.fsNew('file',graphObject.parent, graphObject.name, _xml, _attr);
 			},function(){
                 if(!_.isEmpty(window.jsPanel.activePanels.list)){
                     window.jsPanel.activePanels.getPanel(0).close();

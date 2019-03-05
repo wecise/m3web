@@ -217,7 +217,7 @@
                             name: "查看数据", icon: "fa-table", callback: function (key, opt) {
 
                                 let _mql = `SELECT * FROM ${self.selectedNode.name} limit 50`;
-                                let _list = fetchDataByMql(_mql);
+                                let _list = omdbHandler.fetchDataByMql(_mql);
 
                                 if(_list.status === 'ok'){
                                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -235,7 +235,7 @@
 
                                 _data = _list.message;
 
-                                _columns = columnsParse(_list.meta);
+                                _columns = mx.columnsParse(_list.meta);
 
                                 let _result = {type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
 
@@ -246,7 +246,7 @@
                         "触发器": {
                             name: "触发器", icon: "fa-flash", callback: function (key, opt) {
 
-                                let _list = triggerList(self.selectedNode.name);
+                                let _list = triggerHandler.triggerList(self.selectedNode.name);
 
                                 let _result = {name: self.selectedNode.name, result: _list};
 
@@ -358,7 +358,7 @@
 
                 _.forEach(node, function(v,k){
 
-                    let _rtn = classList(v.cid);
+                    let _rtn = omdbHandler.classList(v.cid);
 
                     if (_.isEmpty(_rtn)) {
                         return;
@@ -393,7 +393,7 @@
 	        edgeList: function(){
                 let self = this;
                 let _rtn = null;
-                let _list = fetchDataByMql('select edge type');
+                let _list = omdbHandler.fetchDataByMql('select edge type');
 
                 if(!_.isEmpty(_list)){
                     _rtn = _list;
@@ -404,7 +404,7 @@
 	        ruleList: function(){
                 let self = this;
 
-                let _list = ruleList();
+                let _list = ruleHandler.ruleList();
 
                 if(!_.isEmpty(_list)){
                     _rtn = _list;

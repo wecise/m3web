@@ -333,7 +333,7 @@ class Omdb extends Matrix {
                             } else if(event.model.pattern === 'update') {
                                 mql = "UPDATE " + event.model.node.name + "\nSET " + _.map(event.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
                             } else if(event.model.pattern === 'delete') {
-                                mql = "DELETE\n\t " + cls + "\nFROM\n\t " + event.model.node.name;
+                                mql = "DELETE FROM\n\t " + event.model.node.name;
                             } else if(event.model.pattern === 'ddl') {
 
                                 mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + event.model.node.name + " (\n\t" + _.map(event.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(event.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + event.model.node.keys.join(",") + ")\n);";
@@ -431,7 +431,7 @@ class Omdb extends Matrix {
                         initKeys: function(){
                             let self = this;
 
-                            let _rtn = classList(-1);
+                            let _rtn = omdbHandler.classList(-1);
                             self.keys = _.sortBy(_.keys(_.attempt(JSON.parse.bind(null, _rtn))[0]));
                         },
                         dropClass: function(){
@@ -794,7 +794,7 @@ class Omdb extends Matrix {
                             let self = this;
 
                             _.forEach(event,function(v){
-                                let _list = fetchData(v);
+                                let _list = omdbHandler.fetchData(v);
 
                                 _.forEach(_list.message,function(v){
 

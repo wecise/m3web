@@ -758,9 +758,7 @@
 
 							item = _.merge(item,{lang: lang, action:action});
 
-							let url = genFsUrl(item,null,null);
-
-							console.log(item,url)
+							let url = fsHandler.genFsUrl(item,null,null);
 
 							window.open(url, "_blank");
 						}
@@ -902,13 +900,13 @@
 
 								_.merge(item,{action:'run'});
 
-								let url = genFsUrl(item,null,null);
+								let url = fsHandler.genFsUrl(item,null,null);
 
 								window.open(url,'_blank');
 							} else if(_.includes(['md'], item.ftype)){
 								_.merge(item,{action:'run'});
 
-								let url = genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
+								let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
 
 								window.open(url,'_blank');
 							}
@@ -1120,7 +1118,7 @@
 
                         _param = _ifDebug + _ifHistory + _param;
 
-						let _list = fetchData(_param);
+						let _list = omdbHandler.fetchData(_param);
 
 
                         let event = new Array();
@@ -1246,7 +1244,7 @@
                                 } else if( _.includes(d.class, '/matrix/filesystem') ){
 									if( _.includes(['imap','iflow','ishow','md'],d.ftype) ) {
 										d = _.merge(d,{lang: window.mxLanguage, action:'run'});
-										let url = genFsUrl(d,null,null);
+										let url = fsHandler.genFsUrl(d,null,null);
 										graph.push( _.merge(d,{tag: {"_all":[] }, preset: JSON.stringify(self.search.default), href: url }) );
                                     } else {
 										files.push(d);
@@ -1315,7 +1313,7 @@
 						let self = this;
 						let rtn = [];
 						let param = "serial=" + _.map(data,cond).join(";serial=");
-						let _list = fetchData("#/matrix/devops/event/omnibus/journal/: | " + param);
+						let _list = omdbHandler.fetchData("#/matrix/devops/event/omnibus/journal/: | " + param);
 
 						rtn = _list.message;
 

@@ -327,7 +327,7 @@
                     _mql = self.editor.getSelectedText();
                 }
 
-                let _list = fetchDataByMql(_mql);
+                let _list = omdbHandler.fetchDataByMql(_mql);
 
                 if(_list.status === 'ok'){
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -391,7 +391,7 @@
 
                 let _data = _list.message;
 
-                let _columns = columnsParse(_list.meta);
+                let _columns = mx.columnsParse(_list.meta);
 
 
                 // Graph
@@ -460,7 +460,7 @@
                     _mql = self.editor.getSelectedText();
                 }
 
-                let _list = fetchDataByMql(_mql);
+                let _list = omdbHandler.fetchDataByMql(_mql);
 
                 if(_list.status === 'ok'){
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -516,7 +516,7 @@
 
                 let _data = _list.message;
 
-                let _columns = columnsParse(_list.meta);
+                let _columns = mx.columnsParse(_list.meta);
 
 
                 // Graph
@@ -549,7 +549,7 @@
 
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
-                let _list = fetchDataByMql(_mql);
+                let _list = omdbHandler.fetchDataByMql(_mql);
                 let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
                 let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
@@ -565,7 +565,7 @@
 								</body>
 							</html>`;
 
-                let _url = fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
+                let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
 
                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
             },
@@ -584,7 +584,7 @@
                 let self = this;
 
                 let user = window.SignedUser_UserName;//$("#signed-user-name").val();
-                let mql = fsContent(`/${user}/temp`, 'cache_mql_script.txt');
+                let mql = fsHandler.fsContent(`/${user}/temp`, 'cache_mql_script.txt');
 
                 self.editor.setValue(mql);
 

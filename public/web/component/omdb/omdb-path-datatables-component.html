@@ -513,7 +513,7 @@
 
                                     let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
 
-                                    let _rtn = fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
 
                                     if(_rtn.status === 'ok') {
                                         self.datatable.rows( { selected: true } ).remove().draw(false);

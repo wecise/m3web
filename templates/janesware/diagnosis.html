@@ -884,14 +884,14 @@
 
 						if(window.GLOBAL_OBJECT.company.name=="telus"){
 	                    	// get siteid by tuid=element_id
-				    		let _tmp = fetchData(`#/matrix/devops/element_translations_join/: | element_id=` + self.search.input.term.split("|")[0]);
+				    		let _tmp = omdbHandler.fetchData(`#/matrix/devops/element_translations_join/: | element_id=` + self.search.input.term.split("|")[0]);
                             // get all element by siteid
-							let _element = fetchData(`#/matrix/devops/element_translations_join/: | siteid=` + _tmp.message[0].siteid);
+							let _element = omdbHandler.fetchData(`#/matrix/devops/element_translations_join/: | siteid=` + _tmp.message[0].siteid);
 
 				    		self.diagnosis.entity.nodes = [];
 				    		
 				    		_.forEach(_element.message, function(v){
-				    			let _data = fetchData(`#/matrix/devops/event/: | ` + self.diagnosis.devops.object.tuid);
+				    			let _data = omdbHandler.fetchData(`#/matrix/devops/event/: | ` + self.diagnosis.devops.object.tuid);
 
 				    			self.diagnosis.entity.nodes.push({
 								    								name: v.element_id,
@@ -914,7 +914,7 @@
 			                return false;
 			            }
 
-			            let _list = fetchData(_param);
+			            let _list = omdbHandler.fetchData(_param);
 
                         if(_.isEmpty(_list.message)) {
                             self.diagnosis.graph.selectedNodes = [];

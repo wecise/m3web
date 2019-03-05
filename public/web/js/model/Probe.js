@@ -19,21 +19,43 @@ class Probe extends Matrix {
     init() {
 
         // 集成接入
-        let cfg = urlParams['cfg'] ? _.attempt(JSON.parse.bind(null, decodeURIComponent(urlParams['cfg']))) : null;
+        let cfg = mx.urlParams['cfg'] ? _.attempt(JSON.parse.bind(null, decodeURIComponent(mx.urlParams['cfg']))) : null;
 
-        if(cfg){
-            _.forEach(cfg,function(v,k){
-                $(`#${k}`).hide();
-                $(`#${k}-bg`).hide();
-            })
+        _.delay(function(){
+            if(cfg){ 
+                _.forEach(cfg,function(v,k){
+                    $(`#${k}`).hide();
+                    $(`#${k}-bg`).hide();
+    
+                    if(k==='tabs'){
+                        let i = 0;
+                        _.forEach(v,function(item){
+                            if(item){
+                                $($("#probe-tabs-ul").children()[i]).css("display","");
+                                $($("#probe-tabs-div").children()[i]).css("display","");
+                            } else {
+                                $($("#probe-tabs-ul").children()[i]).css("display","none");
+                                $($("#probe-tabs-div").children()[i]).css("display","none");
+                            }
+                            i = i+1;
+                        })
+                        
+                        $("#probe-tabs-ul > li").removeClass("active")
+                        $("#probe-tabs-div > div").removeClass("active")
 
-            _.delay(function(){
-                $('#content.content').addClass('content-expand');
-            },1000)
-        } else {
-            $('#content.content').removeClass('content-expand');
-        }
-
+                        $($("#probe-tabs-ul").children()[_.indexOf(v,true)]).addClass("active")
+                        $($("#probe-tabs-div").children()[_.indexOf(v,true)]).addClass("active")
+                    }
+                })
+    
+                _.delay(function(){
+                    $('#content.content').addClass('content-expand');
+                },1000)
+            } else {
+                $('#content.content').removeClass('content-expand');
+            }
+        },500)
+        
         // 组件实例化
         VueLoader.onloaded(["ai-robot-component",
             "probe-tree-component",
@@ -155,7 +177,7 @@ class Probe extends Matrix {
                             let self = this;
 
                             _.forEach(event, function (v) {
-                                window[v] = callFsJScript(`/probe/probe_summary_by_${v}.js`, '');
+                                window[v] = fsHandler.callFsJScript(`/probe/probe_summary_by_${v}.js`, '');
 
                                 if (window[v].status == 'ok') {
                                     self[v] = window[v].message;

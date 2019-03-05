@@ -21,10 +21,12 @@ class Imap extends Matrix {
     init() {
         VueLoader.onloaded(["vue-base-datatables-component"],function() {
 
-            const URL_PARAMS_ITEM = urlParams['item']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item'])))):null;
-            const URL_PARAMS_CFG = urlParams['cfg']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg'])))):null;
-            const URL_PARAMS_DATA = urlParams['data']?decodeURIComponent(window.atob(urlParams['data'])):[];
-            const URL_PARAMS_SESSIONID = urlParams['sessionid'];
+            const URL_PARAMS_ITEM = mx.urlParams['item']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item'])))):null;
+            const URL_PARAMS_CFG = mx.urlParams['cfg']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg'])))):null;
+            const URL_PARAMS_DATA = mx.urlParams['data']?decodeURIComponent(window.atob(mx.urlParams['data'])):[];
+            const URL_PARAMS_SESSIONID = mx.urlParams['sessionid'];
+
+            console.log(URL_PARAMS_ITEM,URL_PARAMS_CFG,URL_PARAMS_DATA,URL_PARAMS_SESSIONID)
     
             let init = function(){
     
@@ -48,12 +50,14 @@ class Imap extends Matrix {
                         model:Object
                     },
                     template: `<form class="form-horizontal">
-                                    <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                        <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
-                                        <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
-                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                    <div v-show="model.rows.length">
+                                        <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                            <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
+                                            <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                            </div>
                                         </div>
-                                    </div>
+                                    <div>
                                 </form>`,
                     mounted(){
                         
@@ -72,7 +76,9 @@ class Imap extends Matrix {
                             datatable:null
                         }
                     },
-                    template: `<table :id="id" class="display" cellspacing="0"  width="100%"></table>`,
+                    template: ` <div v-show="model.rows.length && this.model.columns.length">
+                                    <table :id="id" class="display" cellspacing="0"  width="100%"></table>
+                                </div>`,
                     mounted(){
                         let cols = this.model.columns;
 
@@ -102,12 +108,14 @@ class Imap extends Matrix {
                             gaugePS: null
                         }
                     },
-                    template: ` <ul style="list-style:none;padding:0 5px;">
+                    template: ` <div v-show="model.rows.length">
+                                <ul style="list-style:none;padding:0 5px;">
                                     <li v-for="item in model.rows" style="float: left;width: 50%;height: 170px;padding: 10px;font-size: 10px;line-height: 1.4;text-align: center;">
                                         <canvas :id="'gauge-'+item.id"></canvas>
                                         <p>#{item.host}#/<small>#{item.param}#</small></p>
                                     </li>
-                                </ul>`,
+                                </ul>
+                                </div>`,
                     mounted:function(){
                         const self = this;
                         _.delay(function(){
@@ -211,11 +219,13 @@ class Imap extends Matrix {
                         model:Object
                     },
                     template: `<form class="form-horizontal">
+                                    <div v-show="model.rows.length">
                                     <div class="form-group" v-for="item in model.rows" style="padding: 0px 10px;margin-bottom: 1px;">
                                         <label :for="item.id" class="col-sm-4 control-label" style="text-align:left;"><h4>#{item.host}# <small>#{item.param}#</small></h4></label>
                                         <div class="col-sm-8" style="border-left: 1px solid rgb(235, 235, 244);">
                                             <input type="text" class="form-control-bg-grey" :placeholder="item.id" :value="item.value" style="height:50px;font-size:24px;color:green;">
                                         </div>
+                                    </div>
                                     </div>
                                 </form>`,
                     mounted(){
@@ -259,7 +269,7 @@ class Imap extends Matrix {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row" v-show="model && model.rows">
+                                <div class="row" v-if="model && model.rows">
                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                         <div id="grid" style="padding:0 5px;"><ul>
                                             <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
@@ -392,7 +402,7 @@ class Imap extends Matrix {
                                     confirmButtonColor: "#ff0000"
                                 }).then((result) => {
                                     if (result.value) {
-                                        let _rtn = fsDelete(event.parent,event.name);
+                                        let _rtn = fsHandler.fsDelete(event.parent,event.name);
                                         if (_rtn == 1){
                                             let fs = {class: event.class, id:event.id, name: event.name, file: `${event.parent}/${event.name}`};
                                             self.updateEntity(fs,"-");
@@ -400,7 +410,7 @@ class Imap extends Matrix {
                                     }
                                 })
                             } else {
-                                let _rtn = fsDelete(event.parent,event.name);
+                                let _rtn = fsHandler.fsDelete(event.parent,event.name);
             
                                 if (_rtn == 1){
                                     
@@ -411,7 +421,7 @@ class Imap extends Matrix {
                             let self = this;
             
                             if(item.ftype == 'dir'){
-                                let rtn = fsList(item.parent);
+                                let rtn = fsHandler.fsList(item.parent);
                             } else {
                                 let _url = `/fs/${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`.replace(/\/\//g,'/');
                                 let _target = '_blank';
@@ -597,9 +607,9 @@ class Imap extends Matrix {
                         },  
                         // 上传完毕，更新/matrix/entity   
                         updateEntity(event,action){
-                            let id = imap.app.model.graph.selectedCell.value;
-                            let fs = {action: action, class: `/matrix/entity/${imap.app.model.graph.selectedCell.value.split(":")[0]}`, id:id, name: event.name, file: `/entity/files/${imap.app.model.graph.selectedCell.value}/${event.name}`};
-                            let rtn = callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
+                            let id = imap.app.model.graph.selectedCell.id;
+                            let fs = {action: action, class: `/matrix/entity/${imap.app.model.graph.selectedCell.id.split(":")[0]}`, id:id, name: event.name, file: `/entity/files/${imap.app.model.graph.selectedCell.value}/${event.name}`};
+                            let rtn = fsHandler.callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
                             imap.app.reloadData();
                         },                     
                         openIt: function(item, path){
@@ -655,12 +665,12 @@ class Imap extends Matrix {
                                     let _wnd = maxWindow.winApp(item.name, contents, null,null);
                                 } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
                                     _.merge(item,{action:'run'});
-                                    let url = genFsUrl(item,null,null);
+                                    let url = fsHandler.genFsUrl(item,null,null);
                                     window.open(url,'_blank');
                                 } else if(_.includes(['md'], item.ftype)){
                                     _.merge(item,{action:'run'});
             
-                                    let url = genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
+                                    let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
             
                                     window.open(url,'_blank');
                                 }
@@ -750,11 +760,11 @@ class Imap extends Matrix {
     
                             // 根据查询参数获取图
                             if( !_.isEmpty(URL_PARAMS_DATA) ){
-                                self.model.graph.data = callFsJScript('/graph/graph_service.js', encodeURIComponent(URL_PARAMS_DATA)).message[0].graph;
+                                self.model.graph.data = fsHandler.callFsJScript('/graph/graph_service.js', encodeURIComponent(URL_PARAMS_DATA)).message[0].graph;
                             }
                             // 根据文件获取图
                             else {
-                                self.model.graph.data = fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
+                                self.model.graph.data = fsHandler.fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
                             }
                         },
                         init: function() {
@@ -856,6 +866,12 @@ class Imap extends Matrix {
                                     //self.model.graph.layout = new mxFastOrganicLayout(self.model.graph.graph);
                                     self.model.graph.layout.orientation = "north";
                                     self.model.graph.layout.forceConstant = 120;
+
+                                    // self.model.graph.layout = new mxCompactTreeLayout(self.model.graph.graph,false);
+                                    // self.model.graph.layout.useBoundingBox = false;
+                                    // self.model.graph.layout.edgeRouting = false;
+                                    // self.model.graph.layout.levelDistance = 30;
+                                    // self.model.graph.layout.nodeDistance = 10;
     
                                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
     
@@ -934,76 +950,68 @@ class Imap extends Matrix {
                                 let state = self.model.graph.graph.view.getState(cell);
                                 let model = null;
                                 
-                                try {
-                                    model = callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
-                                    
-                                    state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
-                                    state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(model));
+                                model = fsHandler.callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
+                                //state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                                //state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(model));
 
-                                } catch(error){
-                                    alertify.error("没有关联信息");
-                                    return false;
-                                }
-                                
                                 // copy to copyboard
                                 let clipboard2 = new Clipboard('g image',{
                                     text: function(trigger) {
-    
-                                        if(window.jsPanel.activePanels.list.length>1){
-                                            if(window.jsPanel.activePanels.getPanel('jsPanel-entity')) {
-                                                window.jsPanel.activePanels.getPanel('jsPanel-entity').close();
-                                            }
-                                        }
-    
-                                        let wnd = maxWindow.winEntity(id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
                                         
-                                        let hashId = objectHash.sha1(cell);
-                                        let config = {
-                                            delimiters: ['#{', '}#'],
-                                            template: ` <tabs v-model="layout.main.index">
-                                                            <tab :title="item.title" v-for="(item,index) in layout.main.tabs" :key="item.id"  html-title style="height:calc(100vh - 235px);overflow:hidden;">
-                                                                <div v-if="item.type === 'profile'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
-                                                                    <profile-view :id="item.id" :model="model[item.type]"></profile-view>
-                                                                </div>
-                                                                <div v-if="item.type === 'event'" style="height:100%;overflow:auto;">
-                                                                    <event-view :id="item.id" :model="model[item.type]"></event-view>
-                                                                </div>
-                                                                <div v-if="item.type === 'performance'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
-                                                                    <div class="grid" data-masonry="{itemSelector: '.grid-item',columnWidth: '.grid-item',percentPosition: true}">
-                                                                        <div class="grid-item">
-                                                                            <gauge-view :id="item.id" :model="model[item.type]"></gauge-view>
-                                                                        </div>
-                                                                        <div class="grid-item">
-                                                                            <performance-view :id="item.id" :model="model[item.type]"></performance-view>
+                                        try {
+                                            if( window.jsPanel.activePanels.getPanel(`jsPanel-entity`) ){
+                                                window.jsPanel.activePanels.getPanel(`jsPanel-entity`).close();
+                                            }
+                                        } catch(err){
+                                            let wnd = maxWindow.winEntity(id, `<div id="entity-container" style="width:100%;height:100%;"></div>`, null, 'body');
+                                            let hashId = objectHash.sha1(cell);
+                                            let config = {
+                                                delimiters: ['#{', '}#'],
+                                                template: ` <tabs v-model="layout.main.index">
+                                                                <tab :title="item.title" v-for="(item,index) in layout.main.tabs" :key="item.id"  html-title style="height:calc(100vh - 235px);overflow:hidden;">
+                                                                    <div v-if="item.type === 'profile'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
+                                                                        <profile-view :id="item.id" :model="model[item.type]"></profile-view>
+                                                                    </div>
+                                                                    <div v-if="item.type === 'event'" style="height:100%;overflow:auto;">
+                                                                        <!--event-view :id="item.id" :model="model[item.type]"></event-view-->
+                                                                    </div>
+                                                                    <div v-if="item.type === 'performance'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
+                                                                        <div class="grid" data-masonry="{itemSelector: '.grid-item',columnWidth: '.grid-item',percentPosition: true}">
+                                                                            <div class="grid-item">
+                                                                                <!--gauge-view :id="item.id" :model="model[item.type]"></gauge-view-->
+                                                                            </div>
+                                                                            <div class="grid-item">
+                                                                                <!--performance-view :id="item.id" :model="model[item.type]"></performance-view-->
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                                <div v-if="item.type === 'file'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
-                                                                    <file-view :id="item.id" :model="model[item.type]"></file-view>
-                                                                </div>
-                                                            </tab>
-                                                        </tabs>`,
-                                            data: {
-                                                layout:{
-                                                    main:{
-                                                        index: 0,
-                                                        tabs:[
-                                                            {title:'属性', id:`profile-${hashId}`, type: 'profile'},
-                                                            {title:'事件', id:`event-${hashId}`, type: 'event'},
-                                                            {title:'性能', id:`performance-${hashId}`, type: 'performance'},
-                                                            {title:'文件', id:`file-${hashId}`, type: 'file'}
-                                                        ]
-                                                    }
+                                                                    <div v-if="item.type === 'file'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
+                                                                        <file-view :id="item.id" :model="model[item.type]"></file-view>
+                                                                    </div>
+                                                                </tab>
+                                                            </tabs>`,
+                                                data: {
+                                                    layout:{
+                                                        main:{
+                                                            index: 0,
+                                                            tabs:[
+                                                                {title:'属性', id:`profile-${hashId}`, type: 'profile'},
+                                                                {title:'事件', id:`event-${hashId}`, type: 'event'},
+                                                                {title:'性能', id:`performance-${hashId}`, type: 'performance'},
+                                                                {title:'文件', id:`file-${hashId}`, type: 'file'}
+                                                            ]
+                                                        }
+                                                    },
+                                                    model: model
                                                 },
-                                                model: model
-                                            },
-                                            mounted(){
-                                                $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
-                                            },
-                                            methods: {
-                                            }
-                                        };
-                                        new Vue(config).$mount("#entity-container");
+                                                mounted(){
+                                                    $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                                                },
+                                                methods: {
+                                                }
+                                            };
+                                            new Vue(config).$mount("#entity-container");
+                                        }
                                         
                                         return id;
                                     }
@@ -1022,19 +1030,19 @@ class Imap extends Matrix {
     
                             let input = "('" + `${cells.join("','")}` + "')";
     
-                            self.model.graph.appData = callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
+                            self.model.graph.appData = fsHandler.callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
                         },
                         reloadData(){
                             try {
                                 let id = this.model.graph.selectedCell.getId();
                                 let value = this.model.graph.selectedCell.getValue();
-                                let model = callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
-                                console.log(2,)
+                                let model =fsHandler. callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
+                                
                                 eventHub.$emit("GRAPH-DIAGNOSIS-DATA-TRIGGER",model);
                                 
                             } catch(error){
-                                alertify.error("没有关联信息");
-                                return false;
+                                // alertify.error("没有关联信息");
+                                // return false;
                             }
                         },
                         reset: function(){

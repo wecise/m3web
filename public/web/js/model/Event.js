@@ -410,7 +410,7 @@ class Event extends Matrix {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event));
                                 // 根据event获取关联信息
-                                let model = callFsJScript('/event/diagnosis-by-id.js',term).message;
+                                let model = fsHandler.callFsJScript('/event/diagnosis-by-id.js',term).message;
                                 
                                 // 详情数据
                                 this.layout.main.detail.model.push(model);
@@ -446,7 +446,7 @@ class Event extends Matrix {
                             //     data: {
                             //         tabs: tabTemp,
                             //         index: 0,
-                            //         model: [callFsJScript('/topological/diagnosis.js',event.host).message]
+                            //         model: [fsHandler.callFsJScript('/topological/diagnosis.js',event.host).message]
                             //     },
                             //     filters: {
                             //         pickTitle(event){
@@ -508,7 +508,7 @@ class Event extends Matrix {
                             //     let view = {
                             //         delimiters: ['#{', '}#'],
                             //         el: `#${elId}`,
-                            //         template: callFsJScript('/event/event_ui.js', null).message.eventDetail,
+                            //         template: fsHandler.callFsJScript('/event/event_ui.js', null).message.eventDetail,
                             //         data: {
                             //             id: elId,
                             //             model: row
@@ -603,7 +603,7 @@ class Event extends Matrix {
             template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
             data: {
                 id: id,
-                model: callFsJScript('/event/event_detail_graph.js', null).message.data[0].graph
+                model: fsHandler.callFsJScript('/event/event_detail_graph.js', null).message.data[0].graph
             },
             mounted: function () {
                 const self = this;

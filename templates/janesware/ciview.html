@@ -926,11 +926,11 @@
                         let self = this;
 
                         let _data = _.map(self.model.data,function(v){
-                            return _.merge(v,{icon: `/web/vendor/zTree/css/entityStyle/img/diy/${_.last(v.class.split("/"))}.svg`});
+                            return _.merge(v,{icon: `/fs/assets/images/entity/png/${_.last(v.class.split("/"))}.png?issys=true&type=download`});
                         });
 
                         self.model.columns.unshift({"field":"icon","title":"图例", render: function(data, type, row) {
-                                return `<img src="${data}">`;
+                                return `<img src="${data}" style="width:22px;">`;
                             }}
                         );
 
@@ -1087,7 +1087,7 @@
                     searchHandler: function(param,func) {
                         let self = this;
 
-                        let _list = fetchData(param);
+                        let _list = omdbHandler.fetchData(param);
 
                         self.model = _.map(_list.message,function(v,k){
                                         v.parent = v.parent.replace(/\/home\/admin/,"");
@@ -1243,7 +1243,7 @@
                             let _id = $(this).data("index");
                             let _item = _.find(self.model,{id:_id});
 
-                            fetchData(_item.id + ' | tags +' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags +' + event.item);
                         });
 
                         $(".tagsLabel").on('itemRemoved', function(event) {
@@ -1251,7 +1251,7 @@
                             let _id = $(this).data("index");
                             let _item = _.find(self.model,{id:_id});
 
-                            fetchData(_item.id + ' | tags -' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     },
@@ -1515,7 +1515,7 @@
                     },
                     searchHandler: function(param,func){
                         let self = this;
-                        let _list = fetchData(param);
+                        let _list = omdbHandler.fetchData(param);
                         
                         if(_.isEmpty(_list.message)){
                             self.search.result.data = [];
@@ -1746,7 +1746,7 @@
                             let _id = $(this).data("index");
                             let _item = _.find(self.model,{id:_id});
 
-                            fetchData(_item.id + ' | tags +' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags +' + event.item);
                         });
 
                         $(".tagsLabel").on('itemRemoved', function (event) {
@@ -1754,7 +1754,7 @@
                             let _id = $(this).data("index");
                             let _item = _.find(self.model,{id:_id});
 
-                            fetchData(_item.id + ' | tags -' + event.item);
+                            omdbHandler.fetchData(_item.id + ' | tags -' + event.item);
 
                         });
                     },
@@ -1953,8 +1953,8 @@
 
                                             </div>
                                             <div class="btn-group-action btn-group-action pull-right">
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-icon-component','model':null})"><i class="fa fa-table m-r-5"></i>Grid</a>
-                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-table-component','model':null})"><i class="fa fa-list m-r-5"></i>List</a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-icon-component','model':null})"><i class="fa fa-table m-r-5"></i></a>
+                                                <a href="javascript:void(0)" class="btn btn-xs btn-default" @click="view({'view':'ci-view-table-component','model':null})"><i class="fa fa-list m-r-5"></i></a>
                                             </div>
                                         </div>
                                         <div>

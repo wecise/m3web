@@ -241,7 +241,7 @@
 
                             if(val != oldVal){
                                 console.log(self.model.object.param.parent, val)
-                                self.model.graph.data = fsContent(self.model.object.param.parent, val);
+                                self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, val);
                                 self.initGraph();
                             }
                         },
@@ -275,7 +275,7 @@
 
                     self.model.object.param = _.attempt(JSON.parse.bind(null, _tmp));
 
-                    self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                    self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, self.model.object.param.name);
 
 
                 },
@@ -479,7 +479,7 @@
                         let _project = _.last(self.model.object.param.parent.split("/"));
                         let _page = self.model.object.param.name;
 
-                        let _rtn = jobContextGet(_project, _project);// + "/" + _page);
+                        let _rtn = jobHandler.jobContextGet(_project, _project);// + "/" + _page);
 
                         if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
                             self.reset();
@@ -509,7 +509,7 @@
                     initPrompt: function(type,item){
                         let self = this;
 
-                        let _wnd = newWindow(type, item.title, '<div id="modal-panel"></div>', null,null);
+                        let _wnd = maxWindow.winModal(type, item.title, '<div id="modal-panel"></div>', null,null);
                         if(_wnd){
                             let _vue = new Vue({
                                 delimiters: ['#{', '}#'],
@@ -657,7 +657,7 @@
                     reload: function(){
                         let self = this;
 
-                        self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                        self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, self.model.object.param.name);
                         self.initGraph();
                     },
                     initTools: function () {
@@ -952,7 +952,7 @@
                     callJob: function(job){
                         let self = this;
 
-                        return callBobJob(job,'OneSwitch');
+                        return jobHandler.callBobJob(job,'OneSwitch');
 
                     },
                     cmdVue: function(evt) {
@@ -1059,13 +1059,13 @@
                                     let _page = self.model.object.param.name;
 
                                     if (me.cmd.reset.value === "ALL") {
-                                        jobContextReset(_project);
+                                        jobHandler.jobContextReset(_project);
                                         alertify.log("重置项目 " + moment().format("LLL"));
                                     } else {
                                         let _name = _project + "/" + _page + ".iflow/" + _.find(me.cmd.reset.list, {name:me.cmd.reset.value}).id;
                                         let _value = `{"status":"3","ctrl":"0"}`;
 
-                                        jobContextSetup(_project, _name, _value);
+                                        jobHandler.jobContextSetup(_project, _name, _value);
                                         alertify.log("重置节点 " + moment().format("LLL") + " " + me.cmd.reset.value);
                                     }
                                 },

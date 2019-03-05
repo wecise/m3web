@@ -172,37 +172,16 @@
 	<script src="/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js"></script>
 
 	<!-- App JS-->
-	<script src="/web/js/VueHub.js" type="text/javascript"></script>
-	<script src="/web/js/init.js" type="text/javascript"></script>
-	<script src="/web/js/cfg.js" type="text/javascript"></script>
-	<script src="/web/js/context.js" type="text/javascript"></script>
-	<script src="/web/js/company.js" type="text/javascript"></script>
-	<script src="/web/js/class.js" type="text/javascript"></script>
-	<!--<script src="/web/js/job.js" type="text/javascript"></script>-->
-	<!--<script src="/web/js/dispatch.js" type="text/javascript"></script>-->
-	<script src="/web/js/fs.js" type="text/javascript"></script>
-	<!--<script src="/web/js/grok.js" type="text/javascript"></script>-->
-	<script src="/web/js/license.js" type="text/javascript"></script>
-	<script src="/web/js/jscript.js" type="text/javascript"></script>
-	<script src="/web/js/ContextMenu.js" type="text/javascript"></script>
-	<script src="/web/js/object.js" type="text/javascript"></script>
-	<!--<script src="/web/js/policy.js" type="text/javascript"></script>-->
-	<!--<script src="/web/js/probe.js" type="text/javascript"></script>-->
-	<script src="/web/js/rule.js" type="text/javascript"></script>
-	<script src="/web/js/schgroup.js" type="text/javascript"></script>
-	<script src="/web/js/script.js" type="text/javascript"></script>
-	<script src="/web/js/search.js" type="text/javascript"></script>
-	<script src="/web/js/sign.js" type="text/javascript"></script>
-	<!--<script src="/web/js/SideBar.js" type="text/javascript"></script>-->
-	<script src="/web/js/tag.js" type="text/javascript"></script>
-	<script src="/web/js/trigger.js" type="text/javascript"></script>
-	<script src="/web/js/user.js" type="text/javascript"></script>
-	<script src="/web/js/websocket.js" type="text/javascript"></script>
-	<script src="/web/js/Window.js" type="text/javascript"></script>
 	<script src="/web/js/app.js" type="text/javascript"></script>
-	<script src="/web/js/model/Creative.js" type="text/javascript"></script>
-	<!--<script src="/web/js/Matrix.js" type="text/javascript"></script>-->
-
+	<script src="/web/js/cfg.js" type="text/javascript"></script>
+	<script src="/web/js/init.js" type="text/javascript"></script>
+	<script src="/web/js/model/Window.js" type="text/javascript"></script>
+	<script src="/web/js/model/VueHub.js" type="text/javascript"></script>
+	
+	<script src="/web/js/handler/FsHandler.js" type="text/javascript"></script>
+	<script src="/web/js/handler/OmdbHandler.js" type="text/javascript"></script>
+	<script src="/web/js/handler/UserHandler.js" type="text/javascript"></script>
+	
 	<script type="text/javascript" src="js/Init.js"></script>
 	<script type="text/javascript" src="deflate/pako.min.js"></script>
 	<script type="text/javascript" src="deflate/base64.js"></script>
@@ -211,7 +190,7 @@
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 	<script type="text/javascript" src="js/EditorUi.js"></script>
 	<script type="text/javascript" src="js/Editor.js"></script>
-	<script type="text/javascript" src="js/Sidebar.js"></script>
+	<script type="text/javascript" src="js/model/Sidebar.js"></script>
 	<script type="text/javascript" src="js/Graph.js"></script>
 	<script type="text/javascript" src="js/Format.js"></script>
 	<script type="text/javascript" src="js/Shapes.js"></script>
@@ -279,11 +258,11 @@
                 let _xml = mxUtils.getXml(editorUi.editor.getGraphXml());
                 let _attr = _.attempt(JSON.parse.bind(null, URL_PARAMS_ITEM.attr));
 
-                let _rtn = fsNew('file',URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name, _xml, _attr);
+                let _rtn = fsHandler.fsNew('file',URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name, _xml, _attr);
 
             };
 
-            let _list = fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
+            let _list = fsHandler.fsContent(URL_PARAMS_ITEM.parent, URL_PARAMS_ITEM.name);
 
             editorUi.editor.graph.model.beginUpdate();
             try
@@ -336,7 +315,7 @@
 
             $("a[title='Preview Panel']").click(function(event){
 	            let item = _.merge(_.cloneDeep(URL_PARAMS_ITEM),{action: 'run'});
-                let url = genFsUrl(item,null,null);
+                let url = fsHandler.genFsUrl(item,null,null);
 
                 window.open(url, "_blank");
             });

@@ -180,8 +180,19 @@
 		.dataTables_wrapper.no-footer .dataTables_scrollBody,
 		table.dataTable.no-footer {
 			border-bottom: none;;
-		}
+        }
+        
+        .tagify {
+            border: rgba(0, 0, 0, 0);
+        }
 
+        .event-datatable-component div.dt-buttons {
+            padding-bottom: 5px;
+        }
+
+        .event-datatable-component .dataTables_filter{
+            display: none;
+        }
 
 	</style>
 
@@ -209,7 +220,10 @@
                 columns: [],
 	            selectedRows: []
 			}
-		},
+        },
+        created() {
+            eventHub.$on(`DATATABLE-FILTER-BY-event-EVENT`, this.filterColumn);
+        },
 		mounted: function () {
             const self = this;
 
@@ -245,6 +259,7 @@
                     this.toolBar();
                     // 重构可拖拽
                     this.dragHandle();
+                    this.dropHandle();
 
                 } else {
                     this.init();
@@ -307,7 +322,7 @@
                 }
                 // 自定义checkbox、序号
                 temp.unshift( { title: "序号", visible: true, sortable: false } );
-                temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
+                temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true }, sortable: false } );
                 
                 // 保证唯一并加入渲染函数
                 let cols = _.map(_.uniqBy(temp,'data'),function(v){
@@ -321,7 +336,7 @@
 	                            destroy: true,
                                 data: self.rows,
                                 columns: cols,
-                                searching: false,
+                                searching: true,
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
@@ -334,7 +349,7 @@
 	                            stateSave: false,
                                 select: {
 			                        style: 'multi',
-			                        //selector: 'td:first-child'
+			                        selector: 'td:first-child'
 			                    },
 			                    fixedColumns:   {
 			                        leftColumns: 2
@@ -387,7 +402,6 @@
                                     self.dropHandle();
                                     
                                     self.resize();
-
 			                    },
 			                    createdRow: function ( row, data, index ) {
 			                        // severity 渲染
@@ -398,8 +412,11 @@
                                         $('td',row).eq(4).html(self.model.status[data['status']].cnname);
                                     }
 			                    }
-                },self.model.options)).columns.adjust().draw();
+                },self.model.options));
 			},
+            filterColumn(event) {
+                $("#"+this.id).DataTable().search(event.name).draw();
+            },
             serial:function(){
                 let datatable = $("#"+this.id).DataTable();
                 datatable.on( 'order.dt search.dt', function () {
@@ -414,8 +431,7 @@
                 var table = $("#"+self.id).DataTable();
 
                 let singleClick = function(row){
-					console.log(1)
-                    self.selectedRows = row;
+					self.selectedRows = row;
                 };
 
                 let doubleClick = function(row){
@@ -445,7 +461,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let contextMenuItems = callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let contextMenuItems = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.event;
                 let id = self.id;
 
                 $.contextMenu({
@@ -532,8 +548,8 @@
                     let node = treeObj.getNodeByTId(tId);
 
                     // 打标签
-                    let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
-                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
 						self.$root.$refs.searchRef.search();
@@ -660,8 +676,10 @@
             selectColumns: function(){
             },
             resize(){
+                $("#"+this.id).DataTable().draw();
+
 				let parentHeight = $(this.$el).closest(".row").height() - 255;
-				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
+                $(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
 			}
 		}
 	

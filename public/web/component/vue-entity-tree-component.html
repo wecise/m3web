@@ -182,7 +182,7 @@
 	    methods: {
 	        init: function() {
 	            let self = this;
-	            let _list = fetchData(`call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`);
+	            let _list = omdbHandler.fetchData(`call tree {"ftype":"class", "parent":"/matrix/entity","fields":["cid","pid","name","alias"]}`);
 	            let _data = _.map(_list.message[0].tree,function(v,k){
 	            				let _name = _.last(v.name.split("/"));
 	            				v.icon = "/web/vendor/zTree/css/entityStyle/img/diy/" + _name + ".svg";
@@ -323,7 +323,7 @@
 	                return false;
 	            }
 
-	            let _list = fetchData(`#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`);
+	            let _list = omdbHandler.fetchData(`#` + treeNode.name + `: | print id as cid, name, name as title, class | top 1000`);
 
                 if(!_.isEmpty(_list.message)) {
 
@@ -458,7 +458,7 @@
 					methods: {
                         init: function(){
                             let self = this;
-							let _list = fetchClass(item.node.name);
+							let _list = omdbHandler.fetchClass(item.node.name);
 							let _properties = {};
                             let _fields = {};
                             let _data = {"class":item.node.name};
@@ -490,7 +490,7 @@
 						},
 						save: function(event){
                             let self = this;
-                            let rtn = putDataByMql(event);
+                            let rtn = omdbHandler.putDataByMql(event);
 						}
 					}
 				});

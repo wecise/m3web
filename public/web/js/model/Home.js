@@ -123,7 +123,7 @@ class Home extends Matrix {
 
                                         items: {
                                             "default": {name: '设为首页', icon: "fas fa-home", callback: function(key, opt) {
-                                                    setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
+                                                    mx.setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
                                                 }
                                             }
                                         }
@@ -153,7 +153,7 @@ class Home extends Matrix {
 
                             _param = _ifDebug + _ifHistory + _param;// + _forTime;
 
-                            let _list = fetchData(_param);
+                            let _list = omdbHandler.fetchData(_param);
                             if(_.isEmpty(_list.message)){
                                 $("#search-result-panel").fadeOut(500);
                                 $("#search-result-panel").hide();
@@ -254,7 +254,7 @@ class Home extends Matrix {
                         loadApps: function() {
                             let self = this;
 
-                            let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
+                            let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
 
                             self.user.appList = _.orderBy(_list.message,["seat"],["asc"]);
                             self.user.apps = [];
@@ -293,7 +293,7 @@ class Home extends Matrix {
 
                             ldap.remark = self.user.appsId.join(",");
 
-                            let _rtn = putDataToClass(ldap);
+                            let _rtn = omdbHandler.putDataToClass(ldap);
 
                             if(_rtn == 1){
                                 self.loadApps();

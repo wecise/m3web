@@ -22,7 +22,6 @@ class Creative {
 
                 let _appVue = new Vue({
                     delimiters: ['${', '}'],
-                    el: '#app',
                     template: '#app-template',
                     data: {
                         model: {
@@ -272,7 +271,7 @@ class Creative {
                             let self = this;
 
 
-                            let _rtn = jobContextGet("BOB", "");
+                            let _rtn = jobHandler.jobContextGet("BOB", "");
 
                             if (!_.isEmpty(_rtn) && !_.isEmpty(_rtn.message)) {
                                 if (!_.isEmpty(_rtn.message["BOB"])){
@@ -290,7 +289,7 @@ class Creative {
                         load: function() {
                             let self = this;
 
-                            let _rtn = fsList(self.model.root);
+                            let _rtn = fsHandler.fsList(self.model.root);
 
                             self.model.list = _.orderBy(_.map(_rtn,function(v,k){
 
@@ -325,13 +324,13 @@ class Creative {
                                         let _new = _item.parent + "/" + newValue + _extName;
 
 
-                                        let _check = fsCheck( _item.parent, newValue);
+                                        let _check = fsHandler.fsCheck( _item.parent, newValue);
                                         if(_check) {
                                             alertify.error("文件已存在，请确认！")
                                             return false;
                                         }
 
-                                        let _rtn = fsRename(_old, _new);
+                                        let _rtn = fsHandler.fsRename(_old, _new);
 
                                         if(_rtn == 1){
                                             self.load();
@@ -413,13 +412,13 @@ class Creative {
                                         let _type = me.model.type;
                                         let _info = {remark: me.model.info.remark, ctime: _.now(), author: window.SignedUser_UserName, type: _type, icon: `${window.ASSETS_ICON}/files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}`};
 
-                                        let _check = fsCheck(_root, _name);
+                                        let _check = fsHandler.fsCheck(_root, _name);
                                         if(_check) {
                                             alertify.error("文件已存在，请确认！")
                                             return false;
                                         }
 
-                                        let _rtn = fsNew(_type, _root, _name, null, _info);
+                                        let _rtn = fsHandler.fsNew(_type, _root, _name, null, _info);
 
                                         if(_rtn == 1){
 
@@ -443,7 +442,7 @@ class Creative {
                                             let _name = "PAGE_" + _.now();
                                             let _type = me.model.project.extName[me.model.project.value];
                                             let _info = {remark: me.model.info.remark, ctime: _.now(), author: window.SignedUser_UserName, type: _type, icon: `${window.ASSETS_ICON}/files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}`};
-                                            let _rtn = fsNew(_type, parent, _name+"."+_type, "", _info);
+                                            let _rtn = fsHandler.fsNew(_type, parent, _name+"."+_type, "", _info);
 
                                             if(_rtn == 1){
 
@@ -520,7 +519,7 @@ class Creative {
                                         let me = this;
 
 
-                                        let _list = fetchData("#/matrix/filesystem/: | ftype=" + me.type + "| top 200");
+                                        let _list = omdbHandler.fetchData("#/matrix/filesystem/: | ftype=" + me.type + "| top 200");
 
                                         me.model.templates = _.map(_list.message,function(v,k){
                                             v.parent = v.parent.replace(/\/home\/admin/,"");
@@ -548,13 +547,13 @@ class Creative {
                                             _type = me.type;
                                         }
 
-                                        let _check = fsCheck(self.model.root, _name+"."+_type);
+                                        let _check = fsHandler.fsCheck(self.model.root, _name+"."+_type);
                                         if(_check) {
                                             alertify.error("文件已存在，请确认！")
                                             return false;
                                         }
 
-                                        let _rtn = fsNew(_type, self.model.root, _name+"."+_type, _xml, _info);
+                                        let _rtn = fsHandler.fsNew(_type, self.model.root, _name+"."+_type, _xml, _info);
 
                                         if(_rtn == 1){
                                             _.delay(function(){
@@ -589,7 +588,7 @@ class Creative {
                                 let _id = $(this).data("index");
                                 let _item = _.find(self.model.list,{id:_id});
 
-                                fetchData(_item.id + ' | tags +' + event.item);
+                                omdbHandler.fetchData(_item.id + ' | tags +' + event.item);
 
                             });
 
@@ -598,7 +597,7 @@ class Creative {
                                 let _id = $(this).data("index");
                                 let _item = _.find(self.model.list,{id:_id});
 
-                                fetchData(_item.id + ' | tags -' + event.item);
+                                omdbHandler.fetchData(_item.id + ' | tags -' + event.item);
 
                             });
                         },
@@ -615,9 +614,7 @@ class Creative {
 
                                 item = _.merge(item,{lang: lang, action:action});
 
-                                let url = genFsUrl(item,null,null);
-
-                                console.log(item,url)
+                                let url = fsHandler.genFsUrl(item,null,null);
 
                                 window.open(url, "_blank");
                             }
@@ -636,7 +633,7 @@ class Creative {
                                 confirmButtonColor: "#ff0000"
                             }).then((result) => {
                                 if (result.value) {
-                                    let _rtn = fsDelete(event.parent,event.name);
+                                    let _rtn = fsHandler.fsDelete(event.parent,event.name);
 
                                     if (_rtn == 1){
                                         self.load();
@@ -765,7 +762,7 @@ class Creative {
                                     init: function(){
                                         let me = this;
 
-                                        me.model.icon.list = fsList('/assets/images/files/png');
+                                        me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
                                     },
                                     triggerInput: function(id){
                                         let self = this;
@@ -796,13 +793,13 @@ class Creative {
                                         let _new = node.parent + "/" + me.model.newName + me.model.extName;
 
 
-                                        let _check = fsCheck( node.parent, me.model.newName + me.model.extName);
+                                        let _check = fsHandler.fsCheck( node.parent, me.model.newName + me.model.extName);
                                         if(_check) {
                                             alertify.error("文件已存在，请确认！")
                                             return false;
                                         }
 
-                                        let _rtn = fsRename(_old, _new);
+                                        let _rtn = fsHandler.fsRename(_old, _new);
 
                                         if(_rtn == 1){
 
@@ -814,7 +811,7 @@ class Creative {
 
                                         me.model.attr.icon = me.model.icon.value;
 
-                                        let _rtn = fsUpdateAttr(node.parent, node.name, me.model.attr);
+                                        let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
 
                                         if(_rtn == 1){
                                             self.load();
@@ -844,7 +841,7 @@ class Creative {
                             }
 
                             self.model.action.to = self.model.root;
-                            let _rtn = fsCopy(self.model.action.from, self.model.action.to);
+                            let _rtn = fsHandler.fsCopy(self.model.action.from, self.model.action.to);
                             if(_rtn == 1){
 
                                 alertify.log("已粘贴 " + self.model.action.to);
@@ -863,7 +860,7 @@ class Creative {
 
                             item = _.merge(item,{lang: lang, action:'run'});
 
-                            let url = genFsUrl(item,null,null);
+                            let url = fsHandler.genFsUrl(item,null,null);
 
                             alertify.set({ labels: {
                                     ok     : "复制地址",
@@ -927,7 +924,7 @@ class Creative {
                         }
 
                     }
-                })
+                }).$mount("#app");
             })
         })
     }

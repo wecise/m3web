@@ -453,12 +453,12 @@
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
 	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};
-                        let rtn = fsNew('file', parent, name, xml, attr);
+                        let rtn = fsHandler.fsNew('file', parent, name, xml, attr);
 	                    if(rtn == 1){
 
 	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
 
-                            let url = genFsUrl(item,null,null);
+                            let url = fsHandler.genFsUrl(item,null,null);
 
                             alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
 	                    }

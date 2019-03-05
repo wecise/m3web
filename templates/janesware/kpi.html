@@ -164,8 +164,8 @@
                         "vue-bootstrap-table",
                         "vue-object-detail-component"],function() {
 
-        var OBJECT_COND = urlParams["cond"];
-        var OBJECT_PRESET = _.attempt(JSON.parse.bind(null,decodeURI(urlParams["preset"])));
+        var OBJECT_COND = mx.urlParams["cond"];
+        var OBJECT_PRESET = _.attempt(JSON.parse.bind(null,decodeURI(mx.urlParams["preset"])));
         var renderDataLua = "";
         
         $(function() {

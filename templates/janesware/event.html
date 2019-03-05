@@ -201,6 +201,19 @@
 		padding:15px;
 	}
 
+	/* 告警统计widget */
+	#event-view-summary::before{
+		content: "\f103";
+		font-family: "Font Awesome 5 Free";
+		right: 15px;
+		padding-top: 5px;
+		display: inline-block;
+		padding-right: 3px;
+		vertical-align: middle;
+		font-weight: 900;
+		position: fixed;
+	}
+
 </style>
 
 <div id="app"></div>
@@ -251,7 +264,7 @@
 									<h4 class="panel-title"></h4>
 								</div>
 								<div class="panel-body" style="height:calc(100vh - 185px);">
-									<div class="row" style="height:200px;">
+									<div class="row" id="event-view-summary" style="height:200px;">
 										<div class="col-md-12">
 											<tabs v-model="layout.summary.index">
 												<tab :title="item.title" v-for="item in layout.summary.tabs">
@@ -265,7 +278,7 @@
 											</tabs>
 										</div>
 									</div>
-									<div class="row"  style="height:calc(100vh - 245px);">
+									<div class="row" id="event-view-console"  style="height:calc(100vh - 245px);">
 										<div class="col-md-2 tree-view animated fadeInRight">
 											<probe-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>
 										</div>

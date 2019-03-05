@@ -1,0 +1,217 @@
+/*
+              # ####### ######
+              # #     # #     #
+              # #     # #     #
+              # #     # ######
+        #     # #     # #     #
+        #     # #     # #     #
+         #####  ####### ######
+
+* */
+
+class  JobHandler {
+    constructor(){
+
+    }
+
+    /*
+    *   作业管理
+    *
+    *   获取作业
+    *
+    *
+    */
+    jobContextGet(key,prefix) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/job/context/${key}`,
+            dataType: 'json',
+            type: 'GET',
+            async:false,
+            data: {
+                prefix: prefix
+            },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if (_.isEmpty(data.message)) return rtn;
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   作业状态
+    *
+    *
+    */
+    jobContextSetup(key,name,value) {
+        let rtn = 1;
+
+        jQuery.ajax({
+            url: `/job/context/${key}`,
+            dataType: 'json',
+            type: 'PUT',
+            async:false,
+            data: {
+                name:name,
+                value: value
+            },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("成功" + " " + moment().format("LLL"));
+                } else {
+                    rtn = 0;
+                    alertify.error("失败" + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = 0;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+        return rtn;
+    };
+
+    /*
+    *   作业管理
+    *
+    *   重置作业
+    *
+    *
+    */
+    jobContextReset(key) {
+        let rtn = 1;
+
+        jQuery.ajax({
+            url: `/job/context/${key}?clear=true`,
+            dataType: 'json',
+            type: 'DELETE',
+            async:false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("成功" + " " + moment().format("LLL"));
+                } else {
+                    rtn = 0;
+                    alertify.error("失败" + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = 0;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+        return rtn;
+    };
+
+
+    /*
+    *   作业管理
+    *
+    *   执行作业
+    *
+    *       参数：
+    *           receive_output： false【等待执行】 true【立即执行】 default：false
+    *           param：cmd
+    */
+    callJob(cmd,host) {
+        let rtn = null;
+        let event = `{"cmd": "${cmd}", "HOST!": "${host}", "timeout": 5}`;
+
+        jQuery.ajax({
+            url: '/job/remote_command@system/common',
+            dataType: 'json',
+            type: 'GET',
+            async:false,
+            timeout:3000,
+            data: {
+                receive_output: true,
+                param: event
+            },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if (_.isEmpty(data.message)) return rtn;
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+        return rtn;
+    };
+
+    callBobJob(cmd,host) {
+        let rtn = null;
+        let event = `{"cmd": "${cmd}", "HOST!": "${host}", "timeout": 6000}`;
+
+        jQuery.ajax({
+            url: '/job/remote_wincall@system/common',
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            data: {
+                receive_output: true,
+                param: event
+            },
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if (_.isEmpty(data.message)) return rtn;
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown){
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+        return rtn;
+    };
+}
+
+var jobHandler = new JobHandler();

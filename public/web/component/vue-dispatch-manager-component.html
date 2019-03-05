@@ -258,7 +258,7 @@
             self.$nextTick(function () {
 
                 _.delay(function(){
-                    FormWizard.init("agent-wizard");
+                    mx.handleBootstrapWizards("agent-wizard");
                     self.initPlugIn();
                 },500);
 
@@ -347,7 +347,7 @@
                 _content.rule = self.model.dispatch.rule.selected;
                 _content.env = self.model.dispatch.env.list;
 
-                let _rtn = agentDispatch(_script,_content);
+                let _rtn = null;//agentDispatch(_script,_content);
 				if(_rtn.status == 'ok'){
                     let _rtnCopy = _.cloneDeep(_rtn);
                     let _preRunid = _rtn.message.runid.toString().slice(0,13);
@@ -365,7 +365,7 @@
 			initServerList: function(){
 		        let self = this;
 
-                let _tmp = serverGroupList();
+                let _tmp = groupHandler.serverGroupList();
 
                 self.model.server.list = _.map(_tmp.message,function(v,k){
                     return { name:v.name, children: _.map(v.hosts,function(o,n){ return {name:o.host, children: []};}), open:true };

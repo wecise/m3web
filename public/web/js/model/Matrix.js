@@ -15,6 +15,7 @@ class Matrix {
     constructor() {
         this.name = 'M³ Platform';
         this.version = '0.8';
+        this.theme = 'DARK';
 
         this.username = window.SignedUser_UserName;
         this.fullname = window.SignedUser_FullName;
@@ -24,6 +25,27 @@ class Matrix {
         this.companyName = window.COMPANY_NAME;
         this.companyLogo = window.COMPANY_LOGO;
         this.companyTitle = window.COMPANY_TITLE;
+
+        this.urlParams = (function(url){
+                            var result = new Object();
+                            var idx = url.lastIndexOf('?');
+
+                            if (idx > 0)
+                            {
+                                var params = url.substring(idx + 1).split('&');
+
+                                for (var i = 0; i < params.length; i++)
+                                {
+                                    idx = params[i].indexOf('=');
+
+                                    if (idx > 0)
+                                    {
+                                        result[params[i].substring(0, idx)] = params[i].substring(idx + 1);
+                                    }
+                                }
+                            }
+                            return result; 
+                        })(window.location.href);
     }
 
     init() {
@@ -44,6 +66,8 @@ class Matrix {
             mx.toolTip()
             // 模式监控
             mx.viewListen();
+            // Alert设置
+            mx.mxAlert();
 
             document.addEventListener('click', function (event) {
 
@@ -87,11 +111,20 @@ class Matrix {
 
     }
 
+    
+
+    bytesToSize(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
     // 设置主题
     // Theme
     setTheme(){
         let theme = localStorage.getItem("MATRIX_THEME") || 'DARK';
-        toggleTheme(theme);
+        mx.toggleTheme(theme);
     }
 
     // 设置Logo
@@ -115,6 +148,12 @@ class Matrix {
     mxLang() {
         return 'zh_CN';// ['zh_CN','en_EG']
     }
+
+
+    // alertify setup
+   mxAlert(){
+        alertify.set({ labels : { ok: "确认", cancel: "取消" } });
+   }
 
     // 打标签
     tagInput( className, container, row, fn){
@@ -153,7 +192,7 @@ class Matrix {
 
 
                     let input = {class: row.class, action: "+", tag: event.detail.value, id: row.id};
-                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         fn();
@@ -163,7 +202,7 @@ class Matrix {
                 onRemoveTag: function(event){
 
                     let input = {class: row.class, action: "-", tag: event.detail.value, id: row.id};
-                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         fn();
@@ -177,10 +216,44 @@ class Matrix {
         return tag;
     }
 
+    /*
+    *   设置Home
+    *
+    *   参数：
+    *       home.html
+    *
+    */
+    setDefaultHome(name,token){
+        let rtn = null;
+
+        jQuery.ajax({
+            url: "/user/settings/home",
+            type: "POST",
+            dataType: "json",
+            data: {
+                home: name,
+                _csrf: token
+            },
+            beforeSend: function(xhr) {
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        })
+        return rtn;
+    }
+
     // 全文搜索配置
     search(){
         let search = {
-            el: '#search-bar',
             data: {
                 term: null,
                 preset: {"default":{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},"nearest":[{"name":"最近 30秒","value":" | nearest 30 seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"最近 1分钟","value":" | nearest 1 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 5","value":" | nearest 5 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 10","value":" | nearest 10 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 15分钟","value":" | nearest 15 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 30分钟","value":" | nearest 30 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 1小时","value":" | nearest 1 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 2小时","value":" | nearest 2 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 8小时","value":" | nearest 8 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"L","filter":"YYYY/MM/DD HH"}}],"realtime":[{"name":"30秒","value":" | within 30seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"1分钟","value":" | within 1minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"5分钟","value":" | within 5minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"10分钟","value":" | within 10minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"15分钟","value":" | within 15minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"30分钟","value":" | within 30minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"1小时","value":" | within 1hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"2小时","value":" | within 2hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"8小时","value":" | within 8hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1天","value":" | within 1day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1月","value":" | within 1month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD HH"}},{"name":"所有","value":"","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM/DD HH"}}],"relative":[{"name":"今天","value":" | today ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"昨天","value":" | yesterday ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"本周","value":" | week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上周","value":" | last week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"本月","value":" | month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上个月","value":" | last month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"今年","value":" | year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}},{"name":"去年","value":" | last year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}}],"range":{"from":"","to":""},"others":{"ifHistory":false,"ifDebug":false,"forTime":" for vtime "}},
@@ -221,7 +294,7 @@ class Matrix {
 
         };
 
-        new Vue(search);
+        new Vue(search).$mount("#search-bar");
     }
 
     // Robot
@@ -243,7 +316,6 @@ class Matrix {
                 let win = maxWindow.winRobot('∵', '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
 
                 let robotVue = {
-                    el: '#robot-active-win',
                     template: '<ai-robot-component id="THIS-IS-ROBOT"></ai-robot-component>',
                     mounted: function () {
 
@@ -254,7 +326,7 @@ class Matrix {
                     }
                 };
 
-                new Vue(robotVue);
+                new Vue(robotVue).$mount("#robot-active-win");
             });
 
         },'text');
@@ -267,35 +339,56 @@ class Matrix {
         return page;
     }
 
-    // 截取URL
-    urlParams(){
-        (function(url){
-            var result = new Object();
-            var idx = url.lastIndexOf('?');
+    getLicense(){
 
-            if (idx > 0)
-            {
-                var params = url.substring(idx + 1).split('&');
+        let _config = _.attempt(JSON.parse.bind(null, `{{.config}}`));
+    
+        if(_.isEmpty(_config)){
+            $(".license").html("");
+        } else {
+            $(".license").html(_config.license);
+        }
+    }
 
-                for (var i = 0; i < params.length; i++)
-                {
-                    idx = params[i].indexOf('=');
+    renameKey(obj, key, newKey) {
 
-                    if (idx > 0)
-                    {
-                        result[params[i].substring(0, idx)] = params[i].substring(idx + 1);
-                    }
-                }
-            }
-            return result;
-        })(window.location.href)
+        if(_.includes(_.keys(obj), key)) {
+            obj[newKey] = _.clone(obj[key], true);
+    
+            delete obj[key];
+            delete obj['enum'];
+            //delete obj['type'];
+        }
+    
+        return obj;
+    }
+    
+    
+    columnsParse(meta){
+        let _columns = null;
+    
+        // *
+    
+        if(_.isEmpty(meta)) {
+            return _columns;
+        }
+    
+        // meta
+        _.forEach(meta.columns, function(v,k){
+            _.forEach(v,function(val,key){
+                mx.renameKey(val, 'name', 'field');
+            })
+        })
+    
+        return meta.columns;
+    
     }
 
     // API菜单
     footerApiContextMenu(){
 
         let open = function(url){ window.open(url,"_blank");};
-        let rtn = callFsJScript('/footer/api_contextmenu.js', null).message || [];
+        let rtn = fsHandler.callFsJScript('/footer/api_contextmenu.js', null).message || [];
         contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
     }
 
@@ -311,22 +404,6 @@ class Matrix {
             trigger : 'hover',
             template: `<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`
         });
-    }
-
-    // 全屏监听
-    viewListen(){
-        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e){
-            if(!window.screenTop && !window.screenY) {
-                $("body").addClass("view-fullscreen");
-            } else {
-                $("body").removeClass("view-fullscreen");
-            }
-        });
-    }
-
-    // Window RESIZE事件
-    windowResize(){
-        eventHub.$emit("WINDOW-RESIZE-EVENT");
     }
 
     // 全屏控制
@@ -394,6 +471,10 @@ class Matrix {
             $(`.tab-content.${containerClass}-content`).append(`<div class="tab-pane" id="${tabId}">${id}</div>`);
             $(`.nav-tabs.${containerClass}-ul li:nth-child(${id}) a`).click();
         });
+    }
+
+    handleBootstrapWizards(id) {
+        $("#" + id).bwizard()
     }
 
     handleSidebarMenu() {
@@ -782,6 +863,125 @@ class Matrix {
             });
             return !0
         })
+    }
+
+    toggleTheme(event){
+
+        if(event == 'LIGHT'){
+            
+            $(".navbar.navbar-default.navbar-fixed-top").css({
+                "backgroundColor": "rgb(33, 149, 244)",
+            
+                "backgroundImage": "none",
+                "backgroundImage": "none",
+                "backgroundImage": "none",
+                "backgroundRepeat": "none",
+                "filter": "none",
+                "filter": "none",
+                "borderRadius": "none",
+                "-webkitBoxShadow": "none",
+                "boxShadow": "none"
+            });
+
+            $("#sidebar").css({
+                "backgroundColor": "rgb(33, 149, 244)!important",
+            });
+
+            $("#sidebar-bg").css({
+                "backgroundColor": "rgb(33, 149, 244)!important",
+            });
+
+            $(".sidebar-toggle i").css({
+                "color": "rgb(166, 211, 248)"
+            });
+
+            $(".layer.btn.btn-primary").css({
+                "backgroundColor": "rgb(33, 149, 244)"
+            });
+
+            $(".layer > .dropdown > a").css({
+                "color": "rgb(110, 180, 236)"
+            });
+
+            $(".layer > .dropdown > i").css({
+                "color": "rgba(255,255,255,0.5)"
+            });
+
+            $(".layer a").css({
+                "color": "rgb(255,255,255)"
+            });
+
+            $(".row .btn.btn-primary").css({
+                "backgroundColor": "rgb(33, 149, 244)",
+                "borderColor": "rgba(0, 0, 0, 0)"
+            });
+
+            $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(240, 243, 244)");
+            $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#333333");
+            $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#333333");
+
+        } else if (event == 'DARK'){
+
+            $(".navbar.navbar-default.navbar-fixed-top").css({
+                "backgroundColor": "rgb(37, 45, 71)",
+            });
+
+            $("#sidebar").css({
+                "backgroundColor": "rgb(37, 45, 71)!important",
+            });
+
+            $("#sidebar-bg").css({
+                "backgroundColor": "rgb(37, 45, 71)!important",
+            });
+
+            $(".sidebar-toggle i").css({
+                "color": "rgb(141, 146, 151)"
+            });
+
+            $(".layer.btn.btn-primary").css({
+                "backgroundColor": "rgb(37, 45, 71)"
+            });
+
+            $(".layer > .dropdown > a").css({
+                "color": "rgb(255,255,255)"
+            });
+
+            $(".layer > .dropdown > i").css({
+                "color": "rgba(255,255,255,0.5)"
+            });
+
+            $(".layer a").css({
+                "color": "rgb(255,255,255)"
+            });
+
+            $(".row .btn.btn-primary").css({
+                "backgroundColor": "rgb(37, 45, 71)",
+                "borderColor": "rgb(37, 45, 71)"
+            });
+
+            $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(37, 45, 71)");
+            $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#f9f9f9");
+            $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#f9f9f9");
+        }
+
+        localStorage.setItem("MATRIX_THEME",event);
+
+    }
+
+    // 全屏监听
+    viewListen(){
+        $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e){
+            if(!window.screenTop && !window.screenY) {
+                $("body").addClass("view-fullscreen");
+            } else {
+                $("body").removeClass("view-fullscreen");
+            }
+        });
+    }
+
+    // Window RESIZE事件
+    windowResize(){
+        eventHub.$emit("WINDOW-RESIZE-EVENT");
     }
 
 }

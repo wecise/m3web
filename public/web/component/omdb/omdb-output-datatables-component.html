@@ -154,34 +154,36 @@
 
                 let _cols = _.map(self.columns,function(v,k){
 
-		                    //  msg
+                            let title = `${v.field || v.title} <span class="badge" style="padding:4px;line-height: 8px;color:#eeeeee;background-color:rgb(220, 220, 220);">${v.type.slice(0,1)}</span>`;
+                            //  msg
 		                    if(_.includes(['msg'],v.field)){
-		                        return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
-		                                return  _.truncate(data, {'length': 100});
-		                            }};
+		                        return _.extend(v,{data:v.field, title: title, render: function(data, type, row){
+                                            return  _.truncate(data, {'length': 100});
+                                        }});
 		                    }
 
                             //  data & time render
                             if(_.includes(['day','vtime','mtime','ctime'],v.field)){
-                                return { "data": v.field, "title": v.field, visible: v.visible, orderable: true, render: function(data, type, row){
-                                        return moment(data).format("YYYY-MM-DD HH:mm:ss");
-	                                }};
+                                return _.extend(v,{data:v.field, title: title, render: function(data, type, row){
+                                            return moment(data).format("YYYY-MM-DD HH:mm:ss");
+                                        }});
                             }
 
 		                    if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
-                                return { "data": v.field, "title": v.field, visible: v.visible, render: function(data, type, row){
-		                                if(_.isNull(data) || _.isEmpty(data)) {
-                                            return '';
-		                                } else{
-                                            return JSON.stringify(data,null,2);
-		                                }
-		                            }};
+                                return _.extend(v,{data:v.field, title: title, render: function(data, type, row){
+                                            if(_.isNull(data) || _.isEmpty(data)) {
+                                                return '';
+                                            } else{
+                                                return JSON.stringify(data,null,2);
+                                            }
+                                        }});
 		                    }
 
-	                        return { "data": v.field, "title": v.field || v.title, visible: v.visible, orderable: true, render: v.render};
+	                        return _.extend(v,{data:v.field, title: title, render: v.render});
 
-
-						});
+                });
+                
+                console.log(_cols)
 
                 _cols.unshift({ data: "checkbox", title: "", visible: true, orderable: false, order: null, targets: 0, checkboxes: { selectRow: true } } );
 
@@ -442,7 +444,7 @@
                     el: `#${self.id}-datatables-tool-bars`,
                     template: `<div class="${self.id} datatables-toolbars">
 									<div class="btn-group" role="group" aria-label="...">
-										<a href="javascript:void(0);" class="btn btn-sm btn-primary toolbars ${self.id}-datatables-tool-bars" title="选择类" data-tooltip="tooltip"><i class="fa fa-bars"></i></a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary toolbars ${self.id}-datatables-tool-bars" title="选择类" data-tooltip="tooltip"><i class="fas fa-bars"></i></a>
 										<!--<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fa fa-square-o"></i></a>-->
 										<a href="javascript:void(0);" class="btn btn-sm btn-primary delete" @click="deleteIt" title="删除" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
 										<a href="javascript:void(0);" class="btn btn-sm btn-primary edit" @click="editIt" title="编辑" data-tooltip="tooltip"><i class="fa fa-edit"></i></a>
@@ -507,7 +509,7 @@
 
                                     let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
 
-                                    let _rtn = fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
 
                                     if(_rtn.status === 'ok') {
                                         self.datatable.rows( { selected: true } ).remove().draw(false);

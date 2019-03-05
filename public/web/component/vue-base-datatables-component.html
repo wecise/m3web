@@ -196,7 +196,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('fsLarge', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
+                                                                                                        maxWindow.winModal('fsLarge', opt.items[key].name + " " + _selectedRow.name, `<div id="ci-create-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -265,7 +265,7 @@
                                                                                                                 methods: {
                                                                                                                     init: function(){
                                                                                                                         let me = this;
-                                                                                                                        let _list = fetchClass(_item.class);
+                                                                                                                        let _list = omdbHandler.fetchClass(_item.class);
                                                                                                                         let _properties = {};
                                                                                                                         let _fields = {};
                                                                                                                         let _data = {"class":_item.class};
@@ -297,7 +297,7 @@
                                                                                                                     },
                                                                                                                     save: function(event){
                                                                                                                         let me = this;
-                                                                                                                        let rtn = putDataByMql(event);
+                                                                                                                        let rtn = omdbHandler.putDataByMql(event);
                                                                                                                     }
                                                                                                                 }
                                                                                                             });
@@ -312,7 +312,7 @@
                     grok: {
                                 "new": { app:"grok", name: "新建", icon: "fa-paste", callback: function(key, opt) {
 
-                                        maxWindow.winSmall( '新建', `<div id="grok-new-template"></div>`,null,null);
+                                        maxWindow.winModal( '新建', `<div id="grok-new-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -410,7 +410,7 @@
 
                                                                                                                         let _data = {name:me.model.name,pattern:_pattern.getValue(), eg: _eg.getValue()};
                                                                                                                         
-                                                                                                                        let rtn = grokNew(_data);
+                                                                                                                        let rtn = grokHandler.grokNew(_data);
 
                                                                                                                         if(rtn == 1){
                                                                                                                             eventHub.$emit("grok-list-refresh-event", null);    
@@ -428,7 +428,7 @@
                                                                                                         let _selectedRow = _table.row('.selected').data();
                                                                                                         
 
-                                                                                                        newWindow('fsSmall', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`,null,null);
+                                                                                                        maxWindow.winModal('fsSmall', opt.items[key].name + " " + _selectedRow.name, `<div id="grok-edit-template"></div>`,null,null);
 
                                                                                                         _.delay(function() {
 
@@ -529,7 +529,7 @@
 
                                                                                                                         let _data = {name:me.model.name,pattern:_pattern.getValue(), eg: _eg.getValue()};
                                                                                                                         
-                                                                                                                        let rtn = grokNew(_data);
+                                                                                                                        let rtn = grokHandler.grokNew(_data);
                                                                                                                         
                                                                                                                         if(rtn == 1){
                                                                                                                             eventHub.$emit("grok-list-refresh-event", null);    
@@ -558,7 +558,7 @@
                                                                                                                 cancelButtonText: '取消'
                                                                                                             }).then((result) => {
                                                                                                                 if (result.value) {
-                                                                                                                    let rtn = grokDelete(_selectedRow);
+                                                                                                                    let rtn = grokHandler.grokDelete(_selectedRow);
                                                                                                                         
                                                                                                                     if(rtn == 1){
                                                                                                                         eventHub.$emit("grok-list-refresh-event", null);    

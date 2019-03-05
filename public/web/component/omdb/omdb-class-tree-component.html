@@ -262,7 +262,7 @@
                                     if (e) {
                                         let count = Number(str) || 200;
                                         let _mql = `SELECT * FROM ${self.selectedNode.name} limit ${count}`;
-                                        let _list = fetchDataByMql(_mql);
+                                        let _list = omdbHandler.fetchDataByMql(_mql);
 
                                         if(_list.status === 'ok'){
                                             eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -280,7 +280,7 @@
 
                                         _data = _list.message;
 
-                                        _columns = columnsParse(_list.meta);
+                                        _columns = mx.columnsParse(_list.meta);
 
                                         let result = { id:self.id, bid: self.id, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
 
@@ -297,7 +297,7 @@
                             name: "导出数据", icon: "fas fa-file-export", callback: function (key, opt) {
 
                                 let _mql = `SELECT * FROM ${self.selectedNode.name} limit -1`;
-                                let _list = fetchDataByMql(_mql);
+                                let _list = omdbHandler.fetchDataByMql(_mql);
 
                                 if(_list.status === 'ok'){
                                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -330,7 +330,7 @@
                                 let _ftype = "sql";
                                 let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
                                 let _name = `${self.selectedNode.name}_INSERT_${moment().format("LLL")}`;
-                                let _url = fsTemp(_ftype, _name + "." + _ftype, _content, _attr);
+                                let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _content, _attr);
                                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
                             }
                         },
@@ -338,7 +338,7 @@
                         "触发器": {
                             name: "触发器", icon: "fas fa-toggle-on", callback: function (key, opt) {
 
-                                // let _list = triggerList(self.selectedNode.name);
+                                // let _list = triggerHandler.triggerList(self.selectedNode.name);
                                 //
                                 // let _result = {name: self.selectedNode.name, result: _list};
 
@@ -495,7 +495,7 @@
 
                 _.forEach(node, function(v,k){
 
-                    let _rtn = classList(v.cid);
+                    let _rtn = omdbHandler.classList(v.cid);
 
                     if (_.isEmpty(_rtn)) {
                         return;
@@ -520,7 +520,8 @@
                             zTree.removeChildNodes(nodes[0]);
                         }
 
-                        zTree.addNodes(v.treeNode, _.map(JSON.parse(_rtn),function(v){ return _.merge(v,{rtype:'A1'});}));
+                        // 按name排序
+                        zTree.addNodes(v.treeNode, _.orderBy(_.map(JSON.parse(_rtn),function(v){ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
 
                     }
                 })
@@ -529,7 +530,7 @@
 	        edgeList: function(){
                 let self = this;
                 let _rtn = null;
-                let _list = fetchDataByMql('select edge type');
+                let _list = omdbHandler.fetchDataByMql('select edge type');
 
                 if(!_.isEmpty(_list)){
                     _rtn = _list;
@@ -540,7 +541,7 @@
 	        ruleList: function(){
                 let self = this;
 
-                let _list = ruleList();
+                let _list = ruleHandler.ruleList();
 
                 if(!_.isEmpty(_list)){
                     _rtn = _list;

@@ -134,7 +134,7 @@
             init: function () {
                 let self = this;
 
-                self.zNodes = callFsJScript(`/probe/dropDownTree_for_rules.js`).message;
+                self.zNodes = fsHandler.callFsJScript(`/probe/dropDownTree_for_rules.js`).message;
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
                 self.zTree.expandAll(true);
 

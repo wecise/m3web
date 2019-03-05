@@ -392,7 +392,7 @@
 	        initData: function(){
                 let self = this;
 
-                let rtn = triggerList(self.className);
+                let rtn = triggerHandler.triggerList(self.className);
 
                 let list = [];
 
@@ -476,7 +476,7 @@
 
                 alertify.prompt("新增触发器", function (e, str) {
                     if (e) {
-                        let _rtn = triggerNew({class: self.className, name: _.trim(str), script:''});
+                        let _rtn = triggerHandler.triggerNew({class: self.className, name: _.trim(str), script:''});
 
                         if(_rtn === 1) {
                             self.refresh(str);
@@ -491,7 +491,7 @@
 
                 let script = self.editor.getValue();
 
-                let _rtn = triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
+                let _rtn = triggerHandler.triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
 
                 if(_rtn === 1) {
                     self.refresh(self.selected.name);
@@ -500,11 +500,9 @@
             update: function(){
                 let self = this;
 
-                console.log(self.selected.disable)
-
                 let script = self.editor.getValue();
 
-                let _rtn = triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
+                let _rtn = triggerHandler.triggerNew({class: self.className, name: self.selected.name, script: script, attr:{disable: `${self.selected.disable}`}});
 
                 if(_rtn === 1) {
                     self.refresh(self.selected.name);
@@ -514,7 +512,7 @@
                 let self = this;
 
 
-                let rtn = triggerList(self.className);
+                let rtn = triggerHandler.triggerList(self.className);
 
                 if(!_.isEmpty(rtn)){
                     self.list = _.map(self.treatNode(rtn[0]),function(v,k){
@@ -542,7 +540,7 @@
 
                 alertify.confirm(`确认删除触发器：${self.selected.name}`, function(e) {
                     if(e) {
-                        let _rtn = triggerDelete(self.className, self.selected.name);
+                        let _rtn = triggerHandler.triggerDelete(self.className, self.selected.name);
 
                         if(_rtn === 1){
                             let name = self.list.length>0 ? _.head(self.list).name : null

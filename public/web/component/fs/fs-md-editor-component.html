@@ -163,7 +163,7 @@
                             return
                         }
 
-                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+                        let rtn = omdbHandler.fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
 
                         if(_.isEmpty(rtn)) return;
 
@@ -446,7 +446,7 @@
             reload: function(){
 				let self = this;
 
-                let rtn = fsContent(self.model.fs.parent,self.model.fs.name);
+                let rtn = fsHandler.fsContent(self.model.fs.parent,self.model.fs.name);
 
                 self.editor.setValue(rtn);
             },
@@ -602,7 +602,7 @@
                         init: function(){
                             let me = this;
 
-                            me.app.icon.list = fsList(`${window.ASSETS_ICON}/apps/png`);
+                            me.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
 
                         },
                         triggerInput: function(id){
@@ -613,7 +613,7 @@
                         deploy: function(){
                             let me = this;
 
-                            let check = callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
+                            let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
 
                             if(check==1){
                                 alertify.log("应用已经发布，请确认。")
@@ -628,7 +628,7 @@
                                 url: me.app.url
                             };
 
-                            let rtn = callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                            let rtn = fsHandler.callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
                             if( _.lowerCase(rtn.status) == "ok"){
                                 alertify.success("应用发布成功");
                                 eventHub.$emit("APP-REFRESH-EVENT");
@@ -668,7 +668,7 @@
                 }*/
 
                 // save
-                let sRtn = fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+                let sRtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
 
                 if(sRtn == 0){
                     alertify.log("请确认脚本！");
@@ -691,7 +691,7 @@
 	            if(_.includes(['html','html'],self.model.fs.ftype)){
                     eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, `/fs${[self.model.fs.parent,self.model.fs.name].join("/")}?issys=true&type=download`);
 	            } else {
-                    let rRtn = callFsJScript([self.model.fs.parent,self.model.fs.name].join("/").replace(/\/script/g,""), '');
+                    let rRtn = fsHandler.callFsJScript([self.model.fs.parent,self.model.fs.name].join("/").replace(/\/script/g,""), '');
 
                     eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, rRtn)
 	            }

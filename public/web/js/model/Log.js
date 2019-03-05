@@ -389,7 +389,7 @@ class Log extends Matrix {
                         },
                         searchHandler: function (param, func) {
                             let self = this;
-                            let _list = fetchData(param);
+                            let _list = omdbHandler.fetchData(param);
 
                             if (_.isEmpty(_list.message)) {
                                 self.search.result.data = [];

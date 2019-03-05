@@ -19,32 +19,75 @@ class SideBar {
             el: '#nav-menu-level1',
             data: {
                 model: [],
-                selectedApps: []
+                selectedApps: [],
+                term: null,
+                group: [
+                        {name:'IT运维',url:'', cnname:'IT运维', target:'', icon: 'fas fa-star', count: 15},
+                        {name:'供销存管理',url:'', cnname:'供销存管理', target:'', icon: '', count: 0},
+                        {name:'财务管理',url:'', cnname:'财务管理', target:'', icon: '', count: 0},
+                        {name:'OA应用',url:'', cnname:'OA应用', target:'', icon: '', count: 0},
+                        {name:'平台应用',url:'', cnname:'平台应用', target:'', icon: '', count: 0},
+                        {name:'应用管理',url:'', cnname:'应用管理', target:'', icon: '', count: 0},
+                        {name:'数据接入',url:'', cnname:'数据接入', target:'', icon: '', count: 0},
+                        {name:'数据处理',url:'', cnname:'数据处理', target:'', icon: '', count: 0},
+                        {name:'数据分析',url:'', cnname:'数据分析', target:'', icon: '', count: 0},
+                        {name:'仪表盘',url:'', cnname:'仪表盘', target:'', icon: '', count: 0},
+                        {name:'资产管理',url:'', cnname:'资产管理', target:'', icon: '', count: 0},
+                        {name:'政务应用',url:'', cnname:'政务应用', target:'', icon: '', count: 0},
+                        {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
+                    ]
             },
-            template: `<ul class="top-bar animated fadeInDown nav-menu-level1">
-					<li>
-						<a href="/" title="首页" data-tooltip="tooltip">
-							<img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
-						</a>
-					</li>
-					<li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
-						<a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname" data-tooltip="tooltip">
-							<img :src="item.icon | pickIcon" style="width:48px;"></img> 
-							<p>
-							    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
-							</p>
-						</a>
-					</li>
-					<li>
-						<a href="/janesware/system?view=app"  title="应用管理" data-tooltip="tooltip">
-							<i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
-						</a>
-					</li>
-				</ul>`,
+            template: ` <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="input-group full-width topbar" style="margin:0;width:100%;">
+                                        <input type="text" class="form-control-transparent" placeholder="请输入关键词" v-model="term">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-9">
+                                    <ul class="top-bar animated fadeInDown nav-menu-level1">
+                                        <!--li>
+                                            <a href="/" title="首页" data-tooltip="tooltip">
+                                                <img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
+                                            </a>
+                                        </li-->
+                                        <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
+                                            <a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname" data-tooltip="tooltip">
+                                                <img :src="item.icon | pickIcon" style="width:48px;"></img> 
+                                                <p>
+                                                    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/janesware/system?view=app"  title="应用管理" data-tooltip="tooltip">
+                                                <i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-lg-3" style="border-left: 1px solid #ddd;">
+                                    <ul class="animated fadeIn" style="list-style: none;">
+                                        <li v-for="(item,index) in group" :class="index<group.length - 1?'slot-li-divider':''" style="margin:5px 0px;">
+                                            <a href="javascript:void(0);" :target="item.target" :title="item.cnname" data-tooltip="tooltip">
+                                                #{_.truncate(item.cnname, {'length': 6})}#  
+                                                <span class="badge" style="background-color:transparent;color:#999;">#{item.count}#</span>
+                                            </a>
+                                            <span :class="item.icon" style="color:#fba729;"></span> 
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
+                                </div>
+                            </div>
+                        </div>`,
             created: function(){
-
                 this.init();
-
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);
             },
             filters:{
@@ -54,10 +97,10 @@ class SideBar {
             },
             methods: {
                 init: function(){
-                    let _list = fetchData("#/matrix/portal/tools/: | sort by seat asc");
+                    let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
                     let user = window.SignedUser_UserName;//$("#signed-user-name").val();
 
-                    this.selectedApps = callFsJScript("/user/user.js",user).message.split(",");
+                    this.selectedApps = fsHandler.callFsJScript("/user/user.js",user).message.split(",");
                     let _selectedApps = this.selectedApps;
 
                     this.model = _.map(_list.message,function(v){
@@ -76,7 +119,7 @@ class SideBar {
 
                     let ldap = new Object();
                     ldap.class = "/matrix/ldap";
-                    ldap.fullname = window.SignedUser_FullName;//$("#signed-user-fullname").val();
+                    ldap.fullname = window.SignedUser_FullName;
 
                     if(_.indexOf(this.selectedApps, item.id) > -1){
                         _.pull(this.selectedApps,item.id);
@@ -86,7 +129,7 @@ class SideBar {
 
                     ldap.remark = this.selectedApps.join(",");
 
-                    let _rtn = putDataToClass(ldap);
+                    let _rtn = omdbHandler.putDataToClass(ldap);
 
                     if(_rtn == 1){
                         this.init();
@@ -97,6 +140,9 @@ class SideBar {
                     event.stopPropagation();
                     event.preventDefault();
                     $(this.$refs[name]).click();
+                },
+                onSearch(){
+
                 }
             }
 
@@ -148,10 +194,10 @@ class SideBar {
             methods: {
                 init: function(){
                     let user = window.SignedUser_UserName;
-                    let selectedApps = callFsJScript("/user/user.js",user).message.replace(/,/g,";");
-                    let _list = fetchData(`#/matrix/portal/tools/: | ${selectedApps}| sort by seat asc`);
+                    let selectedApps = fsHandler.callFsJScript("/user/user.js",user).message.replace(/,/g,";");
+                    let _list = omdbHandler.fetchData(`#/matrix/portal/tools/: | ${selectedApps}| sort by seat asc`);
                     this.model = _.map(_list.message,function(v){
-                        let _page = _.last(getPage().split("/"));
+                        let _page = _.last(mx.getPage().split("/"));
 
                         if(_.endsWith(v.url,_page)){
                             return _.merge(v, {status: "active"});
@@ -163,7 +209,7 @@ class SideBar {
                 initWnd: function(){
 
                     setTimeout(() => {
-                        let wnd = maxWindow.winApps(`工具箱`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
+                        let wnd = maxWindow.winApps(`应用市场`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
                         new Vue(sideBar.appBox);
                     }, 50);
 
@@ -178,7 +224,7 @@ class SideBar {
     // 左边栏切换
     toggleSideBar(){
 
-        let page = getPage();
+        let page = mx.getPage();
 
         let index = 1;
 

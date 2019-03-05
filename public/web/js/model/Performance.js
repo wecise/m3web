@@ -270,7 +270,7 @@ class Performance extends Matrix {
                             let self = this;
                             let param = editor.getValue();
                             let cols = [];
-                            let _list = fetchData(param);
+                            let _list = omdbHandler.fetchData(param);
                             let _data = _list.message;
 
                             $("#tempDataTable").bootstrapTable('destroy');
@@ -293,7 +293,7 @@ class Performance extends Matrix {
                         },
                         searchHandler: function (param, func) {
                             let self = this;
-                            let _list = fetchData(param);
+                            let _list = omdbHandler.fetchData(param);
 
                             if (_.isEmpty(_list.message)) {
                                 self.search.result.columns = [];

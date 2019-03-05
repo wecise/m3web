@@ -101,7 +101,7 @@
 
                                                                                                         eventHub.$emit("ci-view-toggle-event", {view: 'ci-view-card-component', model: _selectedRow});
                                                                                                         
-                                                                                                        /*newWindow('fsLarge', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
+                                                                                                        /*maxWindow.winModal('fsLarge', opt.items[key].name + " " + _selectedRow.name, `<div id="panel-card"></div>`,null,null);
 
                                                                                                         _.delay(function(){
 
@@ -196,7 +196,7 @@
                                                                                                                 methods: {
                                                                                                                     init: function(){
                                                                                                                         let me = this;
-                                                                                                                        let _list = fetchClass(_item.class);
+                                                                                                                        let _list = omdbHandler.fetchClass(_item.class);
                                                                                                                         let _properties = {};
                                                                                                                         let _fields = {};
                                                                                                                         let _data = {"class":_item.class};
@@ -228,7 +228,7 @@
                                                                                                                     },
                                                                                                                     save: function(event){
                                                                                                                         let me = this;
-                                                                                                                        let rtn = putDataByMql(event);
+                                                                                                                        let rtn = omdbHandler.putDataByMql(event);
                                                                                                                     }
                                                                                                                 }
                                                                                                             });

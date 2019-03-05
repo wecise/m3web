@@ -119,7 +119,7 @@ Sidebar.prototype.init = function()
         self.addSearchPalette(true);
 
         // entity
-        entity = fetchSubClass("/matrix/entity");
+        entity = omdbHandler.fetchSubClass("/matrix/entity");
         this.imapConfig = _.map(entity,'alias')
 
         _.delay(function(){
@@ -128,7 +128,7 @@ Sidebar.prototype.init = function()
 
                 let _data = null;
                 _.forEach(entity,function(v,k){
-                    let _tmp = fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
+                    let _tmp = omdbHandler.fetchData(conds.replace(/&className/,v.name).replace(/&top/,500));
 
                     if(_.isNull(_tmp.message)) {
                         return;

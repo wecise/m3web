@@ -296,7 +296,7 @@
                 let table = $("#"+self.id).DataTable();
 			},
 			refresh: function(){
-				this.model = callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
+				this.model = fsHandler.callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
 			},
 			detail: function(){
                 this.$root.detail(this.selectedRows);
@@ -308,7 +308,7 @@
             contextMenu: function(){
                 const self = this;
 
-                let items = callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.event;
                 let id = self.id;
 
                 $.contextMenu({

@@ -118,7 +118,7 @@ class Topological extends Event {
 
                 topological.app = new Vue({
                     delimiters: ['${', '}'],
-                    template: callFsJScript('/topological/ui.js', null).message.layout,
+                    template: fsHandler.callFsJScript('/topological/ui.js', null).message.layout,
                     data: {
                         // 搜索组件结构
                         model: {
@@ -191,7 +191,7 @@ class Topological extends Event {
                             const self = this;
                             
                             // 根据graph节点搜索关联数据
-                            let model = callFsJScript('/topological/diagnosis.js', encodeURIComponent(term)).message || [];
+                            let model = fsHandler.callFsJScript('/topological/diagnosis.js', encodeURIComponent(term)).message || [];
                             
                             // 重绘detail页面
                             _.delay(function(){
@@ -247,9 +247,9 @@ class Topological extends Event {
                             </span>
                             
                             <div class="animated fadeIn" v-if="type.selected[0]==='advanced'">
-                                <!--input type="text" class="form-control-transparent"  placeholder="搜索语法" v-model="advanced.input"-->
-                                <input id="topological-graph-advanced-input" class="form-control-transparent" type="text" placeholder="搜索...">
-                                <typeahead v-model="advanced.input" target="#topological-graph-advanced-input" force-select :data="advanced.data" item-key="value"/>
+                                <input type="text" class="form-control-transparent"  placeholder="搜索语法" v-model="advanced.input">
+                                <!--input id="topological-graph-advanced-input" class="form-control-transparent" type="text" placeholder="搜索...">
+                                <typeahead v-model="advanced.input" target="#topological-graph-advanced-input" force-select :data="advanced.data" item-key="value"/-->
                             </div>
                             <div class="input-group animated fadeIn" v-else>
                                 <input type="text" class="form-control-transparent"  placeholder="节点">
@@ -279,7 +279,7 @@ class Topological extends Event {
                 normal: {
                     rel:{
                         selected: [],
-                        options: callFsJScript('/graph/edges.js',null).message
+                        options: fsHandler.callFsJScript('/graph/edges.js',null).message
                     },
                     step: {
                         selected: [],
@@ -298,9 +298,13 @@ class Topological extends Event {
                     }
             },
             watch:{
-                'advanced.input':function(val,oldVal){
-                    if(val === oldVal) return false;
-                    _.extend(this.term, val['value']?{value: val.value}:{value:val});
+                'advanced.input':{
+                    handler:function(val,oldVal){
+                        if(val === oldVal) return false;
+                        _.extend(this.term, val['value']?{value: val.value}:{value:val});
+                        console.log(2,this.term)
+                    },
+                    deep:true
                 }
             },
             mounted(){
@@ -313,7 +317,6 @@ class Topological extends Event {
                 })
 
                 this.advanced.data = this.loadCache();
-                console.log(this.loadCache())
             },
             methods:{
                 search(){
@@ -324,7 +327,7 @@ class Topological extends Event {
                     let name = 'TOPOLOGICAL_GRAPH_SEARCH_CACHE.txt';
 
                     // load
-                    return _.attempt(JSON.parse.bind(null, fsContent(`/${window.SignedUser_UserName}/temp`, name)));
+                    return _.attempt(JSON.parse.bind(null, fsHandler.fsContent(`/${window.SignedUser_UserName}/temp`, name)));
                 },
                 cache(){
                     let preContent = this.loadCache();
@@ -334,7 +337,7 @@ class Topological extends Event {
                     let content = JSON.stringify(_.merge(preContent,this.term));
                     let ftype = "txt";
                     let attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: ftype};
-                    let rtn = fsNew(ftype, `/${window.SignedUser_UserName}/temp`, name, content, attr);
+                    let rtn = fsHandler.fsNew(ftype, `/${window.SignedUser_UserName}/temp`, name, content, attr);
                 }
             }
         };
@@ -365,10 +368,11 @@ class Topological extends Event {
                 id: id,
                 model: {}
             },
+            created(){
+                eventHub.$on("TOPOLOGICAL-TERM-EVENT", this.search);   
+            },
             mounted() {
-                const self = this;
                 this.search();
-                eventHub.$on("TOPOLOGICAL-TERM-EVENT", self.search);
             },
             methods:{
                 search(term){
@@ -387,7 +391,7 @@ class Topological extends Event {
                     }
 
                     try {
-                        this.model = callFsJScript('/graph/graph_service.js', defaultTerm).message[0].graph;
+                        this.model = fsHandler.callFsJScript('/graph/graph_service.js', defaultTerm).message[0].graph;
                     } catch(error) {
                         alertify.error("图查询失败，请确认语法！"+error);
                         this.model = {};
@@ -505,7 +509,7 @@ class Topological extends Event {
                     tabs: [tabTemp],
                     index: 0,
                     secIndex: _.findIndex(tabTemp.child,{type:event.type}),
-                    model: [callFsJScript('/topological/diagnosis.js',event.value).message]
+                    model: [fsHandler.callFsJScript('/topological/diagnosis.js',event.value).message]
                 },
                 filters: {
                     pickTitle(event){
@@ -547,7 +551,7 @@ class Topological extends Event {
             if(!check){
                 topological.graphAssociation.$data.tabs.push(tabTemp);
                 topological.graphAssociation.$data.index = topological.graphAssociation.$data.tabs.length - 1;
-                topological.graphAssociation.$data.model[topological.graphAssociation.$data.index] = callFsJScript('/topological/diagnosis.js',event.value).message;
+                topological.graphAssociation.$data.model[topological.graphAssociation.$data.index] = fsHandler.callFsJScript('/topological/diagnosis.js',event.value).message;
                 _.delay(function(){
                     topological.graphAssociation.$data.subIndex = _.findIndex(tabTemp.child,{type:event.type});
                     $(topological.graphAssociation.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");

@@ -152,7 +152,11 @@
 			top: 8px;
 			left: 50px;
 			padding: 0 5px;
-		}
+        }
+        
+        .dataTables_filter{
+            display: none;
+        }
 
         
 	</style>
@@ -225,6 +229,7 @@
             let self = this;
 
             eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
+            eventHub.$on(`DATATABLE-FILTER-BY-probe-EVENT`, self.filterColumn);
         },
 		mounted: function () {
             let self = this;
@@ -282,7 +287,7 @@
                                 columns: self._columns,
                                 //stripeClasses: [],
                                 responsive: false,
-                                searching: false,
+                                searching: true,
                                 aDataSort: true,
 	                            bSort: true,
 			                    bAutoWidth: true,
@@ -379,6 +384,9 @@
                     },self.options)).columns.adjust().draw();
 
 			},
+            filterColumn(event) {
+                $("#"+this.id).DataTable().search(event.name).draw();
+            },
 			initPlugin: function(){
                 let self = this;
 
@@ -415,8 +423,8 @@
                     let node = treeObj.getNodeByTId(tId);
 
                     // 打标签
-	                let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
-                    let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+	                let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -431,7 +439,7 @@
             initMenu: function(){
                 let self = this;
 
-                let items = callFsJScript('/probe/toolbar.js', '').message.probe.probe;
+                let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.probe;
                 let id = self.id;
 
                 $.contextMenu({
@@ -538,7 +546,7 @@
                         onAddTag: function(event){
 
 	                        let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -548,7 +556,7 @@
                         onRemoveTag: function(event){
 
                             let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -646,7 +654,7 @@
 
                                     let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
 
-                                    let _rtn = fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
 
                                     if(_rtn.status === 'ok') {
                                         self.datatable.rows( { selected: true } ).remove().draw(false);

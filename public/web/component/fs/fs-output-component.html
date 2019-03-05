@@ -134,7 +134,7 @@
                             return
                         }
 
-                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+                        let rtn = omdbHandler.fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
 
                         if(_.isEmpty(rtn)) return;
 

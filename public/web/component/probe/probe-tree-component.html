@@ -6,43 +6,45 @@
 
 		}
 
-		.navbar-form {
-			margin: 12px -15px;
+		.probe-tree-component .navbar-form {
+			margin: 0px;
 		}
 
 		.probe-tree-component .navbar-form .form-control {
 			width: 100%;
 		}
 
-		.navbar-form .form-control:focus{
+		.probe-tree-component .navbar-form .form-control:focus{
 			width: 200px;
 			animation:none;
 			-webkit-animation: none;
 		}
 
-		.navbar-form .btn-search {
+		.probe-tree-component .navbar-form .btn-search {
 			right: -3px;
 			top: 2px;
 		}
 
-		.ztree li a.curSelectedNode {
+		.probe-tree-component .ztree li a.curSelectedNode {
 			background-color: rgb(161, 212, 250)!important;
 			border:1px solid #ffffff!important;
 			color: rgb(255,255,255)!important;
 		}
 
-		.ztree li a:hover{
+		.probe-tree-component .ztree li a:hover{
 			text-decoration: none!important;
 		}
 
-		.ztree {
+		.probe-tree-component .ztree {
 			height: 100%;
 			overflow: auto;
 			padding-bottom: 100px!important;
-			position: relative;
+            position: relative;
+            margin: 0px;
+            padding: 12px;
 		}
 
-		.toolbar{
+		.probe-tree-component .toolbar{
 			position: relative;
 			left: calc(100% - 68px);
 			top: 0px;
@@ -57,7 +59,7 @@
 		}
 
 
-		.ztree li span.blank {
+		.probe-tree-component .ztree li span.blank {
 			width: 16px;
 			height: 16px;
 			display: inline-block;
@@ -66,11 +68,11 @@
 
 
 		/* For x-editable */
-		.editable-click, a.editable-click, a.editable-click:hover{
+		.probe-tree-component .editable-click, a.editable-click, a.editable-click:hover{
 			border-bottom:unset;
 		}
 
-		.editable-unsaved {
+		.probe-tree-component .editable-unsaved {
 			font-weight: normal;
 		}
 
@@ -81,7 +83,7 @@
 	/*----------  最外层element会自动增加组件同名 class="probe-tree-component"  ----------*/
 	<template>
 		<div>
-			<form class="navbar-form full-width">
+			<form class="navbar-form full-width" style="display: none;">
 				<div class="form-group">
 					<input type="text" class="form-control-transparent" placeholder="搜索">
 				</div>
@@ -106,6 +108,7 @@
                         dblClickExpand: this.onDblClickExpand,
                         addDiyDom: this.addCountDom,
                         removeHoverDom: this.removeHoverDom,
+                        showTitle: true
                     },
                     edit: {
                         enable: false
@@ -116,7 +119,9 @@
                     },
                     data: {
                         simpleData: {
-                            enable: true
+                            enable: true,
+                            idKey : "id",
+                            pIdKey : "pId"
                         },
                         key: {
                             name: 'name',
@@ -127,18 +132,18 @@
                         enable: false
                     }
                 },
-                zNodes: callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
+                zNodes: fsHandler.callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
                 curTarget: null,
                 curTmpTarget: null,
             }
         },
         created: function(){
-            let self = this;
+            const self = this;
 
         },
         mounted: function () {
-            let self =  this;
+            const self =  this;
 
             self.$nextTick(function () {
 
@@ -151,13 +156,13 @@
         },
         methods:{
             init: function () {
-                let self = this;
+                const self = this;
 
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
 
             },
 	        initPlugIn: function(){
-                let self = this;
+                const self = this;
 
                 $(self.$el).contextMenu({
                     selector: 'span.class.more',
@@ -194,13 +199,11 @@
 
 	        },
             initData: function(node){
-				let self = this;
-
+				const self = this;
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
-
 	        },
             onExpand: function(event, treeId, treeNode) {
-                let self = this;
+                const self = this;
 
                 let recursiveTraverse = function (node) {
 
@@ -215,7 +218,7 @@
 
 	            if(treeNode.rtype === 'A2' && treeNode.parent == null){
 
-	                let tagDir = getTagDir(self.model.domain);
+	                let tagDir = tagHandler.getTagDir(self.model.domain);
 
 	                // 忽略第一层
 	                let tree = recursiveTraverse(tagDir.nodes);
@@ -226,9 +229,12 @@
                 }
             },
             onClick: function (event, treeId, treeNode, clickFlisParentag) {
-                let self = this;
+                const self = this;
 
                 self.selectedNode = treeNode;
+
+                // 根据节点过滤数据
+                eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
 
                 if(treeNode.rtype === 'A1') {
 
@@ -242,14 +248,14 @@
 										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
 										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
 										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'></span>
-								</div>`;
+								    </div>`;
 
 
-                    if(scObj.length > 0){
-                        scObj.after(addStr);
-                    } else {
-                        sObj.after(addStr);
-                    }
+                    // if(scObj.length > 0){
+                    //     scObj.after(addStr);
+                    // } else {
+                    //     sObj.after(addStr);
+                    // }
 
                     return;
                 }
@@ -329,10 +335,10 @@
                             container: 'body',
                             success: function(response, newValue) {
 
-                                let rtn = delTagDir(self.model.domain, treeNode.name);
+                                let rtn = tagHandler.delTagDir(self.model.domain, treeNode.name);
 
                                 if(rtn === 1){
-                                    updateTagDir(self.model.domain, newValue);
+                                    tagHandler.updateTagDir(self.model.domain, newValue);
                                 }
                             }
                         });
@@ -377,12 +383,12 @@
 
             },
             addCountDom: function (treeId, treeNode) {
-                let self = this;
+                const self = this;
                 let aObj = $("#" + treeNode.tId + "_a");
-
-                if(!_.isEmpty(treeNode.child)){
-                    if (treeNode.child.length > 0){
-                        let str = `<span class='${treeNode.name} count' style='color:rgb(160,160,160);'>(${treeNode.child.length})</span>`;
+                
+                if(!_.isEmpty(treeNode.children)){
+                    if (treeNode.children.length > 0){
+                        let str = `<span class='${treeNode.name} count' style='color:rgb(160,160,160);'>(${treeNode.children.length})</span>`;
                         aObj.append(str);
                     }
                 }
@@ -391,7 +397,7 @@
                 $("#toolbars_"+treeNode.tId).unbind().remove();
             },
             refresh: function(event) {
-                let self = this;
+                const self = this;
 
                 let pNode = self.selectedNode;
 
@@ -411,25 +417,25 @@
 
             },
 	        addTagDir: function(newName,treeNode){
-                let self = this;
+                const self = this;
 
-				let _uuid = callFsJScript("/utils/uuid.js").message;
+				let _uuid = fsHandler.callFsJScript("/utils/uuid.js").message;
 
 				let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
 
-                let rtn = updateTagDir(self.model.domain, _name);
-
+                let rtn = tagHandler.updateTagDir(self.model.domain, _name);
+                
                 if(rtn === 1){
                     self.zTree.addNodes(treeNode, {cid: `tag_${_uuid}`, pId:treeNode.cid, rtype: treeNode.rtype, name: _name, title: newName, iconSkin: treeNode.iconSkin});
                 }
 
             },
             delTagDir: function(treeNode){
-                let self = this;
+                const self = this;
 
                 alertify.confirm("确认删除", function (e) {
                     if (e) {
-                        let rtn = delTagDir(self.model.domain, treeNode.name);
+                        let rtn = tagHandler.delTagDir(self.model.domain, treeNode.name);
 
                         if(rtn === 1) {
                             self.zTree.removeNode(treeNode);

@@ -262,7 +262,7 @@
                     _mql = self.editor.getSelectedText();
                 }
 
-                let _list = fetchDataByMql(_mql);
+                let _list = omdbHandler.fetchDataByMql(_mql);
 
                 if(_list.status === 'ok'){
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -318,7 +318,7 @@
 
                 let _data = _list.message;
 
-                let _columns = columnsParse(_list.meta);
+                let _columns = mx.columnsParse(_list.meta);
 
                 // Graph
                 if(_list.meta.type === 'gremlin'){
@@ -344,7 +344,7 @@
                     _mql = self.editor.getSelectedText();
                 }
 
-                let _list = fetchDataByMql(_mql);
+                let _list = omdbHandler.fetchDataByMql(_mql);
 
                 if(_list.status === 'ok'){
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -400,7 +400,7 @@
 
                 let _data = _list.message;
 
-                let _columns = columnsParse(_list.meta);
+                let _columns = mx.columnsParse(_list.meta);
 
 
                 // Graph
@@ -445,7 +445,7 @@
 								</body>
 							</html>`;
 
-                let _url = fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
+                let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
 
                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=download" target="_blank">点击查看</a>`);
             }

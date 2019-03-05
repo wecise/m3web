@@ -230,7 +230,6 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 
-<script src="{{AppSubUrl}}/web/js/Fss.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Imap.js"></script>
 
 <!--File Parse JS-->
@@ -300,7 +299,7 @@
 <script type="text/x-template" id="app-template">
     <div>
         <div id="title" style="position:absolute;z-index:1000;"> <small style="font-size:45%;display:none;"></small></div>
-        <div id="graph" style="top:0px;width:100%;background:url('/fs/assets/images/tools/png/grid.gif?type=download&issys=true');"></div>
+        <div id="graph"></div>
         <div id="nav">
             <a href="javascript:void(0);" @click="navToggle();">
                 <i class="fa fa-th fa-2x" style="position: relative;left: 5px;top: -50px;z-index: 1000;color:rgb(219, 219, 219);cursor:pointer;"></i>
@@ -318,4 +317,4 @@
 
 </html>
 
-<!--{{template "base/footer" .}}-->
+

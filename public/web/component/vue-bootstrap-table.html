@@ -454,7 +454,7 @@
 	                	init: function(){
 	                        let self = this;
 	                        let param = "serial=" + row.serial;
-	                        let _list = fetchData(param);
+	                        let _list = omdbHandler.fetchData(param);
                             let cols = [];
                             let columns = [];
 
@@ -1049,7 +1049,7 @@
 									self.chart = echarts.init(document.getElementById("table-chart-history"));
 
 									if (_.isEmpty(self.dataset.series[0].data) || _.size(self.dataset.series[0].data) < 2){
-										let _options = fetchFile("https://easy-mock.com/mock/5a8e27b8b9b9b15c62da7f5d/telus/performance");
+										let _options = fsHandler.fetchFile("https://easy-mock.com/mock/5a8e27b8b9b9b15c62da7f5d/telus/performance");
 
 										_options.title = self.options.title;
 										_options.yAxis = self.options.yAxis;

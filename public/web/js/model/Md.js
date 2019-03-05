@@ -19,8 +19,8 @@ class Md {
     init() {
         VueLoader.onloaded([],function() {
 
-            const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
-            const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
+            const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
+            const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
 
             let init = function(){
 
@@ -59,7 +59,7 @@ class Md {
                         init: function(){
                             let self = this;
 
-                            let rtn = fsContent(URL_PARAMS_ITEM.parent,URL_PARAMS_ITEM.name);
+                            let rtn = fsHandler.fsContent(URL_PARAMS_ITEM.parent,URL_PARAMS_ITEM.name);
                             self.model.content = marked(rtn, { sanitize: true });
                         }
                     }

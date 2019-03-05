@@ -417,7 +417,7 @@
 
 	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
 
-                            let url = genFsUrl(item,null,null);
+                            let url = fsHandler.genFsUrl(item,null,null);
 
                             alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
 	                    }

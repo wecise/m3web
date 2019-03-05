@@ -9,12 +9,10 @@
 
  */
 
-class Fss {
+class FsHandler {
 
-    constructor() {
-    }
-    
-    init() {
+    constructor(){
+
     }
 
     /*
@@ -52,7 +50,7 @@ class Fss {
             },
             success: function(data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = data.message;
@@ -91,8 +89,6 @@ class Fss {
             _url += '?issys=true';
         }
 
-        console.log(_url)
-
         let fm = new FormData();
 
         fm.append("data", content);
@@ -114,7 +110,7 @@ class Fss {
             },
             success: function(data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -173,7 +169,7 @@ class Fss {
             },
             success: function(data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if (_.isEmpty(data.message)) return false;
 
@@ -224,7 +220,7 @@ class Fss {
             },
             success: function(data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -283,7 +279,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if (_.isEmpty(data.message)) return false;
 
@@ -327,14 +323,13 @@ class Fss {
         }
 
         jQuery.ajax({
-            url: '/fs/rename',
+            url: `/fs/rename?issys=${_issys}`,
             type: 'POST',
             dataType: 'json',
             async:false,
             data: {
                 srcpath: srcpath,
-                dstpath: dstpath,
-                issys: _issys
+                dstpath: dstpath
             },
             beforeSend: function (xhr) {
             },
@@ -342,7 +337,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -385,14 +380,13 @@ class Fss {
         }
 
         jQuery.ajax({
-            url: '/fs/copy',
+            url: `/fs/copy?issys=${_issys}`,
             type: 'POST',
             dataType: 'json',
             async:false,
             data: {
                 srcpath: srcpath,
-                dstpath: dstpath,
-                issys: window.SignedUser_IsAdmin
+                dstpath: dstpath
             },
             beforeSend: function (xhr) {
             },
@@ -400,7 +394,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -442,16 +436,15 @@ class Fss {
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
-
+        
         jQuery.ajax({
-            url: '/fs/move',
+            url: `/fs/move?issys=${_issys}`,
             type: 'POST',
             dataType: 'json',
-            async:false,
+            async: false,
             data: {
                 srcpath: srcpath,
-                dstpath: dstpath,
-                issys: _issys
+                dstpath: dstpath
             },
             beforeSend: function (xhr) {
             },
@@ -459,7 +452,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -512,7 +505,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -541,7 +534,7 @@ class Fss {
         let rtn = null;
 
 
-        let _tmp = fsNew(ftype, '/temp', name, content, attr);
+        let _tmp = fsHandler.fsNew(ftype, '/temp', name, content, attr);
 
         if(_tmp === 1){
             rtn = `/temp/${name}`;
@@ -549,6 +542,7 @@ class Fss {
 
         return rtn;
     };
+
 
     /*
     *   文件系统
@@ -586,7 +580,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 let header = xhr.getResponseHeader('Content-Disposition');
 
@@ -645,7 +639,7 @@ class Fss {
             },
             success: function (data, textStatus, xhr) {
 
-                ifSignIn(data);
+                userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
@@ -656,6 +650,58 @@ class Fss {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("解压失败" + xhr);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
+            }
+        })
+
+        return rtn;
+    };
+
+    /*
+    *   文件系统
+    *
+    *   文件解析
+    *
+    *
+    */
+    fsParse(rule, file){
+        let rtn = 0;
+
+        let _issys = false;
+
+        if(window.SignedUser_IsAdmin){
+            _issys = true;
+        }
+
+        var form = new FormData();
+        form.append("uploadfile", zippack); // file
+
+        jQuery.ajax({
+            url: `/action/parsefile?$issys=${_issys}`,
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                rule:'/matrix/devops/event', 
+                filename:'/home/admin/test.csv'
+            },
+            async: true,
+            beforeSend: function (xhr) {
+            },
+            complete: function (xhr, textStatus) {
+            },
+            success: function (data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("文件解析成功" + srcpath);
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = 0;
+                alertify.error("文件解析失败" + xhr);
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON);
             }
         })
@@ -695,7 +741,74 @@ class Fss {
 
         return url;
     };
+
+    /*
+    *   Server端脚本调用
+    *
+    *       参数：
+    *
+    */
+    callFsJScript(name,term){
+
+        let rtn = null;
+
+        jQuery.ajax({
+            url: `/script/exec/js?input=${term}&isfile=true`,
+            type: "POST",
+            data: name,
+            async: false,
+            dataType: 'json',
+            contentType: false,
+            beforeSend: function(xhr) {
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        });
+
+        return rtn;
+    };
+
+    /*
+    *   获取一个文件内容
+    *
+    *       参数：
+    *          url
+    */
+    fetchFile(url) {
+
+        let rtn = null;
+
+        jQuery.ajax({
+            url: url,
+            async:false,
+            beforeSend: function(xhr) {
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data.data;
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+
+        return rtn;
+
+    };
 }
 
-let fs = new Fss();
-fs.init();
+var fsHandler = new FsHandler();

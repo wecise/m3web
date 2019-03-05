@@ -261,8 +261,8 @@
 
         moment.locale({{.Lang}});
 
-        const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['item']))));
-        const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(urlParams['cfg']))));
+        const URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
+        const URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
 
         let init = function(){
 
@@ -366,7 +366,7 @@
                             let self = this;
 
                             if(val != oldVal){
-                                self.model.graph.data = fsContent(self.model.object.param.parent, val);
+                                self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, val);
                                 self.initGraph();
                             }
                         },
@@ -400,7 +400,7 @@
 
                     self.model.object.param = _.attempt(JSON.parse.bind(null, _tmp));
 
-                    self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                    self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, self.model.object.param.name);
 
 
                 },
@@ -600,7 +600,7 @@
                         let _page = self.model.object.param.name;
                         let _jsPanels =  window.jsPanel.activePanels.list;
 
-                        let _rtn = jobContextGet(_project, null);// + "/" + _page);
+                        let _rtn = jobHandler.jobContextGet(_project, null);// + "/" + _page);
 
                         if(_.isEmpty(_rtn) || _.isEmpty(_rtn.message)){
 
@@ -691,7 +691,7 @@
 
                                         me.model.select = -1;
 
-                                        jobContextSetup(_project, _name, me.model);
+                                        jobHandler.jobContextSetup(_project, _name, me.model);
 
                                         window.jsPanel.activePanels.getPanel('jsPanel-prompt').close();
 
@@ -852,7 +852,7 @@
                     reload: function(){
                         let self = this;
 
-                        self.model.graph.data = fsContent(self.model.object.param.parent, self.model.object.param.name);
+                        self.model.graph.data = fsHandler.fsContent(self.model.object.param.parent, self.model.object.param.name);
                         self.initGraph();
                     },
                     initToolBars: function () {
@@ -970,7 +970,7 @@
                     callJob: function(job){
                         let self = this;
 
-                        return callBobJob(job,'OneSwitch');
+                        return jobHandler.callBobJob(job,'OneSwitch');
 
                     },
                     cmdVue: function(evt) {
@@ -1066,7 +1066,7 @@
                                     let _page = self.model.object.param.name;
 
                                     if (me.cmd.reset.value === "ALL") {
-                                        jobContextReset(_project);
+                                        jobHandler.jobContextReset(_project);
                                         alertify.log("重置项目 " + moment().format("LLL"));
                                     } else {
                                         let _name = _project + "/" + _page + "/" + _.find(me.cmd.reset.list, {id:me.cmd.reset.value}).id;

@@ -149,7 +149,11 @@
 			background-color: rgb(246, 246, 246);
 			color: #333333;
 			border:none;
-		}
+        }
+        
+        .dataTables_filter{
+            display: none;
+        }
 
 	</style>
 
@@ -223,6 +227,7 @@
                 let self = this;
 
                 eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
+                eventHub.$on(`DATATABLE-FILTER-BY-policy-EVENT`, self.filterColumn);
             },
             mounted: function () {
                 let self = this;
@@ -450,6 +455,9 @@
                     },self.options)).columns.adjust().draw();
 
                 },
+                filterColumn(event) {
+                    $("#"+this.id).DataTable().search(event.name).draw();
+                },
                 initPlugin: function(){
                     let self = this;
 
@@ -498,8 +506,8 @@
                         let node = treeObj.getNodeByTId(tId);
 
                         // 打标签
-                        let input = {class: data[0].class, action: "+", tag: node.name, id: _.map(data,'id')};
-                        let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
@@ -513,7 +521,7 @@
                 initMenu: function(){
                     let self = this;
 
-                    let items = callFsJScript('/probe/toolbar.js', '').message.probe.policy;
+                    let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.policy;
                     let id = self.id;
 
                     $.contextMenu({
@@ -625,7 +633,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
@@ -635,7 +643,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['policy']);
@@ -738,7 +746,7 @@
                                             return
                                         }
 
-                                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+                                        let rtn = omdbHandler.fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
 
                                         if (_.isEmpty(rtn)) return;
 
@@ -1174,7 +1182,7 @@
 
                     let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 添加`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
-                    let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
+                    let conf = fsHandler.callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 
                     let wizard = {
                         delimiters: ['#{', '}#'],
@@ -1240,7 +1248,7 @@
                             save: function(){
                                 let me = this;
 
-                                let rtn = cmdPolicyAdd(me.model.item);
+                                let rtn = policyHandler.cmdPolicyAdd(me.model.item);
 
                                 if(rtn === 1){
                                     wnd.close();
@@ -1256,7 +1264,7 @@
                             let me = this;
 
                             me.$nextTick(function () {
-                                FormWizard.init("wizard");
+                                mx.handleBootstrapWizards("wizard");
                                 me.tagInput();
 
                                 //
@@ -1390,7 +1398,7 @@
 
                     let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="policy-add-container"></div>`, null, 'policy-container');
 
-                    let conf = callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
+                    let conf = fsHandler.callFsJScript('/probe/probe_summary_policy_conf.js', '').message;
 
                     let node = _.cloneDeep(event);
 
@@ -1472,7 +1480,7 @@
                             let me = this;
 
                             me.$nextTick(function () {
-                                FormWizard.init("wizard");
+                                mx.handleBootstrapWizards("wizard");
                                 me.tagInput();
                             })
                         },

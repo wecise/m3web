@@ -24,7 +24,7 @@ class Window {
         this.wW = this.width * 0.7;
         this.hH = this.height * 0.7;
         this.lrwh = [(this.width - this.wW)/2, (this.height - this.hH)/2, this.wW, this.hH];
-        this.theme = {background:"rgb(26, 31, 49)",color:"rgb(255, 255, 255)"};
+        this.theme = {dark: 'rgb(37, 45, 71)', light:'rgb(255,255,255)', grey: 'rgb(247,247,247)'};
     }
 
     init(){
@@ -45,7 +45,7 @@ class Window {
             show: 'animated fadeInDownBig',
             headerControls: { maximize: 'remove' },
             headerRemove:  false,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             content:        template,
             container: 'body',
             dragit: {
@@ -56,12 +56,8 @@ class Window {
                     "position":"absoulate",
                     "z-index": "1000"
                 });
-                $(".jsPanel-hdr").css({
-                    "background-color": maxWindow.theme.background,
-                });
+                
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": maxWindow.theme.background,
-                    "background-image": "none",
                     "min-height": "28px",
                     "border-bottom": "none"
                 });
@@ -69,18 +65,14 @@ class Window {
                     "border-top": "none",
                     "overflow":"auto"
                 });
-                $(".jsPanel-title",this).css({
-                    "color": maxWindow.theme.color
-                });
+                
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
                 });
-                $(".jsPanel-controlbar .jsglyph").css({
-                    "color": maxWindow.theme.color
-                });
+                
             },
             footerToolbar: function (footer) {
                 return `<div id="jsPanel-upload-footer-${objectHash.sha1(title)}"></div>`;
@@ -103,13 +95,10 @@ class Window {
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             show: 'animated fadeInDownBig',
             headerRemove:  true,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             content:        template,
             callback:       function(){
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -132,7 +121,7 @@ class Window {
     winToolBars(title, template, position, container){
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             contentSize:    {width: 35, height: 230},
             position: {
                 left: position[0],
@@ -156,7 +145,7 @@ class Window {
         this.lrwh[3] = this.height * 0.125;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
@@ -173,9 +162,6 @@ class Window {
             content:        template,
             callback:       function(){
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -211,7 +197,7 @@ class Window {
 
         let win = $.jsPanel({
             id: id,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.grey,
             headerTitle:   `<img src="${window.ASSETS_ICON}/apps/png/matrix.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:12px;"></img> ${title}`,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -233,8 +219,6 @@ class Window {
                     "z-index": "2000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(246, 246, 246)",
-                    "background-image": "none",
                     "min-height": "28px",
                     "border-bottom": "none"
                 });
@@ -265,7 +249,7 @@ class Window {
         this.lrwh[3] = this.height * 0.55;
 
         let win = $.jsPanel({
-            theme:        'filledlight',
+            theme:        maxWindow.theme.dark,
             headerTitle:  title,
             contentSize:  {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
@@ -283,9 +267,6 @@ class Window {
                     "z-index": "1000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -320,7 +301,7 @@ class Window {
 
         let win = $.jsPanel({
             id: 'jsPanel-robot',
-            theme:          'filledlight',
+            theme:          maxWindow.theme.light,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -338,12 +319,8 @@ class Window {
                     "position":"absoulate",
                     "z-index": "1000"
                 });
-                $(".jsPanel-hdr").css({
-                    "background-color": "rgb(255,255,255)",
-                });
+                
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(255,255,255)",
-                    "background-image": "none",
                     "min-height": "28px",
                     "border": "1px solid rgb(221, 221, 221)",
                     "border-bottom": "none"
@@ -367,17 +344,17 @@ class Window {
 
     winApps(title, template, position, container){
 
-        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[2] = this.width * 0.7;
         this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
             id: 'jsPanel-robot',
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
                 left: 59,
-                top: 54,
+                top: 50,
             },
             //container: 'body',
             headerControls: { controls: 'closeonly' },
@@ -393,12 +370,8 @@ class Window {
                     "position":"absoulate",
                     "z-index": "1000"
                 });
-                $(".jsPanel-hdr").css({
-                    "background-color": "rgb(255,255,255)",
-                });
+                
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(255,255,255)",
-                    "background-image": "none",
                     "min-height": "28px",
                     "border": "1px solid rgb(221, 221, 221)",
                     "border-bottom": "none"
@@ -415,7 +388,7 @@ class Window {
                 });
 
                 this.mouseleave(function(){
-                    win.close();
+                    //win.close();
                 })
 
             }
@@ -431,7 +404,7 @@ class Window {
 
         let win = $.jsPanel({
             id: 'jsPanel-entity',
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {my: "right-top", at: "right-top"},
@@ -449,29 +422,21 @@ class Window {
                     "position":"absoulate",
                     "z-index": "1000"
                 });
-                $(".jsPanel-hdr").css({
-                    "background-color": "rgb(26, 31, 49)",
-                });
+                
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(26, 31, 49)",
-                    "background-image": "none",
                     "min-height": "28px",
                     "border-bottom": "none"
                 });
                 $(".jsPanel-content",this).css({
                     "border-top": "none"
                 });
-                $(".jsPanel-title",this).css({
-                    "color": "#ffffff"
-                });
+                
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
+                
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
-                });
-                $(".jsPanel-controlbar .jsglyph").css({
-                    "color": "#ffffff"
                 });
 
             }
@@ -484,12 +449,12 @@ class Window {
 
         let _position = { top: 0, right: 0 };
 
-        this.lrwh[2] = $(`.${container}`).width() + 0;
+        this.lrwh[2] = $(`.${container}`).width() + 5;
         this.lrwh[3] = $(`.${container}`).height() + 0;
 
         let win = $.jsPanel({
             id: `jsPanel-${container}`,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.light,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -507,12 +472,8 @@ class Window {
                     "left":"0px",
                     "box-shadow":"none"
                 });
-                $(".jsPanel-hdr").css({
-                    "background-color": "rgb(255,255,255)",
-                });
+                
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(255,255,255)",
-                    "background-image": "none",
                     "min-height": "28px",
                     "border": "none",
                 });
@@ -538,15 +499,16 @@ class Window {
 
         let _position = { my: "center", at: "center" };
 
-        this.lrwh[2] = this.width * 0.3;
-        this.lrwh[3] = this.height * 0.5;
+        this.lrwh[2] = this.width * 0.5;
+        this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            id: 'jsPanel-deploy',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
-            container: $(`.${container}`),
+            container: '#content',//$(`.${container}`),
             headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
@@ -554,14 +516,15 @@ class Window {
                 disabled:  false
             },
             callback: function(){
-                this.addClass("animated fadeInDown");
 
-                this.find(".jsPanel-hdr").css({
-                    "background-color": maxWindow.theme.background,
+                this.addClass("animated fadeInDown");
+                
+                $(".jsPanel").css({
+                    "position":"absolute",
+                    "z-index": "10001"
                 });
+
                 this.find(".jsPanel-headerbar",this).css({
-                    "background-color": maxWindow.theme.background,
-                    "background-image": "none",
                     "min-height": "28px",
                 });
                 this.find(".jsPanel-content",this).css({
@@ -569,18 +532,11 @@ class Window {
                     "overflow": "auto"
                 });
 
-                this.find(".jsPanel-title",this).css({
-                    "color": maxWindow.theme.color
-                });
                 this.find(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
                 this.find(".jsPanel-titlebar h3").css({
                     "font-size": "12px",
-                });
-
-                this.find(".jsPanel-controlbar .jsglyph").css({
-                    "color": maxWindow.theme.color
                 });
 
             }
@@ -595,7 +551,7 @@ class Window {
         this.lrwh[3] = this.height * 0.8;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
@@ -616,9 +572,6 @@ class Window {
                     "z-index": "10000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -647,7 +600,7 @@ class Window {
         this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
@@ -668,9 +621,6 @@ class Window {
                     "z-index": "10000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -707,7 +657,7 @@ class Window {
         this.lrwh[3] = 340; //$( window ).height()*0.55;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -726,9 +676,6 @@ class Window {
                     "z-index": "1000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -764,7 +711,7 @@ class Window {
         this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:         maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -783,9 +730,6 @@ class Window {
                     "z-index": "1000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -816,7 +760,7 @@ class Window {
 
         let win = $.jsPanel({
             id: `jsPanel-${title}`,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position:    'right-top DOWN -5 5',
@@ -830,9 +774,6 @@ class Window {
                     "z-index": "11000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    // "background-color": "rgb(238, 238, 238)",
-                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    // "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -866,7 +807,7 @@ class Window {
 
         let win = $.jsPanel({
             id: `jsPanel-${id}`,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position:   _position,
@@ -881,9 +822,6 @@ class Window {
                     "box-shadow":"none"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    // "background-color": "rgb(238, 238, 238)",
-                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    // "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
@@ -915,7 +853,7 @@ class Window {
 
         let win = $.jsPanel({
             id: `jsPanel-${id}`,
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position:   {
@@ -933,9 +871,6 @@ class Window {
                     "border":"none"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    // "background-color": "rgb(238, 238, 238)",
-                    // "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    // "background-repeat": "repeat-x",
                     "background": "rgb(250, 250, 250)",
                     "min-height": "28px"
                 });
@@ -967,7 +902,7 @@ class Window {
         this.lrwh[3] = this.height * 0.8;
 
         let win = $.jsPanel({
-            theme:          'filledlight',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
@@ -988,9 +923,6 @@ class Window {
                     "z-index": "10000"
                 });
                 $(".jsPanel-headerbar",this).css({
-                    "background-color": "rgb(238, 238, 238)",
-                    "background-image": "linear-gradient(180deg,rgb(247, 247, 247),rgb(224, 224, 224))",
-                    "background-repeat": "repeat-x",
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({

@@ -68,6 +68,10 @@
 <div id="app"></div>
 
 <script src="{{AppSubUrl}}/web/js/model/Probe.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Script.js"></script>
+<script src="{{AppSubUrl}}/web/js/handler/ProbeHandler.js"></script>
+<script src="{{AppSubUrl}}/web/js/handler/ScriptHandler.js"></script>
+<script src="{{AppSubUrl}}/web/js/handler/PolicyHandler.js"></script>
 
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
@@ -93,13 +97,21 @@
 <script type="text/x-template" id="app-template">
 
     <div id="content" class="content">
-        <ul class="nav nav-tabs nav-main" role="tablist">
-            <li class="active"><a href="#tab1" role="tab" data-toggle="tab">探针列表</a></li>
-            <li><a href="#tab2" role="tab" data-toggle="tab">策略管理</a></li>
-            <li><a href="#tab3" role="tab" data-toggle="tab">日志配置</a></li>
-            <li><a href="#tab4" role="tab" data-toggle="tab">脚本管理</a></li>
+        <ul class="nav nav-tabs nav-main" role="tablist" id="probe-tabs-ul">
+            <li class="active">
+                <a href="#tab1" role="tab" data-toggle="tab">探针列表</a>
+            </li>
+            <li>
+                <a href="#tab2" role="tab" data-toggle="tab">策略管理</a>
+            </li>
+            <li>
+                <a href="#tab3" role="tab" data-toggle="tab">日志配置</a>
+            </li>
+            <li>
+                <a href="#tab4" role="tab" data-toggle="tab">脚本管理</a>
+            </li>
         </ul>
-        <div class="tab-content" style="background-color:#ffffff;height:81.5vh;">
+        <div class="tab-content" style="background-color:#ffffff;height:81.5vh;" id="probe-tabs-div">
             <div class="tab-pane fade in active" id="tab1">
                 <probe-view :model="probe"></probe-view>
             </div>

@@ -149,13 +149,13 @@
 		destroyed: function(){
 			let self = this;
 
-            webSocketClose(self.ws);
+            mxWebSocket.webSocketClose(self.ws);
 		},
         methods: {
             init: function(event) {
                 let self = this;
 
-                self.ws = new WebSocket('ws://47.92.151.165/websocket/event');//webSocketNew(self.wsUrl);
+                self.ws = new WebSocket('ws://47.92.151.165/websocket/event');//mxWebSocket.webSocketNew(self.wsUrl);
 
                 self.ws.onopen = function() {
 
@@ -203,7 +203,7 @@
 
                 if(self.ws){
 
-                    webSocketClose(self.ws);
+                    mxWebSocket.webSocketClose(self.ws);
 
                     self.init();
 
@@ -216,7 +216,7 @@
                 self.cron.sched = null;
                 self.cron.timer = null;
 
-                webSocketClose(self.ws);
+                mxWebSocket.webSocketClose(self.ws);
 	        }
         }
 	

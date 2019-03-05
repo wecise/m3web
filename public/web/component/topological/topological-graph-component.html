@@ -178,25 +178,46 @@
                         new mxDivResizer(outline);
                     }
 
-                    // Creates the graph inside the given container
-                    // self.model.graph.layers.root = new mxCell();
-                    //
+                    // Enables crisp rendering of rectangles in SVG
+                    //mxConstants.ENTITY_SEGMENT = 20;
+
                     // self.model.graph.model = new mxGraphModel(self.model.graph.layers.root);
                     self.model.graph.graph = new mxGraph(self.model.graph.container);
                     self.model.graph.graph.resizeContainer = true;
 
                     // Enables automatic sizing for vertices after editing and
                     // panning by using the left mouse button.
-                    self.model.graph.graph.setEnabled(false);
-                    self.model.graph.graph.setCellsMovable(true);
+                    // self.model.graph.graph.setEnabled(false);
+                    // self.model.graph.graph.setCellsMovable(true);
                     self.model.graph.graph.setAutoSizeCells(true);
                     self.model.graph.graph.setPanning(true);
-                    self.model.graph.graph.centerZoom = true;
-                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
-                    // Disables tooltips on touch devices
+                    // self.model.graph.graph.centerZoom = true;
+                    // self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                    // // Disables tooltips on touch devices
                     self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
                     self.model.graph.graph.htmlLabels = true;
 
+
+                    // Sets global styles
+                    var style = self.model.graph.graph.getStylesheet().getDefaultEdgeStyle();
+                    style[mxConstants.STYLE_EDGE] = mxEdgeStyle.EntityRelation;
+                    style[mxConstants.STYLE_ROUNDED] = true;
+
+                    style = self.model.graph.graph.getStylesheet().getDefaultVertexStyle();
+                    style[mxConstants.STYLE_FILLCOLOR] = '#2f8ee7';
+                    style[mxConstants.STYLE_FONTCOLOR] = '#ffffff';
+                    style[mxConstants.STYLE_FONTSIZE] = '14';
+                    style[mxConstants.STYLE_SHAPE] = 'swimlane';
+                    style[mxConstants.STYLE_SPACING] = '10';
+                    style[mxConstants.STYLE_STARTSIZE] = 30;
+
+                    style = [];
+                    style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_RECTANGLE;
+                    style[mxConstants.STYLE_STROKECOLOR] = 'none';
+                    style[mxConstants.STYLE_FILLCOLOR] = 'none';
+                    style[mxConstants.STYLE_FOLDABLE] = false;
+                    style = self.model.graph.graph.getStylesheet().putCellStyle('column', style);
+                    
                     new mxCellTracker(self.model.graph.graph);
 
                     self.model.graph.graph.getCursorForCell = function(cell){
@@ -214,8 +235,30 @@
 
                     // Creates a layout algorithm to be used with the graph
                     self.model.graph.layout.hierarchical = new mxHierarchicalLayout(self.model.graph.graph);
-                    self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
-                    self.model.graph.layout.default = self.model.graph.layout.hierarchical;
+                    // self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
+                    // self.model.graph.layout.default = self.model.graph.layout.hierarchical;
+
+                    let layout = new mxStackLayout(self.model.graph.graph);
+                    layout.border = self.model.graph.graph.border;
+                    var layoutMgr = new mxLayoutManager(self.model.graph.graph);
+                    layoutMgr.getLayout = function(cell){
+                        if (!cell.collapsed){
+                            if (cell.parent != self.model.graph.graph.model.root){
+                                layout.resizeParent = true;
+                                layout.horizontal = false;
+                                layout.spacing = 10;
+                            } else {
+                                layout.resizeParent = true;
+                                layout.horizontal = true;
+                                layout.spacing = 40;
+                            }
+                            
+                            
+                            return layout;
+                        }
+                        
+                        return null;
+                    };
 
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
 
@@ -258,26 +301,47 @@
             initGraph(){
                 const self = this;
 
+                // Extends mxGraphModel.getStyle to show an image when collapsed
+                var modelGetStyle = self.model.graph.graph.model.getStyle;
+                self.model.graph.graph.model.getStyle = function(cell){
+                    if (cell != null){
+                        var style = modelGetStyle.apply(this, arguments);
+                        if (this.isCollapsed(cell)){
+                            style = style + `;shape=image;image=${window.ASSETS_ICON}/entity/png/${cell.value}.png?type=download&issys=${window.SignedUser_IsAdmin};imageBackground=#FFFFFF;imageBorder=#FFFFFF`;
+                        }
+                        return style;
+                    }
+                    return null;
+                };
+
                 self.model.graph.graph.getModel().beginUpdate();
 
-                try
-                {
+                try{
                     self.model.graph.graph.getModel()
 
+                    let groupList = {};
+                    let nodesList = {};
+            
                     self.model.graph.nodes = {};
                     let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
                     //let orderNodes = _.groupBy(self.graphData.edges,'source');
-                    console.log(_.groupBy(self.graphData.edges,'source'))
+                    
+                    // 节点
                     _.forEach(orderNodes,function(v){
 
                         let _type = v._icon || 'matrix';
                         let _name =  _.last(v.id.split(":")) || '';
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`);
+                            `column;shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`,false);
 
                         self.model.graph.nodes[v.id] = node;
+
+                        // 分组
+                        _.merge(nodesList,{[v._icon]:[]});
+                        nodesList[v._icon].push(node);
                     })
 
+                    // 边界
                     _.forEach(self.graphData.edges,function(k){
                         let source =  self.model.graph.nodes[k.source];
                         let target = self.model.graph.nodes[k.target];
@@ -290,8 +354,35 @@
                         let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                     })
 
+                    // 创建组
+                    let groups = _.groupBy(self.graphData.nodes,'_icon');
+                    if(groups){
+                        _.forEach(groups,function(v,k){
+                            let cell = null;
+                            if(k==='biz'){
+                                cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
+                                cell.geometry.alternateBounds = new mxRectangle(0, 50, 120, 90);  
+                            } else if(k==='ha'){
+                                cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
+                                cell.geometry.alternateBounds = new mxRectangle(0, 100, 120, 90);  
+                            } else if(k==='weblogic'){
+                                cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
+                                cell.geometry.alternateBounds = new mxRectangle(0, 150, 120, 90);  
+                            } else {
+                                cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
+                                cell.geometry.alternateBounds = new mxRectangle(0, 200, 120, 90);  
+                            }
+                            
+                            _.merge(groupList,{[k]:[]});
+                            groupList[k].push(cell);
+
+                            self.model.graph.graph.groupCells(cell,0,nodesList[k]);
+                        })
+                    }
+
                     // Executes the layout
-	                self.model.graph.layout.default.execute(self.model.graph.parent);
+                    //self.model.graph.layout.hierarchical.execute(self.model.graph.parent);
+                    
                 }
                 finally
                 {
@@ -359,7 +450,7 @@
 
                                     let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
                                     let items = {};
-                                    let menu = callFsJScript('/graph/contextmenu.js', null).message;
+                                    let menu = fsHandler.callFsJScript('/graph/contextmenu.js', null).message;
                                     _.forEach(menu,function(v){
                                         return _.merge(items, v);
                                     })
@@ -417,12 +508,12 @@
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
 	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};
-                        let rtn = fsNew('file', parent, name, xml, attr);
+                        let rtn = fsHandler.fsNew('file', parent, name, xml, attr);
 	                    if(rtn == 1){
 
 	                        let item = _.merge({parent:parent,name:name,attr:attr,ftype:ftype},{lang: 'zh', action:'run'});
 
-                            let url = genFsUrl(item,null,null);
+                            let url = fsHandler.genFsUrl(item,null,null);
 
                             alertify.success(`已保存到/fs${[parent,name].join("/")}，<a class="btn btn-success" href="${url}" target="_blank">点击前往编辑或查看</a>`);
 	                    }
@@ -525,8 +616,21 @@
             toCenter(){
                 const self = this;
 
-                self.model.graph.graph.fit();
-                self.model.graph.graph.center(true,false,0.5,0.5);
+                //self.model.graph.graph.fit();
+                //self.model.graph.graph.center(true,false,0.5,0.5);
+                var margin = 2;
+                var max = 3;
+
+                var bounds = self.model.graph.graph.getGraphBounds();
+                var cw = self.model.graph.graph.container.clientWidth - margin;
+                var ch = self.model.graph.graph.container.clientHeight - margin;
+                var w = bounds.width / self.model.graph.graph.view.scale;
+                var h = bounds.height / self.model.graph.graph.view.scale;
+                var s = Math.min(max, Math.min(cw / w, ch / h));
+
+                self.model.graph.graph.view.scaleAndTranslate(s,
+                (margin + cw - w * s) / (2 * s) - bounds.x / self.model.graph.graph.view.scale,
+                (margin + ch - h * s) / (2 * s) - bounds.y / self.model.graph.graph.view.scale);
 
             },
             path(){
