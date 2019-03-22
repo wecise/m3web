@@ -444,12 +444,12 @@
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
-												  <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
-												  <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
-												  <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
+												  <p style="margin: 0 0 8.5px;"><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
+												  <p style="margin: 0 0 8.5px;"><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
+												  <p style="margin: 0 0 8.5px;"><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
 												  <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
-												  <p><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
-												  <p><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
+												  <p style="margin: 0 0 8.5px;"><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+												  <p style="margin: 0 0 8.5px;"><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
 											  </a>
 										  </div>
 										  <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
@@ -592,12 +592,12 @@
 										  </div>
 										  <div class="stats-link">
 											  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
-												  <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
-												  <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
-												  <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
-												  <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
-												  <p><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
-												  <p><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
+                                                <p style="margin: 0 0 8.5px;"><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
+                                                <p style="margin: 0 0 8.5px;"><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
+                                                <p style="margin: 0 0 8.5px;"><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
+												<!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
+												<p style="margin: 0 0 8.5px;"><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+												<p style="margin: 0 0 8.5px;"><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
 											  </a>
 										  </div>
 										  <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
@@ -911,13 +911,20 @@
 
                 self.orderIt();
 
+                //非选择区域事件
+                // $(document).mouseup(function(e) {
+                //     let items = $("li.dir.fs-node");
+                //     if (!items.is(e.target) && items.has(e.target).length === 0) {
+                //         self.selectedItem = [];
+                //         window.fsSelectedItem = [];
+                //     }
+                // });
+
 			},
 			toggleView: function(view){
 			    const self = this
 
-
 			    self.currentView = view;
-
 			},
 			initContextMenu: function(){
 			    const self = this
@@ -1610,31 +1617,14 @@
                 }
             },
             newFile: function() {
-                const self = this
-
-                alertify.prompt("文件类型", function (e, str) {
-                    // str is the input text
-                    if (e) {
-                        let _name = `新文件_${_.now()}.${str}`;
-                        let _type = str || 'file';
-                        let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
-
-                        let _rtn = fsHandler.fsNew(_type, self.rootPath, _name, null, _attr);
-
-                        if(_rtn == 1){
-                            self.load();
-                        }
-                    } else {
-                        // user clicked "cancel"
-                    }
-                }, "文件类型");
+                fileSystem.fileNew(this.rootPath,this.load);
             },
             info: function(node){
                 const self = this
 
                 let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
 
-                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": "{{.SignedUser.UserName}}", "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
+                let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": ${window.SignedUser_UserName}, "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
 
                 if(_.isEmpty(node.attr)){
                     node = _.merge(node, _attr);
@@ -1999,7 +1989,7 @@
 		                                <label class="col-sm-2 control-label">图标</label>
 		                                <div class="col-sm-10">
 		                                    <a href="#fs-deploy-icon-list" aria-controls="fs-deploy-icon-list" role="tab" data-toggle="tab">
-		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;background-color:rgb(37, 45, 73);" >
+		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);" >
 		                                    </a>
 		                                </div>
 		                              </div>
@@ -2011,13 +2001,13 @@
 		                              </div>
 		                            </form>
 		                        </div>
-		                        <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list">
+		                        <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list" style="padding:10px;">
 		                            <div class="row">
 		                              <div class="col-md-12" style="display: list-item;height: 35vh;overflow: auto;">
 		                                <ul>
-		                                    <li v-for="icon in app.icon.list" style="width: 80px;height: 85px;padding: 0px;">
-		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(37, 45, 73);height:100%;" @click="triggerInput(icon.id)">
-		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
+		                                    <li v-for="icon in app.icon.list" style="width: 68px;height: 68px;padding: 0px;">
+		                                        <a href="#" class="thumbnail" style="border:none;height:100%;" @click="triggerInput(icon.id)">
+		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 34px;min-width: 34px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
 		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value" >
 		                                        </a>
 		                                    </li>
@@ -2083,7 +2073,7 @@
                             let app = {
                                 cnname: me.app.cnname,
                                 enname: me.app.enname,
-                                icon: me.app.icon.value,
+                                icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,''),
 	                            seat: me.app.seat,
                                 url: me.app.url
                             };

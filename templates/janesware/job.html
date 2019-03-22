@@ -21,1540 +21,296 @@
 
 -->
 {{template "base/head" .}}
+<!--MXClient JS & CSS-->
+<script>
+	mxBasePath = '{{AppSubUrl}}/web/creative/src';
+	mxLanguage = window.MATRIX_LANG.replace(/en/g,"eg").split("-")[0];
+</script>
+
+<script src="{{AppSubUrl}}/web/creative/src/js/mxClient.js" type="text/javascript"></script>
+<link href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+
+<script>
+    mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
+</script>
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
-<link href="{{AppSubUrl}}/web/vendor/bootstrap-wizard/css/bwizard.min.css" rel="stylesheet">
 
-<style type="text/css">
+<style>
 
-    .bootstrap-table > .fixed-table-container > .fixed-table-body {
-        height: -moz-calc(100vh - 305px);
-        height: -webkit-calc(100vh - 305px);
-        height: calc(100vh - 305px);
-    }
+	/* body */
+	body {
+		overflow:hidden;
+	}
 
-    span > .btn.dropdown-toggle {
-        padding: 2px 12px;
-        border-radius: 0px;
-    }
+	/* content */
+	#content.content {
+		padding: 5px 10px 0px 5px!important;
+	}
 
-    .btn.dropdown-toggle {
-        padding: 7px 12px;
-        border-radius: 0px;
-    }
+	/* Event view */
+	.tree-view {
+		padding: 0 15px;
+	}
 
-    /* panel-group*/
-    .panel-group > .panel > .panel-heading {
-        padding: 4px 10px;
-        background-color: rgb(255, 255, 255);
-    }
+	/* 运维模式 */
+	.view-normal .tree-view {
+		display: none;
+		width: 0%;
+	}
+	.view-normal .table-view {
+		width: 100%;
+	}
 
-    /* Button Group */
-    .btn-group > .btn-default.active:visited,
-    .btn-group > .btn-default.active:hover,
-    .btn-group > .btn-default.active:focus,
-    .btn-group > .btn-default.active:active {
-        background-color: #919ba0!important;
-    }
+	/* 标签树模式 */
+	.view-tags .tree-view {
+		width: 18%;
+	}
+	.view-tags .table-view {
+		width: 82%;
+	}
 
-    /*----------  Job Status For Cell Color  ----------*/
+	/* 全屏模式 */
+	.view-fullscreen .tree-view {
+		display: none;
+		width: 0%;
+	}
+	.view-fullscreen .table-view {
+		width: 100%;
+	}
 
-    td.status_1 { /*Unknown*/
-        color: #fff;
-        background: #f9d50f;
-        text-align: center;
-    }
+	/* timeline view */
+	.timeline-view {
+		background: rgb(250, 250, 250);
+	}
 
-    td.status_2 { /*Ready*/
-        color: #fff;
-        background: #14ccfa;
-        text-align: center;
-    }
-
-
-    td.status_3 { /*Waiting*/
-        color: #fff;
-        background: #f0ad4e;
-        text-align: center;
-    }
-
-
-    td.status_4 { /*Queue*/
-        color: #fff;
-        background: #a860f8;
-        text-align: center;
-    }
-
-    td.status_5 { /*Running*/
-        color: #fff;
-        background: #337ab7;
-        text-align: center;
-    }
+	/* table view */
+	.table-view {
+		padding-top: 10px!important;
+	}
 
 
-    td.status_6 { /*Succeeded*/
-        color: #fff;
-        background: #5cb85c;
-        text-align: center;
-    }
+	/* nav nav-tabs nav-tabs-line-2px li a */
+	.panel-title-btn .nav-tabs-line-2px{
+		margin: 0 -15px;
+	}
+	.panel-title-btn .nav-tabs-line-2px > li > a {
+		padding: 0px 15px
+	}
 
+	/* 自定义Panel */
+	.panel.panel-default.panel-white-border {
+		margin-bottom: 10px;
+		border: 1px solid rgb(250, 250, 250);
+	}
 
-    td.status_7 { /*Failed*/
-        color: #fff;
-        background: #d9534f;
-        text-align: center;
-    }
+	.panel-white-border .panel-heading .nav-tabs {
+		margin-left: -13px;
+		margin-top: -8px;
+		margin-right: -15px;
+	}
 
+	.panel-white-border .panel-title{
+		height: 18px;
+	}
+	.panel-white-border .panel-body {
+		padding:0 10px;
+	}
 
-    td.status_8 { /*Cancelled*/
-        color: #fff;
-        background: #ca7303;
-        text-align: center;
-    }
+	/* 告警详情页Tab */
+	.detail.tab-pane.Tab{
+		min-height: 72vh;
+	}
 
-    td.status_9 { /*Skipped*/
-        color: #fff;
-        background: #294af6;
-        text-align: center;
-    }
+	/* 告警分析 */
+	form.event-view-detail > .form-group:nth-child(even) {
+		background: rgb(249, 249, 249);
+	}
+	form.event-view-detail > .form-group:nth-child(odd) {
+		background: rgb(255, 255, 255);
+	}
 
-    td.status_10 { /*Timeout*/
-        color: #fff;
-        background: #e01fec;
-        text-align: center;
-    }
+	section.event-diagnosis > ul {
+		padding:15px 0px;
+		padding-left: 23vw;
+	}
 
+	section.event-diagnosis > ul > li > a{
+		font-size: 14px;
+		color: #333333;
+		background: transparent;
+	}
 
-    td {
-        white-space: nowrap;
-    }
+	section.event-diagnosis > ul > li.active > a{
+		font-size: 14px;
+		box-shadow: 1px 1px 1px 1px #ddd;
+    	color: #ffffff!important;
+    	border-radius: 2px;
+    	background: rgb(130, 192, 255)!important;
+	}
+
+	section.event-diagnosis > div.content{
+		margin: 0px;
+		padding:0px 15px;
+		height:calc(90vh - 183px);
+		overflow:auto;
+	}
+
+	section.event-diagnosis > div.content > p{
+		border:1px solid #ddd;
+		padding:15px;
+	}
+
+	/* 告警统计widget */
+	.event-view-summary-control{
+		right: 15px;
+		padding-top: 5px;
+		display: inline-block;
+		padding-right: 3px;
+		vertical-align: middle;
+		font-weight: 900;
+		position: absolute;
+		z-index: 10;
+		cursor: pointer;
+	}
+
+	/* el tabs */
+	#event-view-summary .el-tabs__content{
+		max-height:160px;
+		overflow-y:auto;
+	}
+
+	.el-tabs__item {
+    	height: 30px;
+		line-height: 30px;
+		font-size: 12px;
+	}
+	.el-tabs__nav-prev,
+	.el-tabs__nav-next{
+		line-height: 30px;
+	}
+
+	.el-card__header{
+		padding:0 5px;
+	}
+	.el-card__header > .clearfix > span {
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	/* 属性选择，隐藏第一列checkbox */
+	.dt-button-collection.fixed.four-column > a:nth-child(1){
+		display: none;
+	}
 
 </style>
 
 <div id="app"></div>
+
+<script src="{{AppSubUrl}}/web/js/model/Job.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
 
-<!-- Jquery Timer JS-->
-<script src="{{AppSubUrl}}/web/vendor/timer/jquery.timer.js"></script>
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
-<!-- Bootstrap-wizard JS-->
-<script src="{{AppSubUrl}}/web/vendor/bootstrap-wizard/js/bwizard.js"></script>
-
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-tree-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-table-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<SCRIPT type="text/javascript">
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-diagnosis-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-graph-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-summary-component.html"></link>
 
-    VueLoader.onloaded(["vue-search-preset-component",
-                        "vue-search-input-component",
-                        "vue-base-tree-component",
-                        "vue-base-table-component",
-                        "vue-object-detail-component",
-                        "vue-base-datatables-component",
-                        "ai-robot-component"],function() {
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
-        moment.locale(`{{.Lang}}`);
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
-        $(function () {
+<link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
-            $(".current-active-item").html(`<a class="active item" href="{{AppSubUrl}}/janesware/{{.ActiveView}}"><i class="fa fa-tasks"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
-            var timeoutId = 0;
-
-            var appVue = new Vue({
-                delimiters: ['${', '}'],
-                el: "#app",
-                template: "#app-template",
-                data: {
-                    search: {
-                        params: {
-                            at: '#',
-                            class: '',
-                            subclass: ':',
-                            top: 'top 200',
-                            lua: ""
-                        },
-                        filter:[],
-                        input: {
-                            type: {type:"event",quick: ""},
-                            term: ""
-                        },
-                        preset: {},
-                        regexp: {
-                            top: /top (\d+(\.\d)*)/gmi,
-                            undefined:  /undefined/g,
-                            doubleGrep: /\|(\s+(\|))/g,
-
-                        },
-                        result:{
-                            data: [],
-                            columns: [],
-                            options: {
-                                classes: "table table-no-bordered",
-                                search: true,
-                                locale: '{{.Lang}}',
-                                rowStyle: 	function rowStyle(row, index) {
-                                    return {
-                                        classes: 'text-nowrap'
-                                    };
-                                }
-                            },
-                            byStatus: []
-                        }
-                    },
-                    toggle:{
-                        left: false,
-                        top: true,
-                        mode: {
-                            default: {name:'m', title:'Monitoring Mode', icon: 'fa fa-tachometer'},
-                            list:[
-                                {name:'d', title:'Diagnosis Mode', icon: 'fa fa-desktop'},
-                                {name:'o', title:'Operation Mode', icon: 'fa fa-laptop'},
-                                {name:'m', title:'Monitoring Mode', icon: 'fa fa-tachometer'},
-                            ]
-                        }
-                    },
-                    treeNodes: {},
-                    outputEditor: {},
-                    job: {
-                        folder: {
-                            ifShowNav: false,
-                            list: [],
-                            contextMenu: {
-                                            "start": {name: "Start", icon: "fa-play",
-                                                        callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                                            let _item = $(this).attr("id");
-                                                            console.log(_item)
-                                                        }},
-                                            "stop": {name: "Stop", icon: "fa-stop"},
-                                            "pause": {name: "Pause", icon: "fa-pause"},
-                                        },
-                            table: {
-                                search: "#/matrix/jobs/jobrun/ : | top 1000",
-                                options: {
-                                    toggle: "table",
-                                    classes: "table table-striped",
-                                    showToggle: false,
-                                    showColumns: true,
-                                    pagination: false,
-                                    toolbar: "#custom-toolbar1",
-                                    showExport: true,
-                                    exportTypes: "['json', 'xml', 'csv', 'txt', 'sql', 'excel']",
-                                    showFooter: false,
-                                    pageSize: "15",
-                                    pageList: "[15,30,45,60]",
-                                    detailView: true,
-                                    buttonsAlign: "right",
-                                },
-                                columns: [],
-                                dataset: []
-                            }
-
-                        },
-                        define: {
-                            ifShowNav: false,
-                            table: {
-                                search: "#/matrix/jobs/jobdef/ : | top 1000",
-                                options: {
-                                    toggle: "table",
-                                    classes: "table table-striped",
-                                    showToggle: false,
-                                    showColumns: true,
-                                    pagination: false,
-                                    toolbar: "#custom-toolbar2",
-                                    showExport: true,
-                                    exportTypes: "['json', 'xml', 'csv', 'txt', 'sql', 'excel']",
-                                    showFooter: false,
-                                    pageSize: "15",
-                                    pageList: "[15,30,45,60]",
-                                    detailView: true,
-                                    buttonsAlign: "right",
-                                    height: 450
-                                },
-                                columns: [],
-                                dataset: []
-                            },
-                            contextMenu: {
-                                "newFolder": {name: "New Folder", icon: "fa-folder-open",
-                                    callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                        let _item = $(this).attr("id");
-                                        console.log(_item)
-                                    }},
-                                "newJob": {name: "New Job", icon: "fa-file"},
-                                "cloneJob": {name: "Clone Job", icon: "fa-copy"},
-                                "sep1": "---------",
-                                "delJob": {name: "Delete", icon: "fa-trash"},
-                            }
-                        }
-                    }
-                },
-                mounted: function () {
-                    let self = this;
-
-                    self.$nextTick(function () {
-
-                        self.init();
-
-                        self.initJob();
-                        self.initDefine();
-
-                        $('.selectpicker.severity').on('changed.bs.select', function (e) {
-                            var array_where = [];
-                            var selected = $(this).val();
-
-                            if (selected != null) {
-                                array_where = selected;
-                            } else {
-                                array_where.splice(0, 5);
-                            }
-                        });
-
-                        _.delay(function () {
-                            self.outputEditor = ace.edit("output_name");
-                            self.outputEditor.setOptions({
-                                maxLines: Infinity,
-                                minLines: 10,
-                            });
-                            self.outputEditor.setTheme("ace/theme/clouds");
-                            self.outputEditor.getSession().setMode("ace/mode/toml");
-                        }, 2000)
-                    })
-                },
-                methods: {
-                    initJob: function () {
-                        let self = this;
-                        let _list = null;
-                        let _columns = [];
-
-                        _list = omdbHandler.fetchData(self.job.folder.table.search);
-
-                        if(_.isEmpty(_list.message)){
-                            self.job.table.dataset = [];
-                            return false;
-                        }
-
-                        let _classKeys = _.keys(_list.meta.classes);
-
-                        _.forEach(_list.meta.columns[_classKeys[0]],function (v) {
-                            let _sortable = false;
-
-                            if (v.type === 'timestamp'){
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    sortable: true,
-                                    render: function(data, type, row) {
-                                        return moment(data).format("LLL");
-                                    }
-                                });
-                            } else if (v.type === 'date'){
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    sortable: true,
-                                    render: function(data, type, row) {
-                                        return moment(data).format("L");
-                                    }
-                                });
-                            } else if (v.type === 'map'){
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    render: function(data, type, row) {
-                                        return JSON.stringify(data);
-                                    }
-                                });
-                            } else if (v.type === 'set' || v.type === 'list'){
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    render: function(data, type, row) {
-                                        return data.join(",");
-                                    }
-                                });
-                            } else if (v.type === 'smallint'){
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    sortable: true,
-                                    formatter: function(value, row, index) {
-
-                                        if(!v.enum) return false;
-
-                                        let _enum = v.enum[value];
-
-                                        if (!_.isEmpty(_enum)) {
-                                            return _enum[0];
-                                        } else {
-                                            return 'Unknown';
-                                        }
-
-                                    },
-                                    cellStyle: function(value,row,index){
-
-                                        if(!v.enum) return false;
-
-                                        let _enum = v.enum[value];
-
-                                        if (!_.isEmpty(_enum)) {
-                                            return {classes: v.name + value};
-                                        } else {
-                                            return {classes: v.name + '_1'};
-                                        }
-
-                                    }
-                                });
-
-                            } else {
-                                _columns.push({
-                                    field: v.name,
-                                    title: v.title || _.startCase(v.name),
-                                    sortable: _.sortable
-                                });
-                            }
-                        })
-
-                        self.job.folder.table.columns = _columns;
-                        self.job.folder.table.dataset = _list.message;
-
-                        _.delay(function (text) {
-                            self.summary(_list.message);
-                            //self.loadDetailData();
-                            self.initSearchBar();
-                        }, 500);
-                    },
-                    initDefine: function () {
-                        let self = this;
-                        let _list = null;
-                        let _cols = [];
-
-                        _list = omdbHandler.fetchData(self.job.define.table.search);
-
-                        if (_.isEmpty(_list.message)){
-                            self.job.define.table.dataset = [];
-                            return false;
-                        }
-
-                        _cols[0] = {
-                            field: "state",
-                            checkbox: "true"
-                        }
-
-                        _.forEach(_list.meta.columns[_.keys(_list.meta.columns)[0]],function (v,k) {
-                            if (v.type == 'timestamp'){
-                                _cols.push({
-                                    field: v.name,
-                                    title: _.startCase(v.name),
-                                    formatter: function (value,row,index) {
-                                        return moment(value).format("LLL");
-                                    }
-                                })
-                            } else {
-                                _cols.push({
-                                    field: v.name,
-                                    title: _.startCase(v.name)
-                                })
-                            }
-
-                        })
-
-                        _cols.push({
-                            field: "period",
-                            title: "执行时间",
-                            formatter: function (value, row, index) {
-                                return moment(row.stime).from(moment(row.etime), 'hour');
-                            }
-                        })
-
-                        self.job.define.table.columns = _cols;
-                        self.job.define.table.dataset = _list.message;
-
-                        _.delay(function (text) {
-                            self.loadDetailData();
-                            self.initSearchBar();
-                        }, 500);
-                    },
-                    summary: function (event) {
-                        let self = this;
-                        let byStatus = {
-                                            name: ["status"],
-                                            level: {
-                                                "1": {name:"Unknown", color:"#f9d50f"},
-                                                "2": {name:"Ready", color:"#14ccfa"},
-                                                "3": {name:"Waiting", color:"#f0ad4e"},
-                                                "4": {name:"Queue", color:"#a860f8"},
-                                                "5": {name:"Running", color:"#337ab7"},
-                                                "6": {name:"Succeeded", color:"#5cb85c"},
-                                                "7": {name:"Failed", color:"#d9534f"},
-                                                "8": {name:"Cancelled", color:"#ca7303"},
-                                                "9": {name:"Skipped", color:"#294af6"},
-                                                "10": {name:"Timeout", color:"#e01fec"}
-                                            }
-                                        };
-
-                        // For Gauge & Severity Btn
-                        self.search.result.byStatus = [];
-
-                        let _groupTemp = _.omit(_.groupBy(event,byStatus.name[0]),['undefined','']);
-
-                        _.forEach(_groupTemp, function(v,k){
-
-                            let s = {};
-                            s.name = byStatus.level[k]?byStatus.level[k].name:byStatus.level["other"].name;
-                            s.count = v.length;
-                            s.severity = k;
-                            s.color = byStatus.level[k]?byStatus.level[k].color:byStatus.level["other"].color;
-
-                            self.search.result.byStatus.push(s);
-
-                        });
-
-                    },
-                    loadDetailData: function () {
-                        let self = this;
-
-                        $(self.target).on('expand-row.bs.table', function (e, index, row, $detail) {
-
-                            var table = $("<table></table>").addClass("table")
-                                .attr("id", "table-" + index)
-                                .attr("data-show-header", "true")
-                                //.attr("data-row-style", "rowStyle")
-                                .attr("data-click-to-select", "true")
-                                .attr("data-undefined-text", "")
-                                .attr("data-show-toggle", "false")
-                                .attr("data-show-columns", "false")
-                                .attr("data-buttons-align", "left");
-                            var cols = [];
-
-                            $("#table-" + index).bootstrapTable('destroy');
-
-                            let _list = omdbHandler.fetchData("#/matrix/jobs/cmdrun/ : runid=" + row.runid + " | top 1000");
-
-                            let _data = _list.message;
-
-                            cols.push({
-                                field: "state",
-                                checkbox: "true"
-                            })
-
-                            $.map(_data[0], function (k, v) {
-                                var col = v;
-
-                                if (col == 'jobstatus') {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true,
-                                        formatter: operateJobstatusFormatter
-                                    })
-                                } else if (col == 'out' || col == 'err') {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true,
-                                        wrap: true,
-                                        formatter: operateOutputFormatter
-                                    })
-                                } else if (col == 'jobtype') {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true,
-                                        formatter: operateJobTypeFormatter
-                                    })
-                                } else if (col == 'tokens') {
-
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true,
-                                        visible: false
-                                    })
-                                } else if (col == "vtime" || col == "stime" || col == "etime") {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true,
-                                        formatter: formaterDate
-                                    })
-                                } else if (col == "vtime" || col == "class" || col == "id") {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        visible: false,
-                                    })
-                                } else {
-                                    cols.push({
-                                        field: col,
-                                        title: col,
-                                        sortable: true
-                                    })
-                                }
-                            });
-
-                            $("#table-" + index).bootstrapTable({
-                                columns: cols
-                            });
-
-                            $("#table-" + index).bootstrapTable('removeAll');
-                            $("#table-" + index).bootstrapTable('load', _data);
-
-                            $detail.html(table).ready(function () {
-                                console.log($(".wzd").html());
-                            });
-
-
-                        });
-                    },
-                    toogleView: function (container) {
-                        let self = this;
-
-                        if (self.job[container].ifShowNav) {
-
-                            $("#nav-job-" + container).hide();
-
-                            $("#content-job-" + container).removeClass("col-lg-10");
-                            $("#content-job-" + container).addClass("col-lg-12")
-                                .css("padding-left", "10px");
-
-                            $(".navtoggle").removeClass("fa fa-caret-left");
-                            $(".navtoggle").addClass("fa fa-caret-right");
-
-                            self.job[container].ifShowNav = false;
-                        } else {
-                            $("#nav-job-" + container).slideDown(500);
-                            $("#nav-job-" + container).show();
-
-                            $("#content-job-" + container).removeClass("col-lg-12");
-                            $("#content-job-" + container).addClass("col-lg-10")
-                                .css("padding-left", "0px");
-
-                            $(".navtoggle-job-" + container).removeClass("fa fa-caret-right");
-                            $(".navtoggle-job-" + container).addClass("fa fa-caret-left");
-
-                            self.job[container].ifShowNav = true;
-                        }
-                    },
-                    onSearch: function (term) {
-                        let self = this;
-                        let params;
-
-                        if (term.length > 0) {
-                            params = self.searchParams + term;
-                        } else {
-                            params = self.searchParams;
-                        }
-                        let _list = omdbHandler.fetchData(params);
-
-                        $(self.target).bootstrapTable('load', _list.message);
-                    },
-                    initSearchBar: function () {
-                        let self = this;
-
-                        /**
-                         * @todo 自定义搜索框
-                         */
-                        $(".export.btn-group").after('<div class="input-group" id="btn_group"></div>');
-
-                        $search = $('.searchinput input');
-                        $search.off('keyup drop').on('keyup drop', function (event) {
-
-                            clearTimeout(timeoutId); // doesn't matter if it's 0
-                            timeoutId = setTimeout(function () {
-                                if (_.trim($search.val()).length > 0) {
-                                    self.onSearch(" | " + _.trim($search.val()));
-                                } else {
-                                    self.onSearch(_.trim($search.val()));
-                                }
-                            }, 500);
-                        });
-                    },
-                    init: function () {
-                        let self = this;
-
-                        self.job.folder.list = fsHandler.fetchFile("https://easy-mock.com/mock/5a3c6a010df23b51b3615692/wecise/jobfolder");
-
-                    },
-                    setFilterByStatus: function(event){
-                        let self = this;
-                        let s = {};
-                        let obj = $(".event-severity-btn ."+event);
-                        let _class = obj.attr("class");
-                        let _severity = obj.data("value");
-
-                        s.name = window.GLOBAL_OBJECT.company.object.event.preconfig.severity.name[0];
-                        s.value = _severity;
-                        s.type = "match";
-
-                        /*if(_class.indexOf("active") != -1) {
-                            self.summary.filter = _.values(_.omitBy(self.summary.filter,s));
-                        } else {
-                            self.summary.filter.push(s);
-                        }*/
-                    },
-                    toggleTop: function(){
-                        let self = this;
-
-                        if(self.toggle.top) {
-
-                            $(".event-top").slideDown(500);
-                            $(".event-top").css("display","");
-
-                            $(".toggle-top").removeClass("fa-caret-right");
-                            $(".toggle-top").addClass("fa-caret-down");
-
-                            $(".fixed-table-body").css( {
-                                "height": "-moz-calc(100vh - 440px)",
-                                "height": "-webkit-calc(100vh - 440px)",
-                                "height": "calc(100vh - 440px)"
-                            });
-
-                            self.toggle.top = false;
-
-                        } else {
-
-                            $(".event-top").slideUp(500, function() {
-                                $(".event-top").css("display","none");
-
-                                $(".toggle-top").removeClass("fa-caret-down");
-                                $(".toggle-top").addClass("fa-caret-right");
-
-                                $(".fixed-table-body").css( {
-                                    "height": "-moz-calc(100vh - 305px)",
-                                    "height": "-webkit-calc(100vh - 305px)",
-                                    "height": "calc(100vh - 305px)"
-                                });
-
-                                self.toggle.top = true;
-
-                            })
-                        }
-
-                        eventHub.$emit("chart-resize-event",null);
-                    },
-                    toggleLeft: function() {
-                        let self = this;
-
-                        if(self.toggle.left) {
-
-                            $("#nav").hide();
-
-                            $("#content").removeClass("col-lg-10");
-                            $("#content").addClass("col-lg-12");
-                            //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
-
-                            $(".navtoggle").removeClass("fa fa-caret-left");
-                            $(".navtoggle").addClass("fa fa-caret-right");
-
-                            self.toggle.left = false;
-                        } else {
-                            $("#nav").slideDown(500);
-                            $("#nav").show();
-
-                            $("#content").removeClass("col-lg-12");
-                            $("#content").addClass("col-lg-10");
-                            //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
-
-                            $(".navtoggle").removeClass("fa fa-caret-right");
-                            $(".navtoggle").addClass("fa fa-caret-left");
-
-                            self.toggle.left = true;
-                        }
-                    },
-                    toggleDefault: function () {
-                        let self = this;
-
-                        $(".fixed-table-body").css( {
-                            "height": "-moz-calc(100vh - 305px)",
-                            "height": "-webkit-calc(100vh - 305px)",
-                            "height": "calc(100vh - 305px)"
-                        });
-                    },
-                    toggleMode: function() {
-                        let self = this;
-                        let _default = _.head(self.toggle.mode.list);
-                        let _head = _.nth(self.toggle.mode.list,1);
-
-                        if(_default.name == 'd'){
-                            $(".navbar-fixed-top").css({"display":"none"});
-                            $("#page-container").css({"padding-top":"0px"});
-
-                            $(".fixed-table-body").css( {
-                                "height": "-moz-calc(100vh - 250px)",
-                                "height": "-webkit-calc(100vh - 250px)",
-                                "height": "calc(100vh - 250px)"
-                            });
-
-                        } else if(_default.name == 'o'){
-
-                            $(".event-search").css({"display":"none"});
-
-                            $(".fixed-table-body").css( {
-                                "height": "-moz-calc(100vh - 205px)",
-                                "height": "-webkit-calc(100vh - 205px)",
-                                "height": "calc(100vh - 205px)"
-                            });
-
-                        } else {
-                            $(".navbar-fixed-top").css({"display":""});
-                            $("#page-container").css({"padding-top":"54px"});
-                            $(".event-search").css({"display":""});
-
-                            $(".fixed-table-body").css( {
-                                "height": "-moz-calc(100vh - 305px)",
-                                "height": "-webkit-calc(100vh - 305px)",
-                                "height": "calc(100vh - 305px)"
-                            });
-                        }
-
-                        $(".toggle-mode").removeClass(_default.icon);
-                        $(".toggle-mode").addClass(_head.icon);
-                        $(".toggle-mode").attr("title",_head.title);
-
-                        self.toggle.mode.list.push(self.toggle.mode.list.shift());
-                    },
-                }
-            })
-
-            Vue.component('params-manage', {
-                delimiters: ['${', '}'],
-                template: '#params-manage-template',
-                data: function () {
-                    return {
-                        params: [],
-                        editor: Object,
-                    }
-                },
-                mounted: function () {
-                    this.$nextTick(function () {
-                        this.initEditer();
-                    })
-                },
-                methods: {
-                    add: function () {
-                        let self = this;
-                        var val = _.trim(self.editor.getValue());
-                        self.params.push(val.trim());
-                        self.editor.setValue('');
-                    },
-                    remove: function (item) {
-                        let self = this;
-                        self.params.splice($.inArray(item, self.params), 1);
-                    },
-                    initEditer: function () {
-                        let self = this;
-                        self.editor = ace.edit("params_value");
-                        self.editor.setOptions({
-                            maxLines: 30,//Infinity,
-                            minLines: 10,
-                        });
-                        self.editor.$blockScrolling = Infinity;
-                        self.editor.setTheme("ace/theme/xcode");
-                        self.editor.getSession().setMode("ace/mode/ini");
-                        self.editor.getSession().setTabSize(2);
-                        self.editor.getSession().setUseWrapMode(true);
-                    }
-                }
-            })
-
-            Vue.component('agent-manage', {
-                delimiters: ['${', '}'],
-                template: '#agent-manage-template',
-                data: function () {
-                    return {
-                        agentModel: [
-                            {name: "bin", type: "isFolder"},
-                            {name: "cfg", type: "isFolder"},
-                            {name: "etc", type: "isFolder"},
-                            {name: "log", type: "isFolder"},
-                            {name: "readme.txt", type: "file"},
-                        ]
-                    }
-                },
-                methods: {
-                    toggleEvent: function (event) {
-                        eventHub.$emit("return-dispatch-manage", event);
-                    }
-                }
-            })
-
-            Vue.component('rules-tree-component', {
-                delimiters: ['${', '}'],
-                template: '<ul class="ztree" id="rulesTree" style="overflow:auto;"></ul>',
-                props: {
-                    zNodes: Object,
-
-                },
-                data: function () {
-                    return {
-                        zTree: Object,
-                        setting: {
-                            edit: {
-                                enable: false
-                            },
-                            callback: {},
-                            data: {
-                                simpleData: {
-                                    enable: true
-                                },
-                                key: {
-                                    name: "key",
-                                    children: "nodes"
-                                }
-                            }
-                        },
-                    }
-                },
-                mounted: function () {
-                    this.$nextTick(function () {
-                        self = this;
-                        self.setting.callback.onClick = self.zTreeOnClick;
-                        self.setting.callback.onExpand = self.zTreeOnExpand;
-                    })
-                },
-                watch: {
-                    setting: function (val) {
-                        this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
-                    },
-                    zNodes: function (val) {
-
-                        $.fn.zTree.init($(this.$el), this.setting, val);
-                        this.zTree = $.fn.zTree.getZTreeObj("rulesTree");
-                        var nodes = this.zTree.getNodes();
-                        if (nodes.length > 0) {
-                            this.zTree.expandNode(nodes[0], true, false, true);
-                        }
-                    }
-                },
-                methods: {
-                    zTreeOnExpand: function (event, treeId, treeNode) {
-                        if (treeNode.dir) {
-                            treeNode.isParent = true;
-                        } else {
-                            treeNode.isParent = false;
-                        }
-                    },
-                    zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        self = this;
-                        var node = self.zTree.getSelectedNodes();
-
-                        jQuery.ajax({
-                            url: '/mxconfig/get',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                key: treeNode.key
-                            },
-                            beforeSend: function (xhr) {
-                                loading = layer.load(2, {
-                                    shade: [0.1, '#ccc'],
-                                    time: 30 * 1000
-                                });
-                            },
-                            complete: function (xhr, textStatus) {
-                                layer.close(loading);
-                            },
-                            success: function (data, textStatus, xhr) {
-                                /**
-                                 * @todo  刷新当前节点结构
-                                 */
-                                self.zTree.removeChildNodes(node[0]);
-                                var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
-                                self.zTree.addNodes(treeNode, eval(rtn.message.node.nodes));
-
-                                /**
-                                 * @todo  赋键值
-                                 */
-                                eventHub.$emit('editor-value', treeNode);
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                layer.close(loading);
-                            }
-                        });
-                    }
-                }
-            })
-
-            Vue.component('rules-manage', {
-                delimiters: ['${', '}'],
-                template: '#rules-manage-template',
-                data: function () {
-                    return {
-                        editor: Object,
-                        etcd: {
-                            createdIndex: String,
-                            modifiedIndex: String,
-                            ttl: -1,
-                            expiration: Number,
-                        },
-                        etcdKey: String,
-                    }
-                },
-                mounted: function () {
-                    this.$nextTick(function () {
-                        this.initEditer();
-                    })
-                },
-                created: function () {
-                    eventHub.$on("editor-value", this.setEditor);
-                },
-                methods: {
-                    initEditer: function () {
-                        let self = this;
-                        self.editor = ace.edit("etcd_value");
-                        ace.require('ace/ext/settings_menu').init(self.editor);
-                        self.editor.setOptions({
-                            maxLines: 30,//Infinity,
-                            minLines: 10,
-                        });
-                        self.editor.commands.addCommands([{
-                            name: "showSettingsMenu",
-                            bindKey: {
-                                win: "Ctrl-9",
-                                mac: "Command-9"
-                            },
-                            exec: function (editor) {
-                                self.editor.showSettingsMenu();
-                            },
-                            readOnly: true
-                        }]);
-                        self.editor.$blockScrolling = Infinity;
-                        self.editor.setTheme("ace/theme/xcode");
-                        self.editor.getSession().setMode("ace/mode/ini");
-                        self.editor.getSession().setTabSize(2);
-                        self.editor.getSession().setUseWrapMode(true);
-                    },
-                    setEditor: function (event) {
-                        self = this;
-                        self.etcdKey = event.key;
-                        self.editor.setValue(event.value);
-                        self.editor.setValue(self.editor.getValue(), 1);
-
-                        /**
-                         * @todo  当前节点为目录，隐藏键值输入框并显示节点［添加］按钮
-                         */
-                        if (event.dir) {
-                            $("#etcd_value").hide();
-                            $("#etcd_label").hide();
-                            $("#config_btn_new_modal").show();
-                        } else {
-                            /**
-                             * @todo  当前为节点，显示键值输入框并隐藏节点［添加］按钮，调用刷新为正常显示键值（codemirror's bug)
-                             */
-                            $("#etcd_value").show();
-                            $("#etcd_label").show();
-                            $("#config_btn_new_modal").hide();
-
-                        }
-                        /**
-                         * @todo  设置节点其它值信息
-                         */
-                        self.etcd.createdIndex = event.createdIndex;
-                        self.etcd.modifiedIndex = event.modifiedIndex;
-                        self.etcd.ttl = event.ttl;
-                        self.etcd.expiration = event.expiration;
-                    },
-                    addNode: function () {
-
-                    },
-                    removeNode: function () {
-
-                    },
-                    saveNode: function () {
-                        self = this;
-                        var key = self.etcdKey;
-                        var value = self.editor.getValue();
-                        var ttl = self.etcd.ttl;
-
-                        jQuery.ajax({
-                            url: '/mxconfig/set',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                key,
-                                value,
-                                ttl
-                            },
-                            complete: function (xhr, textStatus) {
-                                //called when complete
-                            },
-                            success: function (data, textStatus, xhr) {
-
-                                swal("修改成功!", self.etcdKey, "success");
-                                return false;
-                                var treeObj = $.fn.zTree.getZTreeObj("tree1");
-                                var sNodes = treeObj.getSelectedNodes();
-                                if (sNodes.length > 0) {
-                                    var node = sNodes[0].getParentNode();
-
-                                    refreshNodeData(node);
-                                }
-                            },
-                            error: function (xhr, textStatus, errorThrown) {
-                                //called when there is an error
-                            }
-                        })
-                    }
-                }
-            })
-
-
-        });
-
-
-        function operateJobstatusFormatter(value, row, index) {
-
-            var html = "";
-
-            if (value == 0) {
-                html = '<button class="btn btn-xs Unknown">未知</button>';
-            } else if (value == 1) {
-                html = '<button class="btn btn-xs Ready">就绪</button>';
-            } else if (value == 2) {
-                html = '<button class="btn btn-xs Waiting">等待</button>';
-            } else if (value == 3) {
-                html = '<button class="btn btn-xs Queue">队列</button>';
-            } else if (value == 4) {
-                html = '<button class="btn btn-xs Running">运行</button>';
-            } else if (value == 5) {
-                html = '<button class="btn btn-xs Succeeded">成功</button>';
-            } else if (value == 6) {
-                html = '<button class="btn btn-xs Failed">失败</button>';
-            } else if (value == 7) {
-                html = '<button class="btn btn-xs Cancelled">取消</button>';
-            } else if (value == 8) {
-                html = '<button class="btn btn-xs Skipped">略过</button>';
-            } else if (value == 9) {
-                html = '<button class="btn btn-xs Timeout">超时</button>';
-            }
-            return html;
-        }
-
-        function operateOutputFormatter(value, row, index) {
-
-            var html;
-
-            if (value.length > 0) {
-                html = "<a href='#' data-toggle='modal' data-target='#outputModal' data-whatever='" + value + "'><i class='glyphicon glyphicon-list-alt'></i> </a> " + value;
-            }
-
-            return html;
-        }
-
-        function operateJobTypeFormatter(value, row, index) {
-
-            var html = "";
-
-            if (value == 0) {
-                html = '<button class="btn btn-xs Service">服务</button>';
-            } else {
-                html = '<button class="btn btn-xs Job">作业</button>';
-            }
-            return html;
-        }
-    })
-
-</script>
 
 <script type="text/x-template" id="app-template">
-
-    <div id="content" class="content">
-
-        <div class="row event-search">
-            <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
-                <div class="input-group searchinput">
-                    <vue-search-input-component :model="search.input"></vue-search-input-component>
-                    <div class="input-group-btn">
-                        <vue-search-preset-component id="job-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
-                    </div>
-                    <div class="input-group-btn">
-                        <button type="button" class="btn btn-success" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class='row'>
-            <div class="col-lg-12">
-                <!-- TAB NAVIGATION -->
-                <ul class="nav nav-tabs nav-main" role="tablist">
-                    <li class="active"><a href="#tab1" role="tab" data-toggle="tab">执行</a></li>
-                    <li><a href="#tab2" role="tab" data-toggle="tab">定义</a></li>
-                    <li><a href="#tab3" role="tab" data-toggle="tab">Gauge</a></li>
-                    <li role="presentation" class="pull-right">
-                        <a href="javascript:void(0)" @click="toggleMode" title="Toggle Running Mode"><i class="fa fa-desktop fa-fw toggle-mode"></i></a>
-                    </li>
-                </ul>
-                <!-- TAB CONTENT -->
-                <div class="tab-content">
-                    <div class="tab-pane fade in active" id="tab1">
-                        <div class="row">
-                            <div class="col-lg-2" id="nav-job-folder" style="display: none;">
-                                <div class="panel">
-                                    <div class="panel-body" style="padding:0px;">
-                                        <vue-base-tree-component id="jobfolder-tree" :zNodes="job.folder.list" :contextMenu="job.folder.contextMenu"></vue-base-tree-component>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-12" id="content-job-folder">
-
-                                <div class="panel">
-
-                                    <div class="panel-body" style="padding:0px;">
-                                        <!--<div class="row">
-                                            &lt;!&ndash; begin col-3 &ndash;&gt;
-                                            <div class="col-md-3 col-sm-6">
-                                                <div class="widget widget-stats bg-green">
-                                                    <div class="stats-icon"><i class="fa fa-desktop"></i></div>
-                                                    <div class="stats-info">
-                                                        <h4>执行成功</h4>
-                                                        <p>322/2200</p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a href="javascript:;"><i class="fa fa-arrow-circle-o-right"></i> 事件 | 日志 </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            &lt;!&ndash; end col-3 &ndash;&gt;
-                                            &lt;!&ndash; begin col-3 &ndash;&gt;
-                                            <div class="col-md-3 col-sm-6">
-                                                <div class="widget widget-stats bg-blue">
-                                                    <div class="stats-icon"><i class="fa fa-chain-broken"></i></div>
-                                                    <div class="stats-info">
-                                                        <h4>正在执行</h4>
-                                                        <p>2323/2200</p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a href="javascript:;"><i class="fa fa-arrow-circle-o-right"></i> 事件 | 日志</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            &lt;!&ndash; end col-3 &ndash;&gt;
-                                            &lt;!&ndash; begin col-3 &ndash;&gt;
-                                            <div class="col-md-3 col-sm-6">
-                                                <div class="widget widget-stats bg-purple">
-                                                    <div class="stats-icon"><i class="fa fa-users"></i></div>
-                                                    <div class="stats-info">
-                                                        <h4>等待执行</h4>
-                                                        <p>2323/2200</p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a href="javascript:;"><i class="fa fa-arrow-circle-o-right"></i> 事件 | 日志</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            &lt;!&ndash; end col-3 &ndash;&gt;
-                                            &lt;!&ndash; begin col-3 &ndash;&gt;
-                                            <div class="col-md-3 col-sm-6">
-                                                <div class="widget widget-stats bg-red">
-                                                    <div class="stats-icon"><i class="fa fa-clock-o"></i></div>
-                                                    <div class="stats-info">
-                                                        <h4>执行失败</h4>
-                                                        <p>323/2200</p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a href="javascript:;"><i class="fa fa-arrow-circle-o-right"></i> 事件 | 日志</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            &lt;!&ndash; end col-3 &ndash;&gt;
-                                        </div>-->
-                                        <div id="custom-toolbar1">
-                                            <!--<div class="btn-group btn-group-action">
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="toogleView('folder')"><i class="fa fa-caret-right navtoggle"></i></a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-default"><i class="fa fa-play m-r-5"></i> Start</a>
-                                                <a href="#" class="btn btn-sm btn-default"><i class="fa fa-pause m-r-5"></i> Pause</a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-default"><i class="fa fa-refresh m-r-5"></i> Refresh</a>
-                                                <a href="javascript:void(0)" class="btn btn-sm btn-default"><i class="fa fa-stop m-r-5"></i> Stop</a>
-                                                <span v-for="item in search.result.byStatus" class="event-severity-btn">
-                                                    <a 	href="javascript:void(0)"
-                                                          :class="'btn btn-xs '+item.name + ' active'"
-                                                          data-toggle="button"
-                                                          data-active-class="selected"
-                                                          :data-value="item.severity"
-                                                          :style="'background-color:'+item.color+'!important;color:#fff;max-width:45px;min-width:45px;margin-right: 3px;'"
-                                                          @click="setFilterByStatus(item.name)">
-                                                        ${item.count}
-                                                    </a>
-                                                </span>
-                                            </div>-->
-                                            <span @click="toogleView('folder')"><button class="btn btn-xs btn-default"><i class="fa fa-caret-right navtoggle"></i></button></span>
-                                            <span v-for="item in search.result.byStatus" class="event-severity-btn">
-                                                <a 	href="javascript:void(0)"
-                                                      :class="'btn btn-xs '+item.name + ' active'"
-                                                      data-toggle="button"
-                                                      data-active-class="selected"
-                                                      :data-value="item.severity"
-                                                      :style="'background-color:'+item.color+'!important;color:#fff;max-width:45px;min-width:45px;margin-right: 3px;'"
-                                                      @click="setFilterBySeverity(item.name)">
-                                                    ${item.count}
-                                                </a>
-                                            </span>
-
-                                            <span>
-                                                <button type="button" class="btn btn-xs btn-default dropdown-toggle dropdown-cmd" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions <span class="caret"></span></button>
-                                                <ul class="dropdown-menu dropdown-menu-right">
-                                                    <li><a href="#" data-value="事件确认@维护命令/事件">启动</a></li>
-                                                    <li role="separator" class="divider"></li>
-                                                    <li><a href="#" data-value="关闭事件@维护命令/事件">停止</a></li>
-                                                    <li role="separator" class="divider"></li>
-                                                    <li><a href="#" data-value="添加命令">New Cmd</a></li>
-                                                </ul>
-                                            </span>
-                                        </div>
-                                        <vue-base-datatables-component id="job-list-datatable"
-                                                                       :columns="job.folder.table.columns"
-                                                                       :dataset="job.folder.table.dataset"
-                                                                       contextmenu="ciview"></vue-base-datatables-component>
-                                    </div>
-                                    <div class="panel-footer">
-                                        <small>Count: ${job.folder.table.dataset.length} | ${moment().format("LLL")} </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade in" id="tab2">
-                        <div class="row">
-                            <div class="col-lg-2" id="nav-job-define" style="display: ;">
-                                <div class="panel panel-default" style="border-radius: 0px;min-height: 50vh;">
-                                    <div class="panel-body" style="padding:0px 0px;">
-                                        <vue-base-tree-component id="jobdefine-tree" :zNodes="job.folder.list" :contextMenu="job.define.contextMenu"></vue-base-tree-component>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-10" id="content-job-define">
-
-                                <div class="panel">
-
-                                    <div class="panel-body context-menu-content" style="padding:0px;">
-                                        <div class="btn-group btn-group-action" id="custom-toolbar2">
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="toogleView('define')"><i class="fa fa-caret-right navtoggle"></i></a>
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-default"><i class="fa fa-table m-r-5"></i> Refresh</a>
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-default"><i class="fa fa-list m-r-5"></i> List</a>
-                                        </div>
-                                        <vue-base-table-component id="define-table"
-                                                                  :columns="job.define.table.columns"
-                                                                  :options="job.define.table.options"
-                                                                  :dataset="job.define.table.dataset"></vue-base-table-component>
-                                    </div>
-                                    <div class="panel-footer">
-                                        <small>Count: ${job.define.table.dataset.length} | ${moment().format("LLL")} </small>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="tab3" style="height:74vh;">
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="outputModal" tabindex="-1" role="dialog" aria-labelledby="outputModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title" id="outputModalLabel">作业输出</h4>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <textarea type="text" class="form-control" id="output_name"></textarea>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div id="content" class="content">
+		<el-row :gutter="10">
+			<el-col :xl="24" style="padding-bottom:7px;">
+				<search-base-component :id="model.id"
+				                       :options="options"
+									   ref="searchRef"
+									   class="grid-content"></search-base-component>
+			</el-col>
+			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
+				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
+					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
+						<div v-if="item.type==='main'">
+							<!--div class="panel panel-default panel-white-border" data-sortable-id="ui-modal-notification-1"-->
+								<!-- <div class="panel-heading">
+									<div class="panel-heading-btn">
+										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-expand"><i class="fa fa-expand"></i></a>
+										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
+									</div>
+									<h4 class="panel-title"></h4>
+								</div> -->
+								<!--div class="panel-body" id="event-view-container" style="height:calc(100vh - 200px);display: flex;flex-direction: column;"-->
+									<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
+										<div class="event-view-summary-control">
+											${control.ifSmart==1?'智能分析启用中':'智能分析关闭中'}
+											<el-switch
+											v-model="control.ifSmart"
+											active-color="#13ce66"
+											inactive-color="#dddddd"
+											active-value="1"
+											inactive-value="0"
+											@change="toggleSummaryView">
+											</el-switch>
+										</div>
+									</el-tooltip>
+									<el-row :gutter="10" id="event-view-summary">
+										<el-col :xl="24">
+											<el-tabs v-model="layout.summary.activeIndex" type="border">
+												<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+													<div v-if="item.type=='radar'">
+														<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
+													</div>
+													<div v-if="item.type=='gauge'">
+														<gauge-component id="performance-view-gauge"></gauge-component>
+													</div>
+												</el-tab-pane>
+											</el-tabs>
+										</el-col>
+									</el-row>
+									<el-row :gutter="10" id="event-view-console">
+										<el-col :xl="8" class="tree-view animated fadeInRight">
+											<probe-tree-component id="event-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>
+										</el-col>
+										<el-col :xl="16" class="table-view animated fadeInLeft">
+											<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
+										</el-col>
+									</el-row>
+								<!--/div-->
+							<!--/div-->
+						</div>
+						<div v-if="item.type==='detail'">
+							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;">
+								<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
+									<div v-if="it.type==='diagnosis'">
+										<event-diagnosis :id="it.name" :model="it.model"></event-diagnosis>
+									</div>
+									<div v-else>
+										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
+									</div>
+								</el-tab-pane>
+							</el-tabs>
+						</div>
+					</tab>
+				</el-tabs>
+			</el-col>
+		</el-row>
+	</div>
 </script>
 
-<script type="text/x-template" id="rules-manage-template">
-    <div>
-        <div class="panel-group" id="accordionContent" role="tablist" aria-multiselectable="true">
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <span data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigInfo">
-                      <i class="fa fa-home"></i>
-                    </span>
-                    <span id="olNav" style="font-size: 12px;font-weight: bold;"></span>
-                    <span class="pull-right">
-                        <a class="btn btn-xs btn-default" data-toggle="modal" data-target="#configAddModal"
-                           @click="addNode">
-                            <i class="icon-plus"></i>
-                            添加&nbsp;
-                        </a>
-                        <a href="#" class="btn btn-xs btn-default" data-trigger="tooltip" data-content="保存新增目录或节点"  @click="saveNode">
-                            <i class="icon-save"></i>
-                            提交
-                        </a>
-                        <a id="config_btn_help" class="btn btn-xs btn-default">
-                            <i class="icon-question-sign"></i> 帮助
-                        </a>
-                        <a href="#" class="btn btn-xs btn-danger" readonly @click="removeNode">
-                            <i class="icon-remove"></i>
-                            删除&nbsp;
-                        </a>
-                    </span>
-                </div>
-                <div id="collapseConfigInfo" class="panel-collapse collapse in" role="tabpanel"
-                     aria-labelledby="headingOne">
-                    <div class="panel-body">
-                        <label id="etcd_label" for="">节点值</label>
-                        <pre id="etcd_value"></pre>
-                        <BR/>
-                        <label for="">TTL(生存周期)</label>
-                        <input type="number" class="form-control" :value='etcd.ttl'>
-                        <BR/>
-                        <label for="">失效时间</label>
-                        <input type="text" class="form-control text-primary" readonly :value='etcd.expiration'>
-                        <BR/>
-                        <label for="">createdIndex</label>
-                        <input type="text" class="form-control" readonly :value='etcd.createdIndex'>
-                        <BR/>
-                        <label for="">modifiedIndex</label>
-                        <input type="text" class="form-control" readonly :value='etcd.modifiedIndex'>
-                    </div>
-                </div>
-            </div>
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingTwo">
-                    <i class="fa fa-desktop"></i>
-                    <a data-toggle="collapse" data-parent="#accordionContent" href="#collapseConfigMonitorInfo">监控信息</a>
-                </div>
-                <div id="collapseConfigMonitorInfo" class="panel-collapse collapse" role="tabpanel"
-                     aria-labelledby="headingTwo">
-                    <div class="panel-body">
-                        <div id="panel_dashboard"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Config Add Modal -->
-        <div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        <h4 class="modal-title" id="myModalLabel">配置添加</h4>
-                    </div>
-                    <div class="modal-body">
-                        <label for="">节点名称</label>
-                        <input type="text" class="form-control" id="config_key">
-                        <BR/>
-                        <label for="">目录</label>
-                        <div class="input-group">
-                            <span class="input-group-addon">
-                  <input type="checkbox" id="config_dir" value="true"></span>
-                            <label class="form-control well"></label>
-                        </div>
-                        <BR/>
-                        <div id="modal_config_value">
-                            <label for="">节点值</label>
-                            <pre id="config_value"></pre>
-                        </div>
-                        <BR/>
-                        <label for="">TTL(生存周期)</label>
-                        <input type="number" class="form-control" id="config_ttl">
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                        <button type="button" class="btn btn-primary" id="config_btn_new" data-dismiss="modal">提交
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- /Config Add Modal -->
-    </div>
-</script>
-
-<script type="text/x-template" id="agent-manage-template">
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-        <div class="panel panel-default">
-            <div class="panel-heading" role="tab" id="headingZero">
-                <span style="cursor:pointer;"><i class="fa fa-caret-left navtoggle fa-fw"></i></span>
-                <a data-toggle="collapse" data-parent="#accordion" href="#collapseZero" aria-expanded="true"
-                   aria-controls="collapseZero" style="text-decoration: none;color:#000000;">
-                    采集维护
-                </a>
-                <span class="pull-right">
-                    <a href="#" @click="toggleEvent('dispatch-manage')"><i class="fa fa-close"></i></a>
-                </span>
-            </div>
-            <div id="collapseZero" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                <div class="panel-heading" style="height:28px;padding-top:3px;">
-                    <span class="pull-right">
-                        <a class="btn btn-xs btn-default" href="#"><i class="fa fa-upload fa-fw"></i> 上传</a>
-                        <a class="btn btn-xs btn-default" href="#"><i class="fa fa-edit fa-fw"></i> 编辑</a>
-                        <a class="btn btn-xs btn-success" href="#"><i class="fa fa-download fa-fw"></i> 下载</a>
-                    </span>
-                </div>
-                <div class="panel-body" style="padding:0px 10px;">
-                    <div class="container-fluid" style="margin-top: 5px;margin-bottom: 5px;height:20vw;overflow: auto;">
-                        <div class="row">
-                            <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" v-for="value in agentModel"
-                                 style="display: -webkit-block;cursor: pointer;text-align:center;">
-                                <img :src="[value.type=='isFolder'?'/web/assets/images/filesystem_orange.png':'/web/assets/images/Document-Blank-icon.png']"
-                                     width="48" height="48">
-                                <p>${value.name}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
-
-<script type="text/x-template" id="params-manage-template">
-    <div class="panel panel-default" style="border-top: none;">
-        <div class="panel-body">
-            <div class="well well-xs" v-for="(param,index) in params"
-                 style="background-color: #f5f4ed;border: 0px solid #e3e3e3;border-radius: 0px;-webkit-box-shadow: inset 0 0px 0px rgba(0,0,0,.05);box-shadow: inset 0 0px 0px rgba(0,0,0,.05); ">
-                <span class="pull-right">
-                    <i class="fa fa-square-o fa-fw" style="color:rgba(0,0,0,.1);cursor:pointer;" data-toggle="collapse"
-                       :data-target="'#collapse_'+index" aria-expanded="false" :aria-controls="'#collapse_'+index"></i>
-                    <i class="fas fa-times" style="color:rgba(0,0,0,.1);cursor:pointer;" @click="remove(param)"></i>
-                </span>
-                <span style="height: 15px;display: block;overflow: auto">
-                    ${param}
-                </span>
-                <div class="collapse" :id="'collapse_'+index">
-                    ${param}
-                </div>
-            </div>
-            <button type="button" class="btn btn-xs btn-success" @click="add()"><i class="fa fa-save fa-fw"></i>保存
-            </button>
-            <BR/><BR/>
-            <pre id="params_value"></pre>
-            <div class="clearfix"></div>
-        </div>
-    </div>
-</script>
 {{template "base/footer" .}}

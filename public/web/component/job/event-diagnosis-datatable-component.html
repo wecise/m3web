@@ -1,0 +1,398 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.event-diagnosis-datatable-component,
+		.event-diagnosis-datatable-component .dataTables_wrapper{
+			width:100%;
+			height: 100%;
+			margin: 0 auto;
+		}
+
+		.event-diagnosis-datatable-component .dataTables_wrapper table.dataTable{
+			margin: 0!important
+		}
+
+		.event-diagnosis-datatable-component .dataTables_scrollHead{
+			background: rgb(241, 241, 241);
+		}
+
+		.event-diagnosis-datatable-component thead tr th, .event-diagnosis-datatable-component tbody tr td{
+			line-height: 10px;
+			white-space: nowrap;
+		}
+
+		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected,
+		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected td,
+		.event-diagnosis-datatable-component table.dataTable tbody>tr>.selected {
+			background: rgb(196, 235, 253)!important;
+		}
+
+		/* input高度*/
+		.event-diagnosis-datatable-component .dataTables_filter input{
+			height: 24px;
+		}
+
+		.event-diagnosis-datatable-component tr{
+			animation-delay: .5s;
+		}
+
+		/* CSS to add checkboxes to colvis items */
+		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
+		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+			display:block;
+			position:absolute;
+			top:1.2em;
+			left:0;
+			width:12px;
+			height:12px;
+			box-sizing:border-box;
+		}
+
+		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
+			content: '\25A1 ';
+			margin-top: -25px;
+			margin-left: -2px;
+			border-radius: 0px;
+			padding: 8px 8px;
+			font-size: 20px;
+			color: rgb(221,221,221);
+		}
+
+		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+			content: '\2713';
+			margin-top: -11px;
+			margin-left: 5px;
+			text-align: center;
+			text-shadow: none;
+			padding: 2px 4px;
+			font-size: 14px;
+			color: rgb(29, 28, 28);
+		}
+
+		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility span {
+			margin-left: 25px;
+		}
+
+		/* columns选择 */
+		.event-diagnosis-datatable-component div.dt-button-collection {
+			width: 50vw;
+			max-height: 50vh;
+			overflow: auto!important;
+		}
+
+		.event-diagnosis-datatable-component div.dt-button-background {
+			display: none!important;
+		}
+
+		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
+		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
+			background-color: #ffffff;
+			background-image:  none;
+			background-image: none;
+			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f0f0f0', EndColorStr='#dadada');
+			box-shadow: none;
+		}
+
+		.event-diagnosis-datatable-component a.buttons-columnVisibility:active:not(.disabled),
+		.event-diagnosis-datatable-component a.buttons-columnVisibility.active:not(.disabled) {
+			background-color: #ffffff;
+			background-image:  none;
+			background-image: none;
+			background-image:  none;
+			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f3f3f3', EndColorStr='#e2e2e2');
+			box-shadow:  none;
+		}
+
+		.event-diagnosis-datatable-component a.buttons-columnVisibility {
+			position: relative;
+			display: inline-block;
+			box-sizing: border-box;
+			margin-right: 0.333em;
+			margin-bottom: 0.333em;
+			padding: 0.5em 0em;
+			border: 1px solid rgb(233, 228, 228);
+			border-radius: 2px;
+			cursor: pointer;
+			font-size: 0.88em;
+			line-height: 1.6em;
+			color: rgb(0, 0, 0);
+			white-space: nowrap;
+			overflow: hidden;
+			background-color:  none;
+			background-image:  none;
+			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='white', EndColorStr='#e9e9e9');
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			text-decoration: none;
+			outline: none;
+			min-width: 12em;
+			text-align: left;
+		}
+
+		.event-diagnosis-datatable-component a.buttons-columnVisibility:hover:not(.disabled) {
+			background-color:  none;
+			background-image:  none;
+			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f9f9f9', EndColorStr='#e0e0e0');
+		}
+
+
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="event-diagnosis-datatable-component"  ----------*/
+	<template>
+		<div>
+			<table :id="id" class="stripe row-border order-column" width="100%"></table>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="event-diagnosis-datatable-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+        	id: String,
+			model: Object
+		},
+		data: function(){
+          	return {
+                datatable: null,
+                selectedRows: [],
+	            model: {}
+			}
+		},
+		mounted: function () {
+            const self = this;
+
+            self.$nextTick(function () {
+				self.init();
+				eventHub.$on("WINDOW-RESIZE-EVENT",self.resize);
+				setInterval(function(){
+					self.resize();
+				},5000)
+            });
+        },
+		watch: {
+            // model: function(val,oldVal){
+          	//     // 数据无更新
+            //     if(val === oldVal) {
+            //         return false;
+            //     }
+
+            //     // 数据为空
+            //     if( _.isEmpty(val)) {
+            //         this.datatable.rows().remove().draw();
+            //         return false;
+            //     }
+
+            //     // 表格已经初始化
+            //     if(this.datatable instanceof $.fn.dataTable.Api) {
+            //         this.datatable.clear();
+            //         this.datatable.rows.add(val.rows);
+            //         this.datatable.draw();
+
+            //     } else {
+            //         this.init();
+            //     }
+            // }
+		},
+		methods: {
+            init: function(){
+				const self = this;
+				
+				if(!self.model.rows) return false;
+				if(!self.model.columns) return false;
+
+                // 自定义checkbox、序号
+                //self.model.columns.unshift( { title: "", visible: true, sortable: false } );
+                //self.model.columns.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
+				let cols = _.uniqBy(self.model.columns,'data');
+				
+				if(self.model.template.length){
+					cols = self.model.template;
+				}
+
+				cols = 	_.map(cols,function(v){
+							if(v.render){
+								v.render = eval(v.render);
+							}
+							return v;
+						});
+
+                self.datatable = $("#"+self.id).DataTable( _.extend({
+	                            destroy: true,
+                                data: self.model.rows,
+                                columns: cols,
+                                searching: false,
+                                bSort: true,
+			                    bAutoWidth: true,
+                                info: true,
+                                scrollX: true,
+                                scrollY: '48vh',
+                                scrollCollapse: true,
+			                    paging:         false,
+                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+	                            stateSave: true,
+                                select: {
+			                        style: 'multi',
+			                        selector: 'td:first-child'
+			                    },
+                                language : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    },
+                                    buttons: {
+                                        copyTitle: '已拷贝到剪切板',
+                                        copyKeys: '已拷贝',
+                                        copySuccess: {
+                                            _: '已拷贝 %d 项',
+                                            1: '1 已拷贝'
+                                        }
+                                    }
+
+                                },
+			                    initComplete: function(){
+				                    self.serial();
+	                                //self.toolBar();
+	                                self.contextMenu();
+	                                self.selectRows();
+			                    }
+                },self.model.options)).columns.adjust().draw();
+
+			},
+            serial:function(){
+                let datatable = $("#"+this.id).DataTable();
+                datatable.on( 'order.dt search.dt', function () {
+                    datatable.column(1, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+                        cell.innerHTML = i+1;
+                    } );
+                } ).draw();
+			},
+			selectRows: function(){
+                const self = this;
+                let table = $("#"+self.id).DataTable();
+			},
+			refresh: function(){
+				this.model = fsHandler.callFsJScript('/job/job_diagnosis.js', null).message[self.type] || [];
+			},
+			detail: function(){
+                this.$root.detail(this.selectedRows);
+			},
+			resize(){
+				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
+				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
+			},
+            contextMenu: function(){
+                const self = this;
+
+                let items = fsHandler.callFsJScript('/job/toolbar.js', '').message.job;
+                let id = self.id;
+
+                $.contextMenu({
+                    selector: `#${id} tr td:not(:nth-child(1))`,
+                    trigger: 'left',
+                    delay: 10,
+                    hideOnSecondTrigger: true,
+                    className: `animated slideIn ${id}`,
+                    build: function($trigger, e) {
+
+                        return {
+                            callback: function(key, opt) {
+                                if(key === 'detail') {
+                                    self.detail();
+                                }
+                            },
+                            items: items,
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+
+                            let $this = this;
+
+                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
+                        },
+                        hide: function(opt) {
+
+                            let $this = this;
+
+                        }
+                    }
+                });
+            },
+			toolBar: function(){
+                const self = this;
+
+                // 创建工具栏
+                let datatable = $("#"+this.id).DataTable();
+
+				let buttons = [
+				                    {
+				                        extend: 'colvis',
+				                        text: '<i class="fas fa-list"></i>',
+				                        collectionLayout: 'fixed four-column',
+				                        className: 'btn-white',
+				                        fade: true,
+                                        titleAttr: '选择属性'
+
+				                    },
+				                    {
+				                        extend: 'csv',
+				                        text: '<i class="fas fa-download"></i>',
+				                        className: 'btn-white',
+				                        titleAttr: '导出csv格式'
+
+				                    }
+				                ];
+
+                new $.fn.dataTable.Buttons(datatable, {
+                    dom: {
+                        button: {
+                            tag: 'a',
+                            className: 'btn btn-xs animated fadeInLeft'
+                        }
+                    },
+                    buttons: buttons
+                });
+
+                // 更新Dom
+                if( $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
+                    $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').empty();
+                }
+                datatable.buttons().containers().prependTo( `.event-diagnosis-datatable-component .dataTables_wrapper` );
+
+                // button样式调整
+                $(".event-diagnosis-datatable-component a.dt-button").removeClass("dt-button");
+                // tooltip
+                $(".event-diagnosis-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
+
+			}
+		}
+	
+	}
+	</script>
+
+</code>

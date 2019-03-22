@@ -262,7 +262,7 @@ class OmdbHandler {
     *      mql
     */
     putDataByMql(event) {
-        let rtn = 1;
+        let rtn = 0;
         let _mql = `INSERT JSON '` + JSON.stringify(event) + `'`;
 
         jQuery.ajax({
@@ -283,12 +283,13 @@ class OmdbHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("成功" + " " + moment().format("LLL"));
+                    alertify.success("插入成功" + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = 0;
+                alertify.error("插入失败" + " " + xhr.responseText);
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         });
@@ -377,6 +378,82 @@ class OmdbHandler {
 
         return rtn;
     };
+
+    /*
+    *   类数据导出
+    *
+    * */
+    classDataExport(event){
+        let rtn = null;
+
+        jQuery.ajax({
+            url: '/mxobject/export?recursive=true&class=' + encodeURIComponent(event),
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+                
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = data;
+                    alertify.success("导出成功" + " " + event + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = null;
+                alertify.error("导出失败" + " " + xhr.responseText);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        return rtn;
+    };
+
+    /*
+    *   类数据导出
+    *
+    * */
+   classDataImport(event){
+        let rtn = 0;
+
+        let fm = new FormData();
+        fm.append("uploadfile", event);
+
+        jQuery.ajax({
+            url: '/mxobject/import',
+            dataType: 'json',
+            type: 'POST',
+            data: fm,
+            mimeType: "multipart/form-data",
+            async: false,
+            beforeSend:function(xhr){
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("导入成功" + " " + event + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = 0;
+                alertify.error("导入失败" + " " + xhr.responseText);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        })
+        return rtn;
+    };
+
 }
 
 var omdbHandler = new OmdbHandler();

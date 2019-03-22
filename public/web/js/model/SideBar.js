@@ -55,7 +55,7 @@ class SideBar {
                                         </li-->
                                         <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
                                             <a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname" data-tooltip="tooltip">
-                                                <img :src="item.icon | pickIcon" style="width:48px;"></img> 
+                                                <img :src="item.icon | pickIcon" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></img> 
                                                 <p>
                                                     <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
                                                 </p>
@@ -159,27 +159,33 @@ class SideBar {
             },
             template: `<ul class="nav animated bounceIn">
                         <li class="dropdown top-bar">
-                            <a class="sidebar-toggle" href="javascript:sideBar.toggleSideBar();" data-tooltip="tooltip" title="切换导航栏">
-                                <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">切换</span>
-                            </a>
+                            <el-tooltip content="切换导航栏" placement="right">
+                                <a class="sidebar-toggle" href="javascript:sideBar.toggleSideBar();">
+                                    <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">切换</span>
+                                </a>
+                            </el-tooltip>
                         </li>
                         <li class="dropdown top-bar">
-                            <a  href="javascript:void(0);"  
-                                title="应用"
-                                data-tooltip="tooltip"
-                                @click="initWnd">
-                                <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">应用</span>
-                            </a>
+                            <el-tooltip content="应用" placement="right">
+                                <a  href="javascript:void(0);"  
+                                    @click="initWnd">
+                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">应用</span>
+                                </a>
+                            </el-tooltip>
                         </li>
                         <li>
-                            <a href="/" title="首页" data-tooltip="tooltip">
-                                <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">首页</span>
-                            </a>
+                            <el-tooltip content="首页" placement="right">
+                                <a href="/">
+                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">首页</span>
+                                </a>
+                            </el-tooltip>
                         </li>
                         <li v-for="(item,index) in model" :class="item.status">
-                            <a :href="item.url" :target="item.target" :title="item.cnname" data-tooltip="tooltip">
-                                <img :src="item.icon | pickIcon" style="width:17px;"></img> <span class="nav-label">#{item.cnname}#</span>
-                            </a>
+                            <el-tooltip :content="item.cnname" placement="right">
+                                <a :href="item.url" :target="item.target">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img> <span class="nav-label">#{item.cnname}#</span>
+                                </a>
+                            </el-tooltip>
                         </li>
                     </ul>`,
             created: function(){

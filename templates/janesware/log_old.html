@@ -1,0 +1,404 @@
+{{template "base/head" .}}
+
+<!-- sweetalert core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.min.css" rel="stylesheet">
+
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+<style type="text/css" media="screen">
+
+    .btn.dropdown-toggle {
+        padding: 7px 12px;
+        border-radius: 0px;
+    }
+
+    .vue-search-input-component > .btn-group > .btn.dropdown-toggle {
+        border-bottom: 2px solid rgb(182, 194, 202);
+    }
+
+    /* Event Severity Button Start */
+    .event-severity-btn > .btn.active[data-active-class="selected"] {
+        border-right: 3px solid #333;
+        border-bottom: 3px solid #333;
+        clear: both;
+    }
+
+    /* Event Severity Button End*/
+
+    /*----------  Data Table Start ----------*/
+    .data-table > .bootstrap-table {
+        padding-bottom: 15px;
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container {
+        border: none;
+        border-left: 0px solid #ddd;
+        border-right: 0px solid #ddd;
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container thead th .th-inner, .fixed-table-container tbody td .th-inner {
+        padding: 2px;
+        line-height: 20px;
+    }
+
+    .data-table > .bootstrap-table .table:not(.table-condensed), .bootstrap-table .table:not(.table-condensed) > tbody > tr > th, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > th, .bootstrap-table .table:not(.table-condensed) > thead > tr > td, .bootstrap-table .table:not(.table-condensed) > tbody > tr > td, .bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+        padding: 5px;
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-body {
+        height: -moz-calc(100vh - 440px);
+        height: -webkit-calc(100vh - 440px);
+        height: calc(100vh - 440px);
+    }
+
+    .data-table > .bootstrap-table > .fixed-table-container > .fixed-table-pagination {
+        margin: 0px 10px -15px 10px
+    }
+
+    /*----------  Data Table End ----------*/
+
+    .table > tbody > tr > td:first-child {
+        /*background-color: rgba(238,238,238,1);*/
+        text-align: center;
+    }
+
+    .table > tbody > tr > td:nth-child(2) {
+        white-space: nowrap !important;
+        text-align: center;
+    }
+
+    .fixed-table-container tbody td {
+        border-left: none;
+    }
+
+    table > tbody > tr:not(.detail-view):hover > td {
+        background-color: #c3e4f5;
+    }
+
+    table > tbody > tr:not(.detail-view).selected > td {
+        background-color: #c3e4f5;
+        border: 1px dashed #cccccc;
+    }
+
+    /* For Search Dropdown Panel */
+    .dropdown-menu {
+        padding: 0;
+        font-size: 12px;
+        background-color: #fff;
+        border: 0px solid #ccc;
+        border: 0px solid rgba(0, 0, 0, .15);
+        border-radius: 0px;
+    }
+
+    .dropdown-menu > .panel-group {
+        margin-bottom: 0px;
+    }
+
+    .dropdown-menu > .panel-group .panel {
+        margin-bottom: 0px;
+        background-color: #fff;
+        border: 0px solid transparent;
+        border-radius: 0px;
+    }
+
+    .dropdown-menu > .panel-group .panel + .panel {
+        margin-top: 0px;
+    }
+
+    .btn.dropdown-toggle {
+        padding: 7px 12px;
+        border-radius: 0px;
+    }
+
+    .panel-default > .panel-heading {
+        padding-top: 5px;
+        padding-bottom: 5px;
+
+        border: 1px solid #ccc;
+        border-bottom: 0px;
+        border-radius: 0px;
+
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f9f9f9+0,e5e5e5+100 */
+        background: #f9f9f9; /* Old browsers */
+        background: -moz-linear-gradient(top, #f9f9f9 0%, #e5e5e5 100%); /* FF3.6-15 */
+        background: -webkit-linear-gradient(top, #f9f9f9 0%, #e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+        background: linear-gradient(to bottom, #f9f9f9 0%, #e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#e5e5e5', GradientType=0); /* IE6-9 */
+    }
+
+    .panel-default > .panel-heading.active {
+        color: #333;
+        background-color: #def1fb;
+        border: 1px solid #ccc;
+        border-bottom: 0px;
+        background: #def1fb;
+
+    }
+
+    .panel-group .panel-heading + .panel-collapse > .list-group, .panel-group .panel-heading + .panel-collapse > .panel-body {
+        border-top: 0px;
+    }
+
+    .panel-default > .collapse {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    .fixed-table-toolbar .btn-group > .btn-group > .btn {
+        border: none;
+    }
+
+    .fixed-table-toolbar .btn-group > .btn-group > .btn > i {
+        font-size: 10px;
+    }
+
+    .breadcrumb {
+        padding: 8px 15px 0px 15px;
+        margin: 0px;
+        background-color: transparent;
+    }
+
+    /*----------  Event Severity For Cell Color  ----------*/
+    td.severity6 {
+        background-color: #333333 !important; /*Fatal*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    td.severity5 {
+        background-color: #FF0000 !important; /*Error*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    td.severity4 {
+        background-color: #FFA500 !important; /*Warning*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    td.severity3 {
+        background-color: #00acac !important; /*Info*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    td.severity2 {
+        background-color: #008000 !important; /*Debug*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    td.severity_1 {
+        background-color: #808080 !important; /*Unknown*/
+        text-align: center;
+        color: #ffffff;
+    }
+
+    /*----------  Mark  ----------*/
+    mark {
+        background-color: #fbed78c7;
+    }
+
+    .object-footer{
+        position: fixed;
+        bottom: 30px;
+        left: 5%;
+    }
+
+</style>
+
+<div id="app"></div>
+
+<script src="{{AppSubUrl}}/web/js/model/Log.js"></script>
+
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
+
+<!-- ECharts JS -->
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<!--Mark JS-->
+<script src="{{AppSubUrl}}/web/vendor/mark/dist/jquery.mark.min.js"></script>
+
+<!-- sweetalert core JS -->
+<script src="{{AppSubUrl}}/web/vendor/sweetalert2/dist/sweetalert2.all.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-heatmap-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-entity-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-echart-timeline-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/cmdb/vue-ci-tags-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+<script type="text/x-template" id="app-template">
+
+    <div id="content" class="content">
+
+        <div class="row log-search">
+            <div class="col-lg-12" style="padding-left:10px;padding-bottom: 10px;">
+                <div class="input-group searchinput">
+                    <vue-search-input-component :model="search.input"></vue-search-input-component>
+                    <div class="input-group-btn">
+                        <vue-search-preset-component id="log-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
+                    </div>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search"
+                                                                                           style="font-size:18px;"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div row="col-lg-12">
+            </div>
+        </div>
+        <div class="row" style="margin:0px 0px;background-color:#fff;border:1px solid rgb(240, 243, 244);">
+            <div role="tabpanel">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs nav-main" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#log" aria-controls="log" role="tab" data-toggle="tab">Log</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#gauge" aria-controls="gauge" role="tab" data-toggle="tab"
+                           title="Business Gauge">Gauge</a>
+                    </li>
+                    <li role="presentation">
+                        <a href="#heatmap" aria-controls="heatmap" role="tab" data-toggle="tab" title="Event HeatMap">Heatmap</a>
+                    </li>
+                    <li role="presentation" style="display: -webkit-box;">
+                        <a href="javascript:void(0)"
+                           v-for="(item,index) in search.filter"
+                           class="btn btn-xs btn-success"
+                           @click="toggleFilter(item.value)"
+                           style="min-width: 60px;padding:0px 10px;background-color:#dae0e8!important;">
+                            ${item.name}
+                        </a>
+                    </li>
+                    <li role="presentation" class="pull-right" style="display: -webkit-box;">
+                        <a href="javascript:void(0)" @click="toggleMode" ><i
+                                class="fa fa-desktop fa-fw toggle-mode"></i></a>
+                        <a href="javascript:void(0)" @click="toggleTop" ><i
+                                class="fa fa-caret-down fa-fw toggle-top"></i></a>
+                    </li>
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content tab-main">
+                    <div role="tabpanel" class="tab-pane active" id="log" style="margin-top: -15px;">
+                        <div class="col-lg-12 event-top">
+                            <ol class="breadcrumb">
+                                <li><a href="#" class="active">${search.fortime}</a></li>
+                            </ol>
+                        </div>
+                        <div class="col-lg-12 event-top" style="padding:0px;">
+                            <vue-echart-timeline-component :model="summary.data"
+                                                           :preconfig="preconfig"></vue-echart-timeline-component>
+                        </div>
+                        <div class="col-lg-2" id="nav" style="display: none;">
+                            <div class="panel panel-default">
+                                <div class="panel-body" style="padding-top: 5px;">
+                                    <vue-entity-tree-component id="log-entity-tree" :list="search.result.data"></vue-entity-tree-component>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" id="mainview" style="padding:0px;">
+                            <div id="custom-toolbar1">
+                                <span id="title-path" @click="toggleLeft"><button class="btn btn-xs btn-default"><i
+                                        class="fa fa-caret-right navtoggle"></i></button></span>
+                                <span v-for="item in summary.bySeverity" class="event-severity-btn">
+                                <a href="javascript:void(0)"
+                                   :class="'btn btn-xs '+item.name + ' active'"
+                                   data-toggle="button"
+                                   data-active-class="selected"
+                                   :data-value="item.severity"
+                                   :style="'background-color:'+item.color+'!important;color:#fff;max-width:45px;min-width:45px;margin-right: 3px;'"
+                                   @click="setFilterBySeverity(item.name)">
+                                  ${item.count}
+                                </a>
+                              </span>
+                            </div>
+                            <div class="table-responsive data-table">
+                                <vue-bootstrap-table id="dataTable"
+                                                     :columns="search.result.columns"
+                                                     :options="search.result.options"
+                                                     :dataset="search.result.data"
+                                                     :filter="summary.filter"
+                                                     contextMenu="context-menu"></vue-bootstrap-table>
+                            </div>
+                            <div class="panel-footer object-footer">
+                                <i class="fa fa-search"></i> Search: ${search.input.term} ${search.preset.default?search.preset.default.name:""} &nbsp;&nbsp;
+                                <i class="fa fa-list-alt"></i> Result: ${search.result.data.length} &nbsp;&nbsp;
+                                <i class="fa fa-clock-o"></i> Time: ${search.currentTimer} &nbsp;&nbsp;
+                            </div>
+                            <!-- context menu -->
+                            <ul id="context-menu" class="dropdown-menu">
+                                <li data-item='{"num": "0", "app":"log","item":"detail", "show":"list"}'><a
+                                        href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-list fa-fw"></i>
+                                    Details</a></li>
+                                <li data-item='{"num": "1", "app":"log","item":"history","show":"table"}'><a
+                                        href="javascript:void(0)" style="cursor:hand;"><i
+                                        class="fa fa-history fa-fw"></i> History</a></li>
+                                <li data-item='{"num": "2", "app":"log","item":"timeline","show":"timeline"}'><a
+                                        href="javascript:void(0)" style="cursor:hand;"><i
+                                        class="fa fa-clock-o fa-fw"></i> Timeline</a></li>
+                                <li data-item='{"num": "3", "app":"log","item":"diagnosis","show":"widget"}'><a
+                                        href="javascript:void(0)" style="cursor:hand;"><i
+                                        class="fa fa-wrench fa-fw"></i> Diagnosis</a></li>
+                                <li data-item='{"num": "4", "app":"log","item":"add","show":"command"}'><a
+                                        href="javascript:void(0)" style="cursor:hand;"><i class="fa fa-plus fa-fw"></i>
+                                    New Action</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="gauge">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6" v-for="(item,key) in summary.byHost">
+                                <div class="widget widget-stats bg-blue">
+                                    <div class="stats-icon"><i class="fa fa-desktop"></i></div>
+                                    <div class="stats-info">
+                                        <h4>${key}</h4>
+                                        <p>
+                                            <a class="btn btn-icon btn-circle btn-sm"
+                                               :style="'background-color:'+subitem.color+';color:#fff;'"
+                                               v-for="subitem in item">
+                                                ${subitem.length}
+                                            </a>
+                                        </p>
+                                    </div>
+                                    <div class="stats-link">
+                                        <a href="javascript:void(0);" @click="openDiagnosis(item,'perfromance')">Performance
+                                            <i class="fa fa-arrow-circle-o-right"></i></a>
+                                        <a href="javascript:void(0);" @click="openDiagnosis(item,'graph')">Graph <i
+                                                class="fa fa-arrow-circle-o-right"></i></a>
+                                        <a href="javascript:void(0);" @click="openDiagnosis(item,'config')">Config <i
+                                                class="fa fa-arrow-circle-o-right"></i></a>
+                                        <a href="javascript:void(0);" @click="openDiagnosis(item,'ticket')">Ticket <i
+                                                class="fa fa-arrow-circle-o-right"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="heatmap">
+                        <vue-entity-heatmap-component :model="summary.data.list" :preset="search.preset.default"
+                                                      :preconfig="preconfig"></vue-entity-heatmap-component>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</script>
+
+{{template "base/footer" .}}

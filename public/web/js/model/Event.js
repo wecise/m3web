@@ -36,81 +36,167 @@ class Event extends Matrix {
                             "vue-timeline-component"],function() {
             $(function() {
 
-                Vue.component('bootstrap-table-search', {
-                    template: `<table></table>`,
-                    props:{
-                        columns: Array,
-                        data: Array,
-                        options: Object,
-                        forward: String
-                    },
-                    mounted: function () {
-                        let self = this;
-
-                        self.$nextTick(function () {
-                            $(self.$el).bootstrapTable(_.extend({
-                                                    data: self.data,
-                                                    columns: self.columns
-                                                }, self.options));
-
-                            $(self.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
-                                
-                                // Search For
-                                localStorage.setItem("search-open-"+self.forward,JSON.stringify({
-                                                                                id: row.id,
-                                                                                preset:appVue.search.preset
-                                                                            })
-                                                    );
-                                window.open(
-                                        "/janesware/"+self.forward,
-                                        "_blank"
-                                    );
-                            });
-
-                            $(self.$el).on('click-row.bs.table', function (e, row, $element) {
-                                $('.info').removeClass('info');
-                                $($element).addClass('info');
-                            });
-                        })
-                    },
-                    watch: {
-                        data: {
-                            handler: function (val,oldVal) {
-                                let self = this;
-                                
-                                var cols= $(self.$el).bootstrapTable('getVisibleColumns');
-                                
-                                if(_.isEmpty(cols)){ // table null
-                                    $(self.$el).bootstrapTable('destroy').bootstrapTable(_.extend({
-                                                            data: val,
-                                                            columns: self.columns
-                                                        }, self.options));
-                                } else {
-                                    $(self.$el).bootstrapTable('load',val);
-                                    $(self.$el).bootstrapTable('refreshOptions',self.options);
-                                }
-                            },
-                            deep:true
-                        }
-                    }
-                }); 
-
                 // 时间轴
-                Vue.component("event-view-timeline",{
-                    delimiters: ['${', '}'],
+                Vue.component("event-timeline",{
+                    delimiters: ['#{', '}#'],
                     props: {
-                        id: String
+                        id: String,
+                        model: Object
                     },
-                    template: "#event-view-timeline-template"
-                });
+                    template:   `<div class="block"><el-timeline>
+                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
+                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                            <h4>#{item.value}#</h4>
+                                            <p>#{item.biz}# #{item.host}#</p>
+                                            <p>#{item.msg}#</p>
+                                        </el-card>
+                                    </el-timeline-item>
+                                </el-timeline></div>`
+                })
 
                 // 告警雷达
                 Vue.component("event-view-radar",{
-                    delimiters: ['${', '}'],
+                    delimiters: ['#{', '}#'],
                     props: {
-                        id: String
+                        id: String,
+                        model: Object
                     },
-                    template: "#event-view-radar-template",
+                    data(){
+                        return {
+                            progress:[]
+                        }
+                    },
+                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
+                    template:   `<div>
+                                    <div class="progress" 
+                                         v-for="pg in progress" 
+                                         style="padding-left: 80px;overflow: hidden;height: 24px;margin-bottom: 5px;background-color: rgb(245, 245, 245);border-radius: 4px;transition: width .6s ease;">
+                                        <label style="padding: 3px 5px;position: absolute;left: 10px;">#{pg.name}#</label>
+                                        <el-tooltip placement="top" v-for="item in pg.child">
+                                            <div slot="content">#{item.title}#</div>
+                                            <div class="progress-bar animated fadeInLeft" 
+                                                :id="item.id"
+                                                role="progressbar" 
+                                                aria-valuemin="0" 
+                                                :aria-valuenow="item.width" 
+                                                aria-valuemax="100" 
+                                                :style="'width:'+item.width+'%;background:'+item.color + ';padding:3px;cursor: pointer;'" 
+                                                @click="search(item.expression)">
+                                                <div v-if="pg.child.length < 20">
+                                                    #{item.name}#
+                                                </div>
+                                            </div>
+                                        </el-tooltip>
+                                    </div>
+                                </div>`,
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true
+                        }
+                    },
+                    mounted(){
+                    },
+                    methods: {
+                        initData(){
+                            
+                            this.progress = _.map(this.model.summary.radar,function(v,k){
+                                let className = k.split("_")[0];
+                                let title = k.split("_")[1];
+                                let sum = _.sum(_.map(v,function(s){return s[1];}));
+                                let pgs = _.map(v,function(val){
+                                    let name = '其它';
+                                    if(val[0]){
+                                        name = val[0];
+                                    }
+                                    
+                                    return {id:objectHash.sha1(name+val+_.now()), 
+                                            name: name, 
+                                            value: val[1],
+                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
+                                            title: `按${title}分析 \n\n ${name}: ${val[1]}`,
+                                            width: val[1]/sum * 100, 
+                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                        }
+                                })
+                                return {name: title, class:className, child: pgs, sum: sum}
+                            });
+                        },
+                        search(event){
+                            this.$root.options.term = event;
+                            this.$root.$refs.searchRef.search();
+                        }
+                    }
+                });
+
+                // 告警统计
+                Vue.component("event-view-pie",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            circles:[]
+                        }
+                    },
+                    template:   `<div style="height:200px;">
+                                    <el-progress type="circle" :percentage="item.percent" v-for="item in circles"></el-progress>
+                                    <!--Circle
+                                        dashboard
+                                        :percent="item.percent"
+                                        v-for="item in circles">
+                                        <div>
+                                            <h1>#{item.count}#</h1>
+                                            <p>#{item.name}#</p>
+                                            <span>
+                                                总数
+                                                <i>#{item.count}#</i>
+                                            </span>
+                                        </div>
+                                    </Circle-->
+                                </div>`,
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true
+                        }
+                    },
+                    mounted(){
+                        _.delay(function(){
+                            this.initData();
+                        },1000)
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            self.circles = [];
+                            _.forEach(self.model.summary.pie,function(v,k){
+                                _.forEach(v,function(val){
+                                    self.circles.push({
+                                            dimension: k,
+                                            id:objectHash.sha1(k+val+_.now()), 
+                                            name: val[0], 
+                                            count: val[1],
+                                            sum: _.sum(_.map(v,function(s){return s[1];})),
+                                            percent: val[1]/180*100,
+                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                        });
+                                })
+                            });
+                            console.log(self.circles)
+                        },
+                        search(event){
+                            this.$root.options.term = event;
+                            this.$root.$refs.searchRef.search();
+                        }
+                    }
                 });
 
                 // 告警详情
@@ -261,26 +347,61 @@ class Event extends Matrix {
                                         <li class=""><a href="#event-diagnosis-probability">概率相关性告警</a></li>
                                     </ul>
                                     <div class="content">
-                                        <h5 id="event-diagnosis-detail">告警详情</h5>
-                                        <p>
-                                            <event-view-detail :id="id + '-detail'" :model="model.event"></event-view-detail>
-                                        </p>
-                                        <h5 id="event-diagnosis-journal">告警轨迹</h5>
-                                        <p style="height:50vh;overflow:auto;">
-                                            <vue-timeline-component :id="id + '-journal'" :model="model.journal.rows"></vue-timeline-component>
-                                        </p>
-                                        <h5 id="event-diagnosis-history">历史相关告警</h5>
-                                        <p>
-                                            <event-diagnosis-datatable-component :id="id + '-history'" :model="model.historyEvent"></event-diagnosis-datatable-component>
-                                        </p>
-                                        <h5 id="event-diagnosis-dimension">维度关联性告警</h5>
-                                        <p>
-                                            <event-diagnosis-datatable-component :id="id + '-dimension'" :model="model.historyEvent"></event-diagnosis-datatable-component>
-                                        </p>
-                                        <h5 id="event-diagnosis-probability">概率相关性告警</h5>
-                                        <p>
-                                            <event-diagnosis-datatable-component :id="id + '-probability'" :model="model.historyEvent"></event-diagnosis-datatable-component>
-                                        </p>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-detail">告警详情</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <event-view-detail :id="id + '-detail'" :model="model.event"></event-view-detail>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-journal">告警轨迹</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <event-timeline :id="id + '-journal'" :model="model.journal.rows"></event-timeline>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history">历史相关告警</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <event-diagnosis-datatable-component :id="id + '-history'" :model="model.history"></event-diagnosis-datatable-component>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-dimension">维度关联性告警</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <event-diagnosis-datatable-component :id="id + '-dimension'" :model="model.history"></event-diagnosis-datatable-component>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-probability">概率相关性告警</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <event-diagnosis-datatable-component :id="id + '-probability'" :model="model.history"></event-diagnosis-datatable-component>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
                                     </div>
                                 </section>`,
                     mounted:function(){
@@ -293,9 +414,7 @@ class Event extends Matrix {
                             $(self.$el).find("ul>li").click(function(e){
                                 $(self.$el).find("li.active").removeClass("active");
                                 $(e.target).closest("li").addClass("active");
-                                console.log(1,$("#content.content").css("padding-top"));
                                 $("#content.content").css("padding-top","60px!important;");
-                                console.log(2,$("#content.content").css("padding-top"));
                             })
                             
                         }
@@ -303,31 +422,35 @@ class Event extends Matrix {
                     
                 });
                 
-
-                event.app = new Vue({
+                event.app = {
                     delimiters: ['${', '}'],
-                    el: "#app",
                     template: "#app-template",
                     data: {
                         // 布局
                         layout:{
                             main:{
-                                index: 0,
+                                tabIndex: 1,
+                                activeIndex: 'event-view-console',
                                 tabs:[
-                                    {title:'告警列表', type: 'main'}
+                                    {name: 'event-view-console', title:'告警列表', type: 'main'}
                                 ],
                                 detail: {
                                     model: [],
-                                    index: 0
+                                    tabIndex: 1,
+                                    activeIndex: '1',
                                 }
                             },
                             summary: {
-                                index: 0,
+                                tabIndex: 1,
+                                activeIndex: 'event-view-radar',
                                 tabs:[
-                                    {title:'告警雷达', type: 'radar'},
-                                    {title:'时间序列', type: 'timeline'}
+                                    {name: 'event-view-radar', title:'告警雷达', type: 'radar'},
+                                    {name: 'event-view-pie', title:'告警统计', type: 'pie'}
                                 ]
                             }
+                        },
+                        control: {
+                            ifSmart: '1',
                         },
                         // 搜索组件结构
                         model: {
@@ -341,9 +464,11 @@ class Event extends Matrix {
                             // 搜索窗口
                             name:"所有", value: "",
                             // 输入
-                            term: "柜面",
+                            term: "",
                             // 指定类
                             class: "#/matrix/devops/event/:",
+                            // 指定api
+                            api: "event",
                             // 时间窗口
                             range: { from: "", to: ""},
                             // 其它设置
@@ -355,6 +480,18 @@ class Event extends Matrix {
                                 // 指定时间戳
                                 forTime:  ' for vtime ',
                             }
+                        }
+                    },
+                    watch:{
+                        'layout.main.tabs':{
+                            handler(val,oldVal){
+                                if(val.length > 1){
+                                    $("#tab-event-view-console").show();
+                                }else {
+                                    $("#tab-event-view-console").hide();
+                                }
+                            },
+                            deep:true
                         }
                     },
                     filters: {
@@ -380,204 +517,126 @@ class Event extends Matrix {
                             }
                         }
                     },
-                    created: function(){
+                    created(){
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
+                        // 接收窗体RESIZE事件
+                        eventHub.$on("WINDOW-RESIZE-EVENT",event.resizeEventConsole);
                     },
-                    mounted: function(){
+                    mounted(){
                         $(this.$el).addClass('view-normal');
-                        $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                        
+                        // 没有详细页时，默认隐藏告警列表Title
+                        this.hideTabEventViewConsoleUl();
+                        
                     },
                     methods: {
                         setData(event){
                             this.model = _.extend(this.model, this.$refs.searchRef.result);
                         },
+                        hideTabEventViewConsoleUl(){
+                            const self = this;
+
+                            if($('#tab-event-view-console').is(':visible')) {
+                                $("#tab-event-view-console").hide();
+                            $("#tab-event-view-console > span").hide();
+                            } else {
+                                setTimeout(self.hideTabEventViewConsoleUl, 50);
+                            }   
+                        },
                         // 切换运行模式
-                        toggleModel: function(event){
+                        toggleModel(event){
                             $(this.$el).removeClass(window.EVENT_VIEW);
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
-                        close(index){
-                            this.layout.main.tabs.splice(index, 1);
-                            this.layout.main.detail.model.splice(this.layout.main.index - 1, 1);
-                            if (this.layout.main.index === this.layout.main.tabs.length && this.layout.main.index > 0) {
-                                --this.layout.main.index
+                        toggleSummaryView(evt){
+                            if(evt==1) {
+                                $("#event-view-summary").css("height","200px").css("display","");
+                            } else {
+                                $("#event-view-summary").css("height","0px").css("display","none");
                             }
+                            this.control.ifSmart = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
                         },
-                        detail: function(event){
+                        detailAdd(event){
                             try {
+                                let id = event.id;
+                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript('/event/diagnosis-by-id.js',term).message;
                                 
-                                // 详情数据
-                                this.layout.main.detail.model.push(model);
                                 // 添加tab
-                                let id = event.id;
-                                this.layout.main.tabs.push( {title:`告警分析 ${event.id}`, type: 'detail', child:[
-                                                                {title:'告警分析', id:`diagnosis-${id}`, type: 'diagnosis'},
-                                                                // {title:'告警轨迹', id:`journal-${id}`, type: 'journal'},
-                                                                // {title:'历史告警', id:`historyEvent-${id}`, type: 'historyEvent'},
-                                                                // {title:'维度关联性告警', id:`associationEvent-${id}`, type: 'associationEvent'},
-                                                                // {title:'概率相关性告警', id:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                                // {title:'性能', id:`performance-${id}`, type: 'performance'},
-                                                                // {title:'日志', id:`log-${id}`, type: 'log'},
-                                                                // {title:'配置', id:`config-${id}`, type: 'config'},
-                                                                // {title:'工单', id:`ticket-${id}`, type: 'ticket'},
-                                                                // {title:'原始报文', id:`raw-${id}`, type: 'raw'},
-                                                                {title:'资源信息', id:`topological-${id}`, type: 'topological'},
-                                                            ]});
+                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
+                                let detail = {title:`告警分析 ${event.id}`, name:`detail-${id}`, type: 'detail', child:[
+                                                {title:'告警分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
+                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
+                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'historyEvent'},
+                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
+                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
+                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
+                                                // {title:'日志', name:`log-${id}`, type: 'log'},
+                                                // {title:'配置', name:`config-${id}`, type: 'config'},
+                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
+                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
+                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                            ]};
                                 
-                                this.layout.main.tabs.index = this.layout.main.detail.model.length - 1;
-                                $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                                this.layout.main.tabs.push(detail);
+                                this.layout.main.activeIndex = `detail-${id}`;
+                                
                             } catch(error){
-                                this.layout.main.detail.model = [];
+                                this.layout.main.tabs = [];
                             }
-
-                            // let detail = new Vue({
-                            //     delimiters: ['#{', '}#'],
-                            //     template: ` <tabs v-model="index">
-                            //                     <tab :title="item | pickTitle" v-for="item in tabs" :key="item.id" html-title>
-                            //                         <event-diagnosis-datatable-component :id="item.id" :model="model[index][item.type]"></event-diagnosis-datatable-component>
-                            //                     </tab>
-                            //                 </tabs>`,
-                            //     data: {
-                            //         tabs: tabTemp,
-                            //         index: 0,
-                            //         model: [fsHandler.callFsJScript('/topological/diagnosis.js',event.host).message]
-                            //     },
-                            //     filters: {
-                            //         pickTitle(event){
-                            //             const self = this;
-                            //             let count = 0;
-                            //             try {
-                            //                 count = this.model[this.index][event.type].rows.length;
-                            //             } catch(error){
-                                            
-                            //             }
-                
-                            //             let badge = '0';
-                            //             try {
-                            //                 let severity = _.maxBy(this.model[this.index][event.type].rows,'severity').severity;
-                            //                 badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:0;
-                            //             } catch(error){}
-                                        
-                            //             return `${event.title} ${badge}`;
-                            //         }
-                            //     },
-                            //     mounted(){
-                            //         $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
-                            //     },
-                            //     methods:{
-                            //         onChange(index) {  
-                            //         }
-                            //     }
-                            // }).$mount(`#event-association`);
-                           
-                            // 生成tab页的唯一ID
-                            // let id = objectHash.sha1(row);
-                            // let elId = `event-detail-${id}`;
-
-                            // $(".event-ul").find(".active").removeClass("active");
-                            // $(".event-ul").append(`<li class="active">
-                            //                            <a href="#${elId}" role="tab" data-toggle="tab" title="告警详情" data-tooltip="tooltip">
-                            //                             告警详情 ${row.id || row.host}  
-                            //                             <span class="fas fa-times" style="cursor:pointer;padding-left:5px;" data-id="${elId}"></span>
-                            //                            </a>
-                            //                        </li>`)
-                            //     .on("click", "span", function () {
-                            //         var anchor = $(this).siblings('a');
-                            //         $(anchor.attr('href')).remove();
-                            //         $(this).parent().remove();
-
-                            //         $(`.event-ul li`).children('a').first().click();
-
-                            //         let id = $(this).data("id");
-                            //         $(`#${id}`).remove();
-                            //         $(`a[href="#${id}"]`).remove();
-                            //         $(`.event-div`).children("div").first().addClass("active");
-
-                            //     });
-
-                            // $(".event-div").find(".active").removeClass("active");
-                            // $(".event-div").append(`<div id="${elId}"></div>`).ready(function(){
-
-                            //     // 动态生成组件
-                            //     let view = {
-                            //         delimiters: ['#{', '}#'],
-                            //         el: `#${elId}`,
-                            //         template: fsHandler.callFsJScript('/event/event_ui.js', null).message.eventDetail,
-                            //         data: {
-                            //             id: elId,
-                            //             model: row
-                            //         },
-                            //         mounted:function(){
-                            //             const self = this;
-
-                            //             $(this.$el).closest("div .container-fluid").attr("id",`${elId}`);
-                            //             $(this.$el).addClass("tab-pane fade in active");
-                            //         },
-                            //         destroyed: function () {
-                            //             $(this.$el).off();
-                            //         }
-                            //     };
-
-                            //     // 告警详情页实例化
-                            //     new Vue(view);
-
-                            //     _.delay(function(){
-                            //         let ui = ['graphNav','performance','log','config','ticket'];
-
-                            //         // 告警管理拓扑页实例化
-                            //         let graphElId = `${elId}-graph`;
-                            //         $(`#${elId} .graph`).attr("id", graphElId);
-                            //         //$(`#${elId}`).addClass("tab-pane fade in active");
-
-                            //         new Vue(event.graph(graphElId));
-
-                            //         // 告警关联数据页实例化
-                            //         mx.tabs("event-detail-data");
-                            //         _.forEach(ui,function(v,index){
-                            //             let cid = `${elId}-${v}`;
-                            //             $(`#${elId} .${v}`).attr("id", cid);
-                            //             new Vue(event[v](cid));
-                            //         })
-
-                            //         // 增加tab active
-                            //         $(".tab-content.event-detail-data-content").children().addClass("tab-pane fade in")
-                            //         $(".tab-content.event-detail-data-content").children().first().addClass("active");
-
-                            //     },50)
-
-
-                            //     mx.handleDraggablePanel();
-                            //     //mx.handleLocalStorage();
-                            //     //mx.handleResetLocalStorage();
-                            //     //mx.handleSlimScroll();
-                            //     mx.handleSidebarMenu();
-                            //     // mx.handleMobileSidebarToggle();
-                            //     mx.handleSidebarMinify();
-                            //     // mx.handleMobileSidebar();
-                            //     // mx.handleThemePageStructureControl();
-                            //     // mx.handleThemePanelExpand();
-                            //     mx.handleAfterPageLoadAddClass();
-                            //     mx.handlePanelAction();
-                            //     mx.handelTooltipPopoverActivation();
-                            //     mx.handleScrollToTopButton();
-                            //     mx.handlePageContentView();
-                            //     mx.handleIEFullHeightContent();
-                            // })
-
+                        },
+                        detailRemove(targetName) {
+                            let tabs = this.layout.main.tabs;
+                            let activeIndex = this.layout.main.activeIndex;
+                            if (activeIndex === targetName) {
+                              tabs.forEach((tab, index) => {
+                                if (tab.name === targetName) {
+                                  let nextTab = tabs[index + 1] || tabs[index - 1];
+                                  if (nextTab) {
+                                    activeIndex = nextTab.name;
+                                  }
+                                }
+                              });
+                            }
+                            
+                            this.layout.main.activeIndex = activeIndex;
+                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
                         }
                     }
-                });
-
+                };
+                new Vue(event.app).$mount("#app");    
             });
         })
+
+        window.addEventListener('resize', () => { 
+            event.resizeEventConsole();
+        })
+
+        
     }
+
+    resizeEventConsole(){
+        let evwH = $(window).height();
+        let evcH = $("#event-view-container").height();
+        let evsH = $("#event-view-summary").height();
+        
+        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+                                                        .css("max-height","-=260px")
+                                                        .css("max-height","-=" + evsH + "px");
+    }
+
     graphNav(id){
         return {
             delimiters: ['${', '}'],
@@ -670,6 +729,16 @@ class Event extends Matrix {
             }
         };
     }
+
+    checkContainer(){
+        if($('#event-view-container').is(':visible')) {
+            event.layout();
+        } else {
+            setTimeout(event.checkContainer, 50);
+        }
+    }
+
+
 
 }
 

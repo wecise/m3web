@@ -180,6 +180,50 @@ class Window {
         return win;
     }
 
+    winConfig(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.55;
+        this.lrwh[3] = this.height * 0.55;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-configNew',
+            theme:        maxWindow.theme.dark,
+            headerTitle:  title,
+            contentSize:  {width: this.lrwh[2], height: this.lrwh[3]},
+            position: {
+                my: 'center',
+                at: 'center',
+                of: 'window'
+            },
+            container: 'body',
+            headerControls: { controls: '' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden auto"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            }
+        });
+
+        return win;
+    }
+
     winEditor(title, template, position, container){
 
         let id = `jsPanel-editor-${objectHash.sha1(title)}`;
@@ -286,29 +330,28 @@ class Window {
         return win;
     }
 
-    winRobot(title, template, position, container){
+    winNewFile(title, template, position, container){
 
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
+        let _position = "center 0 0";
 
-        let _position = { top: 50, right: 160 };
-
-        if(!_.isEmpty(_tmp)){
-            _position = _tmp;
-        }
-
-        this.lrwh[2] = this.width * 0.3;
-        this.lrwh[3] = this.height * 0.7;
+        this.lrwh[2] = this.width * 0.35;
+        this.lrwh[3] = this.height * 0.47;
 
         let win = $.jsPanel({
-            id: 'jsPanel-robot',
-            theme:          maxWindow.theme.light,
+            id: 'jsPanel-fileNew',
+            theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
+            maximizedMargin: [100, 100, 100, 100],
             container: 'body',
-            headerControls: { controls: 'closeonly' },
+            headerControls: { maximize: 'remove',minimize: 'remove' },
             headerRemove:  false,
             content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
+                opacity: 0.8
+            },
             dragit: {
                 drag: function (panel, position) {
                     localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
@@ -317,16 +360,16 @@ class Window {
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
-                    "z-index": "1000"
+                    "z-index": "10000"
                 });
                 
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",
-                    "border": "1px solid rgb(221, 221, 221)",
-                    "border-bottom": "none"
+                    // "border": "1px solid rgb(221, 221, 221)",
+                    // "border-bottom": "none"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd",
+                    // "border": "1px solid #dddddd",
                     "border-top": "none"
                 });
                 $(".jsPanel-titlebar",this).css({
@@ -336,7 +379,74 @@ class Window {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format("LLL")}</div>`;
             }
+        });
+
+        return win;
+    }
+
+    winRobot(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
+
+        let _position = "center 0 0";
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width * 0.6;
+        this.lrwh[3] = this.height * 0.7;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-robot',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   'AI 运维',//title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            maximizedMargin: [100, 100, 100, 100],
+            container: 'body',
+            headerControls: { minimize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
+                opacity: 0.8
+            },
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "10000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    // "border": "1px solid rgb(221, 221, 221)",
+                    // "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    // "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            // footerToolbar: function (footer) {
+            //     return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            // }
         });
 
         return win;
@@ -353,8 +463,8 @@ class Window {
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
-                left: 59,
-                top: 50,
+                left: 62,
+                top: 52,
             },
             //container: 'body',
             headerControls: { controls: 'closeonly' },
@@ -791,7 +901,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                //return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 

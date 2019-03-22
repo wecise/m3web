@@ -111,8 +111,6 @@ class Matrix {
 
     }
 
-    
-
     bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0) return '0 Byte';
@@ -399,6 +397,11 @@ class Matrix {
             trigger : 'hover',
             template: `<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`
         });
+        $("div[data-tooltip='tooltip']").tooltip({
+            container: 'body',
+            trigger : 'hover',
+            template: `<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>`
+        });
         $("li[data-tooltip='tooltip']").tooltip({
             container: 'body',
             trigger : 'hover',
@@ -597,8 +600,10 @@ class Matrix {
                     "panel-heading" != e && "panel-body" != e && (l += $(this).height() + 30)
                 }), 40 != l && $(t).css("top", 40 + "px")
             }
+            
             $(window).trigger("resize")
             mx.windowResize()
+            
         })
     }
 

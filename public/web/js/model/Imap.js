@@ -20,26 +20,30 @@ class Imap extends Matrix {
 
     init() {
         VueLoader.onloaded(["vue-base-datatables-component"],function() {
+            let URL_PARAMS_ITEM, URL_PARAMS_CFG,URL_PARAMS_DATA,URL_PARAMS_SESSIONID;
+            try {
+                URL_PARAMS_ITEM = mx.urlParams['item']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item'])))):null;
+                URL_PARAMS_CFG = mx.urlParams['cfg']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg'])))):null;
+                URL_PARAMS_DATA = mx.urlParams['data']?decodeURIComponent(window.atob(mx.urlParams['data'])):[];
+                URL_PARAMS_SESSIONID = mx.urlParams['sessionid'];
 
-            const URL_PARAMS_ITEM = mx.urlParams['item']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item'])))):null;
-            const URL_PARAMS_CFG = mx.urlParams['cfg']?_.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg'])))):null;
-            const URL_PARAMS_DATA = mx.urlParams['data']?decodeURIComponent(window.atob(mx.urlParams['data'])):[];
-            const URL_PARAMS_SESSIONID = mx.urlParams['sessionid'];
+                let init = function(){
+        
+                    $(".geDiagramContainer").css("background-color","#000000");
+                    
+                    _.forEach(URL_PARAMS_CFG,function(v,k){
+        
+                        if(!v){
+                            $(`#${k}`).hide();
+                        }
+                    })
+                    $(".geDiagramContainer").css("background-color","#ffffff");
+        
+                }();
+            } catch(error){
 
-            console.log(URL_PARAMS_ITEM,URL_PARAMS_CFG,URL_PARAMS_DATA,URL_PARAMS_SESSIONID)
-    
-            let init = function(){
-    
-                $(".geDiagramContainer").css("background-color","#000000");
-                _.forEach(URL_PARAMS_CFG,function(v,k){
-    
-                    if(!v){
-                        $(`#${k}`).hide();
-                    }
-                })
-                $(".geDiagramContainer").css("background-color","#ffffff");
-    
-            }();
+            }
+            
     
             $(function() {
                 // 详情
@@ -929,7 +933,7 @@ class Imap extends Matrix {
                             self.initToolBars();
                             self.model.graph.container.style.top = "0px";
     
-                            //self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
+                            self.crontab.load.sched = later.parse.text('every '+self.crontab.frequency+' sec');
                             //self.crontab.load.timer = later.setInterval(self.initData, self.crontab.load.sched);
     
                             $("#nav").find("div").hide();
@@ -1068,6 +1072,26 @@ class Imap extends Matrix {
                                 self.model.graph.graph.getModel().endUpdate();
                             }
                         },
+                        createOverlayByTip(image, tooltip) {
+                            
+                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/severity/${image}.png?issys=true&type=download`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            
+                            return overlay;
+                        },
+                        createOverlayByMask(state){
+                            let x = Number($(state[0]).attr('x')) - 5;
+                            let y = Number($(state[0]).attr('y')) - 5;
+                            let w = Number($(state[0]).attr('width')) + 5;
+                            let h = Number($(state[0]).attr('height')) + 5;
+                            
+                            $(state[0]).parent().prepend(`<rect x="${x}" y="${y}" height="${h}" width="${w}" style="stroke: #70d5dd; fill: #dd524b">
+                                                                <animate attributeType="XML"
+                                                                        attributeName="fill" 
+                                                                        values="#800;#f00;#800;#800" 
+                                                                        dur="0.8s" 
+                                                                        repeatCount="indefinite"/>
+                                                        </rect>`);//setAttribute('class', 'animated infinite flash');
+                        },
                         update: function () {
     
                             const self = this;
@@ -1075,25 +1099,56 @@ class Imap extends Matrix {
                             self.model.graph.graph.getModel().beginUpdate();
     
                             try {
-    
-                                _.forEach(self.model.graph.appData.dataset,function(v) {
-    
-                                    let _id = v.gid;
-                                    let _cell = self.model.graph.graph.getModel().getCell(_id);
-    
-                                    let state = self.model.graph.graph.view.getState(_cell);
-    
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [_cell]);
-    
-                                    if(v.severity >= 5){
-    
+                                _.forEach(self.model.graph.appData,function(v) {
+                                    
+                                    let id = v.gid;
+                                    let status = v.status;
+                                    let cell = self.model.graph.graph.getModel().getCell(id);
+                                    let state = self.model.graph.graph.view.getState(cell);
+                                    
+                                    if (cell != null) {
+                                        // Resets
+                                        self.model.graph.graph.removeCellOverlays(cell);
+                
+                                        // Changes the cell color for the known states
+                                        if (status >= 5) {
+                                            
+                                            // 判断节点类型
+                                            let image = state.shape.node.getElementsByTagName("image");
+                                            if(image){
+                                                self.model.graph.graph.addCellOverlay(cell, self.createOverlayByTip(status, `${id}: 重大告警`));
+                                                return false;
+                                            }
+
+                                            let rect = state.shape.node.getElementsByTagName("rect");
+                                            if(rect){
+                                                self.model.graph.graph.addCellOverlay(cell, self.createOverlayByMask(rect));
+                                                return false;
+                                            }
+
+                                        } else if (status >3 && status < 5) {
+                                            self.model.graph.graph.addCellOverlay(cell, self.createOverlay(status, `${id}: 严重告警`));
+                                        }
+                                    
+                                    }
+                                    /*
+                                    
+                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [cell]);
+                                    
+                                    if(v.status >= 5){
+                                        
                                         if(state && state.shape.node){
+
+
                                             //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ff0000', [_cell]);
                                             self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ff0000', [_cell]);
                                             self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
                                             //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
     
-    
+                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("image"))){
+                                                state.shape.node.getElementsByTagName("image")[k].setAttribute('class', 'animated infinite flash');
+                                            }
+
                                             if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
                                                 _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
                                                     if(k == 1){
@@ -1219,7 +1274,7 @@ class Imap extends Matrix {
     
                                         //self.tip(_id + " 报错",4);
     
-                                    }
+                                    }*/
     
                                 })
     

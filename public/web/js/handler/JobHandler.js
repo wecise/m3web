@@ -82,14 +82,12 @@ class  JobHandler {
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
                     alertify.success("成功" + " " + moment().format("LLL"));
-                } else {
-                    rtn = 0;
-                    alertify.error("失败" + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
                 rtn = 0;
+                alertify.error("失败" + " " + xhr.responseText);
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         });

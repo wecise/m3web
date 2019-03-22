@@ -1,0 +1,157 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+<style type="text/css">
+
+    body{
+        overflow: hidden;
+    }
+
+   /* content */
+	#content.content {
+		padding: 5px 5px 0px 5px!important;
+	}
+
+    ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .config-value {
+        min-height: calc(100vh - 190px);
+        max-height: calc(100vh - 138px);
+    }
+
+    .el-main{
+        padding: 0;
+        overflow: hidden;
+    }
+    .el-header {
+        background-color: #FFFFFF;
+        color: #333;
+        line-height: 30px;
+        height:30px;
+    }
+
+    /* el tabs */
+	.el-tabs__item {
+    	height: 30px;
+		line-height: 30px;
+		font-size: 12px;
+	}
+	.el-tabs__nav-prev,
+	.el-tabs__nav-next{
+		line-height: 30px;
+	}
+
+	.el-card__header{
+		padding:0 5px;
+	}
+	.el-card__header > .clearfix > span {
+		font-size: 14px;
+		font-weight: 600;
+    }
+    
+    .el-tabs--border-card{
+        border:none;
+        border-top:1px solid rgb(220, 223, 230);
+        -webkit-box-shadow:unset;
+        box-shadow:unset;
+    }
+    .el-tabs--border-card>.el-tabs__content {
+        padding: 0px 0px 10px 0px;
+    }
+    
+    .el-aside {
+        background-color: #FFFFFF!important;
+        color: #333333;
+        border-right:1px solid rgb(220, 223, 230);
+    }
+    
+    
+</style>
+
+<div id="app"></div>
+
+<!-- iView import stylesheet -->
+<link rel="stylesheet" href="{{AppSubUrl}}/web/vendor/iView/iview.css">
+<!-- iView import iView -->
+<script src="{{AppSubUrl}}/web/vendor/iView/iview.min.js"></script>
+
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Config.js" type="text/javascript"></script>
+<script src="{{AppSubUrl}}/web/js/handler/ConfigHandler.js" type="text/javascript"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+<script type="text/x-template" id="config-manage-template">
+    <div>
+        
+        <div class="config-value" :id="id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;"></div>
+        <div class="config-status-footer" :id="'statusBar-'+id" style="height: 30px;line-height: 2;background: rgb(246, 246, 246);"></div>
+
+        <!-- Config Add Modal -->
+        <!--div class="modal fade" id="configAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">新增</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label for="">节点名称</label>
+                        <input type="text" class="form-control" id="config_key" :value="etcdKey">
+                        <BR/>
+                        <label for="">目录</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                            <input type="checkbox" id="config_dir" value="true"></span>
+                            <label class="form-control well"></label>
+                        </div>
+                        <BR/>
+                        <div id="modal_config_value">
+                            <label for="">值</label>
+                            <pre id="config_value"></pre>
+                        </div>
+                        <BR/>
+                        <label for="">TTL</label>
+                        <input type="number" class="form-control" id="config_ttl">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="javascript:void(0)" class="btn btn-default" data-dismiss="modal">取消</a>
+                        <a href="javascript:void(0)" class="btn btn-primary" data-dismiss="modal" @click="addNode">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div-->
+        <!-- /Config Add Modal -->
+    </div>
+</script>
+
+{{template "base/footer" .}}

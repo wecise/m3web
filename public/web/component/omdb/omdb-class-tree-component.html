@@ -296,8 +296,12 @@
                         "导出数据": {
                             name: "导出数据", icon: "fas fa-file-export", callback: function (key, opt) {
 
-                                let _mql = `SELECT * FROM ${self.selectedNode.name} limit -1`;
-                                let _list = omdbHandler.fetchDataByMql(_mql);
+                                let event = `${self.selectedNode.name}`;
+                                let _list = omdbHandler.classDataExport(event);
+                                
+
+                                // 失败
+                                if(!_list) return false;
 
                                 if(_list.status === 'ok'){
                                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
@@ -305,7 +309,7 @@
                                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
                                 }
 
-
+                                return false;
                                 if(_.isEmpty(_list)) {
 
                                     alertify.log("查询结果为空");
@@ -332,6 +336,12 @@
                                 let _name = `${self.selectedNode.name}_INSERT_${moment().format("LLL")}`;
                                 let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _content, _attr);
                                 alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
+                            }
+                        },
+                        "导入数据": {
+                            name: "导入数据", icon: "fas fa-file-import", callback: function (key, opt) {
+
+                                
                             }
                         },
                         "sep3": "---------",
@@ -590,7 +600,7 @@
                     let _tmp = _list.message;
 
 					let _nodes = _.map(_tmp,function(v){
-					    return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.remedy, title: v.name, children:[]};
+					    return {cid: _.now(), parent:'A3', rtype: 'A3', isParent:false, name: v.name+`[${v.remedy}]`, title: v.name, children:[]};
 					});
 
 					let zTree = $.fn.zTree.getZTreeObj(self.id);
@@ -720,7 +730,7 @@
                         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'query-console',
 											                            name: treeNode.name,
 											                            title: treeNode.name,
-											                            model: { pattern: 'select', node: treeNode, pnode: treeNode.getParentNode() }
+											                            model: { pattern: 'select-edge', node: treeNode, pnode: treeNode.getParentNode() }
 											                        });
 
                     });
@@ -751,36 +761,6 @@
                     }
                 }
             },
-            /*addHoverDom: function (treeId, treeNode) {
-
-                if(treeNode.cid == 'A2' || treeNode.cid == 'A3') return false;
-
-                let sObj = $("#" + treeNode.tId + "_span");
-                let scObj = $("#" + treeNode.tId + "_a").find(".count");
-
-                if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
-
-                let addStr = `<div class="well hover-toolbars" id='toolbars_${treeNode.tId}' >
-								<span class='button add' id='addBtn_${treeNode.tId}' title='新建' onfocus='this.blur();' ></span>
-								<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑' onfocus='this.blur();' ></span>
-								<span class='button remove' id='removeBtn_${treeNode.tId}' title='删除' onfocus='this.blur();' ></span>
-							</div>`;
-
-                if(scObj.length > 0){
-                    scObj.after(addStr);
-                } else {
-                    sObj.after(addStr);
-                }
-
-                let btnNew = $("#addBtn_"+treeNode.tId);
-
-                if (btnNew) btnNew.bind("click", function(event){
-
-                    let zTree = $.fn.zTree.getZTreeObj(self.id);
-                    zTree.addNodes(treeNode, {cid: treeNode.cid + _.now(), pId:treeNode.id, name:treeNode.name + _.now()});
-                    return false;
-                });
-            },*/
             removeHoverDom: function (treeId, treeNode) {
                 $("#toolbars_"+treeNode.tId).unbind().remove();
             },

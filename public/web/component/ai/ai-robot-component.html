@@ -1,0 +1,211 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.ai-robot-component{
+			height: 100%;
+		}
+
+		.no-border{
+			padding:5px;
+			background-color: #f9f9f9;
+		}
+
+		.ws-setup{
+			padding:7px!important;
+		}
+		
+		.ai-robot-component .el-aside {
+			text-align: center;
+			line-height: 30px;
+			background-color: rgb(249, 249, 249);
+			overflow: hidden;
+		}
+		.ai-robot-component .el-aside ul {
+			height: 100%;
+			list-style: none;
+			padding: 0px;
+		}
+		.ai-robot-component .el-aside ul li{
+			border-radius: 5px;
+			margin-bottom: 2px;
+		}
+		
+		.ai-robot-component .el-footer {
+			height:50px;
+			background: #f9f9f9;
+			text-align: center;
+			line-height: 30px;
+			padding: 10px 0px;
+		}
+
+		.ai-robot-component .el-aside .media.selected{
+			background: #eeeeee;
+		}
+
+		/* ai robot chats to */
+		.chats .to {
+			text-align: right;
+		}
+		.chats .to .date-time {
+			float: left;
+		}
+		.chats .to .name {
+			text-align: right;
+		}
+		.chats .to .image {
+			float: right;
+		}
+		.chats .to .image+.message {
+			margin-right: 50px;
+			margin-left: 0;
+		}
+
+		.chats .to .message:after, .chats .to .message:before {
+			left: auto;
+			right: -14px;
+			border-right-color: rgba(0, 0, 0, 0);
+			border-left-color: rgb(204, 208, 212);
+		}
+
+		.chats .to .message:after {
+			right: -13px;
+			border-left-color: rgb(255, 255, 255);
+		}
+
+		/* ai robot chats from */
+		.chats .from {
+			text-align: left;
+		}
+		.chats .date-time {
+			font-size: 10px;
+			display: block;
+			float: right;
+			color: rgb(153, 153, 153);
+			margin-top: 3px;
+		}
+
+		.chats .name {
+			color: rgb(51, 51, 51);
+			display: block;
+			margin-bottom: 5px;
+			font-weight: 600;
+			text-decoration: none;
+		}
+
+		.chats .image {
+			float: left;
+			width: 48px;
+			height: 48px;
+			-webkit-border-radius: 4px;
+			-moz-border-radius: 4px;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+		.chats .image+.message {
+			margin-left: 50px;
+		}
+
+		.chats .message {
+			border: 1px solid rgb(204, 208, 212);
+			padding: 7px 12px;
+			font-size: 12px;
+			position: relative;
+			background: rgb(255, 255, 255);
+			-webkit-border-radius: 4px;
+			-moz-border-radius: 4px;
+			border-radius: 4px;
+			text-align: left;
+		}
+
+		.chats>li:after, .chats>li:before {
+			content: '';
+			display: table;
+			clear: both;
+		}
+
+		/* el-tabs */
+		.ai-robot-component .el-tabs__header{
+			background: rgb(249, 249, 249);
+			width: 80px;
+			height: 100%;
+		}
+		.ai-robot-component .el-tabs__content{
+			height: 100%;
+		}
+
+		.ai-robot-component .el-tabs__item{
+			font-size: 12px;
+			height: 60px;
+			line-height: 60px;
+			text-align: center!important;
+			padding: 0px;
+		}
+
+		.ai-robot-component .el-container, .ai-robot-component .el-tab-pane{
+			height: 100%;
+		}
+
+		.ai-robot-component .el-tabs--left .el-tabs__header.is-left{
+			margin: 0px;
+		}
+
+		.ai-robot-component .is-active{
+			/* padding: 10px 10px;
+			border-radius: 35px; */
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+		}
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="ai-robot-component"  ----------*/
+	<template>		
+			<el-container>
+				<el-tabs :tab-position="tabs.position" v-model="tabs.activeName">
+					<el-tab-pane name="robot-ai">
+						<span slot="label"><img src="/fs/assets/images/robot/png/robot.png?issys=true&type=download" class="image" style="width: 68px;"></span>
+						<ai-robot></ai-robot>
+					</el-tab-pane>
+					<el-tab-pane label="消息"  name="robot-message">
+						<ai-message></ai-message>
+					</el-tab-pane>
+					<el-tab-pane label="设置"  name="robot-setup">
+						
+					</el-tab-pane>
+				</el-tabs>
+			</el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="ai-robot-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+		},
+		data:function(){
+			return {
+				tabs:{
+					position: 'left',
+					activeName: 'robot-message'
+				}
+            }
+		},
+        created: function(){
+            
+        },
+        mounted: function(){
+			
+        },
+		destroyed: function(){
+			
+		},
+        methods: {
+            
+        }
+	
+	}
+	</script>
+
+</code>

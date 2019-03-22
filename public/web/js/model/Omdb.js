@@ -328,6 +328,8 @@ class Omdb extends Matrix {
                                 mql = `SELECT\n\t ${cls} \nFROM\n\t ${event.model.node.name} limit 50`;
                             } else if(event.model.pattern === 'select') {
                                 mql = "SELECT\n\t " + cls + "\nFROM\n\t " + event.model.node.name;
+                            } else if(event.model.pattern === 'select-edge') {
+                                mql = "SELECT\n\t " + cls + "\nFROM\n\t " + event.model.node.name.split("[")[0];
                             } else if(event.model.pattern === 'insert') {
                                 mql = "INSERT INTO " + event.model.node.name + "\n" + _.map(event.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
                             } else if(event.model.pattern === 'update') {
@@ -415,7 +417,7 @@ class Omdb extends Matrix {
                             } else if(event.model.pattern === 'g') {  // edge  query
                                 mql = `g.V(" ").In("${event.model.node.title}").All();`;
                             } else if(event.model.pattern === 'create-edge-type') {  // edge  new edge type
-                                mql = `CREATE EDGE TYPE  type_name type_remedy;`;
+                                mql = `CREATE EDGE TYPE  type_name 'type_remedy';`;
                             } else if(event.model.pattern === 'drop-edge-type') {  // edge drop edge type
                                 mql = `DROP EDGE TYPE ${event.model.node.title};`;
                             } else if(event.model.pattern === 'edge-insert') {  // edge  create
@@ -883,7 +885,6 @@ class Omdb extends Matrix {
 
             let appVue = new Vue({
                 delimiters: ['${', '}'],
-                el: '#app',
                 data: {
                     layout: null,
                     id: null,
@@ -1266,7 +1267,7 @@ class Omdb extends Matrix {
 
                     }
                 }
-            });
+            }).$mount("#app");
 
         })
     }

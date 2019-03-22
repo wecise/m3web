@@ -44,6 +44,10 @@
 			<a href="javascript:;" :class="'history history_'+id" @click="fromCache"><i class="fas fa-caret-down"></i></a>
 			<!--搜索框-->
 			<input type="text" class="form-control" v-model.trim="options.term" placeholder="搜索" autofocus="autofocus">
+			<!--重置过滤条件-->
+			<div class="input-group-btn" v-if="options.term" style="position: absolute;z-index: 100;right: 207px;">
+				<a href="javascript:void(0);" class="btn btn-sm btn-no-border" @click="resetTerm"><i class="fas fa-times"></i></a>
+			</div>
 			<!--搜索条件预设置-->
 			<div class="input-group-btn">
 				<search-preset-component :id="id+'-preset'"
@@ -137,9 +141,14 @@
                 this.toCache(this.options.term);
 
 			    // 搜索
-				let rtn = fsHandler.callFsJScript('/event/event_list.js', encodeURIComponent(this.result.term)).message;
+				let rtn = fsHandler.callFsJScript(`/${this.options.api}/${this.options.api}_list.js`, encodeURIComponent(this.result.term)).message;
 				// 结果
 				this.result.message = rtn;
+			},
+			resetTerm(){
+				this.options.term = "";
+				this.search();
+				mx.windowResize();
 			},
 		    toCache: function(event){
 			    let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');

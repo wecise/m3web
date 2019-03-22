@@ -15,637 +15,735 @@ class Performance extends Matrix {
     constructor() {
         super();
 
+        // 运行模式定义
+        window.EVENT_VIEW_LIST = ['view-normal','view-tags','view-fullscreen'];
+        window.EVENT_VIEW = 'view-normal';
+        
+        this.app = null;
+        this.detail = null;
     }
 
     init() {
-        VueLoader.onloaded(["vue-editor-component",
-            "vue-entity-tree-component",
-            "vue-search-preset-component",
-            "vue-search-input-component",
-            "vue-bootstrap-table",
-            "vue-gauge-radial-component",
-            "vue-gauge-linear-component",
-            "vue-common-form-component",
-            "vue-object-detail-component",
-            "vue-ci-tags-component",
-            "ai-robot-component"], function () {
 
-            var current_class_path = "/matrix/devops/performance";
+        VueLoader.onloaded(["ai-robot-component",
+                            "event-graph-component",
+                            "event-datatable-component",
+                            "event-diagnosis-datatable-component",
+                            "event-summary-component",
+                            "search-preset-component",
+                            "search-base-component",
+                            "probe-tree-component",
+                            "vue-timeline-component"],function() {
+            $(function() {
 
-            $(function () {
-
-                $(".current-active-item").html(`<a class="active item" href="/janesware/performance"><i class="fa fa-signal"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
-
-                var appVue = new Vue({
-                    delimiters: ['${', '}'],
-                    el: "#app",
-                    template: "#app-template",
-                    data: {
-                        search: {
-                            filter: [],
-                            params: {
-                                at: '#',
-                                class: '/matrix/devops/performance/',
-                                subclass: ':',
-                                top: 'top 200',
-                                lua: ""
-                            },
-                            input: {
-                                type: {type: "performance", quick: ""},
-                                term: ""
-                            },
-                            preset: {},
-                            regexp: {
-                                top: /top (\d+(\.\d)*)/gmi,
-                                undefined: /undefined/g,
-                                doubleGrep: /\|(\s+(\|))/g,
-
-                            },
-                            result: {
-                                dataList: [],
-                                data: [],
-                                columns: [],
-                                options: {
-                                    classes: "table table-striped",
-                                    toolbar: "#custom-toolbar1",
-                                    detailView: false,
-                                    search: true,
-                                    pageSize: "60",
-                                    pageList: "[15,30,45,60]",
-                                    locale: '{{.Lang}}'
+                Vue.component('performance-history-chart', {
+                    template: `<div :id="id" style="width:100%;height:200px;"></div>`,
+                    props:{
+                        id:String,
+                        model:Object
+                    },
+                    data(){
+                        return {
+                            chart: null,
+                            option: {
+                                tooltip: {
+                                    trigger: 'axis'
                                 },
-                                gauge: {
-                                    groupby: [],
-                                    list: [],
-                                    selected: {}
-                                }
-                            },
-                            currentTimer: null
-                        },
-                        target: "#dataTable",
-                        crontab: {
-                            main: {
-                                sched: Object,
-                                timer: Object
-                            },
-                            currentTimer: {
-                                sched: Object,
-                                timer: Object
-                            }
-                        },
-                        toggle: {
-                            left: false,
-                            top: true,
-                            mode: {
-                                default: {name:'m', title:'Monitoring Mode', icon: 'fas fa-tachometer'},
-                                list:[
-                                    {name:'d', title:'Diagnosis Mode', icon: 'fas fa-desktop'},
-                                    {name:'o', title:'Operation Mode', icon: 'fas fa-laptop'},
-                                    {name:'m', title:'Monitoring Mode', icon: 'fas fa-tachometer-alt'},
-                                ]
-                            }
+                                xAxis: {
+                                    type: 'category',
+                                    data: []
+                                },
+                                yAxis: {
+                                    type: 'value'
+                                },
+                                series: [{
+                                    data: [],
+                                    type: 'line',
+                                    smooth: true
+                                }]
+                            }                            
                         }
                     },
-                    created: function () {
-                        let self = this;
-
-                        self.defaultSearch();
-
-                        eventHub.$on('preset-selected-event', self.setPresetDefault);
-                        eventHub.$on("input-term-event", self.setSearchTerm);
-                        eventHub.$on("input-reset-event", self.setSearchReset);
-
+                    created(){
+                        // 接收窗体RESIZE事件
+                        eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
                     },
-                    mounted: function () {
-                        let self = this;
-
-                        self.$nextTick(function () {
-
-                            self.onSearch();
-
-                            self.initPlugin();
-
-                        })
+                    mounted() {
+                        this.init();
                     },
                     watch: {
-                        'search.result.data': {
-                            handler: function (val, oldVal) {
-                                let self = this;
-
-                                $(self.target).bootstrapTable('load', val);
-
-                                self.groupBy(val);
-
-                                self.setGauge();
+                        model: {
+                            handler: function (val,oldVal) {
+                                
                             },
-                            deep: true
-                        },
-                        'search.result.gauge.list': {
-                            handler: function (val, oldVal) {
-                                let self = this;
-
-                                $('.selectpicker').selectpicker('refresh');
-                            },
-                            deep: true
+                            deep:true
                         }
                     },
                     methods: {
-                        initPlugin: function () {
-                            let self = this;
-
-                            $("a[data-toggle='tab']").on("shown.bs.tab", function () {
-                                eventHub.$emit("chart-resize-event", null);
-                            })
-
-                            $(document).keypress(function (event) {
-                                var keycode = (event.keyCode ? event.keyCode : event.which);
-                                if (keycode == 13) {
-                                    self.onSearch();
-                                } else if (keycode == 27) {
-                                    self.setSearchReset();
-                                    self.onSearch();
-                                }
-                            })
-
-                            /* cron to refresh */
-                            self.crontab.main.sched = later.parse.text('every 30 min');
-                            self.crontab.main.timer = later.setInterval(self.onSearch, self.crontab.main.sched);
-
-                            self.crontab.currentTimer.sched = later.parse.text('every 1 sec');
-                            self.crontab.currentTimer.timer = later.setInterval(self.refreshCurrentTimer, self.crontab.currentTimer.sched);
-
-
-                            self.initFilter();
-
-                            /* copy selected word to search */
-                            self.copyWordToSearch();
-
-                            App.init();
-
+                        init(){
+                            this.initData();
+                            this.chart = echarts.init(this.$el);
+                            this.chart.setOption(this.option);
                         },
-                        defaultSearch: function () {
-                            let self = this;
-                            let _tmp = localStorage.getItem("search-open-performance");
-
-                            if (!_.isEmpty(_tmp)) {
-                                let _searchObject = _.attempt(JSON.parse.bind(null, _tmp));
-
-                                self.search.preset = _searchObject.preset;
-                                self.search.input.term = _searchObject.id;
-
-                                localStorage.setItem("search-open-performance", "");
-                            }
-
-                        },
-                        setPresetDefault: function (event) {
-                            let self = this;
-
-                            self.search.preset = event;
-                        },
-                        onSearch: function () {
-                            let self = this;
-                            let _param = "";
-                            let _preset = null;
-                            let _ifDebug = "";
-
-                            if(!_.isEmpty(self.search.preset)){
-                                _preset = self.search.preset.default;
-                                _ifDebug = self.search.preset.others.ifDebug ? "debug> " : "";
-                            }
-
-                            if (!_.isEmpty(self.search.input.term)) {
-
-                                let _top = self.search.input.term.match(self.search.regexp.top);
-
-                                if (!_.isEmpty(_top)) {
-                                    self.search.params.top = _.last(_top);
-                                }
-
-                                _param = self.search.params.at + self.search.params.class + self.search.params.subclass + " | " + self.search.input.term;
-                            } else {
-                                _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
-                            }
-
-                            if (!_.isEmpty(_preset)) {
-                                _param = _param + _preset.value + self.search.fortime;
-                            } else {
-                                _param = _param + _preset.value;
-                            }
-                            _param = _param + " | " + self.search.params.top;
-
-                            _param = _ifDebug + _param.replace(self.search.regexp.undefined, "").replace(self.search.regexp.doubleGrep, " | ");
-
-                            self.searchHandler(_param, null);
-                        },
-                        setSearchReset: function () {
-                            let self = this;
-                            let _param = self.search.params.at + self.search.params.class + self.search.params.subclass;
-                            let _preset = self.search.preset.default;
-
-                            self.search.params.top = 'top 200';
-                            _param = _param + _preset.value + self.search.preset.others.forTime + " | " + self.search.params.top;
-
-                            self.setSearchTerm("");
-                            self.searchHandler(_param, null);
-                        },
-                        setSearchTerm: function (term) {
-                            let self = this;
-
-                            self.search.input.term = term;
-                        },
-                        filterByTimeLine: function (event) {
-                            let self = this;
-
-                            self.search.result.data = _.filter(self.search.result.dataList, function (d) {
-                                var time = moment(d.ctime).format("YYYY-MM-DD HH");
-                                var tmp = moment.duration(moment(time).diff(event)).asMinutes();
-
-                                if (tmp < 15 && tmp >= 0) {
-                                    return d;
-                                }
-                            })
-                        },
-                        initTempTable: function () {
-                            let self = this;
-                            let param = editor.getValue();
-                            let cols = [];
-                            let _list = omdbHandler.fetchData(param);
-                            let _data = _list.message;
-
-                            $("#tempDataTable").bootstrapTable('destroy');
-
-                            $.map(_data[0], function (k, v) {
-
-                                var col = v;
-
-                                cols.push({
-                                    field: col,
-                                    title: col,
-                                    sortable: true
-                                })
-
+                        initData(){
+                            const self = this;
+                            this.option.xAxis.data = [];
+                            this.option.series[0].data = [];
+                            _.forEach(this.model.reverse(),function(v){
+                                self.option.xAxis.data.push(moment(v.vtime).format("YY-MM-DD HH:mm:SS"));
+                                self.option.series[0].data.push(v.value);
                             });
-
-                            $("#tempDataTable").bootstrapTable({columns: cols});
-
-                            $("#tempDataTable").bootstrapTable('load', _data);
                         },
-                        searchHandler: function (param, func) {
-                            let self = this;
-                            let _list = omdbHandler.fetchData(param);
-
-                            if (_.isEmpty(_list.message)) {
-                                self.search.result.columns = [];
-                                self.search.result.data = [];
-                                _.delay(self.setGauge, 500);
-                                return false;
-                            }
-
-                            let cols = [];
-
-                            cols = window.GLOBAL_OBJECT.company.object.performance.columns || window.GLOBAL_CONFIG.keyspace.wecise.performance['/matrix/devops/performance'].columns;
-
-                            self.preconfig = window.GLOBAL_OBJECT.company.object.performance.preconfig || window.GLOBAL_CONFIG.keyspace.wecise.performance['/matrix/devops/performance'].preconfig;
-
-                            let tmp = _list.meta.columns[_.keys(_list.meta.classes)[0]];
-
-                            if (!_.isEmpty(tmp)) {
-                                _.forEach(tmp, function (v) {
-                                    var fIndex = _.findIndex(cols, {field: v});
-                                    if (fIndex == -1) {
-                                        cols.push({field: v, title: _.upperFirst(v), visible: false});
-                                    }
-                                });
-                            }
-
-                            if (_.isEmpty(_.find(cols, {
-                                field: "state",
-                                checkbox: "true"
-                            }))) {
-                                cols.unshift({
-                                    field: "state",
-                                    checkbox: "true"
-                                });
-                            }
-
-                            self.search.result.columns = cols;
-                            self.search.result.data = _list.message;
-                            _.delay(self.setGauge, 500);
-                        },
-                        toggleTop: function () {
-                            let self = this;
-
-                            if (self.toggle.top) {
-
-                                $(".event-top").slideDown(500);
-                                $(".event-top").css("display", "");
-
-                                $(".toggle-top").removeClass("fa-caret-right");
-                                $(".toggle-top").addClass("fa-caret-down");
-
-                                $(".fixed-table-body").css({
-                                    "height": "-moz-calc(100vh - 440px)",
-                                    "height": "-webkit-calc(100vh - 440px)",
-                                    "height": "calc(100vh - 440px)"
-                                });
-
-                                self.toggle.top = false;
-
+                        checkChart(){
+                            const self = this;
+        
+                            if(self.chart.id){
+                                self.chart.resize();
                             } else {
-
-                                $(".event-top").slideUp(500, function () {
-                                    $(".event-top").css("display", "none");
-
-                                    $(".toggle-top").removeClass("fa-caret-down");
-                                    $(".toggle-top").addClass("fa-caret-right");
-
-                                    $(".fixed-table-body").css({
-                                        "height": "-moz-calc(100vh - 305px)",
-                                        "height": "-webkit-calc(100vh - 305px)",
-                                        "height": "calc(100vh - 305px)"
-                                    });
-
-                                    self.toggle.top = true;
-
-                                })
+                                setTimeout(self.checkChart, 50);
                             }
-
-                            eventHub.$emit("chart-resize-event", null);
-                        },
-                        toggleLeft: function () {
-                            let self = this;
-
-                            if (self.toggle.left) {
-
-                                $("#nav").hide();
-
-                                $("#mainview").removeClass("col-lg-10");
-                                $("#mainview").addClass("col-lg-12");
-                                //$("#content").find(".panel-default").css("border-left","1px #ddd solid");
-
-                                $(".navtoggle").removeClass("fa fa-caret-left");
-                                $(".navtoggle").addClass("fa fa-caret-right");
-
-                                self.toggle.left = false;
-                            } else {
-                                $("#nav").slideDown(500);
-                                $("#nav").show();
-
-                                $("#mainview").removeClass("col-lg-12");
-                                $("#mainview").addClass("col-lg-10");
-                                //$("#content").find(".panel-default").css("border-left","2px #ddd dotted");
-
-                                $(".navtoggle").removeClass("fa fa-caret-right");
-                                $(".navtoggle").addClass("fa fa-caret-left");
-
-                                self.toggle.left = true;
-                            }
-                        },
-                        toggleMode: function () {
-                            let self = this;
-                            let _default = _.head(self.toggle.mode.list);
-                            let _head = _.nth(self.toggle.mode.list, 1);
-
-                            if (_default.name == 'd') {
-                                $(".navbar-fixed-top").css({"display": "none"});
-                                $("#page-container").css({"padding-top": "0px"});
-
-                                $(".fixed-table-body").css({
-                                    "height": "-moz-calc(100vh - 250px)",
-                                    "height": "-webkit-calc(100vh - 250px)",
-                                    "height": "calc(100vh - 250px)"
-                                });
-
-                            } else if (_default.name == 'o') {
-
-                                $(".performance-search").css({"display": "none"});
-
-                                $(".fixed-table-body").css({
-                                    "height": "-moz-calc(100vh - 175px)",
-                                    "height": "-webkit-calc(100vh - 175px)",
-                                    "height": "calc(100vh - 175px)"
-                                });
-
-                                toggleFullScreen();
-
-                            } else {
-                                $(".navbar-fixed-top").css({"display": ""});
-                                $("#page-container").css({"padding-top": "54px"});
-                                $(".performance-search").css({"display": ""});
-
-                                $(".fixed-table-body").css({
-                                    "height": "-moz-calc(100vh - 305px)",
-                                    "height": "-webkit-calc(100vh - 305px)",
-                                    "height": "calc(100vh - 305px)"
-                                });
-                            }
-
-                            $(".toggle-mode").removeClass(_default.icon);
-                            $(".toggle-mode").addClass(_head.icon);
-                            $(".toggle-mode").attr("title", _head.title);
-
-                            self.toggle.mode.list.push(self.toggle.mode.list.shift());
-                        },
-                        toggleFilter: function (filter) {
-                            let self = this;
-
-                            self.setSearchTerm(" | " + filter);
-                            self.onSearch();
-                        },
-                        initFilter: function () {
-                            let self = this;
-
-                            let _tmp = localStorage.getItem(window.GLOBAL_OBJECT.company.name + "_quick_list_performance");
-                            if (!_.isNull(_tmp)) {
-                                self.search.filter = _.map(_.attempt(JSON.parse.bind(null, _tmp)), function (v) {
-                                    return {name: v.name, value: v.value};
-                                });
-                            }
-                        },
-                        topN: function () {
-                            let self = this;
-
-                            eventHub.$emit("input-set-event", "inst=cpu* | param=usedpercent | sort value desc | top 10");
-
-                            self.onSearch();
-                        },
-                        shareIt: function () {
-                            let self = this;
-                            var term = ` inst=cpu* | param=usedpercent | top 5  | sort value desc | value > 1 | lua value=<lua>return "<pre class='pull-right'  style='color:#3dad00;font-size:22px'><b>" .. string.format("%.2f",_value).. "%</b>&nbsp;<hr><label style='font-size:14px;'>接收人：</label><input class='form-control'><hr><button class='btn btn-xs btn-success' onclick='javascript:alert(111)'>发送</button></pre>"</lua>`;
-
-                            $(".searchinput").find("input").val(term);
-                            self.onSearch();
-                        },
-                        openDashBoardModal: function () {
-                            let self = this;
-                            var selected = $(self.target).bootstrapTable('getSelections');
-
-                            if (_.isEmpty(selected)) {
-                                swal("Please select kpi to generate DashBoard!", "", "info");
-                                return false;
-                            } else {
-                                $('#addDashBoardModal').modal('show')
-                            }
-                        },
-                        saveDashboard: function (ifOpen) {
-                            let self = this;
-                            var modal = $("#addDashBoardModal");
-                            var name = modal.find('#title').val() + ".ishow";//"dashboard_" + Math.floor(_.now() / 1000);
-                            //var title = modal.find('#title').val();
-                            if (_.isEmpty(name)) {
-                                swal("视图标题不能空！", "", "warning");
-                                modal.find('#title').setFocus();
-                                return false;
-                            }
-
-                            var tags = modal.find("#tags").tagsinput('items');
-                            var ispublic = $("#ispublic input:radio:checked").val();
-                            var skin = $('input[name=radioTheme]:checked').val();
-                            var type = $('input[name=radioType]:checked').val();
-
-                            var data = new Object();
-                            data.class = '/matrix/dashboard';
-                            data.name = name;
-                            data.title = title;
-                            data.tag = {
-                                //"_all": JSON.stringify(tags)
-                            };
-                            data.star = 0;
-                            data.username = '{{.SignedUser.UserName}}';
-                            data.ispublic = ispublic;
-
-                            var options = $.map($(self.target).bootstrapTable('getSelections'), function (row) {
-                                var o = new Object();
-                                o.option = {
-                                    title: {
-                                        text: row.host,
-                                    },
-                                    series: {
-                                        type: type
-                                    }
-                                };
-                                o.col = 6;
-                                o.param = "id=" + row.id + " | top 14440 ";//nearest 1day " + window.GLOBAL_OBJECT.company.object.performance.preconfig.time[0];
-                                o.id = _.random(_.now()) + "";
-                                return JSON.stringify(o);
-                            });
-
-                            data.portlet = options;
-                            data.theme = new Array(skin);
-
-                            jQuery.ajax({
-                                url: '/fs/home/dashboard/' + name,
-                                type: 'PUT',
-                                //contentType: "application/text; charset=utf-8",
-                                data: {
-                                    type: 'file',
-                                    data: JSON.stringify(data),
-                                    attr: ""
-                                },
-                                beforeSend: function (xhr) {
-                                },
-                                complete: function (xhr, textStatus) {
-                                },
-                                success: function (data, textStatus, xhr) {
-
-                                    modal.modal("hide");
-
-                                    _.delay(function () {
-                                        if (ifOpen) {
-
-                                            let _obj = {};
-
-                                            _obj.name = name;
-                                            _obj.parent = "/home/dashboard";
-                                            _obj.fsExtension = name.split(".")[1] || "ishow";
-
-                                            localStorage.setItem("dashboard-object", JSON.stringify(_obj));
-
-                                            window.open(
-                                                "/janesware/" + _obj.fsExtension,
-                                                "_blank"
-                                            );
-                                        }
-                                    }, 1000);
-
-                                },
-                                error: function (xhr, textStatus, errorThrown) {
-                                }
-                            })
-                        },
-                        groupBy: function (event) {
-                            let self = this;
-
-                            self.search.result.gauge.groupby = _.omit(_.groupBy(event, "host"), ["undefined", ""]);
-                        },
-                        setGauge: function () {
-                            let self = this;
-                            let host = window.GLOBAL_OBJECT.company.object.performance.preconfig.host[0];
-
-                            self.search.result.gauge.list = _.omit(_.groupBy(_.sortBy(_.map(_.cloneDeep(self.search.result.data), function (v, k) {
-                                var regex = /<b[^>]*>.*\/b>/i;
-                                let m;
-                                if ((m = regex.exec(v.value)) !== null) {
-                                    m.forEach((match, groupIndex) => {
-                                        v.value = match.replace(/<b>/, "").replace(/<\/b>/, "");
-                                    });
-                                }
-                                return v;
-                            }), host), host), ["undefined", ""]);
-
-                            _.forEach(_.keys(self.search.result.gauge.list), function (k) {
-                                $(".selectpicker.performance-kpi." + k).on("changed.bs.select", function (e) {
-                                    self.search.result.gauge.selected["gauge_" + k] = $(this).selectpicker('val');
-                                    self.onSearch();
-                                });
-                            })
-                        },
-                        getSelectionText: function(){
-                            let selectedText = "";
-
-                            if (window.getSelection){ // all modern browsers and IE9+
-                                selectedText = window.getSelection().toString();
-                            }
-                            return selectedText;
-                        },
-                        copyWordToSearch: function (argument) {
-                            let self = this;
-
-                            $("table").mouseup(function(){
-                                var selected = self.getSelectionText();
-                                if (selected.length > 0){
-                                    if (_.isEmpty(self.search.input.term)){
-                                        self.search.input.term = selected;
-                                    } else {
-                                        self.search.input.term += selected;
-                                    }
-                                }
-                            })
-                        },
-                        refreshCurrentTimer: function () {
-                            let self = this;
-
-                            self.search.currentTimer = moment().format("LL") + " " + moment().format("LTS");
                         }
                     }
+                }); 
+
+                // 雷达
+                Vue.component("event-view-radar",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            progress:[]
+                        }
+                    },
+                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
+                    template:   `<div>
+                                    <div class="progress" 
+                                         v-for="pg in progress" 
+                                         style="padding-left: 80px;overflow: hidden;height: 24px;margin-bottom: 5px;background-color: rgb(245, 245, 245);border-radius: 4px;transition: width .6s ease;">
+                                        <label style="padding: 3px 5px;position: absolute;left: 10px;">#{pg.name}#</label>
+                                        <el-tooltip placement="top" v-for="item in pg.child">
+                                            <div slot="content">#{item.title}#</div>
+                                            <div class="progress-bar animated fadeInLeft" 
+                                                :id="item.id"
+                                                role="progressbar" 
+                                                aria-valuemin="0" 
+                                                :aria-valuenow="item.width" 
+                                                aria-valuemax="100" 
+                                                :style="'width:'+item.width+'%;background:'+item.color + ';padding:3px;cursor: pointer;'" 
+                                                @click="search(item.expression)">
+                                                <div v-if="pg.child.length < 20">
+                                                    #{item.name}#
+                                                </div>
+                                            </div>
+                                        </el-tooltip>
+                                    </div>
+                                </div>`,
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true
+                        }
+                    },
+                    mounted(){
+                    },
+                    methods: {
+                        initData(){
+                            
+                            this.progress = _.map(this.model.summary.radar,function(v,k){
+                                let className = k.split("_")[0];
+                                let title = k.split("_")[1];
+                                let sum = _.sum(_.map(v,function(s){return s[1];}));
+                                let pgs = _.map(v,function(val){
+                                    let name = '其它';
+                                    if(val[0]){
+                                        name = val[0];
+                                    }
+                                    
+                                    return {id:objectHash.sha1(name+val+_.now()), 
+                                            name: name, 
+                                            value: val[1],
+                                            expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
+                                            title: `按${title}分析 \n\n ${name}: ${val[1]}`,
+                                            width: val[1]/sum * 100, 
+                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                        }
+                                })
+                                return {name: title, class:className, child: pgs, sum: sum}
+                            });
+                        },
+                        search(event){
+                            this.$root.options.term = event;
+                            this.$root.$refs.searchRef.search();
+                        }
+                    }
+                });
+
+                // 详情
+                Vue.component("performance-view-detail",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<el-row :gutter="10">
+                                    <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
+                                        <div class="grid-content" style="text-align:center;">
+                                            <img src="/fs/assets/images/entity/png/linux.png?issys=true&type=download" class="image">
+                                            <p><h3>#{model.rows.host}#</h3></p>
+                                        </div>
+                                    </el-col>
+                                    <el-col :xs="12" :sm="14" :md="18" :lg="18" :xl="14">
+                                        <div class="grid-content">
+                                            <form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
+                                                <!-- 有模板 -->
+                                                <div class="form-group" v-for="item in model.template" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
+                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
+                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                        <div v-if="item.data==='value' && model.rows[item.data] <= 100">
+                                                            <progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b>
+                                                        </div>
+                                                        <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize">
+                                                        </div>
+                                                        <div v-else>
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- 没有模板 -->
+                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
+                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                        <div v-if="key==='value' && value <= 100">
+                                                            <progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b>
+                                                        </div>
+                                                        <div v-else-if="key==='value' && value > 100">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize">
+                                                        </div>
+                                                        <div v-else>
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </el-col>
+                                </el-row>`,
+                    filters:{
+                        handlerFormat(evt){
+                            // 2019-03-13T21:35:31.678Z
+                            // 检查是否是UTC格式
+                            if(_.indexOf(evt,'T') === 10 && (_.indexOf(evt,'Z') === 23 || _.indexOf(evt,'Z') === 19) ){
+                                return moment(evt).format("LLL");
+                            } else {
+                                return evt;
+                            }
+                        }
+                    },
+                    mounted(){
+                    }
+                });
+
+                // 仪表盘
+                Vue.component("gauge-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data:function(){
+                        return {
+                            gauge: [
+                                {host:'wecise',inst:'',param:'', value:25,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:80,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:100,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:50,status:'text', showText:false},
+                                {host:'wecise',inst:'',param:'', value:100,status:'exception', showText:false},
+                                {host:'wecise',inst:'',param:'', value:75,status:'success', showText:false}
+                            ]
+                        }
+                    },
+                    template: ` <el-row :gutter="0">
+                                    <el-col :span="3" v-for="item in gauge">
+                                        <div class="grid-content" style="text-align: center;">
+                                            <el-progress type="circle" :percentage="item.value" :status="item.status"></el-progress>
+                                            <p>#{item.host}#</p>
+                                        </div>
+                                    </el-col>
+                                </el-row>`,
+                    mounted:function(){
+                        this.init();
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+                        
+                        }
+                    }
+                    
+                });
+
+                // 时间轴
+                Vue.component("performance-timeline",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    template:   `<div class="block"><el-timeline>
+                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
+                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                            <h4>#{item.value}#</h4>
+                                            <p>#{item.biz}# #{item.host}# #{item.inst}# #{item.param}#</p>
+                                        </el-card>
+                                    </el-timeline-item>
+                                </el-timeline></div>`
                 })
-            });
+                
+                // 分析
+                Vue.component("event-diagnosis",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data:function(){
+                        return {
+                            
+                        }
+                    },
+                    template: ` <section class="event-diagnosis">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active"><a href="#event-diagnosis-detail">性能详情</a></li>
+                                        <li class=""><a href="#event-diagnosis-history">历史趋势</a></li>
+                                        <li class=""><a href="#event-diagnosis-journal">性能轨迹</a></li>
+                                    </ul>
+                                    <div class="content">
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card" shadow="always">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-detail">性能详情</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-view-detail :id="id + '-detail'" :model="model.detail"></performance-view-detail>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history">历史趋势 <small>5分钟</small></span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min5"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history-15min">历史趋势 15分钟</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min15"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history">历史趋势 30分钟</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min30"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history-15min">历史趋势 1小时</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour1"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history">历史趋势 2小时</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour2"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-history">历史趋势 1天</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.day1"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                        <el-row>
+                                            <el-col :span="24">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span id="event-diagnosis-journal">性能轨迹
+                                                            <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
+                                                        </span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-timeline :id="id + '-journal'" :model="model.journal.rows"></performance-timeline>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                    </div>
+                                </section>`,
+                    mounted:function(){
+                        this.init();
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+                            
+                            $(self.$el).find("ul>li").click(function(e){
+                                $(self.$el).find("li.active").removeClass("active");
+                                $(e.target).closest("li").addClass("active");
+                                $("#content.content").css("padding-top","60px!important;");
+                            })
+                            
+                        }
+                    }
+                    
+                });
+                
+                mxPerformance.app = {
+                    delimiters: ['${', '}'],
+                    template: "#app-template",
+                    data: {
+                        // 布局
+                        layout:{
+                            main:{
+                                tabIndex: 1,
+                                activeIndex: 'event-view-console',
+                                tabs:[
+                                    {name: 'event-view-console', title:'性能列表', type: 'main'}
+                                ],
+                                detail: {
+                                    model: [],
+                                    tabIndex: 1,
+                                    activeIndex: '1',
+                                }
+                            },
+                            summary: {
+                                tabIndex: 1,
+                                activeIndex: 'performance-view-radar',
+                                tabs:[
+                                    {name: 'performance-view-radar', title:'雷达', type: 'radar'},
+                                    {name: 'performance-view-gauge', title:'仪表盘', type: 'gauge'}
+                                ]
+                            }
+                        },
+                        control: {
+                            ifSmart: '1',
+                        },
+                        // 搜索组件结构
+                        model: {
+                            id: "matrix-event-search",
+                            filter: null,
+                            term: null,
+                            preset: null,
+                            message: null,
+                        },
+                        options: {
+                            // 搜索窗口
+                            name:"所有", value: "",
+                            // 输入
+                            term: "",
+                            // 指定类
+                            class: "#/matrix/devops/performance/:",
+                            // 指定api
+                            api: "performance",
+                            // 时间窗口
+                            range: { from: "", to: ""},
+                            // 其它设置
+                            others: {
+                                // 是否包含历史数据
+                                ifHistory: false,
+                                // 是否包含Debug信息
+                                ifDebug: false,
+                                // 指定时间戳
+                                forTime:  ' for vtime ',
+                            }
+                        }
+                    },
+                    watch:{
+                        'layout.main.tabs':{
+                            handler(val,oldVal){
+                                if(val.length > 1){
+                                    $("#tab-event-view-console").show();
+                                }else {
+                                    $("#tab-event-view-console").hide();
+                                }
+                            },
+                            deep:true
+                        }
+                    },
+                    filters: {
+                        pickTitle(item,model,index){
+                            try {
+                                let count = 0;
+                                count = model[item.type].rows.length;
+                                
+                                let badge = 0;
+                                let severity = 0;
+                                try{
+                                    severity = _.maxBy(model[item.type].rows,'severity').severity;
+                                } catch(error){
+                                    severity = 0;
+                                }
+                                
+                                badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
+                                
+                                return `${item.title} ${badge}`;
 
-            /**
-             * @author cnwangzd
-             * @todo 工具栏级别过滤
-             */
-            $('.selectpicker.param').on('changed.bs.select', function (e) {
-                var selected = $(this).val();
-            });
+                            } catch(error){
+                                return `${item.title} 0`;
+                            }
+                        }
+                    },
+                    created(){
+                        // 接收搜索数据
+                        eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
+                        // 接收窗体RESIZE事件
+                        eventHub.$on("WINDOW-RESIZE-EVENT",mxPerformance.resizeEventConsole);
+                    },
+                    mounted(){
+                        $(this.$el).addClass('view-normal');
+                        
+                        // 没有详细页时，默认隐藏告警列表Title
+                        this.hideTabEventViewConsoleUl();
+                        
+                    },
+                    methods: {
+                        setData(event){
+                            this.model = _.extend(this.model, this.$refs.searchRef.result);
+                        },
+                        hideTabEventViewConsoleUl(){
+                            const self = this;
 
-            function formaterDate(value, row, index) {
-                return moment(value).format('YYYY-MM-DD HH:mm:ss');
-            }
+                            if($('#tab-event-view-console').is(':visible')) {
+                                $("#tab-event-view-console").hide();
+                            $("#tab-event-view-console > span").hide();
+                            } else {
+                                setTimeout(self.hideTabEventViewConsoleUl, 50);
+                            }   
+                        },
+                        // 切换运行模式
+                        toggleModel(event){
+                            $(this.$el).removeClass(window.EVENT_VIEW);
+                            $(this.$el).addClass(event);
+                            window.EVENT_VIEW = event;
+                        },
+                        toggleSummaryView(evt){
+                            if(evt==1) {
+                                $("#event-view-summary").css("height","200px").css("display","");
+                            } else {
+                                $("#event-view-summary").css("height","0px").css("display","none");
+                            }
+                            this.control.ifSmart = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            mxPerformance.resizeEventConsole();
+                        },
+                        detailAdd(event){
+                            try {
+                                let id = event.id;
+                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                
+                                // event
+                                let term = encodeURIComponent(JSON.stringify(event));
+                                // 根据event获取关联信息
+                                let model = fsHandler.callFsJScript('/performance/diagnosis-by-id.js',term).message;
+                                
+                                // 添加tab
+                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
+                                let detail = {title:`性能分析 ${event.host}/${event.inst}/${event.param}`, name:`detail-${id}`, type: 'detail', child:[
+                                                {title:'性能分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
+                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
+                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'history'},
+                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
+                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
+                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
+                                                // {title:'日志', name:`log-${id}`, type: 'log'},
+                                                // {title:'配置', name:`config-${id}`, type: 'config'},
+                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
+                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
+                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                            ]};
+                                
+                                this.layout.main.tabs.push(detail);
+                                this.layout.main.activeIndex = `detail-${id}`;
+                                
+                            } catch(error){
+                                this.layout.main.tabs = [];
+                            }
+                        },
+                        detailRemove(targetName) {
+                            console.log(targetName)
+                            let tabs = this.layout.main.tabs;
+                            let activeIndex = this.layout.main.activeIndex;
+                            if (activeIndex === targetName) {
+                              tabs.forEach((tab, index) => {
+                                if (tab.name === targetName) {
+                                  let nextTab = tabs[index + 1] || tabs[index - 1];
+                                  if (nextTab) {
+                                    activeIndex = nextTab.name;
+                                  }
+                                }
+                              });
+                            }
+                            
+                            this.layout.main.activeIndex = activeIndex;
+                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+
+                        }
+                    }
+                };
+                new Vue(mxPerformance.app).$mount("#app");    
+            });
         })
+
+        window.addEventListener('resize', () => { 
+            mxPerformance.resizeEventConsole();
+        })
+
+        
     }
+
+    resizeEventConsole(){
+        let evwH = $(window).height();
+        let evcH = $("#event-view-container").height();
+        let evsH = $("#event-view-summary").height();
+        
+        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+                                                        .css("max-height","-=260px")
+                                                        .css("max-height","-=" + evsH + "px");
+    }
+
+    graphNav(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`,
+            data: {
+                id: id
+            },
+            mounted: function () {
+                const self = this;
+
+                self.$nextTick(function () {
+
+                })
+            }
+        };
+    }
+
+    graph(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
+            data: {
+                id: id,
+                model: fsHandler.callFsJScript('/performance/event_detail_graph.js', null).message.data[0].graph
+            },
+            mounted: function () {
+                const self = this;
+
+                self.$nextTick(function () {
+
+                })
+            }
+        };
+    }
+
+    performance(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<div id="performance">
+                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
+                       </div>`,
+            data: {
+                id: id,
+                model: 'performance'
+            }
+        };
+    }
+
+    log(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<div id="log">
+                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
+                        </div>`,
+            data: {
+                id: id,
+                model: 'log'
+            }
+        };
+    }
+
+    config(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<div id="config">
+                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
+                        </div>`,
+            data: {
+                id: id,
+                model: 'config'
+            }
+        };
+    }
+
+    ticket(id){
+        return {
+            delimiters: ['${', '}'],
+            el: '#' + id,
+            template: `<div id="ticket">
+                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
+                       </div>`,
+            data: {
+                id: id,
+                model: 'ticket'
+            }
+        };
+    }
+
+    checkContainer(){
+        if($('#event-view-container').is(':visible')) {
+            mxPerformance.layout();
+        } else {
+            setTimeout(mxPerformance.checkContainer, 50);
+        }
+    }
+
+
+
 }
 
-let performance = new Performance();
-performance.init();
+let mxPerformance = new Performance();
+mxPerformance.init();

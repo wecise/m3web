@@ -536,7 +536,7 @@
 		                                <label class="col-sm-2 control-label">图标</label>
 		                                <div class="col-sm-10">
 		                                    <a href="#fs-deploy-icon-list" aria-controls="fs-deploy-icon-list" role="tab" data-toggle="tab">
-		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;background-color:rgb(37, 45, 73);" >
+		                                        <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);" >
 		                                    </a>
 		                                </div>
 		                              </div>
@@ -548,13 +548,13 @@
 		                              </div>
 		                            </form>
 		                        </div>
-		                        <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list">
+		                        <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list" style="padding:10px;">
 		                            <div class="row">
 		                              <div class="col-md-12" style="display: list-item;height: 50vh;overflow: auto;">
 		                                <ul>
-		                                    <li v-for="icon in app.icon.list" style="width: 80px;height: 85px;padding: 0px;">
-		                                        <a href="#" class="thumbnail" style="border:none;background-color:rgb(37, 45, 73);height:100%;" @click="triggerInput(icon.id)">
-		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
+		                                    <li v-for="icon in app.icon.list" style="width: 68px;height: 68px;padding: 0px;">
+		                                        <a href="#" class="thumbnail" style="border:none;height:100%;" @click="triggerInput(icon.id)">
+		                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 34px;min-width: 34px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
 		                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="icon.name" v-model="app.icon.value" >
 		                                        </a>
 		                                    </li>
@@ -613,7 +613,7 @@
                         deploy: function(){
                             let me = this;
 
-                            let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
+                            let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;
 
                             if(check==1){
                                 alertify.log("应用已经发布，请确认。")
@@ -623,7 +623,7 @@
                             let app = {
                                 cnname: me.app.cnname,
                                 enname: me.app.enname,
-                                icon: me.app.icon.value,
+                                icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,''),
                                 seat: me.app.seat,
                                 url: me.app.url
                             };

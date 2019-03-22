@@ -199,16 +199,11 @@ class FsHandler {
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
 
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _url += '?issys=true';
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _url += '?issys=true';
         }
 
         jQuery.ajax({
-
             url: _url,
             type: 'DELETE',
             dataType: 'text json',
@@ -225,14 +220,12 @@ class FsHandler {
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
                     alertify.success("删除成功" + " " + name);
-                } else {
-                    rtn = 0;
-                    alertify.error("删除失败" + " " + name);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
+                alertify.error("删除失败" + " " + xhr.responseText);
                 console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
         })
