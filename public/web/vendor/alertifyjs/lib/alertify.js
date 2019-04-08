@@ -30,14 +30,15 @@
 		 */
 		dialogs = {
 			buttons : {
-				holder : "<nav class=\"alertify-buttons\">{{buttons}}</nav>",
-				submit : "<button type=\"submit\" class=\"alertify-button alertify-button-ok\" id=\"alertify-ok\">{{ok}}</button>",
-				ok     : "<button class=\"alertify-button alertify-button-ok\" id=\"alertify-ok\">{{ok}}</button>",
-				cancel : "<button class=\"alertify-button alertify-button-cancel\" id=\"alertify-cancel\">{{cancel}}</button>"
+				holder : `<nav class="alertify-buttons">{{buttons}}</nav>`,
+				submit : `<button type="submit" class="btn btn-sm btn-primary btn-button" id="alertify-ok">{{ok}}</button>`,
+				ok     : `<button class="btn btn-sm btn-primary btn-button" id="alertify-ok">{{ok}}</button>`,
+				cancel : `<button class="btn btn-sm btn-default btn-button" id="alertify-cancel">{{cancel}}</button>`
 			},
-			input   : "<div class=\"alertify-text-wrapper\"><input type=\"text\" class=\"alertify-text\" id=\"alertify-text\"></div>",
-			message : "<p class=\"alertify-message\">{{message}}</p>",
-			log     : "<article class=\"alertify-log{{class}}\">{{message}}</article>"
+			input   : `<div class="alertify-text-wrapper"><input type="text" class="alertify-text" id="alertify-text"></div>`,
+			//header: `<p class="alertify-header"><i class="fas fa-exclamation-circle"></i> 确认</p>`,
+			message : `<p class="alertify-message" contenteditable="true">{{message}}</p>`,
+			log     : `<article class="alertify-log{{class}}">{{message}}</article>`
 		};
 
 		/**
@@ -251,13 +252,13 @@
 			 */
 			build : function (item) {
 				var html    = "",
-				    type    = item.type,
-				    message = item.message,
+					type    = item.type,
+					message = item.message,
 				    css     = item.cssClass || "";
 
-				html += "<div class=\"alertify-dialog\">";
-				html += "<a id=\"alertify-resetFocusBack\" class=\"alertify-resetFocus\" href=\"#\">Reset Focus</a>";
-
+				html += `<div class="alertify-dialog">`;
+				html += `<a id="alertify-resetFocusBack" class="alertify-resetFocus" href="#">Reset Focus</a>`;
+				html += `<p class="alertify-header"><i class="fas fa-exclamation-circle"></i></p>`;
 				if (_alertify.buttonFocus === "none") html += "<a href=\"#\" id=\"alertify-noneFocus\" class=\"alertify-hidden\"></a>";
 
 				// doens't require an actual form

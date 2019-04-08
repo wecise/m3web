@@ -370,9 +370,8 @@ class OmdbHandler {
 
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = {message:[],status:"error"};
+                rtn = xhr.responseText;
                 alertify.error("失败" + " " + moment().format("LLL") + " " +  xhr.responseText);
-                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + JSON.stringify(xhr.responseJSON));
             }
         });
 

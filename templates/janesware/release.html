@@ -35,49 +35,51 @@
         overflow: hidden;
     }
 
-    .lm_goldenlayout {
-        background: none;
-        background-color: rgb(249, 249, 249);
+    .ivu-split-trigger-vertical{
+        width: 3px!important;
     }
 
-    #app .lm_goldenlayout:nth-child(1){
-        margin: -20px 0px 0px -20px;
+    .ivu-split-trigger-bar{
+        background: transparent!important;
     }
 
-    .lm_column .lm_content {
-        background: rgb(255, 255, 255);
-        border: 1px solid rgb(255, 255, 255);
-        overflow: auto;
-        padding: 5px 15px 5px 0px;
-        width: calc(100% + 60px)!important;
+    .ivu-split-trigger{
+        border:none!important;
     }
 
-    .lm_row .lm_content{
-        width: 100%;
+    .el-tabs--border-card>.el-tabs__header{
+        background: rgb(246, 246, 246);
     }
 
-    .lm_header .lm_tab.lm_active {
+    .el-tabs--border-card>.el-tabs__header {
         border-bottom: none;
-        box-shadow: none;
-        padding-bottom: 5px;
     }
 
-    .lm_tab:hover, .lm_tab.lm_active {
-        background: rgb(249, 249, 249);
-        color: rgb(119, 119, 119);
+    .ivu-layout{
+        background: #ffffff;
     }
 
-    .lm_header .lm_tab {
-        border: none;
+    .ivu-layout-content {
+        height: calc(100vh - 135px)!important;
+        background: rgb(255, 255, 255);
+    }
+    .ivu-layout-header {
+        background: rgb(246, 246, 246)!important;
+        padding: 0 50px!important;
+        height: 34px!important;
+        line-height: 34px!important;
+        text-align: right;
     }
 
-    .lm_splitter {
-        opacity: .2;
+    .el-tabs--border-card {
+        border-top: none!important;
     }
 
-    [id="app"] {
-        width: 100%;
-        height: 100vh;
+    .ivu-layout-footer {
+        background: rgb(255, 255, 255)!important;
+        padding: 10px 10px!important;
+        color: rgb(81, 90, 110)!important;
+        font-size: 12px!important;
     }
 
 </style>
@@ -85,6 +87,11 @@
 <div id="content" class="content">
     <div id="app"></div>
 </div>
+
+<!-- iView import stylesheet -->
+<link rel="stylesheet" href="{{AppSubUrl}}/web/vendor/iView/iview.css">
+<!-- iView import iView -->
+<script src="{{AppSubUrl}}/web/vendor/iView/iview.min.js"></script>
 
 <script src="{{AppSubUrl}}/web/js/model/FileSystem.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>

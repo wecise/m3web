@@ -217,9 +217,6 @@
 
 <div id="app"></div>
 
-<script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
-<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
-
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
@@ -241,6 +238,11 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
+
+<script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+
 
 
 <script type="text/x-template" id="app-template">
@@ -283,10 +285,13 @@
 											<el-tabs v-model="layout.summary.activeIndex" type="border">
 												<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
 													<div v-if="item.type=='radar'">
-														<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
+														<event-view-radar id="event-summary-radar" :model='model.message'></event-view-radar>
 													</div>
 													<div v-if="item.type=='pie'">
-														<event-view-pie id="event-pie" :model='model.message'></event-view-pie>
+														<event-view-pie id="event-summary-pie" :model='model.message'></event-view-pie>
+													</div>
+													<div v-if="item.type=='group'">
+														<event-view-group id="event-summary-group" :model='model.message'></event-view-group>
 													</div>
 												</el-tab-pane>
 											</el-tabs>

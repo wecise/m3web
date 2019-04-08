@@ -881,6 +881,8 @@ class Creative {
                                 }
                             }, url);
 
+                            $(".alertify-prompt .alertify-message").css('height','5vh');
+
                         },
                         shareIt: function(item){
                             let self = this;
@@ -893,6 +895,8 @@ class Creative {
                                     // user clicked "cancel"
                                 }
                             }, "admin;");
+
+                            $(".alertify-prompt .alertify-message").css('height','5vh');
                         },
                         toggleLeft: function() {
                             let self = this;

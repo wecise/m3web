@@ -11,7 +11,11 @@
 
 class  WebSocket {
     constructor(){
+        this.ws = null;
+    }
 
+    init(){
+        mxWebSocket.checkWebSocket();
     }
 
     checkWebSocket(){
@@ -42,3 +46,4 @@ class  WebSocket {
 }
 
 var mxWebSocket = new WebSocket();
+mxWebSocket.init();

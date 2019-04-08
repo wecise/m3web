@@ -81,10 +81,6 @@ class FsHandler {
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
 
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _url += '?issys=true';
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _url += '?issys=true';
         }
@@ -551,44 +547,33 @@ class FsHandler {
 
         let _srcpath = srcpath.replace(/\/\//g,'/');
 
+        let fileName = _.last(srcpath.split("/")) + `_${moment().format("MMMM Do YYYY, h:mm:ss")}.zip`;
+
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
 
-        let form = new FormData();
-        form.append("srcpath", _srcpath);
-
-        jQuery.ajax({
-            url: `/fs/export?issys=${_issys}`,
-            type: 'POST',
-            dataType: 'binary',
-            processData: false,
-            contentType: false,
-            mimeType: 'multipart/form-data',
-            data: form,
-            async: true,
-            beforeSend: function (xhr) {
-            },
-            complete: function (xhr, textStatus) {
-            },
-            success: function (data, textStatus, xhr) {
-
-                userHandler.ifSignIn(data);
-
-                let header = xhr.getResponseHeader('Content-Disposition');
-
-                let blob = new Blob([atob(data)], {type: "application/zip;charset=utf-8"});
-                FileSaver.saveAs(blob, header.split("=")[1]);
-
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.log("导出失败 " + xhr.responseJSON);
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON);
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", `/fs/export?issys=${_issys}&srcpath=${_srcpath}`, true);
+            xhr.setRequestHeader("Content-type","application/zip");
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var blob = new Blob([xhr.response], {type: "octet/stream"});
+                    saveAs(blob, fileName);
+                    alertify.success("导出成功" + " " + fileName);
+                    rtn = 1;
+                }
             }
-        });
-
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+        } catch(err){
+            
+        }
+        
         return rtn;
+
     };
 
 

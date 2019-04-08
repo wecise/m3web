@@ -17,7 +17,7 @@ class Config {
     }
 
     init() {
-        VueLoader.onloaded(["ai-robot-component"], function () {
+        VueLoader.onloaded(["ai-robot-component","dropdown-tree-component"], function () {
 
             
             $(function () {
@@ -168,7 +168,7 @@ class Config {
                     },
                     template: ` <div>
                                     <div class="config-value" :id="'editor-'+id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;"></div>
-                                    <div class="config-status-footer" :id="'statusBar-'+id"></div>
+                                    <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
                                 </div>`,
                     data() {
                         return {
@@ -375,44 +375,39 @@ class Config {
     
                 maxConfig.app = {
                     delimiters: ['#{', '}#'],
-                    template:   `<div id="content" class="content">
-                                    <el-container style="height: 88vh;border: 1px solid rgb(238, 238, 238);background-color:rgb(255, 255, 255);width: 100%;">
-                                        
+                    template:   `<div class="layout" style="margin: -15px -15px 0px;">
+                                    <Layout>
+                                        <Header>
+                                            <ButtonGroup>
+                                                <Button type="text" size="small" @click="configNew"><i class="fas fa-plus"></i> 新增</Button>
+                                                <Button type="text" size="small" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-save"></i> 保存</Button>
+                                                <Button type="text" size="small" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-trash"></i> 删除</Button>
+                                                <Button type="text" size="small" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tv"></i> 调试</Button>
+                                                <Button type="text" size="small" :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tshirt"></i> 主题</Button>
+                                            </ButtonGroup>
+                                            <Dropdown placement="top-start">
+                                                <Button type="text" size="small" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-boxes"></i> 模板</Button>
+                                                <DropdownMenu slot="list">
+                                                    <DropdownItem>屏蔽规则</DropdownItem>
+                                                    <DropdownItem>过滤规则</DropdownItem>
+                                                    <DropdownItem>压缩规则</DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>
+                                            <Dropdown placement="top-start">
+                                                <Button type="text" size="small" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-grip-vertical"></i> 插入</Button>
+                                                <DropdownMenu slot="list">
+                                                    <DropdownItem>属性</DropdownItem>
+                                                    <DropdownItem>函数</DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>
+                                        </Header>
+                                        <Content>
                                             <Split v-model="split1">
-                                                <div slot="left">
+                                                <div slot="left" style="height: 100%;overflow: auto;">
                                                     <config-tree-component id="config-tree" :zNodes="configTreeNodes"></config-tree-component>
                                                 </div>
                                                 <div slot="right">
                                                     <el-container>
-                                                        <el-header style="text-align: right; font-size: 12px;height:30px;">
-                                                            <el-row type="flex" class="row-bg" justify="space-around">
-                                                                <el-col :span="18"><div class="grid-content bg-purple">
-                                                                    
-                                                                </div></el-col>
-                                                                <el-col :span="6"><div class="grid-content bg-purple-light">
-                                                                    <div class="btn-group">
-                                                                        <a class="btn btn-xs btn-link" data-target="#configAddModal" title="新增目录或节点" data-toggle="modal">
-                                                                            <i class="fa fa-plus"></i>
-                                                                            新增&nbsp;
-                                                                        </a>
-                                                                        <a  href="#"
-                                                                            class="btn btn-xs btn-link config-editor-save"
-                                                                            title="保存新增目录或节点"
-                                                                            @click="configSave"
-                                                                            style="display:;">
-                                                                            <i class="fa fa-save"></i> 保存
-                                                                        </a>
-                                                                        <a href="#" class="btn btn-xs btn-link" readonly @click="configDelete" title="删除目录或节点">
-                                                                            <i class="fa fa-trash"></i>
-                                                                            删除&nbsp;
-                                                                        </a>
-                                                                        <a href="javascript:void(0)" @click="configDegug" class="btn btn-xs btn-link">
-                                                                            <i class="fas fa-tv"></i>
-                                                                        </a>
-                                                                    </div>
-                                                                </div></el-col>
-                                                            </el-row>
-                                                        </el-header>
                                                         <el-main>
                                                             <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose">
                                                                 <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
@@ -429,10 +424,9 @@ class Config {
                                                     </el-container>
                                                 </div>
                                             </Split>
-                                            
-                                        </el-aside>
-                                        
-                                    </el-container>
+                                        </Content>
+                                        <Footer style="padding-top: 20px!important;"><i class="fas fa-user"></i> #{window.SignedUser_UserName}#    <i class="fas fa-clock"></i> #{moment().format("LLL")}# </Footer>
+                                    </Layout>     
                                 </div>`,
                     data: {
                         split1: 0.2,
@@ -440,7 +434,9 @@ class Config {
                             tabs:[],
                             activeIndex: '',
                         },
-                        configTreeNodes:{}
+                        configTreeNodes:{},
+                        configTreeSelectedNode:{},
+
                     },
                     created() {
                         eventHub.$on("CONFIG-TREE-CLICK-EVENT", this.configOpen);
@@ -458,7 +454,10 @@ class Config {
                     },
                     methods: {
                         configOpen(treeNode){
+                            const self = this;
                             
+                            self.configTreeSelectedNode = treeNode;
+
                             try {
                                 let id = treeNode.tId;
                                 //if(this.configTabs.activeIndex === id) return false;
@@ -471,6 +470,8 @@ class Config {
                                 // 添加tab
                                 this.configTabs.activeIndex = id;
                                 this.configTabs.tabs.push({dir: treeNode.dir, title: treeNode.key, name: id, type: 'config', model: treeNode});                                
+
+                                self.initTheme();
                             } catch(error){
                                 this.configTabs.tabs = [];
                             }
@@ -492,11 +493,203 @@ class Config {
                             this.configTabs.activeIndex = activeIndex;
                             this.configTabs.tabs = tabs.filter(tab => tab.name !== targetName);
                         },
-                        configSave(){
+                        initTheme: function(){
+                            const self = this;
+                            let id = objectHash.sha1(self.configTabs.activeIndex);
+            
+                            $.contextMenu({
+                                selector: `.editor-select-theme-${id}`,
+                                trigger: 'left',
+                                callback: function (key, options) {
+                                    if(key !== 'bright' && key !== 'dark'){
+                                        let editor = ace.edit('editor-' + self.configTabs.activeIndex);
+                                        editor.setTheme("ace/theme/"+key);
+                                        localStorage.setItem(`editor-select-theme-${id}`,key);
+                                    }
+                                },
+                                items: {
+                                    "bright": { name: "亮色", items: {
+                                            "chrome": { name: "chrome"},
+                                            "clouds": { name: "clouds"},
+                                            "crimson_editor": { name: "crimson_editor"},
+                                            "dawn": { name: "dawn"},
+                                            "dreamweaver": { name: "dreamweaver"},
+                                            "eclipse": { name: "eclipse"},
+                                            "github": { name: "github"},
+                                            "iplastic": { name: "iplastic"},
+                                            "solarized_light": { name: "solarized_light"},
+                                            "textmate": { name: "textmate"},
+                                            "tomorrow": { name: "tomorrow"},
+                                            "xcode": { name: "xcode"},
+                                            "kuroir": { name: "kuroir"},
+                                            "katzenmilch": { name: "katzenmilch"},
+                                            "sqlserver": { name: "sqlserver"}
+                                        }
+                                    },
+                                    "dark": { name: "暗色", items: {
+                                            "ambiance": { name: "ambiance"},
+                                            "chaos": { name: "chaos"},
+                                            "clouds_midnight": { name: "clouds_midnight"},
+                                            "dracula": { name: "dracula"},
+                                            "cobalt": { name: "cobalt"},
+                                            "gruvbox": { name: "gruvbox"},
+                                            "gob": { name: "gob"},
+                                            "idle_fingers": { name: "idle_fingers"},
+                                            "kr_theme": { name: "kr_theme"},
+                                            "merbivore": { name: "merbivore"},
+                                            "merbivore_soft": { name: "merbivore_soft"},
+                                            "mono_industrial": { name: "mono_industrial"},
+                                            "monokai": { name: "monokai"},
+                                            "pastel_on_dark": { name: "pastel_on_dark"},
+                                            "solarized_dark": { name: "solarized_dark"},
+                                            "terminal": { name: "terminal"},
+                                            "tomorrow_night": { name: "tomorrow_night"},
+                                            "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                                            "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                                            "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                                            "twilight": { name: "twilight"},
+                                            "vibrant_ink": { name: "vibrant_ink"}
+                                        }
+                                    }
+                                }
+                            });
+                        },
+                        configNew(){
+                            const self = this;
 
+                            let wnd = null;
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-configNew')){
+                                    jsPanel.activePanels.getPanel('jsPanel-configNew').close();
+                                }
+                            }catch(error){
+            
+                            }
+                            finally{
+                                wnd = maxWindow.winConfig('新增', '<div id="config-new-window"></div>', null,null);
+                            }
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                template:   `<Form :label-width="80" style="padding:30px 30px 0px 0px;">
+                                                <FormItem label="位置" prop="parent">
+                                                    <Input v-model="parent" placeholder="位置"></Input>
+                                                    <!--dropdown-tree-component id="config-select-parent" v-model="parent" ref="refConfigParent"></dropdown-tree-component-->
+                                                </FormItem>
+                                                <FormItem label="名称" prop="name">
+                                                    <Input v-model="name" placeholder="节点名称"></Input>
+                                                </FormItem>
+                                                <FormItem :label="formItem.ifDir?'目录':'节点'">
+                                                    <i-switch v-model="formItem.ifDir" size="small">
+                                                        <span slot="true">是</span>
+                                                        <span slot="false">否</span>
+                                                    </i-switch>
+                                                </FormItem>
+                                                <FormItem label="TTL" prop="ttl">
+                                                    <Input v-model="formItem.ttl" placeholder="TTL"></Input>
+                                                </FormItem>
+                                                <FormItem label="值" prop="value">
+                                                    <Input v-model="formItem.value" type="textarea" :autosize="{minRows: 1,maxRows: 3}" placeholder="输入值。。。"></Input>
+                                                </FormItem>
+                                                <FormItem style="text-align:right;">
+                                                    <Button type="primary" @click="save">保存</Button>
+                                                    <Button @click="cancel" style="margin-left: 8px">取消</Button>
+                                                </FormItem>
+                                            </Form>`,
+                                data: {
+                                    parent: '',
+                                    name: '',
+                                    formItem: {
+                                        key: '',
+                                        value: '',
+                                        ttl: -1,
+                                        ifDir: true,
+                                    }
+                                },
+                                mounted(){
+                                    const me = this;
+                                    
+                                    // 初始化位置
+                                    me.parent = self.configTreeSelectedNode.key || '/';
+                                },
+                                methods: {
+                                    save(){
+                                        const me = this;
+
+                                        me.formItem.key = [me.parent, me.name].join("/").replace(/\/\//g,'/');
+                                        
+                                        alertify.confirm(`确认要新增以下配置?<br><br>
+                                            位置：${me.formItem.key}<br><br>
+                                            值：${_.truncate(me.formItem.value)}<br><br>
+                                            TTL：${me.formItem.ttl}<br><br>`, function (e) {
+                                            if (e) {
+                                                let rtn = configHandler.configAdd(me.formItem);
+                                                if(rtn == 1){
+                                                    eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",me.formItem.key);
+                                                    me.cancel();
+                                                }
+                                            } else {
+                                                
+                                            }
+                                        });
+
+                                    },
+                                    cancel(){
+                                        wnd.close();
+                                    }
+                                }
+                            }).$mount("#config-new-window");
+                        },
+                        configUpdate(){
+                            const self = this;
+
+                            let item = {};
+                            item.key = self.configTreeSelectedNode.key;
+                            
+                            let editor = ace.edit('editor-' + self.configTabs.activeIndex);
+                            item.value = editor.getValue();
+                            
+                            item.ttl = self.configTreeSelectedNode.ttl || -1;
+
+                            alertify.confirm(`确认要更新以下配置?<br><br>
+                                位置：${item.key}<br><br>
+                                值：${_.truncate(item.value)}<br><br>
+                                TTL：${item.ttl}<br><br>`, function (e) {
+                                if (e) {
+                                    let rtn = configHandler.configAdd(item);
+                                    if(rtn == 1){
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", item.key);
+                                    }
+                                } else {
+                                    
+                                }
+                            });
                         },
                         configDelete(){
+                            const self = this;
 
+                            let item = self.configTreeSelectedNode;
+
+                            alertify.confirm(`确认要删除以下配置?<br><br>
+                                位置：${item.key}<br><br>
+                                值：${_.truncate(item.value)}<br><br>
+                                TTL：${item.ttl}<br><br>`, function (e) {
+                                if (e) {
+                                    let rtn = configHandler.configDelete(item);
+                                    
+                                    if(rtn == 1){
+                                        // 刷新Tree
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
+                                        // 关闭Tab
+                                        self.configClose(item.tId);
+                                        // 重置选择
+                                        self.configTreeSelectedNode = null;
+
+                                    }
+                                } else {
+                                    
+                                }
+                            });
                         },
                         configDegug(){
 

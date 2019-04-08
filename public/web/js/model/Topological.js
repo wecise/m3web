@@ -10,10 +10,9 @@
  *
  *
  */
-class Topological extends Event {
+class Topological {
     
     constructor() {
-        super();
         this.app = null;
         this.graphAssociation = null;
     }

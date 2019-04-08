@@ -258,31 +258,90 @@ class Performance extends Matrix {
                     },
                     data:function(){
                         return {
-                            gauge: [
-                                {host:'wecise',inst:'',param:'', value:25,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:80,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:100,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:50,status:'text', showText:false},
-                                {host:'wecise',inst:'',param:'', value:100,status:'exception', showText:false},
-                                {host:'wecise',inst:'',param:'', value:75,status:'success', showText:false}
-                            ]
+                            gauge: []
                         }
                     },
                     template: ` <el-row :gutter="0">
                                     <el-col :span="3" v-for="item in gauge">
                                         <div class="grid-content" style="text-align: center;">
-                                            <el-progress type="circle" :percentage="item.value" :status="item.status"></el-progress>
-                                            <p>#{item.host}#</p>
+                                            <max-echart-pie :id="'guage-'+objectHash.sha1(item)" :model="item"></max-echart-pie>
                                         </div>
                                     </el-col>
                                 </el-row>`,
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                const self = this;
+
+                                self.initData();
+                            },
+                            deep:true
+                        }
+                    },
                     mounted:function(){
-                        this.init();
+                        this.initData();
                     },
                     methods: {
-                        init: function(){
+                        initData: function(){
                             const self = this;
-                        
+                            
+                            if(!self.model || !self.model.rows) return false;
+                            self.gauge = [];
+                            self.gauge = _.map(self.model.rows,function(v){
+                                return {
+                                    series: [{
+                                        name: '性能统计',
+                                        type: 'pie',
+                                        radius: ['100%', '90%'],
+                                        avoidLabelOverlap: false,
+                                        label: {
+                                            normal: {
+                                                show: true,
+                                                position: 'center'
+                                            },
+                                            emphasis: {
+                                                show: true,
+                                                textStyle: {
+                                                    fontSize: '12',
+                                                    fontWeight: 'bold'
+                                                }
+                                            }
+                                        },
+                                        labelLine: {
+                                            normal: {
+                                                show: false
+                                            }
+                                        },
+                                        data: [{
+                                                value: _.round(v.value,0),
+                                                name: _.round(v.value,0) + "%",
+                                                label: {
+                                                    normal: {
+                                                        textStyle: {
+                                                            fontSize: '20',
+                                                            fontWeight: 'bold'
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                value: _.round(100 - v.value,0),
+                                                name: v.param,
+                                                label: {
+                                                    normal: {
+                                                        textStyle: {
+                                                            fontSize: '12',
+                                                            color:'#333',
+                                                            fontWeight: 'bold'
+                                                        },
+                                                        padding: [140, 0, 0, 0]
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }]
+                                }
+                            })
                         }
                     }
                     
@@ -456,7 +515,7 @@ class Performance extends Matrix {
                         },
                         // 搜索组件结构
                         model: {
-                            id: "matrix-event-search",
+                            id: "matrix-performance-search",
                             filter: null,
                             term: null,
                             preset: null,

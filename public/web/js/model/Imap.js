@@ -977,17 +977,11 @@ class Imap extends Matrix {
                                                                         <profile-view :id="item.id" :model="model[item.type]"></profile-view>
                                                                     </div>
                                                                     <div v-if="item.type === 'event'" style="height:100%;overflow:auto;">
-                                                                        <!--event-view :id="item.id" :model="model[item.type]"></event-view-->
+                                                                        <event-view :id="item.id" :model="model[item.type]"></event-view>
                                                                     </div>
                                                                     <div v-if="item.type === 'performance'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
-                                                                        <div class="grid" data-masonry="{itemSelector: '.grid-item',columnWidth: '.grid-item',percentPosition: true}">
-                                                                            <div class="grid-item">
-                                                                                <!--gauge-view :id="item.id" :model="model[item.type]"></gauge-view-->
-                                                                            </div>
-                                                                            <div class="grid-item">
-                                                                                <!--performance-view :id="item.id" :model="model[item.type]"></performance-view-->
-                                                                            </div>
-                                                                        </div>
+                                                                        <!--gauge-view :id="item.id" :model="model[item.type]"></gauge-view-->    
+                                                                        <performance-view :id="item.id" :model="model[item.type]"></performance-view>
                                                                     </div>
                                                                     <div v-if="item.type === 'file'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
                                                                         <file-view :id="item.id" :model="model[item.type]"></file-view>

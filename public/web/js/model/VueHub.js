@@ -13,6 +13,7 @@
 class VueHub {
 
     constructor() {
+
     }
 
     // 全局 Event Hub For Vue
@@ -24,3 +25,6 @@ class VueHub {
 let vue = new VueHub();
 
 let eventHub = vue.hub();
+
+// Element UI Setup
+Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000 };

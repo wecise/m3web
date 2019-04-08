@@ -3,22 +3,22 @@
 	<style scoped>
 		/*----------  style  ----------*/
 		.fs-view-component .fs-node-highlight {
-			-webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-			-moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-			box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+			-webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+			-moz-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 		}
 
 		.fs-view-component .fs-node-selected {
-			-webkit-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-			-moz-box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
-            box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+			-webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+			-moz-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
         }
         
         .fs-view-component .fs-node-selected::before {
             content: '\2713 ';
             font-size: 16px;
             font-weight: 600;
-            color: rgb(37, 45, 73);
+            color: rgba(37, 45, 73, 0.5);
             position: absolute;
             bottom: 5px;
             right: 5px;
@@ -342,38 +342,66 @@
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 					<div class="btn-group" style="padding:0 11px;float:right;">
 
-						<a href="#" class="btn btn-link" @click="load" title="刷新" data-tooltip="tooltip">
-							<i class="fas fa-sync-alt"></i>
-						</a>
+                        <el-tooltip content="刷新" placement="top">
+                            <a href="#" class="btn btn-link" @click="load" title="刷新">
+                                <i class="fas fa-sync-alt"></i>
+                            </a>
+                        </el-tooltip>
 
-						<a href="#" class="btn btn-link fs-order" title="排序" data-tooltip="tooltip">
-							<i class="fas fa-list-ol"></i>
-						</a>
+                        <el-tooltip content="排序" placement="top">
+                            <a href="#" class="btn btn-link fs-order" title="排序">
+                                <i class="fas fa-list-ol"></i>
+                            </a>
+                        </el-tooltip>
 
-						<a href="#" class="btn btn-link" @click="newDir" title="新建目录" data-tooltip="tooltip">
-							<i class="fas fa-folder-plus"></i>
-						</a>
-						<a href="#" class="btn btn-link" @click="newFile" title="新建文件" data-tooltip="tooltip">
-							<i class="fas fa-file"></i>
-						</a>
+                        <el-tooltip content="新建目录" placement="top">
+                            <a href="#" class="btn btn-link" @click="newDir" title="新建目录">
+                                <i class="fas fa-folder-plus"></i>
+                            </a>
+                        </el-tooltip>
 
+                        <el-tooltip content="新建文件" placement="top">
+                            <a href="#" class="btn btn-link" @click="newFile" title="新建文件">
+                                <i class="fas fa-file"></i>
+                            </a>
+                        </el-tooltip>
 
-						<a href="#" class="btn btn-link" @click="selectAll" title="选择所有" data-tooltip="tooltip">
-							<i class="fas fa-check"></i>
-						</a>
-						<a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到当前目录" data-tooltip="tooltip">
-							<i class="fas fa-paste"></i>
-						</a>
-						<a href="#" class="btn btn-link" @click="moveIt" title="移动到当前目录" data-tooltip="tooltip">
-							<i class="fas fa-people-carry"></i>
-						</a>
-						<a href="#" class="btn btn-link" @click="deleteThem" title="删除" data-tooltip="tooltip">
-							<i class="fas fa-trash"></i>
-						</a>
-						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" data-tooltip="tooltip">
-							<i class="fas fa-upload"></i>
-							<input id="file-upload" type="file" name="uploadfile" multiple>
-						</a>
+                        <el-tooltip content="选择所有" placement="top">
+                            <a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
+                                <i class="fas fa-check-square"></i>
+                            </a>
+                        </el-tooltip>
+                        
+                        <el-tooltip content="复制" placement="top">
+                            <a href="#" class="btn btn-link" @click="copyThem" title="复制">
+                                <i class="fas fa-copy"></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="粘贴到" placement="top">
+                            <a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到">
+                                <i class="fas fa-paste"></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="移动到" placement="top">
+                            <a href="#" class="btn btn-link" @click="moveIt" title="移动到">
+                                <i class="fas fa-people-carry"></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="删除" placement="top">
+                            <a href="#" class="btn btn-link" @click="deleteThem" title="删除">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="上传文件" placement="top">
+                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件">
+                                <i class="fas fa-upload"></i>
+                                <input id="file-upload" type="file" name="uploadfile" multiple>
+                            </a>
+                        </el-tooltip>
 						<!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
 							<i class="fas fa-download""></i>
 						</a>-->
@@ -382,17 +410,26 @@
 						</a>
 						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
 							<i class="fas fa-bars"></i>
-						</a> -->
-						<a href="#" class="btn btn-link" @click="exportIt" title="导出备份" data-tooltip="tooltip">
-                            <i class="fas fa-cloud-download-alt""></i>
-						</a>
-						<a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复" data-tooltip="tooltip">
-							<i class="fas fa-cloud-upload-alt" style=""></i>
-							<input type="file" name="loadfile" multiple @change="importIt">
-						</a>
-						<a href="#" class="btn btn-link" @click="syncIt" title="版本同步" data-tooltip="tooltip">
-							<i class="fas fa-retweet""></i>
-						</a>
+                        </a> -->
+                        <el-tooltip content="导出备份" placement="top">
+                            <a href="#" class="btn btn-link" @click="exportIt(rootPath)" title="导出备份">
+                                <i class="fas fa-cloud-download-alt""></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="导入恢复" placement="top">
+                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复">
+                                <i class="fas fa-cloud-upload-alt" style=""></i>
+                                <input type="file" name="loadfile" multiple @change="importIt">
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="版本同步" placement="top">
+                            <a href="#" class="btn btn-link" @click="syncIt" title="版本同步">
+                                <i class="fas fa-retweet""></i>
+                            </a>
+                        </el-tooltip>
+
 					</div>
 				</div>
 			</div>
@@ -572,6 +609,7 @@
 
                 }
             });
+
             Vue.component('list-view',{
                 delimiters: ['#{', '}#'],
                 props: {
@@ -625,13 +663,12 @@
                         return _name;
                     },
                     pickIcon: function(item){
-
                         // extend || ...
                         if( item.fullname === '/extend' ){
                             return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         } else {
 
-                            try{
+                            try {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                             }
                             catch(error){
@@ -716,6 +753,7 @@
 
                 }
             });
+
             Vue.component('grid-view',{
                 delimiters: ['#{', '}#'],
                 props: {
@@ -766,9 +804,12 @@
                         if( item.fullname === '/extend' ){
                             return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         } else {
-
                             try{
-                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                if(_.includes(['png','jpeg'],item.ftype)){
+                                    return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;    
+                                } else {
+                                    return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                }
                             }
                             catch(error){
                                 return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
@@ -777,6 +818,7 @@
                     }
                 }
             });
+
             Vue.component('table-view',{
                 delimiters: ['#{', '}#'],
                 props: {
@@ -883,23 +925,16 @@
 		},
         computed: {
             filePath: function(){
-                const self = this
-                let _tmp = self.rootPath.split("/");
-
-                return _tmp;//_.remove(_tmp,null);
+                return this.rootPath.split("/");
             }
         },
 		methods: {
 			init: function(){
-                const self = this
-
-                self.load();
-
-                self.signedUserName = window.SignedUser_UserName;//$("#signed-user-name").val();
-
+                this.load();
+                this.signedUserName = window.SignedUser_UserName;
 			},
 			initPlugIn: function(){
-			    const self = this
+			    const self = this;
 
                 self.initFileUpload();
 
@@ -911,14 +946,23 @@
 
                 self.orderIt();
 
-                //非选择区域事件
+                // 非选择区域事件
                 // $(document).mouseup(function(e) {
                 //     let items = $("li.dir.fs-node");
+                //     let exclude = $("div.btn-group > a");
+                    
                 //     if (!items.is(e.target) && items.has(e.target).length === 0) {
                 //         self.selectedItem = [];
                 //         window.fsSelectedItem = [];
                 //     }
                 // });
+
+                // 排他事件
+                $('*[data-edit="true"]').click(function(e) {
+                    console.log(e)
+                    //e.preventDefault();
+                    e.stopPropagation();
+                });
 
 			},
 			toggleView: function(view){
@@ -933,10 +977,7 @@
                     selector: '.list-context-menu',
                     trigger: 'left',
                     build: function($trigger, e) {
-                        // this callback is executed every time the menu is to be shown
-                        // its results are destroyed every time the menu is hidden
-                        // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
-
+                        
 	                    let _item = null;
 
 	                    if(!_.isEmpty(e.target.attributes.getNamedItem('data-item').value)) {
@@ -959,18 +1000,6 @@
                                         }
                                     },
                                     "sep1": "---------",
-                                    "copy": {
-                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
-                                            self.copyIt(_item);
-                                        }
-                                    },
-                                    "paste": {
-                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
-                                            self.pasteIt();
-
-                                        }
-                                    },
-                                    "sep2": "---------",
 	                                "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                             self.deleteIt(_item,true);
@@ -1021,18 +1050,6 @@
                                         }
                                     },
                                     "sep1": "---------",
-                                    "copy": {
-                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
-                                            self.copyIt(_item);
-                                        }
-                                    },
-                                    "paste": {
-                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
-                                            self.pasteIt();
-
-                                        }
-                                    },
-                                    "sep2": "---------",
                                     "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                             self.deleteIt(_item,true);
@@ -1078,18 +1095,6 @@
                                         }
                                     },
                                     "sep1": "---------",
-                                    "copy": {
-                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
-                                            self.copyIt(_item);
-                                        }
-                                    },
-                                    "paste": {
-                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
-                                            self.pasteIt();
-
-                                        }
-                                    },
-                                    "sep2": "---------",
                                     "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                             self.deleteIt(_item,true);
@@ -1126,18 +1131,6 @@
                                         }
                                     },
                                     "sep1": "---------",
-                                    "copy": {
-                                        name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
-                                            self.copyIt(_item);
-                                        }
-                                    },
-                                    "paste": {
-                                        name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
-                                            self.pasteIt();
-
-                                        }
-                                    },
-                                    "sep2": "---------",
                                     "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                             self.deleteIt(_item,true);
@@ -1162,13 +1155,22 @@
                             return {
 
                                 items: {
-
-                                    "download": {
-                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                            self.downloadIt(_item,true);
+                                    "open": {
+                                        name: "打开", icon: "fas fa-folder-open", callback: function (key, opt) {
+                                            self.openIt(_item);
                                         }
                                     },
                                     "sep1": "---------",
+                                    "download": {
+                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
+                                            if(_item.ftype==='dir'){
+                                                self.exportIt(_item.fullname);
+                                            } else {
+                                                self.downloadIt(_item,true);
+                                            }
+                                        }
+                                    },
+                                    "sep2": "---------",
                                     "copy": {
                                         name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
                                             self.copyIt(_item);
@@ -1180,19 +1182,19 @@
 
                                         }
                                     },
-                                    "sep2": "---------",
+                                    "sep3": "---------",
                                     "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
                                             self.deleteIt(_item,true);
                                         }
                                     },
-                                    "sep3": "---------",
+                                    "sep4": "---------",
                                     "share": {
                                         name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
                                             self.shareIt(_item);
                                         }
                                     },
-                                    "sep4": "---------",
+                                    "sep5": "---------",
                                     "info": {
                                         name: "属性", icon: "fas fa-info", callback: function (key, opt) {
                                             self.info(_item);
@@ -1554,6 +1556,7 @@
                     }
                 }, file);
 
+                $(".alertify-prompt .alertify-message").css('height','5vh');
 
 			},
             load: function() {
@@ -1815,20 +1818,30 @@
 
             },
 			copyIt: function(item){
-                const self = this
+                const self = this;
 
-                self.action.from = item.parent + "/" + item.name;
-                alertify.log("已复制 " + self.action.from);
+                self.selectedItem = [];
+                window.fsSelectedItem = [];
+                self.selectedItem[0] = item;
+                window.fsSelectedItem = _.cloneDeep(self.selectedItem)
+                alertify.log(`已复制 ${window.fsSelectedItem.length} 项`);
+            },
+            copyThem(){
+                const self = this;
+
+                window.fsSelectedItem = _.cloneDeep(self.selectedItem);
+                alertify.log(`已复制 ${window.fsSelectedItem.length} 项`);
             },
             moveIt: function(){
                 const self = this;
                 
-                if(!window.fsSelectedItem) {
+                
+                if(_.isEmpty(window.fsSelectedItem)) {
                     alertify.log("请选择移动内容")
                     return false;
                 }
                 
-                alertify.confirm(`确认要将所选文件移动到当前目录：\n ${self.root}？`, function (e) {
+                alertify.confirm(`确认要将下列所选文件移动到 ${self.rootPath} 目录? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
                     if (e) {
                         try {
                             let rtn = true;
@@ -1855,23 +1868,30 @@
             pasteIt: function(){
                 const self = this
 
-                if(_.isEmpty(self.action.from)){
+                if(_.isEmpty(window.fsSelectedItem)) {
                     alertify.log("请选择复制内容")
                     return false;
                 }
-
-                alertify.confirm(`确认要将所选文件复制到当前目录：\n ${self.root}？`, function (e) {
+                
+                alertify.confirm(`确认要将下列所选文件复制到 ${self.rootPath} 目录? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
                     if (e) {
-                        self.action.to = self.rootPath;
-                        let _rtn = fsHandler.fsCopy(self.action.from, self.action.to);
-                        if(_rtn == 1){
-                            alertify.log("已粘贴 " + self.action.to);
-                            self.load();
-
-                            //
-                            self.action.from = null;
-                            self.action.to = null;
-                        }     
+                        try {
+                            let rtn = true;
+                            _.forEach(window.fsSelectedItem,function(v){
+                                let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), self.rootPath);
+                                if(_rtn===0){
+                                    rtn = false;
+                                }
+                            })
+                            if(rtn){
+                                alertify.success("复制成功 " + self.rootPath);
+                                self.load();
+                            }
+                        }
+                        catch(error){}
+                        finally{
+                            window.fsSelectedItem = [];
+                        }
                     } else {
                         
                     }
@@ -1890,29 +1910,22 @@
                     return false;
                 }
 
-                swal({
-                    title: "",
-                    text: `确定要删除 ${self.rootPath} 下的目录或文件?`,
-                    type: "warning",
-                    showCancelButton: true,
-                    closeOnConfirm: false,
-                    cancelButtonText: "取消",
-                    confirmButtonText: "删除",
-                    confirmButtonColor: "#ff0000"
-                }).then((result) => {
-                    if (result.value) {
-
+        
+                alertify.confirm(`确定要删除 ${self.rootPath} 目录下的选定文件：<br><br> ${_.map(self.selectedItem,'name').join("<br>")}`, function (e) {
+                    if (e) {
                         _.forEach(self.selectedItem, function(v){
                             self.deleteIt(v, false);
                         })
+                    } else {
+                        
                     }
-                })
+                });
 
             },
 			deleteIt: function(event, prompt) {
                 const self = this
 
-                if(_.includes(['app','extend','assets','opt','script'],event.name)){
+                if(_.includes(['admin','app','extend','assets','opt','script'],event.name)){
                     alertify.error("系统目录，不允许删除!");
                     return false;
                 }
@@ -1923,24 +1936,19 @@
                 }
 
                 if(prompt){
-                    swal({
-                        title: event.name,
-                        text: "确定要删除?",
-                        type: "warning",
-                        showCancelButton: true,
-                        closeOnConfirm: false,
-                        cancelButtonText: "取消",
-                        confirmButtonText: "删除",
-                        confirmButtonColor: "#ff0000"
-                    }).then((result) => {
-                        if (result.value) {
+                    
+                    alertify.confirm(`确定要删除 ${event.name} 文件?`, function (e) {
+                        if (e) {
                             let _rtn = fsHandler.fsDelete(event.parent,event.name);
 
                             if (_rtn == 1){
                                 self.load();
                             }
+                        } else {
+                            
                         }
-                    })
+                    });
+                    
                 } else {
 
                     let _rtn = fsHandler.fsDelete(event.parent,event.name);
@@ -1962,6 +1970,7 @@
                         // user clicked "cancel"
                     }
                 }, "admin;");
+                $(".alertify-prompt .alertify-message").css('height','5vh');
 			},
             deployIt: function(item){
                 const self = this
@@ -2586,7 +2595,7 @@
 
 
             },
-            downloadThem: function(){
+            downloadThem(){
 			    const self = this
 
                 let _them = $(".fs-node-highlight .list-context-menu");
@@ -2611,30 +2620,42 @@
 
 
             },
-			exportIt: function(){
-				const self = this
-
-				/*console.log(self.rootPath)
-				if(_.includes(self.rootPath,["/"])){
-					    alertify.log("请选择子目录进行备份！");
-					    return false;
-				}*/
-				let rtn = fsHandler.fsZip(self.rootPath);
+			exportIt(path){
+                const self = this;
+                
+                alertify.confirm(`确认要导出 ${path} 目录下的所有文件?`, function (e) {
+                    if (e) {
+                        fsHandler.fsZip(path);
+                    } else {
+                        
+                    }
+                });
 
 			},
-            importIt: function(event) {
-                const self = this
+            importIt(event) {
+                const self = this;
 
                 let file = event.target.files[0];
+                
+                alertify.confirm(`确认要导入 ${file.name} 文件，导入后将覆盖原有文件，请确认！<br><br>
+                                    文件名称：${file.name}<br><br>
+                                    修改时间：${file.lastModifiedDate}<br><br>
+                                    文件大小：${mx.bytesToSize(file.size)}`, function (e) {
+                    if (e) {
+                        let rtn = fsHandler.fsUnZip(self.rootPath, file);
 
-                let rtn = fsHandler.fsUnZip(self.rootPath, file);
+                        if(rtn == 1){
+                            self.load();
+                        }
+                    } else {
+                        
+                    }
 
-                if(rtn == 1){
-                    self.load();
-                }
+                    event.target.value = null;
 
+                });
             },
-            syncIt: function(){
+            syncIt(){
 			    const self = this
 
 			    alertify.prompt("同步设置", function (e, str) {
@@ -2645,6 +2666,7 @@
                         // user clicked "cancel"
                     }
                 }, "url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;");
+                $(".alertify-prompt .alertify-message").css('height','5vh');
             },
             selectIt: function(item){
                 const self = this
@@ -2655,8 +2677,8 @@
                     self.selectedItem.push(item);
                 }
 
-                window.fsSelectedItem = self.selectedItem;
-                console.log(self.selectedItem,window.fsSelectedItem)
+                window.fsSelectedItem = [];
+                
             },
             selectAll: function(){
                 const self = this
@@ -2664,28 +2686,26 @@
                 let items = $("li.fs-node").find('.fs-name');
 
                 self.selectedItem = [];
-                window.fsSelectedItem = [];
-
+        
                 _.forEach(items,function(v){
                     let item = $(v).data("info");
 
                     self.selectedItem.push(item);
                 })
 
-                window.fsSelectedItem = self.selectedItem;
+                window.fsSelectedItem = [];
 
             },
 			setRootPath: function(item) {
-			    const self = this
+                const self = this;
+                
                 let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
-
-                console.log(123,_item)
 
                 self.openIt(_item, [_item.parent,_item.name].join("/"));
 
 			},
             toggleLeft: function() {
-                const self = this
+                const self = this;
 
                 if(self.toggle.left) {
 

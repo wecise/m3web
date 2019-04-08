@@ -300,6 +300,9 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
 #ai-robot {
     height: 45px;
 }
+#ai-robot>div{
+    display: flex;
+}
 
 #ai-robot svg {
     width: 45px;
@@ -799,11 +802,6 @@ td.status_1 {
   animation-name: flash;
 }
 
-.alertify{
-    top: 35%;
-}
-
-
 /* Loading */
 .sk-fading-circle {
     margin: 100px auto;
@@ -942,4 +940,16 @@ td.status_1 {
   @keyframes sk-circleFadeDelay {
     0%, 39%, 100% { opacity: 0; }
     40% { opacity: 1; } 
+  }
+
+  
+
+  /* context-menu-list */
+  #.context-menu-layer,
+  .context-menu-list{
+    -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
+    -moz-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
+    border: none!important;
+    z-index:10!important;
   }

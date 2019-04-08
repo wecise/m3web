@@ -183,8 +183,6 @@
 
                 });
                 
-                console.log(_cols)
-
                 _cols.unshift({ data: "checkbox", title: "", visible: true, orderable: false, order: null, targets: 0, checkboxes: { selectRow: true } } );
 
                 return _cols;
@@ -199,7 +197,7 @@
                                 this.datatable.destroy();
 		                        $("#" + this.id).empty();
 		                    }
-                            this.init();
+                            //this.init();
 
                 },
                 deep:true
@@ -209,11 +207,16 @@
 		methods: {
             init: function(){
                 let self = this;
+                
+                console.log(1,moment().format("yyyy-mm-dd hh:m.s"))
+                let dataset = self.dataset;
 
+                let cols = mx.sanitizeColumns(_.uniqBy(self._columns,'data'),'data');
+                
                 self.datatable = $("#"+self.id).DataTable( _.extend({
                                 destroy: true,
-	                            data: self.dataset,
-                                columns: _.uniqBy(self._columns,'data'),
+	                            data: dataset,//self.dataset,
+                                columns: cols,//_.uniqBy(self._columns,'data'),
                                 responsive: false,
                                 searching: true,
                                 aDataSort: true,
@@ -316,6 +319,8 @@
                                     ]
 			                    },
                     },self.options)).columns.adjust().draw();
+
+                    console.log(2,moment().format("yyyy-mm-dd hh:m.s"))
 
                 $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192);
 

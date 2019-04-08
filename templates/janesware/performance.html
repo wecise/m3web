@@ -208,6 +208,7 @@
 
 <div id="app"></div>
 
+<script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Performance.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
@@ -277,7 +278,7 @@
 														<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
 													</div>
 													<div v-if="item.type=='gauge'">
-														<gauge-component id="performance-view-gauge"></gauge-component>
+														<gauge-component id="performance-view-gauge" :model="model.message"></gauge-component>
 													</div>
 												</el-tab-pane>
 											</el-tabs>

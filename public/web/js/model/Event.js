@@ -140,24 +140,11 @@ class Event extends Matrix {
                     },
                     data(){
                         return {
-                            circles:[]
+                            dataset:[]
                         }
                     },
-                    template:   `<div style="height:200px;">
-                                    <el-progress type="circle" :percentage="item.percent" v-for="item in circles"></el-progress>
-                                    <!--Circle
-                                        dashboard
-                                        :percent="item.percent"
-                                        v-for="item in circles">
-                                        <div>
-                                            <h1>#{item.count}#</h1>
-                                            <p>#{item.name}#</p>
-                                            <span>
-                                                总数
-                                                <i>#{item.count}#</i>
-                                            </span>
-                                        </div>
-                                    </Circle-->
+                    template:   `<div style="width: 35%;height:200px;float: left;display: flex;">
+                                    <max-echart-pie :id="id" :model="item" v-for="item in dataset"></max-echart-pie>
                                 </div>`,
                     watch:{
                         model:{
@@ -168,18 +155,19 @@ class Event extends Matrix {
                         }
                     },
                     mounted(){
+                        const self = this;
                         _.delay(function(){
-                            this.initData();
+                            self.initData();
                         },1000)
                     },
                     methods: {
                         initData(){
                             const self = this;
                             
-                            self.circles = [];
+                            self.dataset = [];
                             _.forEach(self.model.summary.pie,function(v,k){
                                 _.forEach(v,function(val){
-                                    self.circles.push({
+                                    self.dataset.push({
                                             dimension: k,
                                             id:objectHash.sha1(k+val+_.now()), 
                                             name: val[0], 
@@ -190,10 +178,67 @@ class Event extends Matrix {
                                         });
                                 })
                             });
-                            console.log(self.circles)
                         },
                         search(event){
                             this.$root.options.term = event;
+                            this.$root.$refs.searchRef.search();
+                        }
+                    }
+                });
+
+                // 告警聚合
+                Vue.component("event-view-group",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dataset:[]
+                        }
+                    },
+                    template:   `<div style="width: 100%;height:200px;float:left;display: flex;">
+                                    <max-echart-pie-group :id="id+'-'+item.id" :model="item" v-for="item in dataset" @click.native="search(item)"></max-echart-pie-group>
+                                </div>`,
+                    watch:{
+                        model:{
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true
+                        }
+                    },
+                    mounted(){
+                        const self = this;
+                        _.delay(function(){
+                            self.initData();
+                        },500)
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            self.dataset = [];
+
+                            _.forEach(self.model.summary.group,function(v,k){
+                                _.forEach(v,function(val){
+                                    self.dataset.push({
+                                            dimension: k,
+                                            id:objectHash.sha1(k+val+_.now()), 
+                                            name: val[0], 
+                                            count: val[1],
+                                            sum: _.sum(_.map(v,function(s){return s[1];})),
+                                            percent: _.round(val[1]/180*100,2),
+                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                        });
+                                })
+                            });
+                            
+                        },
+                        search(event){
+                            // 根据相应维度再搜索
+                            this.$root.options.term = `${event.dimension}=${event.name}`;
                             this.$root.$refs.searchRef.search();
                         }
                     }
@@ -445,7 +490,8 @@ class Event extends Matrix {
                                 activeIndex: 'event-view-radar',
                                 tabs:[
                                     {name: 'event-view-radar', title:'告警雷达', type: 'radar'},
-                                    {name: 'event-view-pie', title:'告警统计', type: 'pie'}
+                                    // {name: 'event-view-pie', title:'告警统计', type: 'pie'},
+                                    {name: 'event-view-group', title:'告警聚合', type: 'group'}
                                 ]
                             }
                         },

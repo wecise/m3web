@@ -40,7 +40,7 @@
 		}
 
 		.ai-robot-component .el-aside .media.selected{
-			background: #eeeeee;
+			background: rgb(228, 231, 237);
 		}
 
 		/* ai robot chats to */
@@ -65,7 +65,7 @@
 			left: auto;
 			right: -14px;
 			border-right-color: rgba(0, 0, 0, 0);
-			border-left-color: rgb(204, 208, 212);
+			border-left-color: rgb(255, 255, 255);
 		}
 
 		.chats .to .message:after {
@@ -107,7 +107,7 @@
 		}
 
 		.chats .message {
-			border: 1px solid rgb(204, 208, 212);
+			border: 1px solid rgb(255, 255, 255);
 			padding: 7px 12px;
 			font-size: 12px;
 			position: relative;
@@ -118,6 +118,10 @@
 			text-align: left;
 		}
 
+		.chats .message:after, .chats .message:before{
+			border-right-color: #ffffff;
+		}
+
 		.chats>li:after, .chats>li:before {
 			content: '';
 			display: table;
@@ -126,7 +130,7 @@
 
 		/* el-tabs */
 		.ai-robot-component .el-tabs__header{
-			background: rgb(249, 249, 249);
+			background: rgb(228, 231, 237);
 			width: 80px;
 			height: 100%;
 		}
@@ -155,7 +159,84 @@
 			border-radius: 35px; */
 			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 		}
+
+		.ai-robot-component .el-footer {
+			background: rgb(228, 231, 237);
+		}
 		
+		/* AI ROBOT */
+		.robot-ai-setup-neuralnetwork-cell text {
+			pointer-events: none;
+		}
+		
+		.robot-ai-setup-neuralnetwork-cell .node:hover {
+			stroke: #999;
+			stroke-opacity: .6;
+			stroke-width: 4px;
+		}
+		
+		.robot-ai-setup-neuralnetwork-cell .link {
+			stroke: #999;
+			stroke-opacity: .6;
+		}
+
+		.el-form-item__label {
+			font-size: 12px;
+		}
+
+		.el-form-item--mini .el-form-item__content, .el-form-item--mini .el-form-item__label {
+			line-height: 40px;
+		}
+
+		.el-card__header{
+			padding: 0 10px;
+			border-bottom: none;
+		}
+
+		.el-card__body {
+			padding: 10px;
+		}
+		.el-tag + .el-tag {
+			margin-left: 10px;
+		}
+		.button-new-tag {
+			margin-left: 10px;
+			height: 32px;
+			line-height: 30px;
+			padding-top: 0;
+			padding-bottom: 0;
+		}
+		.input-new-tag {
+			width: 90px;
+			margin-left: 10px;
+			vertical-align: bottom;
+		}
+
+		.transition{
+			background: #fff;
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+			font-size: 12px;
+		}
+
+
+		/* svg line flow effect */
+		.ai-robot-component line {
+			fill: none;
+			stroke: #7d2d68;
+			stroke-width: 17px;
+
+			/* Stroke-dasharray property */
+			stroke-dasharray: 10; 
+			stroke-dashoffset: 50;
+
+			animation: move 2s linear infinite;     
+		}
+		@keyframes move {
+			100% {
+				stroke-dashoffset: 0;
+			}
+		}
+
 	</style>
 
 	
@@ -171,7 +252,7 @@
 						<ai-message></ai-message>
 					</el-tab-pane>
 					<el-tab-pane label="设置"  name="robot-setup">
-						
+						<ai-setup></ai-setup>
 					</el-tab-pane>
 				</el-tabs>
 			</el-container>

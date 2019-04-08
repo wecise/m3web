@@ -1,0 +1,179 @@
+
+	<style scoped>
+		/*----------  style  ----------*/
+
+		.dropdown-tree-component{
+
+		}
+
+		.ztree li a.curSelectedNode {
+			background-color: rgb(161, 212, 250)!important;
+			border:1px solid #ffffff!important;
+			color: rgb(255,255,255)!important;
+		}
+
+		.ztree li a:hover{
+			text-decoration: none!important;
+		}
+
+		.ztree {
+			height: 100%;
+			overflow: auto;
+			padding-bottom: 100px!important;
+			position: relative;
+		}
+
+		.toolbar{
+			position: relative;
+			left: calc(100% - 68px);
+			top: 0px;
+			padding: 0px 5px!important;
+			margin: -20px 0px!important;
+			width: 60px;
+			height: 100%;
+			display: block;
+			background-color: rgb(161, 212, 250);
+			border: none;
+			border-radius: 0;
+		}
+
+
+		.ztree li span.blank {
+			width: 16px;
+			height: 16px;
+			display: inline-block;
+			vertical-align: middle;
+		}
+
+        .dropdown-tree-component .navbar-form .form-control {
+            width: 100%;
+        }
+
+
+		/* For x-editable */
+		.editable-click, a.editable-click, a.editable-click:hover{
+			border-bottom:unset;
+		}
+
+		.editable-unsaved {
+			font-weight: normal;
+		}
+
+	</style>
+
+
+
+	/*----------  最外层element会自动增加组件同名 class="dropdown-tree-component"  ----------*/
+	<template>
+		<div>
+			<div class="input-group" style="width:100%;">
+				<input type="text" class="form-control" :id="id+'_input_value'" placeholder="/matrix" v-model="value" @focus="showMenu">
+			</div>
+			<div :id="id+'_menuContent'" class="menuContent" style="display:none; position: releative;">
+				<ul class="ztree" :id="id" style="margin-top:0; width:160px;"></ul>
+			</div>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="dropdown-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+            id: String,
+			value: String
+        },
+        data: function(){
+            return {
+                zTree: Object,
+                zSetting: {
+                    edit: {
+                        enable: false
+                    },
+                    callback: {
+                        onClick: this.onClick,
+                        beforeClick: this.onBeforeClick,
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: "key",
+                            children: "nodes"
+                        }
+                    },
+                    check: {
+                        enable: false
+                    }
+                },
+                zNodes: null,
+                selectedNode: null,
+            }
+        },
+        created: function(){
+            let self = this;
+
+        },
+        mounted: function () {
+            let self =  this;
+
+            self.$nextTick(function () {
+
+                self.init();
+
+            })
+        },
+        methods:{
+            init: function () {
+                let self = this;
+
+                self.zNodes = fsHandler.callFsJScript(`/config/dropDownTree_for_rules.js`).message;
+                self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+                self.zTree.expandAll(false);
+
+            },
+            showMenu: function() {
+                let self = this;
+
+                let inputValue = $(`#${self.id}_input_value`);
+                let inputValueOffset = $(`#${self.id}_input_value`).offset();
+                $(`#${self.id}_menuContent`).css({left:inputValueOffset.left + "px", top:inputValueOffset.top + inputValue.outerHeight() + "px"}).slideDown();
+
+                $("body").bind("mousedown", self.onBodyDown);
+            },
+            hideMenu: function() {
+                let self = this;
+
+                $(`#${self.id}_menuContent`).fadeOut("fast");
+                $("body").unbind("mousedown", self.onBodyDown);
+            },
+            onBodyDown: function(event) {
+                let self = this;
+
+                if (!(event.target.id == `${self.id}_select_btn` || event.target.id == `${self.id}_menuContent` || $(event.target).parents(`#${self.id}_menuContent`).length>0)) {
+                    self.hideMenu();
+                }
+            },
+            onBeforeClick: function(treeId, treeNode) {
+                let self = this;
+
+                // let check = (treeNode && !treeNode.isParent);
+                // if (!check) alertify.log("请选择一个规则！");
+                // return check;
+            },
+            onClick: function(e, treeId, treeNode) {
+                let self = this;
+
+                let zTree = $.fn.zTree.getZTreeObj(self.id),
+                    nodes = zTree.getSelectedNodes();
+
+                self.value = nodes[0].key;
+                self.selectedNode = nodes[0];
+            }
+        }
+	
+	}
+	</script>
+
+</code>

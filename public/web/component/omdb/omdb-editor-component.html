@@ -83,7 +83,6 @@
 				<div class="btn-group" role="group">
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统" data-tooltip="tooltip"><i class="fas fa-save"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载" data-tooltip="tooltip"><i class="fas fa-arrow-circle-down"></i></a>
-
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fas fa-copy"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fas fa-paste"></i></a>
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fas fa-check"></i></a>
@@ -345,7 +344,6 @@
 
 
                 if(_.isEmpty(_list)) {
-
                     alertify.log("查询结果为空");
                     return false;
                 }
@@ -397,11 +395,20 @@
                 // Graph
                 if(_list.meta.type === 'graph'){
 
-                    self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
+                    //有数据
+                    if(_list.message){   
+                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
 
-                    eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                        return false;
+                    }
+                    // 没数据 
+                    else{
+                        self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: {nodes:[],edges:[]}};
 
-                    return false;
+                        eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                        return false;
+                    }
                 }
 
                 // Graph-PATH
@@ -576,14 +583,14 @@
 
                 if(_.isEmpty(mql)) return false;
 
-                let user = window.SignedUser_UserName;//$("#signed-user-name").val();
+                let user = window.SignedUser_UserName;
                 let attr = {remark: '', ctime: _.now(), author: user, type: 'txt'};
-                let rtn = fsNew('file', `/${user}/temp`, 'cache_mql_script.txt', mql, attr);
+                let rtn = fsHandler.fsNew('file', `/${user}/temp`, 'cache_mql_script.txt', mql, attr);
             },
             loadFromFs: function(){
                 let self = this;
 
-                let user = window.SignedUser_UserName;//$("#signed-user-name").val();
+                let user = window.SignedUser_UserName;
                 let mql = fsHandler.fsContent(`/${user}/temp`, 'cache_mql_script.txt');
 
                 self.editor.setValue(mql);

@@ -188,7 +188,7 @@ class Log extends Matrix {
                         id: String,
                         model:String
                     },
-                    template: `<form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
+                    template: `<form class="form-horizontal">
                                     <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
                                         <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
                                         <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
@@ -275,7 +275,7 @@ class Log extends Matrix {
                                             <event-view-detail :id="id + '-detail'" :model="model.log"></event-view-detail>
                                         </p>
                                         <h5 id="event-diagnosis-journal">轨迹</h5>
-                                        <p style="height:50vh;overflow:auto;">
+                                        <p>
                                             <vue-timeline-component :id="id + '-journal'" :model="model.journal.rows"></vue-timeline-component>
                                         </p>
                                         <h5 id="event-diagnosis-history">历史</h5>

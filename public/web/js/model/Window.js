@@ -183,7 +183,7 @@ class Window {
     winConfig(title, template, position, container){
 
         this.lrwh[2] = this.width * 0.55;
-        this.lrwh[3] = this.height * 0.55;
+        this.lrwh[3] = this.height * 0.56;
 
         let win = $.jsPanel({
             id: 'jsPanel-configNew',
@@ -196,7 +196,7 @@ class Window {
                 of: 'window'
             },
             container: 'body',
-            headerControls: { controls: '' },
+            headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
             callback:       function(){
@@ -209,7 +209,7 @@ class Window {
                 });
                 $(".jsPanel-content",this).css({
                     "border": "1px solid #dddddd",
-                    "overflow": "hidden auto"
+                    "overflow": "hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
@@ -422,10 +422,10 @@ class Window {
                 }
             },
             callback: function(){
-                $(".jsPanel").css({
-                    "position":"absoulate",
-                    "z-index": "10000"
-                });
+                // $(".jsPanel").css({
+                //     "position":"absoulate",
+                //     "z-index": "10000"
+                // });
                 
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",

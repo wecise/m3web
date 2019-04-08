@@ -63,7 +63,8 @@ class ConfigHandler {
             async: false,
             data: {
                 key:event.key,
-                ttl: event.ttl
+                ttl: event.ttl,
+                value: event.value
             },
             beforeSend: function(xhr) {
             },
@@ -75,7 +76,7 @@ class ConfigHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("添加成功：" + key + " " + moment().format("LLL"));
+                    alertify.success("添加成功：" + event.key + " " + moment().format("LLL"));
                 }
                 
             },
@@ -86,6 +87,41 @@ class ConfigHandler {
         });
         return rtn;
     };
+
+    /*
+    *  Config Delete ETCD
+    *
+    */
+    configDelete(event) {
+        let rtn = 0;
+
+        jQuery.ajax({
+            url: '/config/del',
+            type: 'POST',
+            dataType: 'json',
+            async: false,
+            data: {
+                key: event.key
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("删除成功：" + event.key + " " + moment().format("LLL"));
+                }
+        
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = 0;
+                alertify.error("删除失败：" + event.key + " " + xhr.responseText);
+            }
+        })
+        return rtn;
+    }
 
 }
 

@@ -302,10 +302,9 @@ class Matrix {
 
             $("#ai-robot").empty();
 
-            $("#ai-robot").append(`<div style="position: absolute;right:35px;top: 0px;cursor: pointer;" class="animated fadeIn">
+            $("#ai-robot").append(`<div style="cursor: pointer;" class="animated fadeIn">
                                 ${svg}
-                             </div>
-                             <span class="badge badge-danger" style="margin: 15px 15px;">5</span>`).find('svg').click(function(){
+                             </div>`).find('svg').click(function(){
 
                 if($("#jsPanel-robot")){
                     $("#jsPanel-robot").remove();
@@ -326,6 +325,22 @@ class Matrix {
 
                 new Vue(robotVue).$mount("#robot-active-win");
             });
+
+            let getStatus = function(){
+                try{
+                    let count = fsHandler.callFsJScript("/ai/status.js",null).message.count;
+                    if(count < 1){
+                        $("#ai-robot span").remove();
+                    } else {
+                        $("#ai-robot span").remove();
+                        $("#ai-robot div").first().append(`<span class="badge badge-danger animated fadeIn" style="margin:15px 0;">${count}</span>`);
+                    }
+                } catch(err){
+
+                }
+            }
+
+            setInterval(getStatus,5000);
 
         },'text');
     }
@@ -381,6 +396,29 @@ class Matrix {
         return meta.columns;
     
     }
+
+    sanitizeData(arr) {
+        let newKey;
+        _.forEach(arr,function(item) {
+            for(var key in item) {
+                newKey = key.replace(/\./g, '&#46;');
+                if (key != newKey) {
+                    item[newKey]=item[key];
+                    delete item[key];
+                }     
+            }    
+        })    
+        return arr;
+    }            
+    
+    sanitizeColumns(arr,column) {
+        let dataProp;
+        arr.forEach(function(item) {
+            dataProp = item[column].replace(/\./g, '\\.');
+            item[column] = dataProp;
+        })
+        return arr;
+    }    
 
     // API菜单
     footerApiContextMenu(){
