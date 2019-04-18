@@ -153,8 +153,8 @@
 	/*----------  最外层element会自动增加组件同名 class="auto-list-datatables-component"  ----------*/
 	<template>
 		<div class="container-fluid">
-			<input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
-			<hr/>
+			<!--input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
+			<hr/-->
 			<table :id="id" class="display" width="100%"></table>
 		</div>
 	</template>
@@ -451,7 +451,7 @@
                 initPlugin: function(){
                     const self = this;
 
-                    self.tagsInput();
+                    //self.tagsInput();
 
                     // Buttons enable/disable
                     self.datatable.on( 'select deselect', function () {

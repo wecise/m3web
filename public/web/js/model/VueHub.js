@@ -27,4 +27,4 @@ let vue = new VueHub();
 let eventHub = vue.hub();
 
 // Element UI Setup
-Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000 };
+Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000};

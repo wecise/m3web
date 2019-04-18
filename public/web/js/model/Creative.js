@@ -13,14 +13,14 @@
 class Creative {
 
     constructor() {
-
+        this.app = null;
     }
 
     init() {
         VueLoader.onloaded(["ai-robot-component"],function() {
             $(function() {
 
-                let _appVue = new Vue({
+                creative.app = new Vue({
                     delimiters: ['${', '}'],
                     template: '#app-template',
                     data: {
@@ -61,7 +61,7 @@ class Creative {
 
                     },
                     mounted: function() {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function() {
                             self.load();
@@ -75,7 +75,7 @@ class Creative {
                     watch: {
                         model: {
                             handler:function(newValue, oldValue) {
-                                let self = this;
+                                const self = this;
 
                                 if (!_.isEqual(newValue, oldValue)) {
                                     self.refresh();
@@ -85,7 +85,7 @@ class Creative {
                         }
                     },
                     created: function() {
-                        let self = this;
+                        const self = this;
 
                         self.initProject();
 
@@ -93,7 +93,7 @@ class Creative {
                     },
                     computed: {
                         filePath: function(){
-                            let self = this;
+                            const self = this;
                             let _tmp = self.model.root.split("/");
 
                             return _tmp;
@@ -101,7 +101,7 @@ class Creative {
                     },
                     filters: {
                         pickName: function (item) {
-                            let self = this;
+                            const self = this;
 
                             if (_.isEmpty(item)) return '';
 
@@ -114,36 +114,24 @@ class Creative {
                             return _name;
                         },
                         pickRemark: function (item) {
-                            let self = this;
-
-                            if (_.isEmpty(item.attr)) return '';
-
+                            const self = this;
+                            
                             let _remark = '';
 
-                            if(_.attempt(JSON.parse.bind(null, item.attr)).remark){
+                            try{
+                                if (_.isEmpty(item.attr)) return '';
 
-                                _remark = _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                                if(_.attempt(JSON.parse.bind(null, item.attr)).remark){
+                                    _remark = _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                                }
 
-                                /*if(_.isEmpty(_remark)) return '';
-
-
-                                if($(window).width()>1280){
-                                    if(_.size(_remark) > 50){
-                                        _remark = _.split(_remark,"",49).join("") + "..."
-                                    }
-                                } else {
-
-                                    if(_.size(_remark) > 44){
-                                        _remark = _.split(_remark,"",43).join("") + "..."
-                                    }
-                                }*/
-
+                                return _remark;
+                            } catch(err){
+                                return _remark;
                             }
-
-                            return _remark;
                         },
                         pickIcon: function(item){
-                            let self = this;
+                            const self = this;
 
                             if (_.isEmpty(item.attr)) return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
 
@@ -158,11 +146,11 @@ class Creative {
                     },
                     methods: {
                         init: function() {
-                            let self = this;
+                            const self = this;
 
                         },
                         initPlugin: function(){
-                            let self = this;
+                            const self = this;
 
                             self.crontab.project.sched = later.parse.text('every 15 sec');
                             self.crontab.project.timer = later.setInterval(self.initProject, self.crontab.project.sched);
@@ -172,15 +160,12 @@ class Creative {
 
                         },
                         initContextMenu: function(){
-                            let self = this;
+                            const self = this;
 
                             $.contextMenu({
                                 selector: '.list-context-menu',
                                 trigger: 'left',
                                 build: function($trigger, e) {
-                                    // this callback is executed every time the menu is to be shown
-                                    // its results are destroyed every time the menu is hidden
-                                    // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
                                     let _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
 
                                     if(_.includes(['dir'], _item.ftype)){
@@ -268,8 +253,7 @@ class Creative {
 
                         },
                         initProject: function(){
-                            let self = this;
-
+                            const self = this;
 
                             let _rtn = jobHandler.jobContextGet("BOB", "");
 
@@ -280,14 +264,14 @@ class Creative {
                             }
                         },
                         forwardDir: function(path){
-                            let self = this;
+                            const self = this;
 
                             self.model.root = path;
 
                             self.load();
                         },
                         load: function() {
-                            let self = this;
+                            const self = this;
 
                             let _rtn = fsHandler.fsList(self.model.root);
 
@@ -295,63 +279,90 @@ class Creative {
 
                                 return _.merge(v, {"username": window.SignedUser_UserName, "project": self.model.project });
 
-                            }),['fullname'],['asc']);
+                            }),['vtime','fullname'],['desc','asc']);
 
 
                             _.delay(function(){
-
                                 self.refresh();
-
-                                /*$(".fs-name").editable({
-                                    type: "text",
-                                    container: 'body',
-                                    validate: function (value) {
-                                        if (!$.trim(value)) {
-                                            return '不能为空';
-                                        }
-                                    },
-                                    display: function(value, sourceData) {
-                                        if(value.length > 10) {
-                                            $(this).html(_.split(value,"",9).join("")+"...");
-                                        }
-                                    },
-                                    success: function (response,newValue) {
-
-                                        let _item = $(this).data("info");
-
-                                        let _extName = _item.ftype=='dir'?'':'.'+_item.ftype;
-                                        let _old = _item.parent + "/" + $(this).editable('getValue', true) + _extName;
-                                        let _new = _item.parent + "/" + newValue + _extName;
-
-
-                                        let _check = fsHandler.fsCheck( _item.parent, newValue);
-                                        if(_check) {
-                                            alertify.error("文件已存在，请确认！")
-                                            return false;
-                                        }
-
-                                        let _rtn = fsHandler.fsRename(_old, _new);
-
-                                        if(_rtn == 1){
-                                            self.load();
-                                        } else {
-                                            $(this).innerHTML($(this).editable('getValue', true));
-                                        }
-                                    }
-                                });*/
-
                             },200);
 
                         },
                         newDir: function() {
-                            let self = this;
+                            const self = this;
 
                             let win = maxWindow.winDir('新建项目',`<div id="creative-starting"></div>`, null,null);
 
-                            let _vue  = new Vue({
+                            new Vue({
                                 delimiters: ['#{', '}#'],
-                                el: "#creative-starting",
-                                template: "#creative-project-template",
+                                template: `<el-container style="height: 500px; border: 1px solid #eee">
+                                                <!--el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                                                    <el-menu :default-openeds="['1', '3']">
+                                                        <el-submenu index="1">
+                                                            <template slot="title"><i class="fas fa-sitemap"></i> IT地图</template>
+                                                        </el-submenu>
+                                                        <el-submenu index="2">
+                                                            <template slot="title"><i class="fas fa-tachometer-alt"></i> DashBoard</template>
+                                                        </el-submenu>
+                                                        <el-submenu index="3">
+                                                            <template slot="title"><i class="fas fa-random"></i> 流程设计</template>
+                                                        </el-submenu>
+                                                        <el-submenu index="4">
+                                                            <template slot="title"><i class="fas fa-project-diagram"></i> 作业设计</template>
+                                                        </el-submenu>
+                                                        <el-submenu index="5">
+                                                            <template slot="title"><i class="fas fa-layer-group"></i> 页面设计</template>
+                                                        </el-submenu>
+                                                    </el-menu>
+                                                </el-aside-->
+                                                
+                                                
+                                                    <el-header style="text-align: right; font-size: 12px">
+                                                        <el-button type="text" @click="save"><i class="fas fa-save"></i> 保存</el-button>
+                                                        <el-button type="text" @click="cancel"><i class="fas fa-window-close"></i> 取消</el-button>
+                                                    </el-header>
+                                                
+                                                    <el-main>
+                                                        <el-form label-position="right" label-width="80px">
+                                                            <el-form-item label="名称">
+                                                                <el-input v-model="model.name"></el-input>
+                                                            </el-form-item>
+                                                            
+                                                            <el-form-item label="描述">
+                                                                <el-input type="textarea" v-model="model.info.remark"></el-input>
+                                                            </el-form-item>
+
+                                                            <el-form-item label="标签">
+                                                                <el-tag
+                                                                    :key="tag"
+                                                                    closable
+                                                                    type=""
+                                                                    @close="tagsRemove(tag)"
+                                                                    style="margin:0 2px;" v-for="tag in model.tags.list">
+                                                                    #{tag}#
+                                                                </el-tag>
+                                                                <el-input
+                                                                    class="input-new-tag"
+                                                                    v-if="model.tags.inputVisible"
+                                                                    v-model="model.tags.inputValue"
+                                                                    ref="saveTagInput"
+                                                                    size="small"
+                                                                    @keyup.enter.native="tagsAdd"
+                                                                    @blur="tagsAdd">
+                                                                </el-input>
+                                                                <el-button v-else class="button-new-tag" size="small" @click="showTagsInput">+</el-button>
+                                                            </el-form-item>
+
+                                                            <el-form-item label="是否分享">
+                                                                <el-radio-group v-model="model.ifshare">
+                                                                    <el-radio label="公开" value="1"></el-radio>
+                                                                    <el-radio label="私有" value="0"></el-radio>
+                                                                </el-radio-group>
+                                                            </el-form-item>
+
+                                                        </el-form>
+                                                    </el-main>
+                                                
+                                            </el-container>`,
                                 data: {
                                     model: {
                                         project: {
@@ -364,7 +375,11 @@ class Creative {
                                         },
                                         name: "",
                                         type: "dir",
-                                        tags: [],
+                                        tags: {
+                                            inputVisible: false,
+                                            inputValue: '',
+                                            list:[]
+                                        },
                                         info: {
                                             remark: ""
                                         },
@@ -372,7 +387,7 @@ class Creative {
                                     }
                                 },
                                 mounted:function(){
-                                    let me = this;
+                                    const me = this;
 
                                     me.$nextTick(function() {
                                         me.init();
@@ -383,14 +398,14 @@ class Creative {
                                 },
                                 computed: {
                                     type: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         return me.model.type + "t";
                                     }
                                 },
                                 methods: {
                                     init: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         $("#tags").tagsinput({
                                             tagClass: function(item) {
@@ -400,7 +415,7 @@ class Creative {
 
                                     },
                                     save: function(){
-                                        let me = this;
+                                        const me = this;
                                         let _root = _.cloneDeep(self.model.root);
 
                                         if (_.isEmpty(me.model.name)) {
@@ -409,6 +424,11 @@ class Creative {
                                         }
 
                                         let _name = me.model.name;
+                                        if(!_name){
+                                            alertify.log("名称不能为空！");
+                                            return false;
+                                        }
+
                                         let _type = me.model.type;
                                         let _info = {remark: me.model.info.remark, ctime: _.now(), author: window.SignedUser_UserName, type: _type, icon: `${window.ASSETS_ICON}/files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}`};
 
@@ -422,20 +442,17 @@ class Creative {
 
                                         if(_rtn == 1){
 
-                                            alertify.success("",me.model.name,"success");
-
                                             self.load();
-
-                                            /*let _parent = _root + "/" + me.model.name;
-
-                                            me.newFile(_parent);*/
 
                                             win.close();
                                         }
                                     },
+                                    cancel(){
+                                        win.close();
+                                    },
                                     newFile: function(parent){
 
-                                        let me = this;
+                                        const me = this;
 
                                         _.delay(function(){
 
@@ -446,90 +463,142 @@ class Creative {
 
                                             if(_rtn == 1){
 
-                                                alertify.success("",_name,"success");
-
                                                 self.load();
                                             }
                                         },500)
-
+                                    },
+                                    tagsRemove(tag) {
+                                        this.model.tags.list.splice(this.model.tags.list.indexOf(tag), 1);
+                                    },
+                                    showTagsInput() {
+                                        this.model.tags.inputVisible = true;
+                                        this.$nextTick(_ => {
+                                            this.$refs.saveTagInput.$refs.input.focus();
+                                        });
+                                    },
+                                    tagsAdd() {
+                                        let inputValue = this.model.tags.inputValue;
+                                        if (inputValue) {
+                                            this.model.tags.list.push(inputValue);
+                                        }
+                                        this.model.tags.inputVisible = false;
+                                        this.model.tags.inputValue = '';
                                     }
                                 }
-                            })
+                            }).$mount("#creative-starting");
                         },
                         newFile: function() {
-                            let self = this;
+                            const self = this;
 
                             let win = maxWindow.winFile('新建文件',`<div id="creative-starting"></div>`, null,null);
 
-                            let _vue  = new Vue({
+                            new Vue({
                                 delimiters: ['#{', '}#'],
-                                el: "#creative-starting",
-                                template: "#creative-list-template",
+                                template: `<el-container style="height: 500px; border: 1px solid #eee">
+                                                <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                                                    <el-menu :default-openeds="['imap']" 
+                                                            @open="menuOpen"
+                                                            active-text-color="#ffd04b"
+                                                            unique-opened="true">
+                                                        <el-submenu :index="item.value" v-for="item in _.filter(mx.global.register.file,{type:'private'})">
+                                                            <template slot="title"><i :class="item.icon"></i> #{item.title}#</template>
+                                                        </el-submenu>
+                                                    </el-menu>
+                                                </el-aside>
+                                                <el-container>
+                                                    <el-header style="text-align: right; font-size: 12px">
+                                                        <el-tooltip content="保存" placement="top">
+                                                            <a href="javascript:void(0);" class="btn btn-link" title="保存" @click="save">
+                                                                <i class="fas fa-save"></i> 保存
+                                                            </a>
+                                                        </el-tooltip>
+                                                        <el-tooltip content="取消" placement="top">
+                                                            <a href="javascript:void(0);" class="btn btn-link" title="取消" @click="cancel">
+                                                                <i class="fas fa-window-close"></i> 取消
+                                                            </a>
+                                                        </el-tooltip>
+                                                    </el-header>
+                                                
+                                                    <el-main>
+                                                        <el-form label-position="right" label-width="80px">
+                                                            <el-form-item label="类型">
+                                                                <el-input v-model="model.type" disabled></el-input>
+                                                            </el-form-item>
+                                                            <el-form-item label="名称">
+                                                                <el-input v-model="model.name"></el-input>
+                                                            </el-form-item>
+                                                            
+                                                            <el-form-item label="描述">
+                                                                <el-input type="textarea" v-model="model.info.remark"></el-input>
+                                                            </el-form-item>
+
+                                                            <el-form-item label="标签">
+                                                                <el-tag
+                                                                    :key="tag"
+                                                                    closable
+                                                                    type=""
+                                                                    @close="tagsRemove(tag)"
+                                                                    style="margin:0 2px;" v-for="tag in model.tags.list">
+                                                                    #{tag}#
+                                                                </el-tag>
+                                                                <el-input
+                                                                    class="input-new-tag"
+                                                                    v-if="model.tags.inputVisible"
+                                                                    v-model="model.tags.inputValue"
+                                                                    ref="saveTagInput"
+                                                                    size="small"
+                                                                    @keyup.enter.native="tagsAdd"
+                                                                    @blur="tagsAdd">
+                                                                </el-input>
+                                                                <el-button v-else class="button-new-tag" size="small" @click="showTagsInput">+</el-button>
+                                                            </el-form-item>
+
+                                                            <el-form-item label="是否分享">
+                                                                <el-radio-group v-model="model.ifshare">
+                                                                    <el-radio label="公开" value="1"></el-radio>
+                                                                    <el-radio label="私有" value="0"></el-radio>
+                                                                </el-radio-group>
+                                                            </el-form-item>
+
+                                                        </el-form>
+                                                    </el-main>
+                                                </el-container>
+                                                
+                                            </el-container>`,
                                 data: {
                                     model: {
                                         name: "",
                                         type: "imap",
-                                        tags: [],
+                                        tags: {
+                                            inputVisible: false,
+                                            inputValue: '',
+                                            list:[]
+                                        },
                                         info: {
                                             remark: ""
                                         },
-                                        ifshare: 0,
-                                        astemplate: 0,
-                                        templates: []
+                                        ifshare: 0
                                     }
                                 },
                                 mounted:function(){
-                                    let me = this;
+                                    const me = this;
 
                                     me.$nextTick(function() {
                                         me.init();
                                     })
                                 },
-                                watch: {
-                                    'model.type': function(val,oldVal){
-                                        let me = this;
-
-                                        me.initTemplates();
-
-                                    },
-                                    deep:true
-                                },
-                                computed: {
-                                    type: function(){
-                                        let me = this;
-
-                                        return me.model.type + "t";
-                                    }
-                                },
                                 methods: {
                                     init: function(){
-                                        let me = this;
-
-                                        $("#tags").tagsinput({
-                                            tagClass: function(item) {
-                                                return _.sample(['label label-default', 'label label-success', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
-                                            }
-                                        });
-
-                                        // 只导入template
-                                        me.initTemplates();
+                                        const me = this;
 
                                     },
-                                    initTemplates: function(){
-                                        let me = this;
-
-
-                                        let _list = omdbHandler.fetchData("#/matrix/filesystem/: | ftype=" + me.type + "| top 200");
-
-                                        me.model.templates = _.map(_list.message,function(v,k){
-                                            v.parent = v.parent.replace(/\/home\/admin/,"");
-                                            return _.merge(v, {"username": window.SignedUser_UserName, "star": ""});
-                                        });
-
-                                        _.delay(self.refresh,100);
+                                    menuOpen(key, keyPath) {
+                                        const me = this;
+                                        
+                                        me.model.type = key;
                                     },
                                     save: function(){
-                                        let me = this;
+                                        const me = this;
                                         let _xml = null;
 
                                         if (_.isEmpty(me.model.name)) {
@@ -542,11 +611,6 @@ class Creative {
 
                                         let _info = {remark: me.model.info.remark, ctime: _.now(), author: window.SignedUser_UserName, type: _type, icon: `${window.ASSETS_ICON}/files/png/iflow.png?type=download&issys=${window.SignedUser_IsAdmin}`};
 
-                                        if(me.model.astemplate){
-                                            _name = me.model.name;
-                                            _type = me.type;
-                                        }
-
                                         let _check = fsHandler.fsCheck(self.model.root, _name+"."+_type);
                                         if(_check) {
                                             alertify.error("文件已存在，请确认！")
@@ -556,30 +620,40 @@ class Creative {
                                         let _rtn = fsHandler.fsNew(_type, self.model.root, _name+"."+_type, _xml, _info);
 
                                         if(_rtn == 1){
-                                            _.delay(function(){
-                                                self.load();
-                                                win.close();
-                                            },500);
+                                            self.load();
+                                            win.close();
                                         }
 
                                     },
-                                    click: function(item){
-                                        let me = self;
-
-                                        _vue.model.item = item;
-
-                                        $(".widget-stats.active").removeClass("active");
-                                        $("#"+item.id).addClass("active");
+                                    cancel(){
+                                        win.close();
+                                    },
+                                    tagsRemove(tag) {
+                                        this.model.tags.list.splice(this.model.tags.list.indexOf(tag), 1);
+                                    },
+                                    showTagsInput() {
+                                        this.model.tags.inputVisible = true;
+                                        this.$nextTick(_ => {
+                                            this.$refs.saveTagInput.$refs.input.focus();
+                                        });
+                                    },
+                                    tagsAdd() {
+                                        let inputValue = this.model.tags.inputValue;
+                                        if (inputValue) {
+                                            this.model.tags.list.push(inputValue);
+                                        }
+                                        this.model.tags.inputVisible = false;
+                                        this.model.tags.inputValue = '';
                                     }
                                 }
-                            })
+                            }).$mount("#creative-starting");
                         },
                         refresh: function() {
-                            let self = this;
+                            const self = this;
 
                             $(".tagsLabel").tagsinput({
                                 tagClass: function(item) {
-                                    return _.sample(['label label-success']);//, 'label label-default', 'label label-primary', 'label label-warning', 'label label-danger label-important']);
+                                    return _.sample(['label label-success']);
                                 }
                             });
 
@@ -602,7 +676,7 @@ class Creative {
                             });
                         },
                         forwardCreative: function(action,item){
-                            let self = this;
+                            const self = this;
 
                             if(item.ftype === 'dir'){
 
@@ -620,29 +694,27 @@ class Creative {
                             }
                         },
                         remove: function(event) {
-                            let self = this;
+                            const self = this;
 
-                            swal({
-                                title: event.name,
-                                text: "确定要删除?",
-                                type: "warning",
-                                showCancelButton: true,
-                                closeOnConfirm: false,
-                                cancelButtonText: "取消",
-                                confirmButtonText: "删除",
-                                confirmButtonColor: "#ff0000"
-                            }).then((result) => {
-                                if (result.value) {
-                                    let _rtn = fsHandler.fsDelete(event.parent,event.name);
+                            alertify.confirm(`确定要删除以下目录或文件? <br><br> 
+                                                名称：${event.name}<br>
+                                                位置：${event.parent}<br>
+                                                类型：${event.ftype}<br>
+                                                大小：${mx.bytesToSize(event.size)}<br>
+                                                创建时间：${moment(event.vtime).format("LLL")}`, function (e) {
+                                if (e) {
+                                    let rtn = fsHandler.fsDelete(event.parent,event.name);
 
-                                    if (_rtn == 1){
+                                    if (rtn == 1){
                                         self.load();
                                     }
+                                } else {
+                                    
                                 }
-                            })
+                            });
                         },
                         info: function(node){
-                            let self = this;
+                            const self = this;
 
                             let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, $('#content'));
 
@@ -725,7 +797,7 @@ class Creative {
                                     }
                                 },
                                 mounted: function() {
-                                    let me = this;
+                                    const me = this;
 
                                     me.$nextTick(function() {
                                         me.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
@@ -735,7 +807,7 @@ class Creative {
                                 },
                                 filters: {
                                     pickName: function (value) {
-                                        let me = this;
+                                        const me = this;
 
                                         if (!value) return '';
 
@@ -754,40 +826,40 @@ class Creative {
                                     }
                                 },
                                 destroyed: function(){
-                                    let me = this;
+                                    const me = this;
 
                                     me.model = null;
                                 },
                                 methods: {
                                     init: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
                                     },
                                     triggerInput: function(id){
-                                        let self = this;
+                                        const self = this;
 
                                         $(self.$refs[id]).click()
                                     },
                                     apply: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         me.saveAttr();
 
                                     },
                                     save: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         me.saveAttr();
                                         _win.close();
                                     },
                                     close: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         _win.close();
                                     },
                                     saveName: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         let _old = node.parent + "/" + node.name;// + _extName;
                                         let _new = node.parent + "/" + me.model.newName + me.model.extName;
@@ -807,7 +879,7 @@ class Creative {
                                         }
                                     },
                                     saveAttr: function(){
-                                        let me = this;
+                                        const me = this;
 
                                         me.model.attr.icon = me.model.icon.value;
 
@@ -827,13 +899,13 @@ class Creative {
 
                         },
                         copyIt: function(item){
-                            let self = this;
+                            const self = this;
 
                             self.model.action.from = item.parent + "/" + item.name;
                             alertify.log("已复制 " + self.model.action.from);
                         },
                         pasteIt: function(){
-                            let self = this;
+                            const self = this;
 
                             if(_.isEmpty(self.model.action.from)){
                                 alertify.log("请选择复制内容")
@@ -853,7 +925,7 @@ class Creative {
                             }
                         },
                         copyUrl: function(item){
-                            let self = this;
+                            const self = this;
 
                             let _lang = `{{.Lang}}`;
                             let lang = _lang.replace(/"/g,"").split("-")[0].replace(/en/g,"eg");
@@ -885,7 +957,7 @@ class Creative {
 
                         },
                         shareIt: function(item){
-                            let self = this;
+                            const self = this;
 
                             alertify.prompt("共享设置", function (e, str) {
                                 // str is the input text
@@ -899,7 +971,7 @@ class Creative {
                             $(".alertify-prompt .alertify-message").css('height','5vh');
                         },
                         toggleLeft: function() {
-                            let self = this;
+                            const self = this;
 
                             if(self.toggle.left) {
 

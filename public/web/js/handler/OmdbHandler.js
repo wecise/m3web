@@ -385,36 +385,31 @@ class OmdbHandler {
     classDataExport(event){
         let rtn = null;
 
-        jQuery.ajax({
-            url: '/mxobject/export?recursive=true&class=' + encodeURIComponent(event),
-            dataType: 'json',
-            type: 'GET',
-            async: false,
-            beforeSend:function(xhr){
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function(data, textStatus, xhr) {
+        let fileName = _.last(event.split("/")) + `_${moment().format("YYYY-MM-DD HH:mm:SS")}.mql`;
 
-                userHandler.ifSignIn(data);
-                
-                if( _.lowerCase(data.status) == "ok"){
-                    rtn = data;
-                    alertify.success("导出成功" + " " + event + " " + moment().format("LLL"));
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `/mxobject/export?recursive=true&class=${encodeURIComponent(event)}&limit=0`, true);
+            xhr.setRequestHeader("Content-type","text/csv");
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var blob = new Blob([xhr.response], {type: "octet/stream"});
+                    saveAs(blob, fileName);
+                    alertify.success("导出成功" + " " + fileName);
+                    rtn = 1;
                 }
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = null;
-                alertify.error("导出失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
-        })
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+        } catch(err){
+            
+        }
         return rtn;
     };
 
     /*
-    *   类数据导出
+    *   类数据导入
     *
     * */
    classDataImport(event){

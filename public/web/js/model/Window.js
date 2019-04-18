@@ -658,7 +658,7 @@ class Window {
     winFile(title, template, position, container){
 
         this.lrwh[2] = this.width * 0.7;
-        this.lrwh[3] = this.height * 0.8;
+        this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
             theme:          maxWindow.theme.dark,
@@ -677,10 +677,7 @@ class Window {
             },
             content:        template,
             callback:       function(){
-                $(".jsPanel").css({
-                    "position":"absolute",
-                    "z-index": "10000"
-                });
+                
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px"
                 });
@@ -726,10 +723,7 @@ class Window {
             },
             content:        template,
             callback:       function(){
-                $(".jsPanel").css({
-                    "position":"absolute",
-                    "z-index": "10000"
-                });
+                
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px"
                 });
@@ -763,8 +757,8 @@ class Window {
             _position = _tmp;
         }
 
-        this.lrwh[2] = 300; //$( window ).width()*0.2;
-        this.lrwh[3] = 340; //$( window ).height()*0.55;
+        this.lrwh[2] = 350;//this.width * 0.4; //$( window ).width()*0.2;
+        this.lrwh[3] = 400;//this.height * 0.6; //$( window ).height()*0.55;
 
         let win = $.jsPanel({
             theme:          maxWindow.theme.dark,

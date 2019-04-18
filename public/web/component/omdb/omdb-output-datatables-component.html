@@ -131,14 +131,14 @@
 			}
 		},
         created: function(){
-            let self = this;
+            const self = this;
 
             eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT-${self.id}`, self.resize);
             eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
             eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
         },
 		mounted: function () {
-            let self = this;
+            const self = this;
 
             self.$nextTick(function () {
 
@@ -150,7 +150,7 @@
         },
 		computed: {
             _columns: function(){
-                let self = this;
+                const self = this;
 
                 let _cols = _.map(self.columns,function(v,k){
 
@@ -206,15 +206,16 @@
 		},
 		methods: {
             init: function(){
-                let self = this;
+                const self = this;
                 
-                console.log(1,moment().format("yyyy-mm-dd hh:m.s"))
+                console.log(1,moment().format("YYYY-MM-DD HH:m.s"))
                 let dataset = self.dataset;
 
                 let cols = mx.sanitizeColumns(_.uniqBy(self._columns,'data'),'data');
                 
                 self.datatable = $("#"+self.id).DataTable( _.extend({
                                 destroy: true,
+                                deferRender: true,
 	                            data: dataset,//self.dataset,
                                 columns: cols,//_.uniqBy(self._columns,'data'),
                                 responsive: false,
@@ -320,7 +321,7 @@
 			                    },
                     },self.options)).columns.adjust().draw();
 
-                    console.log(2,moment().format("yyyy-mm-dd hh:m.s"))
+                    console.log(2,moment().format("YYYY-MM-DD HH:m.s"))
 
                 $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192);
 
@@ -335,7 +336,7 @@
 
 			},
 			initPlugin: function(){
-                let self = this;
+                const self = this;
 
                 self.initClassMenu();
 
@@ -406,18 +407,18 @@
 
 			},
             redraw: function(){
-                let self = this;
+                const self = this;
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
 
             },
 			resize: function(event){
-                let self = this;
+                const self = this;
 
                 $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192);
 			},
 			refresh: function(event){
-                let self = this;
+                const self = this;
 
                 self.columns = self.result.columns[event];
                 self.dataset = self.result.data[event];
@@ -429,7 +430,7 @@
 
 			},
 			toolBars: function(){
-                let self = this;
+                const self = this;
                 let _keys = _.keys(self.result.columns);
                 let _items = {};
 
@@ -487,7 +488,7 @@
                             });
                         },
                         selectAll: function () {
-                            let self = this;
+                            const self = this;
 
                             self.datatable.rows({ page: 'current' }).nodes();
 
@@ -528,7 +529,7 @@
 
                         },
 	                    exportIt: function(){
-                            let self = this;
+                            const self = this;
 
                             self.datatable.buttons('.buttons-excel').trigger();
 	                    }
@@ -537,7 +538,7 @@
 
 			},
 			initClassMenu: function(){
-                let self = this;
+                const self = this;
 
                 if(_.isEmpty(self.result)) return false;
 

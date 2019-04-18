@@ -143,10 +143,6 @@ class FsHandler {
             _issys = true;
         }
 
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _issys = true;
-        }*/
-
         let url = `/fs${parent}`.replace(/\/fs\/fs/,"/fs");
 
         jQuery.ajax({
@@ -244,10 +240,6 @@ class FsHandler {
 
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
-
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _url += '?issys=true';
-        }*/
 
         if(window.SignedUser_IsAdmin){
             _url += '?issys=true';
@@ -690,25 +682,8 @@ class FsHandler {
     genFsUrl(item,cfg,data){
 
         let app = function(ext,action){
-            let list = {
-                        "imap":  {
-                            "edit": "/web/creative/graph/index.html",
-                            "run": "/janesware/imap"
-                        },
-                        "iflow": {
-                            "edit": "/web/creative/graph/index.html",
-                            "run": "/janesware/iflow"
-                        },
-                        "ishow": {
-                            "edit": "/web/creative/graph/index.html",
-                            "run": "/janesware/ishow"
-                        },
-                        "md": {
-                            "edit": "/janesware/md",
-                            "run": "/janesware/md"
-                        }
-            };
-            return list[ext][action];
+            let list = _.groupBy(mx.global.register.file,'value');
+            return list[ext][0][action];
         };
 
         let _cfg = _.extend({ header:false, sidebar:false, footbar:false },cfg);

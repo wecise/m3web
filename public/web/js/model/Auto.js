@@ -87,12 +87,12 @@ class Auto {
                     data: {
                         auto: {}
                     },
-                    created: function () {
+                    created() {
                         let self = this;
 
                         eventHub.$on("PROBE-REFRESH-EVENT", self.initData);
                     },
-                    mounted: function () {
+                    mounted() {
                         let self = this;
 
                         self.$nextTick(function () {
@@ -105,12 +105,12 @@ class Auto {
                         })
                     },
                     methods: {
-                        init: function () {
+                        init() {
                             let self = this;
 
                             self.initData(['auto']);
                         },
-                        initPlug: function () {
+                        initPlug() {
                             let self = this;
 
                             /* toggle tab trigger Echart resize */
@@ -118,7 +118,7 @@ class Auto {
                                 eventHub.$emit("COMPONENT-REDRAW-EVENT", null);
                             })
                         },
-                        initData: function (event) {
+                        initData(event) {
                             let self = this;
 
                             _.forEach(event, function (v) {
@@ -148,12 +148,22 @@ class Auto {
         let wizard = {
             data: {
                 model: {
-                    item: {
+                    file: {
                         name: null,
                         version: 1.0,
                         remark: null,
                         uploadfile: null,
-                        tags: [],
+                        tags: ['AUTO'],
+                        servers: conf.servers,
+                        command: null,
+                        wnd: wnd
+                    },
+                    script: {
+                        name: null,
+                        version: 1.0,
+                        remark: null,
+                        uploadfile: null,
+                        tags: ['SCRIPT'],
                         servers: conf.servers,
                         command: null,
                         wnd: wnd
@@ -163,28 +173,32 @@ class Auto {
                     }
                 }
             },
-            created: function(){
+            created(){
                 const me = this
 
                 eventHub.$on("LAYOUT-RESIZE-EVENT",me.resize);
             },
             methods: {
-                tagInput: function(className,container, tags){
+                tagInput(className,container, tags){
                     const me = this
 
                     me.model.handler.tagify = $(me.$el).find(".tags").tagify()
                         .on("add",function(event, tagName){
-                            me.model.item.tags = tagName.value;
+                            me.model.file.tags = tagName.value;
+                            me.model.script.tags = tagName.value;
                         })
                         .on("remove",function(event,tagName){
-                            me.model.item.tags = tagName.value;
+                            me.model.file.tags = tagName.value;
+                            me.model.script.tags = tagName.value;
                         });
 
                 },
-                save: function(){
+                save(){
                     const me = this
+                    let rtn = 0;
                     
-                    let rtn = scriptHandler.depotAdd(me.model.item);
+                    rtn = scriptHandler.depotAdd(me.model.file);
+                    rtn = scriptHandler.depotAdd(me.model.script);
 
                     if(rtn === 1){
 
@@ -199,7 +213,7 @@ class Auto {
                         eventHub.$emit("PROBE-REFRESH-EVENT", ['auto']);
                     }
                 },
-                resize:function(){
+                resize(){
                     wnd.resize($(wnd.content).parent().parent().width()+20, $(wnd.content).parent().parent().height()+60 );
                 },
                 onFileChange(e) {
@@ -207,15 +221,23 @@ class Auto {
 
                     let file = e.target.files[0];
 
-                    me.model.item.name = _.head(file.name.split("."));
+                    me.model.file.name = _.head(file.name.split("."));
 
-                    me.model.item.tags.push(file.name);
+                    me.model.file.uploadfile = file;
 
-                    me.model.item.uploadfile = file;
+                },
+                onScriptChange(e) {
+                    const me = this
+
+                    let file = e.target.files[0];
+
+                    me.model.script.name = _.head(file.name.split("."));
+
+                    me.model.script.uploadfile = file;
 
                 }
             },
-            mounted: function(){
+            mounted(){
                 const me = this
 
                 me.$nextTick(function () {
@@ -231,8 +253,12 @@ class Auto {
                             <div id="auto-wizard">
                                 <ol>
                                     <li>
-                                        选择文件
+                                        上传部署文件
                                         <small>选择文件，上传到文件库。</small>
+                                    </li>
+                                    <li>
+                                        选择部署脚本
+                                        <small>选择部署脚本。</small>
                                     </li>
                                     <li>
                                         部署目标
@@ -245,39 +271,82 @@ class Auto {
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">选择文件：</label>
                                             <div class="col-sm-10">
-                                                <label for="auto-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
+                                                <label for="auto-file-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
                                                     上传文件
                                                 </label>
-                                                <input id="auto-upload" type="file" @change="onFileChange" required="required" style="display:none;" />
+                                                <input id="auto-file-upload" type="file" @change="onFileChange" required="required" style="display:none;" />
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">文件名称：</label>
                                             <div class="col-sm-10">
-                                                <input type="text" placeholder="" class="form-control" v-model="model.item.name" required="required" />
+                                                <input type="text" placeholder="" class="form-control" v-model="model.file.name" required="required" />
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">文件版本：</label>
                                             <div class="col-sm-10">
-                                                <input type="number" placeholder="" class="form-control"  v-model="model.item.version" required="required" step="0.1"/>
+                                                <input type="number" placeholder="" class="form-control"  v-model="model.file.version" required="required" step="0.1"/>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">执行命令：</label>
                                             <div class="col-sm-10">
-                                                <input type="text" placeholder="" class="form-control" v-model="model.item.command"/>
+                                                <input type="text" placeholder="" class="form-control" v-model="model.file.command"/>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">文件说明：</label>
                                             <div class="col-sm-10">
-                                                <textarea row="6" placeholder="" class="form-control"  v-model="model.item.remark"></textarea>
+                                                <textarea row="6" placeholder="" class="form-control"  v-model="model.file.remark"></textarea>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">添加标签：</label>
-                                            <div class="col-sm-10"><input type="text" placeholder="" class="tags"  v-model="model.item.tags"/></div>
+                                            <div class="col-sm-10"><input type="text" placeholder="" class="tags"  v-model="model.file.tags"/></div>
+                                        </div>
+                                        <hr/>
+                                        <a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存并退出</a>
+                                    </fieldset>
+                                </div>
+                                <div>
+                                    <fieldset class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">选择脚本：</label>
+                                            <div class="col-sm-10">
+                                                <label for="auto-script-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
+                                                    上传脚本
+                                                </label>
+                                                <input id="auto-script-upload" type="file" @change="onScriptChange" required="required" style="display:none;" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">脚本名称：</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" placeholder="" class="form-control" v-model="model.script.name" required="required" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">脚本版本：</label>
+                                            <div class="col-sm-10">
+                                                <input type="number" placeholder="" class="form-control"  v-model="model.script.version" required="required" step="0.1"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">执行命令：</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" placeholder="" class="form-control" v-model="model.script.command"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">脚本说明：</label>
+                                            <div class="col-sm-10">
+                                                <textarea row="6" placeholder="" class="form-control"  v-model="model.script.remark"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">添加标签：</label>
+                                            <div class="col-sm-10"><input type="text" placeholder="" class="tags"  v-model="model.script.tags"/></div>
                                         </div>
                                         <hr/>
                                         <a class="btn btn-sm btn-primary pull-right" href="javascript:void(0);" @click="save">保存并退出</a>
@@ -287,7 +356,7 @@ class Auto {
                                     <fieldset>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <auto-base-datatable id="auto-servers-datatable" :model="model.item"></auto-base-datatable>
+                                                <auto-base-datatable id="auto-servers-datatable" :model="model.script"></auto-base-datatable>
                                             </div>
                                         </div>
                                     </fieldset>

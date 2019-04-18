@@ -35,7 +35,7 @@ class Script {
                         version: 1.0,
                         remark: null,
                         uploadfile: null,
-                        tags: [],
+                        tags: ['SCRIPT'],
                         servers: conf.servers,
                         command: null,
                         wnd: wnd
@@ -90,9 +90,7 @@ class Script {
                     let file = e.target.files[0];
 
                     me.model.item.name = _.head(file.name.split("."));
-
-                    me.model.item.tags.push(file.name);
-
+                    
                     me.model.item.uploadfile = file;
 
                 }
@@ -183,7 +181,6 @@ class Script {
     }
 
     deploy(event){
-        console.log(event)
         
         let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
 

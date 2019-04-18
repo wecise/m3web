@@ -163,7 +163,19 @@
 	}
 
 	/* 告警统计widget */
-	.event-view-summary-control{
+	.event-view-summary-control-refresh{
+		right: 155px;
+		padding-top: 5px;
+		display: inline-block;
+		padding-right: 3px;
+		vertical-align: middle;
+		font-weight: 900;
+		position: absolute;
+		z-index: 10;
+		cursor: pointer;
+	}
+
+	.event-view-summary-control-smart{
 		right: 15px;
 		padding-top: 5px;
 		display: inline-block;
@@ -256,8 +268,21 @@
 									<h4 class="panel-title"></h4>
 								</div> -->
 								<!--div class="panel-body" id="event-view-container" style="height:calc(100vh - 200px);display: flex;flex-direction: column;"-->
+									<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top">
+										<div class="event-view-summary-control-refresh">
+											${control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'}
+											<el-switch
+											v-model="control.ifRefresh"
+											active-color="#13ce66"
+											inactive-color="#dddddd"
+											active-value="1"
+											inactive-value="0"
+											@change="toggleSummaryByRefresh">
+											</el-switch>
+										</div>
+									</el-tooltip>
 									<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
-										<div class="event-view-summary-control">
+										<div class="event-view-summary-control-smart">
 											${control.ifSmart==1?'智能分析启用中':'智能分析关闭中'}
 											<el-switch
 											v-model="control.ifSmart"
@@ -265,7 +290,7 @@
 											inactive-color="#dddddd"
 											active-value="1"
 											inactive-value="0"
-											@change="toggleSummaryView">
+											@change="toggleSummaryBySmart">
 											</el-switch>
 										</div>
 									</el-tooltip>

@@ -66,7 +66,6 @@ class Event extends Matrix {
                             progress:[]
                         }
                     },
-                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
                     template:   `<div>
                                     <div class="progress" 
                                          v-for="pg in progress" 
@@ -118,7 +117,7 @@ class Event extends Matrix {
                                             expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                            color: _.sample(_.map(mx.global.register.color.summary,'color'))
                                         }
                                 })
                                 return {name: title, class:className, child: pgs, sum: sum}
@@ -186,8 +185,8 @@ class Event extends Matrix {
                     }
                 });
 
-                // 告警聚合
-                Vue.component("event-view-group",{
+                // 告警统计
+                Vue.component("event-view-summary",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -198,7 +197,7 @@ class Event extends Matrix {
                             dataset:[]
                         }
                     },
-                    template:   `<div style="width: 100%;height:200px;float:left;display: flex;">
+                    template:   `<div style="width: 100%;height:200px;float:left;display: flex;flex-wrap: wrap;">
                                     <max-echart-pie-group :id="id+'-'+item.id" :model="item" v-for="item in dataset" @click.native="search(item)"></max-echart-pie-group>
                                 </div>`,
                     watch:{
@@ -221,20 +220,22 @@ class Event extends Matrix {
                             
                             self.dataset = [];
 
-                            _.forEach(self.model.summary.group,function(v,k){
+                            _.forEach(self.model.summary.summary,function(v,k){
+                                let sum = _.sum(_.map(v,function(s){return s[1];}));
                                 _.forEach(v,function(val){
                                     self.dataset.push({
                                             dimension: k,
                                             id:objectHash.sha1(k+val+_.now()), 
                                             name: val[0], 
                                             count: val[1],
-                                            sum: _.sum(_.map(v,function(s){return s[1];})),
-                                            percent: _.round(val[1]/180*100,2),
+                                            sum: sum,
+                                            percent: _.round(val[1]/sum*100,1),
                                             color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
                                         });
                                 })
                             });
                             
+                            self.dataset = _.orderBy(self.dataset,['percent'],['desc'])
                         },
                         search(event){
                             // 根据相应维度再搜索
@@ -251,7 +252,7 @@ class Event extends Matrix {
                         id: String,
                         model:String
                     },
-                    template: `<form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
+                    template: `<form class="form-horizontal" style="overflow-x: hidden;overflow-y: auto;">
                                     <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
                                         <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
                                         <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
@@ -286,7 +287,7 @@ class Event extends Matrix {
                     },
                     methods: {
                         init: function(){
-                            let self = this;
+                            const self = this;
                             
                             self.gaugePS = new RadialGauge({
                                 renderTo: `gauge-${self.id}`,
@@ -368,8 +369,134 @@ class Event extends Matrix {
                             self.gaugePS.value = self.model.value || 0;
                         }
                     }
-                    
                 });
+
+                // 维度关联性告警
+                Vue.component("event-diagnosis-dimension-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            menuData: [],
+                            defaultOpeneds: [],
+                            tableData: {}
+                        }
+                    },
+                    template:  `<el-container style="height: 500px; border: 1px solid #eee">
+                                    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+                                        <el-menu :default-openeds="defaultOpeneds" @select="menuSelect">
+                                            <el-submenu :index="key" v-for="(item,key) in menuData">
+                                                <template slot="title"><i class="fas fa-braille fa-fw"></i> #{_.upperCase(key)}#</template>
+                                                <el-menu-item :index="k" v-for="k in item">#{k}#</el-menu-item>
+                                            </el-submenu>
+                                        </el-menu>
+                                    </el-aside>
+                                    <el-container>
+                                        <el-main style="padding:0px;">
+                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData"></event-diagnosis-datatable-component>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+                        
+                        // 默认维度关联事件
+                        self.tableData = self.model;
+
+                        self.init();
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                            this.menuData = _.groupBy(_.keys(this.model.rows[0]),function(v){
+                                return v.substr(0,1);
+                            })
+                        },
+                        menuSelect(key, keyPath){
+                            
+                            this.defaultOpeneds = keyPath;
+
+                            let item = {name: key, value: this.model.rows[0][key]}; 
+                            // 获取相应维度的关联事件  eg: biz='查账系统'
+                            this.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(JSON.stringify((item)))).message.event;
+                        }
+                    }
+                })
+
+                // 概率相关性告警
+                Vue.component("event-diagnosis-probability-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            chartData: [],
+                            tableData: {},
+                            byStep: 'YYYY-MM-DD HH'
+                        }
+                    },
+                    watch:{
+                        byStep(val,oldVal){
+                            this.sumByStep();
+                        }
+                    },
+                    template:  `<el-container style="height: 500px; border: 1px solid #eee">
+                                    <el-aside width="400px">
+                                        <el-container>
+                                            <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                                                <el-radio v-model="byStep" label="YYYY-MM-DD">按天</el-radio>
+                                                <el-radio v-model="byStep" label="YYYY-MM-DD HH">按小时</el-radio>
+                                                <el-radio v-model="byStep" label="YYYY-MM-DD HH:mm">按分钟</el-radio>
+                                            </el-header>
+                                            <el-main style="padding:0px;">
+                                                <max-echart-bar-all :id="id + '-chart'" :model="chartData"></max-echart-bar-all>
+                                            </el-main>
+                                        </el-container>
+                                    </el-aside>
+                                    <el-container>
+                                        <el-main style="padding:0px;">
+                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData"></event-diagnosis-datatable-component>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+
+                        self.init();
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                            // 默认维度关联事件
+                            self.tableData = { rows:this.$root.$refs.searchRef.result.message.rows,
+                                                columns:this.$root.$refs.searchRef.result.message.columns[this.$root.$refs.searchRef.result.message.rootClass],
+                                                options:this.$root.$refs.searchRef.result.message.options,
+                                                template:this.$root.$refs.searchRef.result.message.template[window.SignedUser_UserName]
+                                            };
+                            
+                            // 概率时间核
+                            self.sumByStep();
+                        },
+                        sumByStep(){
+                            const self = this;
+
+                            self.chartData = _.groupBy(this.$root.$refs.searchRef.result.message.rows, function(v){
+                                return moment(v.vtime).format(self.byStep);
+                            });
+                        },
+                        nodeClick(event){
+                            // 获取相应维度的关联事件  eg: biz='查账系统'
+                            this.tableData = fsHandler.callFsJScript("/event/diagnosis-probability-by-value.js", encodeURIComponent(JSON.stringify((event)))).message.event;
+                        }
+                    }
+                })
                 
                 // 告警分析
                 Vue.component("event-diagnosis",{
@@ -385,68 +512,77 @@ class Event extends Matrix {
                     },
                     template: ` <section class="event-diagnosis">
                                     <ul class="nav nav-tabs">
-                                        <li class="active"><a href="#event-diagnosis-detail">告警详情</a></li>
-                                        <li class=""><a href="#event-diagnosis-journal">告警轨迹</a></li>
-                                        <li class=""><a href="#event-diagnosis-history">历史相关告警</a></li>
-                                        <li class=""><a href="#event-diagnosis-dimension">维度关联性告警</a></li>
-                                        <li class=""><a href="#event-diagnosis-probability">概率相关性告警</a></li>
+                                        <li class="active"><a :href="'#event-diagnosis-detail-'+id">告警详情</a></li>
+                                        <li class=""><a :href="'#event-diagnosis-journal-'+id">告警轨迹</a></li>
+                                        <li class=""><a :href="'#event-diagnosis-history-'+id">历史相关告警</a></li>
+                                        <li class=""><a :href="'#event-diagnosis-dimension-'+id">维度关联性告警</a></li>
+                                        <li class=""><a :href="'#event-diagnosis-probability-'+id">概率相关性告警</a></li>
                                     </ul>
                                     <div class="content">
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-detail">告警详情</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <event-view-detail :id="id + '-detail'" :model="model.event"></event-view-detail>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-journal">告警轨迹</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <event-timeline :id="id + '-journal'" :model="model.journal.rows"></event-timeline>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history">历史相关告警</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <event-diagnosis-datatable-component :id="id + '-history'" :model="model.history"></event-diagnosis-datatable-component>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-dimension">维度关联性告警</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <event-diagnosis-datatable-component :id="id + '-dimension'" :model="model.history"></event-diagnosis-datatable-component>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-probability">概率相关性告警</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <event-diagnosis-datatable-component :id="id + '-probability'" :model="model.history"></event-diagnosis-datatable-component>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
+                                        
+                                        <el-card class="box-card win" shadow="always">
+                                            <div slot="header" class="clearfix">
+                                                <span :id="'event-diagnosis-detail-'+id">告警详情</span>
+                                                <div class="button-group pull-right">
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
+                                                </div>
+                                            </div>
+                                            <event-view-detail :id="id + '-detail'" :model="model.event"></event-view-detail>
+                                        </el-card>
+
+                                        <hr/>
+                                
+                                        <el-card class="box-card win" shadow="always">
+                                            <div slot="header" class="clearfix">
+                                                <span :id="'event-diagnosis-journal-'+id">告警轨迹</span>
+                                                <div class="button-group pull-right">
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
+                                                </div>
+                                            </div>
+                                            <event-timeline :id="id + '-journal'" :model="model.journal.rows"></event-timeline>
+                                        </el-card>
+
+                                        <hr/>
+                                
+                                        <el-card class="box-card win" shadow="always">
+                                            <div slot="header" class="clearfix">
+                                                <span :id="'event-diagnosis-history-'+id">历史相关告警</span>
+                                                <div class="button-group pull-right">
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
+                                                </div>
+                                            </div>
+                                            <event-diagnosis-datatable-component :id="id + '-history'" :model="model.history"></event-diagnosis-datatable-component>
+                                        </el-card>
+
+                                        <hr/>
+                                
+                                        <el-card class="box-card win" shadow="always">
+                                            <div slot="header" class="clearfix">
+                                                <span :id="'event-diagnosis-dimension-'+id">维度关联性告警</span>
+                                                <div class="button-group pull-right">
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
+                                                </div>
+                                            </div>
+                                            <event-diagnosis-dimension-component :id="id + '-dimension'" :model="model.dimension"></event-diagnosis-dimension-component>
+                                        </el-card>
+
+                                        <hr/>
+                                    
+                                        <el-card class="box-card win" shadow="always">
+                                            <div slot="header" class="clearfix">
+                                                <span :id="'event-diagnosis-probability-'+id">概率相关性告警</span>
+                                                <div class="button-group pull-right">
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
+                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
+                                                </div>
+                                            </div>
+                                            <event-diagnosis-probability-component :id="id + '-probability'" :model="model.event"></event-diagnosis-probability-component>
+                                        </el-card>
+                                            
                                     </div>
                                 </section>`,
                     mounted:function(){
@@ -461,7 +597,42 @@ class Event extends Matrix {
                                 $(e.target).closest("li").addClass("active");
                                 $("#content.content").css("padding-top","60px!important;");
                             })
+
+                            $(self.$el).find(".box-card>.el-card__body").addClass("win-body");
+                            $(self.$el).find(".box-card>.el-card__header").addClass("win-heading");
                             
+
+                            $("[data-click=win-collapse]").click(function(e) {
+                                e.preventDefault(), $(this).closest(".win").find(".win-body").slideToggle()
+                            });
+                            $("[data-click=win-expand]").click(function(e) {
+                                e.preventDefault();
+                                var a = $(this).closest(".win"),
+                                    t = $(a).find(".win-body"),
+                                    i = 40;
+                                if (0 !== $(t).length) {
+                                    var n = $(a).offset().top,
+                                        o = $(t).offset().top;
+                                    i = o - n
+                                }
+                                if ($("body").hasClass("win-expand") && $(a).hasClass("win-expand")) {
+                                    $("body, .win").removeClass("win-expand"),
+                                    $(".win").removeAttr("style"), $(t).removeAttr("style");
+                                } else if ($("body").addClass("win-expand"), $(this).closest(".win").addClass("win-expand"), 0 !== $(t).length && 40 != i) {
+                                    var l = 40;
+                                    $(a).find(" > *").each(function() {
+                                        var e = $(this).attr("class");
+                                        "win-heading" != e && "win-body" != e && (l += $(this).height() + 30)
+                                    }), 40 != l && $(t).css("top", 40 + "px")
+                                }
+                                
+                                $(window).trigger("resize")
+                                mx.windowResize()
+                                
+                            })
+                        },
+                        toggleSize(){
+
                         }
                     }
                     
@@ -491,12 +662,14 @@ class Event extends Matrix {
                                 tabs:[
                                     {name: 'event-view-radar', title:'告警雷达', type: 'radar'},
                                     // {name: 'event-view-pie', title:'告警统计', type: 'pie'},
-                                    {name: 'event-view-group', title:'告警聚合', type: 'group'}
+                                    {name: 'event-view-summary', title:'告警统计', type: 'summary'}
                                 ]
                             }
                         },
                         control: {
                             ifSmart: '1',
+                            ifSummary: '1',
+                            ifRefresh: '0'
                         },
                         // 搜索组件结构
                         model: {
@@ -596,7 +769,7 @@ class Event extends Matrix {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
-                        toggleSummaryView(evt){
+                        toggleSummaryBySmart(evt){
                             if(evt==1) {
                                 $("#event-view-summary").css("height","200px").css("display","");
                             } else {
@@ -609,13 +782,44 @@ class Event extends Matrix {
                             // RESIZE Event Console
                             event.resizeEventConsole();
                         },
+                        toggleSummaryBySummary(evt){
+                            if(evt==1) {
+                                $("#event-view-summary").css("height","200px").css("display","");
+                            } else {
+                                $("#event-view-summary").css("height","0px").css("display","none");
+                            }
+                            this.control.ifSummary = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
+                        },
+                        toggleSummaryByRefresh(evt){
+                            const self = this;
+                            
+                            if(evt==1) {
+                                window.intervalListener = setInterval(function(){
+                                    self.$refs.searchRef.search();
+                                },5000)
+                            } else {
+                                clearInterval(window.intervalListener);
+                            }
+
+                            this.control.ifRefresh = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
+                        },
                         detailAdd(event){
                             try {
                                 let id = event.id;
                                 if(this.layout.main.activeIndex === `detail-${id}`) return false;
                                 
                                 // event
-                                let term = encodeURIComponent(JSON.stringify(event));
+                                let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript('/event/diagnosis-by-id.js',term).message;
                                 
@@ -659,6 +863,10 @@ class Event extends Matrix {
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
                         }
                     }
                 };
@@ -681,99 +889,6 @@ class Event extends Matrix {
         $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
                                                         .css("max-height","-=" + evsH + "px");
-    }
-
-    graphNav(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`,
-            data: {
-                id: id
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    graph(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
-            data: {
-                id: id,
-                model: fsHandler.callFsJScript('/event/event_detail_graph.js', null).message.data[0].graph
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    performance(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="performance">
-                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'performance'
-            }
-        };
-    }
-
-    log(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="log">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'log'
-            }
-        };
-    }
-
-    config(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="config">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'config'
-            }
-        };
-    }
-
-    ticket(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="ticket">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'ticket'
-            }
-        };
     }
 
     checkContainer(){

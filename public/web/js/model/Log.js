@@ -331,6 +331,7 @@ class Log extends Matrix {
                         },
                         control: {
                             ifSmart: '1',
+                            ifRefresh: '0'
                         },
                         // 搜索组件结构
                         model: {
@@ -430,7 +431,25 @@ class Log extends Matrix {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
-                        toggleSummaryView(evt){
+                        toggleSummaryByRefresh(evt){
+                            const self = this;
+                            
+                            if(evt==1) {
+                                window.intervalListener = setInterval(function(){
+                                    self.$refs.searchRef.search();
+                                },5000)
+                            } else {
+                                clearInterval(window.intervalListener);
+                            }
+
+                            this.control.ifRefresh = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
+                        },
+                        toggleSummaryBySmart(evt){
                             if(evt==1) {
                                 $("#event-view-summary").css("height","200px").css("display","");
                             } else {

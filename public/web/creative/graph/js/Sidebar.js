@@ -112,9 +112,9 @@ Sidebar.prototype.init = function()
     let entity = null;
     let self = this;
     let conds = `#&className/: | top &top`;
-    let uname = window.COMPANY_NAME;
-
-    if(uname !== 'oneswitch'){
+    let ospace = window.COMPANY_NAME;
+	
+	if(window.URL_PARAMS_ITEM.ftype == 'imap'){
 
         self.addSearchPalette(true);
 
@@ -174,7 +174,7 @@ Sidebar.prototype.init = function()
                 {'Wireless_Router_N': 'wireless router switch wap wifi access point wlan',
                     'Router_Icon': 'router switch'});
         },500)
-    } else {
+    } else if(window.URL_PARAMS_ITEM.ftype == 'iepc'){
 
         self.addSearchPalette(false);
 
@@ -184,10 +184,34 @@ Sidebar.prototype.init = function()
             $("#imap-config").removeClass("active");
             $("#imap-shape").addClass("active");
 
-            self.addBobPalette(true);
+            self.addEpcPalette(true);
 
-            /*self.addStencilPalette('flowchart', mxResources.get('mx-menu-shape-flowchart'), dir + '/bankofchina_flowchart.xml',
-                ';whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#dddddd;strokeWidth=2');*/
+        },500)
+    } else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
+
+        self.addSearchPalette(false);
+
+        _.delay(function(){
+            $("#imap-tabs ul").remove();
+
+            $("#imap-config").removeClass("active");
+            $("#imap-shape").addClass("active");
+
+            self.addJobPalette(true);
+
+        },500)
+    } else if(window.URL_PARAMS_ITEM.ftype == 'itask'){
+
+        self.addSearchPalette(false);
+
+        _.delay(function(){
+            $("#imap-tabs ul").remove();
+
+            $("#imap-config").removeClass("active");
+            $("#imap-shape").addClass("active");
+
+            self.addJobPalette(true);
+
         },500)
     }
 
@@ -1087,9 +1111,9 @@ Sidebar.prototype.addSvgPalette = function(id, title, prefix, postfix, items, ti
 };
 
 /**
- * Adds the BOB palette to the sidebar.
+ * Adds the IJOB palette to the sidebar.
  */
-Sidebar.prototype.addBobPalette = function(expand)
+Sidebar.prototype.addJobPalette = function(expand)
 {
     var sb = this;
 
@@ -1118,6 +1142,54 @@ Sidebar.prototype.addBobPalette = function(expand)
 
 		this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 80, '', '六边形', null, null, 'hexagon preparation'),
         this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;', 120, 60, '', '复合形', null, null, 'process task'),
+
+        this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线1', null, lineTags + 'manual'),
+        this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;dashed=1;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线2', null, lineTags + 'manual'),
+
+        this.createEdgeTemplateEntry('endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;', 50, 50, '', '线3', null, lineTags + 'directional directed'),
+        this.createEdgeTemplateEntry('endArrow=classic;dashed=1;html=1;strokeColor=#b3b3b3;strokeWidth=3;', 50, 50, '', '线4', null, lineTags + 'directional directed')
+    ];
+
+    this.addPaletteFunctions('general', mxResources.get('general'), (expand != null) ? expand : true, fns);
+
+};
+
+/**
+ * Adds the IEPC palette to the sidebar.
+ */
+Sidebar.prototype.addEpcPalette = function(expand)
+{
+    var sb = this;
+
+    var lineTags = 'line lines connector connectors connection connections arrow arrows ';
+
+    var fns = [
+
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 80, 80, '开始', '开始', null, null, '描述了状态的发生，同时又充当了一个触发器'),
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 80, 80, '结束', '结束', null, null, '描述了状态的结束，同时又充当了一个触发器'),
+
+		this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 50, 50, 'XOR', 'XOR', null, null, 'XOR'),
+		
+		this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 50, 50, 'OR', 'OR', null, null, 'OR'),
+
+		this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 50, 50, 'AND', 'AND', null, null, 'AND'),
+
+        this.createVertexTemplateEntry('ellipse;shape=doubleEllipse;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 80, 'Orgnization Unit', 'Orgnization Unit', null, null, 'Orgnization Unit'),
+
+		// Explicit strokecolor/fillcolor=none is a workaround to maintain transparent background regardless of current style
+        this.createVertexTemplateEntry('text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;opacity=0;fontColor=#000000;',
+            40, 20, '文字', '文字', null, null, 'text textbox textarea label'),
+
+        this.createVertexTemplateEntry('rounded=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '函数', '函数', null, null, '功能描述了一个任务的执行，代表了一个start event和end event转换过程'),
+
+		this.createVertexTemplateEntry('shape=ext;double=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '信息', '信息', null, null, 'rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=ext;double=1;rounded=1;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '长方形3', null, null, 'rounded rect rectangle box double'),
+
+		this.createVertexTemplateEntry('shape=parallelogram;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 60, '', '文档', null, null, 'Parallelogram'),
+
+		this.createVertexTemplateEntry('shape=hexagon;perimeter=hexagonPerimeter;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;fontColor=#333333;', 120, 80, '', '六边形', null, null, 'hexagon preparation'),
+        this.createVertexTemplateEntry('shape=process;whiteSpace=wrap;html=1;fillColor=#dddddd;strokeColor=#dddddd;strokeWidth=2;gradientColor=#ffffff;shadow=1;gradientDirection=north;', 120, 60, 'Process Path', 'Process Path', null, null, '流程之间的连接关系'),
 
         this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线1', null, lineTags + 'manual'),
         this.createEdgeTemplateEntry('edgeStyle=segmentEdgeStyle;dashed=1;endArrow=classic;html=1;strokeColor=#b3b3b3;strokeWidth=3;rounded=1;', 50, 50, '', '线2', null, lineTags + 'manual'),

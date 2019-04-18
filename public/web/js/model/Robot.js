@@ -367,7 +367,7 @@ class Robot {
             data: function(){
                 return {
                     dataFile: {
-                        rules: [`/${window.SignedUser_UserName}/ai/`,`words.json`]
+                        rules: [`/${window.SignedUser_UserName}/ai/words`]
                     },
                     type:{
                         model:'',
@@ -412,10 +412,16 @@ class Robot {
                 initRules(){
                     const self = this;
                     try {
-                        let tmp = fsHandler.fsContent(self.dataFile.rules[0], self.dataFile.rules[1]);
-                        if(tmp){
-                            self.rules = _.attempt(JSON.parse.bind(null, tmp));
-                        }
+                        let fsList = fsHandler.fsList(self.dataFile.rules[0]);
+                        
+                        self.rules = [];
+                        
+                        _.forEach(fsList,function(v){
+                            let tmp = fsHandler.fsContent(v.parent, v.name);
+                            if(tmp){
+                                self.rules.push(_.attempt(JSON.parse.bind(null, tmp)));
+                            }
+                        })
                     } catch(err){
                         self.rules = [];
                     }
@@ -536,10 +542,8 @@ class Robot {
         Vue.component('robot-ai-setup-words-analysis',{
             delimiters: ['#{', '}#'],
             template: `<el-container>
-                            <el-main style="padding:10px;text-align: left;line-height: 45px;" id="words-rule-content">
-                                
+                            <el-main style="padding:10px;text-align: left;line-height: 45px;" id="words-rule-content"> 
                                 <robot-ai-setup-words-input :id="'rule-'+rule.id" :model="rule" v-for="rule in rules"></robot-ai-setup-words-input>
-                        
                             </el-main>
                             <el-footer>
                                 <div class="input-group" style="padding:5px 10px;">
@@ -554,7 +558,7 @@ class Robot {
                 return {
                     term: '',
                     dataFile: {
-                        rules: [`/${window.SignedUser_UserName}/ai/`,`words.json`]
+                        rules: [`/${window.SignedUser_UserName}/ai/words`]
                     },
                     rules: []
                 }
@@ -582,10 +586,16 @@ class Robot {
                 init(){
                     const self = this;
                     try {
-                        let tmp = fsHandler.fsContent(self.dataFile.rules[0], self.dataFile.rules[1]);
-                        if(tmp){
-                            self.rules = _.attempt(JSON.parse.bind(null, tmp));
-                        }
+                        let fsList = fsHandler.fsList(self.dataFile.rules[0]);
+                        
+                        self.rules = [];
+
+                        _.forEach(fsList,function(v){
+                            let tmp = fsHandler.fsContent(v.parent, v.name);
+                            if(tmp){
+                                self.rules.push(_.attempt(JSON.parse.bind(null, tmp)));
+                            }
+                        })
                     } catch(err){
                         self.rules = [];
                     }
@@ -729,7 +739,7 @@ class Robot {
                     nodes: [],
                     rules: [],
                     dataFile: {
-                        rules: [`/${window.SignedUser_UserName}/ai/`,`neuralnetwork.json`]
+                        rules: [`/${window.SignedUser_UserName}/ai/neuralnetwork`]
                     },
                     names:{
                         inputVisible: false,
@@ -825,10 +835,16 @@ class Robot {
                 initRules(){
                     const self = this;
                     try {
-                        let tmp = fsHandler.fsContent(self.dataFile.rules[0], self.dataFile.rules[1]);
-                        if(tmp){
-                            self.rules = _.attempt(JSON.parse.bind(null, tmp));
-                        }
+                        let fsList = fsHandler.fsList(self.dataFile.rules[0]);
+                        
+                        self.rules = [];
+                        
+                        _.forEach(fsList,function(v){
+                            let tmp = fsHandler.fsContent(v.parent, v.name);
+                            if(tmp){
+                                self.rules.push(_.attempt(JSON.parse.bind(null, tmp)));
+                            }
+                        })
                     } catch(err){
                         self.rules = [];
                     }

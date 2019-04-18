@@ -293,57 +293,6 @@
                                 $(".alertify-prompt .alertify-message").css('height','5vh');
                             }
                         },
-                        "导出数据": {
-                            name: "导出数据", icon: "fas fa-file-export", callback: function (key, opt) {
-
-                                let event = `${self.selectedNode.name}`;
-                                let _list = omdbHandler.classDataExport(event);
-                                
-
-                                // 失败
-                                if(!_list) return false;
-
-                                if(_list.status === 'ok'){
-                                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
-                                } else {
-                                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
-                                }
-
-                                return false;
-                                if(_.isEmpty(_list)) {
-
-                                    alertify.log("查询结果为空");
-
-                                    return false;
-                                }
-
-                                let _content = _.map(_list.message,function(v){
-                                    return  `INSERT INTO ${self.selectedNode.name} ` + _.map(v,function(val,key){ 
-                                                if(!val) return;
-                                                let value = val;
-                                                if(typeof val == 'object'){
-                                                    value = JSON.stringify(val);
-                                                }
-                                                if(typeof val == 'string'){
-                                                    value = JSON.stringify(val);
-                                                }
-                                                
-                                                return [key,value].join("="); 
-                                            }).join(",");
-                                }).join(";\n\n").replace(/"/g,"'");
-                                let _ftype = "sql";
-                                let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
-                                let _name = `${self.selectedNode.name}_INSERT_${moment().format("LLL")}`;
-                                let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _content, _attr);
-                                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
-                            }
-                        },
-                        "导入数据": {
-                            name: "导入数据", icon: "fas fa-file-import", callback: function (key, opt) {
-
-                                
-                            }
-                        },
                         "sep3": "---------",
                         "触发器": {
                             name: "触发器", icon: "fas fa-toggle-on", callback: function (key, opt) {
@@ -406,6 +355,26 @@
 											                                    model: { pattern: 'ddl', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
 											                                });
                             }
+                        },
+                        "导出数据结构": {
+                            name: "导出数据结构", icon: `fas fa-file-export`, callback: function (key, opt) {
+
+                                alertify.confirm(`确认要导出类的数据结构? <br><br>
+                                                  类名称：${self.selectedNode.name}`, function (e) {
+                                    if (e) {
+                                        let event = `${self.selectedNode.name}`;
+                                        let _list = omdbHandler.classDataExport(event);
+                                    } else {
+                                        
+                                    }
+                                });
+                                
+                            }
+                        },
+                        "导入数据结构": {
+                            name: "导入数据结构", type:'text', callback: function (key, opt) {
+
+                            }
                         }
                     },
                     events: {
@@ -414,6 +383,31 @@
                             var $this = this;
                             // import states from data store
                             $.contextMenu.setInputValues(opt, $this.data());
+
+                            $(`li.context-menu-input input`).attr("type","file");
+                            $(`li.context-menu-input input`).attr("value","");
+                            $(`li.context-menu-input input`).css("display","none");
+                            // $(`li.context-menu-input label`).addClass("fas fa-file-import").css("color","rgb(32, 148, 243").css("margin-left", "-28px");
+                            
+                            $(`li.context-menu-input input`).change(function(event){
+                                let file = event.target.files[0];
+                
+                                alertify.confirm(`确认要导入类文件！<br><br>
+                                                    文件名称：${file.name}<br><br>
+                                                    修改时间：${file.lastModifiedDate}<br><br>
+                                                    文件大小：${mx.bytesToSize(file.size)}`, function (e) {
+                                    if (e) {
+                                        let rtn = omdbHandler.classDataImport(event);
+
+                                    } else {
+                                        
+                                    }
+
+                                    event.target.value = null;
+
+                                });
+                            });
+
                         },
                         hide: function(opt) {
                             // this is the trigger element

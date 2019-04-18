@@ -29,7 +29,7 @@ class Imap extends Matrix {
 
                 let init = function(){
         
-                    $(".geDiagramContainer").css("background-color","#000000");
+                    //$(".geDiagramContainer").css("background-color","#000000");
                     
                     _.forEach(URL_PARAMS_CFG,function(v,k){
         
@@ -37,7 +37,8 @@ class Imap extends Matrix {
                             $(`#${k}`).hide();
                         }
                     })
-                    $(".geDiagramContainer").css("background-color","#ffffff");
+                    
+                    //$(".geDiagramContainer").css("background-color","#ffffff");
         
                 }();
             } catch(error){
@@ -850,6 +851,8 @@ class Imap extends Matrix {
     
     
                                         self.tip(cell.getValue());
+
+                                        
     
                                     });
                                 },500)
@@ -943,7 +946,7 @@ class Imap extends Matrix {
                             const self = this;
     
                             self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
-    
+
                                 let cell = evt.getProperty('cell');
     
                                 if(_.isEmpty(cell)) return;
@@ -1125,153 +1128,11 @@ class Imap extends Matrix {
                                         }
                                     
                                     }
-                                    /*
-                                    
-                                    self.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, '#000000', [cell]);
-                                    
-                                    if(v.status >= 5){
-                                        
-                                        if(state && state.shape.node){
-
-
-                                            //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ff0000', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ff0000', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                            //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("image"))){
-                                                state.shape.node.getElementsByTagName("image")[k].setAttribute('class', 'animated infinite flash');
-                                            }
-
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-                                        }
-    
-                                        //self.tip(_id + " 跳过不执行",5);
-                                    } else if(v.severity == 4){
-    
-                                        if(state && state.shape.node){
-                                            //self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#8bc34a', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#8bc34a', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                            //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-    
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-                                        }
-    
-                                        //self.tip(_id + " 运行完毕",3);
-    
-                                    } else {
-    
-                                        if(state && state.shape.node){
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, '#ffc107', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKECOLOR, '#ffc107', [_cell]);
-                                            self.model.graph.graph.setCellStyles(mxConstants.STYLE_STROKEWIDTH, '6', [_cell]);
-                                            //self.model.graph.graph.setCellStyles(mxConstants.STYLE_GLASS, '1', [_cell]);
-    
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("rect"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("rect"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("rect")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("rect")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("path"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("path"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("path")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("path")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("path")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-    
-                                            if(!_.isEmpty(state.shape.node.getElementsByTagName("ellipse"))){
-                                                _.forEach(state.shape.node.getElementsByTagName("ellipse"),function(v,k){
-                                                    if(k == 1){
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].setAttribute('class', 'animated infinite flash');
-                                                    } else {
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.stroke = "#ffffff";
-                                                        state.shape.node.getElementsByTagName("ellipse")[k].style.strokeWidth = "12px"
-                                                    }
-                                                })
-                                            }
-                                        }
-    
-                                        //self.tip(_id + " 报错",4);
-    
-                                    }*/
     
                                 })
     
+                            } catch(err){
+
                             }
                             finally {
                                 self.model.graph.graph.getModel().endUpdate();
@@ -1293,10 +1154,8 @@ class Imap extends Matrix {
                             const self = this;
     
                             let outline = document.getElementById('outlineContainer');
-    
-    
+
                             self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
-    
                         },
                         reload: function(){
                             const self = this;
@@ -1311,7 +1170,14 @@ class Imap extends Matrix {
                             content.style.padding = '4px';
     
                             let tb = new mxToolbar(content);
+                            
+                            
+                            tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', `${window.ASSETS_ICON}/tools/png/design.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                            {
+                                self.editIt();
     
+                            },null,'tools-item');   
+
                             tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                             {
                                 self.model.graph.graph.zoomIn();
@@ -1339,9 +1205,22 @@ class Imap extends Matrix {
                                 mx.fullScreen();
     
                             },null,'tools-item');
+
+                            tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', `${window.ASSETS_ICON}/tools/png/theme.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
+                            {
+                                self.toggleGraphBg();
+    
+                            },null,'tools-item');
     
                             self.win.toolbars = maxWindow.winToolBars('{{.i18n.Tr "creative-tools"}}',content,[5,220],null);
     
+                        },
+                        toggleGraphBg(){
+                            if($("#graph.geDiagramContainer").hasClass("dark")){
+                                $("#graph.geDiagramContainer").removeClass("dark");
+                            } else {
+                                $("#graph.geDiagramContainer").addClass("dark");
+                            }
                         },
                         navToggle: function(){
                             const self = this;
@@ -1350,6 +1229,13 @@ class Imap extends Matrix {
                             self.win.toolbars.toggle(500);
     
                             self.initOutline();
+                        },
+                        editIt(){
+                            let item = {parent:URL_PARAMS_ITEM.parent, name:URL_PARAMS_ITEM.name, ftype:URL_PARAMS_ITEM.ftype, lang: window.MATRIX_LANG, action:'edit'};
+
+                            let url = fsHandler.genFsUrl(item,null,null);
+
+                            window.open(url, "_blank");
                         }
                     }
                 });

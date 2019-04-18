@@ -409,7 +409,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let contextMenuItems = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let contextMenuItems = fsHandler.callFsJScript('/event/toolbar.js', '').message.event;
                 let id = self.id;
 
                 $.contextMenu({
@@ -565,27 +565,27 @@
                 }
 
 				// 添加Severity控制
-				if(this.model.severity){
-                    buttons.push({text: '|', enabled: false, className: ''});
-                    _.forEach(this.model.severity,function(v){
-                        if(!v) return;
-                        buttons.push({text:v.cnname, actions: function(e,dt,node,config){
-                            console.log(e,dt,node,config)
-                        }, className: `btn-white ${v.class}`, titleAttr: v.cname})
-                    })
-				};
+				// if(this.model.severity){
+                //     buttons.push({text: '|', enabled: false, className: ''});
+                //     _.forEach(this.model.severity,function(v){
+                //         if(!v) return;
+                //         buttons.push({text:v.cnname, actions: function(e,dt,node,config){
+                //             console.log(e,dt,node,config)
+                //         }, className: `btn-white ${v.class}`, titleAttr: v.cname})
+                //     })
+				// };
 
                 // 添加Status控制
-                if(this.model.status) {
-                    buttons.push({text: '|', enabled: false, className: ''});
-                    _.forEach(this.model.status, function (v) {
-                        if(!v) return;
-                        buttons.push({
-                            text: v.cnname, actions: function (e, dt, node, config) {
-                            }, className: `btn-white ${v.class}`, titleAttr: v.cname
-                        })
-                    })
-                }
+                // if(this.model.status) {
+                //     buttons.push({text: '|', enabled: false, className: ''});
+                //     _.forEach(this.model.status, function (v) {
+                //         if(!v) return;
+                //         buttons.push({
+                //             text: v.cnname, actions: function (e, dt, node, config) {
+                //             }, className: `btn-white ${v.class}`, titleAttr: v.cname
+                //         })
+                //     })
+                // }
 
                 new $.fn.dataTable.Buttons(datatable, {
                     dom: {

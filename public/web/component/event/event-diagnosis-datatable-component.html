@@ -177,28 +177,28 @@
             });
         },
 		watch: {
-            // model: function(val,oldVal){
-          	//     // 数据无更新
-            //     if(val === oldVal) {
-            //         return false;
-            //     }
+            model: function(val,oldVal){
+          	    // 数据无更新
+                if(val === oldVal) {
+                    return false;
+                }
 
-            //     // 数据为空
-            //     if( _.isEmpty(val)) {
-            //         this.datatable.rows().remove().draw();
-            //         return false;
-            //     }
+                // 数据为空
+                if( _.isEmpty(val)) {
+                    this.datatable.rows().remove().draw();
+                    return false;
+                }
 
-            //     // 表格已经初始化
-            //     if(this.datatable instanceof $.fn.dataTable.Api) {
-            //         this.datatable.clear();
-            //         this.datatable.rows.add(val.rows);
-            //         this.datatable.draw();
+                // 表格已经初始化
+                if(this.datatable instanceof $.fn.dataTable.Api) {
+                    this.datatable.clear();
+                    this.datatable.rows.add(val.rows);
+                    this.datatable.draw();
 
-            //     } else {
-            //         this.init();
-            //     }
-            // }
+                } else {
+                    this.init();
+                }
+            }
 		},
 		methods: {
             init: function(){
@@ -308,7 +308,7 @@
             contextMenu: function(){
                 const self = this;
 
-                let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.event;
+                let items = fsHandler.callFsJScript('/event/toolbar.js', '').message.event;
                 let id = self.id;
 
                 $.contextMenu({

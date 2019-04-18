@@ -96,6 +96,25 @@
 <!-- Sortable JS-->
 <script src="{{AppSubUrl}}/web/vendor/Sortable/Sortable.min.js"></script>
 
+<!-- Bootstrap Table CSS -->
+<link href="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table.min.css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/table/export/bootstrap-editable.css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-fixed-columns.css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/table/dragtable/dragtable.css" rel="stylesheet">
+
+<!--Bootstrap Table JS-->
+<script src="{{AppSubUrl}}/web/vendor/table/dragtable/dragtable.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/locale/bootstrap-table-{{.i18n.Tr "bootstrap_table_locate"}}.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/extensions/export/bootstrap-table-export.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/extensions/export/tableExport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/extensions/reorder-columns/bootstrap-table-reorder-columns.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/extensions/editable/bootstrap-table-editable.js"></script>
+<!--script src="{{AppSubUrl}}/web/vendor/table/export/bootstrap-table-editable.js"></script-->
+<!--script src="{{AppSubUrl}}/web/vendor/table/export/bootstrap-editable.js"></script-->
+<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-contextmenu.min.js"></script>
+<!--<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-fixed-columns.js"></script>-->
+
 <!-- FullCalendar JS-->
 <script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.min.js'></script>
 <script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.js'></script>
@@ -132,7 +151,7 @@
                     id: String,
                 },
                 mounted: function () {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function () {
                         
@@ -158,12 +177,12 @@
                 },
                 watch: {
                     data: function (val) {
-                        let self = this;
+                        const self = this;
 
                         $(self.$el).bootstrapTable('load', val);
                     },
                     columns: function(val) {
-                        let self = this;
+                        const self = this;
 
                         $(self.$el).bootstrapTable({                    
                             columns: val,
@@ -172,7 +191,7 @@
                     },
 
                     options: function(val) {
-                        let self = this;
+                        const self = this;
 
                         $(self.$el).bootstrapTable('refreshOptions', val);
                     }
@@ -213,7 +232,7 @@
                 },
                 mounted: function() {
                     this.$nextTick(function(){
-                        let self = this;
+                        const self = this;
                         self.setting.callback.onClick = self.zTreeOnClick;
                         self.setting.callback.onExpand = self.zTreeOnExpand;
                     })
@@ -241,7 +260,7 @@
                         }
                     },
                     zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        let self = this;
+                        const self = this;
                     }
                 }
             })
@@ -278,7 +297,7 @@
                     }
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.setting.callback.onClick = self.zTreeOnClick;
@@ -287,12 +306,12 @@
                 },
                 watch: {
                     setting: function(val){
-                        let self = this;
+                        const self = this;
 
                         self.zTree = $.fn.zTree.init($(this.$el), val, self.zNodes);
                     },
                     zNodes: function(val){
-                        let self = this;
+                        const self = this;
 
                         $.fn.zTree.init($(self.$el), self.setting, val);
                         $.fn.zTree.getZTreeObj("byObjectTree").expandAll(true);
@@ -309,11 +328,11 @@
                         }
                     },
                     zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        let self = this;
+                        const self = this;
 
                     },
                     zTreeOnCheck: function (event, treeId, treeNode) {
-                        let self = this;
+                        const self = this;
 
                         var zTree = $.fn.zTree.getZTreeObj("byObjectTree");
                         var nodes = zTree.getCheckedNodes(true);
@@ -355,7 +374,7 @@
                     }
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.setting.callback.onClick = self.zTreeOnClick;
@@ -363,12 +382,12 @@
                 },
                 watch: {
                     setting: function(val){
-                        let self = this;
+                        const self = this;
 
                         self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
                     },
                     zNodes: function(val){
-                        let self = this;
+                        const self = this;
 
                         $.fn.zTree.init($(self.$el), self.setting, val);
                     }
@@ -382,7 +401,7 @@
                         }
                     },
                     zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        let self = this;
+                        const self = this;
 
                         var zTree = $.fn.zTree.getZTreeObj("byPropertyTree");
                         var nodes = zTree.getSelectedNodes();
@@ -428,12 +447,12 @@
                     }
                 },
                 created: function() {
-                    let self = this;
+                    const self = this;
 
                     eventHub.$on("user-remove-node", self.removeNode);
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         
@@ -443,19 +462,19 @@
                 },
                 watch: {
                     setting: function(val){
-                        let self = this;
+                        const self = this;
 
                         $.fn.zTree.init($(self.$el), val, self.zNodes);
                     },
                     zNodes: function(val){
-                        let self = this;
+                        const self = this;
 
                         $.fn.zTree.init($(self.$el), self.setting, val);
                     }
                 },
                 methods: {
                     zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        let self = this;
+                        const self = this;
 
                         if (treeNode.isParent) {
                             eventHub.$emit("user-tree-click-event",{parent:true,node:treeNode});
@@ -464,7 +483,7 @@
                         }
                     },
                     removeNode: function(event) {
-                        let self = this;
+                        const self = this;
                         var zTree = $.fn.zTree.getZTreeObj("userTree");
                         var nodes = zTree.getSelectedNodes();
                         
@@ -483,7 +502,7 @@
                         }
                     },
                     addDiyDom: function (treeId, treeNode) {
-                        let self = this;
+                        const self = this;
                         let aObj = $("#" + treeNode.tId + "_a");
 
                         if (treeNode.isParent){
@@ -528,12 +547,12 @@
                     }
                 },
                 created: function(){
-                    let self = this;
+                    const self = this;
 
                     eventHub.$on("config-refresh-event",self.refresh);
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.setting.callback.onClick = self.zTreeOnClick;
@@ -543,12 +562,12 @@
                 },
                 watch: {
                     setting: function(val){
-                        let self = this;
+                        const self = this;
 
                         self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
                     },
                     zNodes: function(val){
-                        let self = this;
+                        const self = this;
 
                         $.fn.zTree.init($(self.$el), self.setting, val);
                         self.zTree = $.fn.zTree.getZTreeObj("configTree");
@@ -567,7 +586,7 @@
                         }
                     },
                     zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-                        let self = this;
+                        const self = this;
                         var node = self.zTree.getSelectedNodes();
                         
                         $("[title='" + self.selectedNodeName + "']").removeClass('curSelectedNode');
@@ -605,7 +624,7 @@
                         });
                     },
                     refresh: function () {
-                        let self = this;
+                        const self = this;
 
                         var treeObj = $.fn.zTree.getZTreeObj("configTree");
                         var sNodes = treeObj.getSelectedNodes();
@@ -642,7 +661,7 @@
                         } 
                     },
                     addDiyDom: function (treeId, treeNode) {
-                        let self = this;
+                        const self = this;
                         let aObj = $("#" + treeNode.tId + "_a");
                         
                         if (treeNode.isParent){
@@ -683,7 +702,7 @@
                     }
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.setting.callback.onClick = self.zTreeOnClick;
@@ -776,7 +795,7 @@
                 },
                 mounted: function() {
                     this.$nextTick(function(){
-                        let self = this;
+                        const self = this;
                         self.setting.callback.onClick = self.zTreeOnClick;
                         self.setting.callback.onExpand = self.zTreeOnExpand;
                     })
@@ -836,7 +855,7 @@
                 },
                 mounted: function() {
                     this.$nextTick(function(){
-                        let self = this;
+                        const self = this;
                         self.setting.callback.onClick = self.zTreeOnClick;
                         self.setting.callback.onExpand = self.zTreeOnExpand;
                     })
@@ -886,20 +905,20 @@
                     }
                 },
                 mounted: function(){
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.initEditer();
                     })
                 },
                 created: function(){
-                    let self = this;
+                    const self = this;
 
                     eventHub.$on("editor-value", self.setEditor);
                 },
                 methods: {
                     initEditer: function(){
-                        let self = this;
+                        const self = this;
 
                         self.editor = ace.edit("etcd_value");
                         ace.require('ace/ext/settings_menu').init(self.editor);
@@ -928,7 +947,7 @@
                         self.editor.getSession().setUseWrapMode(true);
                     },
                     setEditor: function(event) {
-                        let self = this;
+                        const self = this;
 
                         self.breadcrumb = [];
                         self.breadcrumb = event.key.split("/");
@@ -966,7 +985,7 @@
                         // $(".config-editor-save").css("display","none");
                     },
                     addNode:function() {
-                        let self = this;
+                        const self = this;
 
                         var key = $("#config_key").val();
                         var value = self.editor.getValue();
@@ -1023,7 +1042,7 @@
                         }
                     },
                     removeNode: function() {
-                        let self = this;
+                        const self = this;
                         let _key = self.etcdKey;
 
                         swal({
@@ -1060,7 +1079,7 @@
                         })
                     },
                     saveNode: function(){
-                        let self = this;
+                        const self = this;
                         var key = self.etcdKey;
                         var value = self.editor.getValue();
                         var ttl = self.etcd.ttl;
@@ -1089,7 +1108,7 @@
                         })
                     },
                     debug: function () {
-                        let self = this;
+                        const self = this;
                         
                         mxLog.consoleName = 'M³ Debug Console' + " Trigger";
                         mxLog.show();
@@ -1163,7 +1182,7 @@
                     }
                 },
                 created: function(){
-                    let self = this;
+                    const self = this;
 
                     eventHub.$on("new-user-event",self.newUser);
                     eventHub.$on("new-group-event",self.newGroup);
@@ -1174,7 +1193,7 @@
                     eventHub.$on("byPropertyTree-select", self.setByPropertyTreeModel)
                 },
                 mounted: function(){
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function () {
 
@@ -1246,7 +1265,7 @@
                 },
                 methods: {
                     newUser: function(){
-                        let self = this;
+                        const self = this;
 
                         let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
@@ -1356,7 +1375,7 @@
                         })
                     },
                     newGroup: function(){
-                        let self = this;
+                        const self = this;
 
                         let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
                         win.setResizable(false);
@@ -1391,7 +1410,7 @@
                             },
                             watch: {
                                 'ldap.object.username': function(val,oldVal){
-                                    let self = this;
+                                    const self = this;
 
                                     self.ldap.object.fullname = self.ldap.object.parent + val;
                                 }
@@ -1428,7 +1447,7 @@
                         })
                     },
                     loadUserData: function(event) {
-                        let self = this;
+                        const self = this;
                         let param = "";
 
                         self.selectedNode = event.node;
@@ -1446,7 +1465,7 @@
                         self.byPropertyTreeNodes = [];
                     },
                     saveUserData: function(){
-                        let self = this;
+                        const self = this;
                         var action = ["add","delete","update","view"];
                         var auth = {
                                     Fields:{
@@ -1522,34 +1541,28 @@
                         var byObjectTableData = $("#byObjectTable").bootstrapTable('getData');
                     },
                     removeUserData: function(event) {
-                        let self = this;
-                        let _user = {
+                        const self = this;
+
+                        let user = {
                             ftype: "delete",
                             object: {
                                 fullname: event
                             }
                         };
                         
-                        swal({
-                            title: name,
-                            text: "确定要删除该用户吗?",
-                            type: "warning",
-                            showCancelButton: true,
-                            closeOnConfirm: false,
-                            cancelButtonText: "取消",
-                            confirmButtonText: "删除",
-                            confirmButtonColor: "#ff0000"
-                        }).then(function () {
-                            
-                            let _result = userHandler.ldapMaintain(_user);
-                            if(_result === 1){
-                                eventHub.$emit('user-remove-node',event);    
+                        alertify.confirm(`确定要删除该用户? <br><br> ${event}`, function (e) {
+                            if (e) {
+                                let rtn = userHandler.ldapMaintain(user);
+                                if(rtn == 1){
+                                    eventHub.$emit('user-remove-node',event);    
+                                }
+                            } else {
+                                
                             }
-                            
-                        })
+                        });
                     },
                     loadByClassTreeNodes: function(event){
-                        let self = this;
+                        const self = this;
                         var selectCurUser = "";
 
                         if(!_.isEmpty(event)){
@@ -1559,7 +1572,7 @@
                         self.getObjectTreeNode(event);
                     },
                     getObjectTreeNode: function(event) {
-                        let self = this;
+                        const self = this;
                         var auth = _.attempt(JSON.parse.bind(null, event.auth));
                         console.log(event.auth)
 
@@ -1607,12 +1620,12 @@
                         });
                     },
                     setByObjectTreeModel: function(event) {
-                        let self = this;
+                        const self = this;
 
                         self.byObjectTreeModel.data = event;
                     },
                     setByPropertyTreeModel: function(event) {
-                        let self = this;
+                        const self = this;
 
                         console.log(JSON.stringify(event))
                         self.byPropertyTreeModel.data = _.map(event[0].fields,function(v){
@@ -1750,7 +1763,7 @@
                 },
                 methods: {
                     init: function(){
-                        let self = this;
+                        const self = this;
                         var sql = `select json * from mxsystem.session`;
                         jQuery.ajax({
                             url: '/mxobject/action',
@@ -1788,12 +1801,12 @@
                     }
                 },
                 created: function(){
-                    let self = this;
+                    const self = this;
 
                     eventHub.$on("grok-list-refresh-event", self.init);
                 },
                 mounted: function(){
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.model.columns = [
@@ -1807,7 +1820,7 @@
                 },
                 methods: {
                     init: function(){
-                        let self = this;
+                        const self = this;
                         
                         let _list = grokHandler.grokList();
                         
@@ -1827,7 +1840,7 @@
                     }
                 },
                 mounted: function() {
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick( function(){
                         self.init(); 
@@ -1835,7 +1848,7 @@
                 },
                 watch: {
                     isDragging: function(newValue) {
-                        let self = this;
+                        const self = this;
 
                         if (newValue){
                             self.delayedDragging = true;
@@ -1853,7 +1866,7 @@
                 },
                 methods: {
                     init: function(){
-                        let self = this;
+                        const self = this;
 
                         jQuery.ajax({
                             url: '/mxobject/search',
@@ -1884,7 +1897,7 @@
                         });
                     },
                     add: function(event){
-                        let self = this;
+                        const self = this;
                         var obj = _.assign({
                                         class: '/matrix/portal/tools',
                                         name: "tools_"+_.now()},
@@ -1912,7 +1925,7 @@
                         })
                     },
                     update: function(event){
-                        let self = this;
+                        const self = this;
                         var obj = _.assign({
                                         class: '/matrix/portal/tools',
                                         name: event},
@@ -1941,7 +1954,7 @@
                         })
                     },
                     remove: function(event) {
-                        let self = this;
+                        const self = this;
 
                         swal({
                             title: '',
@@ -1963,7 +1976,7 @@
 
                     },
                     resetForm: function(){
-                        let self = this;
+                        const self = this;
 
                         var elements = $("form.tools").find( "input,select,textarea" );
                         for( var i = 0; i < elements.length; ++i ) {
@@ -2008,7 +2021,7 @@
                     }
                 },
                 mounted: function(){
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         self.initCalendar();
@@ -2016,7 +2029,7 @@
                 },
                 methods: {
                     init: function(){
-                        let self = this;
+                        const self = this;
                         let _menu = {
                             "open": {
                                 name: "打开", icon: "fa-folder-o",
@@ -2120,7 +2133,7 @@
                         });
                     },
                     load: function () {
-                        let self = this;
+                        const self = this;
 
                         self.event = omdbHandler.fetchData('#/matrix/system/calendar/: | top 200');
                     },
@@ -2358,7 +2371,7 @@
                 },
                 methods: {
                     initQueueData: function(){
-                        let self = this;
+                        const self = this;
 
                         jQuery.ajax({
                             url: '/mxqueue',
@@ -2392,7 +2405,7 @@
                     maintainTreeNodes: {},
                 },
                 mounted: function(){
-                    let self = this;
+                    const self = this;
 
                     self.$nextTick(function(){
                         var name = {{.SignedUser.IsAdmin}};
@@ -2418,7 +2431,7 @@
                         this.currentView=event;
                     },
                     loadTreeData: function(event, param){
-                        let self = this;
+                        const self = this;
                         jQuery.ajax({
                             url: '/config/get',
                             type: 'GET',
@@ -2444,12 +2457,12 @@
                         });
                     },
                     refreshUser: function(){
-                        let self = this;
+                        const self = this;
 
                         self.initUserTreeNodes();
                     },
                     initUserTreeNodes: function() {
-                        let self = this;
+                        const self = this;
                         let _list = omdbHandler.fetchData(`call user { "ftype": "query",  "object":{ "fullname": "/" } }`);
                         
                         self.userTreeNodes = _.map(_.attempt(JSON.parse.bind(null, _list.message[0].user)).result,function(v,k){
@@ -2463,14 +2476,14 @@
                                             });
                     },
                     initNotifyTreeNodes: function() {
-                        let self = this;
+                        const self = this;
                         self.notifyTreeNodes = {name: "值班组", children: [
                                                 {name: "上海值班"},
                                                 {name: "北京值班"}
                                             ]};
                     },
                     initMaintainTreeNodes: function() {
-                        let self = this;
+                        const self = this;
                         self.maintainTreeNodes = {name: "实体", children: [
                                                 {name: "应用"},
                                                 {name: "服务器"},
@@ -2480,7 +2493,7 @@
                                             ]};
                     },
                     saveUserGroup: function(){
-                        let self = this;
+                        const self = this;
 
                         jQuery.ajax({
                             url: '/mxobject/search',
@@ -2510,7 +2523,7 @@
                         eventHub.$emit("new-group-event",null);
                     },
                     toggleLeft: function() {
-                        let self = this;
+                        const self = this;
 
                         if(self.toggle.left) {
 
@@ -2829,7 +2842,7 @@
                     <b>用户信息</b>
                 </span>
                 <span class="pull-right">
-                    <button class="btn btn-xs btn-info" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> Save</button>
+                    <a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> 保存</a>
                 </span>
             </div>
             <div class="panel-body">

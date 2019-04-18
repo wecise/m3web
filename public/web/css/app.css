@@ -945,11 +945,81 @@ td.status_1 {
   
 
   /* context-menu-list */
-  #.context-menu-layer,
+  .context-menu-layer,
   .context-menu-list{
-    -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
-    -moz-box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)!important;
-    border: none!important;
-    z-index:10!important;
+    -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
+    -moz-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
+    border: unset!important;
+    z-index:30000!important;
   }
+
+
+  /* win win-expand */
+  .win.win-expand{
+    position:fixed;
+    top:50px;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:0;
+    overflow:hidden;
+    z-index:1080;
+    background: #ffffff;
+}
+.win-expand .height-full,.win-expand .height-lg,.win-expand .height-md,.win-expand .height-sm,.win-expand .height-xs{
+    height:100%!important
+}
+@keyframes winExpand{
+    from{
+        top:50%;
+        left:50%;
+        right:50%;
+        bottom:50%
+    }
+    to{
+        top:0;
+        left:0;
+        right:0;
+        bottom:0
+    }
+}
+@-webkit-keyframes winExpand{
+    from{
+        top:50%;
+        left:50%;
+        right:50%;
+        bottom:50%
+    }
+    to{
+        top:0;
+        left:0;
+        right:0;
+        bottom:0
+    }
+}
+
+.win>.win-heading{
+    line-height: 24px;
+    padding: 5px 0px 0px 5px;
+}
+
+.win.win-expand>.win-body{
+    position:absolute;
+    right:0;
+    left:0;
+    bottom:0;
+    top:40px;
+    overflow-y:scroll;
+    z-index:1020;
+    padding: 0px!important;
+}
+
+.win>.win-body{
+    padding: 0px!important;
+}
+
+/* elemenu ui */
+.el-radio__label{
+    font-size: 12px;
+}

@@ -261,13 +261,12 @@ class Performance extends Matrix {
                             gauge: []
                         }
                     },
-                    template: ` <el-row :gutter="0">
-                                    <el-col :span="3" v-for="item in gauge">
-                                        <div class="grid-content" style="text-align: center;">
-                                            <max-echart-pie :id="'guage-'+objectHash.sha1(item)" :model="item"></max-echart-pie>
-                                        </div>
-                                    </el-col>
-                                </el-row>`,
+                    template: ` <div style="width: 100%;height:200px;float: left;display: flex;flex-wrap: wrap;">
+                                    <div v-for="(group,key) in _.groupBy(gauge,'host')" style="width: 100%;height:auto;float: left;display: flex;flex-wrap: wrap;border-bottom: 1px solid #ddd;">
+                                        <h5>#{key}#</h5>
+                                        <max-echart-pie-performance :id="'guage-'+objectHash.sha1(item)" :model="item" v-for="item in group"></max-echart-pie-performance>
+                                    </div>
+                                </div>`,
                     watch:{
                         model:{
                             handler(val,oldVal){
@@ -287,61 +286,13 @@ class Performance extends Matrix {
                             
                             if(!self.model || !self.model.rows) return false;
                             self.gauge = [];
-                            self.gauge = _.map(self.model.rows,function(v){
-                                return {
-                                    series: [{
-                                        name: '性能统计',
-                                        type: 'pie',
-                                        radius: ['100%', '90%'],
-                                        avoidLabelOverlap: false,
-                                        label: {
-                                            normal: {
-                                                show: true,
-                                                position: 'center'
-                                            },
-                                            emphasis: {
-                                                show: true,
-                                                textStyle: {
-                                                    fontSize: '12',
-                                                    fontWeight: 'bold'
-                                                }
-                                            }
-                                        },
-                                        labelLine: {
-                                            normal: {
-                                                show: false
-                                            }
-                                        },
-                                        data: [{
-                                                value: _.round(v.value,0),
-                                                name: _.round(v.value,0) + "%",
-                                                label: {
-                                                    normal: {
-                                                        textStyle: {
-                                                            fontSize: '20',
-                                                            fontWeight: 'bold'
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                value: _.round(100 - v.value,0),
-                                                name: v.param,
-                                                label: {
-                                                    normal: {
-                                                        textStyle: {
-                                                            fontSize: '12',
-                                                            color:'#333',
-                                                            fontWeight: 'bold'
-                                                        },
-                                                        padding: [140, 0, 0, 0]
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }]
+                            _.forEach(self.model.rows,function(v){
+                                if(_.endsWith(v.param,'usedpercent')) {
+                                    self.gauge.push(v);
                                 }
-                            })
+                            });
+                            
+                            self.gauge = _.orderBy(self.gauge,['host','inst','param'],['asc','asc','asc'])
                         }
                     }
                     
@@ -512,6 +463,7 @@ class Performance extends Matrix {
                         },
                         control: {
                             ifSmart: '1',
+                            ifRefresh: '0',
                         },
                         // 搜索组件结构
                         model: {
@@ -611,7 +563,7 @@ class Performance extends Matrix {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
-                        toggleSummaryView(evt){
+                        toggleSummaryBySmart(evt){
                             if(evt==1) {
                                 $("#event-view-summary").css("height","200px").css("display","");
                             } else {
@@ -623,6 +575,24 @@ class Performance extends Matrix {
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
                             mxPerformance.resizeEventConsole();
+                        },
+                        toggleSummaryByRefresh(evt){
+                            const self = this;
+                            
+                            if(evt==1) {
+                                window.intervalListener = setInterval(function(){
+                                    self.$refs.searchRef.search();
+                                },5000)
+                            } else {
+                                clearInterval(window.intervalListener);
+                            }
+
+                            this.control.ifRefresh = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            event.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {

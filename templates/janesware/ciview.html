@@ -194,8 +194,6 @@
 
         $(function(){
 
-            $(".current-active-item").html(`<a class="active item" href="/janesware/ciview" ><i class="fa fa-th-list"></i> &nbsp;{{.i18n.Tr .ActiveView }}</a>`);
-
             Vue.component('ci-view-component', {
                 delimiters: ['${', '}'],
                 template: `#ci-view-component-template`,

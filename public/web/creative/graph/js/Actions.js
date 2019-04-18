@@ -35,10 +35,8 @@ Actions.prototype.init = function()
 
     // Object Properties
     this.addAction('mxProperties', function() {
-        let self = this;
-        let tmp = localStorage.getItem("graph-object");
-        let graphObject = _.attempt(JSON.parse.bind(null, tmp));
-
+        const self = this;
+        
         let createPropertiesTextField = function (graph, form, cell, attributes) {
 
             _.forEach(attributes, function(k){
@@ -56,8 +54,10 @@ Actions.prototype.init = function()
                     input = form.addText(_.startCase(k), cell.getTerminal(cell));
                 }
                 $(input).css({
-					"width":"100%"
-                });
+					"width":"90%"
+				});
+				
+				$(input).addClass("form-control");
 
                 let applyHandler = function() {
                     let newValue = input.value || '';
@@ -136,20 +136,27 @@ Actions.prototype.init = function()
 
             let inputX = form.addText('X', cell.getGeometry().x);
             $(inputX).css({
-                "width":"100%"
-            });
+                "width":"90%"
+			});
+			$(inputX).addClass("form-control");
+
             let inputY = form.addText('Y', cell.getGeometry().y);
             $(inputY).css({
-                "width":"100%"
-            });
+                "width":"90%"
+			});
+			$(inputY).addClass("form-control");
+			
             let inputW = form.addText('长', cell.getGeometry().width);
             $(inputW).css({
-                "width":"100%"
-            });
+                "width":"90%"
+			});
+			$(inputW).addClass("form-control");
+
             let inputH = form.addText('宽', cell.getGeometry().height);
             $(inputH).css({
-                "width":"100%"
-            });
+                "width":"90%"
+			});
+			$(inputH).addClass("form-control");
 
             inputX.disabled = true;
             inputY.disabled = true;
@@ -157,10 +164,21 @@ Actions.prototype.init = function()
             inputH.disabled = true;
 
             let btn = form.addButtons(function(){
-                let _xml = mxUtils.getXml(ui.editor.getGraphXml());
-                let _attr = _.attempt(JSON.parse.bind(null, graphObject.attr));
+				let _xml = null;
+				let _attr = null;
+				try{
+					_xml = mxUtils.getXml(ui.editor.getGraphXml());
+					_attr = _.attempt(JSON.parse.bind(null, window.URL_PARAMS_ITEM.attr));
+				}catch(err){
 
-                let _rtn = fsHandler.fsNew('file',graphObject.parent, graphObject.name, _xml, _attr);
+				} finally{
+					
+					let _rtn = fsHandler.fsNew('file',window.URL_PARAMS_ITEM.parent, window.URL_PARAMS_ITEM.name, _xml, _attr);
+
+					if(!_.isEmpty(window.jsPanel.activePanels.list)){
+						window.jsPanel.activePanels.getPanel(0).close();
+					}
+				}
 			},function(){
                 if(!_.isEmpty(window.jsPanel.activePanels.list)){
                     window.jsPanel.activePanels.getPanel(0).close();
@@ -168,13 +186,19 @@ Actions.prototype.init = function()
 			});
 
             _.delay(function(){
-            	$(".btn-ok").addClass("btn btn-sm btn-success");
+            	$(".btn-ok").addClass("btn btn-sm btn-primary");
                 $(".btn-ok").css({
 					"margin-right":"5px"
 				});
-                $(".btn-cancel").addClass("btn btn-sm btn-default");
+				$(".btn-cancel").addClass("btn btn-sm btn-default");
+				
+				$("#properties td").css("border-top","none");
+				$("#properties td").css("text-align","right");
+				$("#properties td").css("vertical-align","middle");
+				$("#properties input").css("height","20px");
+				$("#properties input").css("line-height","20px");
+    
             },100);
-
 
         };
 

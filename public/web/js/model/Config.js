@@ -375,7 +375,7 @@ class Config {
     
                 maxConfig.app = {
                     delimiters: ['#{', '}#'],
-                    template:   `<div class="layout" style="margin: -15px -15px 0px;">
+                    template:   `<div class="layout" style="margin: -20px -20px 0px;">
                                     <Layout>
                                         <Header>
                                             <ButtonGroup>

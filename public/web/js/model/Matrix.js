@@ -13,6 +13,9 @@
 class Matrix {
 
     constructor() {
+
+        this.GLOBAL = null;
+
         this.name = 'M³ Platform';
         this.version = '0.8';
         this.theme = 'DARK';
@@ -49,7 +52,7 @@ class Matrix {
     }
 
     init() {
-
+        mx.global();
         mx.setLogo();
         mx.setFavIcon();
         mx.setTitle();
@@ -95,6 +98,7 @@ class Matrix {
                 // mx.handleThemePanelExpand();
                 mx.handleAfterPageLoadAddClass();
                 mx.handlePanelAction();
+                mx.handleWinAction();
                 mx.handelTooltipPopoverActivation();
                 mx.handleScrollToTopButton();
                 mx.handlePageContentView();
@@ -111,6 +115,7 @@ class Matrix {
 
     }
 
+
     bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0) return '0 Byte';
@@ -119,7 +124,6 @@ class Matrix {
     }
 
     // 设置主题
-    // Theme
     setTheme(){
         let theme = localStorage.getItem("MATRIX_THEME") || 'DARK';
         mx.toggleTheme(theme);
@@ -340,7 +344,9 @@ class Matrix {
                 }
             }
 
-            setInterval(getStatus,5000);
+            if(_.includes(['matrix'],window.COMPANY_OSPACE)){
+                setInterval(getStatus,15000);
+            }
 
         },'text');
     }
@@ -645,6 +651,37 @@ class Matrix {
         })
     }
 
+    handleWinAction() {
+        "use strict";
+        $("[data-click=win-collapse]").click(function(e) {
+            alert(1)
+            e.preventDefault(), $(this).closest(".win.box-card").slideToggle()
+        }), $("[data-click=win-expand]").click(function(e) {
+            e.preventDefault();
+            var a = $(this).closest(".win.box-card"),
+                i = 40;
+            if (0 !== $(a).length) {
+                var n = $(a).offset().top,
+                    o = $(a).offset().top;
+                i = o - n
+            }
+            if ($("body").hasClass("win-expand") && $(a).hasClass("win-expand")) {
+                $("body, .win").removeClass("panwinel-expand"),
+                $(".win").removeAttr("style"), $(t).removeAttr("style");
+            } else if ($("body").addClass("win-expand"), $(this).closest(".win").addClass("win-expand"), 0 !== $(t).length && 40 != i) {
+                var l = 40;
+                $(a).find(" > *").each(function() {
+                    var e = $(this).attr("class");
+                    "el-card__header" != e && "box-card" != e && (l += $(this).height() + 30)
+                }), 40 != l && $(t).css("top", 40 + "px")
+            }
+            
+            $(window).trigger("resize")
+            mx.windowResize()
+            
+        })
+    }
+
     handleDraggablePanel() {
         "use strict";
         var e = $(".panel").parent("[class*=col]"),
@@ -906,6 +943,37 @@ class Matrix {
             });
             return !0
         })
+    }
+
+    //初始化全局配置
+    global(){
+
+        let _url = '/fs/admin/global/global.json';
+
+        if(window.SignedUser_IsAdmin){
+            _url += '?issys=true';
+        }
+
+        jQuery.ajax({
+            url: _url,
+            type: 'GET',
+            dataType: 'json',
+            async:false,
+            data: {
+                type: 'file'
+            },
+            beforeSend: function (xhr) {
+            },
+            complete: function (xhr, textStatus) {
+            },
+            success: function (data, textStatus, xhr) {
+                mx.global = _.attempt(JSON.parse.bind(null, data.message));
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        
     }
 
     toggleTheme(event){

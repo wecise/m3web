@@ -65,13 +65,7 @@ class FileSystem {
                     extName: 'js',
                     remark: ''
                 },
-                fileType: [
-                    {value:'csv', title:'Csv'},
-                    {value:'file', title:'File'},
-                    {value:'html', title:'Html'},
-                    {value:'js', title:'JavaScript'},
-                    {value:'txt', title:'Text'}
-                ]
+                fileType: mx.global.register.file
             },
             mounted(){
                 this.$refs.focusMe.focus();

@@ -306,6 +306,41 @@
         color: #666666;
     }
 
+    /* el-tag */
+    .el-tag + .el-tag {
+        margin-left: 10px;
+    }
+    .button-new-tag {
+        margin-left: 10px;
+        height: 32px;
+        line-height: 30px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .input-new-tag {
+        width: 90px;
+        margin-left: 10px;
+        vertical-align: bottom;
+    }
+    /* el-menu */
+    .el-submenu__title{
+        font-size: 12px;
+    }
+    .el-submenu.is-opened{
+        background: #eeeeee;
+    }
+
+    /* el-header */
+    header.el-header{
+        height:30px!important;
+        line-height: 30px!important;
+    }
+
+    .el-form-item__content{
+        padding-bottom: 20px;
+    }
+    
+
 
 </style>
 <div id="app"></div>
@@ -327,13 +362,10 @@
 <script type="text/x-template" id="app-template">
     <div id="content" class="content container-fluid">
         <div class="row">                
-            <div class="col-lg-2" id="nav" style="display:none;">
-                <vue-fs-tree-component id="creative-fs-tree" :root="model.root" :checkEnable="false" :contextMenu="null"></vue-fs-tree-component>
-            </div>
             <div class="col-lg-12" id="mainview">
                 <div class="row">
                     <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                        <ul style="font-size:16px; list-style: none;display:  flex; margin: 0px -40px;">
+                        <ul style="font-size:16px; list-style: none;display:flex; margin: 0px -40px;">
                             <li style="padding:5px 0px;">
                                 <a href="javascript:void(0);" @click="forwardDir('/opt/creative')" style="text-decoration:none;color:#333333;">
                                     <i class="fa fa-folder-o"></i> 所有
@@ -432,164 +464,4 @@
     </div>
 </script>
 
-<script type="text/x-template" id="creative-project-template">
-    <div class="panel">
-        <div class="panel-body">
-            <form>
-
-                <div class="form-group">
-                    <label for="title">{{.i18n.Tr "mxdashboard_modal_project&name"}}</label>
-                    <div class="input-group">
-                        <div class="input-group-btn">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">#{model.project.value}# <span class="caret"></span></button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <label style="padding:5px;">
-                                        <input type="radio" v-model="model.project.value" value="IT地图" checked> IT地图
-                                    </label>
-                                </li>
-                                <li>
-                                    <label style="padding:5px;">
-                                        <input type="radio" v-model="model.project.value" value="流程设计"> 流程设计
-                                    </label>
-                                </li>
-                                <li>
-                                    <label style="padding:5px;">
-                                        <input type="radio" v-model="model.project.value" value="仪表盘"> 仪表盘
-                                    </label>
-                                </li>
-                            </ul>
-                        </div>
-                        <input type="text" class="form-control" id="title" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="height:33px;">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="remark">{{.i18n.Tr "mxdashboard_modal_remark"}}</label>
-                    <textarea class="form-control" id="remark" rows="6" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark"></textarea>
-                </div>
-
-                {{if ne .SignedUser.Company.OSpace "oneswitch"}}
-                <div class="form-group" style="max-height: 5vh;overflow:auto;">
-                    <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
-                </div>
-
-                <div class="form-group">
-                    <div style="padding:5px;">
-                        <input type="radio" v-model="model.ifshare" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_public"}}
-                        <input type="radio" v-model="model.ifshare" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_private"}}
-                    </div>
-                </div>
-                {{end}}
-                <div class="form-group">
-                    <div class="pull-right" style="background-color:transparent;position: relative;">
-                        <a href="javascript:void(0)" type="button" class="btn btn-sm btn-primary" @click="save">{{.i18n.Tr "mxdashboard_modal_submit"}}</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-</script>
-
-<script type="text/x-template" id="creative-list-template">
-    <div style="padding:10px 0px;">
-        <div class="row" style="border-bottom:1px solid #ddd;">
-            <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label for="name" class="col-sm-2 control-label">{{.i18n.Tr "mxdashboard_modal_title"}}</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="name" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:1px solid #ddd;">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="remark"  class="col-sm-2 control-label">{{.i18n.Tr "mxdashboard_modal_remark"}}</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="remark" placeholder="{{.i18n.Tr "mxdashboard_modal_remark"}}" v-model="model.info.remark" style="border:1px solid #ddd;">
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="row" style="background-color:#f7f7f7;">
-            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                <form class="form-vertical" role="form">
-
-                    <div class="form-group">
-                        <div class="col-lg-12">
-                            <!--<label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="imap" checked>&nbsp;IT地图
-                                <p><img src=`${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}` class="img-fluid img-thumbnail"></p>
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="ishow">&nbsp;DashBoard
-                                <p><img src=`${window.ASSETS_ICON}/files/png/ishow.png?type=download&issys=${window.SignedUser_IsAdmin}` class="img-fluid img-thumbnail"></p>
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" v-model="model.type" value="iflow">&nbsp;流程设计
-                                <p><img src=`${window.ASSETS_ICON}/files/png/iflow.png?type=download&issys=${window.SignedUser_IsAdmin}` class="img-fluid img-thumbnail"></p>
-                            </label>-->
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9"  style="border-left:1px solid #dddddd;">
-                <div class="panel panel-grey" style="background-color:transparent;margin-bottom: 0px;">
-                    <div class="panel-body">
-                        
-                        <div class="row" style="min-height:42vh;max-height:42vh;overflow: auto;border-bottom:1px solid #ddd;">
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3">
-                                <div class="widget widget-stats bg-grey" id="blank" @click="click({'id':'blank'})">
-                                    <div>
-                                        <div class="stats-number" style="font-size:14px;"><i class='fa fa-braille'></i> Blank</div>
-                                        <span>
-                                            <img src="/web/assets/images/logo_trans.png" style="width:75%;height:80px; margin: 0px 20px;opacity: 50;">
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-xs-4 col-sm-3 col-md-3 col-lg-3" v-for="item in model.templates">
-                                <div class="widget widget-stats bg-grey" :id="item.id" @click="click(item)">
-                                    <div>
-                                        <div class="stats-number" style="font-size:14px;"><i class='fa fa-braille'></i> #{item.name}#</div>
-                                        <span>
-                                            <img :src="'/web/assets/images/'+item.ftype+'.png'" style="width:75%;height:80px; margin: 0px 20px;">
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{if ne .SignedUser.Company.OSpace "oneswitch"}}
-                        <div class="row" style="padding-top:10px;">
-                            <div class="col-lg-12" style="max-height: 5vh;overflow:auto;">
-                                <input id="tags" name="tags" placeholder="{{.i18n.Tr "mxdashboard_modal_tag"}}" v-model="model.tags">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <input type="radio" v-model="model.ifshare" value="1" checked>&nbsp;{{.i18n.Tr "mxdashboard_modal_public"}}
-                                <input type="radio" v-model="model.ifshare" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_private"}}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-2">
-                                <input type="checkbox" v-model="model.astemplate" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_astemplate"}}
-                            </div>
-                        </div>
-                        {{end}}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <div class="pull-right" style="background-color:transparent;position: relative; padding:10px 15px;">
-                    <a href="javascript:void(0)" type="button" class="btn btn-sm btn-primary" @click="save">{{.i18n.Tr "mxdashboard_modal_submit"}}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
 {{template "base/footer" .}}
