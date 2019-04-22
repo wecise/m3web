@@ -332,7 +332,7 @@ class Matrix {
 
             let getStatus = function(){
                 try{
-                    let count = fsHandler.callFsJScript("/ai/status.js",null).message.count;
+                    let count = fsHandler.callFsJScript("/ai/status.js",'aiStatusGet').message.count;
                     if(count < 1){
                         $("#ai-robot span").remove();
                     } else {
@@ -424,7 +424,45 @@ class Matrix {
             item[column] = dataProp;
         })
         return arr;
-    }    
+    }   
+    
+    jsonToTable(data) {
+        
+        // EXTRACT VALUE FOR HTML HEADER. 
+        // ('Book ID', 'Book Name', 'Category' and 'Price')
+        var col = [];
+        for (var i = 0; i < data.length; i++) {
+            for (var key in data[i]) {
+                if (col.indexOf(key) === -1) {
+                    col.push(key);
+                }
+            }
+        }
+
+        // CREATE DYNAMIC TABLE.
+        var table = document.createElement("table");
+
+        var tr = table.insertRow(-1); 
+
+        for (var i = 0; i < col.length; i++) {
+            var th = document.createElement("th");
+            th.innerHTML = col[i];
+            tr.appendChild(th);
+        }
+
+        // ADD JSON DATA TO THE TABLE AS ROWS.
+        for (var i = 0; i < data.length; i++) {
+
+            tr = table.insertRow(-1);
+
+            for (var j = 0; j < col.length; j++) {
+                var tabCell = tr.insertCell(-1);
+                tabCell.innerHTML = data[i][col[j]];
+            }
+        }
+
+        return $(table).html();
+    }
 
     // API菜单
     footerApiContextMenu(){

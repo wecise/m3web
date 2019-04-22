@@ -22,7 +22,8 @@ class OmdbHandler {
     * */
     classList(event){
         let rtn = null;
-        let loading = null;
+        
+        Pace.restart();
 
         jQuery.ajax({
             url: "/mxobject/schema/class/list",
@@ -33,13 +34,9 @@ class OmdbHandler {
             },
             async: false,
             beforeSend:function(xhr){
-                loading = layer.load(2, {
-                    shade: [0.1,'#ccc'],
-                    time: 30*1000
-                });
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
-                layer.close(loading);
             },
             success: function(data, textStatus, xhr) {
 
@@ -50,7 +47,6 @@ class OmdbHandler {
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
-                layer.close(loading);
                 console.log(errorThrown);
             }
         })
@@ -74,6 +70,9 @@ class OmdbHandler {
             async: false,
             data: {
                 classinfo: JSON.stringify(event)
+            },
+            beforeSend:function(xhr){
+                Pace.restart();
             },
             success: function (data, status) {
 
@@ -110,6 +109,7 @@ class OmdbHandler {
             type: 'DELETE',
             async: false,
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -158,6 +158,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -196,6 +197,7 @@ class OmdbHandler {
                 class: param
             },
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -234,6 +236,7 @@ class OmdbHandler {
                 ctype: "insert"
             },
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -274,6 +277,7 @@ class OmdbHandler {
                 mql: _mql
             },
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -316,6 +320,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -344,7 +349,7 @@ class OmdbHandler {
     fetchDataByMql(param) {
 
         let rtn = null;
-
+        
         jQuery.ajax({
             url: "/mxobject/mql",
             dataType: 'json',
@@ -355,6 +360,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -386,6 +392,8 @@ class OmdbHandler {
         let rtn = null;
 
         let fileName = _.last(event.split("/")) + `_${moment().format("YYYY-MM-DD HH:mm:SS")}.mql`;
+
+        Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -426,6 +434,7 @@ class OmdbHandler {
             mimeType: "multipart/form-data",
             async: false,
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },

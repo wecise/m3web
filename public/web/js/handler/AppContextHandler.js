@@ -30,6 +30,7 @@ class AppContextHandler {
             type: 'GET',
             async: false,
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -71,6 +72,7 @@ class AppContextHandler {
             async: false,
             data: JSON.stringify(context),
             beforeSend:function(xhr){
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -150,7 +152,6 @@ class AppContextHandler {
         let myLayout = new GoldenLayout( config );
 
         myLayout.registerComponent( 'omdbComponent', function( container, componentState ){
-            console.log(componentState);
             container.getElement().html(`<div id="` + componentState.id + `"></div>`);
         });
 

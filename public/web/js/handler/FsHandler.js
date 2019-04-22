@@ -30,10 +30,6 @@ class FsHandler {
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=check`;
 
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _url += '&issys=true';
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _url += '&issys=true';
         }
@@ -101,6 +97,7 @@ class FsHandler {
             data: fm,
             async:false,
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -156,6 +153,7 @@ class FsHandler {
             },
             async:false,
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -202,6 +200,7 @@ class FsHandler {
             contentType: "application/text; charset=utf-8",
             async: false,
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -255,6 +254,7 @@ class FsHandler {
                 type: 'file'
             },
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -313,6 +313,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -370,6 +371,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -410,10 +412,6 @@ class FsHandler {
         srcpath = srcpath.replace(/\/\//g,'/');
         dstpath = dstpath.replace(/\/\//g,'/');
 
-        /*if(_.startsWith(dstpath,'/extend') || _.startsWith(dstpath,'/script') || _.startsWith(dstpath,'/app') || _.isEqual(dstpath,'/')){
-            _issys = true;
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
@@ -428,6 +426,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -464,10 +463,6 @@ class FsHandler {
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=attr`;
 
-        /*if(_.startsWith(parent,'/extend') || _.startsWith(parent,'/script') || _.startsWith(parent,'/app') || _.isEqual(parent,'/')){
-            _url += '&issys=true';
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _url += '&issys=true';
         }
@@ -481,6 +476,7 @@ class FsHandler {
             },
             async:false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -514,7 +510,6 @@ class FsHandler {
     fsTemp(ftype, name, content, attr){
         let rtn = null;
 
-
         let _tmp = fsHandler.fsNew(ftype, '/temp', name, content, attr);
 
         if(_tmp === 1){
@@ -544,6 +539,8 @@ class FsHandler {
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
+
+        Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -583,10 +580,6 @@ class FsHandler {
 
         let _srcpath = srcpath.replace(/\/\//g,'/');
 
-        /*if(_.startsWith(_srcpath,'/extend') || _.startsWith(_srcpath,'/script') || _.startsWith(_srcpath,'/app') || _.isEqual(_srcpath,'/')){
-            _issys = true;
-        }*/
-
         if(window.SignedUser_IsAdmin){
             _issys = true;
         }
@@ -604,6 +597,7 @@ class FsHandler {
             data: form,
             async: true,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -656,6 +650,7 @@ class FsHandler {
             },
             async: true,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -713,6 +708,10 @@ class FsHandler {
             dataType: 'json',
             contentType: false,
             beforeSend: function(xhr) {
+                // 忽略
+                if(!_.includes(term,'aiStatusGet')){
+                    Pace.restart();
+                }
             },
             complete: function(xhr, textStatus) {
             },
@@ -745,6 +744,7 @@ class FsHandler {
             url: url,
             async:false,
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },

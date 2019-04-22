@@ -99,8 +99,11 @@
                     <el-tooltip content="清空" placement="bottom">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fas fa-trash"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="执行" placement="bottom">
+                    <el-tooltip content="执行输出为表格" placement="bottom">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行" data-tooltip="tooltip"><i class="fas fa-play"></i></a>
+                    </el-tooltip>
+                    <el-tooltip content="执行输出为JSON" placement="bottom">
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary queryByJson" @click="queryByJson"  title="执行输出为JSON" data-tooltip="tooltip"><i class="fas fa-play-circle"></i></a>
                     </el-tooltip>
 					<el-tooltip content="在新窗口执行" placement="bottom">
                         <!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
@@ -335,12 +338,22 @@
             },
             query(){
                 const self = this;
-
+                
                 let _mql = self.editor.getValue();
 
                 if(_.isEmpty(self.editor.getValue())){
                     return false;
                 }
+
+                // if(_.includes(_mql,'limit -1')){
+                //     alertify.confirm(`确认要查询所有记录？`, function (e) {
+                //         if (e) {
+                //             return;
+                //         } else {
+                //             return false;
+                //         }
+                //     });
+                // }
 
                 if( self.editor.getSelectedText().length > 0 ) {
                     _mql = self.editor.getSelectedText();
@@ -363,12 +376,6 @@
 
                 if(_.isEmpty(_list)) {
                     alertify.log("查询结果为空");
-                    return false;
-                }
-
-                // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
-                if(_list.meta.type === 'select' && _list.message.length > mx.global.register.omdb.max_record_threshold){
-                    self.queryAndSave();
                     return false;
                 }
 
@@ -444,25 +451,6 @@
                     return false;
                 }
 
-                // Path
-                // if(_list.meta.type === 'path'){
-
-                //     let dataset = [];
-                //     let cols = {
-                //                     "path":_.concat([{field:"num",title:"序号"}],_.map(_data[0].graph.pathtags,function(v){ return {field:v,title:v}}))
-                //                 };
-                    
-                //     _.forEach(_data[0].graph.paths,function(v,index){
-                //         dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
-                //     })
-                //     self.result = {id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(dataset,'class'), columns: cols};
-                    
-                //     eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                //     eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
-
-                //     return false;
-                // }
-
                 // For Select count Pattern
 	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
 	            let temp = _list.message;
@@ -471,11 +459,75 @@
                     _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
                 }
 
-                self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
+                // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
+                if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                }
+                // 正常Table显示 
+                else {
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
+                }
                 
+                // 初始化生成table
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
+                // 更新table
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
+            },
+            queryByJson(){
+                const self = this;
+
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
+
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+
+                if(_list.status === 'ok'){
+                    // 输出日志
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+
+                    // 输出结果
+                    self.result = { id:self.id, bid: self.bid, type: 'json-update', data: _list};
+                    // 初始化生成JSON
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
+                    // 更新table
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                } else {
+                    // 设置为空
+                    self.result = { id:self.id, bid: self.bid, type: 'json-update', data: null };
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
+                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+
+                    // 输出日志
+                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+	                return false;
+                }        
             },
             queryPlus(){
                 const self = this;
@@ -588,16 +640,31 @@
 							<html>
 								<head>
 								    <meta charset="UTF-8">
-								    <title></title>
+                                    <title></title>
+                                    <link href="/web/css/fs/jsonParseStyle.css" rel="stylesheet">
 								</head>
 								<body>
-									<pre>${_content}</pre>
+                                    <pre>${jsonParse.json2html(_content)}</pre>
+                                    <script src="/web/js/util/JsonParse.js"><\/script>
 								</body>
 							</html>`;
 
                 let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
+                
+                // 保存失败
+                if(!_url)  return false;
 
-                alertify.log(`已保存${_url}，<a class="btn btn-success" href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" target="_blank">点击查看</a>`);
+                alertify.confirm(`运行结果已保存到以下目录 <br><br> 
+                                  目录：${_url} <br><br>
+                                  MQL: ${_mql} <br><br>
+                                  返回记录: ${_list.message.length} <br><br>
+                                  点击【确认】查看详细`, function (e) {
+                    if (e) {
+                        window.open(`/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}`,"_blank");
+                    } else {
+                        
+                    }
+                });
             },
             saveToFs(){
                 const self = this;

@@ -36,22 +36,28 @@ class Event extends Matrix {
                             "vue-timeline-component"],function() {
             $(function() {
 
-                // 时间轴
-                Vue.component("event-timeline",{
+                // 告警轨迹
+                Vue.component("event-diagnosis-journal",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    template:   `<div class="block"><el-timeline>
-                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
-                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                            <h4>#{item.value}#</h4>
-                                            <p>#{item.biz}# #{item.host}#</p>
-                                            <p>#{item.msg}#</p>
-                                        </el-card>
-                                    </el-timeline-item>
-                                </el-timeline></div>`
+                    template:   `<el-container style="height: 75vh;">
+                                    <el-main>
+                                        <div class="block">
+                                            <el-timeline>
+                                                <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.rows">
+                                                    <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                                        <h4>#{item.value}#</h4>
+                                                        <p>#{item.biz}# #{item.host}#</p>
+                                                        <p>#{item.msg}#</p>
+                                                    </el-card>
+                                                </el-timeline-item>
+                                            </el-timeline>
+                                        </div>
+                                    </el-main>
+                                </el-container>`
                 })
 
                 // 告警雷达
@@ -246,20 +252,24 @@ class Event extends Matrix {
                 });
 
                 // 告警详情
-                Vue.component("event-view-detail",{
+                Vue.component("event-diagnosis-detail",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:String
                     },
-                    template: `<form class="form-horizontal" style="overflow-x: hidden;overflow-y: auto;">
-                                    <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                        <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                        <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
-                                        </div>
-                                    </div>
-                                </form>`,
+                    template: `<el-container style="height: 75vh;">
+                                    <el-main>
+                                        <form class="form-horizontal">
+                                            <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                                <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </el-main>
+                                </el-container>`,
                     mounted(){
                         
                     }
@@ -371,8 +381,36 @@ class Event extends Matrix {
                     }
                 });
 
+                // 历史相关告警
+                Vue.component("event-diagnosis-history",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            
+                        }
+                    },
+                    template:  `<el-container style="height: 75vh;">
+                                    <el-main style="padding:0px;">
+                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                        }
+                    }
+                })
+
                 // 维度关联性告警
-                Vue.component("event-diagnosis-dimension-component",{
+                Vue.component("event-diagnosis-dimension",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -385,7 +423,7 @@ class Event extends Matrix {
                             tableData: {}
                         }
                     },
-                    template:  `<el-container style="height: 500px; border: 1px solid #eee">
+                    template:  `<el-container style="height: 75vh;">
                                     <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
                                         <el-menu :default-openeds="defaultOpeneds" @select="menuSelect">
                                             <el-submenu :index="key" v-for="(item,key) in menuData">
@@ -428,7 +466,7 @@ class Event extends Matrix {
                 })
 
                 // 概率相关性告警
-                Vue.component("event-diagnosis-probability-component",{
+                Vue.component("event-diagnosis-probability",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -446,7 +484,7 @@ class Event extends Matrix {
                             this.sumByStep();
                         }
                     },
-                    template:  `<el-container style="height: 500px; border: 1px solid #eee">
+                    template:  `<el-container style="height: 75vh;">
                                     <el-aside width="400px">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -541,7 +579,7 @@ class Event extends Matrix {
                                                     <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
                                                 </div>
                                             </div>
-                                            <event-timeline :id="id + '-journal'" :model="model.journal.rows"></event-timeline>
+                                            <event-journal :id="id + '-journal'" :model="model.journal.rows"></event-journal>
                                         </el-card>
 
                                         <hr/>
@@ -662,7 +700,7 @@ class Event extends Matrix {
                                 tabs:[
                                     {name: 'event-view-radar', title:'告警雷达', type: 'radar'},
                                     // {name: 'event-view-pie', title:'告警统计', type: 'pie'},
-                                    {name: 'event-view-summary', title:'告警统计', type: 'summary'}
+                                    // {name: 'event-view-summary', title:'告警统计', type: 'summary'}
                                 ]
                             }
                         },
@@ -816,7 +854,7 @@ class Event extends Matrix {
                         detailAdd(event){
                             try {
                                 let id = event.id;
-                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
                                 
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
@@ -824,9 +862,12 @@ class Event extends Matrix {
                                 let model = fsHandler.callFsJScript('/event/diagnosis-by-id.js',term).message;
                                 
                                 // 添加tab
-                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
-                                let detail = {title:`告警分析 ${event.id}`, name:`detail-${id}`, type: 'detail', child:[
-                                                {title:'告警分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
+                                let detail = {title:`告警分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                                {title:'告警详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                                {title:'告警轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                                {title:'历史相关告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                                {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
+                                                {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
                                                 // {title:'历史告警', name:`historyEvent-${id}`, type: 'historyEvent'},
                                                 // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
@@ -838,9 +879,10 @@ class Event extends Matrix {
                                                 // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};
-                                
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
+
                                 this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `detail-${id}`;
+                                this.layout.main.activeIndex = `diagnosis-${id}`;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
@@ -870,6 +912,7 @@ class Event extends Matrix {
                         }
                     }
                 };
+
                 new Vue(event.app).$mount("#app");    
             });
         })

@@ -32,6 +32,7 @@ class CompanyHandler{
             async: false,
             data: event,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -74,6 +75,7 @@ class CompanyHandler{
             type: 'GET',
             async: false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -110,6 +112,7 @@ class CompanyHandler{
             type: 'GET',
             async: false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -146,6 +149,7 @@ class CompanyHandler{
             type: 'DELETE',
             async: false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -190,6 +194,7 @@ class CompanyHandler{
             async: false,
             data: JSON.stringify(com),
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },

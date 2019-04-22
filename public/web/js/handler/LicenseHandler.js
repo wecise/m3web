@@ -40,6 +40,7 @@ class LicenseHandler {
             data: fm,
             async: false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },

@@ -30,6 +30,7 @@ class GroupHandler {
             type: 'GET',
             async: false,
             beforeSend: function (xhr) {
+                Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },

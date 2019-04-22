@@ -10,11 +10,12 @@
  *
  *
  */
-class Omdb extends Matrix {
+class Omdb{
 
     constructor() {
-        super();
+        this.app = null;
     }
+
     path(id, bid, node){
 
         let _dataset = [];
@@ -57,7 +58,7 @@ class Omdb extends Matrix {
                 result: _node
             },
             created: function(){
-                let self = this;
+                const self = this;
 
                 eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
 
@@ -65,7 +66,7 @@ class Omdb extends Matrix {
                 eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
             },
             mounted: function() {
-                let self = this;
+                const self = this;
 
                 self.$nextTick(function() {
                     self.init();
@@ -73,7 +74,7 @@ class Omdb extends Matrix {
             },
             methods: {
                 init: function(){
-                    let self = this;
+                    const self = this;
 
                     if(!_.isEmpty(node)) {
                         self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
@@ -85,7 +86,7 @@ class Omdb extends Matrix {
 
                 },
                 setData: function(event){
-                    let self = this;
+                    const self = this;
 
                     self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
                     self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
@@ -93,13 +94,13 @@ class Omdb extends Matrix {
 
                 },
                 setScrollY: function(event){
-                    let self = this;
+                    const self = this;
 
                     self.model.options.scrollY = event.scrollY;
                 }
             }
         };
-    };
+    }
 
     init() {
         VueLoader.onloaded([
@@ -122,7 +123,7 @@ class Omdb extends Matrix {
                         id: id,
                     },
                     mounted: function() {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function() {
                             $(self.$el).click(function(){
@@ -242,11 +243,11 @@ class Omdb extends Matrix {
                         result: event.model.node
                     },
                     created: function(){
-                        let self = this;
+                        const self = this;
 
                     },
                     mounted: function() {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function() {
                             self.init();
@@ -254,7 +255,7 @@ class Omdb extends Matrix {
                     },
                     methods: {
                         init: function(){
-                            let self = this;
+                            const self = this;
 
 
                         }
@@ -297,12 +298,12 @@ class Omdb extends Matrix {
                         keys: []
                     },
                     created: function(){
-                        let self = this;
+                        const self = this;
 
                         self.initKeys();
                     },
                     mounted: function () {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function () {
                             self.init();
@@ -310,7 +311,7 @@ class Omdb extends Matrix {
                     },
                     methods: {
                         init: function(){
-                            let self = this;
+                            const self = this;
 
                             if(_.isEmpty(event.model.node)) return false;
 
@@ -431,15 +432,69 @@ class Omdb extends Matrix {
                             self.model.newInput = mql;
                         },
                         initKeys: function(){
-                            let self = this;
+                            const self = this;
 
                             let _rtn = omdbHandler.classList(-1);
                             self.keys = _.sortBy(_.keys(_.attempt(JSON.parse.bind(null, _rtn))[0]));
                         },
                         dropClass: function(){
-                            let self = this;
+                            const self = this;
 
 
+                        }
+                    }
+                };
+            };
+
+            let outPutByJson = function(id, bid, json){
+
+                let content = null;
+
+                if(!_.isEmpty(json)) {
+                    content = json.data;
+                }
+
+                return {
+
+                    delimiters: ['#{', '}#'],
+                    el: '#' + id,
+                    template: `<el-container style="height: 48vh;">
+                                    <el-main style="padding:0px;">
+                                        <pre style="background:transparent;border:none;">#{JSON.stringify(model,null,4).replace(/   /g, ' ')}#</pre>
+                                    </el-main>
+                                </el-container>`,
+                    data: {
+                        id: id,
+                        bid: bid,
+                        model: null
+                    },
+                    created: function(){
+                        const self = this;
+
+                        eventHub.$on(`QUERY-JSON-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
+                        eventHub.$on(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
+                    },
+                    mounted: function() {
+                        const self = this;
+
+                        self.$nextTick(function() {
+                            self.init();
+                        })
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+
+                            if(!_.isEmpty(content)) {
+                                self.model = content;
+                            } else {
+                                self.model = '';
+                            }
+
+                        },
+                        setData: function(event){
+                            const self = this;
+                            self.model = event.data;
                         }
                     }
                 };
@@ -448,7 +503,7 @@ class Omdb extends Matrix {
             let outPut = function(id, bid, node){
 
                 //if(_.isEmpty(node)) return false;
-
+                
                 let _dataset = [];
                 let _columns = [];
                 let _node = {};
@@ -483,24 +538,24 @@ class Omdb extends Matrix {
                         },
                         result: _node
                     },
-                    created: function(){
-                        let self = this;
+                    created(){
+                        const self = this;
 
                         eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
 
                         eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
                         eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
                     },
-                    mounted: function() {
-                        let self = this;
+                    mounted() {
+                        const self = this;
 
                         self.$nextTick(function() {
                             self.init();
                         })
                     },
                     methods: {
-                        init: function(){
-                            let self = this;
+                        init(){
+                            const self = this;
 
                             if(!_.isEmpty(node)) {
                                 self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
@@ -511,16 +566,16 @@ class Omdb extends Matrix {
                             }
 
                         },
-                        setData: function(event){
-                            let self = this;
+                        setData(event){
+                            const self = this;
 
                             self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
                             self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
                             self.result = event;
 
                         },
-                        setScrollY: function(event){
-                            let self = this;
+                        setScrollY(event){
+                            const self = this;
 
                             self.model.options.scrollY = event.scrollY;
                         }
@@ -559,12 +614,12 @@ class Omdb extends Matrix {
                         model: _data,
                     },
                     created: function(){
-                        let self = this;
+                        const self = this;
 
                         //eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`, self.setData);
                     },
                     mounted: function () {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function () {
                             self.init();
@@ -572,12 +627,12 @@ class Omdb extends Matrix {
                     },
                     methods: {
                         init: function(){
-                            let self = this;
+                            const self = this;
 
 
                         },
                         setData: function(event){
-                            let self = this;
+                            const self = this;
 
                             self.model = event.data;
                         }
@@ -609,7 +664,7 @@ class Omdb extends Matrix {
                     watch: {
                         'debug.mql': {
                             handler: function(val,oldVal){
-                                let self = this;
+                                const self = this;
 
                                 if(val !== oldVal){
                                     self.debugIt(val);
@@ -627,12 +682,12 @@ class Omdb extends Matrix {
                         }
                     },
                     created: function(){
-                        let self = this;
+                        const self = this;
 
                         eventHub.$on("LOG-CONSOLE-APPEND-EVENT", self.append);
                     },
                     mounted: function () {
-                        let self = this;
+                        const self = this;
 
                         self.$nextTick(function () {
                             self.init();
@@ -646,7 +701,7 @@ class Omdb extends Matrix {
                     },
                     methods: {
                         init: function(){
-                            let self = this;
+                            const self = this;
 
                             self.model.push(self.log('info','加载完成'));
 
@@ -654,7 +709,7 @@ class Omdb extends Matrix {
 
                         },
                         initPlugin: function(){
-                            let self = this;
+                            const self = this;
 
                             $(self.$el).contextMenu({
                                 selector: 'a.debug',
@@ -725,12 +780,12 @@ class Omdb extends Matrix {
                             });
                         },
                         refresh: function(){
-                            let self = this;
+                            const self = this;
 
                             self.debugIt(self.debug.mql);
                         },
                         debugs: function(key){
-                            let self = this;
+                            const self = this;
 
                             self.debug.mql = [];
                             self.debug.flag = [];
@@ -744,7 +799,7 @@ class Omdb extends Matrix {
 
                         },
                         append: function(level, event){
-                            let self = this;
+                            const self = this;
                             let _log = null;
 
                             _log = self.log(level, event);
@@ -755,7 +810,7 @@ class Omdb extends Matrix {
 
                         },
                         log: function(level, event){
-                            let self = this;
+                            const self = this;
                             let _content = event;
 
                             if(typeof(event) === 'object'){
@@ -773,7 +828,7 @@ class Omdb extends Matrix {
                             return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
                         },
                         copyIt: function(event){
-                            let self = this;
+                            const self = this;
 
                             new Clipboard(".copy", {
                                 text: function(trigger) {
@@ -787,13 +842,13 @@ class Omdb extends Matrix {
 
                         },
                         clearIt: function(){
-                            let self = this;
+                            const self = this;
 
                             self.model = [];
 
                         },
                         debugIt: function(event){
-                            let self = this;
+                            const self = this;
 
                             _.forEach(event,function(v){
                                 let _list = omdbHandler.fetchData(v);
@@ -818,7 +873,7 @@ class Omdb extends Matrix {
 
                         },
                         toggleTheme: function(){
-                            let self = this;
+                            const self = this;
 
                             if(self.theme === 'light') {
 
@@ -883,295 +938,292 @@ class Omdb extends Matrix {
                 };
             };
 
-            let appVue = new Vue({
-                delimiters: ['${', '}'],
-                data: {
-                    layout: null,
-                    id: null,
-                    config: {
-                        settings:{
-                            showPopoutIcon: false,
-                            showCloseIcon: false,
-                            selectionEnabled: false,
-                            constrainDragToContainer: false
-                        },
-                        dimensions:{
-                            borderWidth:3
-                        },
-                        content: [{
-                            type: 'row',
-                            content:[
-                                {
-                                    type: 'stack',
-                                    width: 18,
-                                    content:[{
-                                        id: 'class-tree',
-                                        type: 'component',
-                                        componentName: 'omdbComponent',
-                                        title:`<i class="fas fa-sitemap"></i> 对象管理`,
-                                        isClosable: false,
-                                        componentState: {
+            $(function() {
+
+                // 主管理页 包括：查询 日志 结果
+                Vue.component("omdb-main-view",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            // 布局
+                            layout:{
+                                tabIndex: 1,
+                                activeIndex: '1',
+                                tabs:[
+                                    {name: 'event-view-console', title:'日志', type: 'main'}
+                                ]
+                            },
+                            splitUpBottom: 0.5
+                        }
+                    },
+                    template:   `<el-container style="height: 75vh;">
+                                    
+                                    <el-main>
+                                        <Split v-model="splitUpBottom">
+                                            <div slot="top">
+                                                
+                                            </div>
+                                            <div slot="bottom">
+                                                
+                                            </div>
+                                        </Split>
+                                    </el-main>
+                                    
+                                </el-container>`
+                })
+                
+                mx.app = new Vue({
+                    delimiters: ['${', '}'],
+                    data: {
+                        layout: null,
+                        id: null,
+                        config: {
+                            settings:{
+                                showPopoutIcon: false,
+                                showCloseIcon: false,
+                                selectionEnabled: false,
+                                constrainDragToContainer: false
+                            },
+                            dimensions:{
+                                borderWidth:3
+                            },
+                            content: [{
+                                type: 'row',
+                                content:[
+                                    {
+                                        type: 'stack',
+                                        width: 18,
+                                        content:[{
                                             id: 'class-tree',
-                                            type: 'class-tree',
-                                            pattern: null,
-                                            model: { pattern: '', node: null, pnode: null }
-                                        }
-                                    }]
-                                },
-                                {
-                                    type: 'stack',
-                                    content: [
-                                        {
-                                            type: 'column',
-                                            title: '<i class="fas fa-laptop-code"></i> 查询',
-                                            content:[{
-                                                type: 'component',
-                                                title: '',
-                                                id: 'layout_search_no_header',
-                                                componentName: 'omdbComponent',
-                                                componentState: {
-                                                    id: `div_query_000000`,
-                                                    bid: `batch_000000`,
-                                                    type: 'query-console',
-                                                    model: { pattern: '', node: null, pnode: null }
-                                                }
-                                            },
-                                                {
-                                                    type: 'stack',
-                                                    activeItemIndex: 1,
-                                                    content: [
-                                                        {
-                                                            type: 'component',
-                                                            title: `<i class="fas fa-newspaper"></i> 日志`,
-                                                            componentName: 'omdbComponent',
-                                                            componentState: {
-                                                                id: `div_log_000000`,
-                                                                bid: `batch_000000`,
-                                                                type: 'log-console',
-                                                                model: null
-                                                            }
-                                                        },
-                                                        {
-                                                            type: 'component',
-                                                            title: `<i class="fas fa-list-alt"></i> 结果`,
-                                                            componentName: 'omdbComponent',
-                                                            componentState: {
-                                                                id: `div_output_000000`,
-                                                                bid: `batch_000000`,
-                                                                type: 'output-console',
-                                                                model: null
-                                                            }
-                                                        }]
-                                                }]
+                                            type: 'component',
+                                            componentName: 'omdbComponent',
+                                            title:`<i class="fas fa-sitemap"></i> 对象管理`,
+                                            isClosable: false,
+                                            componentState: {
+                                                id: 'class-tree',
+                                                type: 'class-tree',
+                                                pattern: null,
+                                                model: { pattern: '', node: null, pnode: null }
+                                            }
                                         }]
-                                }
-                            ]
-                        }]
-                    }
-
-                },
-                created: function(){
-                    let self = this;
-
-                    eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
-                    eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
-
-                    eventHub.$on("LAYOUT-RESIZE-EVENT",self.resizeLayout);
-                },
-                mounted: function() {
-                    let self = this;
-
-                    self.$nextTick(function() {
-                        setTimeout(function () {
-                            self.init();
-                        });
-                    })
-                },
-                methods: {
-                    init: function(){
-                        let self = this;
-
-                        self.layout = new GoldenLayout(self.config, self.$el);
-
-                        self.layout.registerComponent('omdbComponent', function (container, state) {
-
-                            // console.log(state)
-
-                        });
-
-
-                        self.layout.on( 'stackCreated', function( stack ){
-
-                            try {
-                                if(stack.config.content[0].id === 'layout_search_no_header') {
-
-                                    $(stack.element[0].childNodes[0]).remove();//css("display","none");
-
-                                    _.delay(function(){
-                                        //console.log($(stack.element[0])[0].style.height,$(stack.element[0])[0])
-                                        self.resizeLayout();
-                                    },1000)
-
-                                }
-                            }catch(error){
-
-                            }
-
-                        });
-
-                        self.layout.on( 'itemCreated', function( item ){
-                            // console.log('item',item.config)
-
-                        });
-
-                        self.layout.on( 'columnCreated', function( column ){
-                            //console.log('column',column)
-
-                        });
-
-                        self.layout.on( 'componentCreated', function( component ){
-
-                            let _state = component.config;
-                            let _id = _state.componentState.id;
-                            let _bid = _state.componentState.bid;
-
-                            let html = `<div id="${_id}"></div>`;
-                            let _comp = null;
-
-                            component.container.getElement().html(html);
-
-                            if(_state.componentState.type === 'class-tree'){
-
-                                _comp = classTree(_id, _bid, _state.componentState.type, _state.componentState);
-
-                            } else if(_state.componentState.type === 'class-edit'){
-
-                                _comp = classEdit(_id, _bid, _state.componentState.type, _state.componentState);
-
-                            } else if(_state.componentState.type === 'query-console'){
-
-                                _comp = queryConsole(_id, _bid, _state.componentState.type, _state.componentState);
-
-                            } else if(_state.componentState.type === 'output-console'){
-
-                                _comp = outPut(_id, _bid, _state.componentState.model);
-
-
-                            } else if(_state.componentState.type === 'text-console'){
-
-                                _comp = textConsole(_id, _bid, _state.componentState.model);
-
-                            } else if(_state.componentState.type === 'graph'){
-
-                                _comp = graph(_id, _bid, _state.componentState.model);
-
-
-                            } else if(_state.componentState.type === 'log-console'){
-
-                                _comp = logConsole(_id, _bid, _state.componentState.type, _state.componentState);
-
-
-                            } else if(_state.componentState.type === 'trigger-console'){
-
-                                _comp = triggerConsole(_id, _bid, _state.componentState.model.node);
-
-                            }
-
-                            setTimeout(function(){
-                                new Vue(_comp);
-                            });
-
-                            component.container.on('resize',function(event) {
-
-                                // container height
-                                window.layout_container_layoutHeight =  component.container.layoutManager.height - 80 - 20;
-                                // container_top height
-                                window.layout_container_topHeight =  window.layout_container_layoutHeight - component.container.height;
-                                // container_bottom height
-                                window.layout_container_bottomHeight =  component.container.height;
-
-                                //console.log(_id, component.container.layoutManager.height, component.container.height, component.container.layoutManager.height - component.container.height)
-                                // console.log(_id, window.layout_container_layoutHeight, window.layout_container_topHeight, window.layout_container_bottomHeight)
-                                // container change trigger datatable redraw
-                                eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT-${_id}`, { container:window.layout_container_layoutHeight, top:window.layout_container_topHeight, bottom:window.layout_container_bottomHeight  });
-                            });
-
-
-                        });
-
-                        //  Initialize GL
-                        self.layout.init();
-
-                        //  Update GL on window resize
-                        window.addEventListener('resize', function () { self.layout.updateSize(); });
-
-                    },
-                    resetLayout: function () {
-                        localStorage.removeItem('savedState');
-                        window.location.reload(true);
-                    },
-                    resizeLayout: function(){
-                        let self = this;
-
-                        self.layout.updateSize();
-                    },
-                    addStackFromTree: function( event ) {
-                        let self = this;
-
-                        let _bid = `batch_${_.now()}`;
-
-                        let newItemConfig = {
-                            type: 'column',
-                            title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                            content:[{
-                                type: 'component',
-                                height:50,
-                                title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                                id: 'layout_search_no_header',
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_query_${_.now()}`,
-                                    bid: _bid,
-                                    type: event.type,
-                                    model: event.model
-                                }
-                            },{
-                                type: 'stack',
-                                height:50,
-                                activeItemIndex: 1,
-                                content: [{
-                                    type: 'component',
-                                    title: `<i class="fas fa-newspaper"></i> 日志`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_log_${_.now()}`,
-                                        bid: _bid,
-                                        type: 'log-console',
-                                        model: null
+                                    },
+                                    {
+                                        type: 'stack',
+                                        content: [
+                                            {
+                                                type: 'column',
+                                                title: '<i class="fas fa-laptop-code"></i> 查询',
+                                                content:[{
+                                                    type: 'component',
+                                                    title: '',
+                                                    id: 'layout_search_no_header',
+                                                    componentName: 'omdbComponent',
+                                                    componentState: {
+                                                        id: `div_query_000000`,
+                                                        bid: `batch_000000`,
+                                                        type: 'query-console',
+                                                        model: { pattern: '', node: null, pnode: null }
+                                                    }
+                                                },
+                                                    {
+                                                        type: 'stack',
+                                                        activeItemIndex: 1,
+                                                        content: [
+                                                            {
+                                                                type: 'component',
+                                                                title: `<i class="fas fa-newspaper"></i> 日志`,
+                                                                componentName: 'omdbComponent',
+                                                                componentState: {
+                                                                    id: `div_log_000000`,
+                                                                    bid: `batch_000000`,
+                                                                    type: 'log-console',
+                                                                    model: null
+                                                                }
+                                                            },
+                                                            {
+                                                                type: 'component',
+                                                                title: `<i class="fas fa-list-alt"></i> 结果`,
+                                                                componentName: 'omdbComponent',
+                                                                componentState: {
+                                                                    id: `div_output_000000`,
+                                                                    bid: `batch_000000`,
+                                                                    type: 'output-console',
+                                                                    model: null
+                                                                }
+                                                            }]
+                                                    }]
+                                            }]
                                     }
-                                },{
-                                    type: 'component',
-                                    title: `<i class="fas fa-list-alt"></i> 结果`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_output_${_.now()}`,
-                                        bid: _bid,
-                                        type: 'output-console',
-                                        model: null
-                                    }
-                                }]
+                                ]
                             }]
-                        };
-
-                        if(_.includes(['trigger-console','class-edit'],event.type)){
-                            newItemConfig = {
+                        }
+    
+                    },
+                    created: function(){
+                        const self = this;
+    
+                        eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
+                        eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
+                        eventHub.$on("QUERY-JSON-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
+    
+                        eventHub.$on("LAYOUT-RESIZE-EVENT",self.resizeLayout);
+                    },
+                    mounted: function() {
+                        const self = this;
+    
+                        self.$nextTick(function() {
+                            setTimeout(function () {
+                                self.init();
+                            });
+                        })
+                    },
+                    methods: {
+                        init(){
+                            const self = this;
+    
+                            self.layout = new GoldenLayout(self.config, self.$el);
+    
+                            self.layout.registerComponent('omdbComponent', function (container, state) {
+    
+                                // console.log(state)
+    
+                            });
+    
+                            self.layout.on( 'stackCreated', function( stack ){
+    
+                                try {
+                                    if(stack.config.content[0].id === 'layout_search_no_header') {
+    
+                                        $(stack.element[0].childNodes[0]).remove();//css("display","none");
+    
+                                        _.delay(function(){
+                                            //console.log($(stack.element[0])[0].style.height,$(stack.element[0])[0])
+                                            self.resizeLayout();
+                                        },1000)
+    
+                                    }
+                                }catch(error){
+    
+                                }
+    
+                            });
+    
+                            self.layout.on( 'itemCreated', function( item ){
+                                // console.log('item',item.config)
+    
+                            });
+    
+                            self.layout.on( 'columnCreated', function( column ){
+                                //console.log('column',column)
+    
+                            });
+    
+                            self.layout.on( 'componentCreated', function( component ){
+    
+                                let _state = component.config;
+                                let _id = _state.componentState.id;
+                                let _bid = _state.componentState.bid;
+    
+                                let html = `<div id="${_id}"></div>`;
+                                let _comp = null;
+    
+                                component.container.getElement().html(html);
+    
+                                if(_state.componentState.type === 'class-tree'){
+    
+                                    _comp = classTree(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'class-edit'){
+    
+                                    _comp = classEdit(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'query-console'){
+    
+                                    _comp = queryConsole(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'output-console'){
+                                    
+                                    _comp = outPut(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'output-json-console'){
+                                    
+                                    _comp = outPutByJson(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'text-console'){
+    
+                                    _comp = textConsole(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'graph'){
+    
+                                    _comp = graph(_id, _bid, _state.componentState.model);
+    
+    
+                                } else if(_state.componentState.type === 'log-console'){
+    
+                                    _comp = logConsole(_id, _bid, _state.componentState.type, _state.componentState);
+    
+    
+                                } else if(_state.componentState.type === 'trigger-console'){
+    
+                                    _comp = triggerConsole(_id, _bid, _state.componentState.model.node);
+    
+                                }
+    
+                                setTimeout(function(){
+                                    new Vue(_comp);
+                                });
+    
+                                component.container.on('resize',function(event) {
+    
+                                    // container height
+                                    window.layout_container_layoutHeight =  component.container.layoutManager.height - 80 - 20;
+                                    // container_top height
+                                    window.layout_container_topHeight =  window.layout_container_layoutHeight - component.container.height;
+                                    // container_bottom height
+                                    window.layout_container_bottomHeight =  component.container.height;
+    
+                                    //console.log(_id, component.container.layoutManager.height, component.container.height, component.container.layoutManager.height - component.container.height)
+                                    // console.log(_id, window.layout_container_layoutHeight, window.layout_container_topHeight, window.layout_container_bottomHeight)
+                                    // container change trigger datatable redraw
+                                    eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT-${_id}`, { container:window.layout_container_layoutHeight, top:window.layout_container_topHeight, bottom:window.layout_container_bottomHeight  });
+                                });
+    
+    
+                            });
+    
+                            //  Initialize GL
+                            self.layout.init();
+    
+                            //  Update GL on window resize
+                            window.addEventListener('resize', function () { self.layout.updateSize(); });
+    
+                        },
+                        resetLayout () {
+                            localStorage.removeItem('savedState');
+                            window.location.reload(true);
+                        },
+                        resizeLayout(){
+                            const self = this;
+    
+                            self.layout.updateSize();
+                        },
+                        addStackFromTree( event ) {
+                            const self = this;
+    
+                            let _bid = `batch_${_.now()}`;
+    
+                            let newItemConfig = {
                                 type: 'column',
-                                title: `<i class="fas fa-table"></i> ${event.title}`,
+                                title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
                                 content:[{
                                     type: 'component',
-                                    title: event.title,
+                                    height:50,
+                                    title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
                                     id: 'layout_search_no_header',
-                                    height:55,
                                     componentName: 'omdbComponent',
                                     componentState: {
                                         id: `div_query_${_.now()}`,
@@ -1181,7 +1233,8 @@ class Omdb extends Matrix {
                                     }
                                 },{
                                     type: 'stack',
-                                    height:45,
+                                    height:50,
+                                    activeItemIndex: 1,
                                     content: [{
                                         type: 'component',
                                         title: `<i class="fas fa-newspaper"></i> 日志`,
@@ -1192,82 +1245,144 @@ class Omdb extends Matrix {
                                             type: 'log-console',
                                             model: null
                                         }
+                                    },{
+                                        type: 'component',
+                                        title: `<i class="fas fa-list-alt"></i> 结果`,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_output_${_.now()}`,
+                                            bid: _bid,
+                                            type: 'output-console',
+                                            model: null
+                                        }
                                     }]
                                 }]
                             };
+    
+                            if(_.includes(['trigger-console','class-edit'],event.type)){
+                                newItemConfig = {
+                                    type: 'column',
+                                    title: `<i class="fas fa-table"></i> ${event.title}`,
+                                    content:[{
+                                        type: 'component',
+                                        title: event.title,
+                                        id: 'layout_search_no_header',
+                                        height:55,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_query_${_.now()}`,
+                                            bid: _bid,
+                                            type: event.type,
+                                            model: event.model
+                                        }
+                                    },{
+                                        type: 'stack',
+                                        height:45,
+                                        content: [{
+                                            type: 'component',
+                                            title: `<i class="fas fa-newspaper"></i> 日志`,
+                                            componentName: 'omdbComponent',
+                                            componentState: {
+                                                id: `div_log_${_.now()}`,
+                                                bid: _bid,
+                                                type: 'log-console',
+                                                model: null
+                                            }
+                                        }]
+                                    }]
+                                };
+                            }
+    
+                            if(_.size($(`li[title="${event.title}"]`)) > 0 ){
+                                //return false;
+                            }
+    
+                            self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
+    
+                        },
+                        addStackFromQuery( event ) {
+                            const self = this;
+    
+                            let _bid = `batch_${_.now()}`;
+    
+                            if(event.type == "table-update"){
+                                let newItemConfig =  {
+                                    type: 'component',
+                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                    componentName: 'omdbComponent',
+                                    componentState: {
+                                        id: `div_output_${_.now()}`,
+                                        bid: event.bid,
+                                        type: 'output-console',
+                                        model: event.model
+                                    }
+                                };
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                            }
+
+                            if(event.type == "json-update"){
+                                let newItemConfig =  {
+                                    type: 'component',
+                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                    componentName: 'omdbComponent',
+                                    componentState: {
+                                        id: `div_output_${_.now()}`,
+                                        bid: event.bid,
+                                        type: 'output-json-console',
+                                        model: event.model
+                                    }
+                                };
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                            }
+    
+                            if(event.type == "graph-update"){
+    
+                                let newItemConfig =  {
+                                    type: 'component',
+                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                    componentName: 'omdbComponent',
+                                    componentState: {
+                                        id: `div_output_${_.now()}`,
+                                        bid: event.bid,
+                                        type: 'graph',
+                                        model: event.data
+                                    }
+                                };
+    
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+    
+                            }
+    
+                            if(event.type == "text-console"){
+    
+                                let newItemConfig =  {
+                                    type: 'component',
+                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                    componentName: 'omdbComponent',
+                                    componentState: {
+                                        id: `div_output_${_.now()}`,
+                                        bid: event.bid,
+                                        type: 'text-console',
+                                        model: event.data
+                                    }
+                                };
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                            }
+    
+                            _.delay(function(){
+                                eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
+                                eventHub.$emit(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${event.bid}`, event);
+                            },500)
+    
                         }
-
-                        if(_.size($(`li[title="${event.title}"]`)) > 0 ){
-                            //return false;
-                        }
-
-                        self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
-
-                    },
-                    addStackFromQuery: function( event ) {
-                        let self = this;
-
-                        let _bid = `batch_${_.now()}`;
-
-                        if(event.type == "table-update"){
-                            let newItemConfig =  {
-                                type: 'component',
-                                title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_output_${_.now()}`,
-                                    bid: event.bid,
-                                    type: 'output-console',
-                                    model: null
-                                }
-                            };
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                        }
-
-                        if(event.type == "graph-update"){
-
-                            let newItemConfig =  {
-                                type: 'component',
-                                title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_output_${_.now()}`,
-                                    bid: event.bid,
-                                    type: 'graph',
-                                    model: event.data
-                                }
-                            };
-
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-
-                        }
-
-                        if(event.type == "text-console"){
-
-                            let newItemConfig =  {
-                                type: 'component',
-                                title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                componentName: 'omdbComponent',
-                                componentState: {
-                                    id: `div_output_${_.now()}`,
-                                    bid: event.bid,
-                                    type: 'text-console',
-                                    model: event.data
-                                }
-                            };
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                            self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                        }
-
-                        _.delay(function(){
-                            eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                        },500)
-
                     }
-                }
-            }).$mount("#app");
+                }).$mount("#app");
+
+            })
 
         })
     }
