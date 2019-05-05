@@ -118,8 +118,12 @@ Sidebar.prototype.init = function()
 
         self.addSearchPalette(true);
 
-        // entity
-        entity = omdbHandler.fetchSubClass("/matrix/entity");
+		// entity
+		let temp = _.attempt(JSON.parse.bind(null, omdbHandler.classList("/matrix/entity")))[0].child;
+		entity = _.sortBy(_.map(temp,function(v){
+			return { name:v, alias: _.last(v.split("/")) };
+		}),['alias'],['asc']);
+		
         this.imapConfig = _.map(entity,'alias')
 
         _.delay(function(){
@@ -214,9 +218,6 @@ Sidebar.prototype.init = function()
 
         },500)
     }
-
-
-
     $(".geTitle").insertAfter($("#imap-config"));
 };
 

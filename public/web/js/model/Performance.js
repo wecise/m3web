@@ -107,7 +107,7 @@ class Performance extends Matrix {
                 }); 
 
                 // 雷达
-                Vue.component("event-view-radar",{
+                Vue.component("performance-view-radar",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -170,7 +170,7 @@ class Performance extends Matrix {
                                             expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                            color: _.sample(_.map(mx.global.register.color.summary,'color'))
                                         }
                                 })
                                 return {name: title, class:className, child: pgs, sum: sum}
@@ -183,14 +183,15 @@ class Performance extends Matrix {
                     }
                 });
 
-                // 详情
-                Vue.component("performance-view-detail",{
+                // 性能详情
+                Vue.component("performance-diagnosis-detail",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
                     },
-                    template: `<el-row :gutter="10">
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main><el-row :gutter="10">
                                     <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
                                         <div class="grid-content" style="text-align:center;">
                                             <img src="/fs/assets/images/entity/png/linux.png?issys=true&type=download" class="image">
@@ -233,7 +234,9 @@ class Performance extends Matrix {
                                             </form>
                                         </div>
                                     </el-col>
-                                </el-row>`,
+                                    </el-row>
+                                    </el-main>
+                                </el-container>`,
                     filters:{
                         handlerFormat(evt){
                             // 2019-03-13T21:35:31.678Z
@@ -249,8 +252,102 @@ class Performance extends Matrix {
                     }
                 });
 
+                // 历史趋势
+                Vue.component("performance-diagnosis-history",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>
+                                        <el-row>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 <small>5分钟</small></span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min5"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 15分钟</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min15"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 30分钟</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min30"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 1小时</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour1"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 2小时</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour2"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                            <el-col :span="12">
+                                                <el-card class="box-card">
+                                                    <div slot="header" class="clearfix">
+                                                        <span>历史趋势 1天</span>
+                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                                    </div>
+                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.day1"></performance-history-chart>
+                                                </el-card>
+                                            </el-col>
+                                        </el-row>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                    }
+                });
+
+                // 性能轨迹
+                Vue.component("performance-diagnosis-journal",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main><el-card class="box-card">
+                                        <div slot="header" class="clearfix">
+                                            <span>性能轨迹
+                                                <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
+                                            </span>
+                                            <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                        </div>
+                                        <performance-timeline :id="id + '-journal'" :model="model.journal.rows"></performance-timeline>
+                                    </el-card>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                    }
+                });
+
                 // 仪表盘
-                Vue.component("gauge-component",{
+                Vue.component("performance-gauge",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -315,125 +412,6 @@ class Performance extends Matrix {
                                 </el-timeline></div>`
                 })
                 
-                // 分析
-                Vue.component("event-diagnosis",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data:function(){
-                        return {
-                            
-                        }
-                    },
-                    template: ` <section class="event-diagnosis">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active"><a href="#event-diagnosis-detail">性能详情</a></li>
-                                        <li class=""><a href="#event-diagnosis-history">历史趋势</a></li>
-                                        <li class=""><a href="#event-diagnosis-journal">性能轨迹</a></li>
-                                    </ul>
-                                    <div class="content">
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-detail">性能详情</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-view-detail :id="id + '-detail'" :model="model.detail"></performance-view-detail>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history">历史趋势 <small>5分钟</small></span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min5"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history-15min">历史趋势 15分钟</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min15"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history">历史趋势 30分钟</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min30"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history-15min">历史趋势 1小时</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour1"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history">历史趋势 2小时</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour2"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-history">历史趋势 1天</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.day1"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-journal">性能轨迹
-                                                            <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
-                                                        </span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-timeline :id="id + '-journal'" :model="model.journal.rows"></performance-timeline>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                    </div>
-                                </section>`,
-                    mounted:function(){
-                        this.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                            
-                            $(self.$el).find("ul>li").click(function(e){
-                                $(self.$el).find("li.active").removeClass("active");
-                                $(e.target).closest("li").addClass("active");
-                                $("#content.content").css("padding-top","60px!important;");
-                            })
-                            
-                        }
-                    }
-                    
-                });
-                
                 mxPerformance.app = {
                     delimiters: ['${', '}'],
                     template: "#app-template",
@@ -442,9 +420,9 @@ class Performance extends Matrix {
                         layout:{
                             main:{
                                 tabIndex: 1,
-                                activeIndex: 'event-view-console',
+                                activeIndex: 'performance-view-console',
                                 tabs:[
-                                    {name: 'event-view-console', title:'性能列表', type: 'main'}
+                                    {name: 'performance-view-console', title:'性能列表', type: 'main'}
                                 ],
                                 detail: {
                                     model: [],
@@ -462,7 +440,7 @@ class Performance extends Matrix {
                             }
                         },
                         control: {
-                            ifSmart: '1',
+                            ifSmart: '0',
                             ifRefresh: '0',
                         },
                         // 搜索组件结构
@@ -499,9 +477,9 @@ class Performance extends Matrix {
                         'layout.main.tabs':{
                             handler(val,oldVal){
                                 if(val.length > 1){
-                                    $("#tab-event-view-console").show();
+                                    $("#tab-performance-view-console").show();
                                 }else {
-                                    $("#tab-event-view-console").hide();
+                                    $("#tab-performance-view-console").hide();
                                 }
                             },
                             deep:true
@@ -541,6 +519,15 @@ class Performance extends Matrix {
                         
                         // 没有详细页时，默认隐藏告警列表Title
                         this.hideTabEventViewConsoleUl();
+
+                        // 维度统计
+                        this.toggleSummaryBySmart(this.control.ifSmart);
+
+                        // 窗口Resize
+                        _.delay(function(){
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                        },2000);
                         
                     },
                     methods: {
@@ -550,9 +537,9 @@ class Performance extends Matrix {
                         hideTabEventViewConsoleUl(){
                             const self = this;
 
-                            if($('#tab-event-view-console').is(':visible')) {
-                                $("#tab-event-view-console").hide();
-                            $("#tab-event-view-console > span").hide();
+                            if($('#tab-performance-view-console').is(':visible')) {
+                                $("#tab-performance-view-console").hide();
+                            $("#tab-performance-view-console > span").hide();
                             } else {
                                 setTimeout(self.hideTabEventViewConsoleUl, 50);
                             }   
@@ -565,9 +552,9 @@ class Performance extends Matrix {
                         },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
-                                $("#event-view-summary").css("height","200px").css("display","");
+                                $("#performance-view-summary").css("height","200px").css("display","");
                             } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
+                                $("#performance-view-summary").css("height","0px").css("display","none");
                             }
                             this.control.ifSmart = evt;
                             
@@ -597,31 +584,24 @@ class Performance extends Matrix {
                         detailAdd(event){
                             try {
                                 let id = event.id;
-                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
                                 
                                 // event
-                                let term = encodeURIComponent(JSON.stringify(event));
+                                let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript('/performance/diagnosis-by-id.js',term).message;
                                 
                                 // 添加tab
-                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
-                                let detail = {title:`性能分析 ${event.host}/${event.inst}/${event.param}`, name:`detail-${id}`, type: 'detail', child:[
-                                                {title:'性能分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
-                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
-                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'history'},
-                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
-                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
-                                                // {title:'日志', name:`log-${id}`, type: 'log'},
-                                                // {title:'配置', name:`config-${id}`, type: 'config'},
-                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
-                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
+                                let detail = {title:`性能分析 ${event.host}/${event.inst}/${event.param}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                                {title:'性能详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                                {title:'历史趋势', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                                {title:'性能轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};
-                                
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
+
                                 this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `detail-${id}`;
+                                this.layout.main.activeIndex = `diagnosis-${id}`;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
@@ -645,6 +625,12 @@ class Performance extends Matrix {
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
+                        },
+                        toggle(){
+                            _.delay(function(){
+                                // 窗体RESIZE事件
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            },500)
                         }
                     }
                 };
@@ -654,6 +640,9 @@ class Performance extends Matrix {
 
         window.addEventListener('resize', () => { 
             mxPerformance.resizeEventConsole();
+
+            // RESIZE Event Summary
+            eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
@@ -661,116 +650,16 @@ class Performance extends Matrix {
 
     resizeEventConsole(){
         let evwH = $(window).height();
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
+        let evcH = $("#performance-view-container").height();
+        let evsH = $("#performance-view-summary").height();
         
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+        $("#performance-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px");
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("min-height", evwH + "px")
+                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=" + evsH + "px");
     }
-
-    graphNav(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`,
-            data: {
-                id: id
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    graph(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
-            data: {
-                id: id,
-                model: fsHandler.callFsJScript('/performance/event_detail_graph.js', null).message.data[0].graph
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    performance(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="performance">
-                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'performance'
-            }
-        };
-    }
-
-    log(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="log">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'log'
-            }
-        };
-    }
-
-    config(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="config">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'config'
-            }
-        };
-    }
-
-    ticket(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="ticket">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'ticket'
-            }
-        };
-    }
-
-    checkContainer(){
-        if($('#event-view-container').is(':visible')) {
-            mxPerformance.layout();
-        } else {
-            setTimeout(mxPerformance.checkContainer, 50);
-        }
-    }
-
-
 
 }
 

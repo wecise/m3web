@@ -36,7 +36,7 @@ class Job extends Matrix {
                             "vue-timeline-component"],function() {
             $(function() {
 
-                Vue.component('performance-history-chart', {
+                Vue.component('job-history-chart', {
                     template: `<div :id="id" style="width:100%;height:200px;"></div>`,
                     props:{
                         id:String,
@@ -107,7 +107,7 @@ class Job extends Matrix {
                 }); 
 
                 // 雷达
-                Vue.component("event-view-radar",{
+                Vue.component("job-radar",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -170,7 +170,7 @@ class Job extends Matrix {
                                             expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                            color: _.sample(_.map(mx.global.register.color.summary,'color'))
                                         }
                                 })
                                 return {name: title, class:className, child: pgs, sum: sum}
@@ -183,74 +183,8 @@ class Job extends Matrix {
                     }
                 });
 
-                // 详情
-                Vue.component("performance-view-detail",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model:Object
-                    },
-                    template: `<el-row :gutter="10">
-                                    <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
-                                        <div class="grid-content" style="text-align:center;">
-                                            <img src="/fs/assets/images/entity/png/linux.png?issys=true&type=download" class="image">
-                                            <p><h3>#{model.rows.host}#</h3></p>
-                                        </div>
-                                    </el-col>
-                                    <el-col :xs="12" :sm="14" :md="18" :lg="18" :xl="14">
-                                        <div class="grid-content">
-                                            <form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
-                                                <!-- 有模板 -->
-                                                <div class="form-group" v-for="item in model.template" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <div v-if="item.data==='value' && model.rows[item.data] <= 100">
-                                                            <progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b>
-                                                        </div>
-                                                        <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize">
-                                                        </div>
-                                                        <div v-else>
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- 没有模板 -->
-                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <div v-if="key==='value' && value <= 100">
-                                                            <progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b>
-                                                        </div>
-                                                        <div v-else-if="key==='value' && value > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize">
-                                                        </div>
-                                                        <div v-else>
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </el-col>
-                                </el-row>`,
-                    filters:{
-                        handlerFormat(evt){
-                            // 2019-03-13T21:35:31.678Z
-                            // 检查是否是UTC格式
-                            if(_.indexOf(evt,'T') === 10 && (_.indexOf(evt,'Z') === 23 || _.indexOf(evt,'Z') === 19) ){
-                                return moment(evt).format("LLL");
-                            } else {
-                                return evt;
-                            }
-                        }
-                    },
-                    mounted(){
-                    }
-                });
-
                 // 仪表盘
-                Vue.component("gauge-component",{
+                Vue.component("job-gauge",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -306,9 +240,10 @@ class Job extends Matrix {
                                             <p>进程ID：#{item.pid}#</p>
                                             <p>RUNID：#{item.runid}#</p>
                                             <p>SID：#{item.sid}#</p>
-                                            <p>状态：#{item.stauts}#</p>
-                                            <p>类型：#{item.type}#</p>
+                                            <p v-if="item.stauts">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
+                                            <p v-if="item.type">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
                                             <p>开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
+                                            <p>耗时：#{moment(item.etime).from(item.etime,true)}#</p>
                                             <p>命令：#{item.cmds}#</p>
                                             <p>输出：#{item.output}#</p>
                                             <p>错误：#{item.err}#</p>
@@ -319,7 +254,7 @@ class Job extends Matrix {
                 })
 
                 // 时间轴
-                Vue.component("performance-timeline",{
+                Vue.component("job-timeline",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -329,89 +264,135 @@ class Job extends Matrix {
                                     <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
                                         <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                             <h4>#{item.name}#</h4>
-                                            <p>状态：#{item.stauts}#  类型：#{item.type}#</p>
+                                            <p v-if="item.stauts">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
+                                            <p v-if="item.type">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
                                             <p>开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
+                                            <p>耗时：#{moment(item.etime).from(item.etime,true)}#</p>
                                             <p>命令：#{item.cmds}#</p>
                                         </el-card>
                                     </el-timeline-item>
                                 </el-timeline></div>`
-                })
-                
-                // 分析
-                Vue.component("event-diagnosis",{
+                })   
+
+                // 作业详情
+                Vue.component("job-diagnosis-detail",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
-                        model: Object
+                        model:Object
                     },
-                    data:function(){
-                        return {
-                            
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>
+                                        <el-row :gutter="10">
+                                            <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
+                                                <div class="grid-content" style="text-align:center;">
+                                                    <img src="/fs/assets/images/entity/png/linux.png?issys=true&type=download" class="image">
+                                                    <p><h3>#{model.rows.host}#</h3></p>
+                                                </div>
+                                            </el-col>
+                                            <el-col :xs="12" :sm="14" :md="18" :lg="18" :xl="14">
+                                                <div class="grid-content">
+                                                    <form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
+                                                        <!-- 有模板 -->
+                                                        <div class="form-group" v-for="item in model.template" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
+                                                            <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <div v-if="item.data==='value' && model.rows[item.data] <= 100">
+                                                                    <progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b>
+                                                                </div>
+                                                                <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
+                                                                    <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize">
+                                                                </div>
+                                                                <div v-else>
+                                                                    <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 没有模板 -->
+                                                        <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
+                                                            <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <div v-if="key==='value' && value <= 100">
+                                                                    <progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b>
+                                                                </div>
+                                                                <div v-else-if="key==='value' && value > 100">
+                                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize">
+                                                                </div>
+                                                                <div v-else>
+                                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </el-col>
+                                        </el-row>
+                                    </el-main>
+                                </el-container>`,
+                    filters:{
+                        handlerFormat(evt){
+                            // 2019-03-13T21:35:31.678Z
+                            // 检查是否是UTC格式
+                            if(_.indexOf(evt,'T') === 10 && (_.indexOf(evt,'Z') === 23 || _.indexOf(evt,'Z') === 19) ){
+                                return moment(evt).format("LLL");
+                            } else {
+                                return evt;
+                            }
                         }
                     },
-                    template: ` <section class="event-diagnosis">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active"><a href="#event-diagnosis-detail">作业详情</a></li>
-                                        <li class=""><a href="#event-diagnosis-journal">作业轨迹</a></li>
-                                        <li class=""><a href="#event-diagnosis-cmds">执行命令</a></li>
-                                    </ul>
-                                    <div class="content">
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-detail">作业详情</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-view-detail :id="id + '-detail'" :model="model.detail"></performance-view-detail>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-journal">作业轨迹
-                                                            <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
-                                                        </span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-timeline :id="id + '-journal'" :model="model.journal.rows"></performance-timeline>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row>
-                                            <el-col :span="24">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span id="event-diagnosis-cmds">执行命令
-                                                            <small>#{moment(_.head(model.cmds.rows).vtime).format("LLL")}# - #{moment(_.last(model.cmds.rows).vtime).format("LLL")}#</small>
-                                                        </span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <cmds-timeline :id="id + '-cmds'" :model="model.cmds.rows"></cmds-timeline>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                    </div>
-                                </section>`,
-                    mounted:function(){
-                        this.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                            
-                            $(self.$el).find("ul>li").click(function(e){
-                                $(self.$el).find("li.active").removeClass("active");
-                                $(e.target).closest("li").addClass("active");
-                                $("#content.content").css("padding-top","60px!important;");
-                            })
-                            
-                        }
+                    mounted(){
+                        console.log(this.model)
                     }
-                    
                 });
+
+                // 作业轨迹
+                Vue.component("job-diagnosis-journal",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>
+                                        <el-card class="box-card">
+                                            <div slot="header" class="clearfix">
+                                                <span>作业轨迹
+                                                    <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
+                                                </span>
+                                                <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                            </div>
+                                            <job-timeline :id="id + '-journal'" :model="model.journal.rows"></job-timeline>
+                                        </el-card>
+                                    </el-main>
+                                </el-container>
+                                    `,
+                    mounted(){
+                    }
+                });
+
+                // 执行命令
+                Vue.component("job-diagnosis-cmd",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>
+                                        <el-card class="box-card">
+                                            <div slot="header" class="clearfix">
+                                                <span id="event-diagnosis-cmds">执行命令
+                                                    <small>#{moment(_.head(model.cmds.rows).vtime).format("LLL")}# - #{moment(_.last(model.cmds.rows).vtime).format("LLL")}#</small>
+                                                </span>
+                                                <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
+                                            </div>
+                                            <cmds-timeline :id="id + '-cmds'" :model="model.cmds.rows"></cmds-timeline>
+                                        </el-card>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                    }
+                });             
                 
                 maxJob.app = {
                     delimiters: ['${', '}'],
@@ -421,9 +402,9 @@ class Job extends Matrix {
                         layout:{
                             main:{
                                 tabIndex: 1,
-                                activeIndex: 'event-view-console',
+                                activeIndex: 'job-view-console',
                                 tabs:[
-                                    {name: 'event-view-console', title:'性能列表', type: 'main'}
+                                    {name: 'job-view-console', title:'性能列表', type: 'main'}
                                 ],
                                 detail: {
                                     model: [],
@@ -433,22 +414,22 @@ class Job extends Matrix {
                             },
                             summary: {
                                 tabIndex: 1,
-                                activeIndex: 'performance-view-radar',
+                                activeIndex: 'job-radar',
                                 tabs:[
-                                    {name: 'performance-view-radar', title:'雷达', type: 'radar'},
-                                    {name: 'performance-view-gauge', title:'仪表盘', type: 'gauge'}
+                                    {name: 'job-radar', title:'雷达', type: 'radar'},
+                                    {name: 'job-gauge', title:'仪表盘', type: 'gauge'}
                                 ]
                             }
                         },
                         control: {
-                            ifSmart: '1',
+                            ifSmart: '0',
                             ifRefresh: '0'
                         },
                         // 搜索组件结构
                         model: {
                             id: "matrix-event-search",
                             filter: null,
-                            term: null,
+                            term:  null,
                             preset: null,
                             message: null,
                         },
@@ -458,7 +439,7 @@ class Job extends Matrix {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/jobs/:",
+                            class: "#/matrix/jobs/jobrun:",
                             // 指定api
                             api: "job",
                             // 时间窗口
@@ -478,9 +459,9 @@ class Job extends Matrix {
                         'layout.main.tabs':{
                             handler(val,oldVal){
                                 if(val.length > 1){
-                                    $("#tab-event-view-console").show();
+                                    $("#tab-job-view-console").show();
                                 }else {
-                                    $("#tab-event-view-console").hide();
+                                    $("#tab-job-view-console").hide();
                                 }
                             },
                             deep:true
@@ -510,16 +491,38 @@ class Job extends Matrix {
                         }
                     },
                     created(){
+                        // 初始化term
+                        try{
+                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            console.log(mx.urlParams['term'],term,JSON.stringify(term))
+                            this.options.term = term;
+                            //this.$root.$refs.searchRef.search();
+                        } catch(err){
+
+                        }
+
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
                         eventHub.$on("WINDOW-RESIZE-EVENT",maxJob.resizeEventConsole);
+
                     },
                     mounted(){
+                        const self = this;
+
                         $(this.$el).addClass('view-normal');
                         
                         // 没有详细页时，默认隐藏告警列表Title
                         this.hideTabEventViewConsoleUl();
+                      
+                        // 维度统计
+                        this.toggleSummaryBySmart(this.control.ifSmart);
+
+                        // 窗口Resize
+                        _.delay(function(){
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                        },2000);
                         
                     },
                     methods: {
@@ -529,9 +532,9 @@ class Job extends Matrix {
                         hideTabEventViewConsoleUl(){
                             const self = this;
 
-                            if($('#tab-event-view-console').is(':visible')) {
-                                $("#tab-event-view-console").hide();
-                            $("#tab-event-view-console > span").hide();
+                            if($('#tab-job-view-console').is(':visible')) {
+                                $("#tab-job-view-console").hide();
+                            $("#tab-job-view-console > span").hide();
                             } else {
                                 setTimeout(self.hideTabEventViewConsoleUl, 50);
                             }   
@@ -555,59 +558,51 @@ class Job extends Matrix {
 
                             this.control.ifRefresh = evt;
                             
-                            // RESIZE Event Summary
+                            // RESIZE Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            event.resizeEventConsole();
+                            // RESIZE Console
+                            maxJob.resizeEventConsole();
                         },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
-                                $("#event-view-summary").css("height","200px").css("display","");
+                                $("#job-view-summary").css("height","200px").css("display","");
                             } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
+                                $("#job-view-summary").css("height","0px").css("display","none");
                             }
                             this.control.ifSmart = evt;
                             
-                            // RESIZE Event Summary
+                            // RESIZE Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
+                            // RESIZE Console
                             maxJob.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {
                                 let id = event.id;
-                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
                                 
                                 // event
-                                let term = encodeURIComponent(JSON.stringify(event));
+                                let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript('/job/diagnosis-by-id.js',term).message;
                                 
                                 // 添加tab
-                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
-                                let detail = {title:`作业分析 ${event.name}`, name:`detail-${id}`, type: 'detail', child:[
-                                                {title:'作业分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
-                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
-                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'history'},
-                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
-                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
-                                                // {title:'日志', name:`log-${id}`, type: 'log'},
-                                                // {title:'配置', name:`config-${id}`, type: 'config'},
-                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
-                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
-                                                //{title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                let detail = {title:`作业分析 ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                                {title:'作业详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                                {title:'作业轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                                {title:'执行命令', name:`diagnosis-cmd-${id}`, type: 'cmd', model:model}
                                             ]};
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                                 this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `detail-${id}`;
+                                this.layout.main.activeIndex = `diagnosis-${id}`;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
                             }
                         },
                         detailRemove(targetName) {
-                            console.log(targetName)
+                            
                             let tabs = this.layout.main.tabs;
                             let activeIndex = this.layout.main.activeIndex;
                             if (activeIndex === targetName) {
@@ -633,6 +628,9 @@ class Job extends Matrix {
 
         window.addEventListener('resize', () => { 
             maxJob.resizeEventConsole();
+            
+            // RESIZE Event Summary
+            eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
@@ -640,116 +638,16 @@ class Job extends Matrix {
 
     resizeEventConsole(){
         let evwH = $(window).height();
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
+        let evcH = $("#job-view-container").height();
+        let evsH = $("#job-view-summary").height();
         
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+        $("#job-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px");
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("min-height", evwH + "px")
+                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=" + evsH + "px");
     }
-
-    graphNav(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>`,
-            data: {
-                id: id
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    graph(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
-            data: {
-                id: id,
-                model: fsHandler.callFsJScript('/job/job_detail_graph.js', null).message.data[0].graph
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    performance(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="performance">
-                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'performance'
-            }
-        };
-    }
-
-    log(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="log">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'log'
-            }
-        };
-    }
-
-    config(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="config">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'config'
-            }
-        };
-    }
-
-    ticket(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="ticket">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'ticket'
-            }
-        };
-    }
-
-    checkContainer(){
-        if($('#event-view-container').is(':visible')) {
-            maxJob.layout();
-        } else {
-            setTimeout(maxJob.checkContainer, 50);
-        }
-    }
-
-
 
 }
 

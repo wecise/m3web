@@ -176,7 +176,7 @@ class Config {
                             etcd: {
                                 key: null,
                                 value: null,
-                                ttl: -1,
+                                ttl: null,
                                 isDir: true
                             },
                             breadcrumb: [],
@@ -375,7 +375,7 @@ class Config {
     
                 maxConfig.app = {
                     delimiters: ['#{', '}#'],
-                    template:   `<div class="layout" style="margin: -20px -20px 0px;">
+                    template:   `<div class="layout">
                                     <Layout>
                                         <Header>
                                             <ButtonGroup>
@@ -602,7 +602,7 @@ class Config {
                                     formItem: {
                                         key: '',
                                         value: '',
-                                        ttl: -1,
+                                        ttl: null,
                                         ifDir: true,
                                     }
                                 },
@@ -649,7 +649,7 @@ class Config {
                             let editor = ace.edit('editor-' + self.configTabs.activeIndex);
                             item.value = editor.getValue();
                             
-                            item.ttl = self.configTreeSelectedNode.ttl || -1;
+                            item.ttl = self.configTreeSelectedNode.ttl || null;
 
                             alertify.confirm(`确认要更新以下配置?<br><br>
                                 位置：${item.key}<br><br>

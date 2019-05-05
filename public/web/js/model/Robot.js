@@ -55,10 +55,13 @@ class Robot {
             data(){
                 return {
                     message: {
-                        term: "",
+                        term: '',
                         defaultSubject: [],
                         subject: [],
                         ws: null,
+                        search: {
+                            term: ''
+                        }
                     }
                 }
             },
@@ -67,18 +70,28 @@ class Robot {
                                 <a href="javascript:void(0);">消息 <span class="badge" style="position: absolute;background: rgb(255, 0, 0);" v-if="allMsg>0">#{allMsg}#</span></a>
                             </span>
                             <el-aside width="34%" style="height:100%;overflow: auto;background: transparent;">
-                                <div class="media" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" v-for="(item,index) in message.subject" style="border-bottom: 1px solid rgb(221, 221, 221);padding: 5px;cursor: pointer;margin: 0px;" @click="clickMe(item)">
-                                    <div class="media-left">
-                                        <span class="fas fa-circle" style="position: absolute;left:120px;color: rgb(255, 0, 0);transform: scale(.7);" v-if="item.msgs.length>0"></span>
-                                        <a href="#">
-                                            <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
-                                        </a>
-                                    </div>
-                                    <div class="media-body" style="text-align: left;">
-                                        <h5 class="media-heading">#{item.title}#</h5>
-                                        <span class="date-time">#{moment(item.vtime).format("LLL")}#</span>
-                                    </div>
-                                </div>
+                                <el-container>
+                                    <el-header style="height:80px;line-height:80px;display: flex;">
+                                        <el-input v-model="message.search.term" placeholder="搜索"></el-input>
+                                        <el-tooltip content="订阅消息">
+                                            <a hrefe="javascript:void(0);" class="btn btn-link" style="padding: 30px 10px;"><i class="fas fa-plus"></i></a>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main style="padding:0px;">
+                                        <div class="media" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" v-for="(item,index) in message.subject" style="border-bottom: 1px solid rgb(221, 221, 221);padding: 5px;cursor: pointer;margin: 0px;" @click="clickMe(item)">
+                                            <div class="media-left">
+                                                <span class="fas fa-circle" style="position: absolute;left:40px;color: rgb(255, 0, 0);transform: scale(.7);" v-if="item.msgs.length>0"></span>
+                                                <a href="#">
+                                                    <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
+                                                </a>
+                                            </div>
+                                            <div class="media-body" style="text-align: left;">
+                                                <h5 class="media-heading">#{item.title}#</h5>
+                                                <span class="date-time">#{moment(item.vtime).format("L, ddd, HH:MM A")}#</span>
+                                            </div>
+                                        </div>
+                                    </el-main>
+                                </el-container>
                             </el-aside>
                             <el-container>
                                 <el-main style="padding:0px;text-align: center;line-height: 30px;background:rgb(228, 231, 237);overflow:hidden auto;" id="subject-msgs">
@@ -253,17 +266,24 @@ class Robot {
             },
             template:   `<el-container>
                             <el-aside width="34%" style="height:100%;overflow: auto;background: transparent;border-right:1px solid #dddddd;">
-                                <div class="media" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" v-for="(item,index) in setup.list" style="border-bottom: 1px solid rgb(221, 221, 221);padding: 5px;cursor: pointer;margin: 0px;" @click="clickMe(item)">
-                                    <div class="media-left">
-                                        <a href="#">
-                                            <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
-                                        </a>
-                                    </div>
-                                    <div class="media-body" style="text-align: left;">
-                                        <h5 class="media-heading">#{item.name}#</h5>
-                                        <span class="date-time">#{item.title}#</span>
-                                    </div>
-                                </div>
+                                <el-container>
+                                    <el-header style="height:30px;">
+                                        
+                                    </el-header>
+                                    <el-main style="padding:0px;">
+                                        <div class="media" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" v-for="(item,index) in setup.list" style="border-bottom: 1px solid rgb(221, 221, 221);padding: 5px;cursor: pointer;margin: 0px;" @click="clickMe(item)">
+                                            <div class="media-left">
+                                                <a href="#">
+                                                    <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
+                                                </a>
+                                            </div>
+                                            <div class="media-body" style="text-align: left;">
+                                                <h5 class="media-heading">#{item.name}#</h5>
+                                                <span class="date-time">#{item.title}#</span>
+                                            </div>
+                                        </div>
+                                    </el-main>
+                                </el-container>
                             </el-aside>
                             <component v-bind:is="currentView" :model="null" transition="fade" transition-mode="out-in"></component>
                         </el-container>`,

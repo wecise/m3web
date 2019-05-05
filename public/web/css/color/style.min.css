@@ -27,9 +27,9 @@ a{
 a:focus{
     outline:0
 }
-label{
-    color:#242a30
-}
+/* label{
+    color:#434c55
+} */
 /*.page-header-fixed{
     padding-top:54px
 }*/
@@ -739,9 +739,9 @@ label{
 .form-horizontal.form-bordered .has-feedback .form-control-feedback{
     top:15px
 }*/
-label{
+/* label{
     font-weight:500
-}
+} */
 .has-error .form-control,.has-error .form-control:focus,.has-success .form-control,.has-success .form-control:focus,.has-warning .form-control,.has-warning .form-control:focus{
     -webkit-box-shadow:none;
     box-shadow:none
@@ -920,11 +920,11 @@ legend{
     line-height:1.25;
     font-weight:600
 }
-.label{
+/* .label{
     font-size:75%;
     font-weight:600
-}
-.badge.badge-square{
+} */
+/* .badge.badge-square{
     -webkit-border-radius:0;
     -moz-border-radius:0;
     border-radius:0
@@ -949,7 +949,7 @@ legend{
 }
 .badge.badge-inverse,.label.label-inverse{
     background:#2d353c
-}
+} */
 .pager li>a,.pager li>span,.pagination>li>a{
     border-color:#e2e7eb;
     color:#242a30

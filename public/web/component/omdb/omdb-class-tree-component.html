@@ -397,13 +397,12 @@
                                                     修改时间：${file.lastModifiedDate}<br><br>
                                                     文件大小：${mx.bytesToSize(file.size)}`, function (e) {
                                     if (e) {
-                                        let rtn = omdbHandler.classDataImport(event);
+
+                                        let rtn = omdbHandler.classDataImport(file);
 
                                     } else {
                                         
                                     }
-
-                                    event.target.value = null;
 
                                 });
                             });

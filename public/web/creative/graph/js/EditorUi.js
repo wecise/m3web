@@ -1459,7 +1459,7 @@ EditorUi.prototype.initCanvas = function()
 		
 		// Creates toolbar for viewer - do not use CSS here
 		// as this may be used in a viewer that has no CSS
-		if (urlParams['toolbar'] != '0')
+		if (mx.urlParams['toolbar'] != '0')
 		{
 			this.chromelessToolbar = document.createElement('div');
 			this.chromelessToolbar.style.position = 'fixed';
@@ -1652,7 +1652,7 @@ EditorUi.prototype.initCanvas = function()
 				mxUtils.setOpacity(this.chromelessToolbar, opacity || 30);
 			});
 	
-			if (urlParams['layers'] == '1')
+			if (mx.urlParams['layers'] == '1')
 			{
 				this.layersDialog = null;
 				
@@ -1725,11 +1725,11 @@ EditorUi.prototype.initCanvas = function()
 				}), Editor.editLargeImage, mxResources.get('edit'));
 			}
 			
-			if (graph.lightbox && (urlParams['close'] == '1' || this.container != document.body))
+			if (graph.lightbox && (mx.urlParams['close'] == '1' || this.container != document.body))
 			{
 				addButton(mxUtils.bind(this, function(evt)
 				{
-					if (urlParams['close'] == '1')
+					if (mx.urlParams['close'] == '1')
 					{
 						window.close();
 					}
@@ -2071,7 +2071,7 @@ EditorUi.prototype.createTemporaryGraph = function(stylesheet)
  */
 EditorUi.prototype.addChromelessClickHandler = function()
 {
-	var hl = urlParams['highlight'];
+	var hl = mx.urlParams['highlight'];
 	
 	// Adds leading # for highlight color code
 	if (hl != null && hl.length > 0)
@@ -2105,7 +2105,7 @@ EditorUi.prototype.lightboxFit = function(maxHeight)
 	}
 	else
 	{
-		var p = urlParams['border'];
+		var p = mx.urlParams['border'];
 		var border = 60;
 		
 		if (p != null)
@@ -2362,7 +2362,7 @@ EditorUi.prototype.getUrl = function(pathname)
 	var parms = (href.indexOf('?') > 0) ? 1 : 0;
 	
 	// Removes template URL parameter for new blank diagram
-	for (var key in urlParams)
+	for (var key in mx.urlParams)
 	{
 		if (parms == 0)
 		{
@@ -2373,7 +2373,7 @@ EditorUi.prototype.getUrl = function(pathname)
 			href += '&';
 		}
 	
-		href += key + '=' + urlParams[key];
+		href += key + '=' + mx.urlParams[key];
 		parms++;
 	}
 	

@@ -27,7 +27,7 @@ class Entity extends Matrix {
 
         VueLoader.onloaded(["ai-robot-component",
                             "event-graph-component",
-                            "event-datatable-component",
+                            "entity-datatable-component",
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
@@ -118,7 +118,7 @@ class Entity extends Matrix {
                                             expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
-                                            color: _.sample(['#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                            color: _.sample(_.map(mx.global.register.color.summary,'color'))
                                         }
                                 })
                                 return {name: title, class:className, child: pgs, sum: sum}
@@ -707,7 +707,7 @@ class Entity extends Matrix {
                             }
                         },
                         control: {
-                            ifSmart: '1',
+                            ifSmart: '0',
                         },
                         // 搜索组件结构
                         model: {
@@ -785,6 +785,15 @@ class Entity extends Matrix {
                         
                         // 没有详细页时，默认隐藏告警列表Title
                         this.hideTabEventViewConsoleUl();
+
+                        // 维度统计
+                        this.toggleSummaryBySmart(this.control.ifSmart);
+
+                        // 窗口Resize
+                        _.delay(function(){
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                        },2000);
                         
                     },
                     methods: {
@@ -807,7 +816,7 @@ class Entity extends Matrix {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
-                        toggleSummaryView(evt){
+                        toggleSummaryBySmart(evt){
                             if(evt==1) {
                                 $("#event-view-summary").css("height","200px").css("display","");
                             } else {
@@ -881,6 +890,9 @@ class Entity extends Matrix {
 
         window.addEventListener('resize', () => { 
             maxEntity.resizeEventConsole();
+
+            // RESIZE Event Summary
+            eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
@@ -893,111 +905,11 @@ class Entity extends Matrix {
         
         $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px");
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("min-height", evwH + "px")
+                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=" + evsH + "px");
     }
-
-    graphNav(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`,
-            data: {
-                id: id
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    graph(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
-            data: {
-                id: id,
-                model: fsHandler.callFsJScript('/entity/entity_detail_graph.js', null).message.data[0].graph
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    performance(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="performance">
-                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'performance'
-            }
-        };
-    }
-
-    log(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="log">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'log'
-            }
-        };
-    }
-
-    config(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="config">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'config'
-            }
-        };
-    }
-
-    ticket(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="ticket">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'ticket'
-            }
-        };
-    }
-
-    checkContainer(){
-        if($('#event-view-container').is(':visible')) {
-            maxEntity.layout();
-        } else {
-            setTimeout(maxEntity.checkContainer, 50);
-        }
-    }
-
-
 
 }
 

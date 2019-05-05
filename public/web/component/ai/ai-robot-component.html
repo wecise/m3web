@@ -155,9 +155,7 @@
 		}
 
 		.ai-robot-component .is-active{
-			/* padding: 10px 10px;
-			border-radius: 35px; */
-			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+			box-shadow: 0 0px 4px 0 rgba(0, 0, 0, 0.1);
 		}
 
 		.ai-robot-component .el-footer {
@@ -237,25 +235,47 @@
 			}
 		}
 
+		/* 左边 Tabs 样式 */
+		.ai-robot-component .el-tabs__nav.is-left{
+			position: relative;
+    		height: 100%;
+		}
+		.ai-robot-component .el-tabs__nav.is-left #tab-robot-ai{
+			position: absolute;
+			top: 0;
+			width: 100%;
+			height: 60px;
+			margin-top: 20px;
+		}
+		.ai-robot-component .el-tabs__nav.is-left #tab-robot-message{
+			margin-top: 40px;
+		}
+		.ai-robot-component .el-tabs__nav.is-left #tab-robot-setup{
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			height: 60px;
+		}
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="ai-robot-component"  ----------*/
 	<template>		
-			<el-container>
-				<el-tabs :tab-position="tabs.position" v-model="tabs.activeName">
-					<el-tab-pane name="robot-ai">
-						<span slot="label"><img src="/fs/assets/images/robot/png/robot.png?issys=true&type=download" class="image" style="width: 68px;"></span>
-						<ai-robot></ai-robot>
-					</el-tab-pane>
-					<el-tab-pane label="消息"  name="robot-message">
-						<ai-message></ai-message>
-					</el-tab-pane>
-					<el-tab-pane label="设置"  name="robot-setup">
-						<ai-setup></ai-setup>
-					</el-tab-pane>
-				</el-tabs>
-			</el-container>
+		<el-container>
+			<el-tabs :tab-position="tabs.position" v-model="tabs.activeName">
+				<el-tab-pane name="robot-ai">
+					<span slot="label"><img src="/fs/assets/images/robot/png/robot.png?issys=true&type=download" class="image" style="width: 68px;"></span>
+					<ai-robot></ai-robot>
+				</el-tab-pane>
+				<el-tab-pane label="消息"  name="robot-message">
+					<ai-message></ai-message>
+				</el-tab-pane>
+				<el-tab-pane label="设置"  name="robot-setup">
+					<ai-setup></ai-setup>
+				</el-tab-pane>
+			</el-tabs>
+		</el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/

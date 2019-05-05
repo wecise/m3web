@@ -974,8 +974,8 @@ class Imap extends Matrix {
                                             let hashId = objectHash.sha1(cell);
                                             let config = {
                                                 delimiters: ['#{', '}#'],
-                                                template: ` <tabs v-model="layout.main.index">
-                                                                <tab :title="item.title" v-for="(item,index) in layout.main.tabs" :key="item.id"  html-title style="height:calc(100vh - 235px);overflow:hidden;">
+                                                template: ` <el-tabs v-model="layout.main.activeIndex" class="el-tabs-bottom-line">
+                                                                <el-tab-pane :label="item.title" v-for="(item,index) in layout.main.tabs" :key="item.id"  style="height:calc(100vh - 235px);overflow:hidden;">
                                                                     <div v-if="item.type === 'profile'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
                                                                         <profile-view :id="item.id" :model="model[item.type]"></profile-view>
                                                                     </div>
@@ -989,12 +989,12 @@ class Imap extends Matrix {
                                                                     <div v-if="item.type === 'file'" style="height:100%;overflow-x:hidden;overflow-y:auto;">
                                                                         <file-view :id="item.id" :model="model[item.type]"></file-view>
                                                                     </div>
-                                                                </tab>
-                                                            </tabs>`,
+                                                                </el-tab-pane>
+                                                            </el-tabs>`,
                                                 data: {
                                                     layout:{
                                                         main:{
-                                                            index: 0,
+                                                            activeIndex: 0,
                                                             tabs:[
                                                                 {title:'属性', id:`profile-${hashId}`, type: 'profile'},
                                                                 {title:'事件', id:`event-${hashId}`, type: 'event'},
@@ -1231,11 +1231,18 @@ class Imap extends Matrix {
                             self.initOutline();
                         },
                         editIt(){
-                            let item = {parent:URL_PARAMS_ITEM.parent, name:URL_PARAMS_ITEM.name, ftype:URL_PARAMS_ITEM.ftype, lang: window.MATRIX_LANG, action:'edit'};
+                            let item = { 
+                                            parent:URL_PARAMS_ITEM.parent, 
+                                            name:URL_PARAMS_ITEM.name, 
+                                            ftype:URL_PARAMS_ITEM.ftype, 
+                                            lang: window.MATRIX_LANG, 
+                                            attr:URL_PARAMS_ITEM.attr, 
+                                            action:'edit'
+                                        };
 
                             let url = fsHandler.genFsUrl(item,null,null);
 
-                            window.open(url, "_blank");
+                            window.open(url, "_parent");
                         }
                     }
                 });

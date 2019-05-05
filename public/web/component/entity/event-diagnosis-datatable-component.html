@@ -303,7 +303,7 @@
 			},
 			resize(){
 				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
-				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px');
+				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
 			},
             contextMenu: function(){
                 const self = this;

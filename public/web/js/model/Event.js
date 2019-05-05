@@ -43,15 +43,17 @@ class Event extends Matrix {
                         id: String,
                         model: Object
                     },
-                    template:   `<el-container style="height: 75vh;">
+                    template:   `<el-container style="height: calc(100vh - 230px);">
                                     <el-main>
                                         <div class="block">
                                             <el-timeline>
                                                 <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.rows">
                                                     <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                                        <h4>#{item.value}#</h4>
-                                                        <p>#{item.biz}# #{item.host}#</p>
-                                                        <p>#{item.msg}#</p>
+                                                        <p>业务：#{item.biz}#</p>
+                                                        <p>服务器：#{item.host}#</p>
+                                                        <p>级别：#{mx.global.register.event.severity[item.severity][1]}#</p>
+                                                        <p>状态：#{mx.global.register.event.severity[item.status][1]}#</p>
+                                                        <p>摘要：#{item.msg}#</p>
                                                     </el-card>
                                                 </el-timeline-item>
                                             </el-timeline>
@@ -77,7 +79,7 @@ class Event extends Matrix {
                                          v-for="pg in progress" 
                                          style="padding-left: 80px;overflow: hidden;height: 24px;margin-bottom: 5px;background-color: rgb(245, 245, 245);border-radius: 4px;transition: width .6s ease;">
                                         <label style="padding: 3px 5px;position: absolute;left: 10px;">#{pg.name}#</label>
-                                        <el-tooltip placement="top" v-for="item in pg.child">
+                                        <el-tooltip placement="top" v-for="item in pg.child" open-delay="500">
                                             <div slot="content">#{item.title}#</div>
                                             <div class="progress-bar animated fadeInLeft" 
                                                 :id="item.id"
@@ -258,7 +260,7 @@ class Event extends Matrix {
                         id: String,
                         model:String
                     },
-                    template: `<el-container style="height: 75vh;">
+                    template: `<el-container style="height: calc(100vh - 230px);">
                                     <el-main>
                                         <form class="form-horizontal">
                                             <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
@@ -393,7 +395,7 @@ class Event extends Matrix {
                             
                         }
                     },
-                    template:  `<el-container style="height: 75vh;">
+                    template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
                                         <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
                                     </el-main>
@@ -418,21 +420,50 @@ class Event extends Matrix {
                     },
                     data(){
                         return {
-                            menuData: [],
-                            defaultOpeneds: [],
-                            tableData: {}
+                            dimensionData: {
+                                rows: [],
+                                columns: [],
+                                options: {
+                                    searching: false,
+                                    aDataSort: false,
+                                    bSort: false,
+                                    bAutoWidth: true,
+                                    info: false,
+                                    paging:         false,
+                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                    stateSave: false,
+                                    keys:  true,
+                                    select: {
+                                        style: 'multi',
+                                    }
+                                },
+                                selected: [],
+                                ifOR: '1'
+                            },
+                            tableData: {},
                         }
                     },
-                    template:  `<el-container style="height: 75vh;">
-                                    <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-                                        <el-menu :default-openeds="defaultOpeneds" @select="menuSelect">
-                                            <el-submenu :index="key" v-for="(item,key) in menuData">
-                                                <template slot="title"><i class="fas fa-braille fa-fw"></i> #{_.upperCase(key)}#</template>
-                                                <el-menu-item :index="k" v-for="k in item">#{k}#</el-menu-item>
-                                            </el-submenu>
-                                        </el-menu>
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" id="left-panel">
+                                        <el-container style="overflow:hidden;height:100%;">
+                                            <el-header style="height: 30px;
+                                                                padding: 5px 10px;
+                                                                float: right;
+                                                                line-height: 20px;">
+                                                当前告警
+                                                <el-switch
+                                                    v-model="dimensionData.ifOR"
+                                                    active-text="AND"
+                                                    inactive-text="OR"
+                                                    style="right:-40%;">
+                                                </el-switch>
+                                            </el-header>
+                                            <el-main style="padding:0px;overflow:auto;">
+                                                <table :id="id+'-table'" class="display event-table-dimension" width="100%"></table>
+                                            </el-main>
+                                        </el-container>
                                     </el-aside>
-                                    <el-container>
+                                    <el-container class="split" id="right-panel">
                                         <el-main style="padding:0px;">
                                             <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData"></event-diagnosis-datatable-component>
                                         </el-main>
@@ -450,17 +481,62 @@ class Event extends Matrix {
                         init(){    
                             const self = this;
 
-                            this.menuData = _.groupBy(_.keys(this.model.rows[0]),function(v){
+                            self.dimensionData.rows = _.map(_.toPairs(self.model.rows[0]),function(v){
+                                return {title:v[0],data:v[1]};
+                            });
+
+                            self.dimensionData.columns = [{data:'title',title:'维度'},{data:'data',title:'值'}];
+
+                            self.menuData = _.groupBy(_.keys(self.model.rows[0]),function(v){
                                 return v.substr(0,1);
                             })
-                        },
-                        menuSelect(key, keyPath){
                             
-                            this.defaultOpeneds = keyPath;
+                            //初始化维度选择Table
+                            var table = $(`#${self.id}-table`).DataTable(_.extend(
+                                                                        self.dimensionData.options,{
+                                                                            data: self.dimensionData.rows,
+                                                                            columns: self.dimensionData.columns
+                                                                        }));
+                            
+                            table.on( 'select', function ( e, dt, type, indexes ) {
+                                self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
+                                self.handlerFetchData(self.dimensionData.selected);
+                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                                self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
+                                self.handlerFetchData(self.dimensionData.selected);
+                            } );
 
-                            let item = {name: key, value: this.model.rows[0][key]}; 
-                            // 获取相应维度的关联事件  eg: biz='查账系统'
-                            this.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(JSON.stringify((item)))).message.event;
+                            // table style
+                            $(self.$el).find("thead").css("display","none");
+
+                            Split(['#left-panel', '#right-panel'], {
+                                sizes: [45, 55],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                            });
+                            
+                        },
+                        handlerFetchData(event){
+                            const self = this;
+
+                            if(event.length < 1) {
+                                self.tableData = [];
+                                return false;
+                            }
+
+                            try{
+                                let temp = _.map(event,function(v){
+                                    return `${v.title}='${v.data}'`;
+                                })
+
+                                // 获取相应维度的关联事件  eg: biz='查账系统'
+                                let where = temp.join(` ${self.dimensionData.ifOR=='1'?'and':'or'} `);
+                                self.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
+                            } catch(err){
+                                self.tableData = [];
+                            }
+                            
                         }
                     }
                 })
@@ -484,7 +560,7 @@ class Event extends Matrix {
                             this.sumByStep();
                         }
                     },
-                    template:  `<el-container style="height: 75vh;">
+                    template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-aside width="400px">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -785,6 +861,16 @@ class Event extends Matrix {
                         
                         // 没有详细页时，默认隐藏告警列表Title
                         this.hideTabEventViewConsoleUl();
+
+                        // 维度统计
+                        this.toggleSummaryBySmart(this.control.ifSmart);
+
+                        // 窗口Resize
+                        _.delay(function(){
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                        },2000);
+                        
                         
                     },
                     methods: {
@@ -905,10 +991,12 @@ class Event extends Matrix {
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
-                            // RESIZE Event Summary
-                            eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            event.resizeEventConsole();
+                            _.delay(function(){
+                                // RESIZE Event Summary
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                // RESIZE Event Console
+                                event.resizeEventConsole();
+                            },500)
                         }
                     }
                 };
@@ -919,6 +1007,9 @@ class Event extends Matrix {
 
         window.addEventListener('resize', () => { 
             event.resizeEventConsole();
+
+            // RESIZE Event Summary
+            eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
@@ -931,7 +1022,10 @@ class Event extends Matrix {
         
         $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px");
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("min-height", evwH + "px")
+                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=" + evsH + "px");
     }
 
     checkContainer(){

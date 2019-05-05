@@ -892,13 +892,13 @@ Graph = function(container, model, renderHint, stylesheet, themes)
  * Specifies if the touch UI should be used (cannot detect touch in FF so always on for Windows/Linux)
  */
 Graph.touchStyle = mxClient.IS_TOUCH || (mxClient.IS_FF && mxClient.IS_WIN) || navigator.maxTouchPoints > 0 ||
-	navigator.msMaxTouchPoints > 0 || window.urlParams == null || urlParams['touch'] == '1';
+	navigator.msMaxTouchPoints > 0 || window.urlParams == null || mx.urlParams['touch'] == '1';
 
 /**
  * Shortcut for capability check.
  */
 Graph.fileSupport = window.File != null && window.FileReader != null && window.FileList != null &&
-	(window.urlParams == null || urlParams['filesupport'] != '0');
+	(window.urlParams == null || mx.urlParams['filesupport'] != '0');
 
 /**
  * Default size for line jumps.
@@ -942,12 +942,12 @@ Graph.prototype.maxFitScale = null;
  * Sets the policy for links. Possible values are "self" to replace any framesets,
  * "blank" to load the URL in <linkTarget> and "auto" (default).
  */
-Graph.prototype.linkPolicy = (urlParams['target'] == 'frame') ? 'blank' : (urlParams['target'] || 'auto');
+Graph.prototype.linkPolicy = (mx.urlParams['target'] == 'frame') ? 'blank' : (mx.urlParams['target'] || 'auto');
 
 /**
  * Target for links that open in a new window. Default is _blank.
  */
-Graph.prototype.linkTarget = (urlParams['target'] == 'frame') ? '_self' : '_blank';
+Graph.prototype.linkTarget = (mx.urlParams['target'] == 'frame') ? '_self' : '_blank';
 
 /**
  * Scrollbars are enabled on non-touch devices (not including Firefox because touch events

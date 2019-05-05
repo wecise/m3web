@@ -396,7 +396,7 @@
                 $(self.$el).parent().parent().parent().css("height", event.top);
                 $(self.$el).parent().parent().parent().parent().css("height", event.top);
 
-                $('.omdb-class-datatables-component .dataTables_scrollBody').css("max-height", event.top - 65);
+                $('.omdb-class-datatables-component .dataTables_scrollBody').css("max-height", event.top - 65).css("min-height", event.top - 65);
 			},
 			refresh: function(event){
                 let self = this;

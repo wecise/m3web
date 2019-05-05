@@ -304,7 +304,7 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/entity/entity-datatable-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-diagnosis-datatable-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-summary-component.html"></link>
@@ -330,52 +330,41 @@
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
 						<div v-if="item.type==='main'">
-							<!--div class="panel panel-default panel-white-border" data-sortable-id="ui-modal-notification-1"-->
-								<!-- <div class="panel-heading">
-									<div class="panel-heading-btn">
-										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-expand"><i class="fa fa-expand"></i></a>
-										<a href="javascript:;" class="btn btn-xs btn-icon" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
-									</div>
-									<h4 class="panel-title"></h4>
-								</div> -->
-								<!--div class="panel-body" id="event-view-container" style="height:calc(100vh - 200px);display: flex;flex-direction: column;"-->
-									<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
-										<div class="event-view-summary-control">
-											${control.ifSmart==1?'智能分析启用中':'智能分析关闭中'}
-											<el-switch
-											v-model="control.ifSmart"
-											active-color="#13ce66"
-											inactive-color="#dddddd"
-											active-value="1"
-											inactive-value="0"
-											@change="toggleSummaryView">
-											</el-switch>
-										</div>
-									</el-tooltip>
-									<el-row :gutter="10" id="event-view-summary">
-										<el-col :xl="24">
-											<el-tabs v-model="layout.summary.activeIndex" type="border">
-												<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-													<div v-if="item.type=='radar'">
-														<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
-													</div>
-													<div v-if="item.type=='pie'">
-														<event-view-pie id="event-pie" :model='model.message'></event-view-pie>
-													</div>
-												</el-tab-pane>
-											</el-tabs>
-										</el-col>
-									</el-row>
-									<el-row :gutter="10" id="event-view-console">
-										<el-col :xl="8" class="tree-view animated fadeInRight">
-											<probe-tree-component id="event-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
-										</el-col>
-										<el-col :xl="16" class="table-view animated fadeInLeft">
-											<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
-										</el-col>
-									</el-row>
-								<!--/div-->
-							<!--/div-->
+							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
+								<div class="event-view-summary-control">
+									${control.ifSmart==1?'智能分析':'智能分析'}
+									<el-switch
+									v-model="control.ifSmart"
+									active-color="#13ce66"
+									inactive-color="#dddddd"
+									active-value="1"
+									inactive-value="0"
+									@change="toggleSummaryBySmart">
+									</el-switch>
+								</div>
+							</el-tooltip>
+							<el-row :gutter="10" id="event-view-summary">
+								<el-col :xl="24">
+									<el-tabs v-model="layout.summary.activeIndex" type="border">
+										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+											<div v-if="item.type=='radar'">
+												<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
+											</div>
+											<div v-if="item.type=='pie'">
+												<event-view-pie id="event-pie" :model='model.message'></event-view-pie>
+											</div>
+										</el-tab-pane>
+									</el-tabs>
+								</el-col>
+							</el-row>
+							<el-row :gutter="10" id="event-view-console">
+								<el-col :xl="8" class="tree-view animated fadeInRight">
+									<probe-tree-component id="event-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
+								</el-col>
+								<el-col :xl="16" class="table-view animated fadeInLeft">
+									<entity-datatable-component id="event-list" :model="model.message"></entity-datatable-component>
+								</el-col>
+							</el-row>
 						</div>
 						<div v-if="item.type==='detail'">
 							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;">

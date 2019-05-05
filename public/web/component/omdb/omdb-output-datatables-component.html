@@ -163,9 +163,9 @@
 		                    }
 
                             //  data & time render
-                            if(_.includes(['day','vtime','mtime','ctime'],v.field)){
+                            if(_.includes(['day','vtime','mtime','ctime','stime','etime'],v.field)){
                                 return _.extend(v,{data:v.field, title: title, render: function(data, type, row){
-                                            return moment(data).format("YYYY-MM-DD HH:mm:ss");
+                                            return moment(data).format("YYYY-MM-DD HH:mm:ss.SSSS");
                                         }});
                             }
 
@@ -323,7 +323,7 @@
 
                     console.log(2,moment().format("YYYY-MM-DD HH:m.s"))
 
-                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192);
+                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192).css("min-height", window.layout_container_bottomHeight - 192);
 
 	            _.delay(function(){
                     self.datatable.buttons().container().appendTo( `.${self.id}` );
@@ -415,7 +415,7 @@
 			resize: function(event){
                 const self = this;
 
-                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192);
+                $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", event.bottom - 192).css("min-height", event.bottom - 192);
 			},
 			refresh: function(event){
                 const self = this;

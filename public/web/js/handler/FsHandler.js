@@ -217,7 +217,7 @@ class FsHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("删除失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
 
@@ -268,7 +268,7 @@ class FsHandler {
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
 

@@ -801,6 +801,55 @@ class Window {
         return win;
     }
 
+    winRule(title, template, position, container){
+
+        position = {
+            my: 'center',
+            at: 'center',
+            of: 'window'
+        };
+
+        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[3] = this.height * 0.5;
+
+        let win = $.jsPanel({
+            theme:         maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: position,
+            container: 'body',
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            callback:       function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-content",this).css({
+                    "border": "1px solid #dddddd",
+                    "overflow": "hidden",
+                    "padding": "15px 15px 20px 15px"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
     winInfo(title, template, position, container){
 
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-INFO-POSITION")));

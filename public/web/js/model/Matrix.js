@@ -337,7 +337,7 @@ class Matrix {
                         $("#ai-robot span").remove();
                     } else {
                         $("#ai-robot span").remove();
-                        $("#ai-robot div").first().append(`<span class="badge badge-danger animated fadeIn" style="margin:15px 0;">${count}</span>`);
+                        $("#ai-robot div").first().append(`<span class="animated fadeIn" style="margin:15px 0;background:#ff0000;border-radius:15px;padding:3px;color:#ffffff;">${count}</span>`);
                     }
                 } catch(err){
 

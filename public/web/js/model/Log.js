@@ -27,7 +27,7 @@ class Log extends Matrix {
 
         VueLoader.onloaded(["ai-robot-component",
                             "event-graph-component",
-                            "event-datatable-component",
+                            "log-datatable-component",
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
@@ -95,17 +95,47 @@ class Log extends Matrix {
                     }
                 }); 
 
-                // 时间轴
-                Vue.component("event-view-timeline",{
-                    delimiters: ['${', '}'],
+                // 仪表盘
+                Vue.component("log-gauge",{
+                    delimiters: ['#{', '}#'],
                     props: {
-                        id: String
+                        id: String,
+                        model: Object
                     },
-                    template: "#event-view-timeline-template"
+                    data:function(){
+                        return {
+                            gauge: [
+                                {host:'wecise',inst:'',param:'', value:25,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:80,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:100,status:'success', showText:false},
+                                {host:'wecise',inst:'',param:'', value:50,status:'text', showText:false},
+                                {host:'wecise',inst:'',param:'', value:100,status:'exception', showText:false},
+                                {host:'wecise',inst:'',param:'', value:75,status:'success', showText:false}
+                            ]
+                        }
+                    },
+                    template: ` <el-row :gutter="0">
+                                    <el-col :span="3" v-for="item in gauge">
+                                        <div class="grid-content" style="text-align: center;">
+                                            <el-progress type="circle" :percentage="item.value" :status="item.status"></el-progress>
+                                            <p>#{item.host}#</p>
+                                        </div>
+                                    </el-col>
+                                </el-row>`,
+                    mounted:function(){
+                        this.init();
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+                        
+                        }
+                    }
+                    
                 });
 
                 // 雷达
-                Vue.component("event-view-radar",{
+                Vue.component("log-radar",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -168,7 +198,7 @@ class Log extends Matrix {
                                             expression:  className==='vtime'?`at ${moment(name).format("YYYY-MM-DD HH:mm:SS")} within 15minutes for ${className}`:`${className}=${name}`,
                                             title: `按${title}分析 \n\n ${name}: ${val[1]}`,
                                             width: val[1]/sum * 100, 
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
+                                            color: _.sample(_.map(mx.global.register.color.summary,'color'))
                                         }
                                 })
                                 return {name: title, class:className, child: pgs, sum: sum}
@@ -181,22 +211,26 @@ class Log extends Matrix {
                     }
                 });
 
-                // 详情
-                Vue.component("event-view-detail",{
+                // 日志详情
+                Vue.component("log-diagnosis-detail",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:String
                     },
-                    template: `<form class="form-horizontal">
-                                    <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                        <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                        <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat" v-if="JSON.stringify(value).length<200">
-                                            <textarea type="text" class="form-control-bg-grey" rows="6" :placeholder="key" :value="value | handlerFormat" v-else></textarea>
-                                        </div>
-                                    </div>
-                                </form>`,
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>            
+                                        <form class="form-horizontal">
+                                            <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                                <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat" v-if="JSON.stringify(value).length<200">
+                                                    <textarea type="text" class="form-control-bg-grey" rows="6" :placeholder="key" :value="value | handlerFormat" v-else></textarea>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </el-main>
+                                </el-container>`,
                     filters:{
                         handlerFormat(evt){
                             // 2019-03-13T21:35:31.678Z
@@ -212,95 +246,58 @@ class Log extends Matrix {
                     }
                 });
 
-                // 仪表盘
-                Vue.component("gauge-component",{
+                // 日志轨迹
+                Vue.component("log-diagnosis-journal",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    data:function(){
-                        return {
-                            gauge: [
-                                {host:'wecise',inst:'',param:'', value:25,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:80,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:100,status:'success', showText:false},
-                                {host:'wecise',inst:'',param:'', value:50,status:'text', showText:false},
-                                {host:'wecise',inst:'',param:'', value:100,status:'exception', showText:false},
-                                {host:'wecise',inst:'',param:'', value:75,status:'success', showText:false}
-                            ]
-                        }
-                    },
-                    template: ` <el-row :gutter="0">
-                                    <el-col :span="3" v-for="item in gauge">
-                                        <div class="grid-content" style="text-align: center;">
-                                            <el-progress type="circle" :percentage="item.value" :status="item.status"></el-progress>
-                                            <p>#{item.host}#</p>
+                    template:   `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main>
+                                        <div class="block">
+                                            <el-timeline>
+                                                <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.rows">
+                                                    <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                                        <h4>#{item.value}#</h4>
+                                                        <p>#{item.biz}# #{item.host}#</p>
+                                                        <p>#{item.msg}#</p>
+                                                    </el-card>
+                                                </el-timeline-item>
+                                            </el-timeline>
                                         </div>
-                                    </el-col>
-                                </el-row>`,
-                    mounted:function(){
-                        this.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                        
-                        }
-                    }
-                    
-                });
-                
-                // 分析
-                Vue.component("event-diagnosis",{
+                                    </el-main>
+                                </el-container>`
+                })
+
+                // 历史日志
+                Vue.component("log-diagnosis-history",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    data:function(){
+                    data(){
                         return {
                             
                         }
                     },
-                    template: ` <section class="event-diagnosis">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active"><a href="#event-diagnosis-detail">日志详情</a></li>
-                                        <li class=""><a href="#event-diagnosis-journal">轨迹</a></li>
-                                        <li class=""><a href="#event-diagnosis-history">历史</a></li>
-                                    </ul>
-                                    <div class="content">
-                                        <h5 id="event-diagnosis-detail">详情</h5>
-                                        <p>
-                                            <event-view-detail :id="id + '-detail'" :model="model.log"></event-view-detail>
-                                        </p>
-                                        <h5 id="event-diagnosis-journal">轨迹</h5>
-                                        <p>
-                                            <vue-timeline-component :id="id + '-journal'" :model="model.journal.rows"></vue-timeline-component>
-                                        </p>
-                                        <h5 id="event-diagnosis-history">历史</h5>
-                                        <p>
-                                            <event-diagnosis-datatable-component :id="id + '-history'" :model="model.history"></event-diagnosis-datatable-component>
-                                        </p>
-                                    </div>
-                                </section>`,
-                    mounted:function(){
-                        this.init();
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main style="padding:0px;">
+                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
                     },
                     methods: {
-                        init: function(){
+                        init(){    
                             const self = this;
-                            
-                            $(self.$el).find("ul>li").click(function(e){
-                                $(self.$el).find("li.active").removeClass("active");
-                                $(e.target).closest("li").addClass("active");
-                                $("#content.content").css("padding-top","60px!important;");
-                            })
-                            
+
                         }
                     }
-                    
-                });
+                })
+       
                 
                 maxLog.app = {
                     delimiters: ['${', '}'],
@@ -310,9 +307,9 @@ class Log extends Matrix {
                         layout:{
                             main:{
                                 tabIndex: 1,
-                                activeIndex: 'event-view-console',
+                                activeIndex: 'log-view-console',
                                 tabs:[
-                                    {name: 'event-view-console', title:'日志列表', type: 'main'}
+                                    {name: 'log-view-console', title:'日志列表', type: 'main'}
                                 ],
                                 detail: {
                                     model: [],
@@ -325,12 +322,12 @@ class Log extends Matrix {
                                 activeIndex: 'log-view-radar',
                                 tabs:[
                                     {name: 'log-view-radar', title:'雷达', type: 'radar'},
-                                    {name: 'log-view-gauge', title:'仪表盘', type: 'gauge'}
+                                    //{name: 'log-view-gauge', title:'仪表盘', type: 'gauge'}
                                 ]
                             }
                         },
                         control: {
-                            ifSmart: '1',
+                            ifSmart: '0',
                             ifRefresh: '0'
                         },
                         // 搜索组件结构
@@ -367,9 +364,9 @@ class Log extends Matrix {
                         'layout.main.tabs':{
                             handler(val,oldVal){
                                 if(val.length > 1){
-                                    $("#tab-event-view-console").show();
+                                    $("#tab-log-view-console").show();
                                 }else {
-                                    $("#tab-event-view-console").hide();
+                                    $("#tab-log-view-console").hide();
                                 }
                             },
                             deep:true
@@ -409,6 +406,15 @@ class Log extends Matrix {
                         
                         // 没有详细页时，默认隐藏告警列表Title
                         this.hideTabEventViewConsoleUl();
+
+                        // 维度统计
+                        this.toggleSummaryBySmart(this.control.ifSmart);
+
+                        // 窗口Resize
+                        _.delay(function(){
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                        },2000);
                         
                     },
                     methods: {
@@ -418,9 +424,9 @@ class Log extends Matrix {
                         hideTabEventViewConsoleUl(){
                             const self = this;
 
-                            if($('#tab-event-view-console').is(':visible')) {
-                                $("#tab-event-view-console").hide();
-                            $("#tab-event-view-console > span").hide();
+                            if($('#tab-log-view-console').is(':visible')) {
+                                $("#tab-log-view-console").hide();
+                            $("#tab-log-view-console > span").hide();
                             } else {
                                 setTimeout(self.hideTabEventViewConsoleUl, 50);
                             }   
@@ -451,9 +457,9 @@ class Log extends Matrix {
                         },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
-                                $("#event-view-summary").css("height","200px").css("display","");
+                                $("#log-view-summary").css("height","200px").css("display","");
                             } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
+                                $("#log-view-summary").css("height","0px").css("display","none");
                             }
                             this.control.ifSmart = evt;
                             
@@ -465,31 +471,24 @@ class Log extends Matrix {
                         detailAdd(event){
                             try {
                                 let id = event.id;
-                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
                                 
                                 // event
-                                let term = encodeURIComponent(JSON.stringify(event));
+                                let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript('/log/diagnosis-by-id.js',term).message;
                                 
                                 // 添加tab
-                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
-                                let detail = {title:`日志分析 ${event.id}`, name:`detail-${id}`, type: 'detail', child:[
-                                                {title:'日志分析', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
-                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
-                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'historyEvent'},
-                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
-                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
-                                                // {title:'日志', name:`log-${id}`, type: 'log'},
-                                                // {title:'配置', name:`config-${id}`, type: 'config'},
-                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
-                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
+                                let detail = {title:`日志分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                                {title:'日志详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                                {title:'日志轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                                {title:'日志历史', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                                 this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `detail-${id}`;
+                                this.layout.main.activeIndex = `diagnosis-${id}`;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
@@ -522,6 +521,9 @@ class Log extends Matrix {
 
         window.addEventListener('resize', () => { 
             maxLog.resizeEventConsole();
+
+            // RESIZE Event Summary
+            eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
@@ -529,12 +531,15 @@ class Log extends Matrix {
 
     resizeEventConsole(){
         let evwH = $(window).height();
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
+        let evcH = $("#log-view-container").height();
+        let evsH = $("#log-view-summary").height();
         
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+        $("#log-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px");
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("min-height", evwH + "px")
+                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=" + evsH + "px");
     }
 
     graphNav(id){
@@ -631,7 +636,7 @@ class Log extends Matrix {
     }
 
     checkContainer(){
-        if($('#event-view-container').is(':visible')) {
+        if($('#log-view-container').is(':visible')) {
             maxLog.layout();
         } else {
             setTimeout(maxLog.checkContainer, 50);

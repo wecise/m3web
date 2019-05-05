@@ -130,19 +130,25 @@
 					background: #04C;
 				}
 
-.alertify-log {
-	background: #1F1F1F;
-	background: rgba(0,0,0,.9);
-	padding: 8px 14px;
-	border-radius: 4px;
-	color: #FFF;
-	text-shadow: -1px -1px 0 rgba(0,0,0,.5);
-}
+	.alertify-log {
+		background: #1F1F1F;
+		background: rgba(0,0,0,.9);
+		padding: 8px 14px;
+		border-radius: 4px;
+		color: #FFF;
+		text-shadow: -1px -1px 0 rgba(0,0,0,.5);
+		padding: 10px;
+    	line-height: 20px;
+	}
 	.alertify-log-error {
 		background: #FF3300;
 		background: rgba(254,26,0,.9);
+		padding: 10px;
+    	line-height: 20px;
 	}
 	.alertify-log-success {
 		background: #5CB811;
 		background: rgba(92,184,17,.9);
+		padding: 10px;
+    	line-height: 20px;
 	}

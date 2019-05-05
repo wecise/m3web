@@ -47,7 +47,7 @@ class OmdbHandler {
                 }
             },
             error: function(xhr, textStatus, errorThrown) {
-                console.log(errorThrown);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
         return rtn;
@@ -86,7 +86,7 @@ class OmdbHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("Failed" + " " + xhr.responseText);
-                mxLog.warn("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
         return rtn;
@@ -126,7 +126,7 @@ class OmdbHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("Failed" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
         return rtn;
@@ -143,10 +143,7 @@ class OmdbHandler {
     fetchSubClass(parent){
         let rtn = null;
 
-        let _cond = {
-            ftype: "class",
-            parent: parent
-        };
+        let cond = `#${parent}/ | print id,class,alias`;
 
         jQuery.ajax({
             url: "/mxobject/search",
@@ -154,7 +151,7 @@ class OmdbHandler {
             type: 'POST',
             async: false,
             data: {
-                cond: `call tree ` + JSON.stringify(_cond),
+                cond: cond,
                 meta: true
             },
             beforeSend:function(xhr){
@@ -172,7 +169,7 @@ class OmdbHandler {
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
 
@@ -420,11 +417,11 @@ class OmdbHandler {
     *   类数据导入
     *
     * */
-   classDataImport(event){
+   classDataImport(file){
         let rtn = 0;
 
         let fm = new FormData();
-        fm.append("uploadfile", event);
+        fm.append("uploadfile", file);
 
         jQuery.ajax({
             url: '/mxobject/import',
@@ -433,6 +430,8 @@ class OmdbHandler {
             data: fm,
             mimeType: "multipart/form-data",
             async: false,
+            processData:false,
+            contentType: false,
             beforeSend:function(xhr){
                 Pace.restart();
             },
@@ -444,14 +443,14 @@ class OmdbHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("导入成功" + " " + event + " " + moment().format("LLL"));
+                    alertify.success("导入成功" + " " + file.name + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("导入失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
         return rtn;
