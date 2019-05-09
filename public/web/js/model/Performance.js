@@ -31,16 +31,15 @@ class Performance extends Matrix {
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
-                            "search-base-component",
-                            "probe-tree-component",
-                            "vue-timeline-component"],function() {
+                            "search-base-component"],function() {
             $(function() {
 
                 Vue.component('performance-history-chart', {
-                    template: `<div :id="id" style="width:100%;height:200px;"></div>`,
+                    template: `<div :id="id" style="width:100%;height:280px;"></div>`,
                     props:{
                         id:String,
-                        model:Object
+                        model:Object,
+                        config: Object
                     },
                     data(){
                         return {
@@ -49,6 +48,16 @@ class Performance extends Matrix {
                                 tooltip: {
                                     trigger: 'axis'
                                 },
+                                toolbox: {
+                                    show: true,
+                                    feature: {
+                                        dataZoom: {},
+                                        dataView: {readOnly: false},
+                                        magicType: {type: ['line', 'bar']},
+                                        restore: {},
+                                        saveAsImage: {}
+                                    }
+                                },
                                 xAxis: {
                                     type: 'category',
                                     data: []
@@ -56,11 +65,7 @@ class Performance extends Matrix {
                                 yAxis: {
                                     type: 'value'
                                 },
-                                series: [{
-                                    data: [],
-                                    type: 'line',
-                                    smooth: true
-                                }]
+                                series: []
                             }                            
                         }
                     },
@@ -87,11 +92,38 @@ class Performance extends Matrix {
                         },
                         initData(){
                             const self = this;
-                            this.option.xAxis.data = [];
-                            this.option.series[0].data = [];
-                            _.forEach(this.model.reverse(),function(v){
-                                self.option.xAxis.data.push(moment(v.vtime).format("YY-MM-DD HH:mm:SS"));
-                                self.option.series[0].data.push(v.value);
+                            
+                            // 取实时数据的time作为xAxis
+                            this.option.xAxis.data = _.map(this.model.value.reverse(),function(v){
+                                return moment(v[mx.global.register.performance.chart.time]).format(self.config.step);
+                            });
+                            
+                            this.option.series = _.map(this.config.type,function(v){
+                                
+                                if(v=='value'){
+                                    return {    
+                                        name: v,
+                                        data: _.map(self.model.value.reverse(), v),
+                                        type: 'line',
+                                        smooth: true,
+                                        color: mx.global.register.performance.chart.color[v],
+                                        markLine: {
+                                            data: [{
+                                                type: 'average',
+                                                name: '平均值'
+                                            }]
+                                        }
+                                    }
+                                } else {
+                                    return  {
+                                        name: v,
+                                        data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
+                                        type: 'line',
+                                        smooth: true,
+                                        color: mx.global.register.performance.chart.color[v]
+                                    }
+                                }
+                                
                             });
                         },
                         checkChart(){
@@ -124,7 +156,7 @@ class Performance extends Matrix {
                                          v-for="pg in progress" 
                                          style="padding-left: 80px;overflow: hidden;height: 24px;margin-bottom: 5px;background-color: rgb(245, 245, 245);border-radius: 4px;transition: width .6s ease;">
                                         <label style="padding: 3px 5px;position: absolute;left: 10px;">#{pg.name}#</label>
-                                        <el-tooltip placement="top" v-for="item in pg.child">
+                                        <el-tooltip placement="top" v-for="item in pg.child" open-delay="500">
                                             <div slot="content">#{item.title}#</div>
                                             <div class="progress-bar animated fadeInLeft" 
                                                 :id="item.id"
@@ -252,74 +284,111 @@ class Performance extends Matrix {
                     }
                 });
 
-                // 历史趋势
+                // 历史性能
                 Vue.component("performance-diagnosis-history",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
                     },
+                    data(){
+                        return {
+                            baseLine: {
+                                type: {
+                                    value: [],
+                                    list: [{
+                                        value: 'week',
+                                        label: '周基线'
+                                      }, {
+                                        value: 'month',
+                                        label: '月基线'
+                                      }]
+                                }
+                            },
+                            trends: [{
+                                title: '5分钟',
+                                value: 'min5',
+                                config:{
+                                    step: 'HH:mm',
+                                    type: ['max','min','avg','value']
+                                }
+                            },
+                            {
+                                title: '15分钟',
+                                value: 'min15',
+                                config:{
+                                    step: 'HH:mm',
+                                    type: ['max','min','avg','value']
+                                }
+                            },
+                            {
+                                title: '30分钟',
+                                value: 'min30',
+                                config:{
+                                    step: 'HH:mm',
+                                    type: ['max','min','avg','value']
+                                }
+                            },
+                            {
+                                title: '1小时',
+                                value: 'hour1',
+                                config:{
+                                    step: 'HH:mm',
+                                    type: ['max','min','avg','value']
+                                }
+                            },
+                            {
+                                title: '2小时',
+                                value: 'hour2',
+                                config:{
+                                    step: 'HH:mm',
+                                    type: ['max','min','avg','value']
+                                }
+                            },
+                            {
+                                title: '1天',
+                                value: 'day1',
+                                config:{
+                                    step: 'HH:00',
+                                    type: ['max','min','avg','value']
+                                }
+                            }]
+                        }
+                    },
                     template: `<el-container style="height: calc(100vh - 230px);">
-                                    <el-main>
-                                        <el-row>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 <small>5分钟</small></span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min5"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 15分钟</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min15"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 30分钟</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.min30"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 1小时</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour1"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 2小时</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.hour2"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                            <el-col :span="12">
-                                                <el-card class="box-card">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>历史趋势 1天</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <performance-history-chart :id="id + 'performance-history-chart'" :model="model.history.rows.day1"></performance-history-chart>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
+                                    <el-header style="height: 30px;
+                                                        padding: 0px 10px;
+                                                        line-height: 20px;">
+                                        <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
+                                            <el-option
+                                            v-for="item in baseLine.type.list"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-header>
+                                    <el-main style="padding:10px 0px;float: left;display: flex;flex-wrap: wrap;">
+                                        
+                                        <el-card class="box-card" style="width: 49.5%;height:auto;padding:5px;margin:2px;border:1px solid #f5f5f5;" v-for="item in trends">
+                                            <div slot="header" class="clearfix">
+                                                <span>历史性能 <small>#{item.title}#</small></span>
+                                                <el-tooltip content="功能">
+                                                    <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
+                                                </el-tooltip>
+                                            </div>
+                                            <performance-history-chart :id="id + 'performance-history-chart-' + item.value" 
+                                                                        :model="model.rows[item.value]" 
+                                                                        :config="item.config"></performance-history-chart>
+                                        </el-card>
+                                    
                                     </el-main>
                                 </el-container>`,
                     mounted(){
+                        
+                    },
+                    methods: {
+                        
                     }
                 });
 
@@ -334,11 +403,11 @@ class Performance extends Matrix {
                                     <el-main><el-card class="box-card">
                                         <div slot="header" class="clearfix">
                                             <span>性能轨迹
-                                                <small>#{moment(_.head(model.journal.rows).vtime).format("LLL")}# - #{moment(_.last(model.journal.rows).vtime).format("LLL")}#</small>
+                                                <small>#{moment(_.head(model.rows).vtime).format("LLL")}# - #{moment(_.last(model.rows).vtime).format("LLL")}#</small>
                                             </span>
                                             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                         </div>
-                                        <performance-timeline :id="id + '-journal'" :model="model.journal.rows"></performance-timeline>
+                                        <performance-timeline :id="id + '-journal'" :model="model.rows"></performance-timeline>
                                     </el-card>
                                     </el-main>
                                 </el-container>`,
@@ -455,9 +524,9 @@ class Performance extends Matrix {
                             // 搜索窗口
                             name:"所有", value: "",
                             // 输入
-                            term: "",
+                            term: "top 500",
                             // 指定类
-                            class: "#/matrix/devops/performance/:",
+                            class: "#/matrix/devops/performance:",
                             // 指定api
                             api: "performance",
                             // 时间窗口
@@ -509,12 +578,22 @@ class Performance extends Matrix {
                         }
                     },
                     created(){
+                        // 初始化term
+                        try{
+                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            this.options.term = term;
+                        } catch(err){
+
+                        }
+                        
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
                         eventHub.$on("WINDOW-RESIZE-EVENT",mxPerformance.resizeEventConsole);
                     },
                     mounted(){
+                        const self = this;
+                        
                         $(this.$el).addClass('view-normal');
                         
                         // 没有详细页时，默认隐藏告警列表Title
@@ -527,7 +606,15 @@ class Performance extends Matrix {
                         _.delay(function(){
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                        },2000);
+                        },500);
+
+                        // Document mouse listener
+                        $(document).click(function(evt) {
+                            if($(evt.target).is(".performance-view-summary-control-refresh .el-switch__core")){
+                                evt.preventDefault();
+                                self.control.ifRefresh = '0';
+                            }
+                         });
                         
                     },
                     methods: {
@@ -569,7 +656,7 @@ class Performance extends Matrix {
                             if(evt==1) {
                                 window.intervalListener = setInterval(function(){
                                     self.$refs.searchRef.search();
-                                },5000)
+                                },mx.global.register.interval)
                             } else {
                                 clearInterval(window.intervalListener);
                             }
@@ -579,7 +666,7 @@ class Performance extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
-                            event.resizeEventConsole();
+                            mxPerformance.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {
@@ -594,7 +681,7 @@ class Performance extends Matrix {
                                 // 添加tab
                                 let detail = {title:`性能分析 ${event.host}/${event.inst}/${event.param}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
                                                 {title:'性能详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
-                                                {title:'历史趋势', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                                {title:'历史性能', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 {title:'性能轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};

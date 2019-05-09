@@ -47,19 +47,36 @@ class Event extends Matrix {
                                     <el-main>
                                         <div class="block">
                                             <el-timeline>
-                                                <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.rows">
-                                                    <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                                        <p>业务：#{item.biz}#</p>
-                                                        <p>服务器：#{item.host}#</p>
-                                                        <p>级别：#{mx.global.register.event.severity[item.severity][1]}#</p>
-                                                        <p>状态：#{mx.global.register.event.severity[item.status][1]}#</p>
-                                                        <p>摘要：#{item.msg}#</p>
+                                                <el-timeline-item :timestamp="moment(item.vtime).format(mx.global.register.event.time.format)" placement="top" v-for="item in model.rows">
+                                                    <el-card style="box-shadow: 0 0px 3px 0 rgba(0, 0, 0, 0.1);">
+                                                        <p style="font-size:12px;">业务：#{item.biz}#</p>
+                                                        <p style="font-size:12px;">服务器：#{item.host}#</p>
+                                                        <p style="font-size:12px;">级别：#{item.severity | pickSeverity}#</p>
+                                                        <p style="font-size:12px;">状态：#{item.status | pickStatus}#</p>
+                                                        <p style="font-size:12px;">摘要：#{item.msg}#</p>
                                                     </el-card>
                                                 </el-timeline-item>
                                             </el-timeline>
                                         </div>
                                     </el-main>
-                                </el-container>`
+                                </el-container>`,
+                    filters: {
+                        pickSeverity(item){
+                            try{
+                                return mx.global.register.event.severity[item][1];
+                            } catch(err){
+                                return '';
+                            }
+                            
+                        },
+                        pickStatus(item){
+                            try {
+                                return mx.global.register.event.status[item][1];
+                            } catch(err){
+                                return '';
+                            }
+                        }
+                    }
                 })
 
                 // 告警雷达
@@ -411,6 +428,136 @@ class Event extends Matrix {
                     }
                 })
 
+                // 智能分组
+                Vue.component("event-view-aigroup",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            aiGroupData: {
+                                rows: [],
+                                columns: [],
+                                options: {
+                                    searching: false,
+                                    aDataSort: true,
+                                    bSort: true,
+                                    bAutoWidth: true,
+                                    info: false,
+                                    paging:         false,
+                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                    stateSave: false,
+                                    keys:  true,
+                                    select: {
+                                        style: 'multi',
+                                    }
+                                },
+                                selected: [],
+                            },
+                            tableData: {},
+                        }
+                    },
+                    template: `<el-container style="height: calc(100vh - 185px);">
+                                    <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" id="aigroup-left-panel">
+                                        <el-container style="overflow:hidden;height:100%;">
+                                            <el-main style="padding:0px;overflow:auto;">
+                                                <table :id="id+'-table'" class="event-table-dimension" width="100%"></table>
+                                            </el-main>
+                                        </el-container>
+                                    </el-aside>
+                                    <el-container class="split" id="aigroup-right-panel">
+                                        <el-main style="padding:0px;">
+                                            <event-diagnosis-datatable-component :id="id + '-aigroup-by-value'" :model="tableData"></event-diagnosis-datatable-component>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+                        
+                        // 默认维度关联事件
+                        self.tableData = {rows:self.model.rows,columns:self.model.columns[self.model.rootclass],options:self.model.options};
+
+                        self.init();
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                            self.aiGroupData.rows = _.map(new Array(20),function(v,index){
+                                return {win:`${moment(_.now() - 10000*index).format("YYYY-MM-DD HH:mm:SS")}-${moment().format("YYYY-MM-DD HH:mm:SS")}`,app: [`app${index}`,`app${index*1}`,`app${index*2}`], severity: [index, index*1, index*2]};
+                            });
+
+                            self.aiGroupData.columns = [
+                                {data:'win',title:'统计窗口',sortable:true},
+                                {data:'app',title:'影响应用系统', render:function(data,type,row){
+                                    return `<button class="btn btn-xs btn-default">${data[0]}</button>
+                                            <button class="btn btn-xs btn-default">${data[1]}</button>
+                                            <button class="btn btn-xs btn-default">${data[2]}</button>`;
+                                }},
+                                {data:'severity',title:'告警级别统计', render:function(data,type,row){
+                                    return `<button class="btn btn-xs btn-danger">${data[0]}</button>
+                                            <button class="btn btn-xs btn-warning">${data[1]}</button>
+                                            <button class="btn btn-xs btn-success">${data[2]}</button>`;
+                                }
+                            }];
+
+                            //初始化维度选择Table
+                            var table = $(`#${self.id}-table`).DataTable(_.extend(
+                                                                        self.aiGroupData.options,{
+                                                                            data: self.aiGroupData.rows,
+                                                                            columns: self.aiGroupData.columns
+                                                                        }));
+                            
+                            table.on( 'select', function ( e, dt, type, indexes ) {
+                                self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
+                                self.handlerFetchData(self.aiGroupData.selected);
+                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                                self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
+                                self.handlerFetchData(self.aiGroupData.selected);
+                            } );
+
+                            $(self.$el).find('td').css("white-space","normal");
+                            
+                            Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
+                                sizes: [40, 60],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                            });
+                            
+                        },
+                        handlerFetchData(event){
+                            const self = this;
+
+                            if(event.length < 1) {
+                                self.tableData = [];
+                                return false;
+                            }
+
+                            try{
+                                let temp = _.map(event,function(v){
+                                    // MQL
+                                    //return `${v.title}='${v.data}'`;
+                                    // SEARCH
+                                    return `${v.title}=${v.data}`;
+                                })
+
+                                // 获取相应维度的关联事件  eg: biz='查账系统'
+                                // MQL
+                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
+                                // SEARCH
+                                let where = `biz=matrix`;
+                                self.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
+                            } catch(err){
+                                self.tableData = [];
+                            }
+                            
+                        }
+                    }
+                })
+
                 // 维度关联性告警
                 Vue.component("event-diagnosis-dimension",{
                     delimiters: ['#{', '}#'],
@@ -527,11 +674,17 @@ class Event extends Matrix {
 
                             try{
                                 let temp = _.map(event,function(v){
-                                    return `${v.title}='${v.data}'`;
+                                    // MQL
+                                    //return `${v.title}='${v.data}'`;
+                                    // SEARCH
+                                    return `${v.title}=${v.data}`;
                                 })
 
                                 // 获取相应维度的关联事件  eg: biz='查账系统'
-                                let where = temp.join(` ${self.dimensionData.ifOR=='1'?'and':'or'} `);
+                                // MQL
+                                // let where = temp.join(` ${self.dimensionData.ifOR=='1'?'and':'or'} `);
+                                // SEARCH
+                                let where = temp.join(` ${self.dimensionData.ifOR=='1'?' | ':'; '} `);
                                 self.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
                             } catch(err){
                                 self.tableData = [];
@@ -561,7 +714,7 @@ class Event extends Matrix {
                         }
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
-                                    <el-aside width="400px">
+                                    <el-aside class="split" id="probability-left-panel">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                                 <el-radio v-model="byStep" label="YYYY-MM-DD">按天</el-radio>
@@ -573,7 +726,7 @@ class Event extends Matrix {
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container>
+                                    <el-container class="split" id="probability-right-panel">
                                         <el-main style="padding:0px;">
                                             <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData"></event-diagnosis-datatable-component>
                                         </el-main>
@@ -589,14 +742,17 @@ class Event extends Matrix {
                             const self = this;
 
                             // 默认维度关联事件
-                            self.tableData = { rows:this.$root.$refs.searchRef.result.message.rows,
-                                                columns:this.$root.$refs.searchRef.result.message.columns[this.$root.$refs.searchRef.result.message.rootClass],
-                                                options:this.$root.$refs.searchRef.result.message.options,
-                                                template:this.$root.$refs.searchRef.result.message.template[window.SignedUser_UserName]
-                                            };
+                            self.tableData = self.model;
                             
                             // 概率时间核
                             self.sumByStep();
+
+                            Split(['#probability-left-panel', '#probability-right-panel'], {
+                                sizes: [35, 65],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                            });
                         },
                         sumByStep(){
                             const self = this;
@@ -611,146 +767,6 @@ class Event extends Matrix {
                         }
                     }
                 })
-                
-                // 告警分析
-                Vue.component("event-diagnosis",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data:function(){
-                        return {
-                            
-                        }
-                    },
-                    template: ` <section class="event-diagnosis">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active"><a :href="'#event-diagnosis-detail-'+id">告警详情</a></li>
-                                        <li class=""><a :href="'#event-diagnosis-journal-'+id">告警轨迹</a></li>
-                                        <li class=""><a :href="'#event-diagnosis-history-'+id">历史相关告警</a></li>
-                                        <li class=""><a :href="'#event-diagnosis-dimension-'+id">维度关联性告警</a></li>
-                                        <li class=""><a :href="'#event-diagnosis-probability-'+id">概率相关性告警</a></li>
-                                    </ul>
-                                    <div class="content">
-                                        
-                                        <el-card class="box-card win" shadow="always">
-                                            <div slot="header" class="clearfix">
-                                                <span :id="'event-diagnosis-detail-'+id">告警详情</span>
-                                                <div class="button-group pull-right">
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
-                                                </div>
-                                            </div>
-                                            <event-view-detail :id="id + '-detail'" :model="model.event"></event-view-detail>
-                                        </el-card>
-
-                                        <hr/>
-                                
-                                        <el-card class="box-card win" shadow="always">
-                                            <div slot="header" class="clearfix">
-                                                <span :id="'event-diagnosis-journal-'+id">告警轨迹</span>
-                                                <div class="button-group pull-right">
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
-                                                </div>
-                                            </div>
-                                            <event-journal :id="id + '-journal'" :model="model.journal.rows"></event-journal>
-                                        </el-card>
-
-                                        <hr/>
-                                
-                                        <el-card class="box-card win" shadow="always">
-                                            <div slot="header" class="clearfix">
-                                                <span :id="'event-diagnosis-history-'+id">历史相关告警</span>
-                                                <div class="button-group pull-right">
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
-                                                </div>
-                                            </div>
-                                            <event-diagnosis-datatable-component :id="id + '-history'" :model="model.history"></event-diagnosis-datatable-component>
-                                        </el-card>
-
-                                        <hr/>
-                                
-                                        <el-card class="box-card win" shadow="always">
-                                            <div slot="header" class="clearfix">
-                                                <span :id="'event-diagnosis-dimension-'+id">维度关联性告警</span>
-                                                <div class="button-group pull-right">
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
-                                                </div>
-                                            </div>
-                                            <event-diagnosis-dimension-component :id="id + '-dimension'" :model="model.dimension"></event-diagnosis-dimension-component>
-                                        </el-card>
-
-                                        <hr/>
-                                    
-                                        <el-card class="box-card win" shadow="always">
-                                            <div slot="header" class="clearfix">
-                                                <span :id="'event-diagnosis-probability-'+id">概率相关性告警</span>
-                                                <div class="button-group pull-right">
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-collapse"><i class="fa fa-minus"></i></a>
-                                                    <a href="javascript:void(0);" class="btn btn-link" data-click="win-expand"><i class="fa fa-expand"></i></a>
-                                                </div>
-                                            </div>
-                                            <event-diagnosis-probability-component :id="id + '-probability'" :model="model.event"></event-diagnosis-probability-component>
-                                        </el-card>
-                                            
-                                    </div>
-                                </section>`,
-                    mounted:function(){
-                        this.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                            
-                            $(self.$el).find("ul>li").click(function(e){
-                                $(self.$el).find("li.active").removeClass("active");
-                                $(e.target).closest("li").addClass("active");
-                                $("#content.content").css("padding-top","60px!important;");
-                            })
-
-                            $(self.$el).find(".box-card>.el-card__body").addClass("win-body");
-                            $(self.$el).find(".box-card>.el-card__header").addClass("win-heading");
-                            
-
-                            $("[data-click=win-collapse]").click(function(e) {
-                                e.preventDefault(), $(this).closest(".win").find(".win-body").slideToggle()
-                            });
-                            $("[data-click=win-expand]").click(function(e) {
-                                e.preventDefault();
-                                var a = $(this).closest(".win"),
-                                    t = $(a).find(".win-body"),
-                                    i = 40;
-                                if (0 !== $(t).length) {
-                                    var n = $(a).offset().top,
-                                        o = $(t).offset().top;
-                                    i = o - n
-                                }
-                                if ($("body").hasClass("win-expand") && $(a).hasClass("win-expand")) {
-                                    $("body, .win").removeClass("win-expand"),
-                                    $(".win").removeAttr("style"), $(t).removeAttr("style");
-                                } else if ($("body").addClass("win-expand"), $(this).closest(".win").addClass("win-expand"), 0 !== $(t).length && 40 != i) {
-                                    var l = 40;
-                                    $(a).find(" > *").each(function() {
-                                        var e = $(this).attr("class");
-                                        "win-heading" != e && "win-body" != e && (l += $(this).height() + 30)
-                                    }), 40 != l && $(t).css("top", 40 + "px")
-                                }
-                                
-                                $(window).trigger("resize")
-                                mx.windowResize()
-                                
-                            })
-                        },
-                        toggleSize(){
-
-                        }
-                    }
-                    
-                });
                 
                 event.app = {
                     delimiters: ['${', '}'],
@@ -782,7 +798,7 @@ class Event extends Matrix {
                         },
                         control: {
                             ifSmart: '1',
-                            ifSummary: '1',
+                            ifSummary: '0',
                             ifRefresh: '0'
                         },
                         // 搜索组件结构
@@ -851,12 +867,21 @@ class Event extends Matrix {
                         }
                     },
                     created(){
+                        // 初始化term
+                        try{
+                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            this.options.term = term;
+                        } catch(err){
+
+                        }
+
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
                         eventHub.$on("WINDOW-RESIZE-EVENT",event.resizeEventConsole);
                     },
                     mounted(){
+
                         $(this.$el).addClass('view-normal');
                         
                         // 没有详细页时，默认隐藏告警列表Title
@@ -906,11 +931,24 @@ class Event extends Matrix {
                             // RESIZE Event Console
                             event.resizeEventConsole();
                         },
-                        toggleSummaryBySummary(evt){
+                        toggleSummaryByGroup(evt){
+                            const self = this;
+
                             if(evt==1) {
+                                self.aiGroup();
                                 $("#event-view-summary").css("height","200px").css("display","");
                             } else {
                                 $("#event-view-summary").css("height","0px").css("display","none");
+
+                                //关闭智能分组
+                                try {
+                                    let id = _.find(self.layout.main.tabs,{type:'aiGroup'}).name;
+                                    if(id){
+                                        self.detailRemove(id);
+                                    }
+                                } catch(err){
+
+                                }
                             }
                             this.control.ifSummary = evt;
                             
@@ -937,6 +975,20 @@ class Event extends Matrix {
                             // RESIZE Event Console
                             event.resizeEventConsole();
                         },
+                        aiGroup(){
+                            try {
+                                let id = _.now();
+                                
+                                // 添加tab
+                                let aiGroup = {title:`智能分组`, name:`aiGroup-${id}`, type: 'aiGroup', child:[]};
+                                
+                                this.layout.main.tabs.push(aiGroup);
+                                this.layout.main.activeIndex = `aiGroup-${id}`;
+                                
+                            } catch(error){
+                                this.layout.main.tabs = [];
+                            }
+                        },
                         detailAdd(event){
                             try {
                                 let id = event.id;
@@ -951,17 +1003,9 @@ class Event extends Matrix {
                                 let detail = {title:`告警分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
                                                 {title:'告警详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
                                                 {title:'告警轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                                {title:'历史相关告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
                                                 {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
-                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
-                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'historyEvent'},
-                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
-                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
-                                                // {title:'日志', name:`log-${id}`, type: 'log'},
-                                                // {title:'配置', name:`config-${id}`, type: 'config'},
-                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
+                                                {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};
@@ -975,6 +1019,7 @@ class Event extends Matrix {
                             }
                         },
                         detailRemove(targetName) {
+                            
                             let tabs = this.layout.main.tabs;
                             let activeIndex = this.layout.main.activeIndex;
                             if (activeIndex === targetName) {
@@ -991,12 +1036,53 @@ class Event extends Matrix {
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
+                            // AI Group
+                            if(_.includes(targetName,'aiGroup')){
+                                this.control.ifSummary = '0';
+                            }
+
                             _.delay(function(){
                                 // RESIZE Event Summary
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
                                 // RESIZE Event Console
                                 event.resizeEventConsole();
                             },500)
+                        },
+                        action(event){
+                            const self = this;
+                            
+                            let tip = null;
+                            let list = [];
+
+                            if(event.list.length < 2){
+                                list = event.list;
+                                tip = `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？<br><br>
+                                        告警摘要：${list[0].msg}<br><br>
+                                        告警时间：${moment(list[0].vtime).format("YYYY-MM-DD HH:mm:SS")}<br><br>
+                                        告警级别：${list[0].severity}<br><br>
+                                        告警时间：${list[0].status}<br><br>
+                                        告警ID：${list[0].id}`
+                            } else {
+                                list =  _.map(event.list,function(v){ 
+                                            return _.pick(v, ['id','class'])
+                                        });
+                                let ids = _.map(list,'id').join("<br><br>");
+                                tip = `确定要【${mx.global.register.event.status[event.action][1]}】以下事件？<br><br>
+                                        告警ID【${list.length}】：<br><br>${ids}`
+                            }
+
+                            alertify.confirm(`${tip}`, function (e) {
+                                if (e) {
+                                    let rtn = fsHandler.callFsJScript("/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).message;
+                                    if(rtn == 1){
+                                        self.options.term = _.map(list,'id').join(";");
+                                        self.$refs.searchRef.search();
+                                    }
+                                } else {
+                                    
+                                }
+                            });
+                            
                         }
                     }
                 };

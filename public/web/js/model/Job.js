@@ -233,21 +233,21 @@ class Job extends Matrix {
                                     <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
                                         <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                             <h4>名称：#{item.name}#</h4>
-                                            <p><code>命令：#{item.cmd}#</code></p>
-                                            <p>位置：#{item.dir}#</p>
-                                            <p>源：#{item.source}#</p>
-                                            <p>服务器：#{item.host}#</p>
-                                            <p>进程ID：#{item.pid}#</p>
-                                            <p>RUNID：#{item.runid}#</p>
-                                            <p>SID：#{item.sid}#</p>
-                                            <p v-if="item.stauts">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
-                                            <p v-if="item.type">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                            <p>开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
-                                            <p>耗时：#{moment(item.etime).from(item.etime,true)}#</p>
-                                            <p>命令：#{item.cmds}#</p>
-                                            <p>输出：#{item.output}#</p>
-                                            <p>错误：#{item.err}#</p>
-                                            <p>代码：#{item.code}#</p>
+                                            <p style="font-size:12px;"><code>命令：#{item.cmd}#</code></p>
+                                            <p style="font-size:12px;">位置：#{item.dir}#</p>
+                                            <p style="font-size:12px;">源：#{item.source}#</p>
+                                            <p style="font-size:12px;">服务器：#{item.host}#</p>
+                                            <p style="font-size:12px;">进程ID：#{item.pid}#</p>
+                                            <p style="font-size:12px;">RUNID：#{item.runid}#</p>
+                                            <p style="font-size:12px;">SID：#{item.sid}#</p>
+                                            <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
+                                            <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
+                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
+                                            <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
+                                            <p style="font-size:12px;">命令：#{item.cmds}#</p>
+                                            <p style="font-size:12px;">输出：#{item.output}#</p>
+                                            <p style="font-size:12px;">错误：#{item.err}#</p>
+                                            <p style="font-size:12px;">代码：#{item.code}#</p>
                                         </el-card>
                                     </el-timeline-item>
                                 </el-timeline></div>`
@@ -264,11 +264,11 @@ class Job extends Matrix {
                                     <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
                                         <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                             <h4>#{item.name}#</h4>
-                                            <p v-if="item.stauts">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
-                                            <p v-if="item.type">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
-                                            <p>开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
-                                            <p>耗时：#{moment(item.etime).from(item.etime,true)}#</p>
-                                            <p>命令：#{item.cmds}#</p>
+                                            <p v-if="item.stauts" style="font-size:12px;">状态：#{mx.global.register.jobs.status[item.stauts][1]}#</p>
+                                            <p v-if="item.type" style="font-size:12px;">类型：#{mx.global.register.jobs.type[item.type][1]}#</p>
+                                            <p style="font-size:12px;">开始时间：#{moment(item.stime).format("LLL")}#  结束时间：#{moment(item.etime).format("LLL")}#</p>
+                                            <p style="font-size:12px;">耗时：#{moment(item.etime).from(item.etime,true)}#</p>
+                                            <p style="font-size:12px;">命令：#{item.cmds}#</p>
                                         </el-card>
                                     </el-timeline-item>
                                 </el-timeline></div>`
@@ -494,9 +494,7 @@ class Job extends Matrix {
                         // 初始化term
                         try{
                             let term = decodeURIComponent(window.atob(mx.urlParams['term']));
-                            console.log(mx.urlParams['term'],term,JSON.stringify(term))
                             this.options.term = term;
-                            //this.$root.$refs.searchRef.search();
                         } catch(err){
 
                         }

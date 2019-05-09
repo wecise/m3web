@@ -675,13 +675,12 @@
 
                 let user = window.SignedUser_UserName;
                 let attr = {remark: '', ctime: _.now(), author: user, type: 'txt'};
-                let rtn = fsHandler.fsNew('file', `/${user}/temp`, 'cache_mql_script.txt', mql, attr);
+                let rtn = fsHandler.fsNew('file', `/home/${user}`, 'cache_mql_script.txt', mql, attr);
             },
             loadFromFs(){
                 const self = this;
 
-                let user = window.SignedUser_UserName;
-                let mql = fsHandler.fsContent(`/${user}/temp`, 'cache_mql_script.txt');
+                let mql = fsHandler.fsContent(`/home/${window.SignedUser_UserName}`, 'cache_mql_script.txt');
 
                 self.editor.setValue(mql);
 

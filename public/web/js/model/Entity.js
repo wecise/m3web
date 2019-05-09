@@ -55,7 +55,7 @@ class Entity extends Matrix {
                 })
 
                 // 告警雷达
-                Vue.component("event-view-radar",{
+                Vue.component("entity-view-radar",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -132,7 +132,7 @@ class Entity extends Matrix {
                 });
 
                 // 告警统计
-                Vue.component("event-view-pie",{
+                Vue.component("entity-view-pie",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -201,49 +201,70 @@ class Entity extends Matrix {
                 });
 
                 // 详情 基本信息
-                Vue.component("entity-view-detail-base",{
+                Vue.component("entity-diagnosis-base",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
                     },
-                    template: `<el-row :gutter="10">
-                                    <el-col :span="6">
-                                        <div class="grid-content" style="text-align:center;">
-                                            <img :src="model.rows.class | pickIcon" class="image">
-                                            <p><h3>#{model.rows.host}#</h3></p>
-                                            <p>类型：#{model.rows.class}#</p>
-                                        </div>
-                                    </el-col>
-                                    <el-col :span="18">
-                                        <div class="grid-content">
-                                            <form class="form-horizontal">
-                                                <!-- 有模板 -->
-                                                <div class="form-group" v-for="item in _.filter(model.template,{region:'base'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
-                                                    </div>
+                    data(){
+                        return {
+                            rows:null,
+                            template: null,
+                            tags:{
+                                inputVisible: false,
+                                inputValue: ''
+                            }
+                        }
+                    },
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                                        <el-tooltip content="保存">
+                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-row :gutter="10">
+                                            <el-col :span="6">
+                                                <div class="grid-content" style="text-align:center;">
+                                                    <img :src="model.rows.class | pickIcon" class="image">
+                                                    <p><h3>#{model.rows.host}#</h3></p>
+                                                    <p>类型：#{model.rows.class}#</p>
                                                 </div>
-                                                <!-- 没有模板 -->
-                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <div v-if="key==='value' && value <= 100">
-                                                            <progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b>
-                                                        </div>
-                                                        <div v-else-if="key==='value' && value > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize">
-                                                        </div>
-                                                        <div v-else>
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
-                                                        </div>
-                                                    </div>
+                                            </el-col>
+                                            <el-col :span="18" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                <div class="grid-content">
+                                                    <el-form label-width="100px">
+                                                        <el-form-item :label="item.title" v-for="item in template" v-if="item.visible" style="height:50px;">
+                                                            <el-input type="text" v-model="rows[item.data]" :placeholder="item.data" v-if="item.type==='text'"></el-input>
+                                                            <el-date-picker type="date" v-model="rows[item.data]" :placeholder="item.data" v-else-if="item.type==='datetime'"></el-date-picker>
+                                                            <el-switch v-model="rows[item.data]" :placeholder="item.data" v-else-if="item.type==='switch'"></el-switch>
+                                                        </el-form-item>
+                                                        <el-form-item label="标签">
+                                                            <el-tag
+                                                                :key="tag"
+                                                                closable
+                                                                @close="tagsRemove(tag)"
+                                                                style="margin:0 2px;" v-for="tag in rows.tags" v-if="rows.tags">
+                                                                #{tag}#
+                                                            </el-tag>
+                                                            <el-input
+                                                                class="input-new-tag"
+                                                                v-if="tags.inputVisible"
+                                                                v-model="tags.inputValue"
+                                                                ref="saveTagInput"
+                                                                size="small"
+                                                                @keyup.enter.native="tagsAdd"
+                                                                @blur="tagsAdd">
+                                                            </el-input>
+                                                            <el-button v-else class="button-new-tag" size="small" @click="tagsInputShow">+</el-button>
+                                                        </el-form-item>
+                                                    </el-form>
                                                 </div>
-                                            </form>
-                                        </div>
-                                    </el-col>
-                                </el-row>`,
+                                            </el-col>
+                                        </el-row>
+                                    </el-main>
+                                </el-container>`,
                     filters:{
                         pickIcon(evt){
                             try{
@@ -264,37 +285,85 @@ class Entity extends Matrix {
                         }
                     },
                     mounted(){
+                        this.rows = this.model.rows;
+                        this.template = _.map(_.filter(this.model.template,{region:'base'}),function(v){
+                            return _.extend({visible:true},v);
+                        });
+                    },
+                    methods: {
+                        tagsRemove(tag) {
+                            const self = this;
+        
+                            self.rows.tags.splice($.inArray(tag,self.rows.tags), 1)
+                            
+                            // Tags Handler
+                            let input = {class: self.rows.class, action: "-", tag: tag, id: self.rows.id};
+                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                        },
+                        tagsInputShow() {
+                            const self = this;
+        
+                            self.tags.inputVisible = true;
+                            self.$nextTick(_ => {
+                                self.$refs.saveTagInput.$refs.input.focus();
+                            });
+                        },
+                        tagsAdd() {
+                            const self = this;
+        
+                            let inputValue = self.tags.inputValue;
+                            if (inputValue) {
+                                self.rows.tags.push(inputValue);
+
+                                // Tags Handler
+                                let input = {class: self.rows.class, action: "+", tag: inputValue, id: self.rows.id};
+                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            }
+
+                            self.tags.inputVisible = false;
+                            self.tags.inputValue = '';
+                        }
                     }
                 });
                 // 详情 管理信息
-                Vue.component("entity-view-detail-manager",{
+                Vue.component("entity-diagnosis-manager",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
                     },
-                    template: `<el-row :gutter="10">
-                                    <el-col :span="24">
-                                        <div class="grid-content">
-                                            <form class="form-horizontal">
-                                                <!-- 有模板 -->
-                                                <div class="form-group" v-for="item in _.filter(model.template,{region:'manager'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
-                                                    </div>
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                                        <el-tooltip content="保存">
+                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-row :gutter="10">
+                                            <el-col :span="24">
+                                                <div class="grid-content">
+                                                    <form class="form-horizontal">
+                                                        <!-- 有模板 -->
+                                                        <div class="form-group" v-for="item in _.filter(model.template,{region:'manager'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
+                                                            <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
+                                                            </div>
+                                                        </div>
+                                                        <!-- 没有模板 -->
+                                                        <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
+                                                            <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
+                                                            </div>
+                                                        </div>
+                                                    </form>
                                                 </div>
-                                                <!-- 没有模板 -->
-                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </el-col>
-                                </el-row>`,
+                                            </el-col>
+                                        </el-row>
+                                    </el-main>
+                                </el-container>`,
                     filters:{
                         pickIcon(evt){
                             try{
@@ -317,35 +386,44 @@ class Entity extends Matrix {
                     mounted(){
                     }
                 });
-                // 详情 配置信息
-                Vue.component("entity-view-detail-config",{
+                // 详情 实体信息
+                Vue.component("entity-diagnosis-config",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
                     },
-                    template: `<el-row :gutter="10">
-                                    <el-col :span="24">
-                                        <div class="grid-content">
-                                            <form class="form-horizontal">
-                                                <!-- 有模板 -->
-                                                <div class="form-group" v-for="item in _.filter(model.template,{region:'config'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <textarea rows="6" class="form-control-bg-grey" :placeholder="item.data">#{model.rows[item.data]}#</textarea>
-                                                    </div>
+                    template: `<el-container style="height: calc(100vh - 230px);">
+                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                                        <el-tooltip content="保存">
+                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-row :gutter="10">
+                                            <el-col :span="24">
+                                                <div class="grid-content">
+                                                    <form class="form-horizontal">
+                                                        <!-- 有模板 -->
+                                                        <div class="form-group" v-for="item in _.filter(model.template,{region:'config'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
+                                                            <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <textarea rows="6" class="form-control-bg-grey" :placeholder="item.data">#{model.rows[item.data]}#</textarea>
+                                                            </div>
+                                                        </div>
+                                                        <!-- 没有模板 -->
+                                                        <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
+                                                            <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                                <textarea rows="6" class="form-control-bg-grey" :placeholder="value">#{value}#</textarea>
+                                                            </div>
+                                                        </div>
+                                                    </form>
                                                 </div>
-                                                <!-- 没有模板 -->
-                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <textarea rows="6" class="form-control-bg-grey" :placeholder="value">#{value}#</textarea>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </el-col>
-                                </el-row>`,
+                                            </el-col>
+                                        </el-row>
+                                    </el-main>
+                                </el-container>`,
                     filters:{
                         pickIcon(evt){
                             try{
@@ -476,93 +554,9 @@ class Entity extends Matrix {
                     
                 });
                 
-                // 配置卡片
-                Vue.component("entity-diagnosis",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data:function(){
-                        return {
-                            
-                        }
-                    },
-                    template: ` <section class="entity-diagnosis">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active"><a href="#entity-diagnosis-base">基本信息</a></li>
-                                        <li class=""><a href="#entity-diagnosis-manager">管理信息</a></li>
-                                        <li class=""><a href="#entity-diagnosis-config">配置信息</a></li>
-                                    </ul>
-                                    <div class="content" id="entity-diagnosis-content">
-                                        <el-row id="entity-diagnosis-base">
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>基本信息</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <entity-view-detail-base :id="id + '-base'" :model="model.detail"></entity-view-detail-base>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row id="entity-diagnosis-manager">
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>管理信息</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <entity-view-detail-manager :id="id + '-manager'" :model="model.detail"></entity-view-detail-manager>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row id="entity-diagnosis-config">
-                                            <el-col :span="24">
-                                                <el-card class="box-card" shadow="always">
-                                                    <div slot="header" class="clearfix">
-                                                        <span>配置信息</span>
-                                                        <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
-                                                    </div>
-                                                    <entity-view-detail-config :id="id + '-config'" :model="model.detail"></entity-view-detail-config>
-                                                </el-card>
-                                            </el-col>
-                                        </el-row>
-                                    </div>
-                                </section>`,
-                    mounted:function(){
-                        this.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                            
-                            $(self.$el).find("ul>li").click(function(e){
-                                $(self.$el).find("li.active").removeClass("active");
-                                $(e.target).closest("li").addClass("active");
-                                $("#content.content").css("padding-top","60px!important;");
-                            })   
-                        },
-                        exportToPng(){
-                            var node = document.getElementById('event-diagnosis-content');
-
-                            domtoimage.toPng(node)
-                                .then(function (dataUrl) {
-                                    var img = new Image();
-                                    img.src = dataUrl;
-                                    document.body.appendChild(img);
-                                })
-                                .catch(function (error) {
-                                    console.error('oops, something went wrong!', error);
-                                });
-                            
-                        }
-                    }
-                    
-                });
 
                 // 配置比对
-                Vue.component("entity-compare",{
+                Vue.component("entity-diagnosis-compare",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -592,14 +586,14 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template:   `<div class="block" style="height:calc(100vh - 170px); overflow-x: hidden; overflow-y: auto;">
+                    template:   `<el-container style="height: calc(100vh - 230px);"><el-main>
                                     <el-timeline>
                                         <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.history.rows">
                                             <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
                                                 <h4>#{item.id}#</h4>
-                                                <p>#{item.config}#</p>
-                                                <p>#{item.files}#</p>
-                                                <p>#{item.elements}#</p>
+                                                <p style="font-size:12px;">#{item.config}#</p>
+                                                <p style="font-size:12px;">#{item.files}#</p>
+                                                <p style="font-size:12px;">#{item.elements}#</p>
                                                 <!--a href="javascript:void(0);" class="btn btn-xs btn-primary" @click="compareAdd(item)">加入比对</a-->
                                                 <a href="javascript:void(0);" class="btn btn-xs btn-primary" @click="compareWithLast(item,$event)">与最新配置比对 <i class="fas fa-angle-right"></i></a>
                                                 <p :class="'ace-compare-container ace-compare-container-'+objectHash.sha1(item)" style="display: flex;
@@ -612,7 +606,8 @@ class Entity extends Matrix {
                                             </el-card>
                                         </el-timeline-item>
                                     </el-timeline>
-                                </div>`,
+                                    </el-main>
+                                    </el-container>`,
                     mounted:function(){
                         this.init();
                     },
@@ -687,9 +682,9 @@ class Entity extends Matrix {
                         layout:{
                             main:{
                                 tabIndex: 1,
-                                activeIndex: 'event-view-console',
+                                activeIndex: 'entity-view-console',
                                 tabs:[
-                                    {name: 'event-view-console', title:'实体列表', type: 'main'}
+                                    {name: 'entity-view-console', title:'实体列表', type: 'main'}
                                 ],
                                 detail: {
                                     model: [],
@@ -699,10 +694,10 @@ class Entity extends Matrix {
                             },
                             summary: {
                                 tabIndex: 1,
-                                activeIndex: 'event-view-radar',
+                                activeIndex: 'entity-view-radar',
                                 tabs:[
-                                    {name: 'event-view-radar', title:'雷达', type: 'radar'},
-                                    {name: 'event-view-pie', title:'统计', type: 'pie'}
+                                    {name: 'entity-view-radar', title:'雷达', type: 'radar'},
+                                    {name: 'entity-view-pie', title:'统计', type: 'pie'}
                                 ]
                             }
                         },
@@ -743,9 +738,9 @@ class Entity extends Matrix {
                         'layout.main.tabs':{
                             handler(val,oldVal){
                                 if(val.length > 1){
-                                    $("#tab-event-view-console").show();
+                                    $("#tab-entity-view-console").show();
                                 }else {
-                                    $("#tab-event-view-console").hide();
+                                    $("#tab-entity-view-console").hide();
                                 }
                             },
                             deep:true
@@ -803,9 +798,9 @@ class Entity extends Matrix {
                         hideTabEventViewConsoleUl(){
                             const self = this;
 
-                            if($('#tab-event-view-console').is(':visible')) {
-                                $("#tab-event-view-console").hide();
-                            $("#tab-event-view-console > span").hide();
+                            if($('#tab-entity-view-console').is(':visible')) {
+                                $("#tab-entity-view-console").hide();
+                            $("#tab-entity-view-console > span").hide();
                             } else {
                                 setTimeout(self.hideTabEventViewConsoleUl, 50);
                             }   
@@ -818,9 +813,9 @@ class Entity extends Matrix {
                         },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
-                                $("#event-view-summary").css("height","200px").css("display","");
+                                $("#entity-view-summary").css("height","200px").css("display","");
                             } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
+                                $("#entity-view-summary").css("height","0px").css("display","none");
                             }
                             this.control.ifSmart = evt;
                             
@@ -832,7 +827,7 @@ class Entity extends Matrix {
                         detailAdd(event){
                             try {
                                 let id = event.id;
-                                if(this.layout.main.activeIndex === `detail-${id}`) return false;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
                                 
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event));
@@ -840,25 +835,18 @@ class Entity extends Matrix {
                                 let model = fsHandler.callFsJScript('/entity/diagnosis-by-id.js',term).message;
                                 
                                 // 添加tab
-                                this.layout.main.detail.activeIndex = `diagnosis-${id}`;
-                                let detail = {title:`配置卡片 ${event.id}`, name:`detail-${id}`, type: 'detail', child:[
-                                                {title:'配置卡片', name:`diagnosis-${id}`, type: 'diagnosis', model:model},
-                                                {title:'配置比对', name:`compare-${id}`, type: 'compare', model:model},
-                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
-                                                {title:'配置发现', name:`discover-${id}`, type: 'discover', model:model},
-                                                // {title:'告警轨迹', name:`journal-${id}`, type: 'journal'},
-                                                // {title:'历史告警', name:`historyEvent-${id}`, type: 'historyEvent'},
-                                                // {title:'维度关联性告警', name:`associationEvent-${id}`, type: 'associationEvent'},
-                                                // {title:'概率相关性告警', name:`probabilityEvent-${id}`, type: 'probabilityEvent'},
-                                                // {title:'性能', name:`performance-${id}`, type: 'performance'},
-                                                // {title:'日志', name:`log-${id}`, type: 'log'},
-                                                // {title:'配置', name:`config-${id}`, type: 'config'},
-                                                // {title:'工单', name:`ticket-${id}`, type: 'ticket'},
-                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
+                                let detail = {title:`实体卡片 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                                {title:'基本信息', name:`diagnosis-base-${id}`, type: 'base', model:model},
+                                                {title:'管理信息', name:`diagnosis-manager-${id}`, type: 'manager', model:model},
+                                                {title:'配置信息', name:`diagnosis-cofig-${id}`, type: 'cofig', model:model},
+                                                {title:'配置比对', name:`diagnosis-compare-${id}`, type: 'compare', model:model},
+                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological'},
+                                                {title:'实体发现', name:`diagnosis-discover-${id}`, type: 'discover', model:model},
                                             ]};
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                                 this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `detail-${id}`;
+                                this.layout.main.activeIndex = `diagnosis-${id}`;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
@@ -900,10 +888,10 @@ class Entity extends Matrix {
 
     resizeEventConsole(){
         let evwH = $(window).height();
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
+        let evcH = $("#entity-view-container").height();
+        let evsH = $("#entity-view-summary").height();
         
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+        $("#entity-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
                                                         .css("max-height","-=260px")
                                                         .css("max-height","-=" + evsH + "px")
                                                         .css("min-height", evwH + "px")

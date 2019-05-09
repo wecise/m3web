@@ -155,7 +155,7 @@
 			background-color: rgba(238,238,238, 0.5);
 		}
 
-		tr:not('no-tags').selected:hover:after {
+		.event-datatable-component tr:not('no-tags').selected:hover:after {
 			content: '拖到标签树打标签';
 			background-color: #efefef;
 			border: 2px dashed #ddd;
@@ -183,6 +183,21 @@
 
         .event-datatable-component .dataTables_filter{
             display: none;
+        }
+
+        /* ToolBar */
+        .event-datatable-component .dt-buttons{
+            width: 100%;
+        }
+        .event-datatable-component .dt-buttons > a{
+            margin-right:5px;
+            color: #666666;
+        }
+
+        .event-datatable-component .dt-buttons > a:hover{
+            color: rgb(87, 163, 243);
+            border-color: rgb(87, 163, 243);
+            text-decoration: none;
         }
 
 	</style>
@@ -359,9 +374,23 @@
                                     self.dropHandle();
                                     
                                     self.resize();
+
+                                    self.initPlug();
+                                    
 			                    }
                 },self.model.options));
-			},
+            },
+            initPlug(){
+                const self = this;
+
+                _.delay(function(){
+                    // Buttons enable/disable
+                    self.datatable.on( 'select deselect', function () {
+                        let selectedRows = self.datatable.rows( { selected: true } ).count();
+                        self.datatable.buttons( [3,4,5,6] ).enable( selectedRows > 0 );
+                    } );
+                },2000)
+            },
             filterColumn(event) {
                 $("#"+this.id).DataTable().columns( '.search-filter' ).search(event.name).draw();
             },
@@ -400,7 +429,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let contextMenuItems = fsHandler.callFsJScript('/event/toolbar.js', '').message.event;
+                let contextMenuItems = fsHandler.callFsJScript('/event/contextmenu.js', '').message.event;
                 let id = self.id;
 
                 $.contextMenu({
@@ -414,11 +443,15 @@
 
                         return {
                             callback: function(key, opt) {
-                                if(_.endsWith(key,'diagnosis')) {
+                                if(_.includes(key,'diagnosis')) {
                                     self.$root.detailAdd(self.selectedRows);
+                                } else if(_.includes(key,'action')) {
+                                    // 增加操作类型，避免冲突，命名为：_status
+                                    let action = _.last(key.split("_"));
+                                    self.$root.action({list: [self.selectedRows], action:action});
                                 }
                             },
-                            items: contextMenuItems,
+                            items: contextMenuItems
                         }
                     },
                     events: {
@@ -501,7 +534,7 @@
 			},
 			toolBar: function(){
                 const self = this;
-
+                
                 // 创建工具栏
                 let datatable = $("#"+this.id).DataTable();
 
@@ -549,8 +582,13 @@
                     _.forEach(this.model.actions, function (v) {
                         if(!v) return;
                         buttons.push({
-                            text: v.cnname, actions: function (e, dt, node, config) {
-                            }, className: `btn-white ${v.class}`, titleAttr: v.cname
+                            text: ` ${mx.global.register.event.status[v][1]}`, 
+                            action: function (e, dt, node, config) {
+                                self.$root.action( {list: dt.rows('.selected').data().toArray(), action:v});
+                            }, 
+                            enabled: false,
+                            className: `btn-white ${mx.global.register.event.status[v][2]}`, 
+                            titleAttr: mx.global.register.event.status[v][1]
                         })
                     })
                 }
@@ -582,7 +620,7 @@
                     dom: {
                         button: {
                             tag: 'a',
-                            className: 'btn btn-xs animated fadeInLeft'
+                            //className: 'btn btn-xs animated fadeInLeft'
                         }
                     },
                     buttons: buttons
@@ -590,14 +628,13 @@
 
                 // 更新Dom
                 if( $('.event-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $('.event-datatable-component .dataTables_wrapper > .dt-buttons').empty();
+                    $(`.event-datatable-component .dataTables_wrapper .dt-buttons`).replaceWith(datatable.buttons().containers());
+                } else {
+                    datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
                 }
-                datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
 
                 // button样式调整
                 $(".event-datatable-component a.dt-button").removeClass("dt-button");
-                // tooltip
-                $(".event-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
 
 			},
             // Class分组menu

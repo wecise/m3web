@@ -455,7 +455,7 @@
                     // str is the input text
                     if (e) {
                         // user clicked "ok"
-	                    let parent = '/opt/creative/admin';
+	                    let parent = `/opt/creative/${window.SignedUser_UserName}`;
 	                    let ftype = 'imap';
 	                    let name = `${str}.${ftype}`;
 	                    let attr = {remark: null, ctime: _.now(), author: window.SignedUser_UserName, type: 'imap', icon: `${window.ASSETS_ICON}/files/png/imap.png?type=download&issys=${window.SignedUser_IsAdmin}`};

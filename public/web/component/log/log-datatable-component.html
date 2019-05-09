@@ -155,7 +155,7 @@
 			background-color: rgba(238,238,238, 0.5);
 		}
 
-		tr.selected:hover:after {
+		.log-datatable-component tr.selected:hover:after {
 			content: '拖到标签树打标签';
 			background-color: #efefef;
 			border: 2px dashed #ddd;
@@ -335,6 +335,11 @@
                                         copySuccess: {
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
+                                        }
+                                    },
+                                    select: {
+                                        rows: {
+                                            _: "已拷贝 %d 项"
                                         }
                                     }
 

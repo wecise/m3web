@@ -131,18 +131,18 @@
 		background: rgb(255, 255, 255);
 	}
 
-	section.event-diagnosis > ul {
+	section.log-diagnosis > ul {
 		padding:15px 0px;
 		padding-left: 23vw;
 	}
 
-	section.event-diagnosis > ul > li > a{
+	section.log-diagnosis > ul > li > a{
 		font-size: 14px;
 		color: #333333;
 		background: transparent;
 	}
 
-	section.event-diagnosis > ul > li.active > a{
+	section.log-diagnosis > ul > li.active > a{
 		font-size: 14px;
 		box-shadow: 1px 1px 1px 1px #ddd;
     	color: #ffffff!important;
@@ -150,14 +150,14 @@
     	background: rgb(130, 192, 255)!important;
 	}
 
-	section.event-diagnosis > div.content{
+	section.log-diagnosis > div.content{
 		margin: 0px;
 		padding:0px 15px;
 		height:calc(90vh - 183px);
 		overflow:auto;
 	}
 
-	section.event-diagnosis > div.content > p{
+	section.log-diagnosis > div.content > p{
 		border:1px solid #ddd;
 		padding:15px;
 	}
@@ -226,9 +226,9 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/log/log-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/log/event-diagnosis-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/log/event-graph-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/log/event-summary-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/log/log-diagnosis-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/log/log-graph-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/log/log-summary-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
@@ -293,10 +293,10 @@
 								</el-row>
 								<el-row :gutter="10" id="log-view-console">
 									<el-col :xl="8" class="tree-view animated fadeInRight">
-										<probe-tree-component id="event-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
+										<probe-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
 									</el-col>
 									<el-col :xl="16" class="table-view animated fadeInLeft">
-										<log-datatable-component id="event-list" :model="model.message"></log-datatable-component>
+										<log-datatable-component id="log-list" :model="model.message"></log-datatable-component>
 									</el-col>
 								</el-row>
 						</div>
@@ -313,7 +313,7 @@
 										<log-diagnosis-history :id="it.name+'-history'" :model="it.model.history"></log-diagnosis-history>
 									</div>
 									<div v-else>
-										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
+										<!-- <log-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></log-diagnosis-datatable-component> -->
 									</div>
 								</el-tab-pane>
 							</el-tabs>

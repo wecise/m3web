@@ -392,6 +392,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
+
 <script>
 	
 	VueLoader.onloaded(["vue-bootstrap-table",
@@ -401,7 +403,8 @@
 						"vue-search-input-component",
 						"vue-common-form-component",
 						"vue-object-detail-component",
-						"ai-robot-component"],function() {
+						"ai-robot-component",
+						"event-datatable-component"],function() {
 
 		$(function(){
 
@@ -618,7 +621,7 @@
 	                forward: String
 	            },
 	            mounted: function () {
-	                let self = this;
+	                const self = this;
 
 	                self.$nextTick(function () {
 	                    $(self.$el).bootstrapTable(_.extend({
@@ -627,17 +630,9 @@
 	                                        }, self.options));
 
 	                    $(self.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
-	                    	
-	                    	// Search For
-			                localStorage.setItem("search-open-"+self.forward,JSON.stringify({
-			                                                                id: row.id,
-			                                                                preset:appVue.search.preset
-			                                                            })
-                                            	);
-	                        window.open(
-	                                "/janesware/"+self.forward,
-	                                "_blank"
-	                            );
+	                    	term = row.id;
+                            let url = `/janesware/${self.forward}?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
 			            });
 
 			            $(self.$el).on('click-row.bs.table', function (e, row, $element) {
@@ -1651,7 +1646,8 @@
 			  			<div role="tabpanel" class="tab-pane active" id="journal-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
-			  										:data="model.data"></bootstrap-table-search>
+													  :data="model.data"
+													  forward="event"></bootstrap-table-search>
 			  			</div>
 			  			<div role="tabpanel" class="tab-pane" id="journal-list">
 			  				
@@ -1708,7 +1704,8 @@
 			  			<div role="tabpanel" class="tab-pane active" id="raw-table">
 			  				<bootstrap-table-search :columns="model.columns" 
 			  										:options="model.options" 
-			  										:data="model.data"></bootstrap-table-search>
+													:data="model.data"
+													forward="log"></bootstrap-table-search>
 			  			</div>
 			  			<div role="tabpanel" class="tab-pane" id="raw-list">
 			  				

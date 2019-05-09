@@ -378,6 +378,20 @@ class Config {
                     template:   `<div class="layout">
                                     <Layout>
                                         <Header>
+                                            <Dropdown placement="top-start">
+                                                <Button type="text" size="small"><i class="fas fa-grip-vertical"></i></Button>
+                                                <DropdownMenu slot="list">
+                                                    <DropdownItem>
+                                                        <label for="auto-file-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
+                                                            <i class="fas fa-file-import"></i> 导入
+                                                        </label>
+                                                        <input id="auto-file-upload" type="file" @change="configImport" required="required" style="display:none;" />
+                                                    </DropdownItem>
+                                                    <DropdownItem>
+                                                        <Button type="text" size="small" @click="configExport"><i class="fas fa-file-export"></i> 导出</Button>
+                                                    </DropdownItem>
+                                                </DropdownMenu>
+                                            </Dropdown>
                                             <ButtonGroup>
                                                 <Button type="text" size="small" @click="configNew"><i class="fas fa-plus"></i> 新增</Button>
                                                 <Button type="text" size="small" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-save"></i> 保存</Button>
@@ -453,6 +467,42 @@ class Config {
                         })
                     },
                     methods: {
+                        configImport(event){
+                            const self = this;
+
+                            let file = event.target.files[0];
+
+                            alertify.confirm(`确认要导入配置?<br><br>
+                                                文件名称：${file.name}<br><br>
+                                                修改时间：${file.lastModifiedDate}<br><br>
+                                                文件大小：${mx.bytesToSize(file.size)}`, function (e) {
+                                if (e) {
+                                    let rtn = configHandler.configImport(file,null);
+
+                                    if(rtn === 1){
+                                        eventHub.$emit("CONFIG-TREE-REFRESH-EVENT", '/');
+                                    }
+                                } else {
+                                    
+                                }
+                            });
+                        },
+                        configExport(){
+                            const self = this;
+
+                            if(!self.configTreeSelectedNode.key){
+                                alertify.log("请选择需要导出的节点!");
+                                return false;
+                            }
+
+                            alertify.confirm(`确认要导出 ${self.configTreeSelectedNode.key} 下的配置?`, function (e) {
+                                if (e) {
+                                    let rtn = configHandler.configExport(self.configTreeSelectedNode.key);
+                                } else {
+                                    
+                                }
+                            });
+                        },
                         configOpen(treeNode){
                             const self = this;
                             

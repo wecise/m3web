@@ -437,7 +437,9 @@
             delTagDir: function(treeNode){
                 const self = this;
 
-                alertify.confirm("确认删除", function (e) {
+                alertify.confirm(`确认要删除该标签目录？<br><br>
+                                  标签域：${self.model.domain}<br><br>
+                                  名称：${treeNode.name}`, function (e) {
                     if (e) {
                         let rtn = tagHandler.delTagDir(self.model.domain, treeNode.name);
 

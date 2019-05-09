@@ -275,10 +275,11 @@
 
                                 },
 			                    initComplete: function(){
-				                    self.serial();
+				                    //self.serial();
 	                                //self.toolBar();
 	                                self.contextMenu();
-	                                self.selectRows();
+									self.selectRows();
+									self.resize();
 			                    }
                 },self.model.options)).columns.adjust().draw();
 
@@ -293,7 +294,13 @@
 			},
 			selectRows: function(){
                 const self = this;
-                let table = $("#"+self.id).DataTable();
+				let table = $("#"+self.id).DataTable();
+				
+				table.on( 'select', function ( e, dt, type, indexes ) {
+					self.selectedRows = table.rows( '.selected' ).data().toArray();
+				} ).on( 'deselect', function ( e, dt, type, indexes ) {
+					self.selectedRows = table.rows( '.selected' ).data().toArray();
+				} );
 			},
 			refresh: function(){
 				this.model = fsHandler.callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
@@ -302,13 +309,13 @@
                 this.$root.detail(this.selectedRows);
 			},
 			resize(){
-				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
+				let parentHeight = $(this.$el).closest("section").height() - 120;
 				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
 			},
             contextMenu: function(){
                 const self = this;
 
-                let items = fsHandler.callFsJScript('/event/toolbar.js', '').message.event;
+                let items = fsHandler.callFsJScript('/event/contextmenu.js', '').message.event;
                 let id = self.id;
 
                 $.contextMenu({
@@ -333,7 +340,7 @@
 
                             let $this = this;
 
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
+                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows[0], self.refresh));
                         },
                         hide: function(opt) {
 

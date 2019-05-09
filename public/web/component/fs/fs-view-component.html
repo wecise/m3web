@@ -371,8 +371,20 @@
                                 <i class="fas fa-check-square"></i>
                             </a>
                         </el-tooltip>
+
+                        <el-tooltip content="复制到" placement="top">
+                            <a href="#" class="btn btn-link" @click="copyTo" title="复制到">
+                                <i class="fas fa-copy"></i>
+                            </a>
+                        </el-tooltip>
+
+                        <el-tooltip content="移动到" placement="top">
+                            <a href="#" class="btn btn-link" @click="moveTo" title="移动到">
+                                <i class="fas fa-people-carry"></i>
+                            </a>
+                        </el-tooltip>
                         
-                        <el-tooltip content="复制" placement="top">
+                        <!--el-tooltip content="复制" placement="top">
                             <a href="#" class="btn btn-link" @click="copyThem" title="复制">
                                 <i class="fas fa-copy"></i>
                             </a>
@@ -388,7 +400,7 @@
                             <a href="#" class="btn btn-link" @click="moveIt" title="移动到">
                                 <i class="fas fa-people-carry"></i>
                             </a>
-                        </el-tooltip>
+                        </el-tooltip-->
 
                         <el-tooltip content="删除" placement="top">
                             <a href="#" class="btn btn-link" @click="deleteThem" title="删除">
@@ -1450,6 +1462,8 @@
 			openIt: function(item, path){
                 const self = this
 
+                event.preventDefault();
+
                 // 点击【我的文件】返回不同的root
                 if(_.isNull(item)){
                     self.rootPath = self.root;
@@ -1896,6 +1910,88 @@
                         
                     }
                 });
+            },
+            moveTo: function(){
+                const self = this;
+                
+                if(_.isEmpty(window.fsSelectedItem)) {
+                    alertify.log("请选择移动内容")
+                    return false;
+                }
+                
+                alertify.prompt("请输入目标目录", function (evt, str) {
+                    // str is the input text
+                    if (evt) {
+                        alertify.confirm(`确认要将下列所选目录或文件移动到 ${str}? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
+                            if (e) {
+                                try {
+                                    let rtn = true;
+                                    _.forEach(window.fsSelectedItem,function(v){
+                                        let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), str);
+                                        if(_rtn===0){
+                                            rtn = false;
+                                        }
+                                    })
+                                    if(rtn){
+                                        alertify.success("移动成功 " + str);
+                                        self.load();
+                                    }
+                                }
+                                catch(error){}
+                                finally{
+                                    window.fsSelectedItem = [];
+                                }
+                            } else {
+                                
+                            }
+                        });
+                    } else {
+                        // user clicked "cancel"
+                    }
+                }, '/');
+                $(".alertify-prompt .alertify-message").css('height','5vh');
+
+            },
+            copyTo: function(){
+                const self = this
+
+                if(_.isEmpty(window.fsSelectedItem)) {
+                    alertify.log("请选择复制内容")
+                    return false;
+                }
+
+                alertify.prompt("请输入目标目录", function (evt, str) {
+                    // str is the input text
+                    if (evt) {
+                        alertify.confirm(`确认要将下列所选目录或文件复制到 ${str}? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
+                            if (e) {
+                                try {
+                                    let rtn = true;
+                                    _.forEach(window.fsSelectedItem,function(v){
+                                        let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), str);
+                                        if(_rtn===0){
+                                            rtn = false;
+                                        }
+                                    })
+                                    if(rtn){
+                                        alertify.success("复制成功 " + str);
+                                        self.load();
+                                    }
+                                }
+                                catch(error){}
+                                finally{
+                                    window.fsSelectedItem = [];
+                                }
+                            } else {
+                                
+                            }
+                        });
+                    } else {
+                        // user clicked "cancel"
+                    }
+                }, '/');
+                $(".alertify-prompt .alertify-message").css('height','5vh');
+
             },
             deleteThem: function() {
                 const self = this
@@ -2677,7 +2773,7 @@
                     self.selectedItem.push(item);
                 }
 
-                window.fsSelectedItem = [];
+                window.fsSelectedItem = self.selectedItem;//[];
                 
             },
             selectAll: function(){
@@ -2693,7 +2789,7 @@
                     self.selectedItem.push(item);
                 })
 
-                window.fsSelectedItem = [];
+                //window.fsSelectedItem = self.selectedItem;//[];
 
             },
 			setRootPath: function(item) {

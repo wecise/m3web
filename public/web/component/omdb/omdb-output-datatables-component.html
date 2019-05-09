@@ -260,6 +260,11 @@
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
                                         }
+                                    },
+                                    select: {
+                                        rows: {
+                                            _: "已拷贝 %d 项"
+                                        }
                                     }
 
                                 },
@@ -501,28 +506,21 @@
 								return false;
                             }
 
-                            swal({
-                                title: "",
-                                text: "确定要删除?",
-                                type: "warning",
-                                showCancelButton: true,
-                                closeOnConfirm: false,
-                                cancelButtonText: "取消",
-                                confirmButtonText: "删除",
-                                confirmButtonColor: "#ff0000"
-                            }).then((result) => {
-                                if (result.value) {
+                            let ids = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
 
-                                    let _id = _.map(self.datatable.rows( { selected: true } ).data(), 'id').join("','");
-
-                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${_id}')`);
+                            alertify.confirm(`确定要删除选定的数据：<br><br> 
+                                                ${ids.replace(/,/g,'<br><br>')}`, function (e) {
+                                if (e) {
+                                    
+                                    let _rtn = omdbHandler.fetchDataByMql(`delete from /matrix/ where id in ('${ids}')`);
 
                                     if(_rtn.status === 'ok') {
                                         self.datatable.rows( { selected: true } ).remove().draw(false);
                                     }
+                                } else {
+                                    
                                 }
-                            })
-
+                            });
 
                         },
                         editIt: function () {

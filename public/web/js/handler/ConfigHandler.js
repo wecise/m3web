@@ -30,6 +30,7 @@ class ConfigHandler {
                 key: event
             },
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -44,6 +45,7 @@ class ConfigHandler {
                 
             },
             error: function(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
         return rtn;
@@ -67,6 +69,7 @@ class ConfigHandler {
                 value: event.value
             },
             beforeSend: function(xhr) {
+                Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -83,6 +86,7 @@ class ConfigHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("添加失败：" + event.key + " " + xhr.responseText);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
         return rtn;
@@ -103,6 +107,9 @@ class ConfigHandler {
             data: {
                 key: event.key
             },
+            beforeSend: function(xhr) {
+                Pace.restart();
+            },
             complete: function(xhr, textStatus) {
             },
             success: function(data, textStatus, xhr) {
@@ -118,6 +125,84 @@ class ConfigHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("删除失败：" + event.key + " " + xhr.responseText);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        return rtn;
+    }
+
+    /*
+    *  Config Export From ETCD
+    *
+    */
+    configExport(key) {
+        let rtn = 0;
+
+        let fileName = `ETCD${key}_${moment().format("YYYY-MM-DD_HH:mm:SS")}.json`;
+
+        Pace.restart();
+
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `/config/export?key=${key}`, true);
+            xhr.setRequestHeader("Content-type","text/json");
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var blob = new Blob([xhr.response], {type: "octet/stream"});
+                    saveAs(blob, fileName);
+                    alertify.success("导出成功" + " " + fileName);
+                    rtn = 1;
+                }
+            }
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+        } catch(err){
+            
+        }
+        
+        return rtn;
+    }
+
+    /*
+    *  Config Import Into ETCD
+    *
+    */
+    configImport(file,key) {
+        let rtn = 0;
+
+        let fm = new FormData();
+        fm.append("uploadfile", file);
+        //fm.append("key", key);
+
+        jQuery.ajax({
+            url: '/config/import',
+            type: 'POST',
+            dataType: 'json',
+            async: false,
+            data: fm,
+            processData: false,
+            contentType: false,
+            mimeType: "multipart/form-data",
+            beforeSend: function(xhr) {
+                Pace.restart();
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("导入成功：" + file.name + " " + moment().format("LLL"));
+                }
+        
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = 0;
+                alertify.error("导入失败：" + file.name + " " + xhr.responseText);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
         return rtn;

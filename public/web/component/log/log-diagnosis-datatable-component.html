@@ -2,44 +2,44 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.event-diagnosis-datatable-component,
-		.event-diagnosis-datatable-component .dataTables_wrapper{
+		.log-diagnosis-datatable-component,
+		.log-diagnosis-datatable-component .dataTables_wrapper{
 			width:100%;
 			height: 100%;
 			margin: 0 auto;
 		}
 
-		.event-diagnosis-datatable-component .dataTables_wrapper table.dataTable{
+		.log-diagnosis-datatable-component .dataTables_wrapper table.dataTable{
 			margin: 0!important
 		}
 
-		.event-diagnosis-datatable-component .dataTables_scrollHead{
+		.log-diagnosis-datatable-component .dataTables_scrollHead{
 			background: rgb(241, 241, 241);
 		}
 
-		.event-diagnosis-datatable-component thead tr th, .event-diagnosis-datatable-component tbody tr td{
+		.log-diagnosis-datatable-component thead tr th, .log-diagnosis-datatable-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
 		}
 
-		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected,
-		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected td,
-		.event-diagnosis-datatable-component table.dataTable tbody>tr>.selected {
+		.log-diagnosis-datatable-component table.dataTable tbody>tr.selected,
+		.log-diagnosis-datatable-component table.dataTable tbody>tr.selected td,
+		.log-diagnosis-datatable-component table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
 		}
 
 		/* input高度*/
-		.event-diagnosis-datatable-component .dataTables_filter input{
+		.log-diagnosis-datatable-component .dataTables_filter input{
 			height: 24px;
 		}
 
-		.event-diagnosis-datatable-component tr{
+		.log-diagnosis-datatable-component tr{
 			animation-delay: .5s;
 		}
 
 		/* CSS to add checkboxes to colvis items */
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.log-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
+		.log-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			display:block;
 			position:absolute;
 			top:1.2em;
@@ -49,7 +49,7 @@
 			box-sizing:border-box;
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
+		.log-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
 			content: '\25A1 ';
 			margin-top: -25px;
 			margin-left: -2px;
@@ -59,7 +59,7 @@
 			color: rgb(221,221,221);
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.log-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			content: '\2713';
 			margin-top: -11px;
 			margin-left: 5px;
@@ -70,23 +70,23 @@
 			color: rgb(29, 28, 28);
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility span {
+		.log-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility span {
 			margin-left: 25px;
 		}
 
 		/* columns选择 */
-		.event-diagnosis-datatable-component div.dt-button-collection {
+		.log-diagnosis-datatable-component div.dt-button-collection {
 			width: 50vw;
 			max-height: 50vh;
 			overflow: auto!important;
 		}
 
-		.event-diagnosis-datatable-component div.dt-button-background {
+		.log-diagnosis-datatable-component div.dt-button-background {
 			display: none!important;
 		}
 
-		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
-		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
+		.log-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
+		.log-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
 			background-color: #ffffff;
 			background-image:  none;
 			background-image: none;
@@ -94,8 +94,8 @@
 			box-shadow: none;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility:active:not(.disabled),
-		.event-diagnosis-datatable-component a.buttons-columnVisibility.active:not(.disabled) {
+		.log-diagnosis-datatable-component a.buttons-columnVisibility:active:not(.disabled),
+		.log-diagnosis-datatable-component a.buttons-columnVisibility.active:not(.disabled) {
 			background-color: #ffffff;
 			background-image:  none;
 			background-image: none;
@@ -104,7 +104,7 @@
 			box-shadow:  none;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility {
+		.log-diagnosis-datatable-component a.buttons-columnVisibility {
 			position: relative;
 			display: inline-block;
 			box-sizing: border-box;
@@ -132,7 +132,7 @@
 			text-align: left;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility:hover:not(.disabled) {
+		.log-diagnosis-datatable-component a.buttons-columnVisibility:hover:not(.disabled) {
 			background-color:  none;
 			background-image:  none;
 			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f9f9f9', EndColorStr='#e0e0e0');
@@ -143,7 +143,7 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="event-diagnosis-datatable-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="log-diagnosis-datatable-component"  ----------*/
 	<template>
 		<div>
 			<table :id="id" class="stripe row-border order-column" width="100%"></table>
@@ -151,7 +151,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="event-diagnosis-datatable-component">
+	<script id="log-diagnosis-datatable-component">
 	{
         delimiters: ['${', '}'],
 		props: {
@@ -239,7 +239,6 @@
 	                            stateSave: true,
                                 select: {
 			                        style: 'multi',
-			                        selector: 'td:first-child'
 			                    },
                                 language : {
                                     "sProcessing" : "处理中...",
@@ -271,14 +270,20 @@
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
                                         }
+                                    },
+                                    select: {
+                                        rows: {
+                                            _: "已拷贝 %d 项"
+                                        }
                                     }
 
                                 },
 			                    initComplete: function(){
-				                    self.serial();
+				                    //self.serial();
 	                                //self.toolBar();
 	                                self.contextMenu();
-	                                self.selectRows();
+									self.selectRows();
+									self.resize();
 			                    }
                 },self.model.options)).columns.adjust().draw();
 
@@ -293,7 +298,13 @@
 			},
 			selectRows: function(){
                 const self = this;
-                let table = $("#"+self.id).DataTable();
+				let table = $("#"+self.id).DataTable();
+				
+				table.on( 'select', function ( e, dt, type, indexes ) {
+					self.selectedRows = table.rows( '.selected' ).data().toArray();
+				} ).on( 'deselect', function ( e, dt, type, indexes ) {
+					self.selectedRows = table.rows( '.selected' ).data().toArray();
+				} );
 			},
 			refresh: function(){
 				this.model = fsHandler.callFsJScript('/log/log_diagnosis.js', null).message[self.type] || [];
@@ -302,7 +313,7 @@
                 this.$root.detail(this.selectedRows);
 			},
 			resize(){
-				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
+				let parentHeight = $(this.$el).closest("section").height() - 120;
 				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
 			},
             contextMenu: function(){
@@ -313,7 +324,7 @@
 
                 $.contextMenu({
                     selector: `#${id} tr td:not(:nth-child(1))`,
-                    trigger: 'left',
+                    trigger: 'right',
                     delay: 10,
                     hideOnSecondTrigger: true,
                     className: `animated slideIn ${id}`,
@@ -332,8 +343,8 @@
                         show: function(opt) {
 
                             let $this = this;
-
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
+							
+                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows[0], self.refresh));
                         },
                         hide: function(opt) {
 
@@ -342,54 +353,7 @@
                         }
                     }
                 });
-            },
-			toolBar: function(){
-                const self = this;
-
-                // 创建工具栏
-                let datatable = $("#"+this.id).DataTable();
-
-				let buttons = [
-				                    {
-				                        extend: 'colvis',
-				                        text: '<i class="fas fa-list"></i>',
-				                        collectionLayout: 'fixed four-column',
-				                        className: 'btn-white',
-				                        fade: true,
-                                        titleAttr: '选择属性'
-
-				                    },
-				                    {
-				                        extend: 'csv',
-				                        text: '<i class="fas fa-download"></i>',
-				                        className: 'btn-white',
-				                        titleAttr: '导出csv格式'
-
-				                    }
-				                ];
-
-                new $.fn.dataTable.Buttons(datatable, {
-                    dom: {
-                        button: {
-                            tag: 'a',
-                            className: 'btn btn-xs animated fadeInLeft'
-                        }
-                    },
-                    buttons: buttons
-                });
-
-                // 更新Dom
-                if( $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').empty();
-                }
-                datatable.buttons().containers().prependTo( `.event-diagnosis-datatable-component .dataTables_wrapper` );
-
-                // button样式调整
-                $(".event-diagnosis-datatable-component a.dt-button").removeClass("dt-button");
-                // tooltip
-                $(".event-diagnosis-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
-
-			}
+            }
 		}
 	
 	}

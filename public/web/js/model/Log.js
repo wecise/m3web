@@ -26,10 +26,10 @@ class Log extends Matrix {
     init() {
 
         VueLoader.onloaded(["ai-robot-component",
-                            "event-graph-component",
+                            "log-graph-component",
                             "log-datatable-component",
-                            "event-diagnosis-datatable-component",
-                            "event-summary-component",
+                            "log-diagnosis-datatable-component",
+                            "log-summary-component",
                             "search-preset-component",
                             "search-base-component",
                             "probe-tree-component",
@@ -146,7 +146,7 @@ class Log extends Matrix {
                             progress:[]
                         }
                     },
-                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
+                    //template: `<log-summary-component :id="id" :model='model'></log-summary-component>`,
                     template:   `<div>
                                     <div class="progress" 
                                          v-for="pg in progress" 
@@ -259,9 +259,8 @@ class Log extends Matrix {
                                             <el-timeline>
                                                 <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.rows">
                                                     <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                                        <h4>#{item.value}#</h4>
                                                         <p>#{item.biz}# #{item.host}#</p>
-                                                        <p>#{item.msg}#</p>
+                                                        <p style="font-size:12px;">#{item.msg}#</p>
                                                     </el-card>
                                                 </el-timeline-item>
                                             </el-timeline>
@@ -284,7 +283,7 @@ class Log extends Matrix {
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                        <log-diagnosis-datatable-component :id="id" :model="model"></log-diagnosis-datatable-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -332,7 +331,7 @@ class Log extends Matrix {
                         },
                         // 搜索组件结构
                         model: {
-                            id: "matrix-event-search",
+                            id: "matrix-log-search",
                             filter: null,
                             term: null,
                             preset: null,
@@ -396,6 +395,14 @@ class Log extends Matrix {
                         }
                     },
                     created(){
+                        // 初始化term
+                        try{
+                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            this.options.term = term;
+                        } catch(err){
+
+                        }
+                        
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
@@ -541,108 +548,6 @@ class Log extends Matrix {
                                                         .css("min-height","-=260px")
                                                         .css("min-height","-=" + evsH + "px");
     }
-
-    graphNav(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<probe-tree-component id="event-detail-graph-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`,
-            data: {
-                id: id
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    graph(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<event-graph-component :id="id" :graphData="model"></event-graph-component>`,
-            data: {
-                id: id,
-                model: fsHandler.callFsJScript('/event/event_detail_graph.js', null).message.data[0].graph
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-
-                })
-            }
-        };
-    }
-
-    performance(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="performance">
-                        <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'performance'
-            }
-        };
-    }
-
-    log(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="log">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'log'
-            }
-        };
-    }
-
-    config(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="config">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                        </div>`,
-            data: {
-                id: id,
-                model: 'config'
-            }
-        };
-    }
-
-    ticket(id){
-        return {
-            delimiters: ['${', '}'],
-            el: '#' + id,
-            template: `<div id="ticket">
-                            <event-diagnosis-datatable-component :id="id" :type="model"></event-diagnosis-datatable-component>
-                       </div>`,
-            data: {
-                id: id,
-                model: 'ticket'
-            }
-        };
-    }
-
-    checkContainer(){
-        if($('#log-view-container').is(':visible')) {
-            maxLog.layout();
-        } else {
-            setTimeout(maxLog.checkContainer, 50);
-        }
-    }
-
 
 
 }

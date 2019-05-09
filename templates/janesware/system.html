@@ -1007,7 +1007,7 @@
                                 success: function(data, textStatus, xhr) {
 
                                     //called when successful
-                                    swal("success!", "", "success");
+                                    alertify.success("添加成功!");
                                     
                                     eventHub.$emit("config-refresh-event",key);
                                 },
@@ -1031,7 +1031,7 @@
                                 success: function(data, textStatus, xhr) {
 
                                     //called when successful
-                                    swal("success!", "", "success");
+                                    alertify.success(`添加成功`);
 
                                     eventHub.$emit("config-refresh-event",key);
                                 },
@@ -1045,16 +1045,8 @@
                         const self = this;
                         let _key = self.etcdKey;
 
-                        swal({
-                            title: _key,
-                            text: 'Are you sure,delete it?',
-                            type: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Yes, delete it!'
-                        }).then((result) => {
-                            if (result.value) {
+                        alertify.confirm(`确认要删除该配置? <br><br> ${self.etcdKey}`, function (e) {
+                            if (e) {
                                 jQuery.ajax({
                                     url: '/config/del',
                                     type: 'POST',
@@ -1067,16 +1059,16 @@
                                     },
                                     success: function(data, textStatus, xhr) {
 
-                                        swal("Deleted!", self.etcdKey, "success");
-                                        
                                         eventHub.$emit("config-refresh-event", _key);
                                     },
                                     error: function(xhr, textStatus, errorThrown) {
                                         //called when there is an error
                                     }
                                 })
+                            } else {
+                                
                             }
-                        })
+                        });
                     },
                     saveNode: function(){
                         const self = this;
@@ -1098,7 +1090,7 @@
                             },
                             success: function(data, textStatus, xhr) {
 
-                                swal("success!", self.etcdKey, "success");
+                                alertify.success(`${self.etcdKey} 保存成功!`);
                                 
                                 eventHub.$emit("config-refresh-event", key);
                             },
@@ -1426,14 +1418,14 @@
                                     me.ldap.ftype = "add";
                                     
                                     if (_.isEmpty(me.ldap.object.username)) {
-                                        swal("名称不能为空！", "", "warning");
+                                        alertify.log("名称不能为空！");
                                         return false;
                                     }
 
                                     let _result = userHandler.ldapMaintain(me.ldap);
 
                                     if(_result===1){
-                                        swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.fullname,"success");
+                                        alertify.success(`{{.i18n.Tr "creative-new"}} ${me.ldap.object.fullname}`);
                                         
                                         _.delay(function(){
                                             eventHub.$emit('user-tree-refresh-event', null);
@@ -1494,7 +1486,7 @@
                         var userByObjectData = $("#byObjectTable").bootstrapTable('getData');
                         
                         if(_.isEmpty(userData)) {
-                            swal("请选择用户！","","info");
+                            alertify.log(`请选择用户！`);
                             return false;
                         }
 
@@ -1956,23 +1948,16 @@
                     remove: function(event) {
                         const self = this;
 
-                        swal({
-                            title: '',
-                            text: "确定要删除？",
-                            type: "info",
-                            showCancelButton: true,
-                            closeOnConfirm: false,
-                            cancelButtonText: "取消",
-                            confirmButtonText: "确定",
-                            confirmButtonColor: "#ff0000"
-                        }).then((result) => {
-                            if (result.value) {
+                        alertify.confirm(`确定要删除？<br><br> ${event}`, function (e) {
+                            if (e) {
                                 let _mql = `delete from /matrix/portal/tools where name='${event}'`;
                                 let _rtn = omdbHandler.fetchDataByMql(_mql);
 
                                 self.init();
+                            } else {
+                                
                             }
-                        })
+                        });
 
                     },
                     resetForm: function(){
@@ -2118,7 +2103,7 @@
                             "new-content": {
                                 name: "新增", icon: "fa-plus",
                                 callback: function (itemKey, opt, rootMenu, originalEvent) {
-                                    swal("新增", "新增配置相关内容", "info");
+                                    alertify.log('新增配置相关内容！')
                                 }
                             }
                         };
@@ -2336,7 +2321,7 @@
                             },
                             success: function(data, textStatus, xhr) {
 
-                                swal("Success!", self.etcdKey, "success");
+                                alertify.success(`${self.etcdKey} 添加成功`);
                                 return false;
                                 var treeObj = $.fn.zTree.getZTreeObj("tree1");
                                 var sNodes = treeObj.getSelectedNodes();

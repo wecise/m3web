@@ -278,7 +278,7 @@
                 }
                 // 自定义checkbox、序号
                 //temp.unshift( { title: "序号", visible: true, sortable: false } );
-                temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true }, sortable: false, order: false} );
+                //temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true }, sortable: false, order: false} );
                 
                 // 保证唯一并加入渲染函数
                 let cols = _.map(_.uniqBy(temp,'data'),function(v){
@@ -302,11 +302,18 @@
                                 scrollCollapse: true,
 			                    paging:         false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-	                            stateSave: false,
+                                stateSave: false,
                                 select: {
 			                        style: 'multi',
-			                        selector: 'td:first-child'
-			                    },
+			                        //selector: 'td:first-child'
+                                },
+                                columnDefs: [
+                                    {
+                                        'targets': [1],
+                                        'data': 0,
+                                        'checkboxes': true
+                                    }
+                                ],
 			                    fixedColumns:   {
 			                        leftColumns: 2
 			                    },
@@ -339,6 +346,11 @@
                                         copySuccess: {
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
+                                        }
+                                    },
+                                    select: {
+                                        rows: {
+                                            _: "已拷贝 %d 项"
                                         }
                                     }
 

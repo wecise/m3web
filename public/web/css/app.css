@@ -1029,6 +1029,9 @@ td.status_1 {
 .el-tabs-bottom-line .el-tabs__item.is-active {
     border-bottom: 2px solid rgb(36, 45, 71);
 }
+.el-switch__label * {
+    font-size: 12px;
+}
 
 
 /* This is a compiled file, you should be editing the file in the templates directory */

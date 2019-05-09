@@ -986,7 +986,7 @@ class Matrix {
     //初始化全局配置
     global(){
 
-        let _url = '/fs/admin/global/global.json';
+        let _url = '/fs/etc/global/global.json';
 
         if(window.SignedUser_IsAdmin){
             _url += '?issys=true';

@@ -2,17 +2,17 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-        .event-graph-component{
+        .log-graph-component{
             height: 100%;
         }
-		.event-graph-component .container{
+		.log-graph-component .container{
 			width: 100%!important;
 			height: 100%!important;
             overflow:auto;
             top: 40px;
 		}
 
-		.event-graph-component .outlineContainer {
+		.log-graph-component .outlineContainer {
 			z-index:1;
 			position:absolute;
 			overflow:hidden;
@@ -25,7 +25,7 @@
 			border: 1px solid rgb(42, 147, 249);
 		}
 
-		.event-graph-component .tools {
+		.log-graph-component .tools {
 			z-index: 100;
 			position: absolute;
 			overflow: hidden;
@@ -36,23 +36,23 @@
 			padding: 2px 4px;
 		}
 
-		.event-graph-component .tools > img {
+		.log-graph-component .tools > img {
 			width:18px;
 			height:18px;
 			margin: 0px 5px;
             filter: opacity(1) invert(0.5);
 		}
 
-        .event-graph-component .input-group {
+        .log-graph-component .input-group {
 			width:40%;
             float:right;
 		}
 
-		.event-graph-component .node-menu{
+		.log-graph-component .node-menu{
 			width:20vw;
 		}
 
-		.event-graph-component .nav{
+		.log-graph-component .nav{
 			background: transparent;
 			margin: 0 -10px;
 			position: relative;
@@ -62,7 +62,7 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="event-graph-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="log-graph-component"  ----------*/
 	<template>
 		<div :id="id">
 			<div :id="id+'-container'" class="container"></div>
@@ -105,7 +105,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="event-graph-component">
+	<script id="log-graph-component">
 	{
 	    delimiters: ['${', '}'],
 	    props: {

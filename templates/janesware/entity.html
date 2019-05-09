@@ -96,10 +96,10 @@
 	}
 
 	/* 告警分析 */
-	form.event-view-detail > .form-group:nth-child(even) {
+	form.entity-view-detail > .form-group:nth-child(even) {
 		background: rgb(249, 249, 249);
 	}
-	form.event-view-detail > .form-group:nth-child(odd) {
+	form.entity-view-detail > .form-group:nth-child(odd) {
 		background: rgb(255, 255, 255);
 	}
 
@@ -144,7 +144,7 @@
 	}
 
 	/* 告警统计widget */
-	.event-view-summary-control{
+	.entity-view-summary-control{
 		right: 15px;
 		padding-top: 5px;
 		display: inline-block;
@@ -157,7 +157,7 @@
 	}
 
 	/* el tabs */
-	#event-view-summary .el-tabs__content{
+	#entity-view-summary .el-tabs__content{
 		max-height:160px;
 		overflow-y:auto;
 	}
@@ -186,100 +186,11 @@
 	}
 
 
-	/* ace diff */
-	/* #ace-container {
-		display: flex;
-		display: -webkit-flex;
-		flex-direction: row;
-		position: relative;
-		bottom: 0;
-		width: 100%;
-		top: 0px !important;
-		left: 0px;
-		height: 50vh;
-		width: 100%;
-		overflow: auto;
+	/* el-picker-panel__body-wrapper */
+	.el-picker-panel__body-wrapper{
+		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    	background: rgb(255, 255, 255);
 	}
-	#ace-container>div {
-		flex-grow: 1;
-		-webkit-flex-grow: 1;
-		position: relative;
-	}
-	#ace-container>div#acediff-gutter {
-		flex: 0 0 60px;
-		-webkit-flex: 0 0 60px;
-		border-left: 1px solid #999999;
-		border-right: 1px solid #999999;
-		background-color: #efefef;
-		overflow: hidden;
-	}
-
-	.ace_editor {
-		border: none;
-	}
-
-	#acediff-gutter svg {
-		background-color: #efefef;
-	}
-
-	#acediff-left-editor {
-		position: relative;
-		top: 0;
-		bottom: 0;
-		width: 100%;
-	}
-	#acediff-right-editor {
-		position: relative;
-		top: 0;
-		bottom: 0;
-		width: 100%;
-	}
-	.acediff-diff {
-		background-color: #d8f2ff;
-		border-top: 1px solid #a2d7f2;
-		border-bottom: 1px solid #a2d7f2;
-		position: absolute;
-		z-index: 4;
-	}
-	.acediff-diff.targetOnly {
-		height: 0px !important;
-		border-top: 1px solid #a2d7f2;
-		border-bottom: 0px;
-		position: absolute;
-	}
-	.acediff-connector {
-		fill: #d8f2ff;
-		stroke: #a2d7f2;
-	}
-
-	.acediff-copy-left {
-		float: right;
-	}
-	.acediff-copy-right,
-	.acediff-copy-left {
-		position: relative;
-	}
-	.acediff-copy-right div {
-		color: #000000;
-		text-shadow: 1px 1px #ffffff;
-		position: absolute;
-		margin: 2px 3px;
-		cursor: pointer;
-	}
-	.acediff-copy-right div:hover {
-		color: #004ea0;
-	}
-	.acediff-copy-left div {
-		color: #000000;
-		text-shadow: 1px 1px #ffffff;
-		position: absolute;
-		right: 0px;
-		margin: 2px 3px;
-		cursor: pointer;
-	}
-	.acediff-copy-left div:hover {
-		color: #c98100;
-	} */
 </style>
 
 <div id="app"></div>
@@ -326,12 +237,12 @@
 									   ref="searchRef"
 									   class="grid-content"></search-base-component>
 			</el-col>
-			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
+			<el-col :xl="24" style="min-height: 85vh;" id="entity-view-container">
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
 						<div v-if="item.type==='main'">
 							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
-								<div class="event-view-summary-control">
+								<div class="entity-view-summary-control">
 									${control.ifSmart==1?'智能分析':'智能分析'}
 									<el-switch
 									v-model="control.ifSmart"
@@ -343,21 +254,21 @@
 									</el-switch>
 								</div>
 							</el-tooltip>
-							<el-row :gutter="10" id="event-view-summary">
+							<el-row :gutter="10" id="entity-view-summary">
 								<el-col :xl="24">
 									<el-tabs v-model="layout.summary.activeIndex" type="border">
 										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
 											<div v-if="item.type=='radar'">
-												<event-view-radar id="event-radar" :model='model.message'></event-view-radar>
+												<entity-view-radar id="event-radar" :model='model.message'></entity-view-radar>
 											</div>
 											<div v-if="item.type=='pie'">
-												<event-view-pie id="event-pie" :model='model.message'></event-view-pie>
+												<entity-view-pie id="event-pie" :model='model.message'></entity-view-pie>
 											</div>
 										</el-tab-pane>
 									</el-tabs>
 								</el-col>
 							</el-row>
-							<el-row :gutter="10" id="event-view-console">
+							<el-row :gutter="10" id="entity-view-console">
 								<el-col :xl="8" class="tree-view animated fadeInRight">
 									<probe-tree-component id="event-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
 								</el-col>
@@ -366,14 +277,20 @@
 								</el-col>
 							</el-row>
 						</div>
-						<div v-if="item.type==='detail'">
-							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;">
+						<div v-if="item.type==='diagnosis'">
+							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">
 								<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
-									<div v-if="it.type==='diagnosis'">
-										<entity-diagnosis :id="it.name" :model="it.model"></entity-diagnosis>
+									<div v-if="it.type==='base'">
+										<entity-diagnosis-base :id="it.name+ '-base'" :model="it.model.detail"></entity-diagnosis-base>
+									</div>
+									<div v-else-if="it.type==='manager'">
+										<entity-diagnosis-manager :id="it.name+ '-manager'" :model="it.model.detail"></entity-diagnosis-manager>
+									</div>
+									<div v-else-if="it.type==='config'">
+										<entity-diagnosis-config :id="it.name+ '-config'" :model="it.model.detail"></entity-diagnosis-config>
 									</div>
 									<div v-else-if="it.type==='compare'">
-										<entity-compare :id="it.name" :model="it.model"></entity-compare>
+										<entity-diagnosis-compare :id="it.name+ '-compare'" :model="it.model"></entity-diagnosis-compare>
 									</div>
 									<div v-else>
 										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->

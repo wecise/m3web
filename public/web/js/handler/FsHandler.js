@@ -493,7 +493,7 @@ class FsHandler {
             error: function(xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("编辑失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
 
@@ -510,10 +510,10 @@ class FsHandler {
     fsTemp(ftype, name, content, attr){
         let rtn = null;
 
-        let _tmp = fsHandler.fsNew(ftype, '/temp', name, content, attr);
+        let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}`, name, content, attr);
 
         if(_tmp === 1){
-            rtn = `/temp/${name}`;
+            rtn = `/home/${window.SignedUser_UserName}/${name}`;
         }
 
         return rtn;
@@ -699,6 +699,15 @@ class FsHandler {
     callFsJScript(name,term){
 
         let rtn = null;
+
+        // 打标签
+        if(_.endsWith(name,'tag_service.js')){
+            let system = window.location.pathname.replace(/\/janesware\//,'');
+            term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
+                system:system,
+                user:window.SignedUser_UserName
+            })));
+        }
 
         jQuery.ajax({
             url: `/script/exec/js?input=${term}&isfile=true`,
