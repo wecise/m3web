@@ -82,12 +82,31 @@
     .panel {
         border: 1px solid rgb(239, 239, 239);
     }
+
+    .el-tabs--border-card {
+        border: 1px solid rgb(220, 223, 230);
+        -webkit-box-shadow: unset;
+        box-shadow: unset;
+    }
+
+    .el-collapse-item__header{
+        line-height: 30px;
+        height:30px;
+        font-size: 12px;
+        font-weight: normal;
+        padding: 0px 0px 0px 10px;
+    }
+
+    .el-tabs__content{
+        overflow: auto;
+    }
 </style>
 
-<div id="app"></div>
+<div id="content" class="content">
+    <div id="app"></div>
+</div>
 
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
-
 <script src="{{AppSubUrl}}/web/js/handler/GrokHandler.js" type="text/javascript"></script>
 
 <!-- Jquery Timer JS-->
@@ -127,10 +146,6 @@
 
 <script type="text/javascript">
     
-    function removeUser(event){
-        eventHub.$emit('user-remove', event);
-    }
-
      VueLoader.onloaded(["vue-editor-component",
                          "vue-base-datatables-component",
                          "vue-common-form-component",
@@ -155,7 +170,7 @@
 
                     self.$nextTick(function () {
                         
-                        $('#userTable').on('check.bs.table', function (e, row) {
+                        $(self.$el).on('check.bs.table', function (e, row) {
                             eventHub.$emit('user-table-select', row);
                         })
 
@@ -1151,8 +1166,12 @@
             Vue.component('user-manage',{
                 delimiters: ['${', '}'],
                 template: '#user-manage-template',
-                data: function(){
+                data(){
                     return {
+                        permission: {
+                            tabs: [],
+                            activeIndex:'byObject'
+                        },
                         model:{
                             data: [],
                             columns: [],
@@ -1197,20 +1216,16 @@
                                                     valign: 'middle'
                                                 },
                                                 {"field":"email",title:"邮件", sortable: true, formatter: function(v){
-                                                    return v.join("\n");
+                                                    return v?v.join("\n"):"";
                                                 }},
                                                 {"field":"username",title:"用户名", sortable: true},
-                                                {"field":"passwd",title:"口令", sortable: true, formatter:function(v){
-                                                    return v.substr(-10);
-                                                }},
+                                                {"field":"passwd",title:"口令", sortable: true, visible:false},
                                                 {"field":"parent",title:"组", sortable: true},
-                                                {"field":"isactive",title:"状态",
-                                                 "align":"center", sortable: true, 
-                                                 formatter:function(v){
-                                                    return v?`<i class='fa fa-check-square-o' style='color:#1ab394'></i>`:`<i class='fa fa-square-o'></i>`;
+                                                {"field":"isactive",title:"状态","align":"center", sortable: true, formatter:function(v){
+                                                    return v?`<i class='far fa-check-square' style='color:#1ab394;font-size:14px;'></i>`:`<i class='far fa-square' style="font-size:14px;"></i>`;
                                                 }},
                                                 {"field":"fullname", title:"操作", align: 'center', formatter: function(v,r){
-                                                    return `<a href='#' onClick='removeUser("`+r.fullname+`")'><i class='fa fa-trash'></i></a>`;
+                                                    return `<a href="javascript:eventHub.$emit('user-remove', {id: '${r.id}',fullname: '${r.fullname}'});"><i class="fas fa-trash"></i></a>`;
                                                 }},
                                             ];
                         self.model.options = {
@@ -1259,29 +1274,79 @@
                     newUser: function(){
                         const self = this;
 
-                        let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
-                        win.setResizable(false);
-                        win.setMaximizable(false);
+                        let wnd = null;
 
-                        let _vue  = new Vue({
+                        try{
+                            if(jsPanel.activePanels.getPanel('jsPanel-user')){
+                                jsPanel.activePanels.getPanel('jsPanel-user').close();
+                            }
+                        }catch(error){
+        
+                        }
+                        finally{
+                            wnd = maxWindow.winUser("新建用户",`<div id="ldap-newUser-container"></div>`,null,null); 
+                        }
+
+                        let config = {
                             delimiters: ['#{', '}#'],
-                            el: "#ldap-new",
-                            template: "#ldap-new-template",
+                            template: `<el-container>
+                                            <el-main>
+                                                <el-form ref="form" label-width="80px" size="mini">
+
+                                                    <el-form-item label="{{.i18n.Tr "groupname"}}">
+                                                        <el-input v-model="ldap.parent" autofocus disabled="true"></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="{{.i18n.Tr "username"}}">
+                                                        <el-input v-model="ldap.username" autofocus autocomplete="off"></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item prop="email"
+                                                                label="邮箱"
+                                                                :rules="[
+                                                                { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+                                                                ]">
+                                                        <el-input v-model="email"></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="{{.i18n.Tr "password"}}" prop="pass">
+                                                        <el-input type="password" v-model="ldap.passwd" autocomplete="off"></el-input>
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="{{.i18n.Tr "re_type"}}">
+                                                        <el-input type="password" v-model="checkPass" autocomplete="off"></el-input>
+                                                    </el-form-item>
+
+
+                                                    <el-form-item label="激活" prop="delivery">
+                                                        <el-switch v-model="ldap.isactive" true-value="true" false-value="false"></el-switch>
+                                                    </el-form-item>
+                                                    
+                                                    <el-form-item label="管理员" prop="delivery">
+                                                        <el-switch v-model="ldap.isadmin" true-value="true" false-value="false"></el-switch>
+                                                    </el-form-item>
+
+                                                    <el-form-item>
+                                                        <a href="javascript:void" class="btn btn-success" @click="save">{{.i18n.Tr "auth.create_new_account"}}</a>
+                                                    </el-form-item>
+                                                    
+                                                </form>
+                                            </el-main>
+                                        </el-container>`,
                             data: {
                                 ldap: {
-                                    ftype: "add",
-                                    object: {
-                                        parent: self.selectedNode.fullname, 
-                                        fullname: "",
-                                        username: "",
-                                        passwd: "",
-                                        isactive: true,
-                                        isadmin: false,
-                                        otype: 'usr'
-                                    }                                
+                                    parent: "", 
+                                    username: "",
+                                    passwd: "",
+                                    isactive: true,
+                                    isadmin: false,
+                                    otype: 'usr'                     
                                 },
                                 email: "",
-                                spasswd: "",
+                                checkPass: ""
+                            },
+                            created(){
+                                this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/用户组';
                             },
                             mounted:function(){
                                 let me = this;
@@ -1289,30 +1354,6 @@
                                 me.$nextTick(function() {
                                     me.init();
                                 })
-                            },
-                            watch: {
-                                'ldap.object.isadmin': {
-                                    handler: function(val,oldVal){
-                                        let me = this;
-                                        
-                                        if(val) {
-                                            me.ldap.object.parent = self.selectedNode.fullname;//'/用户组';
-                                        } else {
-                                            me.ldap.object.parent = '/系统组';
-                                        }
-
-                                    },
-                                    deep:true
-                                },
-                                'ldap.object.username': {
-                                    handler: function(val,oldVal){
-                                        let me = this;
-                                        
-                                        me.ldap.object.fullname = me.ldap.object.parent + "/" + val;
-
-                                    },
-                                    deep:true
-                                }
                             },
                             methods: {
                                 init: function(){
@@ -1322,76 +1363,99 @@
                                 save: function(){
                                     let me = this;
 
-                                    me.ldap.ftype = "add";
-                                    
-                                    if (_.isEmpty(me.ldap.object.username)) {
-                                        swal("名称不能为空！", "", "warning");
+                                    if (_.isEmpty(me.ldap.username)) {
+                                        alertify.error("名称不能为空！");
                                         return false;
                                     }
 
                                     if (_.isEmpty(me.email)) {
-                                        swal("邮件不能为空！", "", "warning");
+                                        alertify.error("邮件不能为空！");
                                         return false;
                                     }
 
-                                    if (_.isEmpty(me.ldap.object.passwd)) {
-                                        swal("密码不能为空！", "", "warning");
+                                    if (_.isEmpty(me.ldap.passwd)) {
+                                        alertify.error("密码不能为空！");
                                         return false;
                                     }
 
-                                    if (_.isEmpty(me.spasswd)) {
-                                        swal("确认密码不能为空！", "", "warning");
+                                    if (_.isEmpty(me.checkPass)) {
+                                        alertify.error("确认密码不能为空！");
                                         return false;
                                     }
 
-                                    if ( me.ldap.object.passwd !== me.spasswd) {
-                                        swal("确认密码不一致！", "", "warning");
+                                    if ( me.ldap.passwd !== me.checkPass) {
+                                        alertify.error("确认密码不一致！");
                                         return false;
                                     }
 
-                                    let _result = userHandler.ldapMaintain(me.ldap);
+                                    let _csrf = '{{.CsrfToken}}'.replace(/'/g,"");
+                                    let rtn = userHandler.userAdd(me.ldap, _csrf);
 
-                                    if(_result===1){
-                                        swal(`{{.i18n.Tr "creative-new"}}`,me.ldap.object.username + " " + me.email,"success");
+                                    if(rtn===1){
+                                        alertify.success(`用户: ${me.ldap.username} ${me.email} 添加成功！`);
                                         
                                         _.delay(function(){
                                             eventHub.$emit('user-tree-refresh-event', null);
-                                            //self.loadUserData({node: {fullname: me.ldap.object.fullname,name:me.ldap.object.name}});
-                                            win.destroy();
+                                            wnd.close();
                                         },500);
 
                                     }
 
                                 }
                             }
-                        })
+                        };
+                        
+                        new Vue(config).$mount("#ldap-newUser-container");
                     },
                     newGroup: function(){
                         const self = this;
 
-                        let win = maxWindow.winModal( `{{.i18n.Tr "creative-new"}}`,`<div id="ldap-new"></div>`,null,null);
-                        win.setResizable(false);
-                        win.setMaximizable(false);
+                        let wnd = null;
 
-                        let _vue  = new Vue({
+                        try{
+                            if(jsPanel.activePanels.getPanel('jsPanel-user')){
+                                jsPanel.activePanels.getPanel('jsPanel-user').close();
+                            }
+                        }catch(error){
+        
+                        }
+                        finally{
+                            wnd = maxWindow.winUser("新建组",`<div id="ldap-newGroup-container"></div>`,null,null); 
+                        }
+
+                        let config  = {
                             delimiters: ['#{', '}#'],
-                            el: "#ldap-new",
-                            template: "#ldap-new-group-template",
+                            template: `<el-container>
+                                            <el-main>
+                                                <el-form ref="form" label-width="80px" size="mini">
+
+                                                    <el-form-item label="{{.i18n.Tr "groupname"}}">
+                                                        <el-input v-model="ldap.parent" disabled="true"></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item label="名称">
+                                                        <el-input v-model="ldap.username" autofocus></el-input>
+                                                    </el-form-item>
+
+                                                    <el-form-item>
+                                                        <a href="javascript:void" class="btn btn-success" @click="save">{{.i18n.Tr "auth.create_new_account"}}</a>
+                                                    </el-form-item>
+                                                    
+                                                </form>
+                                            </el-main>
+                                        </el-container>`,
                             data: {
                                 ldap: {
-                                    ftype: "add",
-                                    object: {
-                                        parent: "/", 
-                                        fullname: "",
-                                        username: "",
-                                        passwd: "",
-                                        isactive: true,
-                                        isadmin: false,
-                                        otype: 'org'
-                                    }                                
-                                },
-                                email: "",
-                                spasswd: "",
+                                    parent: "", 
+                                    username: "",
+                                    passwd: "",
+                                    isactive: true,
+                                    isadmin: false,
+                                    otype: 'org'                     
+                                }
+                            },
+                            created(){
+                                this.ldap.parent = !_.isEmpty(self.selectedNode.fullname)?self.selectedNode.fullname:'/用户组';
                             },
                             mounted:function(){
                                 let me = this;
@@ -1399,13 +1463,6 @@
                                 me.$nextTick(function() {
                                     me.init();
                                 })
-                            },
-                            watch: {
-                                'ldap.object.username': function(val,oldVal){
-                                    const self = this;
-
-                                    self.ldap.object.fullname = self.ldap.object.parent + val;
-                                }
                             },
                             methods: {
                                 init: function(){
@@ -1415,28 +1472,34 @@
                                 save: function(){
                                     let me = this;
 
-                                    me.ldap.ftype = "add";
-                                    
-                                    if (_.isEmpty(me.ldap.object.username)) {
-                                        alertify.log("名称不能为空！");
+                                    if (_.isEmpty(me.ldap.parent)) {
+                                        alertify.error("所属组名称不能为空！");
                                         return false;
                                     }
 
-                                    let _result = userHandler.ldapMaintain(me.ldap);
+                                    if (_.isEmpty(me.ldap.username)) {
+                                        alertify.error("组名称不能为空！");
+                                        return false;
+                                    }
 
-                                    if(_result===1){
-                                        alertify.success(`{{.i18n.Tr "creative-new"}} ${me.ldap.object.fullname}`);
+                                    let _csrf = '{{.CsrfToken}}'.replace(/'/g,"");
+                                    let rtn = userHandler.userAdd(me.ldap, _csrf);
+
+                                    if(rtn===1){
+                                        alertify.success(`组: ${me.ldap.parent} 添加成功！`);
                                         
                                         _.delay(function(){
                                             eventHub.$emit('user-tree-refresh-event', null);
-                                            win.destroy();
+                                            wnd.close();
                                         },500);
 
                                     }
 
                                 }
                             }
-                        })
+                        };
+
+                        new Vue(config).$mount("#ldap-newGroup-container");
                     },
                     loadUserData: function(event) {
                         const self = this;
@@ -1444,15 +1507,9 @@
 
                         self.selectedNode = event.node;
 
-                        if(event.parent){
-                            param = `#/matrix/ldap/: | parent=` + event.node.fullname;
-                        } else {
-                            param = `#/matrix/ldap/: | ` + event.node.name;
-                        }
-
-                        let _list = omdbHandler.fetchData(param);
-
-                        self.model.data = _list.message;
+                        let rtn = userHandler.userList(event.node.fullname).message;
+                        
+                        self.model.data = rtn;
                         self.byObjectTreeNodes = [];
                         self.byPropertyTreeNodes = [];
                     },
@@ -1534,19 +1591,14 @@
                     },
                     removeUserData: function(event) {
                         const self = this;
-
-                        let user = {
-                            ftype: "delete",
-                            object: {
-                                fullname: event
-                            }
-                        };
                         
-                        alertify.confirm(`确定要删除该用户? <br><br> ${event}`, function (e) {
+                        let user = event;
+
+                        alertify.confirm(`确定要删除该用户? <br><br> ${user.fullname}`, function (e) {
                             if (e) {
-                                let rtn = userHandler.ldapMaintain(user);
+                                let rtn = userHandler.userDelete(user.id);
                                 if(rtn == 1){
-                                    eventHub.$emit('user-remove-node',event);    
+                                    eventHub.$emit('user-remove-node',user.fullname);    
                                 }
                             } else {
                                 
@@ -1555,61 +1607,39 @@
                     },
                     loadByClassTreeNodes: function(event){
                         const self = this;
-                        var selectCurUser = "";
-
-                        if(!_.isEmpty(event)){
-                            selectCurUser = event.fullname;
-                        }
-
+                        
                         self.getObjectTreeNode(event);
                     },
                     getObjectTreeNode: function(event) {
                         const self = this;
-                        var auth = _.attempt(JSON.parse.bind(null, event.auth));
-                        console.log(event.auth)
-
-                        jQuery.ajax({
-                            url: '/mxobject/search',
-                            type: 'POST',
-                            dataType: 'json',
-                            data: {
-                                cond: `call tree {"ftype":"class","parent":"/"}`
-                            },
-                            beforeSend: function(xhr) {
-                            },
-                            complete: function(xhr, textStatus) {
-                            },
-                            success: function(data, textStatus, xhr) {
-                                
-                                if(_.isEmpty(data.message)) return false;
-
-                                self.byObjectTreeNodes = _.map(data.message[0].tree, function(v){
+                        let auth = _.attempt(JSON.parse.bind(null, event.auth));
+                        let rtn = omdbHandler.classTree("/");
+                        
+                        self.byObjectTreeNodes = _.map(rtn, function(v){
                                                             return _.pick(v,['cid', 'pid', 'name']);
                                                          });
-                                if(!_.isEmpty(auth)) {
-                                    _.forEach(auth.conds.add[0].values, function(v,k){
-                                        self.byObjectTreeNodes = _.map(self.byObjectTreeNodes, function(d){
-                                                                    if(d.name == v){
-                                                                        return _.assign(d, {checked: true, open:true});
-                                                                    } else {
-                                                                        return d;
-                                                                    }
-                                                                })
-                                    });
-                                }
-                                
-                                self.setByObjectTreeModel(_.filter(self.byObjectTreeNodes,function(d){
-                                                        return d.checked;
-                                                    }));
 
-                                self.byPropertyTreeNodes =  _.map(data.message[0].tree, function(v){
-                                                                return _.pick(v,['cid', 'pid', 'name', 'fields']);
-                                                            });
-                            },
-                            error: function(xhr, textStatus, errorThrown) {
-                                console.log(errorThrown);
-                            }
-                        });
+                        if(!_.isEmpty(auth)) {
+                            _.forEach(auth.conds.add[0].values, function(v,k){
+                                self.byObjectTreeNodes = _.map(self.byObjectTreeNodes, function(d){
+                                                            if(d.name == v){
+                                                                return _.assign(d, {checked: true, open:true});
+                                                            } else {
+                                                                return d;
+                                                            }
+                                                        })
+                            });
+                        }
+                        
+                        self.setByObjectTreeModel(_.filter(self.byObjectTreeNodes,function(d){
+                                                return d.checked;
+                                            }));
+
+                        self.byPropertyTreeNodes =  _.map(rtn, function(v){
+                                                        return _.pick(v,['cid', 'pid', 'name', 'fields']);
+                                                    });
+
+                                                    
                     },
                     setByObjectTreeModel: function(event) {
                         const self = this;
@@ -1619,7 +1649,6 @@
                     setByPropertyTreeModel: function(event) {
                         const self = this;
 
-                        console.log(JSON.stringify(event))
                         self.byPropertyTreeModel.data = _.map(event[0].fields,function(v){
                                                             return {name:v};
                                                         });
@@ -1828,7 +1857,11 @@
                     return {
                         model: [],
                         isDragging: false,
-                        delayedDragging:false
+                        delayedDragging:false,
+                        layout:{
+                            tabs: [],
+                            activeIndex: ''
+                        }
                     }
                 },
                 mounted: function() {
@@ -2382,7 +2415,7 @@
                 el: "#app",
                 template: "#app-template",
                 data: {
-                    currentView: 'config-manage',
+                    currentView: 'user-manage',
                     userTreeNodes: {},
                     configTreeNodes: {},
                     rulesTreeNodes: {},
@@ -2412,10 +2445,10 @@
                     eventHub.$on('user-tree-refresh-event', this.initUserTreeNodes);
                 },
                 methods: {
-                    toggleView: function(event) {
+                    toggleView(event) {
                         this.currentView=event;
                     },
-                    loadTreeData: function(event, param){
+                    loadTreeData(event, param){
                         const self = this;
                         jQuery.ajax({
                             url: '/config/get',
@@ -2441,33 +2474,28 @@
                             }
                         });
                     },
-                    refreshUser: function(){
+                    refreshUser(){
                         const self = this;
 
                         self.initUserTreeNodes();
                     },
-                    initUserTreeNodes: function() {
+                    initUserTreeNodes() {
                         const self = this;
-                        let _list = omdbHandler.fetchData(`call user { "ftype": "query",  "object":{ "fullname": "/" } }`);
+
+                        let rtn = userHandler.userList("/").message;
                         
-                        self.userTreeNodes = _.map(_.attempt(JSON.parse.bind(null, _list.message[0].user)).result,function(v,k){
-                                                let _tmp = false;
-
-                                                if(v.otype == "org"){
-                                                    _tmp = true;
-                                                }
-
+                        self.userTreeNodes = _.map(rtn,function(v,k){
                                                 return _.merge(v, {open:true});
                                             });
                     },
-                    initNotifyTreeNodes: function() {
+                    initNotifyTreeNodes() {
                         const self = this;
                         self.notifyTreeNodes = {name: "值班组", children: [
                                                 {name: "上海值班"},
                                                 {name: "北京值班"}
                                             ]};
                     },
-                    initMaintainTreeNodes: function() {
+                    initMaintainTreeNodes() {
                         const self = this;
                         self.maintainTreeNodes = {name: "实体", children: [
                                                 {name: "应用"},
@@ -2477,7 +2505,7 @@
                                                 {name: "集群"}
                                             ]};
                     },
-                    saveUserGroup: function(){
+                    saveUserGroup(){
                         const self = this;
 
                         jQuery.ajax({
@@ -2501,13 +2529,13 @@
                             }
                         })
                     },
-                    newUser: function(){
+                    newUser(){
                         eventHub.$emit("new-user-event",null);
                     },
-                    newGroup: function(){
+                    newGroup(){
                         eventHub.$emit("new-group-event",null);
                     },
-                    toggleLeft: function() {
+                    toggleLeft() {
                         const self = this;
 
                         if(self.toggle.left) {
@@ -2545,163 +2573,75 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div id="content" class="content container-fluid">
-        <!--row-->
-        <div class="row">
-            <div  class="col-lg-3" id="nav">
-                <!--Accordion view-->
-                <div class="panel-group" id="accordion">
-                    
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-tree"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse01" style="color:#000000;" @click="toggleView('config-manage')">配置</a>
-                            <span class="pull-right">
-                              <a id="btnAddDomainDiv" href="#"> <i class="icon-congs"></i>
-                              </a>
-                            </span>
-                        </div>
-                        <div id="collapse01" class="panel-collapse collapse in">
-                            <div class="panel-body">
-                                <config-tree-component :zNodes="configTreeNodes" @click.native="toggleView('config-manage')"></config-tree-component>
-                            </div>
-                            <div class="panel-footer" id="treePanelFooter"></div>
-                        </div>
-                    </div>
+    <el-container>
+        <el-aside>
+            <el-collapse value="user-manage" accordion @change="toggleView">
+                
+                <el-collapse-item name="user-manage">
+                    <template slot="title">
+                        <i class="fas fa-users"></i> &nbsp;用户和权限
+                    </template>
+                    <el-container>
+                        <el-header style="line-height:30px;height:30px;text-align:right;padding:0px 5px 0px;">
+                            <el-tooltip content="新建用户">
+                                <a href="javascript:void(0);" class="btn btn-link" @click="newUser" style="padding:0px;color:#999;"><i class="fas fa-user"></i>+</a>
+                            </el-tooltip>
+                            <el-tooltip content="新建组">    
+                                <a href="javascript:void(0);" class="btn btn-link" @click="newGroup" style="padding:0px;color:#999;"><i class="fas fa-users-cog"></i>+</a>
+                            </el-tooltip>
+                        </el-header>
+                        <el-main style="padding:0px;">
+                            <user-tree-component :zNodes="userTreeNodes" @click.native="toggleView('user-manage')"></user-tree-component>
+                        </el-main>
+                    </el-container>
+                </el-collapse-item>
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-random"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse08" aria-expanded="false" aria-controls="collapseSeven" style="color:#000000;" @click="toggleView('grok-manage')">
-                              解析规则
-                            </a>
-                        </div>
-                        <div id="collapse08" class="panel-collapse collapse" role="tabpanel">
-                        </div>
-                    </div>
+                <el-collapse-item name="grok-manage">
+                    <template slot="title">
+                        <i class="fas fa-random"></i> &nbsp;解析规则
+                    </template>
+                </el-collapse-item>
+                
+                <el-collapse-item name="calendar-manage">
+                    <template slot="title">
+                        <i class="fas fa-calendar"></i> &nbsp;日历管理
+                    </template>
+                </el-collapse-item>
 
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-users"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse02" aria-expanded="false" aria-controls="collapseTwo" style="color:#000000;" @click="toggleView('user-manage')">
-                              用户和权限
-                            </a>
-                            <span class="pull-right">
-                                <div class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer;">
-                                        <i class="fa fa-ellipsis-v" style="color: rgba(0,0,0,.5);"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li role="presentation">
-                                            <a role="menuitem" tabindex="-1" href="#" @click="newUser">
-                                                <i class="fa fa-user fa-fw"></i> 新建用户
-                                            </a>
-                                        </li>
-                                        <li role="presentation">
-                                            <a role="menuitem" tabindex="-1" href="#" @click="newGroup">
-                                                <i class="fa fa-group fa-fw"></i> 新建组
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </span>
-                        </div>
-                        <div id="collapse02" class="panel-collapse collapse" role="tabpanel">
-                            <div class="panel-body">
-                                <user-tree-component :zNodes="userTreeNodes" @click.native="toggleView('user-manage')"></user-tree-component>
-                            </div>
-                        </div>
-                    </div>
+                <el-collapse-item name="tools-manage">
+                    <template slot="title">
+                        <i class="fas fa-tasks"></i> &nbsp;应用管理
+                    </template>
+                </el-collapse-item>
 
-                    <div class="panel panel-default" style="display:none;">
-                        <div class="panel-heading">
-                            <i class="fa fa-bell"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse03" aria-expanded="false" aria-controls="collapseThree" style="color:#000000;" @click="toggleView('notify-manage')">
-                              通知中心
-                            </a>
-                            <span class="pull-right">
-                                <div class="dropdown">
-                                    <a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer;">
-                                        <i class="fa fa-ellipsis-v" style="color: rgba(0,0,0,.5);"></i>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li role="presentation">
-                                            <a role="menuitem" tabindex="-1" href="#" @click="newUser">
-                                                <i class="fa fa-user fa-fw"></i> 新建通知规则
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </span>
-                        </div>
-                        <div id="collapse03" class="panel-collapse collapse" role="tabpanel">
-                            <div class="panel-body">
-                                <notify-tree-component :zNodes="notifyTreeNodes" @click.native="toggleView('notify-manage')"></notify-tree-component>
-                            </div>
-                        </div>
-                    </div>
+                <!--el-collapse-item name="session-manage">
+                    <template slot="title">
+                        <i class="fas fa-slideshare"></i> &nbsp;会话管理
+                    </template>
+                </el-collapse-item>
 
-                    <div class="panel panel-default" style="display:none;">
-                        <div class="panel-heading">
-                            <i class="fa fa-calendar"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse06" aria-expanded="false" aria-controls="collapseSix" style="color:#000000;" @click="toggleView('calendar-manage')">
-                              日历
-                            </a>
-                        </div>
-                        <div id="collapse06" class="panel-collapse collapse" role="tabpanel" style="display: none;">
-                            <div class="panel-body">
-                                <!--<maintain-tree-component :zNodes="maintainTreeNodes" @click.native="toggleView('calendar-manage')"></maintain-tree-component>-->
-                            </div>
-                        </div>
+                <el-collapse-item name="notify-manage">
+                    <template slot="title">
+                        <i class="fas fa-bell"></i> &nbsp;通知中心
+                    </template>
+                    <div class="panel-body">
+                        <notify-tree-component :zNodes="notifyTreeNodes" @click.native="toggleView('notify-manage')"></notify-tree-component>
                     </div>
+                </el-collapse-item>
 
-                    <div class="panel panel-default" style="display:;">
-                        <div class="panel-heading">
-                            <i class="fa fa-tasks"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse061" aria-expanded="false" aria-controls="collapseSixOne" style="color:#000000;" @click="toggleView('tools-manage')">
-                              应用
-                            </a>
-                        </div>
-                        <div id="collapse061" class="panel-collapse collapse" role="tabpanel">
-                          
-                        </div>
-                    </div>
-
-                    <div class="panel panel-default" style="display:none;">
-                        <div class="panel-heading">
-                            <i class="fa fa-slideshare"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse07" aria-expanded="false" aria-controls="collapseSeven" style="color:#000000;" @click="toggleView('session-manage')">
-                              会话管理
-                            </a>
-                        </div>
-                        <div id="collapse07" class="panel-collapse collapse" role="tabpanel">
-                          
-                        </div>
-                    </div>
-                       
-                    <div class="panel panel-default" style="display:none;">
-                        <div class="panel-heading">
-                            <i class="fa fa-exchange"></i>
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapse08" aria-expanded="false" aria-controls="collapseEight" style="color:#000000;" @click="toggleView('queue-manage')">
-                              队列管理
-                            </a>
-                        </div>
-                        <!--div id="collapse08" class="panel-collapse collapse" role="tabpanel">
-                          <div class="panel-body">
-                            
-                          </div>
-                        </div-->
-                    </div>
-                                            
-                </div>
-                <!--/Accordion view-->
-            </div>
-            <div class="col-lg-9" id="mainview" style="margin-left: -15px;">
-                <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
-            </div>
-        </div>
-        <!--/row-->
-    </div>    
+                <el-collapse-item name="queue-manage">
+                    <template slot="title">
+                        <i class="fas fa-exchange"></i> &nbsp;队列管理
+                    </template>
+                </el-collapse-item-->
+                                        
+            </el-collapse>
+            
+        </el-aside>
+        <el-main style="padding:0px 15px 10px 5px;">
+            <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
+        </el-main>
+    </el-container>    
 </script>
 
 <script type="text/x-template" id="config-manage-template">
@@ -2819,69 +2759,56 @@
 </script>
 
 <script type="text/x-template" id="user-manage-template">
-    <div>
-        
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <span style="">
-                    <b>用户信息</b>
-                </span>
-                <span class="pull-right">
+    <el-container style="background-color:#ffffff;">
+
+        <el-header style="line-height:30px;height:30px;display:flex;">
+            <h5><i class="fas fa-address-card"></i> 用户信息</h5>
+            <span style="position: absolute;right: 20px;">
+                <el-tooltip content="用户信息更新">
                     <a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> 保存</a>
-                </span>
-            </div>
-            <div class="panel-body">
-                <bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
-            </div>
-        </div>
+                </el-tooltip>
+            </span>
+        </el-header>
 
-        <h5>授权</h5>
-        <hr>
-        <div role="tabpanel">
-            <!-- Nav tabs -->
-            <ul class="nav nav-tabs">
-                <li role="presentation" class="active">
-                    <a href="#byObject" aria-controls="byObject" role="tab" data-toggle="tab">按对象授权</a>
-                </li>
-                <li role="presentation">
-                    <a href="#byProperty" aria-controls="byProperty" role="tab" data-toggle="tab">按属性授权</a>
-                </li>
-            </ul>
-        
-            <!-- Tab panes -->
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane active fade in" id="byObject">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
-                                </div>
-                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                    <bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>
-                                </div>
-                            </div>
-                        </div>
+        <el-main style="padding:10px;">
+            <el-row>
+                <el-col :span="24">
+                    <div class="grid-content bg-purple-dark">
+                        <bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
                     </div>
-                </div>
-                <div role="tabpanel" class="tab-pane fade in" id="byProperty">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
-                                </div>
-                                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                    <bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
-                                </div>
-                            </div>
-                        </div>
+                </el-col>
+            </el-row>
+            <h5><i class="fas fa-user-shield"></i> 权限管理</h5>
+            <el-row>
+                <el-col :span="24">
+                    <div class="grid-content bg-purple-dark">
+                        <el-tabs v-model="permission.activeIndex" class="grid-content" type="border-card">
+                            <el-tab-pane label="按对象授权" name="byObject">
+                                <el-container>
+                                    <el-aside>
+                                        <byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
+                                    </el-aside>
+                                    <el-main>
+                                        <bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>    
+                                    </el-main>
+                                </el-container>  
+                            </el-tab-pane>
+                            <el-tab-pane label="按属性授权" name="byProperty">
+                                <el-container>
+                                    <el-aside>
+                                        <byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
+                                    </el-aside>
+                                    <el-main style="padding:0px 0px 0px 10px;">
+                                        <bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
+                                    </el-main>
+                                </el-container>  
+                            </el-tab-pane>
+                        </el-tabs>
                     </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+                </el-col>
+            </el-row>
+        </el-main>
+    </el-container>
 </script>
 
 <script type="text/x-template" id="notify-manage-template">
@@ -3053,97 +2980,81 @@
 </script>
 
 <script type="text/x-template" id="tools-manage-template">
-    <div role="tabpanel">
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active">
-                        <a href="#tools-list" aria-controls="tools-list" role="tab" data-toggle="tab">应用</a>
-                    </li>
-                    <li role="presentation">
-                        <a href="#tools-keep" aria-controls="tools-keep" role="tab" data-toggle="tab">发布</a>
-                    </li>
-                </ul>
-            
-                <!-- Tab panes -->
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="tools-list">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <div class="block__list_words">      
-                                    <transition-group id="ul-li" type="transition" tag="ul">
-                                        <li class="col-lg-3" v-for="(item,index) in model" :key="index">
-                                            <div class="widget widget-stats bg-blue">
-                                                <div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
-                                                <div class="stats-info">
-                                                    <h4>
-                                                        <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
-                                                            ${item.cnname}
-                                                        </a>
-                                                    </h4>
-                                                </div>
-                                                <div class="stats-link">
-                                                    <a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
-                                                </div>
-                                            </div>
-                                            <div class="collapse block__list_collapse" :id="'collapse'+item.name">
-                                                <form :class="item.name">
-                                                    <div class="form-group">
-                                                        <label for="">中文名</label>
-                                                        <input type="text" class="form-control" id="cnname" placeholder="中文名称" :value="item.cnname">
-                                                        <label for="">英文名称</label>
-                                                        <input type="text" class="form-control" id="enname" placeholder="English Name" :value="item.enname">
-                                                        <label for="">位置</label>
-                                                        <input type="text" class="form-control" id="seat" placeholder="位置" :value="item.seat">
-                                                        <label for="">url</label>
-                                                        <input type="text" class="form-control" id="url" placeholder="Url" :value="item.url">
-                                                        <label for="">图标</label>
-                                                        <input type="text" class="form-control" id="icon" placeholder="Icon" :value="item.icon">
-                                                        <label for="">Target</label>
-                                                        <input type="text" class="form-control" id="target" placeholder="Target" :value="item.target">
-                                                        <label for="">是否选择</label>
-                                                        <input type="number" name="" id="selected" class="form-control" value="" min="0" max="1" step="" required="required" title="" :value="item.selected">
-                                                        <label for="">分组</label>
-                                                        <input type="text" class="form-control" id="groups" placeholder="分组" :value="item.groups">
-                                                    </div>
-                                                </form>
-                                                <button class="btn btn-success" @click="update(item.name)">更新</button>
-                                                <button class="btn btn-default" data-toggle="collapse" :data-target="'#collapse'+item.name">取消</button>
-                                            </div>
-                                        </li>
-                                    </transition-group>
+    
+    <el-tabs type="border-card">
+        <el-tab-pane>
+            <span slot="label"><i class="el-icon-date"></i> 应用</span>
+            <div class="block__list_words">      
+                <transition-group id="ul-li" type="transition" tag="ul">
+                    <li class="col-lg-3" v-for="(item,index) in model" :key="index">
+                        <div class="widget widget-stats bg-blue">
+                            <div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
+                            <div class="stats-info">
+                                <h4>
+                                    <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
+                                        ${item.cnname}
+                                    </a>
+                                </h4>
+                            </div>
+                            <div class="stats-link">
+                                <a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
+                            </div>
+                        </div>
+                        <div class="collapse block__list_collapse" :id="'collapse'+item.name">
+                            <form :class="item.name">
+                                <div class="form-group">
+                                    <label for="">中文名</label>
+                                    <input type="text" class="form-control" id="cnname" placeholder="中文名称" :value="item.cnname">
+                                    <label for="">英文名称</label>
+                                    <input type="text" class="form-control" id="enname" placeholder="English Name" :value="item.enname">
+                                    <label for="">位置</label>
+                                    <input type="text" class="form-control" id="seat" placeholder="位置" :value="item.seat">
+                                    <label for="">url</label>
+                                    <input type="text" class="form-control" id="url" placeholder="Url" :value="item.url">
+                                    <label for="">图标</label>
+                                    <input type="text" class="form-control" id="icon" placeholder="Icon" :value="item.icon">
+                                    <label for="">Target</label>
+                                    <input type="text" class="form-control" id="target" placeholder="Target" :value="item.target">
+                                    <label for="">是否选择</label>
+                                    <input type="number" name="" id="selected" class="form-control" value="" min="0" max="1" step="" required="required" title="" :value="item.selected">
+                                    <label for="">分组</label>
+                                    <input type="text" class="form-control" id="groups" placeholder="分组" :value="item.groups">
                                 </div>
-                            </div>
+                            </form>
+                            <button class="btn btn-success" @click="update(item.name)">更新</button>
+                            <button class="btn btn-default" data-toggle="collapse" :data-target="'#collapse'+item.name">取消</button>
                         </div>
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="tools-keep">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <form class="tools-new">
-                                    <div class="form-group">
-                                        <label for="">中文名</label>
-                                        <input type="text" class="form-control" id="cnname" placeholder="中文名称">
-                                        <label for="">英文名称</label>
-                                        <input type="text" class="form-control" id="enname" placeholder="English Name">
-                                        <label for="">位置</label>
-                                        <input type="text" class="form-control" id="seat" placeholder="位置">
-                                        <label for="">url</label>
-                                        <input type="text" class="form-control" id="url" placeholder="Url">
-                                        <label for="">图标</label>
-                                        <input type="text" class="form-control" id="icon" placeholder="Icon" value="fa fa-globe">
-                                        <label for="">Target</label>
-                                        <input type="text" class="form-control" id="target" placeholder="Target">
-                                        <label for="">是否选择</label>
-                                        <input type="number" name="" id="selected" class="form-control" value="0" min="0" max="1" step="" required="required" title="">
-                                        <label for="">分组</label>
-                                        <input type="text" class="form-control" id="groups" placeholder="分组">
-                                    </div>
-                                </form>
-                                <button class="btn btn-success" @click="add('tools-new')">发布</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </li>
+                </transition-group>
             </div>
+        </el-tab-pane>
+        <el-tab-pane label="tools-list">
+            <span slot="label"><i class="el-icon-date"></i> 发布</span>
+            <div>
+                <form class="tools-new">
+                    <div class="form-group">
+                        <label for="">中文名</label>
+                        <input type="text" class="form-control" id="cnname" placeholder="中文名称">
+                        <label for="">英文名称</label>
+                        <input type="text" class="form-control" id="enname" placeholder="English Name">
+                        <label for="">位置</label>
+                        <input type="text" class="form-control" id="seat" placeholder="位置">
+                        <label for="">url</label>
+                        <input type="text" class="form-control" id="url" placeholder="Url">
+                        <label for="">图标</label>
+                        <input type="text" class="form-control" id="icon" placeholder="Icon" value="fa fa-globe">
+                        <label for="">Target</label>
+                        <input type="text" class="form-control" id="target" placeholder="Target">
+                        <label for="">是否选择</label>
+                        <input type="number" name="" id="selected" class="form-control" value="0" min="0" max="1" step="" required="required" title="">
+                        <label for="">分组</label>
+                        <input type="text" class="form-control" id="groups" placeholder="分组">
+                    </div>
+                </form>
+                <button class="btn btn-success" @click="add('tools-new')">发布</button>
+            </div>    
+        </el-tab-pane>
+    </el-tabs>
 </script>
 
 <script type="text/x-template" id="calendar-manage-template">
@@ -3329,136 +3240,6 @@
                     </div>
                 </div>
             </div>
-</script>
-
-<script type="text/x-template" id="ldap-new-template">
-    <div>
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label for="user_name" class="col-lg-3 control-label">{{.i18n.Tr "username"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" v-model="ldap.object.username" autofocus required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email" class="col-lg-3 control-label">{{.i18n.Tr "email"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="email" v-model="email" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password" class="col-lg-3 control-label">{{.i18n.Tr "password"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="password" v-model="ldap.object.passwd" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="retype" class="col-lg-3 control-label">{{.i18n.Tr "re_type"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="password" v-model="spasswd" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-8">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox"  v-model="ldap.object.isactive" true-value="true" false-value="false"> 激活
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                                
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-8">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox"  v-model="ldap.object.isadmin" true-value="true" false-value="false"> 管理员
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label></label>
-                        <div class="col-lg-offset-3 col-lg-9">
-                            <a href="javascript:void" class="btn btn-success" @click="save">{{.i18n.Tr "auth.create_new_account"}}</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</script>
-
-<script type="text/x-template" id="ldap-new-group-template">
-    <div>
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label for="user_name" class="col-lg-3 control-label">{{.i18n.Tr "groupname"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" v-model="ldap.object.username" autofocus required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email" class="col-lg-3 control-label">{{.i18n.Tr "email"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="email" v-model="email" required disabled>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="password" class="col-lg-3 control-label">{{.i18n.Tr "password"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="password" v-model="ldap.object.passwd" required disabled>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="retype" class="col-lg-3 control-label">{{.i18n.Tr "re_type"}}</label>
-                        <div class="col-lg-8">
-                            <input class="form-control" type="password" v-model="spasswd" required disabled>
-                        </div>
-                    </div>
-
-                    <!--div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-8">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox"  v-model="ldap.object.isactive" true-value="true" false-value="false" disabled> 激活
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                                
-                    <div class="form-group">
-                        <div class="col-sm-offset-3 col-sm-8">
-                            <div class="checkbox">
-                                <label>
-                                    <input type="checkbox"  v-model="ldap.object.isadmin" true-value="true" false-value="false" disabled> 管理员
-                                </label>
-                            </div>
-                        </div>
-                    </div-->
-
-                    <div class="form-group">
-                        <label></label>
-                        <div class="col-lg-offset-3 col-lg-9">
-                            <a href="javascript:void" class="btn btn-success" @click="save">{{.i18n.Tr "auth.create_new_account"}}</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </script>
 
 {{template "base/footer" .}}

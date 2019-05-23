@@ -190,7 +190,7 @@
             width: 100%;
         }
         .event-datatable-component .dt-buttons > a{
-            margin-right:5px;
+            margin:0px 5px;
             color: #666666;
         }
 
@@ -218,7 +218,7 @@
         	id: String,
 			model: Object
 		},
-		data: function(){
+		data(){
           	return {
                 datatable: null,
                 rootClass: "",
@@ -367,7 +367,8 @@
                                     self.handleRow();
 
                                     self.toolBar();
-	                                self.contextMenu();
+	                                //self.contextMenu();
+                                    event.contextMenu(self.id, self, self.model.contextMenu, self.$root, self.refresh);
                                     
                                     
                                     self.dragHandle();
@@ -429,7 +430,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let contextMenuItems = fsHandler.callFsJScript('/event/contextmenu.js', '').message.event;
+                let contextMenuItems = self.model.contextMenu;
                 let id = self.id;
 
                 $.contextMenu({
@@ -443,10 +444,11 @@
 
                         return {
                             callback: function(key, opt) {
+                                
                                 if(_.includes(key,'diagnosis')) {
                                     self.$root.detailAdd(self.selectedRows);
                                 } else if(_.includes(key,'action')) {
-                                    // 增加操作类型，避免冲突，命名为：_status
+                                    // 增加操作类型
                                     let action = _.last(key.split("_"));
                                     self.$root.action({list: [self.selectedRows], action:action});
                                 }

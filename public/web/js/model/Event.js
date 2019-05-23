@@ -131,7 +131,7 @@ class Event extends Matrix {
                                 let title = k.split("_")[1];
                                 let sum = _.sum(_.map(v,function(s){return s[1];}));
                                 let pgs = _.map(v,function(val){
-                                    let name = '其它';
+                                    let name = '';
                                     if(val[0]){
                                         name = val[0];
                                     }
@@ -428,6 +428,62 @@ class Event extends Matrix {
                     }
                 })
 
+                // 日志
+                Vue.component("event-diagnosis-log",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            
+                        }
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main style="padding:0px;">
+                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                        }
+                    }
+                })
+
+                // 性能
+                Vue.component("event-diagnosis-performance",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            
+                        }
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main style="padding:0px;">
+                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        const self = this;
+                    },
+                    methods: {
+                        init(){    
+                            const self = this;
+
+                        }
+                    }
+                })
+
                 // 智能分组
                 Vue.component("event-view-aigroup",{
                     delimiters: ['#{', '}#'],
@@ -448,22 +504,23 @@ class Event extends Matrix {
                                     info: false,
                                     paging:         false,
                                     aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-                                    stateSave: false,
-                                    keys:  true,
                                     select: {
-                                        style: 'multi',
+                                        style: 'single',
                                     }
                                 },
                                 selected: [],
                             },
                             tableData: {},
+                            split:{
+                                inst: null
+                            }
                         }
                     },
                     template: `<el-container style="height: calc(100vh - 185px);">
                                     <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <table :id="id+'-table'" class="event-table-dimension" width="100%"></table>
+                                                <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -473,6 +530,28 @@ class Event extends Matrix {
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
+                    created(){
+                        const self = this;
+
+                        // 根据model进行分组
+                        let ids = _.map(this.model.rows,'id').join(";");
+                        let aiGroup = fsHandler.callFsJScript("/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
+                        self.aiGroupData.rows = aiGroup.rows;
+                        self.aiGroupData.columns = [
+                                                        {data:'type',title:'',sortable:true, width:'5',render: function(data,type,row){
+                                                                return data==1?'<i class="fas fa-font"></i>':'<i class="fab fa-medium-m"></i>';
+                                                            }
+                                                        },
+                                                        {data:'group',title:'分组名称',sortable:true},
+                                                        {data:'app',title:'影响应用系统'},
+                                                        {data:'severity',title:'告警级别统计', render:function(data,type,row){
+                                                            return `<a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[5][2]}">${data[0]}</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[4][2]}">${data[1]}</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[3][2]}">${data[2]}</a>`;
+                                                        }},
+                                                        {data:'ids',title:'IDS', visible: false}
+                                            ];
+                    },
                     mounted(){
                         const self = this;
                         
@@ -485,24 +564,6 @@ class Event extends Matrix {
                         init(){    
                             const self = this;
 
-                            self.aiGroupData.rows = _.map(new Array(20),function(v,index){
-                                return {win:`${moment(_.now() - 10000*index).format("YYYY-MM-DD HH:mm:SS")}-${moment().format("YYYY-MM-DD HH:mm:SS")}`,app: [`app${index}`,`app${index*1}`,`app${index*2}`], severity: [index, index*1, index*2]};
-                            });
-
-                            self.aiGroupData.columns = [
-                                {data:'win',title:'统计窗口',sortable:true},
-                                {data:'app',title:'影响应用系统', render:function(data,type,row){
-                                    return `<button class="btn btn-xs btn-default">${data[0]}</button>
-                                            <button class="btn btn-xs btn-default">${data[1]}</button>
-                                            <button class="btn btn-xs btn-default">${data[2]}</button>`;
-                                }},
-                                {data:'severity',title:'告警级别统计', render:function(data,type,row){
-                                    return `<button class="btn btn-xs btn-danger">${data[0]}</button>
-                                            <button class="btn btn-xs btn-warning">${data[1]}</button>
-                                            <button class="btn btn-xs btn-success">${data[2]}</button>`;
-                                }
-                            }];
-
                             //初始化维度选择Table
                             var table = $(`#${self.id}-table`).DataTable(_.extend(
                                                                         self.aiGroupData.options,{
@@ -510,6 +571,16 @@ class Event extends Matrix {
                                                                             columns: self.aiGroupData.columns
                                                                         }));
                             
+                            $(`#${self.id}-table tbody`).on( 'click', 'tr', function () {
+                                if ( $(this).hasClass('selected') ) {
+                                    $(this).removeClass('selected');
+                                }
+                                else {
+                                    table.$('tr.selected').removeClass('selected');
+                                    $(this).addClass('selected');
+                                }
+                            } );                                    
+
                             table.on( 'select', function ( e, dt, type, indexes ) {
                                 self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
                                 self.handlerFetchData(self.aiGroupData.selected);
@@ -520,13 +591,18 @@ class Event extends Matrix {
 
                             $(self.$el).find('td').css("white-space","normal");
                             
-                            Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
-                                sizes: [40, 60],
-                                gutterSize: 5,
+                            self.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
+                                sizes: [35, 65],
+                                minSize: [0, 0],
+                                gutterSize: 20,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
-                            
+
+                            // 默认选择第一行
+                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
+                            self.aiGroupData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
+                            self.handlerFetchData(self.aiGroupData.selected);
                         },
                         handlerFetchData(event){
                             const self = this;
@@ -548,8 +624,8 @@ class Event extends Matrix {
                                 // MQL
                                 // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
-                                let where = `biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
+                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
+                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
                             } catch(err){
                                 self.tableData = [];
                             }
@@ -658,10 +734,15 @@ class Event extends Matrix {
 
                             Split(['#left-panel', '#right-panel'], {
                                 sizes: [45, 55],
-                                gutterSize: 5,
+                                gutterSize: 10,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
+
+                            // 默认选择第一行
+                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
+                            self.dimensionData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
+                            self.handlerFetchData(self.dimensionData.selected);
                             
                         },
                         handlerFetchData(event){
@@ -748,8 +829,9 @@ class Event extends Matrix {
                             self.sumByStep();
 
                             Split(['#probability-left-panel', '#probability-right-panel'], {
-                                sizes: [35, 65],
-                                gutterSize: 5,
+                                sizes: [0, 100],
+                                minSize: [0, 0],
+                                gutterSize: 10,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
@@ -757,7 +839,7 @@ class Event extends Matrix {
                         sumByStep(){
                             const self = this;
 
-                            self.chartData = _.groupBy(this.$root.$refs.searchRef.result.message.rows, function(v){
+                            self.chartData = _.groupBy(this.model.rows, function(v){
                                 return moment(v.vtime).format(self.byStep);
                             });
                         },
@@ -896,11 +978,10 @@ class Event extends Matrix {
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                         },2000);
                         
-                        
                     },
                     methods: {
                         setData(event){
-                            this.model = _.extend(this.model, this.$refs.searchRef.result);
+                            _.extend(this.model, this.$refs.searchRef.result);
                         },
                         hideTabEventViewConsoleUl(){
                             const self = this;
@@ -1006,6 +1087,8 @@ class Event extends Matrix {
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
                                                 {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                                {title:'相关日志', name:`diagnosis-log-${id}`, type: 'log', model:model},
+                                                {title:'相关性能', name:`diagnosis-performance-${id}`, type: 'performance', model:model},
                                                 // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
                                                 {title:'资源信息', name:`topological-${id}`, type: 'topological'},
                                             ]};
@@ -1099,6 +1182,48 @@ class Event extends Matrix {
         })
 
         
+    }
+
+    contextMenu(tId,inst,items,app,fun){
+        
+        $.contextMenu({
+            selector: `#${tId} tr td:not(:nth-child(1))`,
+            trigger: 'right',
+            autoHide: true,
+            delay: 5,
+            hideOnSecondTrigger: true,
+            className: `animated slideIn ${tId} context-menu-list`,
+            build: function($trigger, e) {
+
+                return {
+                    callback: function(key, opt) {
+                        
+                        if(_.includes(key,'diagnosis')) {
+                            app.detailAdd(inst.selectedRows);
+                        } else if(_.includes(key,'action')) {
+                            // 增加操作类型
+                            let action = _.last(key.split("_"));
+                            app.action({list: [inst.selectedRows], action:action});
+                        }
+                    },
+                    items: items
+                }
+            },
+            events: {
+                show: function(opt) {
+
+                    let $this = this;
+                    _.delay(function(){
+                        new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                    },50)
+                },
+                hide: function(opt) {
+
+                    let $this = this;
+
+                }
+            }
+        });
     }
 
     resizeEventConsole(){

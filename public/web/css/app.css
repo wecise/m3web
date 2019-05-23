@@ -1,7 +1,9 @@
 body {
-    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background-color: #EBEBF3;
-    overflow-x: hidden;
+    font: normal 12px arial,Microsoft Yahei!important;
+    -webkit-font-smoothing: antialiased;
+    background: url(/fs/assets/images/others/png/canvas_bg.jpg?type=open&issys=true) rgb(255, 255, 255);
+    /* background: rgb(217, 224, 231); */
+    overflow: hidden;
 }
 
 .page-sidebar-minified .content {
@@ -84,11 +86,6 @@ div.mxWindow{
 .navbar-default .navbar-brand > span{
     color: rgb(255, 255, 255)!important;
     font-weight: 400;
-}
-
-.modal-header{
-    background-color: #252d47;/*#2195f4;*/
-    color: #ffffff;
 }
 
 .img-responsive{
@@ -1112,4 +1109,161 @@ td.status_1 {
     100% { transform: rotate(360deg); transform: rotate(360deg); }
   }
   
+
+  /* Alertify */
+  .alertify.alertify-confirm .alertify-inner{
+    background-image: url(/fs/assets/images/files/png/warning.png?type=download&issys=true);
+    background-repeat: no-repeat;
+    background-position-x: 95%;
+    background-size: 5em;
+    background-position-y: 10%;
+  }
+
+
+
+/* Matrix Theme */
+body.matrix .navbar.navbar-default.navbar-fixed-top {
+    background-color: rgb(37, 45, 71);
+}
+
+body.matrix #sidebar {
+    background-color: rgb(37, 45, 71)!important;
+}
+
+body.matrix #sidebar-bg {
+    background-color: rgb(37, 45, 71)!important;
+}
+
+body.matrix .sidebar-toggle i {
+    color: rgb(141, 146, 151);
+}
+
+body.matrix .layer.btn.btn-primary {
+    background-color: rgb(37, 45, 71);
+}
+
+body.matrix .layer > .dropdown > a {
+    color: rgb(255,255,255);
+}
+
+body.matrix .layer > .dropdown > i {
+    color: rgba(255,255,255,0.5);
+}
+
+body.matrix .layer a {
+    color: rgb(255,255,255);
+}
+
+body.matrix .row .btn.btn-primary {
+    background-color: rgb(37, 45, 71);
+    border-color: rgb(37, 45, 71);
+}
+
+body.matrix .navbar.navbar-default.navbar-fixed-bottom {
+    background-color: rgb(37, 45, 71);
+}
+
+body.matrix .navbar.navbar-default.navbar-fixed-bottom span {
+    color: #f9f9f9;
+}
+body.matrix .navbar.navbar-default.navbar-fixed-bottom a {
+    color: #f9f9f9;
+}
+
+body.matrix .modal-header{
+    background-color: rgb(37, 45, 71);
+    color: #ffffff;
+}
+
+body.matrix .jsPanel-hdr{
+    background-color: rgb(37, 45, 71)!important;
+}
+
+body.matrix #jsPanel-robot .jsPanel-content a>img{
+    filter: grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8)!important;
+}
+
+body.matrix .jsPanel-titlebar h3{
+    color: #ffffff!important;
+}
+body.matrix .jsPanel-controlbar span.jsglyph{
+    color: #ffffff!important;
+}
+
+body.matrix .thumbnail>.company-logo-bg{
+    background-color: #ffffff;
+}
+
+/* BJZDGT Theme */
+body.bjzdgt .navbar.navbar-default.navbar-fixed-top {
+    background-color: #007a77;
+}
+
+body.bjzdgt #sidebar {
+    background-color:#007a77;!important;
+}
+
+body.bjzdgt #sidebar-bg {
+    background-color:#007a77;!important;
+}
+
+body.bjzdgt .sidebar-toggle i {
+    color: rgb(141, 146, 151);
+}
+
+body.bjzdgt .layer.btn.btn-primary {
+    background-color:#007a77;;
+}
+
+body.bjzdgt .layer > .dropdown > a {
+    color: rgb(255,255,255);
+}
+
+body.bjzdgt .layer > .dropdown > i {
+    color: rgba(255,255,255,0.5);
+}
+
+body.bjzdgt .layer a {
+    color: rgb(255,255,255);
+}
+
+body.bjzdgt .row .btn.btn-primary {
+    background-color:#007a77;;
+    border-color:#007a77;;
+}
+
+body.bjzdgt .navbar.navbar-default.navbar-fixed-bottom {
+    background-color:#007a77;;
+}
+
+body.bjzdgt .navbar.navbar-default.navbar-fixed-bottom span {
+    color: #f9f9f9;
+}
+body.bjzdgt .navbar.navbar-default.navbar-fixed-bottom a {
+    color: #f9f9f9;
+}
+
+body.bjzdgt .modal-header{
+    background-color: #007a77;
+    color: #ffffff;
+}
+
+body.bjzdgt .jsPanel-hdr{
+    background-color: #007a77!important;
+}
+body.bjzdgt .jsPanel-content a>img{
+    filter: grayscale(100%) brightness(70%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8)!important;
+}
+
+body.bjzdgt .jsPanel-titlebar h3{
+    color: #ffffff!important;
+}
+
+body.bjzdgt .jsPanel-controlbar span.jsglyph{
+    color: #ffffff!important;
+}
+
+body.bjzdgt .thumbnail>.company-logo-bg{
+    background-color: #007a77;
+}
   

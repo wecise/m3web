@@ -235,6 +235,141 @@ class AI {
                     },
                 });
                 
+                // 频繁项关联
+                Vue.component('matrix-ai-setup-fpgrowth',{
+                    delimiters: ['#{', '}#'],
+                    props:{
+                        id: String,
+                        model: Object
+                    },
+                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;" v-if="model.content">
+                                    <div slot="header" class="clearfix" style="line-height:30px;">
+                                        <div style="float:right;">
+                                            #{content.status==1?'启用中':'关闭中'}#
+                                            <el-switch v-model="content.status"
+                                                    active-color="#13ce66"
+                                                    inactive-color="#dddddd"
+                                                    active-value=1
+                                                    inactive-value=0
+                                                    @change="statusUpdate">
+                                            </el-switch>
+                                            <el-tooltip content="保存规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="删除规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="查看作业">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                            </el-tooltip>
+                                        </div>
+                                    </div>
+                                    <el-form :model="content" label-width="80px" size="mini">
+                                        <el-form-item label="指定类">
+                                            <el-select v-model="content.class" placeholder="请选择类">
+                                                <el-option
+                                                    v-for="item in type.list"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                </el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                        <el-form-item label="hostfield" prop="hostfield">
+                                            <el-input type="text" v-model="content.hostfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="osfield" prop="osfield">
+                                            <el-input type="text" v-model="content.osfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="timefield" prop="timefield">
+                                            <el-input type="text" v-model="content.timefield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="nearest" prop="nearest">
+                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="interval" prop="interval">
+                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="消息模板" prop="msg">
+                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="时间" prop="time">
+                                            <small>#{moment(content.time).format('LLL')}#</small>
+                                        </el-form-item>
+                                        <el-form-item label="用户" prop="user">
+                                            <small>#{content.user}#</small>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-car>`,
+                    filters: {
+                        pickTag(tag){
+                            if(typeof tag == 'object'){
+                                return tag.join(",");
+                            } else {
+                                return tag;
+                            }
+                        }  
+                    },
+                    data: function(){
+                        return {
+                            type:{
+                                model:'',
+                                list: [
+                                    {
+                                        value: '/matrix/devops/performance',
+                                        label: '所有性能'
+                                    }
+                                ]
+                            },
+                            content: null
+                        }
+                    },
+                    created(){
+                        this.content = this.model.content;
+                    },
+                    methods: {
+                        save(){
+                            const self = this;
+
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        // 删除规则
+                        remove: function() {
+                            const self = this;
+        
+                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                                if (e) {
+                                    // 删除文件系统
+                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
+                                    if(rtn==1){
+                                        // 刷新rules
+                                        self.$root.$refs.aiSetup.load();
+                                        self.$root.$refs.aiSetup.close(self.model.id);
+                                    }   
+                                } else {
+                                    
+                                }
+                            })
+                        },
+                        statusUpdate(evt){
+                            const self = this;
+        
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            
+                            // 更新到文件系统
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        job(term){
+                            // 默认Job名称
+                            term = 'word';
+                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
+                        }
+                    }
+                })
+
                 // 实体异常检测
                 Vue.component('matrix-ai-setup-elad',{
                     delimiters: ['#{', '}#'],
@@ -324,12 +459,8 @@ class AI {
                             content: null
                         }
                     },
-                    mounted(){
-                        const self = this;
-        
-                        self.$nextTick(function(){
-                            self.content = this.model.content;
-                        })
+                    created(){
+                        this.content = this.model.content;
                     },
                     methods: {
                         save(){
@@ -359,7 +490,7 @@ class AI {
                         statusUpdate(evt){
                             const self = this;
         
-                            _.extend(self.content,{status:evt+''});
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
@@ -497,12 +628,8 @@ class AI {
                             content: null
                         }
                     },
-                    mounted(){
-                        const self = this;
-        
-                        self.$nextTick(function(){
-                            self.content = this.model.content;
-                        })
+                    created(){
+                        this.content = this.model.content;
                     },
                     methods: {
                         save(){
@@ -569,7 +696,7 @@ class AI {
                         statusUpdate(evt){
                             const self = this;
         
-                            _.extend(self.content,{status:evt+''});
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
@@ -717,12 +844,11 @@ class AI {
                             content: null
                         }
                     },
+                    created(){
+                        this.content = this.model.content;
+                    },
                     mounted(){
-                        const self = this;
-        
-                        self.$nextTick(function(){
-                            self.content = this.model.content;
-                        })
+                        
                     },
                     methods: {
                         save(){
@@ -782,8 +908,8 @@ class AI {
                         },
                         statusUpdate(evt){
                             const self = this;
-        
-                            _.extend(self.content,{status:evt+''});
+                            
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
@@ -810,6 +936,17 @@ class AI {
                     },
                     data(){
                         return {
+                            draw:{
+                                width:0,
+                                height:0,
+                                inputLayerHeight: 0,
+                                hiddenLayersCount: 1,
+                                hiddenLayersDepths: [2,2,2,2,2],
+                                outputLayerHeight: 0,
+                                networkGraph: {
+                                    "nodes": []
+                                }
+                            },
                             nodes: [],
                             input:{
                                 inputVisible: false,
@@ -899,8 +1036,10 @@ class AI {
                                     </el-form>
                                     
                                 </el-card>`,
-                    mounted(){
+                    created(){
                         this.content = this.model.content;
+                    },
+                    mounted(){
                         this.checkContainer();
                     },
                     methods:{
@@ -908,11 +1047,138 @@ class AI {
                             const self = this;
         
                             if($(`#${self.id}`).is(':visible')) {
-                                self.initNet();
+                                self.drawing();
                                 self.toggle();
                             } else {
                                 setTimeout(self.checkContainer, 50);
                             }
+                        },
+                        drawGraph(svg) {
+                            const self = this;
+
+                            var nodes = _.union(_.union(self.content.nodes.input,self.content.nodes.hidden),self.content.nodes.output);
+                    
+                            // get network size
+                            var netsize = {};
+                            
+                            nodes.forEach(function (d) {
+                                if(d.layer in netsize) {
+                                    netsize[d.layer] += 1;
+                                } else {
+                                    netsize[d.layer] = 1;
+                                }
+                                d["lidx"] = netsize[d.layer];
+                            });
+                    
+                            // calc distances between nodes
+                            var largestLayerSize = Math.max.apply(
+                                null, Object.keys(netsize).map(function (i) { return netsize[i]; }));
+                    
+                            var xdist = this.draw.width / Object.keys(netsize).length,
+                                ydist = (this.draw.height-15) / largestLayerSize;
+                    
+                            // create node locations
+                            nodes.map(function(d) {
+                                d["x"] = (d.layer - 0.5) * xdist;
+                                d["y"] = ( ( (d.lidx - 0.5) + ((largestLayerSize - netsize[d.layer]) /2 ) ) * ydist )+10 ;
+                            });
+                    
+                            // autogenerate links
+                            let links = [];
+                            nodes.map(function(d, i) {
+                                for (var n in nodes) {
+                                    if (d.layer + 1 == nodes[n].layer) {
+                                    links.push({"source": parseInt(i), "target": parseInt(n), "value": 1}) }
+                                }
+                            }).filter(function(d) { return typeof d !== "undefined"; });
+                        
+                            // draw links
+                            let link = svg.selectAll(".link")
+                                .data(links)
+                                .enter().append("line")
+                                .attr("class", "link")
+                                .attr("x1", function(d) { return nodes[d.source].x; })
+                                .attr("y1", function(d) { return nodes[d.source].y; })
+                                .attr("x2", function(d) { return nodes[d.target].x; })
+                                .attr("y2", function(d) { return nodes[d.target].y; })
+                                .style("stroke-width", function(d) { return Math.sqrt(d.value); })
+                                .style("stroke", function(d) { return '#dddddd'; });
+                    
+                            // draw nodes
+                            var node = svg.selectAll(".node")
+                                        .data(nodes)
+                                        .enter().append("g")
+                                        .attr("transform", function(d) {
+                                            let x = d.x - 20;
+                                            let y = d.y - 20;
+                                            return "translate(" + x + "," + y + ")"; }
+                                        );
+                    
+                            let image = node.append("svg:image")
+                                            .attr('width', 48)
+                                            .attr('height', 48)
+                                            .attr("xlink:href", function(d){
+                                                if(d.type==='h'){
+                                                    return "/fs/assets/images/files/png/neural.png?type=download&issys=true";
+                                                } else {
+                                                    return "/fs/assets/images/files/png/cpu.png?type=download&issys=true";
+                                                }
+                                            })
+                                            .attr("class",function(d){
+                                                if(d.type === 'h'){
+                                                    return 'animated fadeIn';
+                                                }
+                                            });
+                            
+                            let fo = node.append("foreignObject")
+                                        .attr("dx", "1.5em")
+                                        .attr("dy", "5em")
+                                        .attr("width", "100px")
+                                        .attr("x", "-2.5em")
+                                        .attr("height", "4em")
+                                        .attr("y", "4.5em");
+                    
+                            let div = fo.append('xhtml:div');
+                            
+                            div.append('p')
+                                .style("text-align","center")
+                                .html(function(d){ 
+                                    if(d.type==='h'){
+                                        return d.label; 
+                                    } else {
+                                        return d.id; 
+                                    }
+                            });
+
+                        },
+                        drawing(){
+                            const self = this;
+
+                            if (!d3.select("svg")[0]) {
+                    
+                            } else {
+                                //clear d3
+                                d3.select('svg').remove();
+                            }
+
+                            this.draw.width = $(self.$el).parent().width();
+                            this.draw.height = $(self.$el).parent().height();
+
+                            this.draw.color = d3.scale.category20();
+
+                            window.addEventListener('resize', () => { 
+                                this.draw.width = $(self.$el).parent().width();
+                                this.draw.height = $(self.$el).parent().height()
+                                self.draw();
+                            });
+
+                            let svg = d3.select(`#${self.id}`).append("svg")
+                                        .attr("width", this.draw.width)
+                                        .attr("height", this.draw.height);
+                            
+                            
+                            this.drawGraph(svg);
+                            
                         },
                         initNet(){
                             const self = this;
@@ -921,28 +1187,27 @@ class AI {
         
                             let width = $(self.$el).parent().width(),
                                 height = $(self.$el).parent().height(),
-                                nodeSize = 30;
+                                nodeSize = 48;
                             
                             let color = d3.scale.category20();
                             
                             let svg = d3.select(`#${self.id}`).append("svg")
                                 .attr("width", width)
                                 .attr("height", height)
-                                .attr("padding", "20px")
-                                .attr("style","background:rgb(37, 45, 71);");
-                            
+                                .attr("padding", "20px");
         
                             let nodes = _.union(_.union(self.nodes.input,self.nodes.hidden),self.nodes.output);
-                        
+                            let groups = _.groupBy(nodes,'layer');
+
                             // get network size
                             let netsize = {};
                             nodes.forEach(function (d) {
-                            if(d.layer in netsize) {
-                                netsize[d.layer] += 1;
-                            } else {
-                                netsize[d.layer] = 1;
-                            }
-                            d["lidx"] = netsize[d.layer];
+                                if(d.layer in netsize) {
+                                    netsize[d.layer] += 1;
+                                } else {
+                                    netsize[d.layer] = 1;
+                                }
+                                d["lidx"] = netsize[d.layer];
                             });
                         
                             // calc distances between nodes
@@ -954,23 +1219,23 @@ class AI {
                         
                             // create node locations
                             nodes.map(function(d) {
-                            d["x"] = (d.layer - 0.5) * xdist;
-                            d["y"] = (d.lidx - 0.5) * ydist;
+                                d["x"] = (d.layer - 0.5) * xdist;
+                                d["y"] = (d.lidx - 0.5) * ydist;
                             });
                         
                             // autogenerate links
                             let links = [];
                             nodes.map(function(d, i) {
-                            for (var n in nodes) {
-                                if (d.layer + 1 == nodes[n].layer) {
-                                links.push({"source": parseInt(i), "target": parseInt(n), "value": 1}) }
-                            }
+                                for (var n in nodes) {
+                                    if (d.layer + 1 == nodes[n].layer) {
+                                    links.push({"source": parseInt(i), "target": parseInt(n), "value": 1}) }
+                                }
                             }).filter(function(d) { return typeof d !== "undefined"; });
                         
                             // draw links
                             let link = svg.selectAll(".link")
                                 .data(links)
-                            .enter().append("line")
+                                .enter().append("line")
                                 .attr("class", "link")
                                 .attr("x1", function(d) { return nodes[d.source].x; })
                                 .attr("y1", function(d) { return nodes[d.source].y; })
@@ -979,30 +1244,79 @@ class AI {
                                 .style("stroke-width", function(d) { return Math.sqrt(d.value); })
                                 .style("stroke", function(d) { return '#dddddd'; });
                         
+                            // draw group
+                            let group = svg.selectAll(".group")
+                                            .data(groups,function(d){
+                                                return _.groupBy(d,'layer');
+                                            })
+                                            .enter().append("g")
+                                            .attr('id', function(d){
+                                                return 'layer'+d.layer;
+                                            })
+                                            .attr("transform", function(d) {
+                                                return "translate(" + d.x + "," + d.y + ")"; }
+                                            );
+
                             // draw nodes
-                            let node = svg.selectAll(".node")
+                            /* let node = svg.selectAll(".node")
                                 .data(nodes)
-                            .enter().append("g")
+                                .enter().append("g")
                                 .attr("transform", function(d) {
-                                    return "translate(" + d.x + "," + d.y + ")"; }
-                                );
-                        
-                            let circle = node.append("circle")
-                                .attr("class", "node")
-                                .attr("r", nodeSize)
-                                .style("fill", function(d) { return color(d.layer); });
-                        
-                        
-                            node.append("text")
-                                .attr("dx", "-.35em")
-                                .attr("dy", ".35em")
-                                .text(function(d) { return d.label; });
+                                    let x = d.x - 20;
+                                    let y = d.y - 20;
+                                    return "translate(" + x + "," + y + ")"; }
+                                ); */
+
+                            let node = group.selectAll(".node")
+                                            .data(nodes)                
+                                            .enter().append("g");
+                                    
+                            let image = node.append("svg:image")
+                                            .attr('width', 48)
+                                            .attr('height', 48)
+                                            .attr("xlink:href", function(d){
+                                                if(d.type==='h'){
+                                                    return "/fs/assets/images/files/png/neural.png?type=download&issys=true";
+                                                } else {
+                                                    return "/fs/assets/images/files/png/cpu.png?type=download&issys=true";
+                                                }
+                                            })
+                                            .attr("class",function(d){
+                                                if(d.type === 'h'){
+                                                    return 'animated fadeIn';
+                                                }
+                                            });
+                            
+                            let fo = node.append("foreignObject")
+                                        .attr("dx", "1.5em")
+                                        .attr("dy", "5em")
+                                        .attr("width", "100px")
+                                        .attr("x", "-2.5em")
+                                        .attr("height", "4em")
+                                        .attr("y", "4.5em");
+                    
+                            let div = fo.append('xhtml:div');
+                            
+                            div.append('p')
+                                .style("text-align","center")
+                                .html(function(d){ 
+                                    if(d.type==='h'){
+                                        return d.label; 
+                                    } else {
+                                        return d.id; 
+                                    }
+                            });
+                            
+                            div.append('button')
+                                .style("text-align","center")
+                                .attr("class","fas fa-plus");
+
                         
                         },
                         statusUpdate(evt){
                             const self = this;
         
-                            _.extend(self.content,{status:evt+''});
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
                             
                             // 更新到文件系统
                             let attr = {ctime: _.now()};
@@ -1159,6 +1473,7 @@ class AI {
                                                     <matrix-ai-setup-neural :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='neural'" transition="fade" transition-mode="out-in"></matrix-ai-setup-neural>
                                                     <matrix-ai-setup-baseline :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='baseline'" transition="fade" transition-mode="out-in"></matrix-ai-setup-baseline>
                                                     <matrix-ai-setup-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-elad>
+                                                    <matrix-ai-setup-fpgrowth :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='fpgrowth'" transition="fade" transition-mode="out-in"></matrix-ai-setup-fpgrowth>
                                                 </el-tab-pane>
                                             </el-tabs>
                                         </el-main>

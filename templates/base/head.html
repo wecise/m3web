@@ -24,7 +24,7 @@
 	<!--Jquery UI JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jquery-ui/1.12.1/jquery-ui.min.js"></script>
 	
-	<script src="https://cdn.bootcss.com/split.js/1.5.10/split.min.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/split/split.min.js"></script>
 
 	<!-- font-awesome  CSS -->
 	<link href="{{AppSubUrl}}/web/vendor/font-awesome/5.4.1/css/all.min.css" rel="stylesheet" >
@@ -124,7 +124,7 @@
 			window.SignedUser_Remark = "{{.SignedUser.Remark}}";
 			window.SignedUser_UserName = "{{.SignedUser.UserName}}";
 			window.SignedUser_FullName = "{{.SignedUser.FullName}}";
-			window.SignedUser_IsAdmin = "{{.SignedUser.IsAdmin}}" || false;
+			window.SignedUser_IsAdmin = true;//"{{.SignedUser.IsAdmin}}" || false;
 			window.COMPANY_NAME = "{{.company}}";
 			window.COMPANY_OSPACE = "{{.ospace}}";
 			window.COMPANY_LOGO = "{{.logo}}";
@@ -205,8 +205,8 @@
 	<!--Pace Progress JS & CSS-->
 	<script src="{{AppSubUrl}}/web/vendor/pace/pace.min.js" type="text/javascript"></script>
 
-	<script src="//cdn.jsdelivr.net/npm/medium-editor@latest/dist/js/medium-editor.min.js"></script>
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/medium-editor@latest/dist/css/medium-editor.min.css" type="text/css" media="screen" charset="utf-8">
+	<!--script src="//cdn.jsdelivr.net/npm/medium-editor@latest/dist/js/medium-editor.min.js"></script>
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/medium-editor@latest/dist/css/medium-editor.min.css" type="text/css" media="screen" charset="utf-8" -->
 
 	<!-- X-editable Table JS & CSS-->
 	<link href="{{AppSubUrl}}/web/vendor/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet">
@@ -214,6 +214,9 @@
 
 	<!--MarkDown JS-->
 	<script src="{{AppSubUrl}}/web/vendor/marked/marked.min.js"></script>
+
+	<!--JS Search-->
+	<script src="{{AppSubUrl}}/web/vendor/js-search/js-search.min.js" type="text/javascript"></script>
 
 	<!-- App CSS -->
 	<link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet">
@@ -246,16 +249,10 @@
 				        </li>
 
 					{{if .IsSigned}}
-
-				    {{if eq .company "wecise"}}
-				        <li>
-					        <div id="ai-robot"></div>
-						</li>
-				    {{end}}
-
-				        <li>
-					        <a class="item" href="{{AppSubUrl}}/"><i class="fas fa-question"></i></a>
-				        </li>
+  
+					<li>
+						<div id="ai-robot"></div>
+					</li>				    
 
 					{{else}}
 						<li>
@@ -310,14 +307,14 @@
 								<li class="divider"></li>
 
 								<li>
-									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('LIGHT')">
-										<i class="fas fa-sun"></i><!--<img src="/web/assets/images/light.svg" class="img-responsive" alt="Image" style="max-width:48px;">--> 亮色
+									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('bjzdgt')">
+										<i class="fas fa-sun"></i> 亮色
 									</a>
 								</li>
 
 								<li>
-									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('DARK')">
-										<i class="fas fa-sun" style="color:#000;"></i><!--<img src="/web/assets/images/dark.svg" class="img-responsive" alt="Image" style="max-width:48px;">--> 深色
+									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('matrix')">
+										<i class="fas fa-sun" style="color:#000;"></i> 深色
 									</a>
 								</li>
 

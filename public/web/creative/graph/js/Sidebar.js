@@ -119,7 +119,7 @@ Sidebar.prototype.init = function()
         self.addSearchPalette(true);
 
 		// entity
-		let temp = _.attempt(JSON.parse.bind(null, omdbHandler.classList("/matrix/entity")))[0].child;
+		let temp = omdbHandler.classList("/matrix/entity")[0].child;
 		entity = _.sortBy(_.map(temp,function(v){
 			return { name:v, alias: _.last(v.split("/")) };
 		}),['alias'],['asc']);

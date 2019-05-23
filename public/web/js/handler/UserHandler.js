@@ -22,6 +22,122 @@ class UserHandler{
         }
     }
 
+    /* 
+        用户列表
+    */
+    userList(event) {
+        let rtn = null;
+
+        jQuery.ajax({
+            url: '/admin/users',
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            data: {
+                fullname: event || "/"
+            },
+            beforeSend: function (xhr) {
+                Pace.restart();
+            },
+            complete: function (xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+            }
+
+        })
+
+        return rtn;
+
+    };
+
+    
+    /* 
+        用户添加
+    */
+    userAdd(event,token) {
+        let rtn = 0;
+
+        jQuery.ajax({
+            url: '/admin/users/new',
+            dataType: 'json',
+            type: 'POST',
+            processData: false,
+            contentType: 'application/json; charset=utf-8',
+            async: false,
+            data: JSON.stringify(event),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-Csrf-Token", token);
+                Pace.restart();
+            },
+            complete: function (xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("用户添加成功" + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                return 0;
+                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+            }
+
+        })
+
+        return rtn;
+
+    };
+    
+    /* 
+        用户删除
+    */
+    userDelete(event) {
+        let rtn = 0;
+
+        jQuery.ajax({
+            url: `/admin/users/${event}`,
+            dataType: 'json',
+            type: 'DELETE',
+            async: false,
+            beforeSend: function (xhr) {
+                Pace.restart();
+            },
+            complete: function (xhr, textStatus) {
+            },
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if( _.lowerCase(data.status) == "ok"){
+                    rtn = 1;
+                    alertify.success("用户删除成功" + " " + moment().format("LLL"));
+                }
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                return 0;
+                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
+            }
+
+        })
+
+        return rtn;
+
+    };
+    
+    
     /*
     *  认证管理
     *

@@ -315,7 +315,7 @@
             contextMenu: function(){
                 const self = this;
 
-                let items = fsHandler.callFsJScript('/event/contextmenu.js', '').message.event;
+                let items = self.model.contextMenu;
                 let id = self.id;
 
                 $.contextMenu({

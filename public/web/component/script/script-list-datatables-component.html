@@ -321,6 +321,11 @@
                                     _: '已拷贝 %d 项',
                                     1: '1 已拷贝'
                                 }
+                            },
+                            select: {
+                                rows: {
+                                    _: "已拷贝 %d 项"
+                                }
                             }
                         },
 	                    select: {
@@ -379,6 +384,22 @@
                                         script.refresh();
                                     },
                                     enabled: true,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '脚本执行',
+                                    action: function (e, dt, node, config) {
+                                        //script.export();
+                                    },
+                                    enabled: false,
+                                    className: 'btn btn-sm btn-white'
+                                },
+                                {
+                                    text: '执行结果',
+                                    action: function (e, dt, node, config) {
+                                        //script.export();
+                                    },
+                                    enabled: false,
                                     className: 'btn btn-sm btn-white'
                                 },
                                 {
@@ -457,7 +478,7 @@
                     self.datatable.on( 'select deselect', function () {
                         var selectedRows = self.datatable.rows( { selected: true } ).count();
 
-                        self.datatable.buttons( [1,2,3,5,6] ).enable( selectedRows > 0 );
+                        self.datatable.buttons( [1,2,3,5,6,7,8] ).enable( selectedRows > 0 );
                     } );
 
                     

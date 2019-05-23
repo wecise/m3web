@@ -617,6 +617,12 @@ class Job extends Matrix {
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
 
+                            _.delay(function(){
+                                // RESIZE Event Summary
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                // RESIZE Event Console
+                                event.resizeEventConsole();
+                            },500)
                         }
                     }
                 };

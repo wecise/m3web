@@ -194,28 +194,24 @@
 				self.toggleStatusBar();
 
                 // Customer Auto Completer
-	            let customerCompleter = {
+                let customerCompleter = {
                     getCompletions(editor, session, pos, prefix, callback) {
+                            
+                        if (prefix.length === 0) { callback(null, []); return };
 
-                        if (prefix.length === 0) {
-                            callback(null, []);
-                            return
-                        }
+                        let templates = mx.searchJson.search(prefix);
 
-                        let rtn = fetchDataByMql(`select name from /matrix/ where name like '${prefix}*'`);
+                        if(_.isEmpty(templates)) return;
 
-                        if(_.isEmpty(rtn)) return;
-
-                        let word = rtn.message;
-
-                        callback(null,_.map(word,function(ea) {
+                        callback(null, _.uniqBy(_.map(templates,function(v) {
                             return {
-                                name: ea.name,
-                                value: ea.name,
+                                name: v.name,
                                 score: 300,
-                                meta: ea.class
+                                meta: v.title,
+                                caption: v.title,
+                                value: v.template
                             }
-                        }));
+                        }),'name'));
 
                     }
                 };
@@ -233,7 +229,8 @@
                         name: "save",
                         bindKey: {mac: "cmd-S", win: "ctrl-S"},
                         exec: self.saveToFs
-                    });
+                    }
+                );
 
                 // init Theme
                 _.delay(function(){

@@ -197,6 +197,7 @@ class Config {
                         initEditer(){
                             const self = this;
                             
+                            self.langTools = ace.require("ace/ext/language_tools");
                             self.editor = ace.edit('editor-'+self.id);
                             ace.require('ace/ext/settings_menu').init(self.editor);
                             let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
@@ -205,6 +206,9 @@ class Config {
                             self.editor.setOptions({
                                 minLines: 10,
                                 autoScrollEditorIntoView: true,
+                                enableBasicAutocompletion: true,
+                                enableLiveAutocompletion: false,
+                                enableSnippets: true
                             });
                             self.editor.commands.addCommands([{
                                 name: "showSettingsMenu",
@@ -222,7 +226,41 @@ class Config {
                             self.editor.getSession().setMode("ace/mode/toml");
                             self.editor.getSession().setTabSize(2);
                             self.editor.getSession().setUseWrapMode(true);
+                            
+                            // Add commands
+                            self.editor.commands.addCommand(
+                                {
+                                    name: "save",
+                                    bindKey: {mac: "cmd-S", win: "ctrl-S"},
+                                    exec: self.$root.configUpdate
+                                }
+                            );
 
+                            // Customer Auto Completer
+                            let customerCompleter = {
+                                getCompletions(editor, session, pos, prefix, callback) {
+                                     
+                                    if (prefix.length === 0) { callback(null, []); return };
+
+                                    let templates = mx.searchJson.search(prefix);
+
+                                    if(_.isEmpty(templates)) return;
+
+                                    callback(null, _.uniqBy(_.map(templates,function(v) {
+                                        return {
+                                            name: v.name,
+                                            score: 1000,
+                                            meta: v.title,
+                                            caption: v.title,
+                                            value: v.template,
+                                            className: "btn btn-danger"
+                                        }
+                                    }),'name'));
+
+                                }
+                            };
+
+                            self.langTools.addCompleter(customerCompleter);
                             
                             // 设置value
                             self.etcd.value = _.has(this.model,'value')?this.model.value:"";

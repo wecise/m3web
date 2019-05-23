@@ -498,16 +498,15 @@
 
                 _.forEach(node, function(v,k){
 
-                    let _rtn = omdbHandler.classList(v.cid);
+                    let rtn = omdbHandler.classList(v.cid);
 
-                    if (_.isEmpty(_rtn)) {
+                    if (_.isEmpty(rtn)) {
                         return;
                     }
 
                     if( v.cid === -1 ) {
 
-                        let _tmp = _.attempt(JSON.parse.bind(null, _rtn));
-                        let _arr = _.map(_tmp,function(v){ return _.merge(v,{rtype:'A1', open:true})});
+                        let _arr = _.map(rtn,function(v){ return _.merge(v,{rtype:'A1', open:true})});
 
                         _.merge(self.zNodes[0],{ children: _arr});
 
@@ -524,7 +523,7 @@
                         }
 
                         // 按name排序
-                        zTree.addNodes(v.treeNode, _.orderBy(_.map(JSON.parse(_rtn),function(v){ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
+                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,function(v){ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
 
                     }
                 })

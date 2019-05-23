@@ -56,6 +56,68 @@ class OmdbHandler {
     /*
     *   类管理
     *
+    *   树
+    *
+    *
+    * */
+    classTree(event){
+        let rtn = null;
+        
+        jQuery.ajax({
+            url: "/mxobject/schema/class/tree",
+            dataType: 'json',
+            type: 'GET',
+            data: {
+                id: event
+            },
+            async: false,
+            beforeSend:function(xhr){
+                Pace.restart();
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if (!_.isEmpty(data.message)){
+                    rtn = data.message;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        return rtn;
+    };
+
+    /*
+    *   类管理
+    *
+    *   树 迭代实现 不建议使用
+    *
+    *
+    * */
+    classAllList(cid,data){
+        
+        var rtn = omdbHandler.classList(cid)[0];
+        
+        if(rtn.child){
+            
+            data.push(rtn);
+
+            _.forEach(rtn.child, function(v){
+                omdbHandler.classAllList(v,data);
+            })
+
+        } else {
+            data.push(rtn);
+        }
+    }
+   
+    /*
+    *   类管理
+    *
     *   新建
     *
     *

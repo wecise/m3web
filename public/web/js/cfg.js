@@ -178,6 +178,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         {field:"biz",title: "业务", visible: true},
                         {field:"app",title: "应用", visible: true},
                         {field:"host",title: "服务器", visible: true},
+                        {field:"ip",title: "IP", visible: true},
                         {field:"severity",title: "级别", visible: true, formatter: function(value, row, index) {
                                 return window.GLOBAL_OBJECT.company.object.event.preconfig.severity.level[row.severity].name;
                             },
@@ -288,7 +289,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                                     } else if ( 'transaction' == row.param ){
                                         return "<span class='pull-right' style='color:#0088CC;'><b>" + _.round(value,2) +  " 笔</b></span>"
                                     } else {
-                                        return "<span class='pull-right' style='color:#9999CC;'><b>" + _.round(value,2) + " MB</b></span>"
+                                        return "<span class='pull-right' style='color:#9999CC;'><b>" + mx.bytesToSize(value) + "</b></span>"
                                     }
                                 } else {
                                     return '';

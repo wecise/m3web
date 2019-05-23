@@ -14,6 +14,8 @@ class Home extends Matrix {
 
     constructor() {
         super();
+
+        this.app = null;
     }
 
     init() {
@@ -26,9 +28,8 @@ class Home extends Matrix {
 
                 var timeoutId = 0;
 
-                var appVue = new Vue({
-                    delimiters: ['${', '}'],
-                    el: '#app',
+                mxHome.app = {
+                    delimiters: ['#{', '}#'],
                     template: '#app-template',
                     data: {
                         search: {
@@ -385,11 +386,13 @@ class Home extends Matrix {
                             $(self.$refs[name]).click();
                         }
                     }
-                });
+                };
+                
+                new Vue(mxHome.app).$mount("#app");
             })
         })
     }
 }
 
-let home = new Home();
-home.init();
+let mxHome = new Home();
+mxHome.init();

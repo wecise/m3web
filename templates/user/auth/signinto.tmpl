@@ -152,12 +152,29 @@
       <script>
          $(function() {
 
-             let _logo = {{.logo}};
-             _logo = _logo.replace(/"/g,"");
-             $("img").attr("src",_logo);
+             try{
+               let _logo = {{.logo}};
+               _logo = _logo.replace(/"/g,"");
+               $("img").attr("src",_logo);
 
-             let _company = '{{.company}}';
-             _company = _company.replace(/"/g,"");
+               let _company = '{{.company}}';
+               _company = _company.replace(/"/g,"");
+
+               if(_company=='nxgd'){
+                  $(".login-brand").css({
+                     "background-color":"#007a77",
+                     "color":"#ffffff"
+                  });
+                  $(".login-brand > .title > h4").css({
+                     "color":"#ffffff"
+                  });
+                  $(".btn.btn-primary").css({
+                     "background-color":"#007a77"
+                  });
+               }
+            } catch(err){
+
+            }
 
          });
 

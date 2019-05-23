@@ -708,6 +708,11 @@ class Script {
                                     _: '已拷贝 %d 项',
                                     1: '1 已拷贝'
                                 }
+                            },
+                            select: {
+                                rows: {
+                                    _: "已拷贝 %d 项"
+                                }
                             }
                         },
                         select: {

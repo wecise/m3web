@@ -49,12 +49,13 @@
         text-align: center;
     }
 
-    #nav .thumbnail, #content {
-        box-shadow: 0px 1px 1px 2px #eeeeee;
+    #nav .thumbnail{
+        padding:0px;
+        border: none;
     }
 
-    #nav .thumbnail{
-        border: none;
+    #nav .thumbnail > .caption{
+        padding: 10px 15px;
     }
 
     .upload-btn-wrapper {
@@ -135,7 +136,7 @@
             },
             computed: {
                 email: function(){
-                    let self = this;
+                    const self = this;
                     let email = _.fill([''], {{.SignedUser.Email}});
 
                     return email.join(",");
@@ -164,7 +165,7 @@
                     return email.join(",");
                 },
                 vtime: function(){
-                    let self = this;
+                    const self = this;
                     let vtime = _.fill([''], {{.SignedUser.Vtime}});
 
                     return moment(vtime[0]).format("LLL");
@@ -195,7 +196,7 @@
                 }
             },
             mounted: function(){
-                let self = this;
+                const self = this;
 
                 self.$nextTick(function(){
                     self.init();
@@ -204,7 +205,7 @@
             },
             methods: {
                 init: function(){
-                    let self = this;
+                    const self = this;
 
                     $(self.$el).find("#icon").attr("src",{{.icon}});
                     $(self.$el).find("#logo").attr("src",{{.logo}});
@@ -219,7 +220,7 @@
 
                 },
                 update: function(){
-                    let self = this;
+                    const self = this;
 
                     let _rtn = companyHandler.companyUpdate(self.company);
 
@@ -231,7 +232,7 @@
                     appVue.currentView = 'user-info';
                 },
                 importLicense: function(event){
-                    let self = this;
+                    const self = this;
 
                     let file = event.target.files[0];
 
@@ -256,7 +257,7 @@
                 license: null
             },
             created:function(){
-                let self = this;
+                const self = this;
 
 
             },
@@ -277,7 +278,7 @@
             },
             methods: {
                 init: function(){
-                    let self = this;
+                    const self = this;
 
                     let _logo = `{{.logo}}`;
 
@@ -292,7 +293,7 @@
                     }
                 },
                 update: function(){
-                    let self = this;
+                    const self = this;
                     let fullname = `{{.SignedUser.FullName}}.replace(/"/g,"")`;
                     let email = $("#email").val().split(",");
                     let password = $("#password").val();
@@ -321,12 +322,12 @@
 
                 },
                 toggleView: function(view){
-                    let self = this;
+                    const self = this;
 
                     self.currentView = view;
                 },
                 changeLogo: function(){
-                    let self = this;
+                    const self = this;
 
                     let _win = maxWindow.winInfo("更改Logo",'<div id="fs-info"></div>',null,$('#content'));
 
@@ -334,7 +335,7 @@
                         delimiters: ['#{', '}#'],
                         el: "#fs-info",
                         template: `<div class="row" id="icon-list">
-                                      <div class="col-md-12" style="display: list-item;height: 44em;overflow: auto;">
+                                      <div class="col-md-12" style="display: list-item;height: 40em;overflow: auto;">
                                         <ul>
                                             <li v-for="icon in model.icon.list">
                                                 <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
@@ -375,7 +376,7 @@
                                             "web": "{{.website}}",
                                             "config": {}
                                         };
-                                        let _rtn = companyUpdate(_company);
+                                        let _rtn = companyHandler.companyUpdate(_company);
                                         if(_rtn == 1){
                                             document.location.href = mx.getPage();
                                         }
@@ -403,7 +404,7 @@
                                 me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
                             },
                             triggerInput: function(id){
-                                let self = this;
+                                const self = this;
 
                                 $(self.$refs[id]).click()
                             },
@@ -436,9 +437,9 @@
         <div class="row-fluid">
             <div  class="col-lg-3" id="nav">
                 <div class="thumbnail">
-                    <div class="upload-btn-wrapper" @click="changeLogo">
+                    <div class="company-logo-bg upload-btn-wrapper" @click="changeLogo">
                         <span class="logo-toggle"><i class="fa fa-wrench"></i></span>
-                        <img :src="logo" style="max-width:250px;" title="点击更换Logo">
+                        <img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;" title="点击更换Logo">
                     </div>
                     <div class="caption">
                         <h5>{{.i18n.Tr "company_info"}}</h5>
@@ -451,7 +452,9 @@
                         <p>{{.i18n.Tr "company_product"}}：{{.i18n.Tr "app_desc"}}</p>
                         <div class="text-right">
                             <a class="btn btn-xs btn-white" href="http://{{.website}}" target="_blank"><i class="fa fa-thumbs-up"></i> {{.i18n.Tr "company_web"}} </a>
+                            {{if .SignedUser.IsAdmin}}
                             <a class="btn btn-xs btn-success" href="javascript:void(0);" @click="toggleView('company-update')"><i class="fa fa-edit"></i> {{.i18n.Tr "company_update"}}</a>
+                            {{end}}
                         </div>
                     </div>
                 </div>

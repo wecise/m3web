@@ -16,10 +16,10 @@
 	-moz-box-shadow:0px 0px 3px 0px #d9d9d9;
 	box-shadow:0px 0px 3px 0px #d9d9d9;
 	  
-	background: radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 0 0, radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 8px 8px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 0 1px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 8px 9px!important;
+	/* background: radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 0 0, radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 8px 8px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 0 1px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 8px 9px!important;
     background-color: rgb(49, 55, 73)!important;
 	background-size: 16px 16px!important;
-	border: unset!important;
+	border: unset!important; */
 }
 .geSidebarContainer a, .geMenubarContainer a, .geToolbar a {
 	color:#333333;
@@ -321,14 +321,14 @@ div.mxWindow .geButton {
 	filter:none !important;
 }
 .geDiagramBackdrop {
-	/* background-color: #ffffff;
-	background: rgb(221, 221, 221);
+	background-color: #f9f9f9;
+	/* background: rgb(221, 221, 221);
     background-image: linear-gradient(rgb(229, 229, 229) 1px, rgba(0, 0, 0, 0) 0), linear-gradient(90deg, rgb(229, 229, 229) 1px, rgba(0, 0, 0, 0) 0);
 	background-size: 30px 30px; */
 	
-	background: radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 0 0, radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 8px 8px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 0 1px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 8px 9px;
+	/* background: radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 0 0, radial-gradient(rgb(0, 0, 0) 10%, rgba(0, 0, 0, 0) 16%) 8px 8px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 0 1px, radial-gradient(rgba(255, 255, 255, .1) 15%, rgba(0, 0, 0, 0) 20%) 8px 9px;
     background-color: rgb(49, 55, 73);
-    background-size: 16px 16px;
+    background-size: 16px 16px; */
 }
 
 .geDiagramBackdrop .grey{

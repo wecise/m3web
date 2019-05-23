@@ -124,7 +124,7 @@ class CompanyHandler{
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseText);
             }
 
         })

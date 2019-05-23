@@ -241,223 +241,158 @@
 		}
 
 
-		/* For layout */
-		.lm_goldenlayout {
-			background: none;
-			background-color: rgb(246, 246, 246)!important;
-		}
-
-		.lm_content {
-			background: rgb(255, 255, 255);
-			border: none!important;
-			overflow: hidden;
-			padding: 0px!important;
-		}
-
-		.lm_header{
-			height: 26px!important;
-		}
-
-		.lm_header .lm_tab {
-			border: none;
-			height: 15px;
-		}
-
-		.lm_tab {
-			height: 18px !important;
-			line-height:20px;
-		}
-
-		.lm_close_tab {
-			height: 16px !important;
-		}
-
-		.lm_controls {
-			top:5px;
-		}
-
-		.lm_header .lm_tab.lm_active {
-			border-bottom: none;
-			box-shadow: none;
-			padding-bottom: 6px;
-			border-bottom: 1px solid rgb(255, 0, 0);
-			background-color: rgb(246, 246, 246);
-		}
-
-		.lm_tab:hover, .lm_tab.lm_active {
-			background: rgb(255, 255, 255);
-			color: rgb(119, 119, 119);
-		}
-
-
-		.lm_selected .lm_header {
-			background-color: rgb(230, 230, 230);
-		}
-
-		.lm_splitter {
-			background: rgb(153, 153, 153);
-			z-index: 1;
-		}
-
-		.lm_tabs > li[title=编辑] .lm_close_tab,
-		.lm_tabs > li[title=结果] .lm_close_tab,
-		.lm_tabs > li[title=预览] .lm_close_tab {
-			display:none;
-		}
-
-
 		/* For view-container */
 		.note-view,
 		.list-view,
 		.grid-view,
 		.table-view{
 			overflow: auto;
-			height: 70vh;
-		}
+			height: calc(100vh - 185px);/* 70vh; */
+        }
+        
+        .fs-view-component{
+            height: 100%;
+        }
 
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-view-component"  ----------*/
 	<template>
+		<el-container>
+			<el-header style="padding:0 5px;">
+				<el-row>
+                    <el-col :span="24">
+                        <ul style="list-style: none;display:  flex;padding:0 8px;">
+                            <li style="padding:5px 0px;">
+                                <a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> ${rootName} </a>
+                            </li>
+                            <li>
+                                <ol class="breadcrumb">
+                                    <li v-for="(item,index) in filePath" >
+                                        <a href="javascript:void(0);" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" :title="_.slice(filePath,0,index+1).join('/')">${item}</a>
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </el-col>
+				</el-row>
+			
+			    <el-row>
+                    <el-col :span="24">
+                        <div class="btn-group" style="padding:0 11px;float:right;">
 
-		<div class="container-fluid">
-			<div class="row">
-				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-					<ul style="list-style: none;display:  flex;padding:0 8px;">
-						<li style="padding:5px 0px;">
-							<a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> ${rootName} </a>
-						</li>
-						<li>
-							<ol class="breadcrumb">
-								<li v-for="(item,index) in filePath" >
-									<a href="javascript:void(0);" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" :title="_.slice(filePath,0,index+1).join('/')">${item}</a>
-								</li>
-							</ol>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-					<div class="btn-group" style="padding:0 11px;float:right;">
+                            <el-tooltip content="刷新" placement="top">
+                                <a href="#" class="btn btn-link" @click="load" title="刷新">
+                                    <i class="fas fa-sync-alt"></i>
+                                </a>
+                            </el-tooltip>
 
-                        <el-tooltip content="刷新" placement="top">
-                            <a href="#" class="btn btn-link" @click="load" title="刷新">
-                                <i class="fas fa-sync-alt"></i>
+                            <el-tooltip content="排序" placement="top">
+                                <a href="#" class="btn btn-link fs-order" title="排序">
+                                    <i class="fas fa-list-ol"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="新建目录" placement="top">
+                                <a href="#" class="btn btn-link" @click="newDir" title="新建目录">
+                                    <i class="fas fa-folder-plus"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="新建文件" placement="top">
+                                <a href="#" class="btn btn-link" @click="newFile" title="新建文件">
+                                    <i class="fas fa-file"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="选择所有" placement="top">
+                                <a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
+                                    <i class="fas fa-check-square"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="复制到" placement="top">
+                                <a href="#" class="btn btn-link" @click="copyTo" title="复制到">
+                                    <i class="fas fa-copy"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="移动到" placement="top">
+                                <a href="#" class="btn btn-link" @click="moveTo" title="移动到">
+                                    <i class="fas fa-people-carry"></i>
+                                </a>
+                            </el-tooltip>
+                            
+                            <!--el-tooltip content="复制" placement="top">
+                                <a href="#" class="btn btn-link" @click="copyThem" title="复制">
+                                    <i class="fas fa-copy"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="粘贴到" placement="top">
+                                <a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到">
+                                    <i class="fas fa-paste"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="移动到" placement="top">
+                                <a href="#" class="btn btn-link" @click="moveIt" title="移动到">
+                                    <i class="fas fa-people-carry"></i>
+                                </a>
+                            </el-tooltip-->
+
+                            <el-tooltip content="删除" placement="top">
+                                <a href="#" class="btn btn-link" @click="deleteThem" title="删除">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </el-tooltip>
+
+                            <el-tooltip content="上传文件" placement="top">
+                                <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" style="color:#16e216;">
+                                    <i class="fas fa-upload"></i>
+                                    <input id="file-upload" type="file" name="uploadfile" multiple>
+                                </a>
+                            </el-tooltip>
+                            <!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
+                                <i class="fas fa-download""></i>
+                            </a>-->
+                            <!-- <a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
+                                <i class="fas fa-th"></i>
                             </a>
-                        </el-tooltip>
+                            <a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
+                                <i class="fas fa-bars"></i>
+                            </a> -->
+                            <el-tooltip content="导出备份" placement="top">
+                                <a href="#" class="btn btn-link" @click="exportIt(rootPath)" title="导出备份">
+                                    <i class="fas fa-cloud-download-alt""></i>
+                                </a>
+                            </el-tooltip>
 
-                        <el-tooltip content="排序" placement="top">
-                            <a href="#" class="btn btn-link fs-order" title="排序">
-                                <i class="fas fa-list-ol"></i>
-                            </a>
-                        </el-tooltip>
+                            <el-tooltip content="导入恢复" placement="top">
+                                <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复">
+                                    <i class="fas fa-cloud-upload-alt" style=""></i>
+                                    <input type="file" name="loadfile" multiple @change="importIt">
+                                </a>
+                            </el-tooltip>
 
-                        <el-tooltip content="新建目录" placement="top">
-                            <a href="#" class="btn btn-link" @click="newDir" title="新建目录">
-                                <i class="fas fa-folder-plus"></i>
-                            </a>
-                        </el-tooltip>
+                            <el-tooltip content="版本同步" placement="top">
+                                <a href="#" class="btn btn-link" @click="syncIt" title="版本同步">
+                                    <i class="fas fa-retweet""></i>
+                                </a>
+                            </el-tooltip>
 
-                        <el-tooltip content="新建文件" placement="top">
-                            <a href="#" class="btn btn-link" @click="newFile" title="新建文件">
-                                <i class="fas fa-file"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="选择所有" placement="top">
-                            <a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
-                                <i class="fas fa-check-square"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="复制到" placement="top">
-                            <a href="#" class="btn btn-link" @click="copyTo" title="复制到">
-                                <i class="fas fa-copy"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="移动到" placement="top">
-                            <a href="#" class="btn btn-link" @click="moveTo" title="移动到">
-                                <i class="fas fa-people-carry"></i>
-                            </a>
-                        </el-tooltip>
-                        
-                        <!--el-tooltip content="复制" placement="top">
-                            <a href="#" class="btn btn-link" @click="copyThem" title="复制">
-                                <i class="fas fa-copy"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="粘贴到" placement="top">
-                            <a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到">
-                                <i class="fas fa-paste"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="移动到" placement="top">
-                            <a href="#" class="btn btn-link" @click="moveIt" title="移动到">
-                                <i class="fas fa-people-carry"></i>
-                            </a>
-                        </el-tooltip-->
-
-                        <el-tooltip content="删除" placement="top">
-                            <a href="#" class="btn btn-link" @click="deleteThem" title="删除">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="上传文件" placement="top">
-                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" style="color:#16e216;">
-                                <i class="fas fa-upload"></i>
-                                <input id="file-upload" type="file" name="uploadfile" multiple>
-                            </a>
-                        </el-tooltip>
-						<!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
-							<i class="fas fa-download""></i>
-						</a>-->
-						<!-- <a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
-							<i class="fas fa-th"></i>
-						</a>
-						<a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
-							<i class="fas fa-bars"></i>
-                        </a> -->
-                        <el-tooltip content="导出备份" placement="top">
-                            <a href="#" class="btn btn-link" @click="exportIt(rootPath)" title="导出备份">
-                                <i class="fas fa-cloud-download-alt""></i>
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="导入恢复" placement="top">
-                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复">
-                                <i class="fas fa-cloud-upload-alt" style=""></i>
-                                <input type="file" name="loadfile" multiple @change="importIt">
-                            </a>
-                        </el-tooltip>
-
-                        <el-tooltip content="版本同步" placement="top">
-                            <a href="#" class="btn btn-link" @click="syncIt" title="版本同步">
-                                <i class="fas fa-retweet""></i>
-                            </a>
-                        </el-tooltip>
-
-					</div>
-				</div>
-			</div>
-			<div class="row">
-
-				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" id="view-container" @dblclick="resetStatus">
-					<component v-bind:is="currentView" :model.sync="model"></component>
-				</div>
-
-			</div>
-			<div class="row fs-footer">
-	            <div class="col-lg-12">
-		            <small>数量：${model.length}  | 已选中：${selectedItem.length} </small>
-	            </div>
-			</div>
-		</div>
+                        </div>
+                    </el-col>
+                </el-row>
+			</el-header>
+			<el-main style="padding:0 5px;overflow:hidden;">
+                <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
+            </el-main>
+			<el-footer style="padding:0 10px;height:30px;line-height:30px;">
+		        <small>数量：${model.length}  | 已选中：${selectedItem.length} </small>
+            </el-footer>
+		</el-container>>
 
 	</template>
 
@@ -482,12 +417,12 @@
 							   <ul>
 								  <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
 								       :id="'fs_node_'+item.id"
-								       @mouseover="$parent.mouseOver(item)"
-								       @mouseout="$parent.mouseOut(item)"
+								       @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
+								       @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);">
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)">
 										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
@@ -631,12 +566,12 @@
 							   <ul>
 								  <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
 								       :id="'fs_node_'+item.id"
-								       @mouseover="$parent.mouseOver(item)"
-								       @mouseout="$parent.mouseOut(item)"
+								       @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
+								       @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);">
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)">
 										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
@@ -775,12 +710,12 @@
 							   <ul>
 								  <li  :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
 								       :id="'fs_node_'+item.id"
-								       @mouseover="$parent.mouseOver(item)"
-								       @mouseout="$parent.mouseOut(item)"
+								       @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
+								       @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
 								       style="cursor: pointer;"
 								       :title="item.name"
 								       v-for="item in model">
-									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="$parent.selectIt(item)" @dblclick="$parent.openIt(item, item.parent+'/'+item.name);" >
+									  <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)" >
 										  <div class="stats-info">
 											  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
 										  </div>
@@ -883,6 +818,12 @@
             const self = this
 
             self.init();
+            
+            eventHub.$on("FS-NODE-SELECTIT-EVENT",self.selectIt);
+            eventHub.$on("FS-NODE-OPENIT-EVENT",self.openIt);
+
+            eventHub.$on("FS-NODE-MOUSEOVER-EVENT",self.mouseOver);
+            eventHub.$on("FS-NODE-MOUSEOUT-EVENT",self.mouseOut);
 
             eventHub.$on("FS-FORWARD-EVENT", self.openIt);
             eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
@@ -1948,7 +1889,7 @@
                     } else {
                         // user clicked "cancel"
                     }
-                }, '/');
+                }, self.rootPath);
                 $(".alertify-prompt .alertify-message").css('height','5vh');
 
             },
@@ -1989,7 +1930,7 @@
                     } else {
                         // user clicked "cancel"
                     }
-                }, '/');
+                }, self.rootPath);
                 $(".alertify-prompt .alertify-message").css('height','5vh');
 
             },

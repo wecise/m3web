@@ -37,55 +37,51 @@ class SideBar {
                         {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
                     ]
             },
-            template: ` <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="input-group full-width topbar" style="margin:0;width:100%;">
-                                        <input type="text" class="form-control-transparent" placeholder="请输入关键词" v-model="term">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-9">
-                                    <ul class="top-bar animated fadeInDown nav-menu-level1">
-                                        <!--li>
-                                            <a href="/" title="首页" data-tooltip="tooltip">
-                                                <img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
-                                            </a>
-                                        </li-->
-                                        <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
-                                            <a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname" data-tooltip="tooltip">
-                                                <img :src="item.icon | pickIcon" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></img> 
-                                                <p>
-                                                    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
-                                                </p>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="/janesware/system?view=app"  title="应用管理" data-tooltip="tooltip">
-                                                <i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="col-lg-3" style="border-left: 1px solid #ddd;">
-                                    <ul class="animated fadeIn" style="list-style: none;">
-                                        <li v-for="(item,index) in group" :class="index<group.length - 1?'slot-li-divider':''" style="margin:5px 0px;">
-                                            <a href="javascript:void(0);" :target="item.target" :title="item.cnname" data-tooltip="tooltip">
-                                                #{_.truncate(item.cnname, {'length': 6})}#  
-                                                <span class="badge" style="background-color:transparent;color:#999;">#{item.count}#</span>
-                                            </a>
-                                            <span :class="item.icon" style="color:#fba729;"></span> 
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
-                                </div>
-                            </div>
-                        </div>`,
+            template: ` <el-container>
+                            <el-header style="height:30px;line-height:30px;">
+                                <input type="text" class="form-control-transparent" placeholder="请输入关键词" v-model="term">
+                            </el-header>
+                            <el-main style="padding:0px;">
+                                <el-container>
+                                    <el-main style="padding:0px;">
+                                        <ul class="top-bar animated fadeInDown nav-menu-level1">
+                                            <!--li>
+                                                <a href="/" title="首页">
+                                                    <img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
+                                                </a>
+                                            </li-->
+                                            <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
+                                                <a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname">
+                                                    <img :src="item.icon | pickIcon" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></img> 
+                                                    <p>
+                                                        <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
+                                                    </p>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/janesware/system?view=app"  title="应用管理">
+                                                    <i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </el-main>
+                                    <el-aside style="width:200px;">
+                                        <ul class="animated fadeIn" style="list-style: none;">
+                                            <li v-for="(item,index) in group" :class="index<group.length - 1?'slot-li-divider':''" style="margin:5px 0px;">
+                                                <a href="javascript:void(0);" :target="item.target" :title="item.cnname">
+                                                    #{_.truncate(item.cnname, {'length': 6})}#  
+                                                    <span class="badge" style="background-color:transparent;color:#999;">#{item.count}#</span>
+                                                </a>
+                                                <span :class="item.icon" style="color:#fba729;"></span> 
+                                            </li>
+                                        </ul>
+                                    </el-aside>
+                                </el-container>
+                            </el-main>
+                            <el-footer>
+                                <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
+                            </el-footer>
+                        </el-container>`,
             created: function(){
                 this.init();
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);

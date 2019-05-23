@@ -29,6 +29,9 @@ class Matrix {
         this.companyLogo = window.COMPANY_LOGO;
         this.companyTitle = window.COMPANY_TITLE;
 
+        this.currentUserTemplate = null;
+        this.searchJson = null;
+
         this.urlParams = (function(url){
                             var result = new Object();
                             var idx = url.lastIndexOf('?');
@@ -57,7 +60,7 @@ class Matrix {
         mx.setFavIcon();
         mx.setTitle();
         mx.setTheme();
-
+        
         document.addEventListener('DOMContentLoaded', function(){
             // 全文搜索实例
             mx.search();
@@ -71,6 +74,8 @@ class Matrix {
             mx.viewListen();
             // Alert设置
             mx.mxAlert();
+            // 加载当前用户模板
+            mx.setCurrentUserTemplate();
 
             document.addEventListener('click', function (event) {
 
@@ -115,7 +120,7 @@ class Matrix {
 
     }
 
-
+    // 单位转换
     bytesToSize(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0) return '0 Byte';
@@ -123,17 +128,11 @@ class Matrix {
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 
-    // 设置主题
-    setTheme(){
-        let theme = localStorage.getItem("MATRIX_THEME") || 'DARK';
-        mx.toggleTheme(theme);
-    }
-
     // 设置Logo
     setLogo(){
-        _.delay(function(){
+        $("#company_logo").ready(function(){
             $("#company_logo").attr("src", mx.companyLogo);
-        },1000)
+        })
     }
 
     // 设置Fav
@@ -144,6 +143,50 @@ class Matrix {
     // 设置Title
     setTitle(){
         document.title = mx.companyTitle;
+    }
+
+    // 设置主题
+    setTheme(){
+        
+        $("body").ready(function(){
+            let allClassName = _.keys(mx.global.register.theme).join(" ");
+            $("body").removeClass(allClassName);
+            $("body").addClass(mx.global.register.theme.default);
+        })
+        
+    }
+
+    // 设置当前用户template
+    setCurrentUserTemplate(){
+        try{
+            let parent = `/etc/template`;
+
+            let temp = fsHandler.fsContent(parent,'template.json');
+            
+            mx.currentUserTemplate = _.attempt(JSON.parse.bind(null, temp));
+
+            mx.searchJson = new JsSearch.Search('name');
+            mx.searchJson.addIndex('name');
+            //mx.searchJson.addIndex('title');
+            //mx.searchJson.addIndex('template')
+
+            let templates = _.map(mx.currentUserTemplate,function(v){
+                let t = fsHandler.fsContent(parent,`${v.name}.json`);
+                return _.merge(v,{template: t});
+            })
+            mx.searchJson.addDocuments(templates);
+        } catch(err){
+
+        }
+    }
+
+    // 切换主题
+    toggleTheme(theme){
+        
+        let allClassName = _.keys(mx.global.register.theme).join(" ");
+        $("body").removeClass(allClassName);
+        $("body").addClass(theme);
+        
     }
 
     // 语言
@@ -301,6 +344,13 @@ class Matrix {
 
     // Robot
     robot(){
+
+        try{
+            if(!mx.global.register.robot.enable) return false;
+        } catch(err){
+            return false;
+        }
+        
 
         $.get(`${window.ASSETS_ICON}/robot/svg/robot.svg?type=download&issys=${window.SignedUser_IsAdmin}`,function(svg){
 
@@ -1012,109 +1062,6 @@ class Matrix {
             }
         })
         
-    }
-
-    toggleTheme(event){
-
-        if(event == 'LIGHT'){
-            
-            $(".navbar.navbar-default.navbar-fixed-top").css({
-                "backgroundColor": "rgb(33, 149, 244)",
-            
-                "backgroundImage": "none",
-                "backgroundImage": "none",
-                "backgroundImage": "none",
-                "backgroundRepeat": "none",
-                "filter": "none",
-                "filter": "none",
-                "borderRadius": "none",
-                "-webkitBoxShadow": "none",
-                "boxShadow": "none"
-            });
-
-            $("#sidebar").css({
-                "backgroundColor": "rgb(33, 149, 244)!important",
-            });
-
-            $("#sidebar-bg").css({
-                "backgroundColor": "rgb(33, 149, 244)!important",
-            });
-
-            $(".sidebar-toggle i").css({
-                "color": "rgb(166, 211, 248)"
-            });
-
-            $(".layer.btn.btn-primary").css({
-                "backgroundColor": "rgb(33, 149, 244)"
-            });
-
-            $(".layer > .dropdown > a").css({
-                "color": "rgb(110, 180, 236)"
-            });
-
-            $(".layer > .dropdown > i").css({
-                "color": "rgba(255,255,255,0.5)"
-            });
-
-            $(".layer a").css({
-                "color": "rgb(255,255,255)"
-            });
-
-            $(".row .btn.btn-primary").css({
-                "backgroundColor": "rgb(33, 149, 244)",
-                "borderColor": "rgba(0, 0, 0, 0)"
-            });
-
-            $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(240, 243, 244)");
-            $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#333333");
-            $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#333333");
-
-        } else if (event == 'DARK'){
-
-            $(".navbar.navbar-default.navbar-fixed-top").css({
-                "backgroundColor": "rgb(37, 45, 71)",
-            });
-
-            $("#sidebar").css({
-                "backgroundColor": "rgb(37, 45, 71)!important",
-            });
-
-            $("#sidebar-bg").css({
-                "backgroundColor": "rgb(37, 45, 71)!important",
-            });
-
-            $(".sidebar-toggle i").css({
-                "color": "rgb(141, 146, 151)"
-            });
-
-            $(".layer.btn.btn-primary").css({
-                "backgroundColor": "rgb(37, 45, 71)"
-            });
-
-            $(".layer > .dropdown > a").css({
-                "color": "rgb(255,255,255)"
-            });
-
-            $(".layer > .dropdown > i").css({
-                "color": "rgba(255,255,255,0.5)"
-            });
-
-            $(".layer a").css({
-                "color": "rgb(255,255,255)"
-            });
-
-            $(".row .btn.btn-primary").css({
-                "backgroundColor": "rgb(37, 45, 71)",
-                "borderColor": "rgb(37, 45, 71)"
-            });
-
-            $(".navbar.navbar-default.navbar-fixed-bottom").css("background-color","rgb(37, 45, 71)");
-            $(".navbar.navbar-default.navbar-fixed-bottom").find("span").css("color","#f9f9f9");
-            $(".navbar.navbar-default.navbar-fixed-bottom").find("a").css("color","#f9f9f9");
-        }
-
-        localStorage.setItem("MATRIX_THEME",event);
-
     }
 
     // 全屏监听

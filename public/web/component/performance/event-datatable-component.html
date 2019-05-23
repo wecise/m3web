@@ -185,6 +185,21 @@
             display: none;
         }
 
+         /* ToolBar */
+         .event-datatable-component .dt-buttons{
+            width: 100%;
+        }
+        .event-datatable-component .dt-buttons > a{
+            margin:0px 5px;
+            color: #666666;
+        }
+
+        .event-datatable-component .dt-buttons > a:hover{
+            color: rgb(87, 163, 243);
+            border-color: rgb(87, 163, 243);
+            text-decoration: none;
+        }
+
 	</style>
 
 	
@@ -599,14 +614,13 @@
 
                 // 更新Dom
                 if( $('.event-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $('.event-datatable-component .dataTables_wrapper > .dt-buttons').empty();
+                    $(`.event-datatable-component .dataTables_wrapper .dt-buttons`).replaceWith(datatable.buttons().containers());
+                } else {
+                    datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
                 }
-                datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
 
                 // button样式调整
                 $(".event-datatable-component a.dt-button").removeClass("dt-button");
-                // tooltip
-                $(".event-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
 
 			},
             // Class分组menu

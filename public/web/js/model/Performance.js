@@ -115,12 +115,14 @@ class Performance extends Matrix {
                                         }
                                     }
                                 } else {
-                                    return  {
-                                        name: v,
-                                        data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
-                                        type: 'line',
-                                        smooth: true,
-                                        color: mx.global.register.performance.chart.color[v]
+                                    if(!_.isEmpty(self.model.baseline)) {
+                                        return  {
+                                            name: v,
+                                            data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
+                                            type: 'line',
+                                            smooth: true,
+                                            color: mx.global.register.performance.chart.color[v]
+                                        }
                                     }
                                 }
                                 
@@ -402,9 +404,9 @@ class Performance extends Matrix {
                     template: `<el-container style="height: calc(100vh - 230px);">
                                     <el-main><el-card class="box-card">
                                         <div slot="header" class="clearfix">
-                                            <span>性能轨迹
-                                                <small>#{moment(_.head(model.rows).vtime).format("LLL")}# - #{moment(_.last(model.rows).vtime).format("LLL")}#</small>
-                                            </span>
+                                            <h4>
+                                                #{moment(_.head(model.rows).vtime).format("LLL")}# - #{moment(_.last(model.rows).vtime).format("LLL")}#
+                                            </h4>
                                             <el-button style="float: right; padding: 3px 0" type="text" icon="el-icon-menu"></el-button>
                                         </div>
                                         <performance-timeline :id="id + '-journal'" :model="model.rows"></performance-timeline>
@@ -472,10 +474,15 @@ class Performance extends Matrix {
                         model: Object
                     },
                     template:   `<div class="block"><el-timeline>
-                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
-                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
-                                            <h4>#{item.value}#</h4>
-                                            <p>#{item.biz}# #{item.host}# #{item.inst}# #{item.param}#</p>
+                                    <el-timeline-item :timestamp="moment(item.ctime).format(mx.global.register.performance.time.format)" placement="top" v-for="item in model">
+                                        <el-card style="box-shadow: 0 0px 2px 0 rgba(0, 0, 0, 0.1);">
+                                            <div style="padding: 5px;">
+                                                <h3>#{item.value}#</h3>
+                                                <div class="bottom clearfix">
+                                                    <time class="time" style="font-size:12px;">采集时间：#{moment(item.ctime).format(mx.global.register.performance.time.format)}#</time><br>
+                                                    <time class="time" style="font-size:12px;">入库时间：#{moment(item.vtime).format(mx.global.register.performance.time.format)}#</time>
+                                                </div>
+                                            </div>    
                                         </el-card>
                                     </el-timeline-item>
                                 </el-timeline></div>`

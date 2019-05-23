@@ -274,6 +274,7 @@ class FsHandler {
 
         return rtn;
     };
+    
 
     /*
     *   文件系统
@@ -510,10 +511,10 @@ class FsHandler {
     fsTemp(ftype, name, content, attr){
         let rtn = null;
 
-        let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}`, name, content, attr);
+        let _tmp = fsHandler.fsNew(ftype, `/home/${window.SignedUser_UserName}/temp`, name, content, attr);
 
         if(_tmp === 1){
-            rtn = `/home/${window.SignedUser_UserName}/${name}`;
+            rtn = `/home/${window.SignedUser_UserName}/temp/${name}`;
         }
 
         return rtn;
