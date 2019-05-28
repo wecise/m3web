@@ -332,7 +332,7 @@ class Imap extends Matrix {
                                     </div>
                                 </div></div>`,
                     created(){
-                        this.upload.option.url = `/fs/entity/files/${imap.app.model.graph.selectedCell.value}?issys=true`;
+                        this.upload.option.url = `/fs/storage/entity/files/${mxImap.app.model.graph.selectedCell.value}?issys=true`;
                         eventHub.$on("GRAPH-DIAGNOSIS-DATA-TRIGGER",this.reloadData);
                     },
                     mounted(){
@@ -638,10 +638,10 @@ class Imap extends Matrix {
                         },  
                         // 上传完毕，更新/matrix/entity   
                         updateEntity(event,action){
-                            let id = imap.app.model.graph.selectedCell.id;
-                            let fs = {action: action, class: `/matrix/entity/${imap.app.model.graph.selectedCell.id.split(":")[0]}`, id:id, name: event.name, file: `/entity/files/${imap.app.model.graph.selectedCell.value}/${event.name}`};
+                            let id = mxImap.app.model.graph.selectedCell.id;
+                            let fs = {action: action, class: `/matrix/entity/${mxImap.app.model.graph.selectedCell.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${mxImap.app.model.graph.selectedCell.value}/${event.name}`};
                             let rtn = fsHandler.callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
-                            imap.app.reloadData();
+                            mxImap.app.reloadData();
                         },                     
                         openIt: function(item, path){
                             const self = this;
@@ -906,7 +906,7 @@ class Imap extends Matrix {
                     }
                 });
     
-                imap.app = new Vue({
+                mxImap.app = new Vue({
                     delimiters: ['${', '}'],
                     el: '#app',
                     template: '#app-template',
@@ -1180,10 +1180,10 @@ class Imap extends Matrix {
                                             if(_.includes(key,'diagnosis')){
                                                 self.config(node, objectHash.sha1(cell));
                                             } else if(_.includes(key,'spath')){
-                                                imap.app.$set(self.model.graph.paths.ports, 0, cell);
+                                                mxImap.app.$set(self.model.graph.paths.ports, 0, cell);
                                                 eventHub.$emit("ENTITY-PATHS-SEARCH-EVENT");
                                             } else if(_.includes(key,'epath')){
-                                                imap.app.$set(self.model.graph.paths.ports, 1, cell);
+                                                mxImap.app.$set(self.model.graph.paths.ports, 1, cell);
                                                 eventHub.$emit("ENTITY-PATHS-SEARCH-EVENT");
                                             }
 
@@ -1761,5 +1761,5 @@ class Imap extends Matrix {
     }
 }
 
-let imap = new Imap();
-imap.init();
+let mxImap = new Imap();
+mxImap.init();

@@ -2,49 +2,49 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.event-datatable-component,
-		.event-datatable-component .dataTables_wrapper{
+		.job-datatable-component,
+		.job-datatable-component .dataTables_wrapper{
 			width:100%;
 			height: 100%;
 			margin: 0 auto;
 		}
 
-		.event-datatable-component .dataTables_wrapper table.dataTable{
+		.job-datatable-component .dataTables_wrapper table.dataTable{
 			margin: 0!important
 		}
 
-		.event-datatable-component .dataTables_scrollHead{
+		.job-datatable-component .dataTables_scrollHead{
 			background: rgb(241, 241, 241);
 		}
 
-		.event-datatable-component thead tr th, .event-datatable-component tbody tr td{
+		.job-datatable-component thead tr th, .job-datatable-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
 		}
 
-		.event-datatable-component table.dataTable tbody>tr.selected,
-		/* .event-datatable-component table.dataTable tbody>tr.selected td, */
-		.event-datatable-component table.dataTable tbody>tr>.selected {
+		.job-datatable-component table.dataTable tbody>tr.selected,
+		/* .job-datatable-component table.dataTable tbody>tr.selected td, */
+		.job-datatable-component table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
         }
         
-        .event-datatable-component table.dataTable tbody>tr.selected-highlight,
-		.event-datatable-component table.dataTable tbody>tr>.selected-highlight {
+        .job-datatable-component table.dataTable tbody>tr.selected-highlight,
+		.job-datatable-component table.dataTable tbody>tr>.selected-highlight {
 			background: rgb(241, 241, 241)!important;
 		}
 
 		/* input高度*/
-		.event-datatable-component .dataTables_filter input{
+		.job-datatable-component .dataTables_filter input{
 			height: 24px;
 		}
 
-		.event-datatable-component tr{
+		.job-datatable-component tr{
 			animation-delay: .5s;
 		}
 
 		/* CSS to add checkboxes to colvis items */
-		.event-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
-		.event-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.job-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
+		.job-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			display:block;
 			position:absolute;
 			top:1.2em;
@@ -54,7 +54,7 @@
 			box-sizing:border-box;
 		}
 
-		.event-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
+		.job-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
 			content: '\25A1 ';
 			margin-top: -25px;
 			margin-left: -2px;
@@ -64,7 +64,7 @@
 			color: rgb(221,221,221);
 		}
 
-		.event-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.job-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			content: '\2713';
 			margin-top: -14px;
 			margin-left: 5px;
@@ -75,12 +75,12 @@
 			color: rgb(29, 28, 28);
 		}
 
-		.event-datatable-component .dt-button-collection a.buttons-columnVisibility span {
+		.job-datatable-component .dt-button-collection a.buttons-columnVisibility span {
 			margin-left: 25px;
 		}
 
 		/* columns选择 */
-		.event-datatable-component div.dt-button-collection {
+		.job-datatable-component div.dt-button-collection {
 			width: 50vw;
 			max-height: 50vh;
 			overflow: auto!important;
@@ -90,8 +90,8 @@
 			display: none!important;
 		}
 
-		.event-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
-		.event-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
+		.job-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
+		.job-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
 			background-color: #ffffff;
 			background-image:  none;
 			background-image: none;
@@ -177,33 +177,18 @@
             border: rgba(0, 0, 0, 0);
         }
 
-        .event-datatable-component div.dt-buttons {
+        .job-datatable-component div.dt-buttons {
             padding-bottom: 5px;
         }
 
-        .event-datatable-component .dataTables_filter{
+        .job-datatable-component .dataTables_filter{
             display: none;
-        }
-
-         /* ToolBar */
-         .event-datatable-component .dt-buttons{
-            width: 100%;
-        }
-        .event-datatable-component .dt-buttons > a{
-            margin:0px 5px;
-            color: #666666;
-        }
-
-        .event-datatable-component .dt-buttons > a:hover{
-            color: rgb(87, 163, 243);
-            border-color: rgb(87, 163, 243);
-            text-decoration: none;
         }
 
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="event-datatable-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="job-datatable-component"  ----------*/
 	<template>
 		<div>
 			<table :id="id" class="row-border hover" width="100%"></table>
@@ -211,7 +196,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="event-datatable-component">
+	<script id="job-datatable-component">
 	{
         delimiters: ['${', '}'],
 		props: {
@@ -351,11 +336,6 @@
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
                                         }
-                                    },
-                                    select: {
-                                        rows: {
-                                            _: "已拷贝 %d 项"
-                                        }
                                     }
 
                                 },
@@ -424,7 +404,7 @@
 			contextMenu: function(){
                 const self = this;
 
-                let contextMenuItems = fsHandler.callFsJScript('/performance/context-menu.js', '').message.performance;
+                let contextMenuItems = fsHandler.callFsJScript('/job/context-menu.js', '').message.job;
                 let id = self.id;
 
                 $.contextMenu({
@@ -613,14 +593,15 @@
                 });
 
                 // 更新Dom
-                if( $('.event-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $(`.event-datatable-component .dataTables_wrapper .dt-buttons`).replaceWith(datatable.buttons().containers());
-                } else {
-                    datatable.buttons().containers().prependTo( `.event-datatable-component .dataTables_wrapper` );
+                if( $('.job-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
+                    $('.job-datatable-component .dataTables_wrapper > .dt-buttons').empty();
                 }
+                datatable.buttons().containers().prependTo( `.job-datatable-component .dataTables_wrapper` );
 
                 // button样式调整
-                $(".event-datatable-component a.dt-button").removeClass("dt-button");
+                $(".job-datatable-component a.dt-button").removeClass("dt-button");
+                // tooltip
+                $(".job-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
 
 			},
             // Class分组menu

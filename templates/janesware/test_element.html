@@ -85,7 +85,7 @@
         console.log(tab, event);
       }
     },
-    template: `<div id="content" class="content">
+    template: `<main id="content" class="content">
 	<el-container>
 	<el-aside width="20%" style="background-color: rgb(238, 241, 246)">
 			<el-menu :default-openeds="['1', '3']">
@@ -159,7 +159,7 @@
     <el-footer>Footer</el-footer>
   </el-container>
 </el-container>
-</div>`
+</main>`
   };
   var Ctor = Vue.extend(Main);
   new Ctor().$mount("#app");

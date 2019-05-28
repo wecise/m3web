@@ -208,7 +208,6 @@
             init: function(){
                 const self = this;
                 
-                console.log(1,moment().format("YYYY-MM-DD HH:m.s"))
                 let dataset = self.dataset;
 
                 let cols = mx.sanitizeColumns(_.uniqBy(self._columns,'data'),'data');
@@ -325,8 +324,6 @@
                                     ]
 			                    },
                     },self.options)).columns.adjust().draw();
-
-                    console.log(2,moment().format("YYYY-MM-DD HH:m.s"))
 
                 $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", window.layout_container_bottomHeight - 192).css("min-height", window.layout_container_bottomHeight - 192);
 

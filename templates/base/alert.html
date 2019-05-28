@@ -1,15 +1,9 @@
 {{if .Flash.ErrorMsg}}
-	<div class="alert alert-danger" role="alert">
-		<p>{{.Flash.ErrorMsg}}</p>
-	</div>
+	<el-alert title="{{.Flash.ErrorMsg}}" type="error"></el-alert>
 {{end}}
 {{if .Flash.SuccessMsg}}
-	<div class="alert alert-success" role="alert">
-		<p>{{.Flash.SuccessMsg}}</p>
-	</div>
+	<el-alert title="{{.Flash.SuccessMsg}}" type="success"></el-alert>
 {{end}}
 {{if .Flash.InfoMsg}}
-	<div class="alert alert-info" role="alert">
-		<p>{{.Flash.InfoMsg}}</p>
-	</div>
+	<el-alert title="{{.Flash.InfoMsg}}" type="info"></el-alert>
 {{end}}

@@ -11,18 +11,17 @@
       <meta name="_suburl" content="{{AppSubUrl}}" />
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link rel="shortcut icon" href="" id="favicon"/>
+      <!--VUE Core JS-->
+	   <script src="{{AppSubUrl}}/web/vendor/vue/2.6.8/dist/vue.min.js"></script>
       <!--Jquery JS-->
       <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-3.3.1.min.js"></script>
       <!-- font-awesome  CSS -->
       <link href="{{AppSubUrl}}/web/vendor/font-awesome/5.4.1/css/all.min.css" rel="stylesheet" >
 
-      <!-- Bootstrap core CSS -->
-      <link href="{{AppSubUrl}}/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
-      <link href="{{AppSubUrl}}/web/css/dist/css/theme_wecise.css" rel="stylesheet">
-      <script src="{{AppSubUrl}}/web/css/dist/js/bootstrap.min.js"></script>
+      <!-- Element -->
+      <script src="{{AppSubUrl}}/web/vendor/element/2.6.1/dist/index.js"></script>
+      <link href="{{AppSubUrl}}/web/vendor/element/2.6.1/dist/theme-dark/index.css" type="text/css" rel="stylesheet" />
 
-        <!-- Color Theme core CSS -->
-        <link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">
 
       <title> {{.SignedUser.Company.Fullname}}</title>
       <style>
@@ -32,33 +31,28 @@
             background-size:cover;
             overflow:hidden;
          }
-         .btn-primary {
-            color: #fff;
-            background-color: #03a9f4;
-            border-color: #03a9f4;
-            padding: 6px 24px;
-            border-radius: 2px;
+         .logo{
+             padding: 1rem;
          }
-         .btn-primary.focus, .btn-primary:hover {
-            color: #fff;
-            background-color: #03a9f4;
-            border-color: #03a9f4;
+         .logo > img{
+            max-width: 125px;
+            width: 100%;
          }
-         .btn-primary.focus, .btn-primary:focus {
-            color: #fff;
-            background-color: #03a9f4;
-            border-color: #03a9f4;
+         .logo h4 {
+            color: #999999;
+            font-size:16px;
+            margin: 0 10px;
          }
-         .btn-primary.focus, .btn-primary:active {
-            color: #fff;
-            background-color: #03a9f4;
-            border-color: #03a9f4;
+
+         .el-form-item {
+            padding: 0 20px;
          }
-         .checkbox label, .radio label, label, .form-group>a{
-            font-weight: 300;
-            color: #4285f4;
+         .el-form-item label,
+         .el-form-item input{
+            font-size: 12px;
          }
-         .form-control {
+
+         .el-from-item input{
             background-color: transparent!important;
             border-top: 1px solid transparent!important;
             border-right: 1px solid transparent!important;
@@ -78,110 +72,100 @@
             border-color: transparent;
             box-shadow: 0 0px 0px rgba(0, 0, 0, 0.075) inset, 0 0 0px rgba(126, 239, 104, 0.6);
             outline: 0 none;
+            border-bottom: 1px solid rgb(221, 221, 221);
+            border-radius: 0px;
          }
-         .login{
-            background-color: rgb(255, 255, 255)!important;
-            box-shadow: 1px 1px 1px 1px #ddd;
-         }
-         .login.login-v2{
-            margin: 68px auto;
-         }
-         .login-brand >  .logo {
-            padding: 20px 0px 0px 30px;
-         }
-         .login-brand >  .logo > img{
-            width: 125px;
-         }
-         .login-brand >  .title > h4 {
-            padding: 0px 20px 10px 40px;
-            color: #999999;
-            font-size:16px;
-         }
-         .login.login-v2 label {
-             color: rgb(153, 153, 153);
-         }
-         .login.login-v2 .form-control {
-             color: #333333;
-         }
+         
       </style>
    </head>
    <body>
+
       <noscript>Please enable JavaScript in your browser!</noscript>
-      <div class="pager-container">
-         <div class="login login-v2 animated fadeIn">
-            {{.CsrfTokenHtml}}
-            <div class="login-brand">
-               <div class="logo">
-                  <img src="" alt="Image">
-               </div>
-               <div class="title">
-                  <h4>{{.title}}</h4>
-               </div>
-            </div>
-            <div class="login-content">
-               <form action="{{.Link}}" method="post" autocomplete="off">
-                  {{template "base/alert" .}}
-                  <div class="form-group" style="display:none;">
-                     <label for="company">{{.i18n.Tr "home.company_name_holder"}}</label>
-                     <input id="company" name="company" class="form-control" value="{{.company}}" required placeholder="{{.i18n.Tr "home.company_name_holder"}}" autocomplete="on">
-                  </div>
-                  <div class="form-group {{if .Err_UserName}}error{{end}}">
-                     <label for="user_name">{{.i18n.Tr "home.uname_holder"}}</label>
-                     <input id="user_name" name="user_name" class="form-control" value="{{.user_name}}" autofocus required placeholder="{{.i18n.Tr "home.uname_holder"}}">
-                  </div>
-                  <div class="form-group {{if .Err_Password}}error{{end}}">
-                     <label for="password">{{.i18n.Tr "password"}}</label>
-                     <input id="password" name="password" class="form-control" type="password" value="{{.password}}" required>
-                  </div>
-                  <div class="form-group">
-                     <div class="checkbox">
-                        <label>
-                        <input name="remember" type="checkbox"> {{.i18n.Tr "auth.remember_me"}}
-                        </label>
-                     </div>
-                  </div>
-                  <div class="form-group" style="text-align:right;">
-                     <button class="btn btn-primary">{{.i18n.Tr "sign_in"}}</button>
-                  </div>
-                  <div class="form-group" style="display:none;">
-                     {{if .ShowRegistrationButton}}
-                     <a href="{{AppSubUrl}}/user/sign_up">{{.i18n.Tr "auth.sign_up_now" | Str2html}}</a>
-                     {{end}}
-                  </div>
-               </form>
-            </div>
-         </div>
-      </div>
+      <div id="app"></div>
+      {{template "base/footer" .}}
+      
       <script>
+
          $(function() {
-            try{
-               let _logo = {{.logo}};
-               _logo = _logo.replace(/"/g,"");
-               $("img").attr("src",_logo);
 
-               let _company = '{{.company}}';
-               _company = _company.replace(/"/g,"");
+            Vue.prototype.$ELEMENT = { size: 'small'};
+            
+            new Vue({
+               delimiters: ['${', '}'],
+               template: "#app-template",
+               data: {
+                  logo: "",
+                  company: "",
+                  username: "",
+                  password: "",
+                  remember: false
+               },
+               created(){
+                  this.logo = '{{.logo}}'.replace(/"/g,"");
+                  this.company = '{{.company}}'.replace(/"/g,"");
+                  this.username = '{{.user_name}}'.replace(/"/g,"");
+                  this.password = '{{.password}}'.replace(/"/g,"");
+               },
+               mounted(){
+                  if(this.company=='nxgd'){
+                     $(".el-header",this.$el).css({
+                        "background-color":"#007a77",
+                        "color":"#ffffff"
+                     });
+                     $("h4",this.$el).css({
+                        "color":"#ffffff"
+                     });
+                     $("button",this.$el).css({
+                        "background-color":"#007a77"
+                     });
+                  }
 
-               if(_company=='nxgd'){
-                  $(".login-brand").css({
-                     "background-color":"#007a77",
-                     "color":"#ffffff"
-                  });
-                  $(".login-brand > .title > h4").css({
-                     "color":"#ffffff"
-                  });
-                  $(".btn.btn-primary").css({
-                     "background-color":"#007a77"
-                  });
+                  $("button",this.$el).attr("type","submit");
                }
-            } catch(err){
-
-            }
+            }).$mount("#app");
          });
 
       </script>
-      {{/*
+
+      <script type="text/x-template" id="app-template">
+         <el-row :gutter="20">
+            <el-col :span="9" :offset="8">
+               <div class="grid-content bg-purple">
+                  <el-container style="background:#ffffff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);margin-top:3rem;">
+                     <el-header style="height:auto;">
+                        {{.CsrfTokenHtml}}
+                        <div class="logo">
+                           <img :src="logo" alt="Image">
+                           <p>
+                              <h4>{{.title}}</h4>
+                           </p>
+                        </div>
+                     </el-header>
+                     <el-main>
+                        <el-form  action="{{.Link}}" method="post" ref="form">
+                           {{template "base/alert" .}}
+                           <el-form-item label="{{.i18n.Tr "home.company_name_holder"}}" style="display:none;">
+                              <el-input name="company" v-model="company" required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>
+                           </el-form-item>
+                           <el-form-item label="{{.i18n.Tr "home.uname_holder"}}" class="form-group {{if .Err_UserName}}error{{end}}">
+                              <el-input name="user_name" v-model="username" autofocus required placeholder="{{.i18n.Tr "home.uname_holder"}}"></el-input>
+                           </el-form-item>
+                           <el-form-item label="{{.i18n.Tr "password"}}" class="form-group {{if .Err_Password}}error{{end}}">
+                              <el-input name="password" type="password" v-model="password" required></el-input>
+                           </el-form-item>
+                           <el-form-item label="{{.i18n.Tr "auth.remember_me"}}">
+                              <el-checkbox v-model="remember"></el-checkbox>
+                           </el-form-item>
+                           <el-form-item>
+                              <el-button type="primary" style="float:right;">{{.i18n.Tr "sign_in"}}</el-button>
+                           </el-form-item>
+                        </el-form>
+                     </el-main>
+                  </el-container>
+               </div>
+            </el-col>
+         </el-row>
+      </script>
+      
    </body>
 </html>
-*/}}
-{{template "base/footer" .}}

@@ -509,7 +509,7 @@ class Omdb{
                 let _node = {};
 
                 if(!_.isEmpty(node)) {
-                    _dataset = node.data[_.keys(node.columns)[0]];
+                    _dataset = node.data;//[_.keys(node.columns)[0]];
                     _columns = node.columns[_.keys(node.columns)[0]];
                     _node = node;
                 }
@@ -558,7 +558,7 @@ class Omdb{
                             const self = this;
 
                             if(!_.isEmpty(node)) {
-                                self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
+                                self.model.dataset = self.result.data;//[_.keys(self.result.columns)[0]];
                                 self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
                             } else {
                                 self.model.dataset = [];
@@ -569,7 +569,7 @@ class Omdb{
                         setData(event){
                             const self = this;
 
-                            self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
+                            self.model.dataset = event.data;//[_.keys(event.columns)[0]] || [];
                             self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
                             self.result = event;
 
@@ -1213,61 +1213,18 @@ class Omdb{
                         },
                         addStackFromTree( event ) {
                             const self = this;
+
+                            try{
+                                let _bid = `batch_${_.now()}`;
     
-                            let _bid = `batch_${_.now()}`;
-    
-                            let newItemConfig = {
-                                type: 'column',
-                                title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                                content:[{
-                                    type: 'component',
-                                    height:50,
-                                    title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                                    id: 'layout_search_no_header',
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_query_${_.now()}`,
-                                        bid: _bid,
-                                        type: event.type,
-                                        model: event.model
-                                    }
-                                },{
-                                    type: 'stack',
-                                    height:50,
-                                    activeItemIndex: 1,
-                                    content: [{
-                                        type: 'component',
-                                        title: `<i class="fas fa-newspaper"></i> 日志`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_log_${_.now()}`,
-                                            bid: _bid,
-                                            type: 'log-console',
-                                            model: null
-                                        }
-                                    },{
-                                        type: 'component',
-                                        title: `<i class="fas fa-list-alt"></i> 结果`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_output_${_.now()}`,
-                                            bid: _bid,
-                                            type: 'output-console',
-                                            model: null
-                                        }
-                                    }]
-                                }]
-                            };
-    
-                            if(_.includes(['trigger-console','class-edit'],event.type)){
-                                newItemConfig = {
+                                let newItemConfig = {
                                     type: 'column',
-                                    title: `<i class="fas fa-table"></i> ${event.title}`,
+                                    title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
                                     content:[{
                                         type: 'component',
-                                        title: event.title,
+                                        height:50,
+                                        title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
                                         id: 'layout_search_no_header',
-                                        height:55,
                                         componentName: 'omdbComponent',
                                         componentState: {
                                             id: `div_query_${_.now()}`,
@@ -1277,7 +1234,8 @@ class Omdb{
                                         }
                                     },{
                                         type: 'stack',
-                                        height:45,
+                                        height:50,
+                                        activeItemIndex: 1,
                                         content: [{
                                             type: 'component',
                                             title: `<i class="fas fa-newspaper"></i> 日志`,
@@ -1288,95 +1246,148 @@ class Omdb{
                                                 type: 'log-console',
                                                 model: null
                                             }
+                                        },{
+                                            type: 'component',
+                                            title: `<i class="fas fa-list-alt"></i> 结果`,
+                                            componentName: 'omdbComponent',
+                                            componentState: {
+                                                id: `div_output_${_.now()}`,
+                                                bid: _bid,
+                                                type: 'output-console',
+                                                model: null
+                                            }
                                         }]
                                     }]
                                 };
+        
+                                if(_.includes(['trigger-console','class-edit'],event.type)){
+                                    newItemConfig = {
+                                        type: 'column',
+                                        title: `<i class="fas fa-table"></i> ${event.title}`,
+                                        content:[{
+                                            type: 'component',
+                                            title: event.title,
+                                            id: 'layout_search_no_header',
+                                            height:55,
+                                            componentName: 'omdbComponent',
+                                            componentState: {
+                                                id: `div_query_${_.now()}`,
+                                                bid: _bid,
+                                                type: event.type,
+                                                model: event.model
+                                            }
+                                        },{
+                                            type: 'stack',
+                                            height:45,
+                                            content: [{
+                                                type: 'component',
+                                                title: `<i class="fas fa-newspaper"></i> 日志`,
+                                                componentName: 'omdbComponent',
+                                                componentState: {
+                                                    id: `div_log_${_.now()}`,
+                                                    bid: _bid,
+                                                    type: 'log-console',
+                                                    model: null
+                                                }
+                                            }]
+                                        }]
+                                    };
+                                }
+        
+                                if(_.size($(`li[title="${event.title}"]`)) > 0 ){
+                                    //return false;
+                                }
+        
+                                self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
+
+                            } catch(err){
+
                             }
-    
-                            if(_.size($(`li[title="${event.title}"]`)) > 0 ){
-                                //return false;
-                            }
-    
-                            self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
     
                         },
                         addStackFromQuery( event ) {
                             const self = this;
-    
-                            let _bid = `batch_${_.now()}`;
-    
-                            if(event.type == "table-update"){
-                                let newItemConfig =  {
-                                    type: 'component',
-                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_output_${_.now()}`,
-                                        bid: event.bid,
-                                        type: 'output-console',
-                                        model: event.model
-                                    }
-                                };
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                            }
+                            
+                            try {
 
-                            if(event.type == "json-update"){
-                                let newItemConfig =  {
-                                    type: 'component',
-                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_output_${_.now()}`,
-                                        bid: event.bid,
-                                        type: 'output-json-console',
-                                        model: event.model
-                                    }
-                                };
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                            }
+                                let _bid = `batch_${_.now()}`;
     
-                            if(event.type == "graph-update"){
-    
-                                let newItemConfig =  {
-                                    type: 'component',
-                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_output_${_.now()}`,
-                                        bid: event.bid,
-                                        type: 'graph',
-                                        model: event.data
-                                    }
-                                };
-    
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-    
-                            }
-    
-                            if(event.type == "text-console"){
-    
-                                let newItemConfig =  {
-                                    type: 'component',
-                                    title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                    componentName: 'omdbComponent',
-                                    componentState: {
-                                        id: `div_output_${_.now()}`,
-                                        bid: event.bid,
-                                        type: 'text-console',
-                                        model: event.data
-                                    }
-                                };
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                            }
-    
-                            _.delay(function(){
-                                eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                                eventHub.$emit(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                            },500)
+                                if(event.type == "table-update"){
+                                    let newItemConfig =  {
+                                        type: 'component',
+                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_output_${_.now()}`,
+                                            bid: event.bid,
+                                            type: 'output-console',
+                                            model: event.model
+                                        }
+                                    };
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                                }
+
+                                if(event.type == "json-update"){
+                                    let newItemConfig =  {
+                                        type: 'component',
+                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_output_${_.now()}`,
+                                            bid: event.bid,
+                                            type: 'output-json-console',
+                                            model: event.model
+                                        }
+                                    };
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                                }
+        
+                                if(event.type == "graph-update"){
+        
+                                    let newItemConfig =  {
+                                        type: 'component',
+                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_output_${_.now()}`,
+                                            bid: event.bid,
+                                            type: 'graph',
+                                            model: event.data
+                                        }
+                                    };
+        
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+        
+                                }
+        
+                                if(event.type == "text-console"){
+        
+                                    let newItemConfig =  {
+                                        type: 'component',
+                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
+                                        componentName: 'omdbComponent',
+                                        componentState: {
+                                            id: `div_output_${_.now()}`,
+                                            bid: event.bid,
+                                            type: 'text-console',
+                                            model: event.data
+                                        }
+                                    };
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
+                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
+                                }
+        
+                                _.delay(function(){
+                                    eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
+                                    eventHub.$emit(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${event.bid}`, event);
+                                },500)
+
+                            } catch (err){
+
+                            } 
     
                         }
                     }

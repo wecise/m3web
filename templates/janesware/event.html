@@ -22,9 +22,23 @@
 -->
 {{template "base/head" .}}
 
+<!--MXClient JS & CSS-->
+<script>
+	mxBasePath = '{{AppSubUrl}}/web/creative/src';
+	mxLanguage = window.MATRIX_LANG.replace(/en/g,"eg").split("-")[0];
+</script>
+
+<script src="{{AppSubUrl}}/web/creative/src/js/mxClient.js" type="text/javascript"></script>
+<link href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+
+<script>
+    mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
+</script>
+
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 
 <style>
 
@@ -253,6 +267,17 @@
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
+
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
@@ -267,13 +292,17 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-path-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
+
+<script src="{{AppSubUrl}}/web/js/model/Topological.js"></script>
+
 <script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
-
 <script type="text/x-template" id="app-template">
-	<div id="content" class="content">
+	<main id="content" class="content">
 		<el-row :gutter="10">
 			<el-col :xl="24" style="padding-bottom:7px;">
 				<search-base-component :id="model.id"
@@ -375,8 +404,8 @@
 									<div v-else-if="it.type==='performance'">
 										<event-diagnosis-performance :id="it.name + '-performance'" :model="it.model.performance"></event-diagnosis-performance>
 									</div>
-									<div v-else>
-										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
+									<div v-else-if="it.type==='topological'">
+										<event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
 									</div>
 								</el-tab-pane>
 							</el-tabs>
@@ -388,7 +417,7 @@
 				</el-tabs>
 			</el-col>
 		</el-row>
-	</div>
+	</main>
 </script>
 
 {{template "base/footer" .}}

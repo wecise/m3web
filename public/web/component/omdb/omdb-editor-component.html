@@ -480,7 +480,8 @@
                 }
                 // 正常Table显示 
                 else {
-                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
+                    //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
                 }
                 
                 // 初始化生成table

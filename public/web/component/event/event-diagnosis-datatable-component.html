@@ -146,7 +146,7 @@
 	/*----------  最外层element会自动增加组件同名 class="event-diagnosis-datatable-component"  ----------*/
 	<template>
 		<div>
-			<table :id="id" class="stripe row-border order-column" width="100%"></table>
+			<table :id="id" class="row-border hover" width="100%"></table>
 		</div>
 	</template>
 
@@ -156,16 +156,18 @@
         delimiters: ['${', '}'],
 		props: {
         	id: String,
-			model: Object
+			model: Object,
+			type: String
 		},
-		data: function(){
+		data(){
           	return {
                 datatable: null,
                 selectedRows: [],
-	            model: {}
+	            model: {},
+				selectedRows: []
 			}
 		},
-		mounted: function () {
+		mounted () {
             const self = this;
 
             self.$nextTick(function () {
@@ -201,15 +203,12 @@
             }
 		},
 		methods: {
-            init: function(){
+            init(){
 				const self = this;
 				
 				if(!self.model.rows) return false;
 				if(!self.model.columns) return false;
 
-                // 自定义checkbox、序号
-                //self.model.columns.unshift( { title: "", visible: true, sortable: false } );
-                //self.model.columns.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true } } );
 				let cols = _.uniqBy(self.model.columns,'data');
 				
 				if(self.model.template.length){
@@ -271,39 +270,46 @@
                                             _: '已拷贝 %d 项',
                                             1: '1 已拷贝'
                                         }
+                                    },
+                                    select: {
+                                        rows: {
+                                            _: "已拷贝 %d 项"
+                                        }
                                     }
 
                                 },
 			                    initComplete: function(){
-				                    //self.serial();
-	                                //self.toolBar();
-	                                self.contextMenu();
-									self.selectRows();
+				                    
+									// 注册Row事件
+                                    self.handleRow();
+
+	                                // 注册右键菜单
+                                    event.contextMenu(self.id, self, event.app.data.model.message.contextMenu[self.type], self.$root, self.refresh);
+									
 									self.resize();
 			                    }
                 },self.model.options)).columns.adjust().draw();
 
 			},
-            serial:function(){
-                let datatable = $("#"+this.id).DataTable();
-                datatable.on( 'order.dt search.dt', function () {
-                    datatable.column(1, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-                        cell.innerHTML = i+1;
-                    } );
-                } ).draw();
-			},
-			selectRows: function(){
-                const self = this;
-				let table = $("#"+self.id).DataTable();
-				
-				table.on( 'select', function ( e, dt, type, indexes ) {
-					self.selectedRows = table.rows( '.selected' ).data().toArray();
-				} ).on( 'deselect', function ( e, dt, type, indexes ) {
-					self.selectedRows = table.rows( '.selected' ).data().toArray();
-				} );
-			},
 			refresh: function(){
 				this.model = fsHandler.callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
+			},
+			handleRow: function(){
+                const self = this;
+
+                let table = $("#"+self.id).DataTable();
+               
+                table.on('dblclick','tr',function(e) {
+                    self.selectedRows = table.row( this ).data();
+                    self.$root.detailAdd(self.selectedRows);
+                })
+
+                table.on('mouseenter','tr',function(e) {
+                    self.selectedRows = table.row( this ).data();
+                    $(`#${self.id} tbody tr`).removeClass("selected-highlight");
+                    $(this).addClass("selected-highlight");
+                })
+
 			},
 			detail: function(){
                 this.$root.detail(this.selectedRows);
@@ -311,91 +317,6 @@
 			resize(){
 				let parentHeight = $(this.$el).closest("section").height() - 120;
 				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
-			},
-            contextMenu: function(){
-                const self = this;
-
-                let items = self.model.contextMenu;
-                let id = self.id;
-
-                $.contextMenu({
-                    selector: `#${id} tr td:not(:nth-child(1))`,
-                    trigger: 'left',
-                    delay: 10,
-                    hideOnSecondTrigger: true,
-                    className: `animated slideIn ${id}`,
-                    build: function($trigger, e) {
-
-                        return {
-                            callback: function(key, opt) {
-                                if(key === 'detail') {
-                                    self.detail();
-                                }
-                            },
-                            items: items,
-                        }
-                    },
-                    events: {
-                        show: function(opt) {
-
-                            let $this = this;
-
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows[0], self.refresh));
-                        },
-                        hide: function(opt) {
-
-                            let $this = this;
-
-                        }
-                    }
-                });
-            },
-			toolBar: function(){
-                const self = this;
-
-                // 创建工具栏
-                let datatable = $("#"+this.id).DataTable();
-
-				let buttons = [
-				                    {
-				                        extend: 'colvis',
-				                        text: '<i class="fas fa-list"></i>',
-				                        collectionLayout: 'fixed four-column',
-				                        className: 'btn-white',
-				                        fade: true,
-                                        titleAttr: '选择属性'
-
-				                    },
-				                    {
-				                        extend: 'csv',
-				                        text: '<i class="fas fa-download"></i>',
-				                        className: 'btn-white',
-				                        titleAttr: '导出csv格式'
-
-				                    }
-				                ];
-
-                new $.fn.dataTable.Buttons(datatable, {
-                    dom: {
-                        button: {
-                            tag: 'a',
-                            className: 'btn btn-xs animated fadeInLeft'
-                        }
-                    },
-                    buttons: buttons
-                });
-
-                // 更新Dom
-                if( $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').empty();
-                }
-                datatable.buttons().containers().prependTo( `.event-diagnosis-datatable-component .dataTables_wrapper` );
-
-                // button样式调整
-                $(".event-diagnosis-datatable-component a.dt-button").removeClass("dt-button");
-                // tooltip
-                $(".event-diagnosis-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
-
 			}
 		}
 	

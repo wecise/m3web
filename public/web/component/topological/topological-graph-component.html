@@ -5,12 +5,6 @@
         .topological-graph-component{
             height: 100%;
         }
-		.topological-graph-component .container{
-			width: 100%!important;
-			height: calc(100vh - 225px)!important;
-            overflow:auto;
-            top: 40px;
-		}
 
 		.topological-graph-component .outlineContainer {
 			z-index:1;
@@ -25,34 +19,13 @@
 			border: 1px solid rgb(42, 147, 249);
 		}
 
-		.topological-graph-component .tools {
-			z-index: 100;
-			position: absolute;
-			overflow: hidden;
-			top: 0px;
-			left: 0px;
-			width: 45%;
-			height: 36px;
-			padding: 2px 4px;
-		}
-
-		.topological-graph-component .tools > img {
-			width:18px;
-			height:18px;
-			margin: 0px 5px;
-            filter: opacity(1) invert(0.5);
-		}
+		
 
         .topological-graph-component .form-control-transparent{
             border-bottom: unset;
         }
 
-        .topological-graph-component .tools-search {
-			width:50%;
-            float:right;
-            margin-right:10px;
-            border: 1px solid rgb(58, 96, 153);
-		}
+        
 
         .topological-graph-component .tools-search .form-control,
         .topological-graph-component .tools-search .text-muted {
@@ -66,11 +39,40 @@
 		}
 
 		.topological-graph-component .nav{
-			background: transparent;
-			margin: 0 -10px;
-			position: relative;
+			background: rgb(255, 255, 255);
+            position: relative;
+            top: 0;
+            left: 0;
+            height: 32px;
+            line-height: 32px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .topological-graph-component .tools {
+			z-index: 100;
+            position: absolute;
+            overflow: hidden;
+            top: 0px;
+            left: 0px;
+            width: 45%;
+            height: 100%;
 		}
 
+		.topological-graph-component .tools > img {
+			width:18px;
+			height:18px;
+			margin: 0px 5px;
+            filter: opacity(1) invert(0.5);
+		}
+
+        .topological-graph-component .tools-search {
+			width: 50%;
+            float: right;
+            height: 100%;
+            line-height: 30px;
+            border: 1px solid rgb(255, 255, 255);
+            background: transparent;
+		}
 
 	</style>
 
@@ -78,7 +80,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<div :id="id">
-			<div :id="id+'-container'" class="container"></div>
+			<div :id="id+'-container'"></div>
 			<div :id="id+'-nav'" class="nav">
                 <div :id="id+'-tools'" class="tools"></div>
                 <div class="tools-search"><div :id="id+'-tools-search'"></div></div>
@@ -102,6 +104,7 @@
                         container: null,
                         model: null,
                         graph: null,
+                        selectedCell: null,
 	                    layout: {
                             default: null,
                             hierarchical:null,
@@ -183,16 +186,16 @@
 
                     // self.model.graph.model = new mxGraphModel(self.model.graph.layers.root);
                     self.model.graph.graph = new mxGraph(self.model.graph.container);
-                    self.model.graph.graph.resizeContainer = true;
+                    //self.model.graph.graph.resizeContainer = true;
 
                     // Enables automatic sizing for vertices after editing and
                     // panning by using the left mouse button.
                     // self.model.graph.graph.setEnabled(false);
-                    // self.model.graph.graph.setCellsMovable(true);
+                    self.model.graph.graph.setCellsMovable(true);
                     self.model.graph.graph.setAutoSizeCells(true);
                     self.model.graph.graph.setPanning(true);
-                    // self.model.graph.graph.centerZoom = true;
-                    // self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                    self.model.graph.graph.centerZoom = true;
+                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
                     // // Disables tooltips on touch devices
                     self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
                     self.model.graph.graph.htmlLabels = true;
@@ -236,8 +239,8 @@
                     // Creates a layout algorithm to be used with the graph
                     self.model.graph.layout.hierarchical = new mxHierarchicalLayout(self.model.graph.graph);
                     // self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
-                    // self.model.graph.layout.default = self.model.graph.layout.hierarchical;
-
+                    self.model.graph.layout.default = self.model.graph.layout.hierarchical;
+/*
                     let layout = new mxStackLayout(self.model.graph.graph);
                     layout.border = self.model.graph.graph.border;
                     var layoutMgr = new mxLayoutManager(self.model.graph.graph);
@@ -259,7 +262,7 @@
                         
                         return null;
                     };
-
+*/
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
 
                     self.initGraph();
@@ -302,6 +305,7 @@
                 const self = this;
 
                 // Extends mxGraphModel.getStyle to show an image when collapsed
+                /*
                 var modelGetStyle = self.model.graph.graph.model.getStyle;
                 self.model.graph.graph.model.getStyle = function(cell){
                     if (cell != null){
@@ -313,6 +317,7 @@
                     }
                     return null;
                 };
+                */
 
                 self.model.graph.graph.getModel().beginUpdate();
 
@@ -355,6 +360,7 @@
                     })
 
                     // 创建组
+                    /*
                     let groups = _.groupBy(self.graphData.nodes,'_icon');
                     if(groups){
                         _.forEach(groups,function(v,k){
@@ -379,16 +385,17 @@
                             self.model.graph.graph.groupCells(cell,0,nodesList[k]);
                         })
                     }
+                    */
 
                     // Executes the layout
-                    //self.model.graph.layout.hierarchical.execute(self.model.graph.parent);
+                    self.model.graph.layout.hierarchical.execute(self.model.graph.parent);
                     
                 }
                 finally
                 {
                     self.model.graph.graph.getModel().endUpdate();
 
-                    self.toCenter();
+                    //self.toCenter();
                     
                 }
             },
@@ -397,7 +404,7 @@
 
                 this.outline();
                 this.toolBars();
-                new Vue(topological.searchBar()).$mount(`#${this.id}-tools-search`);
+                new Vue(mxTopological.searchBar()).$mount(`#${this.id}-tools-search`);
 
             },
             reload(){
@@ -417,8 +424,11 @@
 
                     let id = cell.getId();
                     let value = cell.getValue();
+
+                    mxTopological.graphSelectedCell = cell;
+
                     // 点击获取关联信息
-                    topological.association({id:id,value:value,type:'event'});
+                    mxTopological.diagnosis({id:id,value:value,type:'event'});
                 })
 
                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
@@ -430,54 +440,38 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    let state = self.model.graph.graph.view.getState(cell);
-                    let nodeDic = _.groupBy(self.graphData.nodes,'id');
+                    mxTopological.graphSelectedCell = cell;
 
-                    state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
-                    state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic[id]));
-                    
                     // copy to copyboard
                     let clipboard2 = new Clipboard('g image',{
                         text: function(trigger) {
-
-                            $.contextMenu({
-                                selector: `.${id.replace(/:/g,"_")}`,
-                                trigger: 'right',
-                                delay: 10,
-                                hideOnSecondTrigger: true,
-                                className: `animated slideIn node-menu`,
-                                build: function($trigger, e) {
-
-                                    let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
-                                    let items = {};
-                                    let menu = fsHandler.callFsJScript('/graph/contextmenu.js', null).message;
-                                    _.forEach(menu,function(v){
-                                        return _.merge(items, v);
-                                    })
-                                    
-                                    return {
-                                        callback: function(key, opt) {
-                                            // 点击获取关联信息
-                                            topological.association({id:id,value:value,type:key});
-                                        },
-                                        items:items
-                                    }
-                                },
-                                events: {
-                                    show: function(opt) {
-                                        let $this = this;
-                                    },
-                                    hide: function(opt) {
-                                        let $this = this;
-                                        $(".context-menu-list animated slideIn").remove();
-                                    }
-                                }
-                            });
-
                             return id;
                         }
                     });
-                    //self.tip(`ID：${id} 已复制到剪切板！`);
+
+					if (cell != null)
+					{
+						var overlays = self.model.graph.graph.getCellOverlays(cell);
+						
+						if (overlays == null)
+						{
+							// Creates a new overlay with an image and a tooltip
+							var overlay = new mxCellOverlay(new mxImage('/fs/assets/images/files/png/check.png?type=open&issys=true', 16, 16),'Overlay tooltip');
+
+							// Installs a handler for clicks on the overlay							
+							overlay.addListener(mxEvent.CLICK, function(sender, evt2)
+							{
+								
+							});
+							
+							// Sets the overlay for the cell in the graph
+							self.model.graph.graph.addCellOverlay(cell, overlay);
+						}
+						else
+						{
+							self.model.graph.graph.removeCellOverlays(cell);
+						}
+					}
 
                 });
             },
@@ -529,7 +523,6 @@
                 let self = this;
 
                 let content = document.getElementById(`${self.id}-tools`);
-                content.style.padding = '4px';
 
                 let tb = new mxToolbar(content);
 
@@ -608,7 +601,7 @@
                 
                 tb.addItem('主题', `${window.ASSETS_ICON}/tools/png/theme.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-                    topological.toggleTheme();
+                    mxTopological.toggleTheme();
 
                 },null,'tools-item');
 
@@ -657,7 +650,7 @@
                     dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
                 })
                 let node = { data: _.groupBy(dataset,'class'), columns: cols};
-                let path = topological.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
+                let path = mxTopological.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
                 new Vue(path);
             },
             addPath(event){

@@ -345,14 +345,15 @@
 
                                 },
 			                    initComplete: function(){
-                                    // Row序号
-                                    //self.serial();
                                     
                                     // 注册Row事件
                                     self.handleRow();
 
                                     self.toolBar();
-	                                self.contextMenu();
+	                                
+                                    
+                                    // 注册右键菜单
+                                    maxLog.contextMenu(self.id, self, self.model.contextMenu.log, self.$root, self.refresh);
                                     
                                     
                                     self.dragHandle();
@@ -365,14 +366,6 @@
             filterColumn(event) {
                 $("#"+this.id).DataTable().columns( '.search-filter' ).search(event.name).draw();
             },
-            serial:function(){
-                let datatable = $("#"+this.id).DataTable();
-                datatable.on( 'order.dt search.dt', function () {
-                    datatable.column(1, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-                        cell.innerHTML = i+1;
-                    } );
-                } ).draw();
-			},
 			handleRow: function(){
                 const self = this;
 
@@ -397,45 +390,6 @@
 			refresh: function(){
                 this.$root.$refs.searchRef.search();
 			},
-			contextMenu: function(){
-                const self = this;
-
-                let contextMenuItems = fsHandler.callFsJScript('/log/context-menu.js', '').message.log;
-                let id = self.id;
-
-                $.contextMenu({
-                    selector: `#${id} tr td:not(:nth-child(1))`,
-                    trigger: 'right',
-                    autoHide: true,
-                    delay: 5,
-                    hideOnSecondTrigger: true,
-                    className: `animated slideIn ${id}`,
-                    build: function($trigger, e) {
-
-                        return {
-                            callback: function(key, opt) {
-                                if(_.endsWith(key,'diagnosis')) {
-                                    self.$root.detailAdd(self.selectedRows);
-                                }
-                            },
-                            items: contextMenuItems,
-                        }
-                    },
-                    events: {
-                        show: function(opt) {
-
-                            let $this = this;
-
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
-                        },
-                        hide: function(opt) {
-
-                            let $this = this;
-
-                        }
-                    }
-                });
-            },
 			dragHandle: function(){
                 const self = this;
 

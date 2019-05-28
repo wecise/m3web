@@ -519,6 +519,7 @@ class Matrix {
 
         let open = function(url){ window.open(url,"_blank");};
         let rtn = fsHandler.callFsJScript('/footer/api_contextmenu.js', null).message || [];
+        
         contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
     }
 

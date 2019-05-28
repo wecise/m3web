@@ -35,165 +35,163 @@
 </script>
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
 
 <style>
 
 	/* body */
 	body {
-		overflow:hidden;
-		height: 100vh;
-	}
-	#page-container{
-		height: 100%;
-    	overflow: hidden;
+		background: unset;
+    	background-color: rgb(255, 255, 255);
 	}
 
-	/* content */
 	#content.content {
-		margin: -15px -15px 0px 45px;
-		height: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
+		padding: 0px!important;
 	}
 
-	.container-fluid {
-		margin: -4px 0px;
+	.gutter.gutter-horizontal{
+		background: #e7e7e7;
 	}
 
-	/* Event view */
-	.event-view .tree-view {
-		padding: 0 15px;
-	}
-
-	/* 运维模式 */
-	.event-view.view-normal .tree-view {
-		display: none;
-		width: 0%;
-	}
-	.event-view.view-normal .table-view {
-		width: 100%;
-	}
-
-	/* 标签树模式 */
-	.event-view.view-tags .tree-view {
-		width: 18%;
-	}
-	.event-view.view-tags .table-view {
-		width: 82%;
-	}
-
-	/* 全屏模式 */
-	.event-view.view-fullscreen .tree-view {
-		display: none;
-		width: 0%;
-	}
-	.event-view.view-fullscreen .table-view {
-		width: 100%;
-	}
-
-	/* timeline view */
-	.timeline-view {
-		background: rgb(250, 250, 250);
-	}
-
-	/* table view */
-	.table-view {
-		padding-top: 10px!important;
-	}
-
-
-	/* nav nav-tabs nav-tabs-line-2px li a */
-	.panel-title-btn .nav-tabs-line-2px{
-		margin: 0 -15px;
-	}
-	.panel-title-btn .nav-tabs-line-2px > li > a {
-		padding: 0px 15px
-	}
-
-	/* 自定义Panel */
-	.graphContainer.panel-default > .panel-body {
-		height: calc(100vh - 125px);
-		overflow:hidden;
-		background: #ffffff;
-		padding: 5px;
-	}
-	.graphContainer.panel-inverse > .panel-body {
-		height: calc(100vh - 125px);
-		overflow:hidden;
-		background: rgb(12, 61, 109);
-		padding: 5px;
-	}
-
-	.event.panel-default > .panel-body {
-		height: 78vh;
-		overflow:hidden;
-		background: #ffffff;
-		padding: 5px;
-	}
-	.event.panel-inverse > .panel-body {
-		height: 78vh;
-		overflow:hidden;
-		background: rgb(12, 61, 109);
-		padding: 5px;
-	}
-
-	.association.panel-default > .panel-body {
-		height: 78vh;
-		overflow:hidden;
-		background: #ffffff;
-		padding: 5px;
-	}
-	.association.panel-inverse > .panel-body {
-		height: 78vh;
-		overflow:hidden;
-		background: rgb(12, 61, 109);
-		padding: 5px;
-	}
-
-
-	/* 告警详情页Tab */
-	.nav-tabs.event-detail-data-ul > li {
-		position:relative;
-	}
-	.nav-tabs.event-detail-data-ul > li > a {
-		display:inline-block;
-	}
-	.nav-tabs.event-detail-data-ul > li > span {
-		display:none;
-		cursor:pointer;
-		position:absolute;
-		right: 6px;
-		top: 8px;
-		color: red;
-	}
-	.nav-tabs.event-detail-data-ul > li:hover > span {
-		display: inline-block;
-	}
-
-	.nav-tabs.event-detail-data-ul > li > span {
-	    display:none;
-	    cursor:pointer;
-	    position:absolute;
-	    right: 3px;
-	    top: 8px;
-	    color: #999;
-	}
-
-	.btn-group.dropdown.Dropdown.MultiSelect > .form-control {
+	.topological-view-detail.el-tabs--border-card {
+		background: rgba(0, 0, 0, 0);
+		border: unset;
 		-webkit-box-shadow: unset;
 		box-shadow: unset;
-		-webkit-transition: unset;
-		-o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-		transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 	}
 
-	.panel.graphContainer::after{
-		contemt: 'up'
+	.el-tabs--border-card{
+		background: rgb(255, 255, 255);
+		border: unset;
+		-webkit-box-shadow: unset;
+		box-shadow: unset;
 	}
+	.el-tabs--border-card>.el-tabs__header {
+		background-color: rgb(247, 247, 247);
+		border-bottom: 1px solid rgb(228, 231, 237);
+		margin: 0;
+		height: 32px;
+		line-height: 32px;
+	}
+	.el-tabs__item {
+		height:32px;
+		line-height:32px;
+	}
+
+	/* For Table */
+    thead th {
+        white-space: nowrap;
+    }
+
+    /* 分析 */
+    form.form-horizontal > .form-group:nth-child(even) {
+		background: rgb(249, 249, 249);
+	}
+	form.form-horizontal > .form-group:nth-child(odd) {
+		background: rgb(255, 255, 255);
+    }
+    
+    /* For grid-view */
+    #grid ul{
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #grid ul > li{
+        float: left;
+        width: 9em;
+        height: 90px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        margin: 5px 5px 0px 0px;
+    }
+
+    /*
+    *   File Upload
+    */
+    .progress {
+        height: 16px;
+        border-radius: 0px;
+        display: block;
+        position: relative;
+    }
+
+    .progress small {
+        color: #ffffff;
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+
+    #files ul{
+        margin: 10px;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #files ul > li{
+        float: left;
+        width: 100pt;
+        height: 100px;
+        font-size: 12px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        padding-top: 5px;
+        margin: 5px 0px 20px 5px;
+    }
+
+    #files ul > li > canvas {
+        height: 65%;
+        width: auto;
+    }
+
+    #files ul > li > a {
+        background-color: rgb(249, 249, 249);
+        border-radius: 0px;
+    }
+
+    #files ul > li > button {
+        margin-top: -50px;
+    }
+
+    #files ul > li > .preview-null {
+        width: 100px;
+        padding-top: 10px;
+        height: 64px;
+        color: rgb(221, 221, 221);
+    }
+
+    .preview-img-responsive{
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .fs-view-component #grid,
+    .fs-view-component .dataTables_scroll{
+        height: 75vh;
+        overflow: auto;
+        padding: 0 10px;
+    }
+
+    .fs-name {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 
 </style>
 
-<div id="app"></div>
+<main id="content" class="content">
+	<div id="app"></div>
+</main>
 
 <script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
@@ -203,6 +201,17 @@
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
+
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
@@ -222,5 +231,9 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
-
+<script>
+	$(function(){
+		mxTopological.initComponent("#app");
+	})
+</script>
 {{template "base/footer" .}}

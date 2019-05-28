@@ -91,7 +91,7 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-	<div id="content" class="content">
+	<main id="content" class="content">
 		<div class="container">
 			<search-base-component :id="model.id" ref="search"></search-base-component>
 			<BR/><BR/>
@@ -100,7 +100,7 @@
 			<textarea rows="6">${JSON.stringify(model.message)}</textarea>
 
 		</div>
-	</div>
+	</main>
 </script>
 
 {{template "base/footer" .}}

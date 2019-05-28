@@ -26,10 +26,8 @@ class Performance extends Matrix {
     init() {
 
         VueLoader.onloaded(["ai-robot-component",
-                            "event-graph-component",
-                            "event-datatable-component",
-                            "event-diagnosis-datatable-component",
-                            "event-summary-component",
+                            "performance-datatable-component",
+                            "performance-diagnosis-datatable-component",
                             "search-preset-component",
                             "search-base-component"],function() {
             $(function() {
@@ -152,7 +150,6 @@ class Performance extends Matrix {
                             progress:[]
                         }
                     },
-                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
                     template:   `<div>
                                     <div class="progress" 
                                          v-for="pg in progress" 
@@ -740,6 +737,48 @@ class Performance extends Matrix {
         })
 
         
+    }
+
+    contextMenu(tId,inst,items,app,fun){
+        
+        $.contextMenu({
+            selector: `#${tId} tr td:not(:nth-child(1))`,
+            trigger: 'right',
+            autoHide: true,
+            delay: 5,
+            hideOnSecondTrigger: true,
+            className: `animated slideIn ${tId} context-menu-list`,
+            build: function($trigger, e) {
+
+                return {
+                    callback: function(key, opt) {
+                        
+                        if(_.includes(key,'diagnosis')) {
+                            app.detailAdd(inst.selectedRows);
+                        } else if(_.includes(key,'action')) {
+                            // 增加操作类型
+                            let action = _.last(key.split("_"));
+                            app.action({list: [inst.selectedRows], action:action});
+                        }
+                    },
+                    items: items
+                }
+            },
+            events: {
+                show: function(opt) {
+
+                    let $this = this;
+                    _.delay(function(){
+                        new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                    },50)
+                },
+                hide: function(opt) {
+
+                    let $this = this;
+
+                }
+            }
+        });
     }
 
     resizeEventConsole(){

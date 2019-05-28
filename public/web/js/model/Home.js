@@ -21,8 +21,7 @@ class Home extends Matrix {
     init() {
         VueLoader.onloaded(["vue-editor-component",
             "vue-search-preset-component",
-            "ai-robot-component",
-            "vue-apps-box-component"],function() {
+            "ai-robot-component"],function() {
 
             $(function() {
 

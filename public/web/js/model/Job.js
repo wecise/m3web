@@ -26,10 +26,8 @@ class Job extends Matrix {
     init() {
 
         VueLoader.onloaded(["ai-robot-component",
-                            "event-graph-component",
-                            "event-datatable-component",
-                            "event-diagnosis-datatable-component",
-                            "event-summary-component",
+                            "job-datatable-component",
+                            "job-diagnosis-datatable-component",
                             "search-preset-component",
                             "search-base-component",
                             "probe-tree-component",
@@ -118,7 +116,6 @@ class Job extends Matrix {
                             progress:[]
                         }
                     },
-                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
                     template:   `<div>
                                     <div class="progress" 
                                          v-for="pg in progress" 

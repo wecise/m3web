@@ -26,6 +26,8 @@ class Event extends Matrix {
     init() {
 
         VueLoader.onloaded(["ai-robot-component",
+                            "topological-graph-component",
+                            "omdb-path-datatables-component",
                             "event-graph-component",
                             "event-datatable-component",
                             "event-diagnosis-datatable-component",
@@ -414,7 +416,7 @@ class Event extends Matrix {
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="event"></event-diagnosis-datatable-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -442,7 +444,7 @@ class Event extends Matrix {
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="log"></event-diagnosis-datatable-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -470,7 +472,7 @@ class Event extends Matrix {
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>
+                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="performance"></event-diagnosis-datatable-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -535,7 +537,7 @@ class Event extends Matrix {
 
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        let aiGroup = fsHandler.callFsJScript("/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
+                        let aiGroup = fsHandler.callFsJScript("/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
                         self.aiGroupData.rows = aiGroup.rows;
                         self.aiGroupData.columns = [
                                                         {data:'type',title:'',sortable:true, width:'5',render: function(data,type,row){
@@ -688,7 +690,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData"></event-diagnosis-datatable-component>
+                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData" :type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -809,7 +811,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="probability-right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData"></event-diagnosis-datatable-component>
+                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData" :type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -846,6 +848,46 @@ class Event extends Matrix {
                         nodeClick(event){
                             // 获取相应维度的关联事件  eg: biz='查账系统'
                             this.tableData = fsHandler.callFsJScript("/event/diagnosis-probability-by-value.js", encodeURIComponent(JSON.stringify((event)))).message.event;
+                        }
+                    }
+                })
+
+                // 资源信息
+                Vue.component("event-diagnosis-topological",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            splitInst: null
+                        }
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-aside class="split" :id="id+'-topological-view-left'">
+                                        
+                                    </el-aside>
+                                    <el-container class="split" :id="id+'-topological-view-right'">
+                                        <el-main style="padding:0px;">
+                                            <div id="topological-app"></div>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init(){    
+                            mxTopological.initComponent("#topological-app");
+
+                            this.splitInst = Split([`#${this.id}-topological-view-left`, `#${this.id}-topological-view-right`], {
+                                sizes: [0, 100],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                            });
                         }
                     }
                 })
@@ -893,7 +935,8 @@ class Event extends Matrix {
                         },
                         options: {
                             // 搜索窗口
-                            name:"所有", value: "",
+                            name:"所有", 
+                            value: "",
                             // 输入
                             term: "",
                             // 指定类
@@ -1087,10 +1130,9 @@ class Event extends Matrix {
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
                                                 {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
-                                                {title:'相关日志', name:`diagnosis-log-${id}`, type: 'log', model:model},
-                                                {title:'相关性能', name:`diagnosis-performance-${id}`, type: 'performance', model:model},
-                                                // {title:'原始报文', name:`raw-${id}`, type: 'raw'},
-                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                                //{title:'相关日志', name:`diagnosis-log-${id}`, type: 'log', model:model},
+                                                //{title:'相关性能', name:`diagnosis-performance-${id}`, type: 'performance', model:model},
+                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model}
                                             ]};
                                 this.layout.main.detail.activeIndex = _.first(detail.child).name;
 

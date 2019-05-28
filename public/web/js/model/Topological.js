@@ -13,8 +13,10 @@
 class Topological {
     
     constructor() {
+
         this.app = null;
         this.graphAssociation = null;
+        this.graphSelectedCell = null;
     }
     
     path(id, bid, node){
@@ -115,125 +117,779 @@ class Topological {
                             "probe-tree-component"],function() {
             $(function() {
 
-                topological.app = new Vue({
-                    delimiters: ['${', '}'],
-                    template: fsHandler.callFsJScript('/topological/ui.js', null).message.layout,
-                    data: {
-                        // 搜索组件结构
-                        model: {
-                            id: "matrix-event-search",
-                            filter: null,
-                            term: null,
-                            preset: null,
-                            message: null,
-                        },
-                        options: {
-                            // 搜索窗口
-                            name:"所有", value: "",
-                            // 输入
-                            term: "柜面",
-                            // 指定类
-                            class: "#/matrix/devops/event/:",
-                            // 时间窗口
-                            range: { from: "", to: ""},
-                            // 其它设置
-                            others: {
-                                // 是否包含历史数据
-                                ifHistory: false,
-                                // 是否包含Debug信息
-                                ifDebug: false,
-                                // 指定时间戳
-                                forTime:  ' for vtime ',
+                // 详情
+                Vue.component("profile-view",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    template: `<form class="form-horizontal">
+                                    <div v-show="model.rows.length">
+                                        <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                            <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
+                                            <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                            </div>
+                                        </div>
+                                    <div>
+                                </form>`,
+                    mounted(){
+                        
+                    }
+                });
+
+                // 文件
+                Vue.component("file-view",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:Object
+                    },
+                    data(){
+                        return {
+                            upload:{
+                                option: {
+                                    url: '/fs/temp?issys=true',
+                                    dataType: 'json',
+                                    autoUpload: true,
+                                    acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt|iso|mp3|mp4)$/i,
+                                    disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
+                                    previewMaxWidth: 100,
+                                    previewMaxHeight: 100,
+                                    previewCrop: true
+                                }
                             }
-                        },
-                        count: {
-                            event: 0,
-                            performance: 0,
-                            log: 0,
-                            config: 0,
-                            ticket: 0
                         }
                     },
-                    created: function(){
-                        // 接收搜索数据
-                        eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
+                    template:   `<div><div class="row">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="btn-group" style="padding:0 11px;float:right;">
+                                            <a href="#" class="btn btn-link fs-order" title="排序" data-tooltip="tooltip">
+                                                <i class="fas fa-list-ol"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" data-tooltip="tooltip">
+                                                <i class="fas fa-upload"></i>
+                                                <input id="file-upload" type="file" name="uploadfile" multiple>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" v-if="model && model.rows">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div id="grid" style="padding:0 5px;"><ul>
+                                            <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
+                                                :id="'fs_node_'+item.id"
+                                                style="cursor: pointer;"
+                                                :title="item.name"
+                                                v-for="item in model.rows">
+                                                <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @dblclick="openIt(item, item.parent+'/'+item.name);" >
+                                                    <div class="stats-info">
+                                                        <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';" style="width:32px;"></p>
+                                                    </div>
+                                                    <div class="stats-link">
+                                                        <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name" :data-info="JSON.stringify(item)">
+                                                            #{item.name}#
+                                                        </a>
+                                                    </div>
+                                                    <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+                                                        <i class="fa fa-bars"></i>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul></div>
+                                    </div>
+                                </div></div>`,
+                    created(){
+                        this.upload.option.url = `/fs/storage/entity/files/${mxTopological.graphSelectedCell.value}?issys=true`;
+                        eventHub.$on("GRAPH-DIAGNOSIS-DATA-TRIGGER",this.reloadData);
                     },
-                    mounted: function(){
-                        this.style();
-                        this.graph();
+                    mounted(){
+                        this.initFileUpload();
+                        this.initContextMenu();
+                        this.orderIt();
+                    },
+                    filters: {
+                        pickName: function(item){
+    
+                            if (_.isEmpty(item)) return '';
+    
+                            let _name = _.head(item.name.split("."));
+    
+                            if(!_.isEmpty(_name)){
+                                _name = _.truncate(_name, {
+                                    'length': 9
+                                });
+                            }
+    
+                            return _name;
+                        },
+                        pickIcon: function(item){
+    
+                            // extend || ...
+                            if( item.fullname === '/extend' ){
+                                return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            } else {
+    
+                                try{
+                                    return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                }
+                                catch(error){
+                                    return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                }
+                            }
+                        }
                     },
                     methods: {
-                        style(){
-                            $("#footer .navbar-nav > li > a").css({
-                                "textShadow": "unset",
-                                "color": "rgb(79, 112, 171)",
+                        reloadData(event){
+                            this.model = event['file'];
+                        },
+                        initContextMenu(){
+                            const self = this;
+
+                            $.contextMenu({
+                                selector: '.list-context-menu',
+                                trigger: 'left',
+                                build: function($trigger, e) {
+                                    let _item = null;
+            
+                                    if(!_.isEmpty(e.target.attributes.getNamedItem('data-item').value)) {
+                                        _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+                                    }
+                                    
+                                    return {
+                                        items: {
+            
+                                            "read": {
+                                                name: "下载", icon: "fas fa-download", callback: function (key, opt) {
+                                                    self.downloadIt(_item,true);
+                                                }
+                                            },                                               
+                                            "sep1": "---------",
+                                            "delete": {
+                                                name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
+                                                    self.deleteIt(_item,true);
+                                                }
+                                            },
+                                            "sep2": "---------",
+                                            "info": {
+                                                name: "属性", icon: "fas fa-info", callback: function (key, opt) {
+                                                    self.info(_item);
+                                                }
+                                            }
+                                        }
+                                    }
+            
+                                }
                             });
                         },
-                        setData(event){
-                            this.model = _.extend(this.model, this.$refs.searchRef.result);
-                        },
-                        graph(){
-                            _.delay(function(){
-                                let ui = ['graphNav','graph'];
-                                _.forEach(ui,function(v,index){
-                                    // 根据class设置组件id
-                                    $(`.${v}`).attr("id", v);
-                                   _.delay(function(){
-                                        // 组件实例化并挂载dom
-                                        new Vue(topological[v](`topological-data-${v}`)).$mount(`#${v}`);
-                                   },50)
-                                })
-                            },50)
-                        },
-                        // 详情页
-                        detail(term){
+                        deleteIt: function(event, prompt) {
                             const self = this;
-                            
-                            // 根据graph节点搜索关联数据
-                            let model = fsHandler.callFsJScript('/topological/diagnosis.js', encodeURIComponent(term)).message || [];
-                            
-                            // 重绘detail页面
-                            _.delay(function(){
-                                let ui = ['event','performance','config','ticket','log'];
-                                _.forEach(ui,function(v,index){
-                                    
-                                    // count
-                                    self.count[v] = model[v].rows.length || 0;
+            
+                            if(_.includes(['app','extend','assets','opt','script'],event.name)){
+                                alertify.error("系统目录，不允许删除!");
+                                return false;
+                            }
+            
+                            if(_.isEmpty(event)) {
+                                alertify.log("选择需要删除的对象！");
+                                return false;
+                            }
+            
+                            if(prompt){
 
-                                    // 数据为空 不显示
-                                    if(!model[v].rows || !model[v].columns) {
-                                        // 已实例化： 删除-->重新实例化
-                                        if($(`.${v}`).children().length) $(`.${v}`).empty();
+                                alertify.confirm(`确定要删除 ${event.name} 文件?`, function (e) {
+                                    if (e) {
+                                        let _rtn = fsHandler.fsDelete(event.parent,event.name);
+                                        if (_rtn == 1){
+                                            let fs = {class: event.class, id:event.id, name: event.name, file: `${event.parent}/${event.name}`};
+                                            self.updateEntity(fs,"-");
+                                        }
+                                    } else {
                                         
-                                        // 根据class设置组件id
-                                        $(`.${v}`).attr('id',v);
-
-                                        return;
                                     }
-                                
-                                    // 已实例化： 删除-->重新实例化
-                                    if($(`.${v}`).children().length) $(`.${v}`).empty();
+                                });
+                            } else {
+                                let _rtn = fsHandler.fsDelete(event.parent,event.name);
+            
+                                if (_rtn == 1){
                                     
-                                    // 根据class设置组件id
-                                    $(`.${v}`).attr('id',v);
-                                    // 挂载dom el
-                                    let elId = `${v}-${_.now()}`;
-                                    $(`.${v}`).append(`<div id="${elId}"></div>`);
-                                    
-                                   _.delay(function(){
-                                        // 组件实例化并挂载dom
-                                        new Vue(topological[v](`topological-data-${v}`, model[v])).$mount(`#${elId}`);
-                                   },500)
-                                    
+                                }
+                            }
+                        },                     
+                        downloadIt: function(item, prompt) {
+                            let self = this;
+            
+                            if(item.ftype == 'dir'){
+                                let rtn = fsHandler.fsList(item.parent);
+                            } else {
+                                let _url = `/fs/${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`.replace(/\/\//g,'/');
+                                let _target = '_blank';
+                                window.open(_url, _target);
+                            }
+                        },
+                        orderIt: function(){
+                            const self = this;
+            
+                            $.contextMenu({
+                                selector: '.fs-order',
+                                trigger: 'left',
+                                callback: function (key, options) {
+                                    if(key == 'byNameAsc'){
+                                        self.model.rows = _.orderBy(self.model.rows,['name'],['asc']);
+                                    } else if(key == 'byNameDesc'){
+                                        self.model.rows = _.orderBy(self.model.rows,['name'],['desc']);
+                                    } else if(key == 'byTimeAsc'){
+                                        self.model.rows = _.orderBy(self.model.rows,['vtime'],['asc']);
+                                    } else if(key == 'byTimeDesc'){
+                                        self.model.rows = _.orderBy(self.model.rows,['vtime'],['desc']);
+                                    } else {
+                                        self.model.rows = _.orderBy(self.model.rows,['ftype'],['asc']);
+                                    }
+                                },
+                                items: {
+                                    "byNameAsc": { name: "按名称升序",icon: "fas fa-sort-alpha-up" },
+                                    "byNameDesc": { name: "按名称降序",icon: "fas fa-sort-alpha-down" },
+                                    "byTimeAsc": { name: "按时间升序",icon: "fas fa-sort-alpha-up" },
+                                    "byTimeDesc": { name: "按时间降序",icon: "fas fa-sort-alpha-down" },
+                                    "byFtype": { name: "按类型排序",icon: "fas fa-sort-alpha-down" },
+                                }
+                            });
+            
+                        },
+                        initFileUpload: function(){
+                            const self = this;
+                            let uploadButton = $('<button/>')
+                                .addClass('btn btn-xs btn-primary')
+                                .prop('disabled', true)
+                                .text('准备中...')
+                                .on('click', function () {
+                                    var $this = $(this),
+                                        data = $this.data();
+                                    $this
+                                        .off('click')
+                                        .text('中止')
+                                        .on('click', function () {
+                                            $this.remove();
+                                            data.abort();
+                                        });
+                                    data.submit().always(function () {
+                                        $this.remove();
+                                    });
+                                });
+            
+                            $('#file-upload').fileupload(self.upload.option)
+                                .on('fileuploadadd', function (e, data) {
+            
+                                    let title = "上传";
+            
+                                    let wnd = maxWindow.winUpload(title, '<div id="files" class="files"></div>', null,null);
+            
+                                    // 更新信息栏信息
+                                    new Vue({
+                                        delimiters: ['#{', '}#'],
+                                        el: `#jsPanel-upload-footer-${objectHash.sha1(title)}`,
+                                        template: `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> #{stime}# | 上传文件：#{total}# </div>`,
+                                        data: {
+                                            stime: moment().format("LLL"),
+                                            utime: '',
+                                            upload: 0,
+                                            total: data.originalFiles.length,
+                                            interval: null
+                                        },
+                                        created: function(){
+                                        },
+                                        methods: {
+                                            update: function(event){
+            
+                                                if(event.stop){
+                                                    //clearInterval(this.interval);
+                                                }
+            
+                                                if(event.upload){
+                                                    this.upload += event.upload;
+                                                }
+            
+                                            }
+                                        }
+                                    });
+            
+                                    data.context = $('<ul/>').appendTo('#files');
+            
+                                    $.each(data.files, function (index, file) {
+            
+                                        let _name = file.name;
+            
+                                        if(!_.isEmpty(file.name) && _.size(file.name) > 9){
+                                            _name = _.split(file.name,"",9).join("")+"..."
+                                        }
+            
+                                        var node = $('<li/>')
+                                            .append($(`<a href="#" class="thumbnail" style="margin-bottom:0px;border:none;-webkit-box-shadow: unset;box-shadow: unset;"/>`)
+                                                .text(_name))
+                                            .attr("title",file.name)
+                                            .append($(`<div id="progress_${objectHash.sha1(file.name)}" class="progress">
+                                                            <div class="progress-bar progress-bar-success"></div>
+                                                       </div>`));
+                                        if (!index) {
+                                            node
+                                                .append(uploadButton.clone(true).data(data));
+                                        }
+                                        node.appendTo(data.context);
+                                    });
                                 })
-                            },50)
-
+                                .on('fileuploadprocessalways', function (e, data) {
+                                    var index = data.index,
+                                        file = data.files[index],
+                                        node = $(data.context.children()[index]);
+            
+                                    if (file.preview) {
+                                        node
+                                            .prepend(file.preview);
+                                    }else{
+                                        node
+                                            .prepend(`<span class="fa fa-file fa-4x preview-null"></span>`);
+                                    }
+            
+                                    if (file.error) {
+                                        node
+                                            .append('<hr>')
+                                            .append($('<span class="text-danger"/>').text(file.error));
+                                    }
+                                    if (index + 1 === data.files.length) {
+                                        data.context.find('button')
+                                            .text('上传')
+                                            .css('display','none')
+                                            .prop('disabled', !!data.files.error);
+                                    }
+            
+                                })
+                                .on('fileuploadprogress', function (e, data) {
+            
+                                    let _name = objectHash.sha1(data.files[0].name);
+                                    let progress = parseInt(data.loaded / data.total * 100, 10);
+                                    $(`#progress_${_name} .progress-bar`).css(
+                                        'width',
+                                        progress + '%'
+                                    ).html(`<small>${parseInt(data.loaded/1024,10)} KB / ${parseInt(data.total/1024,10)} KB</small>`);
+            
+                                })
+                                .on('fileuploaddone', function (e, data) {
+                                    $.each(data.files, function (index, file) {
+                                        if (file.name) {
+                                            // var link = $('<a>')
+                                            //     .attr('target', '_blank')
+                                            //     .prop('href', file.name);
+                                            // $(data.context.children()[index])
+                                            //     .wrap(link);
+                                            $(`#progress_${objectHash.sha1(file.name)} .progress-bar`).html(`<small>已完成</small>`);
+                                            self.updateEntity(file,'+');
+                                        } else if (file.error) {
+                                            var error = $('<span class="text-danger"/>').text(file.error);
+                                            $(data.context.children()[index])
+                                                .append('<br>')
+                                                .append(error);
+                                        }
+                                    });
+                                })
+                                .on('fileuploadfail', function (e, data) {
+                                    $.each(data.files, function (index) {
+                                        var error = $('<span class="text-danger"/>').text('上传失败。');
+                                        $(data.context.children()[index])
+                                            .append('<br>')
+                                            .append(error);
+                                    });
+                                    // close upload win
+            
+                                })
+                                .prop('disabled', !$.support.fileInput)
+                                .parent().addClass($.support.fileInput ? undefined : 'disabled');
+                        },  
+                        // 上传完毕，更新/matrix/entity   
+                        updateEntity(event,action){
+                            let id = mxTopological.graphSelectedCell.id;
+                            let fs = {action: action, class: `/matrix/entity/${mxTopological.graphSelectedCell.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${mxTopological.graphSelectedCell.value}/${event.name}`};
+                            let rtn = fsHandler.callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
+                            this.reload();
+                        },                     
+                        openIt: function(item, path){
+                            const self = this;
+            
+                            if(typeof(item) === 'string' || item.ftype === 'dir'){
+                                self.rootPath = path.replace(/\/\//g,'/');
+                                return;
+                            }
+            
+                            if(!_.isEmpty(item)){
+            
+                                if(_.includes(['png','jpg','jpeg','gif'], item.ftype)) {
+            
+            
+                                    let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
+                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
+            
+                                } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
+            
+                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
+                                                        <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
+                                                            your browser does not support the video tag
+                                                        </video>
+                                                    </div>
+                                                    `;
+            
+                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
+            
+                                } else if(_.includes(['pdf'], item.ftype)) {
+            
+                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
+                                                        <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
+                                                    </div>`;
+            
+                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
+            
+                                } else if(_.includes(['pptx','ppt'], item.ftype)) {
+            
+                                    window.open(`/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}`, "_blank");
+            
+                                } else if(_.includes(['js','ltsv','txt','csv','html'], item.ftype)) {
+            
+                                   self.editIt(item);
+            
+                                } else if(_.includes(['swf'], item.ftype)) {
+                                    let contents = `<div class="embed-responsive embed-responsive-16by9">
+                                                        <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
+                                                            Your browser does not support the video tag.
+                                                        </video>
+                                                    </div>`;
+            
+                                    let _wnd = maxWindow.winApp(item.name, contents, null,null);
+                                } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {
+                                    _.merge(item,{action:'run'});
+                                    let url = fsHandler.genFsUrl(item,null,null);
+                                    window.open(url,'_blank');
+                                } else if(_.includes(['md'], item.ftype)){
+                                    _.merge(item,{action:'run'});
+            
+                                    let url = fsHandler.genFsUrl(item,{ header:true, sidebar:true, footbar:true },null);
+            
+                                    window.open(url,'_blank');
+                                }
+                            }
+            
+                        },
+                        info: function(node){
+                            const self = this
+            
+                            let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
+            
+                            let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": ${window.SignedUser_UserName}, "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
+            
+                            if(_.isEmpty(node.attr)){
+                                node = _.merge(node, _attr);
+                            }
+            
+                            let _infoVue = new Vue({
+                                delimiters: ['#{', '}#'],
+                                el: "#fs-info",
+                                template: `<div class="tab-content" style="height:100%;">
+                                                        <div role="tabpanel" class="tab-pane active" id="home"  style="height:100%;">
+                                                            <form  style="height:95%;overflow:auto;">
+                                                                <div class="form-group">
+                                                                    <label for="name">名称</label>
+                                                                    <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName" autofocus @keyup.enter="save">
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="remark">备注</label>
+                                                                    <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="ctime">更新时间</label>
+                                                                    <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="parent">目录</label>
+                                                                    <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="type">类型</label>
+                                                                    <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="type">大小</label>
+                                                                    <input type="text" class="form-control" id="size" placeholder="" value="${mx.bytesToSize(node.size)}" disabled>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="author">作者</label>
+                                                                    <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
+                                                                </div>
+                                                                <div class="form-group">
+                                                                    <label for="icon">图标</label>
+                                                                    <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
+                                                                        <img class="media-object" :src="model.icon.value" style="width:15%;">
+                                                                    </a>
+                                                                </div>
+            
+                                                           </form>
+                                                            <div class="form-group" style="text-align: center;padding-top:3px;">
+                                                                <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
+                                                                <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
+                                                                <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
+                                                            </div>
+                                                        </div>
+                                                        <div role="tabpanel" class="tab-pane" id="icon-list" style="height:100%;">
+                                                            <div class="row" style="height:95%;">
+                                                              <div class="col-md-12" style="display: list-item;height: 95%;overflow: auto;">
+                                                                <ul>
+                                                                    <li v-for="icon in model.icon.list">
+                                                                        <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
+                                                                          <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
+                                                                          <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="model.icon.value" >
+                                                                        </a>
+                                                                    </li>
+                                                                </ul>
+                                                              </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-12" style="text-align:center;">
+                                                                    <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+            
+                                                    </div>`,
+                                data: {
+                                    model: {
+                                        parent: node.parent,
+                                        oldName: node.name,
+                                        newName: node.name,
+                                        type: node.ftype,
+                                        attr: {remark:''},
+                                        icon: {
+                                            value: null,
+                                            list: []
+                                        }
+                                    }
+                                },
+                                mounted: function() {
+                                    let me = this;
+            
+                                    me.$nextTick(function() {
+                                        me.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
+                                        me.model.icon.value = me.model.attr.icon;
+                                        me.init();
+                                    })
+                                },
+                                filters: {
+                                    pickName: function (value) {
+                                        let me = this;
+            
+                                        if (!value) return '';
+            
+                                        let _attr = _.attempt(JSON.parse.bind(null, value));
+            
+                                        return _attr.name;
+                                    },
+                                    pickIcon: function(item) {
+                                        return `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                                    },
+                                    readMore: function (text, length, suffix) {
+                                        return text.substring(0, length) + suffix;
+                                    },
+                                    toLocalTime: function (value) {
+                                        return moment(value).format("LLL");
+                                    }
+                                },
+                                destroyed: function(){
+                                    let me = this;
+            
+                                    me.model = null;
+                                },
+                                methods: {
+                                    init: function(){
+                                        let me = this;
+            
+                                        me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
+                                    },
+                                    triggerInput: function(id){
+                                        const self = this
+            
+                                        $(self.$refs[id]).click()
+                                    },
+                                    apply: function(){
+                                        let me = this;
+            
+                                        me.saveAttr();
+            
+                                    },
+                                    save: function(){
+                                        let me = this;
+            
+                                        me.saveAttr();
+                                        _win.close();
+                                    },
+                                    close: function(){
+                                        let me = this;
+            
+                                        _win.close();
+                                    },
+                                    saveName: function(){
+                                        let me = this;
+            
+                                        let _extName = node.ftype=='dir'?'':'.'+node.ftype;
+                                        let _old = node.parent + "/" + node.name;// + _extName;
+                                        let _new = node.parent + "/" + me.model.newName;// + _extName;
+            
+            
+                                        let _check = fsHandler.fsCheck( node.parent, me.model.newName);
+                                        if(_check) {
+                                            alertify.error("文件已存在，请确认！")
+                                            return false;
+                                        }
+            
+                                        let _rtn = fsHandler.fsRename(_old, _new);
+            
+                                        if(_rtn == 1){
+                                            self.load();
+                                        }
+                                    },
+                                    saveAttr: function(){
+                                        let me = this;
+            
+                                        me.model.attr = me.model.icon.value?_.extend(me.model.attr, {icon: me.model.icon.value}):me.model.attr;
+            
+                                        let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
+            
+                                        if(_rtn == 1){
+                                            self.load();
+                                            $(".list-context-menu").contextMenu('update');
+            
+                                            if(me.model.oldName != me.model.newName){
+                                                me.saveName();
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+            
+                        },
+                        reload(){
+                            try {
+                                let id = mxTopological.graphSelectedCell.getId();
+                                let value = mxTopological.graphSelectedCell.getValue();
+                                let model = fsHandler. callFsJScript("/topological/diagnosis-by-id.js",encodeURIComponent(id)).message;
+                                
+                                eventHub.$emit("GRAPH-DIAGNOSIS-DATA-TRIGGER",model);
+                                
+                            } catch(error){
+                            }
                         }
                     }
-                }).$mount("#app");
+                })
 
             });
         })
+    }
+
+    initComponent(mTo){
+        
+        let randomId = _.now();
+
+        let component =  {
+            delimiters: ['${', '}'],
+            template: `<el-container style="background: transparent;height: 100%;">
+                            <el-aside id="topological-view-left-${randomId}">
+                                <div class="graphNav"></div>
+                            </el-aside>
+                            <el-container id="topological-view-main-${randomId}">
+                                <el-main style="overflow:hidden;padding: 0px;">
+                                    <div class="graph"></div>
+                                </el-main>
+                            </el-container>
+                            <el-aside id="topological-view-right-${randomId}">
+                                <div class="graph-association"></div>
+                            </el-aside>
+                        </el-container>`,
+            data: {
+                // 搜索组件结构
+                model: {
+                    id: "matrix-event-search",
+                    filter: null,
+                    term: null,
+                    preset: null,
+                    message: null,
+                },
+                options: {
+                    // 搜索窗口
+                    name:"所有", value: "",
+                    // 输入
+                    term: "柜面",
+                    // 指定类
+                    class: "#/matrix/devops/event/:",
+                    // 时间窗口
+                    range: { from: "", to: ""},
+                    // 其它设置
+                    others: {
+                        // 是否包含历史数据
+                        ifHistory: false,
+                        // 是否包含Debug信息
+                        ifDebug: false,
+                        // 指定时间戳
+                        forTime:  ' for vtime ',
+                    }
+                },
+                count: {
+                    event: 0,
+                    performance: 0,
+                    log: 0,
+                    config: 0,
+                    ticket: 0
+                },
+                splitInst:null
+            },
+            created: function(){
+                // 初始化term
+                try{
+                    let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                    this.options.term = term;
+                } catch(err){
+
+                }
+
+                // 接收搜索数据
+                eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
+            },
+            mounted: function(){
+                this.graph();
+
+                this.splitInst = Split([`#topological-view-left-${randomId}`, `#topological-view-main-${randomId}`,`#topological-view-right-${randomId}`], {
+                    sizes: [0, 100,0],
+                    minSize: [0, 0],
+                    gutterSize: 5,
+                    cursor: 'col-resize',
+                    direction: 'horizontal',
+                });
+            },
+            methods: {
+                setData(event){
+                    this.model = _.extend(this.model, this.$refs.searchRef.result);
+                },
+                graph(){
+                    _.delay(function(){
+                        let ui = ['graphNav','graph'];
+                        _.forEach(ui,function(v,index){
+                            // 根据class设置组件id
+                            $(`.${v}`).attr("id", v);
+                           _.delay(function(){
+                                // 组件实例化并挂载dom
+                                new Vue(mxTopological[v](`topological-data-${v}`)).$mount(`#${v}`);
+                           },50)
+                        })
+                    },50)
+                }
+            }
+        };
+
+        this.app = new Vue(component).$mount(mTo);
     }
     
     searchBar(){
@@ -293,7 +949,7 @@ class Topological {
                 },
                 // term for search
                 term: {
-                        value: 'match ("biz:查账系统")-[*]->("esx:esx1") return name,status'
+                        value: 'match (m:"biz:查账系统")-[*]->(p:"linux:linux[1-5]")-[*]->(q:"esx:esx4") return status path m,p,q ALL PATH'
                     }
             },
             watch:{
@@ -330,7 +986,6 @@ class Topological {
                 },
                 cache(){
                     let preContent = this.loadCache();
-                    console.log(preContent)
                     // merge && save
                     let name = 'TOPOLOGICAL_GRAPH_SEARCH_CACHE.txt';
                     let content = JSON.stringify(_.merge(preContent,this.term));
@@ -378,15 +1033,15 @@ class Topological {
                     const self = this;
 
                     // 获取默认搜索条件
-                    let defaultTerm = topological.searchBar().data.term.value;
+                    let defaultTerm = mxTopological.searchBar().data.term.value;
 
                     if(term){
                         defaultTerm = term.value;
                     }
 
                     // 重置关联信息
-                    if(topological.graphAssociation){
-                        topological.graphAssociation.$data.tabs = [];
+                    if(mxTopological.graphAssociation){
+                        mxTopological.graphAssociation.$data.tabs = [];
                     }
 
                     try {
@@ -401,72 +1056,17 @@ class Topological {
         };
     }
 
-    event(id,model){
-        return {
-            delimiters: ['${', '}'],
-            template: `<event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>`,
-            data: {
-                id: id,
-                model: model,
-            }
-        };
-    }
-
-    performance(id,model){
-        return {
-            delimiters: ['${', '}'],
-            template: `<event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>`,
-            data: {
-                id: id,
-                model: model,
-            }
-        };
-    }
-
-    log(id,model){
-        return {
-            delimiters: ['${', '}'],
-            template: `<event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>`,
-            data: {
-                id: id,
-                model: model,
-            }
-        };
-    }
-
-    config(id,model){
-        return {
-            delimiters: ['${', '}'],
-            template: `<event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>`,
-            data: {
-                id: id,
-                model: model,
-            }
-        };
-    }
-
-    ticket(id,model){
-        return {
-            delimiters: ['${', '}'],
-            template: `<event-diagnosis-datatable-component :id="id" :model="model"></event-diagnosis-datatable-component>`,
-            data: {
-                id: id,
-                model: model,
-            }
-        };
-    }
-
     toggleTheme(){
         let theme = localStorage.getItem("TOPOLOGICAL-GRAPH-THEME");
 
         if(theme === 'dark'){
-            $(topological.app.$el).find(".panel").removeClass("panel-inverse");
-            $(topological.app.$el).find(".panel").addClass("panel-default");
+            $(mxTopological.app.$el).find(".panel").removeClass("panel-inverse");
+            $(mxTopological.app.$el).find(".panel").addClass("panel-default");
             $("body").css("background","#EBEBF3");
             theme = 'light';
         } else {
-            $(topological.app.$el).find(".panel").removeClass("panel-default");
-            $(topological.app.$el).find(".panel").addClass("panel-inverse");
+            $(mxTopological.app.$el).find(".panel").removeClass("panel-default");
+            $(mxTopological.app.$el).find(".panel").addClass("panel-inverse");
             $("body").css("background","#000000");
             theme = 'dark';
         }
@@ -474,41 +1074,44 @@ class Topological {
         localStorage.setItem("TOPOLOGICAL-GRAPH-THEME",theme);
     }
 
-    association(event){
-        // 新关联信息准备
+    diagnosis(event){
+        
         let id = objectHash.sha1(event);
-        let tabTemp =  {title:event.value, type: 'tab',child:[
-                            {title:'事件', id:`event-${id}`, type: 'event'},
-                            {title:'性能', id:`performance-${id}`, type: 'performance'},
-                            {title:'日志', id:`log-${id}`, type: 'log'},
-                            {title:'配置', id:`config-${id}`, type: 'config'},
-                            {title:'工单', id:`ticket-${id}`, type: 'ticket'},
-                            {title:'原始报文', id:`raw-${id}`, type: 'raw'},
-                            {title:'事件记录', id:`journal-${id}`, type: 'journal'}
+        let model = fsHandler.callFsJScript('/topological/diagnosis-by-id.js',event.id).message;
+        let tabTemp =   {
+                            title:event.value, name: `diagnosis-${id}`, type: 'diagnosis', child:[
+                            {title:'属性', name:`diagnosis-profile-${id}`, type: 'profile', model:model},
+                            {title:'事件', name:`diagnosis-event-${id}`, type: 'event', model:model},
+                            {title:'性能', name:`diagnosis-performance-${id}`, type: 'performance', model:model},
+                            {title:'日志', name:`diagnosis-log-${id}`, type: 'log', model:model},
+                            {title:'文件', name:`diagnosis-file-${id}`, type: 'file', model:model}
                         ]};
-
-        if(!topological.graphAssociation){
-            topological.graphAssociation = new Vue({
+                        
+        if(!mxTopological.graphAssociation){
+            mxTopological.graphAssociation = new Vue({
                 delimiters: ['#{', '}#'],
-                template: ` <tabs v-model="index">
-                                <template slot="nav-right">
-                                    <a href="javascript:void(0);" class="btn btn-xs btn-default" style="cursor:pointer;" @click="close(index)">
-                                        <span class="fas fa-times"></span>
-                                    </a>
-                                </template>
-                                <tab :title="item.title" v-for="item in tabs" :key="item.id" html-title>
-                                    <tabs v-if="item.child" v-model="secIndex">
-                                        <tab :title="it | pickTitle" v-for="it in item.child" :key="it.id" html-title>
-                                            <event-diagnosis-datatable-component :id="it.id" :model="model[index][it.type]"></event-diagnosis-datatable-component>
-                                        </tab>
-                                    </tabs>
-                                </tab>
-                            </tabs>`,
+                template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="detailRemove">
+                                <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
+                                    <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
+                                        <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
+                                            <div v-if="it.type === 'profile'">
+                                                <profile-view :id="item.name" :model="model[it.type]" v-if="it.model[it.type]"></profile-view>
+                                            </div>
+                                            <div v-else-if="_.includes(['event','performance','log'],it.type)">
+                                                <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]" v-if=" _.includes(['event','performance','log'],it.type) "></event-diagnosis-datatable-component>
+                                            </div>
+                                            <div v-else-if="it.type === 'file'">
+                                                <file-view :id="it.id" :model="model[it.type]" v-if="it.model[it.type]""></file-view>
+                                            </div>
+                                        </el-tab-pane>
+                                    </el-tabs>
+                                </el-tab-pane>
+                            </el-tabs>`,
                 data: {
-                    tabs: [tabTemp],
-                    index: 0,
-                    secIndex: _.findIndex(tabTemp.child,{type:event.type}),
-                    model: [fsHandler.callFsJScript('/topological/diagnosis.js',event.value).message]
+                    tabs:   [],
+                    activeIndex: '',
+                    subIndex: '',
+                    model: null
                 },
                 filters: {
                     pickTitle(event){
@@ -516,54 +1119,72 @@ class Topological {
                         
                         try {
                             let count = 0;
-                            count = topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows.length;
+                            
+                            count = event.model[event.type].rows.length;
 
-                            let badge = 0;
-                            let severity = _.maxBy(topological.graphAssociation.$data.model[topological.graphAssociation.$data.index][event.type].rows,'severity').severity;
-                            badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
-
-                            return `${event.title} ${badge}`;
+                            return `${event.title} ${count}`;
                         } catch(error){
                             return `${event.title} 0`;
                         }
                     }
+                },
+                created(){
+                    this.model = model;
+                    this.activeIndex = `diagnosis-${id}`;
+
+                    this.tabs.push(tabTemp);
+                    this.subIndex = _.first(tabTemp.child).name;
                 },
                 mounted(){
                     this.init();
                 },
                 methods:{
                     init(){
-                        $(this.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
+                        
                     },
-                    close(index){
-                        this.tabs.splice(index, 1);
-                        this.model.splice(index, 1);
-                        // select prev tab if the closed tab is the last one
-                        if (this.index === this.tabs.length && this.index > 0) {
-                            --this.index
+                    detailRemove(targetName) {
+                            
+                        let tabs = this.tabs;
+                        let activeIndex = this.index;
+                        if (activeIndex === targetName) {
+                          tabs.forEach((tab, index) => {
+                            if (tab.name === targetName) {
+                              let nextTab = tabs[index + 1] || tabs[index - 1];
+                              if (nextTab) {
+                                activeIndex = nextTab.name;
+                              }
+                            }
+                          });
                         }
+                        
+                        this.index = activeIndex;
+                        this.tabs = tabs.filter(tab => tab.name !== targetName);
+
+                        mxTopological.app.splitInst.setSizes([0,100,0]);
                     }
                 }
             }).$mount(".graph-association");
         } else {
-            let check = _.find(topological.graphAssociation.$data.tabs,{title:event.value});
+            
+            let check = _.find(mxTopological.graphAssociation.$data.tabs,{name: `diagnosis-${id}`});
+            
             if(!check){
-                topological.graphAssociation.$data.tabs.push(tabTemp);
-                topological.graphAssociation.$data.index = topological.graphAssociation.$data.tabs.length - 1;
-                topological.graphAssociation.$data.model[topological.graphAssociation.$data.index] = fsHandler.callFsJScript('/topological/diagnosis.js',event.value).message;
+                mxTopological.graphAssociation.$data.tabs.push(tabTemp);
+                mxTopological.graphAssociation.$data.activeIndex = tabTemp.name;
                 _.delay(function(){
-                    topological.graphAssociation.$data.subIndex = _.findIndex(tabTemp.child,{type:event.type});
-                    $(topological.graphAssociation.$el).find("ul.nav-tabs").addClass("nav-tabs-bottom-1px");
-                },50)
+                    mxTopological.graphAssociation.$data.subIndex = _.first(tabTemp.child).name;
+                },500)
+            } else {
+                mxTopological.graphAssociation.$data.activeIndex = check.name;
             }
         }
+
+        mxTopological.app.splitInst.setSizes([0,60,40]);
     
-        document.location.href = "#graph-association";
-        $("#content.content").css("padding-top","35px");
         mx.windowResize();
     }
 
 }
 
-let topological = new Topological();
-topological.init();
+let mxTopological = new Topological();
+mxTopological.init();

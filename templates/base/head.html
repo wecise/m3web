@@ -232,134 +232,135 @@
 
 	<div id="page-container" class="fade page-sidebar-minified page-header-fixed in">
 		
-		<div id="header" class="header navbar navbar-default navbar-fixed-top">
-			<div class="container-fluid" style="margin:0px;padding:0px 10px 0px 0px;">
-				
-				<div class="navbar-header">
-					<a class="navbar-brand animated bounceIn" href="{{AppSubUrl}}/">
-						<img id="company_logo" src="">
-						<span>{{.title}}</span>
-					</a>
-			    </div>
-				<div class="navbar-collapse collapse">
-			        <ul class="nav navbar-nav navbar-right">
+	<header id="header" class="header navbar navbar-default navbar-fixed-top">
+		
+		<nav class="container-fluid" style="margin:0px;padding:0px 10px 0px 0px;">
+			
+			<div class="navbar-header">
+				<a class="navbar-brand animated bounceIn" href="{{AppSubUrl}}/">
+					<img id="company_logo" src="">
+					<span>{{.title}}</span>
+				</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
 
-				        <li>
-					        <div id="search-bar"></div>
-				        </li>
-
-					{{if .IsSigned}}
-  
 					<li>
-						<div id="ai-robot"></div>
-					</li>				    
+						<div id="search-bar"></div>
+					</li>
 
-					{{else}}
-						<li>
-							<a class="{{if .PageIsInfo}} active{{end}}" href="{{AppSubUrl}}/"><i class="icon-comment"></i></a>
-						</li>
-					{{end}}
+				{{if .IsSigned}}
 
+				<li>
+					<div id="ai-robot"></div>
+				</li>				    
 
-					{{if .IsSigned}}
-
-						<li class="dropdown navbar-user">
-
-							<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-								<i class="fa fa-user"></i> {{.SignedUser.UserName}}
-							</a>
-
-							<ul class="dropdown-menu animated fadeIn">
-
-								<li>
-									<a href="{{AppSubUrl}}/janesware/user">
-										<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}}
-									</a>
-								</li>
-
-								<li class="divider"></li>
-
-								{{if .IsAdmin}}
-								{{if ne .company "oneswitch"}}
-									<li>
-										<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
-											<i class="fa fa-cogs"></i> {{.i18n.Tr "system"}}
-										</a>
-									</li>
-
-								{{end}}
-								{{end}}
-
-								<li>
-									<a target="_blank" href="/janesware/files">
-										<i class="fa fa-list-alt"></i> {{.i18n.Tr "files"}}
-									</a>
-								</li>
+				{{else}}
+					<li>
+						<a class="{{if .PageIsInfo}} active{{end}}" href="{{AppSubUrl}}/"><i class="icon-comment"></i></a>
+					</li>
+				{{end}}
 
 
-								<li>
-									<a target="_blank" href="javascript:mx.setDefaultHome('home','{{.CsrfToken}}')">
-										<i class="fa fa-home"></i> {{.i18n.Tr "defaulthome"}}
-									</a>
-								</li>
+				{{if .IsSigned}}
 
+					<li class="dropdown navbar-user">
 
-								<li class="divider"></li>
+						<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							<i class="fa fa-user"></i> {{.SignedUser.UserName}}
+						</a>
 
-								<li>
-									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('bjzdgt')">
-										<i class="fas fa-sun"></i> 亮色
-									</a>
-								</li>
+						<ul class="dropdown-menu animated fadeIn">
 
-								<li>
-									<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('matrix')">
-										<i class="fas fa-sun" style="color:#000;"></i> 深色
-									</a>
-								</li>
-
-
-								<li>
-									<a target="_blank" href="javascript:void(0);" onclick="mx.fullScreen();">
-										<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
-									</a>
-								</li>
-
-								<li class="divider"></li>
-
-								<li>
-									<a href="{{AppSubUrl}}/user/logout/{{.company}}">
-										<i class="fa fa-sign-out-alt"></i> {{.i18n.Tr "sign_out"}}
-									</a>
-								</li>
-							</ul>
-						</li>
-
-					{{else}}
-						<li>
-							<a class="item" target="_blank" href="http://golang.org/" rel="noreferrer">{{.i18n.Tr "help"}}</a>
-						</li>
-
-						{{if .ShowRegistrationButton}}
 							<li>
-								<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
-									<i class="icon octicon octicon-person-add"></i> {{.i18n.Tr "register"}}
+								<a href="{{AppSubUrl}}/janesware/user">
+									<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}}
 								</a>
 							</li>
-						{{end}}
+
+							<li class="divider"></li>
+
+							{{if .IsAdmin}}
+							
+								<li>
+									<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
+										<i class="fa fa-cogs"></i> {{.i18n.Tr "system"}}
+									</a>
+								</li>
+
+							{{end}}
+
+							<li>
+								<a target="_blank" href="/janesware/files">
+									<i class="fa fa-list-alt"></i> {{.i18n.Tr "files"}}
+								</a>
+							</li>
+
+
+							<li>
+								<a target="_blank" href="javascript:mx.setDefaultHome('home','{{.CsrfToken}}')">
+									<i class="fa fa-home"></i> {{.i18n.Tr "defaulthome"}}
+								</a>
+							</li>
+
+
+							<li class="divider"></li>
+
+							<li>
+								<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('bjzdgt')">
+									<i class="fas fa-sun"></i> 亮色
+								</a>
+							</li>
+
+							<li>
+								<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('matrix')">
+									<i class="fas fa-sun" style="color:#000;"></i> 深色
+								</a>
+							</li>
+
+
+							<li>
+								<a target="_blank" href="javascript:void(0);" onclick="mx.fullScreen();">
+									<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
+								</a>
+							</li>
+
+							<li class="divider"></li>
+
+							<li>
+								<a href="{{AppSubUrl}}/user/logout/{{.company}}">
+									<i class="fa fa-sign-out-alt"></i> {{.i18n.Tr "sign_out"}}
+								</a>
+							</li>
+						</ul>
+					</li>
+
+				{{else}}
+					<li>
+						<a class="item" target="_blank" href="http://golang.org/" rel="noreferrer">{{.i18n.Tr "help"}}</a>
+					</li>
+
+					{{if .ShowRegistrationButton}}
 						<li>
-							<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login">
-								<i class="icon octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
+							<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
+								<i class="icon octicon octicon-person-add"></i> {{.i18n.Tr "register"}}
 							</a>
 						</li>
-
 					{{end}}
+					<li>
+						<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login">
+							<i class="icon octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
+						</a>
+					</li>
 
-				</ul>
-				</div>
+				{{end}}
+
+			</ul>
 			</div>
-		</div>
-		
+		</nav>
+	</header>
+	
+	<aside>
 		<div id="sidebar" class="sidebar animated fadeInLeft">
 			<div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;">
 				<div data-scrollbar="true" data-height="100%" style="overflow: hidden; width: auto; height: 100%;">
@@ -371,6 +372,7 @@
 			<img src="/fs/assets/images/apps/png/play.png?type=download&issys=true"></i>
 		</div>
 		<div id="sidebar-bg" class="sidebar-bg"></div>
+	</aside>
 
 
 

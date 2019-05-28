@@ -233,10 +233,8 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-diagnosis-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-graph-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/job/event-summary-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/job-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/job/job-diagnosis-datatable-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
@@ -247,7 +245,7 @@
 
 
 <script type="text/x-template" id="app-template">
-	<div id="content" class="content">
+	<main id="content" class="content">
 		<el-row :gutter="10">
 			<el-col :xl="24" style="padding-bottom:7px;">
 				<search-base-component :id="model.id"
@@ -304,7 +302,7 @@
 									<probe-tree-component id="job-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>
 								</el-col>
 								<el-col :xl="16" class="table-view animated fadeInLeft">
-									<event-datatable-component id="job-list" :model="model.message"></event-datatable-component>
+									<job-datatable-component id="job-list" :model="model.message"></job-datatable-component>
 								</el-col>
 							</el-row>
 						</div>
@@ -321,7 +319,7 @@
 										<job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model"></job-diagnosis-cmd>
 									</div>
 									<div v-else>
-										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
+										<!-- <job-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></job-diagnosis-datatable-component> -->
 									</div>
 								</el-tab-pane>
 							</el-tabs>
@@ -330,7 +328,7 @@
 				</el-tabs>
 			</el-col>
 		</el-row>
-	</div>
+	</main>
 </script>
 
 {{template "base/footer" .}}

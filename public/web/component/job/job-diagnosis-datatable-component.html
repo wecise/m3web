@@ -2,44 +2,44 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.event-diagnosis-datatable-component,
-		.event-diagnosis-datatable-component .dataTables_wrapper{
+		.job-diagnosis-datatable-component,
+		.job-diagnosis-datatable-component .dataTables_wrapper{
 			width:100%;
 			height: 100%;
 			margin: 0 auto;
 		}
 
-		.event-diagnosis-datatable-component .dataTables_wrapper table.dataTable{
+		.job-diagnosis-datatable-component .dataTables_wrapper table.dataTable{
 			margin: 0!important
 		}
 
-		.event-diagnosis-datatable-component .dataTables_scrollHead{
+		.job-diagnosis-datatable-component .dataTables_scrollHead{
 			background: rgb(241, 241, 241);
 		}
 
-		.event-diagnosis-datatable-component thead tr th, .event-diagnosis-datatable-component tbody tr td{
+		.job-diagnosis-datatable-component thead tr th, .job-diagnosis-datatable-component tbody tr td{
 			line-height: 10px;
 			white-space: nowrap;
 		}
 
-		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected,
-		.event-diagnosis-datatable-component table.dataTable tbody>tr.selected td,
-		.event-diagnosis-datatable-component table.dataTable tbody>tr>.selected {
+		.job-diagnosis-datatable-component table.dataTable tbody>tr.selected,
+		.job-diagnosis-datatable-component table.dataTable tbody>tr.selected td,
+		.job-diagnosis-datatable-component table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
 		}
 
 		/* input高度*/
-		.event-diagnosis-datatable-component .dataTables_filter input{
+		.job-diagnosis-datatable-component .dataTables_filter input{
 			height: 24px;
 		}
 
-		.event-diagnosis-datatable-component tr{
+		.job-diagnosis-datatable-component tr{
 			animation-delay: .5s;
 		}
 
 		/* CSS to add checkboxes to colvis items */
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.job-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before,
+		.job-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			display:block;
 			position:absolute;
 			top:1.2em;
@@ -49,7 +49,7 @@
 			box-sizing:border-box;
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
+		.job-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility:before {
 			content: '\25A1 ';
 			margin-top: -25px;
 			margin-left: -2px;
@@ -59,7 +59,7 @@
 			color: rgb(221,221,221);
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
+		.job-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility.active span:before {
 			content: '\2713';
 			margin-top: -11px;
 			margin-left: 5px;
@@ -70,23 +70,23 @@
 			color: rgb(29, 28, 28);
 		}
 
-		.event-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility span {
+		.job-diagnosis-datatable-component .dt-button-collection a.buttons-columnVisibility span {
 			margin-left: 25px;
 		}
 
 		/* columns选择 */
-		.event-diagnosis-datatable-component div.dt-button-collection {
+		.job-diagnosis-datatable-component div.dt-button-collection {
 			width: 50vw;
 			max-height: 50vh;
 			overflow: auto!important;
 		}
 
-		.event-diagnosis-datatable-component div.dt-button-background {
+		.job-diagnosis-datatable-component div.dt-button-background {
 			display: none!important;
 		}
 
-		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
-		.event-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
+		.job-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility:active:not(.disabled),
+		.job-diagnosis-datatable-component div.dt-button-collection a.buttons-columnVisibility.active:not(.disabled) {
 			background-color: #ffffff;
 			background-image:  none;
 			background-image: none;
@@ -94,8 +94,8 @@
 			box-shadow: none;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility:active:not(.disabled),
-		.event-diagnosis-datatable-component a.buttons-columnVisibility.active:not(.disabled) {
+		.job-diagnosis-datatable-component a.buttons-columnVisibility:active:not(.disabled),
+		.job-diagnosis-datatable-component a.buttons-columnVisibility.active:not(.disabled) {
 			background-color: #ffffff;
 			background-image:  none;
 			background-image: none;
@@ -104,7 +104,7 @@
 			box-shadow:  none;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility {
+		.job-diagnosis-datatable-component a.buttons-columnVisibility {
 			position: relative;
 			display: inline-block;
 			box-sizing: border-box;
@@ -132,7 +132,7 @@
 			text-align: left;
 		}
 
-		.event-diagnosis-datatable-component a.buttons-columnVisibility:hover:not(.disabled) {
+		.job-diagnosis-datatable-component a.buttons-columnVisibility:hover:not(.disabled) {
 			background-color:  none;
 			background-image:  none;
 			filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,StartColorStr='#f9f9f9', EndColorStr='#e0e0e0');
@@ -143,7 +143,7 @@
 	</style>
 
 	
-	/*----------  最外层element会自动增加组件同名 class="event-diagnosis-datatable-component"  ----------*/
+	/*----------  最外层element会自动增加组件同名 class="job-diagnosis-datatable-component"  ----------*/
 	<template>
 		<div>
 			<table :id="id" class="stripe row-border order-column" width="100%"></table>
@@ -151,7 +151,7 @@
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
-	<script id="event-diagnosis-datatable-component">
+	<script id="job-diagnosis-datatable-component">
 	{
         delimiters: ['${', '}'],
 		props: {
@@ -379,15 +379,15 @@
                 });
 
                 // 更新Dom
-                if( $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
-                    $('.event-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').empty();
+                if( $('.job-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').length ) {
+                    $('.job-diagnosis-datatable-component .dataTables_wrapper > .dt-buttons').empty();
                 }
-                datatable.buttons().containers().prependTo( `.event-diagnosis-datatable-component .dataTables_wrapper` );
+                datatable.buttons().containers().prependTo( `.job-diagnosis-datatable-component .dataTables_wrapper` );
 
                 // button样式调整
-                $(".event-diagnosis-datatable-component a.dt-button").removeClass("dt-button");
+                $(".job-diagnosis-datatable-component a.dt-button").removeClass("dt-button");
                 // tooltip
-                $(".event-diagnosis-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
+                $(".job-diagnosis-datatable-component .dataTables_wrapper a").attr("data-tooltip","tooltip");
 
 			}
 		}

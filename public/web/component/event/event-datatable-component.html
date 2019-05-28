@@ -367,8 +367,9 @@
                                     self.handleRow();
 
                                     self.toolBar();
-	                                //self.contextMenu();
-                                    event.contextMenu(self.id, self, self.model.contextMenu, self.$root, self.refresh);
+	                                
+                                    // 注册右键菜单
+                                    event.contextMenu(self.id, self, self.model.contextMenu.event, self.$root, self.refresh);
                                     
                                     
                                     self.dragHandle();
@@ -385,7 +386,6 @@
                 const self = this;
 
                 _.delay(function(){
-                    // Buttons enable/disable
                     self.datatable.on( 'select deselect', function () {
                         let selectedRows = self.datatable.rows( { selected: true } ).count();
                         self.datatable.buttons( [3,4,5,6] ).enable( selectedRows > 0 );
@@ -427,50 +427,6 @@
 			refresh: function(){
                 this.$root.$refs.searchRef.search();
 			},
-			contextMenu: function(){
-                const self = this;
-
-                let contextMenuItems = self.model.contextMenu;
-                let id = self.id;
-
-                $.contextMenu({
-                    selector: `#${id} tr td:not(:nth-child(1))`,
-                    trigger: 'right',
-                    autoHide: true,
-                    delay: 5,
-                    hideOnSecondTrigger: true,
-                    className: `animated slideIn ${id} context-menu-list`,
-                    build: function($trigger, e) {
-
-                        return {
-                            callback: function(key, opt) {
-                                
-                                if(_.includes(key,'diagnosis')) {
-                                    self.$root.detailAdd(self.selectedRows);
-                                } else if(_.includes(key,'action')) {
-                                    // 增加操作类型
-                                    let action = _.last(key.split("_"));
-                                    self.$root.action({list: [self.selectedRows], action:action});
-                                }
-                            },
-                            items: contextMenuItems
-                        }
-                    },
-                    events: {
-                        show: function(opt) {
-
-                            let $this = this;
-
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
-                        },
-                        hide: function(opt) {
-
-                            let $this = this;
-
-                        }
-                    }
-                });
-            },
 			dragHandle: function(){
                 const self = this;
 

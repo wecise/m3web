@@ -242,10 +242,8 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/performance/event-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/performance/event-diagnosis-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/performance/event-graph-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/performance/event-summary-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/performance/performance-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/performance/performance-diagnosis-datatable-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
@@ -256,7 +254,7 @@
 
 
 <script type="text/x-template" id="app-template">
-	<div id="content" class="content">
+	<main id="content" class="content">
 		<el-row :gutter="10">
 			<el-col :xl="24" style="padding-bottom:7px;">
 				<search-base-component :id="model.id"
@@ -313,7 +311,7 @@
 									<probe-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></probe-tree-component>
 								</el-col>
 								<el-col :xl="16" class="table-view animated fadeInLeft">
-									<event-datatable-component id="performance-list" :model="model.message"></event-datatable-component>
+									<performance-datatable-component id="performance-list" :model="model.message"></performance-datatable-component>
 								</el-col>
 							</el-row>
 						</div>
@@ -330,7 +328,7 @@
 										<performance-diagnosis-journal :id="it.name+ '-journal'" :model="it.model.journal"></performance-diagnosis-journal>
 									</div>
 									<div v-else>
-										<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
+										<!-- <performance-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></performance-diagnosis-datatable-component> -->
 									</div>
 								</el-tab-pane>
 							</el-tabs>
@@ -339,7 +337,7 @@
 				</el-tabs>
 			</el-col>
 		</el-row>
-	</div>
+	</main>
 </script>
 
 {{template "base/footer" .}}
