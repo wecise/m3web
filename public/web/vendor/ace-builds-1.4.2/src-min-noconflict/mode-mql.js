@@ -7,10 +7,10 @@ var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 var SqlHighlightRules = function() {
 
     var keywords = (
-        "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|" +
+        "select|insert|update|delete|from|where|and|or|group|by|order|limit|offset|having|as|case|like|" +
         "when|else|end|type|left|right|join|on|outer|desc|asc|union|create|table|primary|key|if|" +
         "foreign|not|references|default|null|inner|cross|natural|database|drop|grant|" +
-        "alter|class|add|column|indexes|key|/|matrix|alias|autosearch|child|cid|fields|fieldsObj|keymethod|keymode|keys|loption|mtime|pid|remedy|subclass|tags|ttl|vtimebase|largepartition|edge|into|match|return|path|detail|short|long|all|back|diff"
+        "alter|class|add|column|indexes|key|/|alias|autosearch|child|cid|fields|fieldsObj|keymethod|keymode|keys|loption|mtime|pid|remedy|subclass|tags|ttl|with|version|vtimebase|largepartition|edge|into|match|return|path|detail|short|long|all|back|diff|until"
     );
 
     var builtinConstants = (

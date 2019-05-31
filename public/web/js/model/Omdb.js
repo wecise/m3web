@@ -585,7 +585,7 @@ class Omdb{
 
             let graph = function(id, bid, node){
 
-                let _data = {nodes:[], edges:[], paths: [], pathtags:[]};
+                let _data = {nodes:[], edges:[], paths: [], pathtags:[], diff:{}};
 
                 if(!_.isEmpty(node)){
                     _data.nodes = node.nodes;
@@ -601,6 +601,10 @@ class Omdb{
 
                 if(!_.isEmpty(node.pathtags)){
                     _data.pathtags = node.pathtags;
+                };
+
+                if(!_.isEmpty(node.diff)){
+                    _data.diff = node.diff;
                 };
 
                 return {

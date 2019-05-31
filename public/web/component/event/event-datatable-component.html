@@ -369,7 +369,7 @@
                                     self.toolBar();
 	                                
                                     // 注册右键菜单
-                                    event.contextMenu(self.id, self, self.model.contextMenu.event, self.$root, self.refresh);
+                                    self.$root.contextMenu(self.id, self, self.model.contextMenu.event, self.refresh);
                                     
                                     
                                     self.dragHandle();

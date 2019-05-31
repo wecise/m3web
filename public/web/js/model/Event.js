@@ -24,6 +24,7 @@ class Event extends Matrix {
     }
 
     init() {
+        const event = this;
 
         VueLoader.onloaded(["ai-robot-component",
                             "topological-graph-component",
@@ -416,63 +417,7 @@ class Event extends Matrix {
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="event"></event-diagnosis-datatable-component>
-                                    </el-main>
-                                </el-container>`,
-                    mounted(){
-                        const self = this;
-                    },
-                    methods: {
-                        init(){    
-                            const self = this;
-
-                        }
-                    }
-                })
-
-                // 日志
-                Vue.component("event-diagnosis-log",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            
-                        }
-                    },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
-                                    <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="log"></event-diagnosis-datatable-component>
-                                    </el-main>
-                                </el-container>`,
-                    mounted(){
-                        const self = this;
-                    },
-                    methods: {
-                        init(){    
-                            const self = this;
-
-                        }
-                    }
-                })
-
-                // 性能
-                Vue.component("event-diagnosis-performance",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            
-                        }
-                    },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
-                                    <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model" :type="performance"></event-diagnosis-datatable-component>
+                                        <event-diagnosis-datatable-component :id="id" :model="model" type="event"></event-diagnosis-datatable-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -528,7 +473,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-aigroup-by-value'" :model="tableData"></event-diagnosis-datatable-component>
+                                            <event-diagnosis-datatable-component :id="id + '-aigroup-by-value'" :model="tableData" type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -547,9 +492,9 @@ class Event extends Matrix {
                                                         {data:'group',title:'分组名称',sortable:true},
                                                         {data:'app',title:'影响应用系统'},
                                                         {data:'severity',title:'告警级别统计', render:function(data,type,row){
-                                                            return `<a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[5][2]}">${data[0]}</a>
-                                                                    <a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[4][2]}">${data[1]}</a>
-                                                                    <a href="javascript:void(0);" class="btn btn-link" style="padding: 2px 4px;background:${mx.global.register.event.severity[3][2]}">${data[2]}</a>`;
+                                                            return `<a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[5][2]}">${data[0]}</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[4][2]}">${data[1]}</a>
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[3][2]}">${data[2]}</a>`;
                                                         }},
                                                         {data:'ids',title:'IDS', visible: false}
                                             ];
@@ -690,7 +635,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData" :type="event"></event-diagnosis-datatable-component>
+                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData" type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -811,7 +756,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="probability-right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData" :type="event"></event-diagnosis-datatable-component>
+                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData" type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -870,7 +815,7 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" :id="id+'-topological-view-right'">
                                         <el-main style="padding:0px;">
-                                            <div id="topological-app"></div>
+                                            <div :id="'topological-app-'+id"></div>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -879,7 +824,11 @@ class Event extends Matrix {
                     },
                     methods: {
                         init(){    
-                            mxTopological.initComponent("#topological-app");
+                            const self = this;
+
+                            let mxTopological = new Topological();
+                            mxTopological.init();
+                            mxTopological.mount(`#topological-app-${self.id}`);
 
                             this.splitInst = Split([`#${this.id}-topological-view-left`, `#${this.id}-topological-view-right`], {
                                 sizes: [0, 100],
@@ -892,7 +841,7 @@ class Event extends Matrix {
                     }
                 })
                 
-                event.app = {
+                let main = {
                     delimiters: ['${', '}'],
                     template: "#app-template",
                     data: {
@@ -1053,6 +1002,7 @@ class Event extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
+                            
                             event.resizeEventConsole();
                         },
                         toggleSummaryByGroup(evt){
@@ -1079,6 +1029,7 @@ class Event extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
+                            
                             event.resizeEventConsole();
                         },
                         toggleSummaryByRefresh(evt){
@@ -1097,6 +1048,7 @@ class Event extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
+                            
                             event.resizeEventConsole();
                         },
                         aiGroup(){
@@ -1130,14 +1082,11 @@ class Event extends Matrix {
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
                                                 {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
-                                                //{title:'相关日志', name:`diagnosis-log-${id}`, type: 'log', model:model},
-                                                //{title:'相关性能', name:`diagnosis-performance-${id}`, type: 'performance', model:model},
                                                 {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model}
                                             ]};
-                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
-
                                 this.layout.main.tabs.push(detail);
                                 this.layout.main.activeIndex = `diagnosis-${id}`;
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
@@ -1160,12 +1109,14 @@ class Event extends Matrix {
                             
                             this.layout.main.activeIndex = activeIndex;
                             this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                            this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
 
                             // AI Group
                             if(_.includes(targetName,'aiGroup')){
                                 this.control.ifSummary = '0';
                             }
 
+                            
                             _.delay(function(){
                                 // RESIZE Event Summary
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
@@ -1208,14 +1159,57 @@ class Event extends Matrix {
                                 }
                             });
                             
+                        },
+                        contextMenu(tId,inst,items,fun){
+                            const self = this;
+
+                            $.contextMenu({
+                                selector: `#${tId} tr td:not(:nth-child(1))`,
+                                trigger: 'right',
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${tId} context-menu-list`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.detailAdd(inst.selectedRows);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.action({list: [inst.selectedRows], action:action});
+                                            }
+                                        },
+                                        items: items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                    
+                                        let $this = this;
+                                        _.delay(function(){
+                                            new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                                        },50)
+                                    },
+                                    hide: function(opt) {
+                    
+                                        let $this = this;
+                    
+                                    }
+                                }
+                            });
                         }
                     }
                 };
 
-                new Vue(event.app).$mount("#app");    
+                event.app = new Vue(main).$mount("#app");    
             });
         })
 
+        
         window.addEventListener('resize', () => { 
             event.resizeEventConsole();
 
@@ -1226,47 +1220,7 @@ class Event extends Matrix {
         
     }
 
-    contextMenu(tId,inst,items,app,fun){
-        
-        $.contextMenu({
-            selector: `#${tId} tr td:not(:nth-child(1))`,
-            trigger: 'right',
-            autoHide: true,
-            delay: 5,
-            hideOnSecondTrigger: true,
-            className: `animated slideIn ${tId} context-menu-list`,
-            build: function($trigger, e) {
-
-                return {
-                    callback: function(key, opt) {
-                        
-                        if(_.includes(key,'diagnosis')) {
-                            app.detailAdd(inst.selectedRows);
-                        } else if(_.includes(key,'action')) {
-                            // 增加操作类型
-                            let action = _.last(key.split("_"));
-                            app.action({list: [inst.selectedRows], action:action});
-                        }
-                    },
-                    items: items
-                }
-            },
-            events: {
-                show: function(opt) {
-
-                    let $this = this;
-                    _.delay(function(){
-                        new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
-                    },50)
-                },
-                hide: function(opt) {
-
-                    let $this = this;
-
-                }
-            }
-        });
-    }
+    
 
     resizeEventConsole(){
         let evwH = $(window).height();
@@ -1283,15 +1237,10 @@ class Event extends Matrix {
 
     checkContainer(){
         if($('#event-view-container').is(':visible')) {
-            event.layout();
+            this.layout();
         } else {
-            setTimeout(event.checkContainer, 50);
+            setTimeout(this.checkContainer, 50);
         }
     }
 
-
-
 }
-
-let event = new Event();
-event.init();

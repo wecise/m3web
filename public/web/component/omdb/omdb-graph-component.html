@@ -220,10 +220,28 @@
                         }
 
                         let _name =  _.last(v.id.split(":")) || '';
+
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                             `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
 
                         self.model.graph.nodes[v.id] = node;
+
+                        try{
+                            //add
+                            if(_.some(self.graphData.diff.add.nodes,{id: v.id})){
+                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                self.model.graph.graph.addCellOverlay(node, overlay);
+                            }
+
+                            //delete
+                            if(_.some(self.graphData.diff.del.nodes,{id: v.id})){
+                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                self.model.graph.graph.addCellOverlay(node, overlay);
+                            }
+                        } catch(err){
+
+                        }
+                        
                     })
 
                     _.forEach(self.graphData.edges,function(k){
@@ -234,6 +252,22 @@
                         if(k.twoway){
                             direction = 'startArrow=block;endArrow=block;endFill=1;';
                         }
+                        let dashed = 0;
+                        
+                        try{
+                            //add
+                            if(_.some(self.graphData.diff.add.edges,{id: k.id})){
+                                direction += 'strokeColor=#58b368;strokeWidth=3;';
+                            }
+
+                            //delete
+                            if(_.some(self.graphData.diff.del.edges,{id: k.id})){
+                                direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=3;';
+                            }
+                        } catch(err){
+
+                        }
+                        
 
                         let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                     })

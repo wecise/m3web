@@ -282,9 +282,9 @@
 				                    
 									// 注册Row事件
                                     self.handleRow();
-
+									
 	                                // 注册右键菜单
-                                    event.contextMenu(self.id, self, event.app.data.model.message.contextMenu[self.type], self.$root, self.refresh);
+                                    self.$root.contextMenu(self.id, self, self.$root.$data.model.message.contextMenu[self.type], self.refresh);
 									
 									self.resize();
 			                    }

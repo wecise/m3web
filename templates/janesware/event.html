@@ -296,10 +296,18 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
 
 <script src="{{AppSubUrl}}/web/js/model/Topological.js"></script>
-
 <script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+
+<script>
+	$(function() {
+		_.delay(function(){
+			let mxEvent = new Event();
+			mxEvent.init();
+		},50)
+	})
+</script>
 
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
@@ -397,12 +405,6 @@
 									</div>
 									<div v-else-if="it.type==='probability'">
 										<event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
-									</div>
-									<div v-else-if="it.type==='log'">
-										<event-diagnosis-log :id="it.name + '-log'" :model="it.model.log"></event-diagnosis-log>
-									</div>
-									<div v-else-if="it.type==='performance'">
-										<event-diagnosis-performance :id="it.name + '-performance'" :model="it.model.performance"></event-diagnosis-performance>
 									</div>
 									<div v-else-if="it.type==='topological'">
 										<event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>

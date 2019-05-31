@@ -233,7 +233,9 @@
 
 <script>
 	$(function(){
-		mxTopological.initComponent("#app");
+        let mxTopological = new Topological();
+        mxTopological.init();
+        mxTopological.mount("#app",mxTopological);
 	})
 </script>
 {{template "base/footer" .}}

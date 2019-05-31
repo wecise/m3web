@@ -81,10 +81,10 @@
 	<template>
 		<div :id="id">
 			<div :id="id+'-container'"></div>
-			<div :id="id+'-nav'" class="nav">
-                <div :id="id+'-tools'" class="tools"></div>
-                <div class="tools-search"><div :id="id+'-tools-search'"></div></div>
-				<div :id="id+'-outlineContainer'" class="outlineContainer"></div>
+			<div class="nav" :id="id+'-nav'">
+                <div class="tools" :id="id+'-tools'"></div>
+                <graph-view-search class="tools-search" :id="id+'-tools-search'"></graph-view-search>
+				<div class="outlineContainer" :id="id+'-outlineContainer'"></div>
 			</div>
 		</div>
 	</template>
@@ -95,7 +95,8 @@
 	    delimiters: ['${', '}'],
 	    props: {
 	        id: String,
-	        graphData: Object,
+            graphData: Object,
+            inst: Object
 	    },
 	    data: function () {
 	        return {
@@ -151,8 +152,10 @@
 
 	        self.$nextTick(function(){
 
-                self.init();
-                self.initPlugIn();
+                _.delay(function(){
+                    self.init();
+                    self.initPlugIn();
+                },1000)
 	            
 	        })
 	    },
@@ -190,8 +193,8 @@
 
                     // Enables automatic sizing for vertices after editing and
                     // panning by using the left mouse button.
-                    // self.model.graph.graph.setEnabled(false);
-                    self.model.graph.graph.setCellsMovable(true);
+                    self.model.graph.graph.setEnabled(false);
+                    self.model.graph.graph.setCellsMovable(false);
                     self.model.graph.graph.setAutoSizeCells(true);
                     self.model.graph.graph.setPanning(true);
                     self.model.graph.graph.centerZoom = true;
@@ -400,12 +403,8 @@
                 }
             },
             initPlugIn(){
-                const self = this;
-
                 this.outline();
                 this.toolBars();
-                new Vue(mxTopological.searchBar()).$mount(`#${this.id}-tools-search`);
-
             },
             reload(){
                 $(this.$el).find(`#${this.id}-container`).empty();
@@ -425,10 +424,8 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    mxTopological.graphSelectedCell = cell;
-
                     // 点击获取关联信息
-                    mxTopological.diagnosis({id:id,value:value,type:'event'});
+                    self.$root.$refs.graphDiagnosisRef.diagnosisAdd( {id:id, value:value, type:'event', cell: cell} );
                 })
 
                 self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
@@ -440,7 +437,7 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    mxTopological.graphSelectedCell = cell;
+                    //inst.graphSelectedCell = cell;
 
                     // copy to copyboard
                     let clipboard2 = new Clipboard('g image',{
@@ -480,7 +477,7 @@
                 alertify.log(event + ' ' + moment().format("LLL"));
             },
             outline(){
-                let self = this;
+                const self = this;
 
                 let outline = document.getElementById(`${self.id}-outlineContainer`);
 
@@ -488,7 +485,7 @@
 
             },
 		    saveas(){
-				let self = this;
+				const self = this;
 
                 let encoder = new mxCodec();
                 let node = encoder.encode(self.model.graph.graph.getModel());
@@ -520,10 +517,10 @@
 
 		    },
             toolBars() {
-                let self = this;
+                const self = this;
 
                 let content = document.getElementById(`${self.id}-tools`);
-
+                
                 let tb = new mxToolbar(content);
 
                 tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_ICON}/tools/png/saveas.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
@@ -566,7 +563,6 @@
                 tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
 
-
                     self.model.graph.graph.getModel().beginUpdate();
 
                     try
@@ -601,7 +597,7 @@
                 
                 tb.addItem('主题', `${window.ASSETS_ICON}/tools/png/theme.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-                    mxTopological.toggleTheme();
+                    inst.toggleTheme();
 
                 },null,'tools-item');
 
@@ -650,7 +646,7 @@
                     dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
                 })
                 let node = { data: _.groupBy(dataset,'class'), columns: cols};
-                let path = mxTopological.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
+                let path = inst.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
                 new Vue(path);
             },
             addPath(event){
