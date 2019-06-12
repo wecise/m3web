@@ -145,15 +145,19 @@
 
 	/* 告警统计widget */
 	.entity-view-summary-control{
-		right: 15px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
+		display: flex;
 		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+		height: 22px;
+		line-height: 22px;
+		width: 50%;
+		right: 15px;
+		top: 10px;
+		flex-direction: row-reverse;
+		z-index: 100;
+	}
+
+	.entity-view-summary-control > .el-tooltip{
+		padding-right: 10px;
 	}
 
 	/* el tabs */
@@ -241,19 +245,21 @@
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
 						<div v-if="item.type==='main'">
-							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
-								<div class="entity-view-summary-control">
-									${control.ifSmart==1?'智能分析':'智能分析'}
-									<el-switch
-									v-model="control.ifSmart"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryBySmart">
-									</el-switch>
-								</div>
-							</el-tooltip>
+							<div class="entity-view-summary-control">
+								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
+									<div class="entity-view-summary-control">
+										${control.ifSmart==1?'智能分析':'智能分析'}
+										<el-switch
+										v-model="control.ifSmart"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryBySmart">
+										</el-switch>
+									</div>
+								</el-tooltip>
+							</div>
 							<el-row :gutter="10" id="entity-view-summary">
 								<el-col :xl="24">
 									<el-tabs v-model="layout.summary.activeIndex" type="border">
@@ -270,10 +276,10 @@
 							</el-row>
 							<el-row :gutter="10" id="entity-view-console">
 								<el-col :xl="8" class="tree-view animated fadeInRight">
-									<probe-tree-component id="event-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
+									<probe-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
 								</el-col>
 								<el-col :xl="16" class="table-view animated fadeInLeft">
-									<entity-datatable-component id="event-list" :model="model.message"></entity-datatable-component>
+									<entity-datatable-component id="entity-list" :model="model.message"></entity-datatable-component>
 								</el-col>
 							</el-row>
 						</div>

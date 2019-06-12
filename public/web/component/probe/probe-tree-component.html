@@ -233,6 +233,11 @@
 
                 self.selectedNode = treeNode;
 
+                // 删除标签
+                if(treeNode.rtype === 'A3'){
+                    return;
+                }
+                
                 // 根据节点过滤数据
                 eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
 
@@ -384,6 +389,7 @@
 
                     return;
                 }
+
 
             },
             addCountDom: function (treeId, treeNode) {

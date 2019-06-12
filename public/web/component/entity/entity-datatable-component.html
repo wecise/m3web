@@ -217,48 +217,44 @@
 			}
         },
         created() {
-            eventHub.$on(`DATATABLE-FILTER-BY-event-EVENT`, this.filterColumn);
+            eventHub.$on(`DATATABLE-FILTER-BY-entity-EVENT`, this.filterColumn);
         },
 		mounted: function () {
             const self = this;
 
             self.$nextTick(function () {
                 self.init();
-
-                setInterval(function(){
-                    //self.resize();
-                },2000);
             });
         },
 		watch: {
-          	'model.rows': function(val,oldVal){
+            'model.rows': {
+                  handler:function(val,oldVal){
 
-          	    // 数据无更新
-                if(val === oldVal) {
-                    return false;
-                }
+                    // 数据无更新
+                    if(val === oldVal) {
+                        return false;
+                    }
 
-                // 数据为空
-                if( _.isEmpty(val)) {
-                    this.datatable.rows().remove().draw();
-                    return false;
-                }
+                    // 数据为空
+                    if( _.isEmpty(val)) {
+                        this.datatable.rows().remove().draw();
+                        return false;
+                    }
 
-                // 表格已经初始化
-                if(this.datatable instanceof $.fn.dataTable.Api) {
-                    this.datatable.clear();
-                    this.datatable.rows.add(val);
-                    this.datatable.draw();
+                    // 表格已经初始化
+                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                        this.datatable.clear();
+                        this.datatable.rows.add(val);
+                        this.datatable.draw();
 
-                    // 重构工具栏
-                    this.toolBar();
-                    // 重构可拖拽
-                    this.dragHandle();
-                    this.dropHandle();
+                        // 数据行重新生成，所以需要再次实例化可拖拽功能
+                        this.dragHandle();
 
-                } else {
-                    this.init();
-                }
+                    } else {
+                        //this.init();
+                    }
+                },
+                immediate: true
             }
 		},
 		methods: {
@@ -278,7 +274,7 @@
                 }
                 // 自定义checkbox、序号
                 //temp.unshift( { title: "序号", visible: true, sortable: false } );
-                //temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true }, sortable: false, order: false} );
+                temp.unshift( { data: "checkbox", title: "", visible: true, checkboxes: { selectRow: true }, sortable: false, order: false} );
                 
                 // 保证唯一并加入渲染函数
                 let cols = _.map(_.uniqBy(temp,'data'),function(v){
@@ -305,15 +301,8 @@
                                 stateSave: false,
                                 select: {
 			                        style: 'multi',
-			                        //selector: 'td:first-child'
+                                    selector: 'td:first-child'
                                 },
-                                columnDefs: [
-                                    {
-                                        'targets': [1],
-                                        'data': 0,
-                                        'checkboxes': true
-                                    }
-                                ],
 			                    fixedColumns:   {
 			                        leftColumns: 2
 			                    },
@@ -356,8 +345,6 @@
 
                                 },
 			                    initComplete: function(){
-                                    // Row序号
-                                    //self.serial();
                                     
                                     // 注册Row事件
                                     self.handleRow();
@@ -370,29 +357,12 @@
                                     self.dropHandle();
                                     
                                     self.resize();
-			                    },
-			                    createdRow: function ( row, data, index ) {
-			                        // severity 渲染
-			                        $('td',row).eq(2).addClass('severity'+data['severity']);
-
-			                        // status 渲染
-				                    if(self.model.status[data['status']] && self.model.status[data['status']].cnname){
-                                        $('td',row).eq(4).html(self.model.status[data['status']].cnname);
-                                    }
-                                }
+			                    }
                 },self.model.options));
 			},
             filterColumn(event) {
                 $("#"+this.id).DataTable().columns( '.search-filter' ).search(event.name).draw();
             },
-            serial:function(){
-                let datatable = $("#"+this.id).DataTable();
-                datatable.on( 'order.dt search.dt', function () {
-                    datatable.column(1, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-                        cell.innerHTML = i+1;
-                    } );
-                } ).draw();
-			},
 			handleRow: function(){
                 const self = this;
 
@@ -479,7 +449,7 @@
                 const self = this;
 
                 // init drop for tree
-                var treeName = "event-tree";
+                var treeName = "entity-tree";
                 let elTo = $(`#${treeName} li`);
 
                 addEvent(elTo, 'dragleave', function (e) {
@@ -507,8 +477,16 @@
                     let treeObj = $.fn.zTree.getZTreeObj(treeName);
                     let node = treeObj.getNodeByTId(tId);
 
+                    let input = null;
+                    // 删除标签
+                    if(node.cid == 'A3'){
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                    } 
                     // 打标签
-                    let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    else {
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    }
+                    
                     let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){

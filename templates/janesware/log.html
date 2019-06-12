@@ -163,28 +163,20 @@
 	}
 
 	/* 告警统计widget */
-	.log-view-summary-control-refresh{
-		right: 125px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
+	.log-view-summary-control{
+		display: flex;
 		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+		height: 22px;
+		line-height: 22px;
+		width: 50%;
+		right: 15px;
+		top: 20px;
+		flex-direction: row-reverse;
+		z-index: 100;
 	}
 
-	.log-view-summary-control-smart{
-		right: 15px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
-		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+	.log-view-summary-control > .el-tooltip{
+		padding-right: 10px;
 	}
 
 	/* el tabs */
@@ -251,8 +243,9 @@
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
 						<div v-if="item.type==='main'">
+							<div class="log-view-summary-control">
 								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top">
-									<div class="log-view-summary-control-refresh">
+									<div>
 										${control.ifRefresh==1?'自动刷新':'自动刷新'}
 										<el-switch
 										v-model="control.ifRefresh"
@@ -265,7 +258,7 @@
 									</div>
 								</el-tooltip>
 								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
-									<div class="log-view-summary-control-smart">
+									<div>
 										${control.ifSmart==1?'智能分析':'智能分析'}
 										<el-switch
 										v-model="control.ifSmart"
@@ -277,28 +270,29 @@
 										</el-switch>
 									</div>
 								</el-tooltip>
-								<el-row :gutter="10" id="log-view-summary">
-									<el-col :xl="24">
-										<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
-											<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-												<div v-if="item.type=='radar'">
-													<log-radar id="log-radar" :model='model.message'></log-radar>
-												</div>
-												<div v-if="item.type=='gauge'">
-													<log-gauge id="log-gauge"></log-gauge>
-												</div>
-											</el-tab-pane>
-										</el-tabs>
-									</el-col>
-								</el-row>
-								<el-row :gutter="10" id="log-view-console">
-									<el-col :xl="8" class="tree-view animated fadeInRight">
-										<probe-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
-									</el-col>
-									<el-col :xl="16" class="table-view animated fadeInLeft">
-										<log-datatable-component id="log-list" :model="model.message"></log-datatable-component>
-									</el-col>
-								</el-row>
+							</div>
+							<el-row :gutter="10" id="log-view-summary">
+								<el-col :xl="24">
+									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
+										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+											<div v-if="item.type=='radar'">
+												<log-radar id="log-radar" :model='model.message'></log-radar>
+											</div>
+											<div v-if="item.type=='gauge'">
+												<log-gauge id="log-gauge"></log-gauge>
+											</div>
+										</el-tab-pane>
+									</el-tabs>
+								</el-col>
+							</el-row>
+							<el-row :gutter="10" id="log-view-console">
+								<el-col :xl="8" class="tree-view animated fadeInRight">
+									<probe-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
+								</el-col>
+								<el-col :xl="16" class="table-view animated fadeInLeft">
+									<log-datatable-component id="log-list" :model="model.message"></log-datatable-component>
+								</el-col>
+							</el-row>
 						</div>
 						<div v-if="item.type==='diagnosis'">
 							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">

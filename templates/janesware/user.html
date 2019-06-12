@@ -30,19 +30,18 @@
         overflow: hidden;
     }
 
+    #content.content{
+        margin-left: 0px;
+        padding: 10px 10px 0px 10px!important;
+    }
+
     .company-info,
     .company-update,
     .user-info,
     .user-update{
         overflow: auto;
-        height: 82vh;
         background: rgb(255, 255, 255);
         padding: 15px;
-    }
-
-    .container-fluid {
-        margin-bottom: 45px;
-        margin: 20px 0px 0px -15px;
     }
 
     form .button-bars {
@@ -108,7 +107,9 @@
 
 </style>
 
-<div id="app"></div>
+<main id="content" class="content">
+    <div id="app"></div>
+</main>
 
 <script src="{{AppSubUrl}}/web/js/handler/CompanyHandler.js" type="text/javascript"></script>
 
@@ -433,37 +434,39 @@
 </script>
 
 <script type="text/x-template" id="app-template">
-    <div class="container-fluid">
-        <div class="row-fluid">
-            <div  class="col-lg-3" id="nav">
-                <div class="thumbnail">
-                    <div class="company-logo-bg upload-btn-wrapper" @click="changeLogo">
-                        <span class="logo-toggle"><i class="fa fa-wrench"></i></span>
-                        <img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;" title="点击更换Logo">
-                    </div>
-                    <div class="caption">
-                        <h5>{{.i18n.Tr "company_info"}}</h5>
-                        <p>{{.i18n.Tr "company_name"}}：{{.company}}</p>
-                        <p>{{.i18n.Tr "company_fullname"}}：{{.company_fullname}}</p>
-                        <p>{{.i18n.Tr "company_icon"}}：{{.icon}}</p>
-                        <p>{{.i18n.Tr "company_ospace"}}：{{.ospace}}</p>
-                        <p>{{.i18n.Tr "company_title"}}：{{.title}}</p>
-                        <p>{{.i18n.Tr "company_license"}}：${license}</p>
-                        <p>{{.i18n.Tr "company_product"}}：{{.i18n.Tr "app_desc"}}</p>
-                        <div class="text-right">
-                            <a class="btn btn-xs btn-white" href="http://{{.website}}" target="_blank"><i class="fa fa-thumbs-up"></i> {{.i18n.Tr "company_web"}} </a>
-                            {{if .SignedUser.IsAdmin}}
-                            <a class="btn btn-xs btn-success" href="javascript:void(0);" @click="toggleView('company-update')"><i class="fa fa-edit"></i> {{.i18n.Tr "company_update"}}</a>
-                            {{end}}
-                        </div>
+
+    <el-container>
+        
+        <el-aside id="nav">
+            <div class="thumbnail">
+                <div class="company-logo-bg upload-btn-wrapper" @click="changeLogo">
+                    <span class="logo-toggle"><i class="fa fa-wrench"></i></span>
+                    <img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;" title="点击更换Logo">
+                </div>
+                <div class="caption">
+                    <h5>{{.i18n.Tr "company_info"}}</h5>
+                    <p>{{.i18n.Tr "company_name"}}：{{.company}}</p>
+                    <p>{{.i18n.Tr "company_fullname"}}：{{.company_fullname}}</p>
+                    <p style="display:none;">{{.i18n.Tr "company_icon"}}：{{.icon}}</p>
+                    <p>{{.i18n.Tr "company_ospace"}}：{{.ospace}}</p>
+                    <p>{{.i18n.Tr "company_title"}}：{{.title}}</p>
+                    <p>{{.i18n.Tr "company_license"}}：${license}</p>
+                    <p>{{.i18n.Tr "company_product"}}：{{.i18n.Tr "app_desc"}}</p>
+                    <div class="text-right">
+                        <a class="btn btn-xs btn-white" href="http://{{.website}}" target="_blank"><i class="fa fa-thumbs-up"></i> {{.i18n.Tr "company_web"}} </a>
+                        {{if .SignedUser.IsAdmin}}
+                        <a class="btn btn-xs btn-success" href="javascript:void(0);" @click="toggleView('company-update')"><i class="fa fa-edit"></i> {{.i18n.Tr "company_update"}}</a>
+                        {{end}}
                     </div>
                 </div>
             </div>
-            <div class="col-lg-9" id="content">
-                <component v-bind:is="currentView"></component>
-            </div>
-        </div>
-    </div>
+        </el-aside>
+        <el-main id="content" style="margin: 0px 0px 0px 10px;height: calc(100vh - 90px);background: rgb(255, 255, 255);">
+            <component v-bind:is="currentView"></component>
+        </el-main>
+        
+    </el-container>
+
 </script>
 
 
@@ -571,10 +574,10 @@
                 <input id="fullname" class="form-control" v-model="company.fullname" autofocus required>
             </div>
 
-            <!--<div class="form-group">
+            <!--div class="form-group">
                 <label for="logo">{{.i18n.Tr "company_logo"}}</label>
                 <img id="logo">
-            </div>-->
+            </div-->
 
             <div class="form-group">
                 <label for="ospace">{{.i18n.Tr "company_ospace"}}</label>
@@ -602,11 +605,6 @@
                     </span>
                 </div>
             </div>
-
-            <!--<div class="form-group">-->
-            <!--<label for="icon">{{.i18n.Tr "company_icon"}}</label>-->
-            <!--<img id="icon">-->
-            <!--</div>-->
 
             <div class="form-group button-bars">
                 <a href="javascript:void(0);" class="btn btn-sm btn-success" @click="update">{{.i18n.Tr "submit"}}</a>

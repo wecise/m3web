@@ -27,15 +27,12 @@ class Event extends Matrix {
         const event = this;
 
         VueLoader.onloaded(["ai-robot-component",
-                            "topological-graph-component",
-                            "omdb-path-datatables-component",
                             "event-graph-component",
                             "event-datatable-component",
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
                             "search-base-component",
-                            "probe-tree-component",
                             "vue-timeline-component"],function() {
             $(function() {
 
@@ -431,6 +428,132 @@ class Event extends Matrix {
                     }
                 })
 
+                // 智能分组 grid
+                Vue.component("event-view-aigroup-grid",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            tableData: null,
+                        }
+                    },
+                    watch: {
+                        model(val,oldVal){
+                            this.initData();
+                        }
+                    },
+                    template:`<event-diagnosis-datatable-component :id="id" :model="tableData" type="event"></event-diagnosis-datatable-component>`,
+                    mounted(){
+                        // 默认维度关联事件
+                        this.tableData = {
+                            rows: this.$root.$data.model.message.rows,
+                            columns: this.$root.$data.model.message.columns[this.$root.$data.model.message.rootclass],
+                            options: this.$root.$data.model.message.options
+                        };
+                        this.initData();
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            let event = this.model;
+
+                            if(event.length < 1) {
+                                self.tableData = null;
+                                return false;
+                            }
+
+                            try{
+                                let temp = _.map(event,function(v){
+                                    // MQL
+                                    //return `${v.title}='${v.data}'`;
+                                    // SEARCH
+                                    return `${v.title}=${v.data}`;
+                                })
+
+                                // 获取相应维度的关联事件  eg: biz='查账系统'
+                                // MQL
+                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
+                                // SEARCH
+                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
+                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
+                            } catch(err){
+                                self.tableData = null;
+                            }
+                            
+                        }
+                    }
+                })
+
+                // 智能分组 graph
+                Vue.component("event-view-aigroup-graph",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object,
+                    },
+                    data(){
+                        return {
+                            tableData: null,
+                            topological: null
+                        }
+                    },
+                    template:`<div :id="'topological-app-'+id"></div>`,
+                    watch: {
+                        model(val,oldVal){
+                            this.initData();
+                        }
+                    },
+                    created(){
+                        this.initData();
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            let event = this.model;
+
+                            if(event.length < 1) {
+                                self.tableData = null;
+                                return false;
+                            }
+
+                            try {
+                                let temp = _.map(event,function(v){
+                                    // MQL
+                                    //return `${v.title}='${v.data}'`;
+                                    // SEARCH
+                                    return `${v.title}=${v.data}`;
+                                })
+
+                                // 获取相应维度的关联事件  eg: biz='查账系统'
+                                // MQL
+                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
+                                // SEARCH
+                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
+                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
+
+                                if(!this.topological){
+                                    this.topological = new Topological();
+                                    this.topological.init();
+                                    this.topological.graphScript = [
+                                        {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`}
+                                    ];
+                                    this.topological.mount(`#topological-app-${self.id}`);
+                                } else {
+                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`} ];
+                                    this.topological.search(this.topological.graphScript[0].value);
+                                }
+
+                            } catch(err){
+                                self.tableData = null;
+                            }
+                            
+                        }
+                    }
+                })
+
                 // 智能分组
                 Vue.component("event-view-aigroup",{
                     delimiters: ['#{', '}#'],
@@ -457,13 +580,16 @@ class Event extends Matrix {
                                 },
                                 selected: [],
                             },
-                            tableData: {},
                             split:{
                                 inst: null
-                            }
+                            },
+                            control: {
+                                ifGraph: '1'
+                            },
+                            currentView: 'event-view-aigroup-grid'                         
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 185px);">
+                    template: `<el-container style="height: calc(100vh - 155px);margin: -15px;">
                                     <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
@@ -472,8 +598,23 @@ class Event extends Matrix {
                                         </el-container>
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
+                                        <el-header style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;">
+                                            <el-tooltip :content="control.ifGraph==1?'列表':'图'" placement="top" open-delay="500">
+                                                <div style="float:right;">
+                                                    #{control.ifGraph==1?'列表':'图'}#
+                                                    <el-switch
+                                                    v-model="control.ifGraph"
+                                                    active-color="#13ce66"
+                                                    inactive-color="#dddddd"
+                                                    active-value="1"
+                                                    inactive-value="0"
+                                                    @change="toggleView">
+                                                    </el-switch>
+                                                </div>
+                                            </el-tooltip>
+                                        </el-header>
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-aigroup-by-value'" :model="tableData" type="event"></event-diagnosis-datatable-component>
+                                            <component v-bind:is="currentView" :id="id + '-aigroup-by-value'" :model="aiGroupData.selected"></component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -502,9 +643,6 @@ class Event extends Matrix {
                     mounted(){
                         const self = this;
                         
-                        // 默认维度关联事件
-                        self.tableData = {rows:self.model.rows,columns:self.model.columns[self.model.rootclass],options:self.model.options};
-
                         self.init();
                     },
                     methods: {
@@ -530,10 +668,10 @@ class Event extends Matrix {
 
                             table.on( 'select', function ( e, dt, type, indexes ) {
                                 self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
-                                self.handlerFetchData(self.aiGroupData.selected);
+                                //self.handlerFetchData(self.aiGroupData.selected);
                             } ).on( 'deselect', function ( e, dt, type, indexes ) {
                                 self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
-                                self.handlerFetchData(self.aiGroupData.selected);
+                                //self.handlerFetchData(self.aiGroupData.selected);
                             } );
 
                             $(self.$el).find('td').css("white-space","normal");
@@ -541,42 +679,20 @@ class Event extends Matrix {
                             self.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
                                 sizes: [35, 65],
                                 minSize: [0, 0],
-                                gutterSize: 20,
+                                gutterSize: 5,
+                                gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
+                                expandToMin: true,
                             });
 
                             // 默认选择第一行
                             $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
                             self.aiGroupData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
-                            self.handlerFetchData(self.aiGroupData.selected);
+                            //self.handlerFetchData(self.aiGroupData.selected);
                         },
-                        handlerFetchData(event){
-                            const self = this;
-
-                            if(event.length < 1) {
-                                self.tableData = [];
-                                return false;
-                            }
-
-                            try{
-                                let temp = _.map(event,function(v){
-                                    // MQL
-                                    //return `${v.title}='${v.data}'`;
-                                    // SEARCH
-                                    return `${v.title}=${v.data}`;
-                                })
-
-                                // 获取相应维度的关联事件  eg: biz='查账系统'
-                                // MQL
-                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
-                                // SEARCH
-                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
-                            } catch(err){
-                                self.tableData = [];
-                            }
-                            
+                        toggleView(event){
+                            this.currentView = this.currentView=='event-view-aigroup-grid' ? 'event-view-aigroup-graph' : 'event-view-aigroup-grid';
                         }
                     }
                 })
@@ -681,7 +797,7 @@ class Event extends Matrix {
 
                             Split(['#left-panel', '#right-panel'], {
                                 sizes: [45, 55],
-                                gutterSize: 10,
+                                gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
@@ -778,7 +894,7 @@ class Event extends Matrix {
                             Split(['#probability-left-panel', '#probability-right-panel'], {
                                 sizes: [0, 100],
                                 minSize: [0, 0],
-                                gutterSize: 10,
+                                gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
@@ -798,7 +914,40 @@ class Event extends Matrix {
                 })
 
                 // 资源信息
-                Vue.component("event-diagnosis-topological",{
+                let eventDiagnosisTopological = Vue.extend({
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main style="padding:0px;">
+                                        <div :id="'topological-app-'+id"></div>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init(){    
+                            var mxTopological = new Topological();
+                            mxTopological.init();
+                            mxTopological.graphScript = _.map(this.model.rows,function(v){
+                                return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
+                            });
+                            mxTopological.mount(`#topological-app-${this.id}`);
+                            
+                            _.delay(()=>{
+                                mxTopological.app.contextMenu();
+                            },500)
+
+                        }
+                    }
+                });
+
+                // Runbook
+                // 获取下发脚本列表，获取脚本下发执行结果
+                let eventDiagnosisScript = Vue.extend({
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
@@ -806,37 +955,151 @@ class Event extends Matrix {
                     },
                     data(){
                         return {
-                            splitInst: null
+                            tableData: {
+                                rows: [],
+                                columns: [],
+                                options: {
+                                    searching: false,
+                                    aDataSort: true,
+                                    bSort: true,
+                                    bAutoWidth: true,
+                                    info: false,
+                                    paging:         false,
+                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                    select: {
+                                        style: 'single',
+                                    }
+                                },
+                                selected: [],
+                                result:{
+                                    runid: "",
+                                    sid: "",
+                                    outputs: []
+                                }
+                            },
+                            split:{
+                                inst: null
+                            }
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
-                                    <el-aside class="split" :id="id+'-topological-view-left'">
-                                        
+                    template:  ` <el-container style="height:calc(100vh - 230px);">
+                                    <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" :id="id+'-left-panel'">
+                                        <el-container style="overflow:hidden;height:100%;">
+                                            <el-main style="padding:0px;overflow:auto;">
+                                                <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
+                                            </el-main>
+                                        </el-container>
                                     </el-aside>
-                                    <el-container class="split" :id="id+'-topological-view-right'">
-                                        <el-main style="padding:0px;">
-                                            <div :id="'topological-app-'+id"></div>
+                                    <el-container class="split" :id="id+'-right-panel'">
+                                        <el-header style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;padding: 0;">
+                                            <el-tooltip content="下发脚本">
+                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="scriptRun"><i class="fas fa-running"></i></a>
+                                            </el-tooltip>
+                                        </el-header>
+                                        <el-main style="padding:0px;background:#333333;">
+                                            <div contenteditable="true" style="height:100vh;color:rgb(23, 236, 59);outline-style: none;white-space: pre-line;">
+                                                #{tableData.result.outputs.toString()}#
+                                            </div>
                                         </el-main>
+                                        <el-footer style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;padding: 0;">
+                                            <el-tooltip :content="'查看作业: ' + tableData.result.runid">
+                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="job(tableData.result.runid)"><i class="fas fa-task"></i> #{tableData.result.runid}#</a>
+                                            </el-tooltip>
+                                            <el-tooltip :content="'查看会话: ' + tableData.result.sid">
+                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="job(tableData.result.sid)"><i class="fas fa-task"></i> #{tableData.result.sid}#</a>
+                                            </el-tooltip>
+                                        </el-footer>
                                     </el-container>
                                 </el-container>`,
+                    created(){
+                        this.tableData = _.extend(this.tableData,{
+                            rows: this.model.rows,
+                            columns: this.model.template
+                        });
+                    },
                     mounted(){
                         this.init();
+                    },
+                    watch: {
+                        'tableData.selected':{
+                            handler(val, oldVal) {
+                                if(val !== oldVal){
+                                    this.tableData.result.outputs = [];
+                                }
+                            },
+                            immediate: true
+                        }
                     },
                     methods: {
                         init(){    
                             const self = this;
 
-                            let mxTopological = new Topological();
-                            mxTopological.init();
-                            mxTopological.mount(`#topological-app-${self.id}`);
+                            //初始化维度选择Table
+                            var table = $(`#${self.id}-table`).DataTable(_.extend(
+                                                                        self.tableData.options,{
+                                                                            data: self.tableData.rows,
+                                                                            columns: self.tableData.columns
+                                                                        }));
+                            
+                            $(`#${self.id}-table tbody`).on( 'click', 'tr', function () {
+                                if ( $(this).hasClass('selected') ) {
+                                    $(this).removeClass('selected');
+                                }
+                                else {
+                                    table.$('tr.selected').removeClass('selected');
+                                    $(this).addClass('selected');
+                                }
+                            } );                                    
 
-                            this.splitInst = Split([`#${this.id}-topological-view-left`, `#${this.id}-topological-view-right`], {
-                                sizes: [0, 100],
+                            table.on( 'select', function ( e, dt, type, indexes ) {
+                                self.tableData.selected = table.rows( '.selected' ).data().toArray();
+                                //self.handlerFetchData(self.tableData.selected);
+                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                                self.tableData.selected = table.rows( '.selected' ).data().toArray();
+                                //self.handlerFetchData(self.tableData.selected);
+                            } );
+
+                            $(self.$el).find('td').css("white-space","normal");
+                            
+                            self.split.inst = Split([`#${self.id}-left-panel`, `#${self.id}-right-panel`], {
+                                sizes: [35, 65],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
+                                expandToMin: true,
                             });
+
+                            // 默认选择第一行
+                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
+                            self.tableData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
+                            //self.handlerFetchData(self.tableData.selected);
+                        },
+                        scriptRun(){
+                            let cmd = this.tableData.selected[0].name;
+                            let server = "wecise";
+                            let user = "matrix";
+                            try {
+                                this.tableData.result.outputs[0] = `${server}:~ ${user}$ ${cmd}\n`;
+
+                                let rtn = jobHandler.callJob(cmd,'wecise');
+                                this.tableData.result.runid = rtn.message.runid;
+                                this.tableData.result.sid = rtn.message.sid;
+                                this.tableData.result.outputs.push(rtn.message.outputs[0]);
+
+                            } catch(err){
+                                this.tableData.result.outputs = [];
+                            }
+                        },
+                        job(term){
+
+                            // 默认Job名称
+                            if(!term){
+                                term = 'remote_command';
+                            }
+                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
                         }
                     }
                 })
@@ -870,8 +1133,8 @@ class Event extends Matrix {
                             }
                         },
                         control: {
-                            ifSmart: '1',
-                            ifSummary: '0',
+                            ifSmart: '0',
+                            ifAiGroup: '0',
                             ifRefresh: '0'
                         },
                         // 搜索组件结构
@@ -939,6 +1202,10 @@ class Event extends Matrix {
                                 return `${item.title} 0`;
                             }
                         }
+                    },
+                    components: {
+                        'event-diagnosis-topological': eventDiagnosisTopological,
+                        'event-diagnosis-script': eventDiagnosisScript
                     },
                     created(){
                         // 初始化term
@@ -1010,9 +1277,9 @@ class Event extends Matrix {
 
                             if(evt==1) {
                                 self.aiGroup();
-                                $("#event-view-summary").css("height","200px").css("display","");
+                                $("#event-view-aigroup").css("height","200px").css("display","");
                             } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
+                                $("#event-view-aigroup").css("height","0px").css("display","none");
 
                                 //关闭智能分组
                                 try {
@@ -1024,7 +1291,7 @@ class Event extends Matrix {
 
                                 }
                             }
-                            this.control.ifSummary = evt;
+                            this.control.ifAiGroup = evt;
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
@@ -1065,6 +1332,12 @@ class Event extends Matrix {
                                 this.layout.main.tabs = [];
                             }
                         },
+                        handleClick(tab, event) {
+                            let tmp = _.find(this.layout.main.tabs,{name: tab.name});
+                            if(tmp.child){
+                                this.layout.main.detail.activeIndex = _.first(tmp.child).name;
+                            }
+                        },
                         detailAdd(event){
                             try {
                                 let id = event.id;
@@ -1082,10 +1355,11 @@ class Event extends Matrix {
                                                 {title:'维度关联性告警', name:`diagnosis-dimension-${id}`, type: 'dimension', model:model},
                                                 {title:'概率相关性告警', name:`diagnosis-probability-${id}`, type: 'probability', model:model},
                                                 {title:'历史相似告警', name:`diagnosis-history-${id}`, type: 'history', model:model},
-                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model}
+                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
+                                                {title:'Runbook', name:`diagnosis-script-${id}`, type: 'script', model:model}
                                             ]};
-                                this.layout.main.tabs.push(detail);
                                 this.layout.main.activeIndex = `diagnosis-${id}`;
+                                this.layout.main.tabs.push(detail);
                                 this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                             } catch(error){
@@ -1094,35 +1368,42 @@ class Event extends Matrix {
                         },
                         detailRemove(targetName) {
                             
-                            let tabs = this.layout.main.tabs;
-                            let activeIndex = this.layout.main.activeIndex;
-                            if (activeIndex === targetName) {
-                              tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                  let nextTab = tabs[index + 1] || tabs[index - 1];
-                                  if (nextTab) {
-                                    activeIndex = nextTab.name;
-                                  }
+                            try{
+                                let tabs = this.layout.main.tabs;
+                                let activeIndex = this.layout.main.activeIndex;
+                                if (activeIndex === targetName) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeIndex = nextTab.name;
+                                    }
+                                    }
+                                });
                                 }
-                              });
+                                
+                                this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                                this.layout.main.activeIndex = activeIndex;
+                                this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
+                                
+                                // AI Group
+                                if(_.includes(targetName,'aiGroup')){
+                                    this.control.ifAiGroup = '0';
+                                }
+                                
+                                _.delay(function(){
+                                    // RESIZE Event Summary
+                                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                    // RESIZE Event Console
+                                    event.resizeEventConsole();
+                                },500)
+                            } catch(err){
+                                
+                                // AI Group
+                                if(_.includes(targetName,'aiGroup')){
+                                    this.control.ifAiGroup = '0';
+                                }
                             }
-                            
-                            this.layout.main.activeIndex = activeIndex;
-                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
-                            this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
-
-                            // AI Group
-                            if(_.includes(targetName,'aiGroup')){
-                                this.control.ifSummary = '0';
-                            }
-
-                            
-                            _.delay(function(){
-                                // RESIZE Event Summary
-                                eventHub.$emit("WINDOW-RESIZE-EVENT");
-                                // RESIZE Event Console
-                                event.resizeEventConsole();
-                            },500)
                         },
                         action(event){
                             const self = this;

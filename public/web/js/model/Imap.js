@@ -1166,7 +1166,7 @@ class Imap extends Matrix {
 
                             $.contextMenu({
                                 selector: `svg g image`,
-                                trigger: 'hover',
+                                trigger: 'left',
                                 autoHide: true,
                                 delay: 10,
                                 hideOnSecondTrigger: true,
@@ -1242,7 +1242,7 @@ class Imap extends Matrix {
                                 });
 
                                 // 查看相关信息
-                                self.config({id:id,value:value}, objectHash.sha1(cell));
+                                //self.config({id:id,value:value}, objectHash.sha1(cell));
 
                             });
 

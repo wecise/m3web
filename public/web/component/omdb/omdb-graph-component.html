@@ -297,25 +297,24 @@
             cellEvent(){
                 const self = this;
 
-                self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
+                try{
+                    self.model.graph.graph.addListener(mxEvent.CLICK, function(sender, evt) {
 
-                    let cell = evt.getProperty('cell');
+                        let cell = evt.getProperty('cell');
 
-                    if(_.isEmpty(cell)) return;
+                        if(_.isEmpty(cell)) return;
 
-                    let id = cell.getId();
-                    let value = cell.getValue();
+                        let id = cell.getId();
+                        let value = cell.getValue();
 
-                    let state = self.model.graph.graph.view.getState(cell);
-                    let nodeDic = _.groupBy(self.graphData.nodes,'id');
+                        let state = self.model.graph.graph.view.getState(cell);
+                        
+                        if(!cell.edge){
 
-                    state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
-                    state.shape.node.getElementsByTagName("image")[0].setAttribute('data-item', JSON.stringify(nodeDic[id]));
-
-                    // copy to copyboard
-                    let clipboard2 = new Clipboard('g image',{
-                        text: function(trigger) {
-
+                            let nodeDic = [_.find(self.graphData.nodes,{id: id})];
+                        
+                            state.shape.node.getElementsByTagName("image")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                            
                             $.contextMenu({
                                 selector: `.${id.replace(/:/g,"_")}`,
                                 trigger: 'left',
@@ -324,12 +323,11 @@
                                 className: `animated slideIn node-menu`,
                                 build: function($trigger, e) {
 
-                                    let temp = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
                                     let items = null;
-                                    _.forEach(temp,function(val){
+                                    _.forEach(nodeDic,function(val){
                                         _.forEach(val,function(v,k){
 
-	                                        let value = null;
+                                            let value = null;
 
                                             if(typeof v == "object") {
                                                 if(_.includes(['depend','runon','connect','refer','contain'],k)){
@@ -380,77 +378,97 @@
                                     }
                                 }
                             });
+                            
+                        
+                        } else {
+                            
+                            let nodeDic = [_.isEmpty(_.find(self.graphData.edges,{id: id}).attrs)?[]:_.find(self.graphData.edges,{id: id}).attrs];
 
-                            return id;
+                            if(!nodeDic) return false;
+
+                            state.shape.node.getElementsByTagName("path")[0].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                            state.shape.node.getElementsByTagName("path")[1].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                            state.shape.node.getElementsByTagName("path")[2].setAttribute('class', `${value} ${id.replace(/:/g,"_")} animated flash`);
+                            
+                            $.contextMenu({
+                                selector: `.${id.replace(/:/g,"_")}`,
+                                trigger: 'left',
+                                delay: 10,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn node-menu`,
+                                build: function($trigger, e) {
+
+                                    let items = null;
+                                    _.forEach(nodeDic,function(val){
+                                        _.forEach(val,function(v,k){
+
+                                            let value = null;
+
+                                            if(typeof v == "object") {
+                                                if(_.includes(['depend','runon','connect','refer','contain'],k)){
+
+                                                    if(v==null || !v['_all']) return;
+                                                    let _options = {};
+                                                    _.map(v['_all'],function(w,y){
+                                                        return _.merge(_options,{[y]:w});
+                                                    })
+
+                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                                } else {
+                                                    value = JSON.stringify(v,null,2);
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', rows: 6, value: value, icon:'fas fa-tags'}} );
+                                                }
+
+                                            } else {
+                                                value = v.toString();
+                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                            }
+
+                                        })
+                                    });
+
+                                    return {
+                                        callback: function(key, opt) {
+
+                                            if(key === 'copy'){
+
+                                            } else if(key === 'tags') {
+
+                                            } else if(key === 'export') {
+
+                                            } else if(key === 'load') {
+
+                                            }
+                                        },
+                                        items:items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                                        let $this = this;
+
+                                    },
+                                    hide: function(opt) {
+                                        let $this = this;
+                                        $(".context-menu-list animated slideIn").remove();
+                                    }
+                                }
+                            }); 
+                            
                         }
+
+                        // copy to copyboard
+                        let clipboard2 = new Clipboard('g image',{
+                            text: function(trigger) {
+                                return id;
+                            }
+                        });
+
                     });
-                    //self.tip(`ID：${id} 已复制到剪切板！`);
+                } catch(err){
 
-                });
+                }
 
-                /* self.model.graph.graph.addMouseListener({
-                    currentState: null,
-                    previousStyle: null,
-                    mouseDown: function (sender, me) {
-                        if (this.currentState != null) {
-                            this.dragLeave(me.getEvent(), this.currentState);
-                            this.currentState = null;
-                        }
-                    },
-                    mouseMove: function (sender, me) {
-                        if (this.currentState != null && me.getState() == this.currentState) {
-                            return;
-                        }
-
-                        var tmp = self.model.graph.graph.view.getState(me.getCell());
-
-                        // Ignores everything but vertices
-                        if (self.model.graph.graph.isMouseDown || (tmp != null && !
-                            self.model.graph.graph.getModel().isVertex(tmp.cell))) {
-                            tmp = null;
-                        }
-
-                        if (tmp != this.currentState) {
-                            if (this.currentState != null) {
-                                this.dragLeave(me.getEvent(), this.currentState);
-                            }
-
-                            this.currentState = tmp;
-
-                            if (this.currentState != null) {
-                                this.dragEnter(me.getEvent(), this.currentState);
-                            }
-                        }
-                    },
-                    mouseUp: function (sender, me) { },
-                    dragEnter: function (evt, state) {
-                        if (state != null) {
-                            this.previousStyle = state.style;
-                            state.style = mxUtils.clone(state.style);
-                            self.updateStyle(state, true);
-                            state.shape.apply(state);
-                            state.shape.redraw();
-
-                            if (state.text != null) {
-                                state.text.apply(state);
-                                state.text.redraw();
-                            }
-                        }
-                    },
-                    dragLeave: function (evt, state) {
-                        if (state != null) {
-                            state.style = this.previousStyle;
-                            self.updateStyle(state, false);
-                            state.shape.apply(state);
-                            state.shape.redraw();
-
-                            if (state.text != null) {
-                                state.text.apply(state);
-                                state.text.redraw();
-                            }
-                        }
-                    }
-                }); */
             },
             updateStyle(state, hover){
                 if (hover)

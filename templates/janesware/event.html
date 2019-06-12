@@ -175,39 +175,20 @@
 	}
 
 	/* 告警统计widget */
-	.event-view-summary-control-smart{
-		right: 15px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
+	.event-view-summary-control{
+		display: flex;
 		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+		height: 22px;
+		line-height: 22px;
+		width: 50%;
+		right: 15px;
+		top: 20px;
+		flex-direction: row-reverse;
+		z-index: 100;
 	}
 
-	.event-view-summary-control-summary{
-		right: 125px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
-		position: absolute;
-		z-index: 10;
-		cursor: pointer;
-	}
-	.event-view-summary-control-refresh{
-		right: 235px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
-		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+	.event-view-summary-control > .el-tooltip{
+		padding-right: 10px;
 	}
 
 	/* el tabs */
@@ -234,6 +215,18 @@
 		font-weight: 600;
 	}
 
+	.el-autocomplete .el-input__inner{
+        height: 30px;
+        line-height: 30px;
+        border: unset;
+    }
+
+	.el-tabs--border-card{
+		border: unset;
+    	-webkit-box-shadow:  unset;
+    	box-shadow:  unset;
+	}
+
 	/* 属性选择，隐藏第一列checkbox */
 	.dt-button-collection.fixed.four-column > a:nth-child(1){
 		display: none;
@@ -241,7 +234,12 @@
 
 	/* Split Style */
 	.gutter.gutter-horizontal{
-		background-color: #ffffff;
+		background-color: rgb(241, 241, 241);
+		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+		background-size: 7px;
+		background-position-x: 50%;
+		background-position-y: 50%;
+		background-repeat: no-repeat;
 	}
 
 	/* diem table selected style */
@@ -254,6 +252,102 @@
 	table.dataTable.event-datatable-component tbody>tr>.selected-highlight {
 		background: rgb(241, 241, 241)!important;
 	}
+
+	/* For grid-view */
+    #grid ul{
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #grid ul > li{
+        float: left;
+        width: 9em;
+        height: 90px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        margin: 5px 5px 0px 0px;
+    }
+
+	/*
+    *   File Upload
+    */
+    .progress {
+        height: 16px;
+        border-radius: 0px;
+        display: block;
+        position: relative;
+    }
+
+    .progress small {
+        color: #ffffff;
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+
+    .files ul{
+        margin: 10px;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .files ul > li{
+        float: left;
+        width: 100pt;
+        height: 100px;
+        font-size: 12px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        padding-top: 5px;
+        margin: 5px 0px 20px 5px;
+    }
+
+    .files ul > li > canvas {
+        height: 65%;
+        width: auto;
+    }
+
+    .files ul > li > a {
+        background-color: rgb(249, 249, 249);
+        border-radius: 0px;
+    }
+
+    .files ul > li > button {
+        margin-top: -50px;
+    }
+
+    .files ul > li > .preview-null {
+        width: 100px;
+        padding-top: 10px;
+        height: 64px;
+        color: rgb(221, 221, 221);
+    }
+
+    .preview-img-responsive{
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .fs-view-component #grid,
+    .fs-view-component .dataTables_scroll{
+        height: 75vh;
+        overflow: auto;
+        padding: 0 10px;
+    }
+
+    .fs-name {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
 
 </style>
 
@@ -319,49 +413,50 @@
 									   class="grid-content"></search-base-component>
 			</el-col>
 			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
-				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
+				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
 						<div v-if="item.type==='main'">
-							
-							<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
-								<div class="event-view-summary-control-refresh">
-									${control.ifRefresh==1?'自动刷新':'自动刷新'}
-									<el-switch
-									v-model="control.ifRefresh"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryByRefresh">
-									</el-switch>
-								</div>
-							</el-tooltip>
-							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-								<div class="event-view-summary-control-smart">
-									${control.ifSmart==1?'智能分析':'智能分析'}
-									<el-switch
-									v-model="control.ifSmart"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryBySmart">
-									</el-switch>
-								</div>
-							</el-tooltip>
-							<el-tooltip :content="control.ifSummary==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
-								<div class="event-view-summary-control-summary">
-									${control.ifSummary==1?'智能分组':'智能分组'}
-									<el-switch
-									v-model="control.ifSummary"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryByGroup">
-									</el-switch>
-								</div>
-							</el-tooltip>
+							<div class="event-view-summary-control">
+								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifRefresh==1?'自动刷新':'自动刷新'}
+										<el-switch
+										v-model="control.ifRefresh"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryByRefresh">
+										</el-switch>
+									</div>
+								</el-tooltip>
+								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifSmart==1?'智能分析':'智能分析'}
+										<el-switch
+										v-model="control.ifSmart"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryBySmart">
+										</el-switch>
+									</div>
+								</el-tooltip>
+								<el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifAiGroup==1?'智能分组':'智能分组'}
+										<el-switch
+										v-model="control.ifAiGroup"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryByGroup">
+										</el-switch>
+									</div>
+								</el-tooltip>
+							</div>
 							<el-row :gutter="10" id="event-view-summary">
 								<el-col :xl="24">
 									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
@@ -408,6 +503,9 @@
 									</div>
 									<div v-else-if="it.type==='topological'">
 										<event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
+									</div>
+									<div v-else-if="it.type==='script'">
+										<event-diagnosis-script :id="it.name + '-script'" :model="it.model.script"></event-diagnosis-script>
 									</div>
 								</el-tab-pane>
 							</el-tabs>

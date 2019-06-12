@@ -108,6 +108,12 @@ website:	http://code.google.com/p/jquerytree/
 .ztree li span.button.tag_ico_close{margin-right:2px; background: url(./img/diy/icon/tag.png); vertical-align:middle; *vertical-align:middle}
 .ztree li span.button.tag_ico_docu{margin-right:2px; background: url(./img/diy/icon/tag.png); vertical-align:middle; *vertical-align:middle}
 
+
+.ztree li span.button.recycle_ico_open{margin-right:2px; background: url(./img/diy/icon/recycle.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.recycle_ico_close{margin-right:2px; background: url(./img/diy/icon/recycle.png); vertical-align:middle; *vertical-align:middle}
+.ztree li span.button.recycle_ico_docu{margin-right:2px; background: url(./img/diy/icon/recycle.png); vertical-align:middle; *vertical-align:middle}
+
+
 .ztree li span.button.ico_loading{margin-right:2px; background:url(./img/loading.gif) no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}
 
 ul.tmpTargetzTree {background-color:#FFE6B0; opacity:0.8; filter:alpha(opacity=80)}

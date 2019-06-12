@@ -213,7 +213,7 @@
 			}
         },
         created() {
-            eventHub.$on(`DATATABLE-FILTER-BY-event-EVENT`, this.filterColumn);
+            eventHub.$on(`DATATABLE-FILTER-BY-job-EVENT`, this.filterColumn);
         },
 		mounted: function () {
             const self = this;
@@ -227,34 +227,34 @@
             });
         },
 		watch: {
-          	'model.rows': function(val,oldVal){
+            'model.rows': {
+                  handler:function(val,oldVal){
 
-          	    // 数据无更新
-                if(val === oldVal) {
-                    return false;
-                }
+                    // 数据无更新
+                    if(val === oldVal) {
+                        return false;
+                    }
 
-                // 数据为空
-                if( _.isEmpty(val)) {
-                    this.datatable.rows().remove().draw();
-                    return false;
-                }
+                    // 数据为空
+                    if( _.isEmpty(val)) {
+                        this.datatable.rows().remove().draw();
+                        return false;
+                    }
 
-                // 表格已经初始化
-                if(this.datatable instanceof $.fn.dataTable.Api) {
-                    this.datatable.clear();
-                    this.datatable.rows.add(val);
-                    this.datatable.draw();
+                    // 表格已经初始化
+                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                        this.datatable.clear();
+                        this.datatable.rows.add(val);
+                        this.datatable.draw();
 
-                    // 重构工具栏
-                    this.toolBar();
-                    // 重构可拖拽
-                    this.dragHandle();
-                    this.dropHandle();
+                        // 数据行重新生成，所以需要再次实例化可拖拽功能
+                        this.dragHandle();
 
-                } else {
-                    this.init();
-                }
+                    } else {
+                        //this.init();
+                    }
+                },
+                immediate: true
             }
 		},
 		methods: {
@@ -463,7 +463,7 @@
                 const self = this;
 
                 // init drop for tree
-                var treeName = "event-tree";
+                var treeName = "job-tree";
                 let elTo = $(`#${treeName} li`);
 
                 addEvent(elTo, 'dragleave', function (e) {
@@ -491,8 +491,16 @@
                     let treeObj = $.fn.zTree.getZTreeObj(treeName);
                     let node = treeObj.getNodeByTId(tId);
 
+                    let input = null;
+                    // 删除标签
+                    if(node.cid == 'A3'){
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                    } 
                     // 打标签
-                    let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    else {
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    }
+
                     let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
@@ -551,29 +559,6 @@
                 // 添加Action控制
                 if(this.model.actions) {
                     _.forEach(this.model.actions, function (v) {
-                        if(!v) return;
-                        buttons.push({
-                            text: v.cnname, actions: function (e, dt, node, config) {
-                            }, className: `btn-white ${v.class}`, titleAttr: v.cname
-                        })
-                    })
-                }
-
-				// 添加Severity控制
-				if(this.model.severity){
-                    buttons.push({text: '|', enabled: false, className: ''});
-                    _.forEach(this.model.severity,function(v){
-                        if(!v) return;
-                        buttons.push({text:v.cnname, actions: function(e,dt,node,config){
-                            console.log(e,dt,node,config)
-                        }, className: `btn-white ${v.class}`, titleAttr: v.cname})
-                    })
-				};
-
-                // 添加Status控制
-                if(this.model.status) {
-                    buttons.push({text: '|', enabled: false, className: ''});
-                    _.forEach(this.model.status, function (v) {
                         if(!v) return;
                         buttons.push({
                             text: v.cnname, actions: function (e, dt, node, config) {

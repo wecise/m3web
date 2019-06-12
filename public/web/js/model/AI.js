@@ -505,6 +505,276 @@ class AI {
                     }
                 })
 
+                // 实体发现
+                Vue.component('matrix-ai-setup-e-elad',{
+                    delimiters: ['#{', '}#'],
+                    props:{
+                        id: String,
+                        model: Object
+                    },
+                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                                    <div slot="header" class="clearfix" style="line-height:30px;">
+                                        <div style="float:right;">
+                                            #{content.status==1?'启用中':'关闭中'}#
+                                            <el-switch v-model="content.status"
+                                                    active-color="#13ce66"
+                                                    inactive-color="#dddddd"
+                                                    active-value=1
+                                                    inactive-value=0
+                                                    @change="statusUpdate">
+                                            </el-switch>
+                                            <el-tooltip content="保存规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="删除规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="查看作业">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                            </el-tooltip>
+                                        </div>
+                                    </div>
+                                    <el-form :model="content" label-width="80px" size="mini">
+                                        <el-form-item label="指定类">
+                                            <el-select v-model="content.class" placeholder="请选择类">
+                                                <el-option
+                                                    v-for="item in type.list"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                </el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                        <el-form-item label="hostfield" prop="hostfield">
+                                            <el-input type="text" v-model="content.hostfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="osfield" prop="osfield">
+                                            <el-input type="text" v-model="content.osfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="timefield" prop="timefield">
+                                            <el-input type="text" v-model="content.timefield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="nearest" prop="nearest">
+                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="interval" prop="interval">
+                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="消息模板" prop="msg">
+                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="时间" prop="time">
+                                            <small>#{moment(content.time).format('LLL')}#</small>
+                                        </el-form-item>
+                                        <el-form-item label="用户" prop="user">
+                                            <small>#{content.user}#</small>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-car>`,
+                    filters: {
+                        pickTag(tag){
+                            if(typeof tag == 'object'){
+                                return tag.join(",");
+                            } else {
+                                return tag;
+                            }
+                        }  
+                    },
+                    data: function(){
+                        return {
+                            type:{
+                                model:'',
+                                list: [
+                                    {
+                                        value: '/matrix/devops/performance',
+                                        label: '所有性能'
+                                    }
+                                ]
+                            },
+                            content: null
+                        }
+                    },
+                    created(){
+                        this.content = this.model.content;
+                    },
+                    methods: {
+                        save(){
+                            const self = this;
+
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        // 删除规则
+                        remove: function() {
+                            const self = this;
+        
+                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                                if (e) {
+                                    // 删除文件系统
+                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
+                                    if(rtn==1){
+                                        // 刷新rules
+                                        self.$root.$refs.aiSetup.load();
+                                        self.$root.$refs.aiSetup.close(self.model.id);
+                                    }   
+                                } else {
+                                    
+                                }
+                            })
+                        },
+                        statusUpdate(evt){
+                            const self = this;
+        
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            
+                            // 更新到文件系统
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        job(term){
+                            // 默认Job名称
+                            term = 'word';
+                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
+                        }
+                    }
+                })
+
+                // 实体关系发现
+                Vue.component('matrix-ai-setup-el-elad',{
+                    delimiters: ['#{', '}#'],
+                    props:{
+                        id: String,
+                        model: Object
+                    },
+                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                                    <div slot="header" class="clearfix" style="line-height:30px;">
+                                        <div style="float:right;">
+                                            #{content.status==1?'启用中':'关闭中'}#
+                                            <el-switch v-model="content.status"
+                                                    active-color="#13ce66"
+                                                    inactive-color="#dddddd"
+                                                    active-value=1
+                                                    inactive-value=0
+                                                    @change="statusUpdate">
+                                            </el-switch>
+                                            <el-tooltip content="保存规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="删除规则">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
+                                            </el-tooltip>
+                                            <el-tooltip content="查看作业">
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                            </el-tooltip>
+                                        </div>
+                                    </div>
+                                    <el-form :model="content" label-width="80px" size="mini">
+                                        <el-form-item label="指定类">
+                                            <el-select v-model="content.class" placeholder="请选择类">
+                                                <el-option
+                                                    v-for="item in type.list"
+                                                    :key="item.value"
+                                                    :label="item.label"
+                                                    :value="item.value">
+                                                </el-option>
+                                            </el-select>
+                                        </el-form-item>
+                                        <el-form-item label="hostfield" prop="hostfield">
+                                            <el-input type="text" v-model="content.hostfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="osfield" prop="osfield">
+                                            <el-input type="text" v-model="content.osfield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="timefield" prop="timefield">
+                                            <el-input type="text" v-model="content.timefield"></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="nearest" prop="nearest">
+                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="interval" prop="interval">
+                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="消息模板" prop="msg">
+                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                        </el-form-item>
+                                        <el-form-item label="时间" prop="time">
+                                            <small>#{moment(content.time).format('LLL')}#</small>
+                                        </el-form-item>
+                                        <el-form-item label="用户" prop="user">
+                                            <small>#{content.user}#</small>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-car>`,
+                    filters: {
+                        pickTag(tag){
+                            if(typeof tag == 'object'){
+                                return tag.join(",");
+                            } else {
+                                return tag;
+                            }
+                        }  
+                    },
+                    data: function(){
+                        return {
+                            type:{
+                                model:'',
+                                list: [
+                                    {
+                                        value: '/matrix/devops/performance',
+                                        label: '所有性能'
+                                    }
+                                ]
+                            },
+                            content: null
+                        }
+                    },
+                    created(){
+                        this.content = this.model.content;
+                    },
+                    methods: {
+                        save(){
+                            const self = this;
+
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        // 删除规则
+                        remove: function() {
+                            const self = this;
+        
+                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                                if (e) {
+                                    // 删除文件系统
+                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
+                                    if(rtn==1){
+                                        // 刷新rules
+                                        self.$root.$refs.aiSetup.load();
+                                        self.$root.$refs.aiSetup.close(self.model.id);
+                                    }   
+                                } else {
+                                    
+                                }
+                            })
+                        },
+                        statusUpdate(evt){
+                            const self = this;
+        
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            
+                            // 更新到文件系统
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        job(term){
+                            // 默认Job名称
+                            term = 'word';
+                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
+                        }
+                    }
+                })
+
                 // 词频输入
                 Vue.component('matrix-ai-setup-words',{
                     delimiters: ['#{', '}#'],
@@ -1473,6 +1743,8 @@ class AI {
                                                     <matrix-ai-setup-neural :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='neural'" transition="fade" transition-mode="out-in"></matrix-ai-setup-neural>
                                                     <matrix-ai-setup-baseline :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='baseline'" transition="fade" transition-mode="out-in"></matrix-ai-setup-baseline>
                                                     <matrix-ai-setup-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-elad>
+                                                    <matrix-ai-setup-e-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='e-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-e-elad>
+                                                    <matrix-ai-setup-el-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='el-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-el-elad>
                                                     <matrix-ai-setup-fpgrowth :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='fpgrowth'" transition="fade" transition-mode="out-in"></matrix-ai-setup-fpgrowth>
                                                 </el-tab-pane>
                                             </el-tabs>

@@ -434,8 +434,9 @@ class Omdb{
                         initKeys: function(){
                             const self = this;
 
-                            let _rtn = omdbHandler.classList(-1);
-                            self.keys = _.sortBy(_.keys(_.attempt(JSON.parse.bind(null, _rtn))[0]));
+                            let rtn = omdbHandler.classList(-1)[0];
+                            console.log(rtn, _.sortBy(_.keys(rtn)))
+                            self.keys = _.sortBy(_.keys(rtn));
                         },
                         dropClass: function(){
                             const self = this;

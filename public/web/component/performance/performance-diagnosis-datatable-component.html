@@ -277,7 +277,10 @@
 			                    initComplete: function(){
 				                    self.serial();
 	                                //self.toolBar();
-	                                self.contextMenu();
+									
+									// 注册右键菜单
+                                    self.$root.contextMenu(self.id, self, self.$root.$data.model.message.contextMenu[self.type], self.refresh);
+									
 	                                self.selectRows();
 			                    }
                 },self.model.options)).columns.adjust().draw();
@@ -305,44 +308,6 @@
 				let parentHeight = $(this.$el).closest(".panel-body").height() - 120;
 				$(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
 			},
-            contextMenu: function(){
-                const self = this;
-
-                let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.event;
-                let id = self.id;
-
-                $.contextMenu({
-                    selector: `#${id} tr td:not(:nth-child(1))`,
-                    trigger: 'left',
-                    delay: 10,
-                    hideOnSecondTrigger: true,
-                    className: `animated slideIn ${id}`,
-                    build: function($trigger, e) {
-
-                        return {
-                            callback: function(key, opt) {
-                                if(key === 'detail') {
-                                    self.detail();
-                                }
-                            },
-                            items: items,
-                        }
-                    },
-                    events: {
-                        show: function(opt) {
-
-                            let $this = this;
-
-                            new Vue(mx.tagInput(`${id}_single_tags`, `.${id} input`, self.selectedRows, self.refresh));
-                        },
-                        hide: function(opt) {
-
-                            let $this = this;
-
-                        }
-                    }
-                });
-            },
 			toolBar: function(){
                 const self = this;
 

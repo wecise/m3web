@@ -50,8 +50,8 @@ class SideBar {
                                                     <img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
                                                 </a>
                                             </li-->
-                                            <li v-for="(item,index) in model" :class="index<model.length - 1?'slot-li-divider':''">
-                                                <a href="javascript:void(0);" :target="item.target" @click="triggerInput($event,item.name)" :title="item.cnname">
+                                            <li v-for="(item,index) in model" :class="index<=model.length - 1?'slot-li-divider':''" :data-item="item.id" @click="triggerInput($event,item.name)">
+                                                <a href="javascript:void(0);" :target="item.target" :title="item.cnname" :ref="item.id">
                                                     <img :src="item.icon | pickIcon" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></img> 
                                                     <p>
                                                         <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
@@ -82,14 +82,17 @@ class SideBar {
                                 <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
                             </el-footer>
                         </el-container>`,
-            created: function(){
-                this.init();
-                eventHub.$on("APP-REFRESH-EVENT",this.refresh);
-            },
             filters:{
                 pickIcon:function(icon){
                     return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
                 }
+            },
+            created: function(){
+                this.init();
+                eventHub.$on("APP-REFRESH-EVENT",this.refresh);
+            },
+            mounted() {
+                this.contextMenu();
             },
             methods: {
                 init: function(){
@@ -139,6 +142,62 @@ class SideBar {
                 },
                 onSearch(){
 
+                },
+                contextMenu(){
+                    const self = this;
+
+                    $.contextMenu({
+                        selector: `li.slot-li-divider`,
+                        trigger: 'right',
+                        autoHide: true,
+                        delay: 10,
+                        hideOnSecondTrigger: true,
+                        build: function($trigger, e) {
+                            
+                            let id = e.target.attributes.getNamedItem('data-item').value;
+                            let item = _.find(self.model,{id:id});
+                            
+                            return {
+                                callback: function(key, opt) {
+                                    
+                                    if(_.includes(key,"running")){
+                                        window.open(item.url,"_parent");
+                                    } else if(_.includes(key,"uninstall")){
+                                        appUninstall(item);
+                                    }
+                                },
+                                items: {
+                                    "m10_running": {
+                                        "name": "运行",
+                                        "icon": "fas fa-running"
+                                    },
+                                    "m20":"----------",
+                                    "m30_uninstall": {
+                                        "name": "卸载应用",
+                                        "icon": "fas fa-trash"
+                                    },
+                                    "m40":"----------",
+                                    "m50_copy": {
+                                        "name": "拷贝地址",
+                                        "icon": "fas fa-copy"
+                                    },
+                                    "m60":"----------",
+                                    "m70_properties": {
+                                        "name": "属性",
+                                        "icon": "fas fa-info"
+                                    },
+                                }
+                            }
+                        },
+                        events: {
+                            show: function(opt) {
+                                let $this = this;
+                            },
+                            hide: function(opt) {
+                                let $this = this;
+                            }
+                        }
+                    });
                 }
             }
 
@@ -279,7 +338,25 @@ class SideBar {
     };
 
     init(){
-        new Vue(sideBar.sideMenu);
+        new Vue(this.sideMenu);
+    }
+
+    appInstall(event){
+
+    }
+
+    appUninstall(event){
+
+        alertify.confirm(`确定要卸载该应用？<br><br> ${event.name}`, function (e) {
+            if (e) {
+                let _mql = `delete from /matrix/portal/tools where name='${event.name}'`;
+                let _rtn = omdbHandler.fetchDataByMql(_mql);
+
+            } else {
+                
+            }
+        });
+
     }
 
 }

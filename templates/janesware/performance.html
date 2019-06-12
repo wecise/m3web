@@ -36,6 +36,8 @@
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
+
 
 <style>
 
@@ -163,28 +165,19 @@
 	}
 
 	/* 告警统计widget */
-	.performance-view-summary-control-refresh{
-		right: 125px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
+	.performance-view-summary-control{
+		display: flex;
 		position: absolute;
-		z-index: 10;
-		cursor: pointer;
-	}
-
-	.performance-view-summary-control-smart{
+		height: 22px;
+		line-height: 22px;
+		width: 50%;
 		right: 15px;
-		padding-top: 5px;
-		display: inline-block;
-		padding-right: 3px;
-		vertical-align: middle;
-		font-weight: 900;
-		position: absolute;
-		z-index: 10;
-		cursor: pointer;
+		top: 20px;
+		flex-direction: row-reverse;
+		z-index: 100;
+	}
+	.performance-view-summary-control > .el-tooltip{
+		padding-right: 10px;
 	}
 
 	/* el tabs */
@@ -224,13 +217,105 @@
 		font-size: 12px;
 	}
 
+	/* For grid-view */
+    #grid ul{
+        padding-left: 0;
+        list-style: none;
+    }
+
+    #grid ul > li{
+        float: left;
+        width: 9em;
+        height: 90px;
+        font-size: 10px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        margin: 5px 5px 0px 0px;
+    }
+
+	/*
+    *   File Upload
+    */
+    .progress {
+        height: 16px;
+        border-radius: 0px;
+        display: block;
+        position: relative;
+    }
+
+    .progress small {
+        color: #ffffff;
+        width: 100%;
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        left: 0;
+    }
+
+    .files ul{
+        margin: 10px;
+        padding-left: 0;
+        list-style: none;
+    }
+
+    .files ul > li{
+        float: left;
+        width: 100pt;
+        height: 100px;
+        font-size: 12px;
+        line-height: 1.4;
+        text-align: center;
+        background-color: rgb(249, 249, 249);
+        border: 1px solid rgb(255, 255, 255);
+        padding-top: 5px;
+        margin: 5px 0px 20px 5px;
+    }
+
+    .files ul > li > canvas {
+        height: 65%;
+        width: auto;
+    }
+
+    .files ul > li > a {
+        background-color: rgb(249, 249, 249);
+        border-radius: 0px;
+    }
+
+    .files ul > li > button {
+        margin-top: -50px;
+    }
+
+    .files ul > li > .preview-null {
+        width: 100px;
+        padding-top: 10px;
+        height: 64px;
+        color: rgb(221, 221, 221);
+    }
+
+    .preview-img-responsive{
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .fs-view-component #grid,
+    .fs-view-component .dataTables_scroll{
+        height: 75vh;
+        overflow: auto;
+        padding: 0 10px;
+    }
+
+    .fs-name {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
 </style>
 
 <div id="app"></div>
-
-<script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
-<script src="{{AppSubUrl}}/web/js/model/Performance.js"></script>
-<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
@@ -239,6 +324,17 @@
 
 <!-- ECharts单文件引入 --> 
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
@@ -252,6 +348,22 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-path-datatables-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
+
+<script src="{{AppSubUrl}}/web/js/model/Topological.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Performance.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+
+<script>
+	$(function() {
+		_.delay(function(){
+			let mxPerformance = new Performance();
+			mxPerformance.init();
+		},50)
+	})
+</script>
 
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
@@ -266,32 +378,34 @@
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name"  lazy=true>
 						<div v-if="item.type==='main'">
-							<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
-								<div class="performance-view-summary-control-refresh">
-									${control.ifRefresh==1?'自动刷新':'自动刷新'}
-									<el-switch
-									v-model="control.ifRefresh"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryByRefresh">
-									</el-switch>
-								</div>
-							</el-tooltip>
-							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-								<div class="performance-view-summary-control-smart">
-									${control.ifSmart==1?'智能分析':'智能分析'}
-									<el-switch
-										v-model="control.ifSmart"
+							<div class="performance-view-summary-control">
+								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifRefresh==1?'自动刷新':'自动刷新'}
+										<el-switch
+										v-model="control.ifRefresh"
 										active-color="#13ce66"
 										inactive-color="#dddddd"
 										active-value="1"
 										inactive-value="0"
-										@change="toggleSummaryBySmart">
-									</el-switch>
-								</div>
-							</el-tooltip>
+										@change="toggleSummaryByRefresh">
+										</el-switch>
+									</div>
+								</el-tooltip>
+								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifSmart==1?'智能分析':'智能分析'}
+										<el-switch
+											v-model="control.ifSmart"
+											active-color="#13ce66"
+											inactive-color="#dddddd"
+											active-value="1"
+											inactive-value="0"
+											@change="toggleSummaryBySmart">
+										</el-switch>
+									</div>
+								</el-tooltip>
+							</div>
 							<el-row :gutter="10" id="performance-view-summary">
 								<el-col :xl="24">
 									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
@@ -321,14 +435,14 @@
 									<div v-if="it.type==='detail'">
 										<performance-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></performance-diagnosis-detail>
 									</div>
-									<div v-if="it.type==='history'">
+									<div v-else-if="it.type==='history'">
 										<performance-diagnosis-history :id="it.name+ '-history'" :model="it.model.history"></performance-diagnosis-history>
 									</div>
-									<div v-if="it.type==='journal'">
+									<div v-else-if="it.type==='journal'">
 										<performance-diagnosis-journal :id="it.name+ '-journal'" :model="it.model.journal"></performance-diagnosis-journal>
 									</div>
-									<div v-else>
-										<!-- <performance-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></performance-diagnosis-datatable-component> -->
+									<div v-else-if="it.type==='topological'">
+										<performance-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></performance-diagnosis-topological>
 									</div>
 								</el-tab-pane>
 							</el-tabs>

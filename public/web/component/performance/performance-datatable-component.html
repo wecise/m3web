@@ -228,48 +228,50 @@
 			}
         },
         created() {
-            eventHub.$on(`DATATABLE-FILTER-BY-event-EVENT`, this.filterColumn);
+            eventHub.$on(`DATATABLE-FILTER-BY-performance-EVENT`, this.filterColumn);
         },
 		mounted: function () {
             const self = this;
 
             self.$nextTick(function () {
                 self.init();
-
-                setInterval(function(){
-                    //self.resize();
-                },2000);
             });
         },
 		watch: {
-          	'model.rows': function(val,oldVal){
+            'model.rows': {
 
-          	    // 数据无更新
-                if(val === oldVal) {
-                    return false;
-                }
+                handler: function(val,oldVal){
 
-                // 数据为空
-                if( _.isEmpty(val)) {
-                    this.datatable.rows().remove().draw();
-                    return false;
-                }
+                    // 数据无更新
+                    if(val === oldVal) {
+                        //console.log(111)
+                        return false;
+                    }
 
-                // 表格已经初始化
-                if(this.datatable instanceof $.fn.dataTable.Api) {
-                    this.datatable.clear();
-                    this.datatable.rows.add(val);
-                    this.datatable.draw();
+                    // 数据为空 
+                    // Table置空
+                    if( _.isEmpty(val)) {
+                        //console.log(222)
+                        this.datatable.rows().remove().draw();
+                        return false;
+                    }
 
-                    // 重构工具栏
-                    this.toolBar();
-                    // 重构可拖拽
-                    this.dragHandle();
-                    this.dropHandle();
+                    // 表格已经初始化
+                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                        //console.log(333)
+                        this.datatable.clear();
+                        this.datatable.rows.add(val);
+                        this.datatable.draw();
 
-                } else {
-                    this.init();
-                }
+                        // 数据行重新生成，所以需要再次实例化可拖拽功能
+                        this.dragHandle();
+
+                    } else {
+                        //console.log(444)
+                        //this.init();
+                    }
+                },
+                immediate: true
             }
 		},
 		methods: {
@@ -367,8 +369,7 @@
                                     self.toolBar();
 	                                
                                     // 注册右键菜单
-                                    mxPerformance.contextMenu(self.id, self, self.model.contextMenu.performance, self.$root, self.refresh);
-                                    
+                                    self.$root.contextMenu(self.id, self, self.model.contextMenu.performance, self.refresh);
                                     
                                     self.dragHandle();
                                     self.dropHandle();
@@ -427,7 +428,7 @@
                 const self = this;
 
                 // init drop for tree
-                var treeName = "event-tree";
+                var treeName = "performance-tree";
                 let elTo = $(`#${treeName} li`);
 
                 addEvent(elTo, 'dragleave', function (e) {
@@ -455,8 +456,16 @@
                     let treeObj = $.fn.zTree.getZTreeObj(treeName);
                     let node = treeObj.getNodeByTId(tId);
 
+                    let input = null;
+                    // 删除标签
+                    if(node.cid == 'A3'){
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                    } 
                     // 打标签
-                    let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    else {
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    }
+                    
                     let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){

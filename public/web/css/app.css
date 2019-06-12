@@ -223,6 +223,12 @@ div.mxWindowPane > div > .tab-content > .tab-pane > div > .panel-body {
     border: 1px solid rgb(255, 255, 255); */
 }
 
+.nav-menu-level1> li:active,
+.nav-menu-level1> li:focus,
+.nav-menu-level1> li:hover {
+    background-color: rgb(245, 245, 245);
+}
+
 .nav-menu-level1> li > a {
     color: rgba(0,0,0,0.4);
 }

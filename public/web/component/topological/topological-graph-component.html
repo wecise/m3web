@@ -6,6 +6,30 @@
             height: 100%;
         }
 
+        /* .topological-graph-component .container {
+            position: absolute;
+            z-index: 10000;
+            right: 0px;
+            left: 60px;
+            top: 80px;
+            bottom: 28px;
+            cursor: default;
+            overflow: auto;
+        }
+        */
+        
+        .topological-graph-component .container > svg {
+            /* width: 100%!important;
+            height: 100%!important;
+            cursor: default;
+            display: block;
+            position: absolute;
+            background-image: none; */
+            min-width: 100vw!important;
+            min-height: 100vh!important;
+        }
+        
+
 		.topological-graph-component .outlineContainer {
 			z-index:1;
 			position:absolute;
@@ -80,7 +104,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<div :id="id">
-			<div :id="id+'-container'"></div>
+			<div :id="id+'-container'" class="container"></div>
 			<div class="nav" :id="id+'-nav'">
                 <div class="tools" :id="id+'-tools'"></div>
                 <graph-view-search class="tools-search" :id="id+'-tools-search'"></graph-view-search>
@@ -144,8 +168,7 @@
             }
         },
         created:function(){
-	        const self = this;
-            eventHub.$on(`PATH-TOGGLE-EVENT-${self.id}-graph-path`,self.addPath);
+	        eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
 	    },
 	    mounted: function() {
 	        const self = this;
@@ -153,6 +176,7 @@
 	        self.$nextTick(function(){
 
                 _.delay(function(){
+                    console.log(self.id,self.graphData,self.inst)
                     self.init();
                     self.initPlugIn();
                 },1000)
@@ -398,13 +422,70 @@
                 {
                     self.model.graph.graph.getModel().endUpdate();
 
-                    //self.toCenter();
+                    self.toCenter();
+
+                    self.updateStatus();
                     
+                }
+            },
+            createOverlayByTip(image, tooltip) {
+                            
+                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/severity/${image}.png?issys=true&type=download`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                
+                return overlay;
+            },
+            updateStatus(){
+                const self = this;
+
+                // 图所有节点
+                let cells = _.map(self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent()),function(v,k){
+                                return {gid: v.id, name: v.value};
+                            });
+    
+                let input = "('" + `${cells.join("','")}` + "')";
+
+                let status = fsHandler.callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
+
+                self.model.graph.graph.getModel().beginUpdate();
+
+                try {
+                    
+                    _.forEach(status,function(v) {
+                        let id = v.gid;
+                        let status = v.status;
+                        let cell = self.model.graph.graph.getModel().getCell(id);
+                        let state = self.model.graph.graph.view.getState(cell);
+                        
+                        if (cell != null) {
+                            
+                            // Resets
+                            self.model.graph.graph.removeCellOverlays(cell);
+    
+                            if (status >= 5) {
+
+                                self.model.graph.graph.addCellOverlay(cell, self.createOverlayByTip(status, `${id}: 重大告警`));
+
+                            } else if (status >3 && status < 5) {
+                                self.model.graph.graph.addCellOverlay(cell, self.createOverlayByTip(status, `${id}: 严重告警`));
+                            } else {
+                                self.model.graph.graph.removeCellOverlays(cell);
+                            } 
+                        
+                        }
+
+                    })
+
+                } catch(err){
+
+                }
+                finally {
+                    self.model.graph.graph.getModel().endUpdate();
                 }
             },
             initPlugIn(){
                 this.outline();
                 this.toolBars();
+                this.$root.contextMenu();
             },
             reload(){
                 $(this.$el).find(`#${this.id}-container`).empty();
@@ -437,7 +518,7 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    //inst.graphSelectedCell = cell;
+                    self.$root.$data.selectedCell = cell;
 
                     // copy to copyboard
                     let clipboard2 = new Clipboard('g image',{
@@ -446,12 +527,11 @@
                         }
                     });
 
-					if (cell != null)
-					{
+                    /*
+					if (cell != null){
 						var overlays = self.model.graph.graph.getCellOverlays(cell);
 						
-						if (overlays == null)
-						{
+						if (overlays == null) {
 							// Creates a new overlay with an image and a tooltip
 							var overlay = new mxCellOverlay(new mxImage('/fs/assets/images/files/png/check.png?type=open&issys=true', 16, 16),'Overlay tooltip');
 
@@ -463,14 +543,25 @@
 							
 							// Sets the overlay for the cell in the graph
 							self.model.graph.graph.addCellOverlay(cell, overlay);
-						}
-						else
-						{
+						} else {
 							self.model.graph.graph.removeCellOverlays(cell);
 						}
-					}
+                    }
+                    */
 
                 });
+
+
+                let track = new mxCellTracker(self.model.graph.graph);
+                track.mouseMove = function(sender, me) {
+                    
+                    let cell = this.getCell(me);
+                    
+                    if(!cell) return;
+                    
+                    self.$root.$data.selectedCell = cell;
+                    
+                };
             },
             tip(event){
                 const self = this;
@@ -603,8 +694,12 @@
 
             },
             toCenter(){
+
                 const self = this;
 
+                self.model.graph.graph.center(true,true,0.5,0);//将画布放到容器中间
+
+                /* 
                 //self.model.graph.graph.fit();
                 //self.model.graph.graph.center(true,false,0.5,0.5);
                 var margin = 2;
@@ -619,7 +714,7 @@
 
                 self.model.graph.graph.view.scaleAndTranslate(s,
                 (margin + cw - w * s) / (2 * s) - bounds.x / self.model.graph.graph.view.scale,
-                (margin + ch - h * s) / (2 * s) - bounds.y / self.model.graph.graph.view.scale);
+                (margin + ch - h * s) / (2 * s) - bounds.y / self.model.graph.graph.view.scale); */
 
             },
             path(){
@@ -637,6 +732,7 @@
             },
             pathHandle(){
                 const self = this;
+
                 let dataset = [];
                 let cols = {
                                 "path":_.concat([{field:"num",title:"序号"}],_.map(self.graphData.pathtags,function(v){ return {field:v,title:v}}))
@@ -646,7 +742,7 @@
                     dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
                 })
                 let node = { data: _.groupBy(dataset,'class'), columns: cols};
-                let path = inst.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
+                let path = self.$root.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
                 new Vue(path);
             },
             addPath(event){

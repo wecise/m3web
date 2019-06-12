@@ -24,6 +24,8 @@ class Performance extends Matrix {
     }
 
     init() {
+        
+        const performance = this;
 
         VueLoader.onloaded(["ai-robot-component",
                             "performance-datatable-component",
@@ -484,8 +486,57 @@ class Performance extends Matrix {
                                     </el-timeline-item>
                                 </el-timeline></div>`
                 })
+
+                // 资源信息
+                Vue.component("performance-diagnosis-topological",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            splitInst: null
+                        }
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-aside class="split" :id="id+'-topological-view-left'">
+                                        
+                                    </el-aside>
+                                    <el-container class="split" :id="id+'-topological-view-right'">
+                                        <el-main style="padding:0px;">
+                                            <div :id="'topological-app-'+id"></div>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init(){
+                            let mxTopological = new Topological();
+                            mxTopological.init();
+                            mxTopological.graphScript = _.map(this.model.rows,function(v){
+                                return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
+                            });
+                            mxTopological.mount(`#topological-app-${this.id}`);
+                            
+                            _.delay(()=>{
+                                mxTopological.app.contextMenu();
+                            },500)
+
+                            this.splitInst = Split([`#${this.id}-topological-view-left`, `#${this.id}-topological-view-right`], {
+                                sizes: [0, 100],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                            });
+                        }
+                    }
+                })
                 
-                mxPerformance.app = {
+                let main = {
                     delimiters: ['${', '}'],
                     template: "#app-template",
                     data: {
@@ -593,7 +644,7 @@ class Performance extends Matrix {
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT",mxPerformance.resizeEventConsole);
+                        eventHub.$on("WINDOW-RESIZE-EVENT",performance.resizeEventConsole);
                     },
                     mounted(){
                         const self = this;
@@ -652,7 +703,7 @@ class Performance extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
-                            mxPerformance.resizeEventConsole();
+                            performance.resizeEventConsole();
                         },
                         toggleSummaryByRefresh(evt){
                             const self = this;
@@ -670,7 +721,7 @@ class Performance extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
-                            mxPerformance.resizeEventConsole();
+                            performance.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {
@@ -687,34 +738,46 @@ class Performance extends Matrix {
                                                 {title:'性能详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
                                                 {title:'历史性能', name:`diagnosis-history-${id}`, type: 'history', model:model},
                                                 {title:'性能轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model}
                                             ]};
-                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
-
+                                
                                 this.layout.main.tabs.push(detail);
                                 this.layout.main.activeIndex = `diagnosis-${id}`;
+                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
                                 
                             } catch(error){
                                 this.layout.main.tabs = [];
                             }
                         },
                         detailRemove(targetName) {
-                            console.log(targetName)
-                            let tabs = this.layout.main.tabs;
-                            let activeIndex = this.layout.main.activeIndex;
-                            if (activeIndex === targetName) {
-                              tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                  let nextTab = tabs[index + 1] || tabs[index - 1];
-                                  if (nextTab) {
-                                    activeIndex = nextTab.name;
-                                  }
-                                }
-                              });
-                            }
                             
-                            this.layout.main.activeIndex = activeIndex;
-                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                            try{
+                                let tabs = this.layout.main.tabs;
+                                let activeIndex = this.layout.main.activeIndex;
+                                if (activeIndex === targetName) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeIndex = nextTab.name;
+                                    }
+                                    }
+                                });
+                                }
+                                
+                                this.layout.main.activeIndex = activeIndex;
+                                this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                                this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
+
+                                _.delay(function(){
+                                    // RESIZE Event Summary
+                                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                    // RESIZE Event Console
+                                    performance.resizeEventConsole();
+                                },500)
+                            } catch(err){
+
+                            }
 
                         },
                         toggle(){
@@ -722,63 +785,65 @@ class Performance extends Matrix {
                                 // 窗体RESIZE事件
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
                             },500)
+                        },
+                        contextMenu(tId,inst,items,fun){
+                            const self = this;
+
+                            $.contextMenu({
+                                selector: `#${tId} tr td:not(:nth-child(1))`,
+                                trigger: 'right',
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${tId} context-menu-list`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.detailAdd(inst.selectedRows);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.action({list: [inst.selectedRows], action:action});
+                                            }
+                                        },
+                                        items: items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                    
+                                        let $this = this;
+                                        _.delay(function(){
+                                            new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                                        },50)
+                                    },
+                                    hide: function(opt) {
+                    
+                                        let $this = this;
+                    
+                                    }
+                                }
+                            });
                         }
+
                     }
                 };
-                new Vue(mxPerformance.app).$mount("#app");    
+                
+                this.app = new Vue(main).$mount("#app");    
             });
         })
 
         window.addEventListener('resize', () => { 
-            mxPerformance.resizeEventConsole();
+            performance.resizeEventConsole();
 
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
-    }
-
-    contextMenu(tId,inst,items,app,fun){
-        
-        $.contextMenu({
-            selector: `#${tId} tr td:not(:nth-child(1))`,
-            trigger: 'right',
-            autoHide: true,
-            delay: 5,
-            hideOnSecondTrigger: true,
-            className: `animated slideIn ${tId} context-menu-list`,
-            build: function($trigger, e) {
-
-                return {
-                    callback: function(key, opt) {
-                        
-                        if(_.includes(key,'diagnosis')) {
-                            app.detailAdd(inst.selectedRows);
-                        } else if(_.includes(key,'action')) {
-                            // 增加操作类型
-                            let action = _.last(key.split("_"));
-                            app.action({list: [inst.selectedRows], action:action});
-                        }
-                    },
-                    items: items
-                }
-            },
-            events: {
-                show: function(opt) {
-
-                    let $this = this;
-                    _.delay(function(){
-                        new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
-                    },50)
-                },
-                hide: function(opt) {
-
-                    let $this = this;
-
-                }
-            }
-        });
     }
 
     resizeEventConsole(){
@@ -795,6 +860,3 @@ class Performance extends Matrix {
     }
 
 }
-
-let mxPerformance = new Performance();
-mxPerformance.init();
