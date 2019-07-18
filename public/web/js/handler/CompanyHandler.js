@@ -8,9 +8,8 @@
          #####  ####### #     # #       #     # #     #    #
 *
 * */
-
-
 class CompanyHandler{
+
     constructor(){
 
     }
@@ -21,7 +20,6 @@ class CompanyHandler{
     *  添加
     *
     */
-
     companyNew(event){
         let rtn = 0;
 
@@ -30,7 +28,8 @@ class CompanyHandler{
             dataType: 'json',
             type: 'POST',
             async: false,
-            data: event,
+            contentType: 'application/json',
+            data: JSON.stringify(event),
             beforeSend: function (xhr) {
                 Pace.restart();
             },

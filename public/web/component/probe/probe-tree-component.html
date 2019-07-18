@@ -239,8 +239,34 @@
                 }
                 
                 // 根据节点过滤数据
-                eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
-
+                // A1 为class搜索
+                // A2 为tag搜索
+                if(treeNode.rtype=='A1'){
+                    if(treeNode.parent == null){
+                        self.$root.options.term = `class=*`;    
+                    } else {
+                        self.$root.options.term = `class=${treeNode.class}`;
+                    }
+                    self.$root.$refs.searchRef.search();
+                } else if(treeNode.rtype=='A2'){
+                    if(treeNode.parent == null){
+                        self.$root.options.term = `tags=*`;    
+                    } else {
+                        self.$root.options.term = `tags=${treeNode.name}`;
+                    }
+                    self.$root.$refs.searchRef.search();
+                }
+                // if(treeNode.parent == null){
+                //     self.$root.options.term = `class=${treeNode.name}`;
+                //     self.$root.$refs.searchRef.search();
+                //     // treeNode.name = '';
+                //     // eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
+                // } else {
+                //     self.$root.options.term = treeNode.name;
+                //     self.$root.$refs.searchRef.search();
+                //     //eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
+                // }
+            
                 if(treeNode.rtype === 'A1') {
 
                     // 右键菜单

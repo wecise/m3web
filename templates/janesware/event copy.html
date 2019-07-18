@@ -21,6 +21,7 @@
 
 -->
 {{template "base/head" .}}
+
 <!--MXClient JS & CSS-->
 <script>
 	mxBasePath = '{{AppSubUrl}}/web/creative/src';
@@ -33,11 +34,11 @@
 <script>
     mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
 </script>
+
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
 <link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
-
 
 <style>
 
@@ -53,7 +54,7 @@
 
 	/* Event view */
 	.tree-view {
-		padding: 0px;
+		padding: 0 15px;
 	}
 
 	/* 运维模式 */
@@ -92,16 +93,44 @@
 		padding-top: 10px!important;
 	}
 
+
+	/* nav nav-tabs nav-tabs-line-2px li a */
+	.panel-title-btn .nav-tabs-line-2px{
+		margin: 0 -15px;
+	}
+	.panel-title-btn .nav-tabs-line-2px > li > a {
+		padding: 0px 15px
+	}
+
+	/* 自定义Panel */
+	.panel.panel-default.panel-white-border {
+		margin-bottom: 10px;
+		border: 1px solid rgb(250, 250, 250);
+	}
+
+	.panel-white-border .panel-heading .nav-tabs {
+		margin-left: -13px;
+		margin-top: -8px;
+		margin-right: -15px;
+	}
+
+	.panel-white-border .panel-title{
+		height: 18px;
+	}
+	.panel-white-border .panel-body {
+		padding:0 10px;
+	}
+
 	/* 告警详情页Tab */
 	.detail.tab-pane.Tab{
 		min-height: 72vh;
 	}
 
 	/* 告警分析 */
-	form.entity-view-detail > .form-group:nth-child(even) {
+	form.event-view-detail > .form-group:nth-child(even) {
 		background: rgb(249, 249, 249);
 	}
-	form.entity-view-detail > .form-group:nth-child(odd) {
+	form.event-view-detail > .form-group:nth-child(odd) {
 		background: rgb(255, 255, 255);
 	}
 
@@ -114,18 +143,18 @@
 		background: #ffffff;
 	} */
 
-	section.entity-diagnosis > ul {
+	section.event-diagnosis > ul {
 		padding:15px 0px;
 		padding-left: 23vw;
 	}
 
-	section.entity-diagnosis > ul > li > a{
+	section.event-diagnosis > ul > li > a{
 		font-size: 14px;
 		color: #333333;
 		background: transparent;
 	}
 
-	section.entity-diagnosis > ul > li.active > a{
+	section.event-diagnosis > ul > li.active > a{
 		font-size: 14px;
 		box-shadow: 1px 1px 1px 1px #ddd;
     	color: #ffffff!important;
@@ -133,50 +162,39 @@
     	background: rgb(130, 192, 255)!important;
 	}
 
-	section.entity-diagnosis > div.content{
+	section.event-diagnosis > div.content{
 		margin: 0px;
 		padding:0px 15px;
 		height:calc(90vh - 183px);
 		overflow:auto;
 	}
 
-	section.entity-diagnosis > div.content > p{
+	section.event-diagnosis > div.content > p{
 		border:1px solid #ddd;
 		padding:15px;
 	}
 
 	/* 告警统计widget */
-	.entity-view-summary-control{
+	.event-view-summary-control{
 		display: flex;
 		position: absolute;
 		height: 22px;
 		line-height: 22px;
 		width: 50%;
 		right: 15px;
-		top: 10px;
+		top: 20px;
 		flex-direction: row-reverse;
 		z-index: 100;
 	}
 
-	.entity-view-summary-control > .el-tooltip{
+	.event-view-summary-control > .el-tooltip{
 		padding-right: 10px;
 	}
 
 	/* el tabs */
-	#entity-view-summary .el-tabs__content{
+	#event-view-summary .el-tabs__content{
 		max-height:160px;
 		overflow-y:auto;
-	}
-
-	#entity-view-summary .el-tabs__header{
-		margin-bottom: 0px;
-	}
-	#entity-view-summary .el-tabs__header .el-tabs__nav-scroll{
-		padding-top: 10px;
-	}
-
-	#entity-view-container .el-tabs__content{
-		padding: 10px 5px;
 	}
 
 	.el-tabs__item {
@@ -201,41 +219,20 @@
         height: 30px;
         line-height: 30px;
         border: unset;
-	}
-	
+    }
+
 	.el-tabs--border-card{
 		border: unset;
     	-webkit-box-shadow:  unset;
     	box-shadow:  unset;
 	}
 
-	.el-autocomplete-suggestion li{
-		font-size: 12px;
-		white-space: normal;
-    }
-
 	/* 属性选择，隐藏第一列checkbox */
 	.dt-button-collection.fixed.four-column > a:nth-child(1){
 		display: none;
 	}
 
-
-	/* el-picker-panel__body-wrapper */
-	.el-picker-panel__body-wrapper{
-		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-    	background: rgb(255, 255, 255);
-	}
-
 	/* Split Style */
-	#pane-entity-view-console .gutter.gutter-horizontal{
-		background-color: rgb(255, 255, 255);
-		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
-		background-size: 7px;
-		background-position-x: 50%;
-		background-position-y: 50%;
-		background-repeat: no-repeat;
-	}
-
 	.gutter.gutter-horizontal{
 		background-color: rgb(241, 241, 241);
 		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
@@ -243,6 +240,17 @@
 		background-position-x: 50%;
 		background-position-y: 50%;
 		background-repeat: no-repeat;
+	}
+
+	/* diem table selected style */
+	table.dataTable.event-table-dimension tbody>tr.selected,
+	table.dataTable.event-datatable-component tbody>tr>.selected {
+		background: rgb(196, 235, 253)!important;
+	}
+	
+	table.dataTable.event-datatable-component tbody>tr.selected-highlight,
+	table.dataTable.event-datatable-component tbody>tr>.selected-highlight {
+		background: rgb(241, 241, 241)!important;
 	}
 
 	/* For grid-view */
@@ -341,42 +349,17 @@
         white-space: nowrap;
     }
 
-	/* 全屏模式 */
-	header#header{
-		display:none;
-	}
-	aside>#sidebar{
-		display:none;
-	}
-	.page-header-fixed{
-		padding-top: 0px;
-	}
-
-	.page-sidebar-minified .sidebar-bg{
-		width: 0px;
-	}
-
-	.page-sidebar-minified .content{
-		margin-left: 0px;
-	)
 </style>
 
-<main id="content" class="content">
-	<div id="app"></div>
-</main>
-
-
-<!-- Ace-Diff -->
-<!-- <script src="{{AppSubUrl}}/web/vendor/ace-diff/ace_1.1.8.js" type="text/javascript"></script>
-<script src="{{AppSubUrl}}/web/vendor/ace-diff/diff_match_patch.js"></script> -->
-<script src="{{AppSubUrl}}/web/vendor/ace-diff/ace-diff.min.js"></script>
-<link href="{{AppSubUrl}}/web/vendor/ace-diff/ace-diff.min.css" type="text/css" rel="stylesheet">
-
+<div id="app"></div>
 
 <!--zTree Core JS-->
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.core-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.excheck-3.5.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.exedit-3.5.js"></script>
+
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
 <!--File Parse JS-->
 <script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
@@ -389,18 +372,12 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
 <script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
-<!-- 二维码生成 --> 
-<script src="{{AppSubUrl}}/web/vendor/qrcode/qrcode.min.js"></script>
-
-<!-- ECharts单文件引入 --> 
-<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
-
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/entity/entity-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-diagnosis-datatable-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-graph-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/entity/event-summary-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-diagnosis-datatable-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-graph-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/event/event-summary-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
 
@@ -413,115 +390,134 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
 
 <script src="{{AppSubUrl}}/web/js/model/Topological.js"></script>
-<script src="{{AppSubUrl}}/web/js/model/Entity.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/MaxEchart.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Event.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
-
-
 
 <script>
 	$(function() {
 		_.delay(function(){
-			let mxEntity = new Entity();
-			mxEntity.init();
-		},500)
+			let mxEvent = new Event();
+			mxEvent.init();
+		},50)
 	})
 </script>
 
 <script type="text/x-template" id="app-template">
-	<el-container>
-		<el-header style="height: 30px;line-height: 30px;padding: 0px;">
-			<search-base-component :id="model.id"
-									:options="options"
-									ref="searchRef"
-									class="grid-content"></search-base-component>
-		</el-header>			
-		<el-main id="entity-view-container" style="padding: 5px 0px 0px 0px;">
-			<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
-				<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" style="padding:0px;">
-					<div v-if="item.type==='main'" style="margin-top:-15px;">
-						<div class="entity-view-summary-control">
-							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-								<div>
-									${control.ifSmart==1?'智能分析':'智能分析'}
-									<el-switch
-									v-model="control.ifSmart"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryBySmart">
-									</el-switch>
-								</div>
-							</el-tooltip>
-							<el-tooltip :content="control.ifGraph==1?'实体图谱启用中':'实体图谱关闭中'" placement="top" open-delay="500">
+	<main id="content" class="content">
+		<el-row :gutter="10">
+			<el-col :xl="24" style="padding-bottom:7px;">
+				<search-base-component :id="model.id"
+				                       :options="options"
+									   ref="searchRef"
+									   class="grid-content"></search-base-component>
+			</el-col>
+			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
+				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
+					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
+						<div v-if="item.type==='main'">
+							<div class="event-view-summary-control">
+								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
 									<div>
-										${control.ifGraph==1?'实体图谱':'实体图谱'}
+										${control.ifRefresh==1?'自动刷新':'自动刷新'}
 										<el-switch
-										v-model="control.ifGraph"
+										v-model="control.ifRefresh"
 										active-color="#13ce66"
 										inactive-color="#dddddd"
 										active-value="1"
 										inactive-value="0"
-										@change="toggleSummaryByGraph">
+										@change="toggleSummaryByRefresh">
 										</el-switch>
 									</div>
 								</el-tooltip>
+								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifSmart==1?'智能分析':'智能分析'}
+										<el-switch
+										v-model="control.ifSmart"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryBySmart">
+										</el-switch>
+									</div>
+								</el-tooltip>
+								<el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
+									<div>
+										${control.ifAiGroup==1?'智能分组':'智能分组'}
+										<el-switch
+										v-model="control.ifAiGroup"
+										active-color="#13ce66"
+										inactive-color="#dddddd"
+										active-value="1"
+										inactive-value="0"
+										@change="toggleSummaryByGroup">
+										</el-switch>
+									</div>
+								</el-tooltip>
+							</div>
+							<el-row :gutter="10" id="event-view-summary">
+								<el-col :xl="24">
+									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
+										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+											<div v-if="item.type=='radar'">
+												<event-view-radar id="event-summary-radar" :model='model.message'></event-view-radar>
+											</div>
+											<div v-if="item.type=='pie'">
+												<event-view-pie id="event-summary-pie" :model='model.message'></event-view-pie>
+											</div>
+											<div v-if="item.type=='summary'">
+												<event-view-summary id="event-summary-summary" :model='model.message'></event-view-summary>
+											</div>
+										</el-tab-pane>
+									</el-tabs>
+								</el-col>
+							</el-row>
+							<el-row :gutter="10" id="event-view-console">
+								<el-col :xl="8" class="tree-view animated fadeInRight">
+									<probe-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>
+								</el-col>
+								<el-col :xl="16" class="table-view animated fadeInLeft">
+									<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
+								</el-col>
+							</el-row>
 						</div>
-						<el-row id="entity-view-summary">
-							<el-col :xl="24">
-								<el-tabs v-model="layout.summary.activeIndex" type="border">
-									<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-										<div v-if="item.type=='radar'">
-											<entity-view-radar id="event-radar" :model='model.message'></entity-view-radar>
-										</div>
-										<div v-if="item.type=='pie'">
-											<entity-view-pie id="event-pie" :model='model.message'></entity-view-pie>
-										</div>
-									</el-tab-pane>
-								</el-tabs>
-							</el-col>
-						</el-row>
-						<el-row id="entity-view-console">
-							<el-col :xl="24" class="animated fadeInRight">
-								<el-container>
-									<el-aside class="tree-view" id="entity-view-left" style="width:200px;height: calc(100vh - 200px);padding: 10px 0;">
-										<probe-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></probe-tree-component>
-									</el-aside>
-									<el-main class="table-view" id="entity-view-main" style="padding:0px;">
-										<entity-datatable-component id="entity-list" :model="model.message"></entity-datatable-component>		
-									</el-main>
-								</el-container>
-							</el-col>
-						</el-row>
-					</div>
-					<div v-if="item.type==='diagnosis'">
-						<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
-							<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
-								<div v-if="it.type==='base'">
-									<entity-diagnosis-base :id="it.name+ '-base'" :model="it.model.detail"></entity-diagnosis-base>
-								</div>
-								<div v-else-if="it.type==='manager'">
-									<entity-diagnosis-manager :id="it.name+ '-manager'" :model="it.model.detail"></entity-diagnosis-manager>
-								</div>
-								<div v-else-if="it.type==='config'">
-									<entity-diagnosis-config :id="it.name+ '-config'" :model="it.model.detail"></entity-diagnosis-config>
-								</div>
-								<div v-else-if="it.type==='compare'">
-									<entity-diagnosis-compare :id="it.name+ '-compare'" :model="it.model"></entity-diagnosis-compare>
-								</div>
-								<div v-else>
-									<!-- <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></event-diagnosis-datatable-component> -->
-								</div>
-							</el-tab-pane>
-						</el-tabs>
-					</div>
-					<div v-else-if="item.type==='graph'">
-						<entity-view-graph id="entity-view-graph" :model="model.message"></entity-view-graph>
-					</div>
-				</tab>
-			</el-tabs>
-		</el-main>
-	</el-container>
+						<div v-else-if="item.type==='diagnosis'">
+							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line"> 
+								<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name"  lazy=true>
+									<div v-if="it.type==='detail'">
+										<event-diagnosis-detail :id="it.name + '-detail'" :model="it.model.event"></event-diagnosis-detail>
+									</div>
+									<div v-else-if="it.type==='journal'">
+										<event-diagnosis-journal :id="it.name + '-journal'" :model="it.model.journal"></event-diagnosis-journal>
+									</div>
+									<div v-else-if="it.type==='history'">
+										<event-diagnosis-history :id="it.name + '-history'" :model="it.model.history"></event-diagnosis-history>
+									</div>
+									<div v-else-if="it.type==='dimension'">
+										<event-diagnosis-dimension :id="it.name + '-dimension'" :model="it.model.dimension"></event-diagnosis-dimension>
+									</div>
+									<div v-else-if="it.type==='probability'">
+										<event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
+									</div>
+									<div v-else-if="it.type==='topological'">
+										<event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
+									</div>
+									<div v-else-if="it.type==='script'">
+										<event-diagnosis-script :id="it.name + '-script'" :model="it.model.script"></event-diagnosis-script>
+									</div>
+								</el-tab-pane>
+							</el-tabs>
+						</div>
+						<div v-else-if="item.type==='aiGroup'">
+							<event-view-aigroup id="event-view-aigroup" :model="model.message"></event-view-aigroup>
+						</div>
+					</tab>
+				</el-tabs>
+			</el-col>
+		</el-row>
+	</main>
 </script>
 
 {{template "base/footer" .}}

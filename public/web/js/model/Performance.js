@@ -306,54 +306,7 @@ class Performance extends Matrix {
                                       }]
                                 }
                             },
-                            trends: [{
-                                title: '5分钟',
-                                value: 'min5',
-                                config:{
-                                    step: 'HH:mm',
-                                    type: ['max','min','avg','value']
-                                }
-                            },
-                            {
-                                title: '15分钟',
-                                value: 'min15',
-                                config:{
-                                    step: 'HH:mm',
-                                    type: ['max','min','avg','value']
-                                }
-                            },
-                            {
-                                title: '30分钟',
-                                value: 'min30',
-                                config:{
-                                    step: 'HH:mm',
-                                    type: ['max','min','avg','value']
-                                }
-                            },
-                            {
-                                title: '1小时',
-                                value: 'hour1',
-                                config:{
-                                    step: 'HH:mm',
-                                    type: ['max','min','avg','value']
-                                }
-                            },
-                            {
-                                title: '2小时',
-                                value: 'hour2',
-                                config:{
-                                    step: 'HH:mm',
-                                    type: ['max','min','avg','value']
-                                }
-                            },
-                            {
-                                title: '1天',
-                                value: 'day1',
-                                config:{
-                                    step: 'HH:00',
-                                    type: ['max','min','avg','value']
-                                }
-                            }]
+                            trends: []
                         }
                     },
                     template: `<el-container style="height: calc(100vh - 230px);">
@@ -371,10 +324,13 @@ class Performance extends Matrix {
                                     </el-header>
                                     <el-main style="padding:10px 0px;float: left;display: flex;flex-wrap: wrap;">
                                         
-                                        <el-card class="box-card" style="width: 49.5%;height:auto;padding:5px;margin:2px;border:1px solid #f5f5f5;" v-for="item in trends">
+                                        <el-card class="box-card" style="width: 49.5%;height:auto;padding:5px;margin:2px;border:1px solid #f5f5f5;" v-for="item in model.trends">
                                             <div slot="header" class="clearfix">
                                                 <span>历史性能 <small>#{item.title}#</small></span>
-                                                <el-tooltip content="功能">
+                                                <el-tooltip :content="item.detail">
+                                                    <span class="fas fa-question-circle"></span>
+                                                </el-tooltip>    
+                                                <el-tooltip content="设置">
                                                     <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
                                                 </el-tooltip>
                                             </div>

@@ -535,7 +535,7 @@ class FsHandler {
 
         let _srcpath = srcpath.replace(/\/\//g,'/');
 
-        let fileName = _.last(srcpath.split("/")) + `_${moment().format("MMMM Do YYYY, h:mm:ss")}.zip`;
+        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(srcpath.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.zip`;
 
         if(window.SignedUser_IsAdmin){
             _issys = true;
@@ -715,6 +715,49 @@ class FsHandler {
             type: "POST",
             data: name,
             async: false,
+            dataType: 'json',
+            contentType: false,
+            beforeSend: function(xhr) {
+                // 忽略
+                if(!_.includes(term,'aiStatusGet')){
+                    Pace.restart();
+                }
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        });
+
+        return rtn;
+    };
+
+    callFsJScriptAsync(name,term){
+
+        let rtn = null;
+
+        // 打标签
+        if(_.endsWith(name,'tag_service.js')){
+            let system = window.location.pathname.replace(/\/janesware\//,'');
+            term = encodeURIComponent(JSON.stringify(_.merge(JSON.parse(decodeURIComponent(term)), {
+                system:system,
+                user:window.SignedUser_UserName
+            })));
+        }
+
+        jQuery.ajax({
+            url: `/script/exec/js?input=${term}&isfile=true`,
+            type: "POST",
+            data: name,
+            async: true,
             dataType: 'json',
             contentType: false,
             beforeSend: function(xhr) {

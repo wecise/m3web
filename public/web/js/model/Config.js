@@ -263,7 +263,17 @@ class Config {
                             self.langTools.addCompleter(customerCompleter);
                             
                             // 设置value
-                            self.etcd.value = _.has(this.model,'value')?this.model.value:"";
+                            if(_.has(this.model,'value')){
+                                // 判断是否为JSON 格式化用
+                                if(_.first(this.model.value) === "{" && _.last(this.model.value) === "}"){
+                                    self.etcd.value = JSON.stringify(JSON.parse(this.model.value),null,2);
+                                } else {
+                                    self.etcd.value = this.model.value;
+                                }
+                                
+                            } else {
+                                self.etcd.value = "";
+                            }
                             self.setEditor();
                         },
                         setEditor: function() {
@@ -338,7 +348,7 @@ class Config {
                             var key = self.etcd.key;
                             var value = self.editor.getValue();
                             var ttl = self.etcd.ttl;
-    
+                            
                             jQuery.ajax({
                                 url: '/config/set',
                                 type: 'POST',
@@ -411,7 +421,7 @@ class Config {
                     }
                 })
     
-                maxConfig.app = {
+                let main = {
                     delimiters: ['#{', '}#'],
                     template:   `<div class="layout">
                                     <Layout>
@@ -461,7 +471,7 @@ class Config {
                                                 <div slot="right">
                                                     <el-container>
                                                         <el-main>
-                                                            <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose">
+                                                            <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" @tab-click="configToggle">
                                                                 <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
                                                                     <span slot="label" v-if="item.dir">
                                                                         <i class="fas fa-folder" style="color:rgb(64, 158, 255);"></i> #{item.title}#
@@ -547,7 +557,7 @@ class Config {
                             self.configTreeSelectedNode = treeNode;
 
                             try {
-                                let id = treeNode.tId;
+                                let id = treeNode.key;//tId;
                                 //if(this.configTabs.activeIndex === id) return false;
                                 // 已经打开
                                 if(_.find(this.configTabs.tabs,{name:id})){
@@ -580,6 +590,9 @@ class Config {
                             
                             this.configTabs.activeIndex = activeIndex;
                             this.configTabs.tabs = tabs.filter(tab => tab.name !== targetName);
+                        },
+                        configToggle(targetName){
+                            //this.configTabs.activeIndex = targetName.index;
                         },
                         initTheme: function(){
                             const self = this;
@@ -732,12 +745,12 @@ class Config {
                             const self = this;
 
                             let item = {};
-                            item.key = self.configTreeSelectedNode.key;
+                            item.key = _.find(self.configTabs.tabs,{name:self.configTabs.activeIndex}).model.key;
                             
                             let editor = ace.edit('editor-' + self.configTabs.activeIndex);
                             item.value = editor.getValue();
                             
-                            item.ttl = self.configTreeSelectedNode.ttl || null;
+                            item.ttl = _.find(self.configTabs.tabs,{name:self.configTabs.activeIndex}).model.ttl;
 
                             alertify.confirm(`确认要更新以下配置?<br><br>
                                 位置：${item.key}<br><br>
@@ -769,7 +782,7 @@ class Config {
                                         // 刷新Tree
                                         eventHub.$emit("CONFIG-TREE-REFRESH-EVENT",item.key);
                                         // 关闭Tab
-                                        self.configClose(item.tId);
+                                        self.configClose(item.key);
                                         // 重置选择
                                         self.configTreeSelectedNode = null;
 
@@ -784,12 +797,10 @@ class Config {
                         }
                     }
                 };
-                new Vue(maxConfig.app).$mount("#app");
+
+                this.app = new Vue(main).$mount("#app");
             })
 
         })
     }
 }
-
-let maxConfig = new Config();
-maxConfig.init();

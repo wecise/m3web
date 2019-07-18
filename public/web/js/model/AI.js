@@ -236,13 +236,13 @@ class AI {
                 });
                 
                 // 频繁项关联
-                Vue.component('matrix-ai-setup-fpgrowth',{
+                Vue.component('matrix-ai-setup-cafp',{
                     delimiters: ['#{', '}#'],
                     props:{
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;" v-if="model.content">
+                    template: `<el-card :id="id"  v-if="model.content">
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -260,7 +260,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -377,7 +380,7 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template: `<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -395,7 +398,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -512,7 +518,7 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template: `<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -530,7 +536,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -647,7 +656,7 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template: `<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -665,7 +674,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -782,7 +794,7 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template: `<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -800,7 +812,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -988,7 +1003,7 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template: `<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -1006,7 +1021,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -1233,7 +1251,7 @@ class AI {
                             content: null
                         }
                     },
-                    template:`<el-card :id="id" style="box-shadow:rgba(0, 0, 0, 0.1) 0px 0px 2px 0px;">
+                    template:`<el-card :id="id" >
                                     <div slot="header" class="clearfix" style="line-height:30px;">
                                         <div style="float:right;">
                                             #{content.status==1?'启用中':'关闭中'}#
@@ -1254,7 +1272,10 @@ class AI {
                                                 <a href="javascript:void(0);" class="btn btn-link"  @click="toggle"><i class="fas fa-cogs"></i></a>
                                             </el-tooltip>
                                             <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)"><i class="fas fa-tasks"></i></a>
+                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
+                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
+                                                    <i class="fas fa-sync" v-else></i>
+                                                </a>
                                             </el-tooltip>
                                         </div>
                                     </div>
@@ -1676,10 +1697,13 @@ class AI {
                 Vue.component("matrix-ai-setup", {
                     delimiters: ['#{', '}#'],
                     props: {  
+                        id: String
                     },
                     data(){
                         return {
-                            split1: 0.2,
+                            split:{
+                                inst: null
+                            },
                             defaultOpends: [],
                             ruleList: [],
                             selectedRule: {},
@@ -1691,7 +1715,7 @@ class AI {
                     },
                     template:   `<el-container style="background-color:#ffffff;height:calc(100vh - 85px);">
                                     
-                                    <el-aside width="20%" style="height:100%;overflow: auto;">
+                                    <el-aside width="20%" style="height:100%;overflow: auto;" :id="'matrix-ai-setup-left-'+id">
                                         <el-container>
                                             <el-header style="height: 30px;padding: 0px 0px 0px 5px;line-height: 30px;font-weight: 900;">
                                                 <i class="fas fa-braille"></i> 规则分类
@@ -1706,7 +1730,7 @@ class AI {
                                                     <el-submenu :index="item.id" v-for="item in ruleList" @open="select">
                                                         <template slot="title">
                                                             <img :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 40px;height: 32px;padding-right:8px;"> 
-                                                            #{item.label}# <el-badge :value="item.child.length" />
+                                                            #{item.label}# <span style="color:#999;">(#{item.child.length}#)</span>
                                                             <div style="position: absolute;
                                                                 top: 25%;
                                                                 right: 30px;
@@ -1728,7 +1752,7 @@ class AI {
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container style="background: rgb(247, 247, 247);">
+                                    <el-container style="background: rgb(247, 247, 247);" :id="'matrix-ai-setup-main-'+id">
                                         <!--el-header style="height: 30px;padding:0 10px;line-height:30px;">
                                             #{[selectedRule.label,selectedRule.name].join("/").replace(/\\//g," / ")}#
                                         </el-header-->
@@ -1745,7 +1769,7 @@ class AI {
                                                     <matrix-ai-setup-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-elad>
                                                     <matrix-ai-setup-e-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='e-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-e-elad>
                                                     <matrix-ai-setup-el-elad :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='el-elad'" transition="fade" transition-mode="out-in"></matrix-ai-setup-el-elad>
-                                                    <matrix-ai-setup-fpgrowth :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='fpgrowth'" transition="fade" transition-mode="out-in"></matrix-ai-setup-fpgrowth>
+                                                    <matrix-ai-setup-cafp :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='cafp'" transition="fade" transition-mode="out-in"></matrix-ai-setup-cafp>
                                                 </el-tab-pane>
                                             </el-tabs>
                                         </el-main>
@@ -1759,7 +1783,7 @@ class AI {
                         const self = this;
 
                         // 默认样式
-                        $(this.$el).find(".el-submenu__title").css({
+                        $(".el-submenu__title",this.$el).css({
                             "display": "-webkit-box",
                             "line-height": "32px",
                             "height": "40px",
@@ -1767,7 +1791,23 @@ class AI {
                             "font-size": "12px"
                         });
 
-                        //self.defaultOpends = _.first(self.model).id;
+                        $(".el-tabs__content",this.$el).css({
+                            "padding": "0px",
+                            "backgroundColor":"#ffffff"
+                        })
+
+                        _.delay(() => {
+                            this.split.inst = Split([`#matrix-ai-setup-left-${this.id}`, `#matrix-ai-setup-main-${this.id}`], {
+                                sizes: [25, 75],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true,
+                            });
+                        },500)
+
                     },
                     methods:{
                         add(item,event){
@@ -1819,7 +1859,11 @@ class AI {
                                                         });
                                         let rtn = fsHandler.fsNew('json', this.model.fullname, this.name+'.json', JSON.stringify(content,null,2), attr);
                                         if(rtn == 1){
+                                            // Reload规则列表
                                             self.load();
+                                            // 刷新菜单
+                                            self.open(item.id,[item.id]);
+                                            // 关闭窗体
                                             win.close();
                                         }
                                     },
@@ -1839,7 +1883,7 @@ class AI {
                             this.currentView = item.id;
                         },
                         open(key,keyPath){
-
+                            
                             this.defaultOpends = [];
                             this.defaultOpends = keyPath;
 
@@ -1906,18 +1950,23 @@ class AI {
                     }
                 })
         
-                maxAI.app = {
-                    delimiters: ['${', '}'],
-                    template:  `<matrix-ai-setup ref="aiSetup"></matrix-ai-setup>`,
-                }
-                
-                new Vue(maxAI.app).$mount("#app");
             })
         })
 
     }
 
-}
+    mount(el){
+        
+        let main = {
+            delimiters: ['${', '}'],
+            template:  `<matrix-ai-setup ref="aiSetup" :id="id"></matrix-ai-setup>`,
+            data:{
+                id: _.now()
+            }
+        }
+        _.delay(() => {
+            this.app = new Vue(main).$mount(el);
+        },50)
+    }
 
-let maxAI = new AI();
-maxAI.init();
+}

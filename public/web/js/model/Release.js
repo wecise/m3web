@@ -244,7 +244,7 @@ class Release {
                     data: {
                         split1: 0.2,
                     },
-                    template: `<el-container style="margin: -15px -15px 0px;height: calc(100vh - 135px);padding:0px;">
+                    template: `<el-container style="height: calc(100vh - 80px);padding:0px;background-color:#ffffff;">
                                     <el-main>
                                         <Split v-model="split1">
                                             <div slot="left" style="height: 100%;overflow: auto;">

@@ -24,8 +24,10 @@
 			left: 0px;
 			width: 100%;
 			height: 30px;
+            line-height: 30px;
 			padding: 2px 4px;
 			background: rgb(246, 246, 246);
+            display: flex;
 		}
 
 		#tools > img {
@@ -93,6 +95,9 @@
 	                    parent: null,
                         theme: "",
                         outline: null,
+                        default: {
+                            title: 'id'
+                        }
                     }
                 }
 	        }
@@ -113,7 +118,7 @@
 	    },
 	    methods: {
             init() {
-                let self = this;
+                const self = this;
 
                 if (!mxClient.isBrowserSupported())
                 {
@@ -198,7 +203,7 @@
                 }
             },
             initGraph(){
-                let self = this;
+                const self = this;
 
                 self.model.graph.graph.getModel().beginUpdate();
 
@@ -219,7 +224,14 @@
                             _type = 'matrix';
                         }
 
-                        let _name =  _.last(v.id.split(":")) || '';
+                        // 可设置默认显示属性
+                        let _name =  '';
+                        
+                        try{
+                            _name = _.last(v[self.model.graph.default.title].split(":"));
+                        } catch(err){
+                            _name = '';
+                        }
 
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                             `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
@@ -288,7 +300,7 @@
                 }
             },
             initPlugIn(){
-                let self = this;
+                const self = this;
 
                 self.outline();
                 self.toolBars();
@@ -341,12 +353,17 @@
                                                     items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
                                                 } else {
                                                     value = JSON.stringify(v,null,2);
-                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', height: 20,value: value, icon:'fas fa-tags'}} );
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', rows: 3, value: value, icon:'fas fa-bars'}} );
                                                 }
 
                                             } else {
                                                 value = v.toString();
-                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                                if(value.length > 20){
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', rows: 3, value: value, icon:'fas fa-bars'}} );
+                                                } else {
+                                                    items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-bars'}} );
+                                                }
+                                                
                                             }
 
                                         })
@@ -371,6 +388,22 @@
                                 events: {
                                     show: function(opt) {
                                         let $this = this;
+
+                                        $(".context-menu-list input").css({
+                                            "margin": "5px",
+                                            "padding": "5px",
+                                            "borderRadius": "2px",
+                                            "fontWeight": "normal",
+                                            "border": "1px solid rgb(221, 221, 221)"
+                                        })
+
+                                        $(".context-menu-list textarea").css({
+                                            "margin": "5px",
+                                            "padding": "5px",
+                                            "fontWeight": "normal",
+                                            "borderRadius": "2px",
+                                            "border": "1px solid rgb(221, 221, 221)"
+                                        })
                                     },
                                     hide: function(opt) {
                                         let $this = this;
@@ -413,15 +446,15 @@
                                                         return _.merge(_options,{[y]:w});
                                                     })
 
-                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-tags'}} );
+                                                    items = _.merge(items, {[k]: {name:k+`(${v['_all'].length})`, type: 'select', options: _options, selected:0, icon:'fas fa-bars'}} );
                                                 } else {
                                                     value = JSON.stringify(v,null,2);
-                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', rows: 6, value: value, icon:'fas fa-tags'}} );
+                                                    items = _.merge(items, {[k]: {name:k, type: 'textarea', rows: 6, value: value, icon:'fas fa-bars'}} );
                                                 }
 
                                             } else {
                                                 value = v.toString();
-                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-tags'}} );
+                                                items = _.merge(items, {[k]: {name:k, type: 'text', value: value, icon:'fas fa-bars'}} );
                                             }
 
                                         })
@@ -489,7 +522,7 @@
                 alertify.log(event + ' ' + moment().format("LLL"));
             },
             outline(){
-                let self = this;
+                const self = this;
 
                 let outline = document.getElementById('outlineContainer');
 
@@ -497,7 +530,7 @@
 
             },
 		    saveas(){
-				let self = this;
+				const self = this;
 
                 let encoder = new mxCodec();
                 let node = encoder.encode(self.model.graph.graph.getModel());
@@ -529,7 +562,7 @@
 
 		    },
             toolBars() {
-                let self = this;
+                const self = this;
 
                 let content = document.getElementById('tools');
                 content.style.padding = '4px';
@@ -577,8 +610,6 @@
 
                 tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
                 {
-
-
                     self.model.graph.graph.getModel().beginUpdate();
 
                     try
@@ -613,10 +644,72 @@
 
                 //$(self.$el).find("#tools img").attr("data-tooltip","tooltip");
 
+                // 插入属性选择
+                let id = `attributes-select-${self.id}`;
+                $(content).append(`<div style="width:100%;"><div id="${id}"></div></div>`).ready(function(){
+                    new Vue({
+                        data: {
+                            options: [],
+                            value: 'id'
+                        },
+                        watch:{
+                            value: function(val,oldVal){
+                                self.model.graph.default.title = this.value;
+                                $(self.$el).find("#container").empty();
+                                self.init();
+                            }
+                        },
+                        template:   `<el-select v-model="value" placeholder="请选择">
+                                        <span class="fas fa-bars" slot="prefix"></span>
+                                        <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                        </el-option>
+                                    </el-select>`,
+                        created(){
+                            const me = this;
+
+                            me.options = _.sortBy(_.map(_.keys(self.graphData.nodes[0]),function(v){
+                                let k = v.replace(/_/g,"");
+                                return {value: k, label: _.capitalize(k)};
+                            }),['value'])
+                        },
+                        mounted(){
+                            _.delay(() => {
+                                $(".el-input--small .el-input__inner",this.$el).css({
+                                    "height": "22px",
+                                    "line-height": "22px",
+                                    "border":"unset",
+                                    "backgroundColor": "transparent"
+                                });
+
+                                $(".el-input--small",this.$el).css({
+                                    "fontSize": "12px"
+                                });
+
+                                $(".el-select--small").css({
+                                    "width": "120px",
+                                    "height": "22px",
+                                    "line-height": "22px",
+                                    "float": "right"
+                                });
+
+                                $(".el-input__suffix",this.$el).css({
+                                    "display": "none"
+                                });
+
+                            },50)
+                        }                                    
+
+                    }).$mount(`#${id}`);
+                });
+
                 $(self.$el).find("img").eq(7).attr("ref", "pathRef");
             },
             toCenter(){
-                let self = this;
+                const self = this;
 
                 self.model.graph.graph.fit();
                 self.model.graph.graph.center(true,false,0.5,0.5);

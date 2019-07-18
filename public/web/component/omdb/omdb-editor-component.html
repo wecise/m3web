@@ -81,37 +81,37 @@
 		<div class="editor-container">
 			<div class="editorToolBar" id="editorToolBar">
 				<div class="btn-group" role="group">
-                    <el-tooltip content="另存到文件系统" placement="bottom">
+                    <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统" data-tooltip="tooltip"><i class="fas fa-save"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="加载" placement="bottom">
+                    <el-tooltip content="加载" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载" data-tooltip="tooltip"><i class="fas fa-arrow-circle-down"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="复制" placement="bottom">
+                    <el-tooltip content="复制" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fas fa-copy"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="粘贴" placement="bottom">
+                    <el-tooltip content="粘贴" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fas fa-paste"></i></a>
                     </el-tooltip>
-					<el-tooltip content="全选" placement="bottom">
+					<el-tooltip content="全选" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fas fa-check"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="清空" placement="bottom">
+                    <el-tooltip content="清空" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fas fa-trash"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="执行输出为表格" placement="bottom">
+                    <el-tooltip content="执行输出为表格" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行" data-tooltip="tooltip"><i class="fas fa-play"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="执行输出为JSON" placement="bottom">
+                    <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary queryByJson" @click="queryByJson"  title="执行输出为JSON" data-tooltip="tooltip"><i class="fas fa-play-circle"></i></a>
                     </el-tooltip>
-					<el-tooltip content="在新窗口执行" placement="bottom">
+					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="500">
                         <!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
                     </el-tooltip>
-                    <el-tooltip content="执行并保存到文件" placement="bottom">
+                    <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
                         <a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件" data-tooltip="tooltip"><i class="fas fa-forward"></i></a>
                     </el-tooltip>
-                    <el-tooltip content="主题" placement="bottom">
+                    <el-tooltip content="主题" placement="bottom" open-delay="500">
                         <a href="javascript:void(0)" :class="'btn btn-sm btn-link pull-right editor-select-theme-'+objectHash.sha1(id)" title="主题" data-tooltip="tooltip"><i class="fas fa-tshirt"></i></a>
                     </el-tooltip>
 				</div>
@@ -423,14 +423,14 @@
                 if(_list.meta.type === 'graph'){
 
                     //有数据
-                    if(_list.message){   
+                    if(!_.isEmpty(_data)){   
                         self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: _data[0].graph};
 
                         eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                         return false;
                     }
                     // 没数据 
-                    else{
+                    else {
                         self.result = {id:self.id, bid: self.bid, type: 'graph-update', data: {nodes:[],edges:[]}};
 
                         eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);

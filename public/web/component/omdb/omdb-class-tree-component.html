@@ -649,10 +649,16 @@
                         event.stopPropagation();
                         event.preventDefault();
 
+                        let nodeFieldObj = omdbHandler.classListField(treeNode.cid);
+                        let pNodeFieldObj = omdbHandler.classListField(treeNode.pid=='A1'?1:treeNode.pid);
+                        
                         eventHub.$emit("OMDB-CLASS-TRIGGER-EVENT", {    type: 'class-edit',
 											                            name: treeNode.name,
 											                            title: treeNode.name,
-											                            model: { pattern: 'select', node: treeNode, pnode: treeNode.getParentNode() }
+                                                                        model: { pattern: 'select', 
+                                                                                node: _.extend(treeNode,{fieldsObj:nodeFieldObj}), 
+                                                                                pnode: _.extend(treeNode.getParentNode(),{fieldsObj: pNodeFieldObj})
+                                                                            }
 											                        });
 
                     });
@@ -701,10 +707,10 @@
 
                     if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
 
-                    let addStr = `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
+                    let addStr =    `<div class="well edge-toolbars" id='toolbars_${treeNode.tId}' >
 										<span class='button edge console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
 										<span class='button edge more' id='moreBtn_${treeNode.tId}' title='更多'  ></span>
-								</div>`;
+								    </div>`;
 
                     if(scObj.length > 0){
                         scObj.after(addStr);

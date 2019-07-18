@@ -54,7 +54,7 @@
 					<input type="text" class="form-control-transparent" placeholder="搜索">
 				</div>
 			</form>
-			<ul class="ztree" :id="id" style="overflow:hidden auto;height:calc(100vh - 120px);"></ul>
+			<ul class="ztree" :id="id" style="overflow:hidden auto;height:calc(100vh - 140px);"></ul>
 		</div>
 	</template>
 
@@ -186,7 +186,7 @@
                 if(_.isEmpty(_rtn)){
                     self.treeNodes = [];
                 } else {
-                    self.treeNodes = _.map(_rtn,function(v,k){
+                    self.treeNodes = _.sortBy(_.map(_rtn,function(v,k){
 			                            let _type = "dir";
 
 			                            if(!_.isEmpty(v.ftype)){
@@ -194,7 +194,7 @@
 			                            }
 
 			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
-			                        });
+			                        }),[v => v.title.toLowerCase()], ['asc']);
                 }
 				self.treeObj = $.fn.zTree.init($(self.$el).find($("#" + self.id)), self.setting, self.treeNodes);
 
@@ -214,30 +214,33 @@
             onClick: function(event, treeId, treeNode) {
                 let self = this;
 
-                if(treeNode.ftype !=='dir') return false;
+                if(treeNode.ftype !=='dir') {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", treeNode,treeNode.parent);
+                } else {
 
-                let _root = treeNode.parent + "/" + treeNode.name;
-                let _rtn = fsHandler.fsList(_root);
+                    let _root = treeNode.parent + "/" + treeNode.name;
+                    let _rtn = fsHandler.fsList(_root);
 
-                eventHub.$emit("FS-FORWARD-EVENT", treeNode,_root);
+                    eventHub.$emit("FS-FORWARD-EVENT", treeNode,_root);
 
-                self.treeObj.removeChildNodes(treeNode);
+                    self.treeObj.removeChildNodes(treeNode);
 
-                if(!_.isEmpty(_rtn)) {
+                    if(!_.isEmpty(_rtn)) {
 
-                    let _nodes = _.map(_rtn,function(v,k){
-					                        let _type = "dir";
+                        let _nodes = _.map(_rtn,function(v,k){
+                                                let _type = "dir";
 
-					                        if(!_.isEmpty(v.ftype)){
-					                            _type = v.ftype;
-					                        }
+                                                if(!_.isEmpty(v.ftype)){
+                                                    _type = v.ftype;
+                                                }
 
-					                        return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
-                                });
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                    });
 
-                    // append sub nodesGr
-                    self.treeObj.addNodes(treeNode, _nodes);
+                        // append sub nodesGr
+                        self.treeObj.addNodes(treeNode, _.sortBy(_nodes,[v => v.title.toLowerCase()], ['asc']));
 
+                    }
                 }
 
             }

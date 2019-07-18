@@ -15,6 +15,9 @@
 			content: none;
 		}
 
+        .script-list-datatables-component .dataTables_scrollHead{
+			background: rgb(241, 241, 241);
+		}
 
 		div.dataTables_wrapper div.dataTables_info {
 			padding-top: 4px;
@@ -23,7 +26,6 @@
 		td.highlight {
 			background-color: whitesmoke !important;
 		}
-
 
 
 		.dataTables_wrapper table.dataTable {
@@ -152,10 +154,10 @@
 
 	/*----------  最外层element会自动增加组件同名 class="script-list-datatables-component"  ----------*/
 	<template>
-		<div class="container-fluid">
+		<div>
 			<!--input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
 			<hr/-->
-			<table :id="id" class="display" width="100%"></table>
+			<table :id="id" class="row-border hover" width="100%"></table>
 		</div>
 	</template>
 
@@ -177,22 +179,44 @@
             },
             watch: {
                 'model.list.dataset': {
+
                     handler: function(val,oldVal){
-                        const self = this;
 
-                        if(val === oldVal) return false;
+                        // 数据无更新
+                        if(val === oldVal) {
+                            //console.log(111)
+                            return false;
+                        }
 
-                        if(self.datatable){
-                            self.datatable.destroy();
-                            $(`#${self.id}`).empty();
-                            self.init();
-                            
+                        // 数据为空 
+                        // Table置空
+                        if( _.isEmpty(val)) {
+                            //console.log(222)
+                            this.datatable.rows().remove().draw();
+                            return false;
+                        }
+
+                        // 表格已经初始化
+                        if(this.datatable instanceof $.fn.dataTable.Api) {
+                            //console.log(333)
+                            this.datatable.clear();
+                            this.datatable.rows.add(val);
+                            this.datatable.draw();
+
+                            // 数据行重新生成，所以需要再次实例化可拖拽功能
+                            this.dragHandle();
+
                             let datatable = $("#"+self.id).DataTable();
                             script.detail(self.id,datatable);
+
+                        } else {
+                            //console.log(444)
+                            //this.init();
                         }
                     },
+                    immediate: true,
                     deep:true
-                },
+                }, 
                 'model.tags':{
                     handler:function(val,oldVal){
                         const self = this;
@@ -220,6 +244,7 @@
             created: function(){
                 const self = this;
 
+                eventHub.$on("WINDOW-RESIZE-EVENT", self.resize);
                 eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
                 eventHub.$on(`DATATABLE-FILTER-BY-script-EVENT`, self.filterColumn);
             },
@@ -230,7 +255,6 @@
 
                     _.delay(function() {
                         self.init();
-                        self.initPlugin();
                     },500);
 
                 })
@@ -275,6 +299,7 @@
                     const self = this;
 
                     self.datatable = $("#"+self.id).DataTable( _.extend({
+                        destroy: true,
                         data: self.model.list.dataset,
                         columns: self._columns,
                         //stripeClasses: [],
@@ -446,87 +471,42 @@
                             // dispatch event to checkbox for all
                             //self.dispatchSelectAll();
 
-                            // init draggable for tr
-                            let elFrom = $("#"+self.id).find("tbody tr");
-                            elFrom.attr("draggable","true");
+                            self.dragHandle();
+                            self.dropHandle();
 
-                            addEvent(elFrom, 'dragstart', function (e) {
-                                e.dataTransfer.effectAllowed = 'copy';
+                            self.initPlugin();
 
-                                let sendList = [];
-
-                                _.forEach(self.datatable.rows('.selected').data(), function(v) {
-                                    sendList.push(v);
-                                });
-
-                                e.dataTransfer.setData("item", JSON.stringify(sendList));
-                            });
-
+                            self.resize();
                         }
                     },self.options));
 
                 },
                 filterColumn(event) {
-                    $("#"+this.id).DataTable().search(event.name).draw();
+                    $("#"+this.id).DataTable().columns( '.search-filter' ).search(event.name).draw();
                 },
                 initPlugin: function(){
                     const self = this;
 
                     //self.tagsInput();
 
-                    // Buttons enable/disable
-                    self.datatable.on( 'select deselect', function () {
-                        var selectedRows = self.datatable.rows( { selected: true } ).count();
-
-                        self.datatable.buttons( [1,2,3,5,6,7,8] ).enable( selectedRows > 0 );
-                    } );
-
-                    
-                    // init drop for tree
-                    var treeName = "script-tree";
-                    let elTo = $(`#${treeName} li`);
-
-                    addEvent(elTo, 'dragleave', function (e) {
-                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
-
-                        $(`#${tId}`).removeClass("curSelectedNode");
-                    });
-
-
-                    addEvent(elTo, 'dragover', function (e) {
-                        e.preventDefault();
-                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
-
-                        $(`#${tId}`).addClass("curSelectedNode");
-                    });
-
-                    addEvent(elTo, 'drop', function (e) {
-                        e.preventDefault();
-                        // 接收数据
-                        let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
-
-                        e.dataTransfer.clearData();
-                        console.log(_.now(),data)
-                        // 获取tree tID
-                        let tId = $(e.target).attr("id").replace(/_span/g,"");
-                        let treeObj = $.fn.zTree.getZTreeObj(treeName);
-                        let node = treeObj.getNodeByTId(tId);
-
-                        // 打标签
-                        let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
-                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
-
-                        if(rtn.status == 'ok'){
-                            eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
-                        }
-
-                        $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
-
-                    });
+                    _.delay(() => {
+                        self.datatable.on( 'select deselect', function () {
+                            let selectedRows = self.datatable.rows( { selected: true } ).count();
+                            self.datatable.buttons( [1,2,3,5,6,7,8] ).enable( selectedRows > 0 );
+                        } );
+                    },2000)
 
                     let datatable = $("#"+self.id).DataTable();
                     script.detail(self.id,datatable);
 
+                    // button样式调整
+                    $(".dt-button",self.$el).removeClass("dt-button");
+                    $(".dt-buttons",self.$el).css({
+                        "margin": "5px 0"
+                    });
+                    $(".btn-white",self.$el).css({
+                        "border": "1px solid #dddddd"
+                    });
                 },
                 initMenu: function(){
                     const self = this;
@@ -576,6 +556,77 @@
                 },
                 redraw: function(){
                     $(`#${this.id}`).DataTable().draw();
+                },
+                dragHandle: function(){
+                    const self = this;
+
+                    // init draggable for tr
+                    let datatable = $("#"+self.id).DataTable();
+                    let elFrom = $("#"+self.id).find("tbody tr");
+                    elFrom.attr("draggable","true");
+
+                    addEvent(elFrom, 'dragstart', function (e) {
+                        e.dataTransfer.effectAllowed = 'copy';
+
+                        let sendList = [];
+                        _.forEach(datatable.rows('.selected').data(), function(v) {
+                            sendList.push(v);
+                        });
+
+                        e.dataTransfer.setData("item", JSON.stringify(sendList));
+                    });
+                },
+                dropHandle: function(){
+                    const self = this;
+
+                    // init drop for tree
+                    var treeName = "script-tree";
+                    let elTo = $(`#${treeName} li`);
+
+                    addEvent(elTo, 'dragleave', function (e) {
+                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                        $(`#${tId}`).removeClass("curSelectedNode");
+                    });
+
+
+                    addEvent(elTo, 'dragover', function (e) {
+                        e.preventDefault();
+                        let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                        $(`#${tId}`).addClass("curSelectedNode");
+                    });
+
+                    addEvent(elTo, 'drop', function (e) {
+                        e.preventDefault();
+                        // 接收数据
+                        let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
+                        e.dataTransfer.clearData();
+
+                        // 获取tree tID
+                        let tId = $(e.target).attr("id").replace(/_span/g,"");
+                        let treeObj = $.fn.zTree.getZTreeObj(treeName);
+                        let node = treeObj.getNodeByTId(tId);
+
+                        let input = null;
+                        // 删除标签
+                        if(node.cid == 'A3'){
+                            input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                        } 
+                        // 打标签
+                        else {
+                            input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                        }
+                        
+                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                        if(rtn.status == 'ok'){
+                            eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                        }
+
+                        $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
+
+                    });
                 },
                 tagsInput: function(){
 
@@ -655,6 +706,10 @@
                     };
 
                     return tag;
+                },
+                resize(){
+                    let parentHeight = $(this.$el).closest("section").height() - 100;
+                    $(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
                 }
                 
             }

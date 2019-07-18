@@ -104,7 +104,7 @@ class Matrix {
                 mx.handleAfterPageLoadAddClass();
                 mx.handlePanelAction();
                 mx.handleWinAction();
-                mx.handelTooltipPopoverActivation();
+                // mx.handelTooltipPopoverActivation();
                 mx.handleScrollToTopButton();
                 mx.handlePageContentView();
                 mx.handleIEFullHeightContent();
@@ -259,41 +259,6 @@ class Matrix {
         };
 
         return tag;
-    }
-
-    /*
-    *   设置Home
-    *
-    *   参数：
-    *       home.html
-    *
-    */
-    setDefaultHome(name,token){
-        let rtn = null;
-
-        jQuery.ajax({
-            url: "/user/settings/home",
-            type: "POST",
-            dataType: "json",
-            data: {
-                home: name,
-                _csrf: token
-            },
-            beforeSend: function(xhr) {
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function(data, textStatus, xhr) {
-
-                userHandler.ifSignIn(data);
-
-                rtn = data;
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
-            }
-        })
-        return rtn;
     }
 
     // 全文搜索配置
@@ -785,10 +750,10 @@ class Matrix {
         })
     }
 
-    handelTooltipPopoverActivation() {
+    /* handelTooltipPopoverActivation() {
         "use strict";
         $("[data-toggle=tooltip]").tooltip(), $("[data-toggle=popover]").popover()
-    }
+    } */
 
     handleScrollToTopButton() {
         "use strict";

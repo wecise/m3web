@@ -10,10 +10,9 @@
  *
  *
  */
-class Event extends Matrix {
+class Event {
 
     constructor() {
-        super();
 
         // 运行模式定义
         window.EVENT_VIEW_LIST = ['view-normal','view-tags','view-fullscreen'];
@@ -21,6 +20,8 @@ class Event extends Matrix {
         
         this.app = null;
         this.detail = null;
+
+        this.URL_PARAMS_CFG = null;
     }
 
     init() {
@@ -496,42 +497,36 @@ class Event extends Matrix {
                     },
                     data(){
                         return {
+                            rId: _.now(),
                             tableData: null,
                             topological: null
                         }
                     },
-                    template:`<div :id="'topological-app-'+id"></div>`,
+                    template:`<div :id="'topological-app-' + id + '-' + rId"></div>`,
                     watch: {
-                        model(val,oldVal){
-                            this.initData();
+                        model:{
+                            handler: function(val,oldVal){
+                                this.initData();
+                            },
+                            immediate:true
                         }
-                    },
-                    created(){
-                        this.initData();
                     },
                     methods: {
                         initData(){
                             const self = this;
-                            let event = this.model;
-
-                            if(event.length < 1) {
+                            
+                            if(this.model.length < 1) {
                                 self.tableData = null;
                                 return false;
                             }
 
                             try {
-                                let temp = _.map(event,function(v){
-                                    // MQL
-                                    //return `${v.title}='${v.data}'`;
-                                    // SEARCH
-                                    return `${v.title}=${v.data}`;
-                                })
-
+                                
                                 // 获取相应维度的关联事件  eg: biz='查账系统'
                                 // MQL
                                 // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
-                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
+                                let where = _.map(this.model,'ids').join(";");//`biz=matrix`;
                                 self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
 
                                 if(!this.topological){
@@ -540,17 +535,25 @@ class Event extends Matrix {
                                     this.topological.graphScript = [
                                         {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`}
                                     ];
-                                    this.topological.mount(`#topological-app-${self.id}`);
+                                    this.topological.mount(`#topological-app-${self.id}-${self.rId}`);
+
                                 } else {
                                     this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`} ];
                                     this.topological.search(this.topological.graphScript[0].value);
                                 }
+
+                                _.delay(() => {
+                                    this.topological.setStyle();
+                                },5000)
 
                             } catch(err){
                                 self.tableData = null;
                             }
                             
                         }
+                    },
+                    destroyed() {
+                        this.topological.destroy();
                     }
                 })
 
@@ -584,13 +587,12 @@ class Event extends Matrix {
                                 inst: null
                             },
                             control: {
-                                ifGraph: '1'
-                            },
-                            currentView: 'event-view-aigroup-grid'                         
+                                ifGraph: '0'
+                            }
                         }
                     },
                     template: `<el-container style="height: calc(100vh - 155px);margin: -15px;">
-                                    <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" id="aigroup-left-panel">
+                                    <el-aside style="width:300px;background: rgb(255, 255, 255);overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
                                                 <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
@@ -599,22 +601,29 @@ class Event extends Matrix {
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
                                         <el-header style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;">
-                                            <el-tooltip :content="control.ifGraph==1?'列表':'图'" placement="top" open-delay="500">
+                                            <el-tooltip :content="control.ifGraph==0?'列表':'图'" placement="top" open-delay="500">
                                                 <div style="float:right;">
-                                                    #{control.ifGraph==1?'列表':'图'}#
+                                                    #{control.ifGraph==0?'列表':'图'}#
                                                     <el-switch
                                                     v-model="control.ifGraph"
                                                     active-color="#13ce66"
                                                     inactive-color="#dddddd"
-                                                    active-value="1"
-                                                    inactive-value="0"
+                                                    active-value="0"
+                                                    inactive-value="1"
                                                     @change="toggleView">
                                                     </el-switch>
                                                 </div>
                                             </el-tooltip>
                                         </el-header>
                                         <el-main style="padding:0px;">
-                                            <component v-bind:is="currentView" :id="id + '-aigroup-by-value'" :model="aiGroupData.selected"></component>
+                                            <el-tabs v-model="control.ifGraph">
+                                                <el-tab-pane label="" name="0">
+                                                    <event-view-aigroup-grid :id="id + '-grid'" :model="aiGroupData.selected" ></event-view-aigroup-grid>
+                                                </el-tab-pane>
+                                                <el-tab-pane label="" name="1">
+                                                    <event-view-aigroup-graph :id="id + '-graph'" :model="aiGroupData.selected" ></event-view-aigroup-graph>
+                                                </el-tab-pane>
+                                            </el-tabs>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -690,9 +699,14 @@ class Event extends Matrix {
                             $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
                             self.aiGroupData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
                             //self.handlerFetchData(self.aiGroupData.selected);
+
+                            // 隐藏tabs header
+                            $(".el-tabs > .el-tabs__header",this.$el).css({
+                                "display":"none"
+                            });
                         },
                         toggleView(event){
-                            this.currentView = this.currentView=='event-view-aigroup-grid' ? 'event-view-aigroup-graph' : 'event-view-aigroup-grid';
+                            this.control.ifGraph = event;
                         }
                     }
                 })
@@ -847,68 +861,54 @@ class Event extends Matrix {
                     },
                     data(){
                         return {
-                            chartData: [],
-                            tableData: {},
-                            byStep: 'YYYY-MM-DD HH'
-                        }
-                    },
-                    watch:{
-                        byStep(val,oldVal){
-                            this.sumByStep();
+                            tableData: null
                         }
                     },
                     template:  `<el-container style="height: calc(100vh - 230px);">
-                                    <el-aside class="split" id="probability-left-panel">
+                                    <el-aside class="split" :id="'probability-left-panel-'+id">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
-                                                <el-radio v-model="byStep" label="YYYY-MM-DD">按天</el-radio>
-                                                <el-radio v-model="byStep" label="YYYY-MM-DD HH">按小时</el-radio>
-                                                <el-radio v-model="byStep" label="YYYY-MM-DD HH:mm">按分钟</el-radio>
+                                                
                                             </el-header>
-                                            <el-main style="padding:0px;">
-                                                <max-echart-bar-all :id="id + '-chart'" :model="chartData"></max-echart-bar-all>
+                                            <el-main style="display: flex;flex-wrap: wrap;align-content: space-around;justify-content: space-between;padding: 0px 10px 0px 10px;" v-if="model.rows">
+                                                <el-button type="success" style="flex: 0 1 18%;padding: 30px;border-radius: 30px;margin: 5px;" v-for="item in model.rows" :data-item="item.name" @click="toggleEvent(item.name)">
+                                                    #{item.names.length}#
+                                                </el-button>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container class="split" id="probability-right-panel">
+                                    <el-container class="split" :id="'probability-right-panel-'+id">
                                         <el-main style="padding:0px;">
                                             <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData" type="event"></event-diagnosis-datatable-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
                     mounted(){
-                        const self = this;
+                        this.init();
 
-                        self.init();
+                        // 默认维度关联事件
+                        this.tableData = {  rows: this.model.rows[0].events, 
+                                            options: this.model.options,
+                                            columns: this.model.columns, 
+                                            template: this.model.template
+                                        };
                     },
                     methods: {
                         init(){    
                             const self = this;
-
-                            // 默认维度关联事件
-                            self.tableData = self.model;
                             
-                            // 概率时间核
-                            self.sumByStep();
-
-                            Split(['#probability-left-panel', '#probability-right-panel'], {
-                                sizes: [0, 100],
+                            Split([`#probability-left-panel-${self.id}`, `#probability-right-panel-${self.id}`], {
+                                sizes: [30, 70],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
-                        },
-                        sumByStep(){
-                            const self = this;
 
-                            self.chartData = _.groupBy(this.model.rows, function(v){
-                                return moment(v.vtime).format(self.byStep);
-                            });
                         },
-                        nodeClick(event){
-                            // 获取相应维度的关联事件  eg: biz='查账系统'
-                            this.tableData = fsHandler.callFsJScript("/event/diagnosis-probability-by-value.js", encodeURIComponent(JSON.stringify((event)))).message.event;
+                        toggleEvent(event){
+                            _.extend(this.tableData, { rows: _.find(this.model.rows,{name:event}).events } );
+                            console.log(this.tableData.rows.length)
                         }
                     }
                 })
@@ -1208,6 +1208,45 @@ class Event extends Matrix {
                         'event-diagnosis-script': eventDiagnosisScript
                     },
                     created(){
+                        try {
+                            if(mx.urlParams['cfg']){
+                                event.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
+                            }
+                            
+                            let init = function(){
+                    
+                                _.forEach(event.URL_PARAMS_CFG,function(v,k){
+                                    if("false" == String(v)){
+                                    
+                                        $(`#${k}`).hide();
+
+                                        $(".page-header-fixed").css({
+                                            "paddingTop": "0px"
+                                        })
+
+                                        $(".page-sidebar-minified .sidebar-bg").css({
+                                            "width": "0px"
+                                        })
+
+                                        $(".page-sidebar-minified .content").css({
+                                            "marginLeft": "0px"
+                                        })
+
+                                        $("body").css({
+                                            "background": "transparent"
+                                        })
+                                        
+                                    }
+                                })
+                    
+                            };
+                            _.delay(()=>{
+                                init();
+                            },50)
+                        } catch(err){
+                            event.URL_PARAMS_CFG = null;
+                        }
+
                         // 初始化term
                         try{
                             let term = decodeURIComponent(window.atob(mx.urlParams['term']));
@@ -1386,11 +1425,6 @@ class Event extends Matrix {
                                 this.layout.main.activeIndex = activeIndex;
                                 this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
                                 
-                                // AI Group
-                                if(_.includes(targetName,'aiGroup')){
-                                    this.control.ifAiGroup = '0';
-                                }
-                                
                                 _.delay(function(){
                                     // RESIZE Event Summary
                                     eventHub.$emit("WINDOW-RESIZE-EVENT");
@@ -1399,6 +1433,7 @@ class Event extends Matrix {
                                 },500)
                             } catch(err){
                                 
+                            } finally{
                                 // AI Group
                                 if(_.includes(targetName,'aiGroup')){
                                     this.control.ifAiGroup = '0';
@@ -1462,6 +1497,31 @@ class Event extends Matrix {
                                                 // 增加操作类型
                                                 let action = _.last(key.split("_"));
                                                 self.action({list: [inst.selectedRows], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${inst.selectedRows.id}<br><br>
+                                                                    实体ID：${inst.selectedRows.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${inst.selectedRows.msg}<br><br>
+                                                                    告警时间：${moment(inst.selectedRows.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(inst.selectedRows).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = inst.selectedRows.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
                                             }
                                         },
                                         items: items

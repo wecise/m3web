@@ -24,7 +24,6 @@ class Log extends Matrix {
     }
 
     init() {
-
         VueLoader.onloaded(["ai-robot-component",
                             "log-graph-component",
                             "log-datatable-component",
@@ -297,302 +296,301 @@ class Log extends Matrix {
                     }
                 })
        
-                
-                maxLog.app = {
-                    delimiters: ['${', '}'],
-                    template: "#app-template",
-                    data: {
-                        // 布局
-                        layout:{
-                            main:{
-                                tabIndex: 1,
-                                activeIndex: 'log-view-console',
-                                tabs:[
-                                    {name: 'log-view-console', title:'日志列表', type: 'main'}
-                                ],
-                                detail: {
-                                    model: [],
-                                    tabIndex: 1,
-                                    activeIndex: '1',
-                                }
-                            },
-                            summary: {
-                                tabIndex: 1,
-                                activeIndex: 'log-view-radar',
-                                tabs:[
-                                    {name: 'log-view-radar', title:'雷达', type: 'radar'},
-                                    //{name: 'log-view-gauge', title:'仪表盘', type: 'gauge'}
-                                ]
-                            }
-                        },
-                        control: {
-                            ifSmart: '0',
-                            ifRefresh: '0'
-                        },
-                        // 搜索组件结构
-                        model: {
-                            id: "matrix-log-search",
-                            filter: null,
-                            term: null,
-                            preset: null,
-                            message: null,
-                        },
-                        options: {
-                            // 搜索窗口
-                            name:"所有", value: "",
-                            // 输入
-                            term: "",
-                            // 指定类
-                            class: "#/matrix/devops/log/:",
-                            // 指定api
-                            api: "log",
-                            // 时间窗口
-                            range: { from: "", to: ""},
-                            // 其它设置
-                            others: {
-                                // 是否包含历史数据
-                                ifHistory: false,
-                                // 是否包含Debug信息
-                                ifDebug: false,
-                                // 指定时间戳
-                                forTime:  ' for vtime ',
-                            }
-                        }
-                    },
-                    watch:{
-                        'layout.main.tabs':{
-                            handler(val,oldVal){
-                                if(val.length > 1){
-                                    $("#tab-log-view-console").show();
-                                }else {
-                                    $("#tab-log-view-console").hide();
-                                }
-                            },
-                            deep:true
-                        }
-                    },
-                    filters: {
-                        pickTitle(item,model,index){
-                            try {
-                                let count = 0;
-                                count = model[item.type].rows.length;
-                                
-                                let badge = 0;
-                                let severity = 0;
-                                try{
-                                    severity = _.maxBy(model[item.type].rows,'severity').severity;
-                                } catch(error){
-                                    severity = 0;
-                                }
-                                
-                                badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
-                                
-                                return `${item.title} ${badge}`;
-
-                            } catch(error){
-                                return `${item.title} 0`;
-                            }
-                        }
-                    },
-                    created(){
-                        // 初始化term
-                        try{
-                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
-                            this.options.term = term;
-                        } catch(err){
-
-                        }
-                        
-                        // 接收搜索数据
-                        eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
-                        // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT",maxLog.resizeEventConsole);
-                    },
-                    mounted(){
-                        $(this.$el).addClass('view-normal');
-                        
-                        // 没有详细页时，默认隐藏告警列表Title
-                        this.hideTabEventViewConsoleUl();
-
-                        // 维度统计
-                        this.toggleSummaryBySmart(this.control.ifSmart);
-
-                        // 窗口Resize
-                        _.delay(function(){
-                            // RESIZE Event Summary
-                            eventHub.$emit("WINDOW-RESIZE-EVENT");
-                        },2000);
-                        
-                    },
-                    methods: {
-                        setData(event){
-                            this.model = _.extend(this.model, this.$refs.searchRef.result);
-                        },
-                        hideTabEventViewConsoleUl(){
-                            const self = this;
-
-                            if($('#tab-log-view-console').is(':visible')) {
-                                $("#tab-log-view-console").hide();
-                            $("#tab-log-view-console > span").hide();
-                            } else {
-                                setTimeout(self.hideTabEventViewConsoleUl, 50);
-                            }   
-                        },
-                        // 切换运行模式
-                        toggleModel(event){
-                            $(this.$el).removeClass(window.EVENT_VIEW);
-                            $(this.$el).addClass(event);
-                            window.EVENT_VIEW = event;
-                        },
-                        toggleSummaryByRefresh(evt){
-                            const self = this;
-                            
-                            if(evt==1) {
-                                window.intervalListener = setInterval(function(){
-                                    self.$refs.searchRef.search();
-                                },5000)
-                            } else {
-                                clearInterval(window.intervalListener);
-                            }
-
-                            this.control.ifRefresh = evt;
-                            
-                            // RESIZE Event Summary
-                            eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            event.resizeEventConsole();
-                        },
-                        toggleSummaryBySmart(evt){
-                            if(evt==1) {
-                                $("#log-view-summary").css("height","200px").css("display","");
-                            } else {
-                                $("#log-view-summary").css("height","0px").css("display","none");
-                            }
-                            this.control.ifSmart = evt;
-                            
-                            // RESIZE Event Summary
-                            eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            maxLog.resizeEventConsole();
-                        },
-                        detailAdd(event){
-                            try {
-                                let id = event.id;
-                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
-                                
-                                // event
-                                let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
-                                // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript('/log/diagnosis-by-id.js',term).message;
-                                
-                                // 添加tab
-                                let detail = {title:`日志分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
-                                                {title:'日志详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
-                                                {title:'日志轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
-                                                {title:'日志历史', name:`diagnosis-history-${id}`, type: 'history', model:model},
-                                                {title:'资源信息', name:`topological-${id}`, type: 'topological'},
-                                            ]};
-                                this.layout.main.detail.activeIndex = _.first(detail.child).name;
-                                
-                                this.layout.main.tabs.push(detail);
-                                this.layout.main.activeIndex = `diagnosis-${id}`;
-                                
-                            } catch(error){
-                                this.layout.main.tabs = [];
-                            }
-                        },
-                        detailRemove(targetName) {
-                            
-                            let tabs = this.layout.main.tabs;
-                            let activeIndex = this.layout.main.activeIndex;
-                            if (activeIndex === targetName) {
-                              tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                  let nextTab = tabs[index + 1] || tabs[index - 1];
-                                  if (nextTab) {
-                                    activeIndex = nextTab.name;
-                                  }
-                                }
-                              });
-                            }
-                            
-                            this.layout.main.activeIndex = activeIndex;
-                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
-
-                        }
-                    }
-                };
-                new Vue(maxLog.app).$mount("#app");    
             });
         })
 
         window.addEventListener('resize', () => { 
-            maxLog.resizeEventConsole();
+            this.app.resizeConsole();
 
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
-
-        
+ 
     }
 
-    contextMenu(tId,inst,items,app,fun){
-        
-        $.contextMenu({
-            selector: `#${tId} tr td:not(:nth-child(1))`,
-            trigger: 'right',
-            autoHide: true,
-            delay: 5,
-            hideOnSecondTrigger: true,
-            className: `animated slideIn ${tId} context-menu-list`,
-            build: function($trigger, e) {
+    mount(el){
 
-                return {
-                    callback: function(key, opt) {
-                        
-                        if(_.includes(key,'diagnosis')) {
-                            app.detailAdd(inst.selectedRows);
-                        } else if(_.includes(key,'action')) {
-                            // 增加操作类型
-                            let action = _.last(key.split("_"));
-                            app.action({list: [inst.selectedRows], action:action});
+        let main = {
+            delimiters: ['${', '}'],
+            template: "#app-template",
+            data: {
+                // 布局
+                layout:{
+                    main:{
+                        tabIndex: 1,
+                        activeIndex: 'log-view-console',
+                        tabs:[
+                            {name: 'log-view-console', title:'日志列表', type: 'main'}
+                        ],
+                        detail: {
+                            model: [],
+                            tabIndex: 1,
+                            activeIndex: '1',
                         }
                     },
-                    items: items
+                    summary: {
+                        tabIndex: 1,
+                        activeIndex: 'log-view-radar',
+                        tabs:[
+                            {name: 'log-view-radar', title:'雷达', type: 'radar'},
+                            //{name: 'log-view-gauge', title:'仪表盘', type: 'gauge'}
+                        ]
+                    }
+                },
+                control: {
+                    ifSmart: '0',
+                    ifRefresh: '0'
+                },
+                // 搜索组件结构
+                model: {
+                    id: "matrix-log-search",
+                    filter: null,
+                    term: null,
+                    preset: null,
+                    message: null,
+                },
+                options: {
+                    // 搜索窗口
+                    name:"所有", value: "",
+                    // 输入
+                    term: "",
+                    // 指定类
+                    class: "#/matrix/devops/log/:",
+                    // 指定api
+                    api: "log",
+                    // 时间窗口
+                    range: { from: "", to: ""},
+                    // 其它设置
+                    others: {
+                        // 是否包含历史数据
+                        ifHistory: false,
+                        // 是否包含Debug信息
+                        ifDebug: false,
+                        // 指定时间戳
+                        forTime:  ' for vtime ',
+                    }
                 }
             },
-            events: {
-                show: function(opt) {
+            watch:{
+                'layout.main.tabs':{
+                    handler(val,oldVal){
+                        if(val.length > 1){
+                            $("#tab-log-view-console").show();
+                        }else {
+                            $("#tab-log-view-console").hide();
+                        }
+                    },
+                    immediate:true,
+                    deep:true
+                }
+            },
+            filters: {
+                pickTitle(item,model,index){
+                    try {
+                        let count = 0;
+                        count = model[item.type].rows.length;
+                        
+                        let badge = 0;
+                        let severity = 0;
+                        try{
+                            severity = _.maxBy(model[item.type].rows,'severity').severity;
+                        } catch(error){
+                            severity = 0;
+                        }
+                        
+                        badge = severity>=5?`<span style="color:#FF0000;">${count}</span>`:severity>=4?`<span style="color:#FFDC00;">${count}</span>`:count;
+                        
+                        return `${item.title} ${badge}`;
 
-                    let $this = this;
-                    _.delay(function(){
-                        new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
-                    },50)
-                },
-                hide: function(opt) {
-
-                    let $this = this;
+                    } catch(error){
+                        return `${item.title} 0`;
+                    }
+                }
+            },
+            created(){
+                // 初始化term
+                try{
+                    let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                    this.options.term = term;
+                } catch(err){
 
                 }
+                
+                // 接收搜索数据
+                eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
+                // 接收窗体RESIZE事件
+                eventHub.$on("WINDOW-RESIZE-EVENT",self.resizeConsole);
+            },
+            mounted(){
+                $(this.$el).addClass('view-normal');
+                
+                // 没有详细页时，默认隐藏告警列表Title
+                this.hideTabEventViewConsoleUl();
+
+                // 维度统计
+                this.toggleSummaryBySmart(this.control.ifSmart);
+
+                // RESIZE Event Summary
+                _.delay(() => {
+                    this.resizeConsole();
+                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                },2000)
+            },
+            methods: {
+                setData(event){
+                    this.model = _.extend(this.model, this.$refs.searchRef.result);
+                },
+                hideTabEventViewConsoleUl(){
+                    const self = this;
+
+                    if($('#tab-log-view-console').is(':visible')) {
+                        $("#tab-log-view-console").hide();
+                    $("#tab-log-view-console > span").hide();
+                    } else {
+                        setTimeout(self.hideTabEventViewConsoleUl, 50);
+                    }   
+                },
+                // 切换运行模式
+                toggleModel(event){
+                    $(this.$el).removeClass(window.EVENT_VIEW);
+                    $(this.$el).addClass(event);
+                    window.EVENT_VIEW = event;
+                },
+                toggleSummaryByRefresh(evt){
+                    const self = this;
+                    
+                    if(evt==1) {
+                        window.intervalListener = setInterval(function(){
+                            self.$refs.searchRef.search();
+                        },5000)
+                    } else {
+                        clearInterval(window.intervalListener);
+                    }
+
+                    this.control.ifRefresh = evt;
+                    
+                    // RESIZE Event Summary
+                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                    // RESIZE Event Console
+                    self.resizeConsole();
+                },
+                toggleSummaryBySmart(evt){
+                    if(evt==1) {
+                        $("#log-view-summary").css("height","200px").css("display","");
+                    } else {
+                        $("#log-view-summary").css("height","0px").css("display","none");
+                    }
+                    this.control.ifSmart = evt;
+                    
+                    // RESIZE Event Summary
+                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                    // RESIZE Event Console
+                    this.resizeConsole();
+                },
+                detailAdd(event){
+                    try {
+                        let id = event.id;
+                        if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
+                        
+                        // event
+                        let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
+                        // 根据event获取关联信息
+                        let model = fsHandler.callFsJScript('/log/diagnosis-by-id.js',term).message;
+                        
+                        // 添加tab
+                        let detail = {title:`日志分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                        {title:'日志详情', name:`diagnosis-detail-${id}`, type: 'detail', model:model},
+                                        {title:'日志轨迹', name:`diagnosis-journal-${id}`, type: 'journal', model:model},
+                                        {title:'日志历史', name:`diagnosis-history-${id}`, type: 'history', model:model},
+                                        {title:'资源信息', name:`topological-${id}`, type: 'topological'},
+                                    ]};
+                        this.layout.main.detail.activeIndex = _.first(detail.child).name;
+                        
+                        this.layout.main.tabs.push(detail);
+                        this.layout.main.activeIndex = `diagnosis-${id}`;
+                        
+                    } catch(error){
+                        this.layout.main.tabs = [];
+                    }
+                },
+                detailRemove(targetName) {
+                    
+                    let tabs = this.layout.main.tabs;
+                    let activeIndex = this.layout.main.activeIndex;
+                    if (activeIndex === targetName) {
+                      tabs.forEach((tab, index) => {
+                        if (tab.name === targetName) {
+                          let nextTab = tabs[index + 1] || tabs[index - 1];
+                          if (nextTab) {
+                            activeIndex = nextTab.name;
+                          }
+                        }
+                      });
+                    }
+                    
+                    this.layout.main.activeIndex = activeIndex;
+                    this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+
+                },
+                contextMenu(tId,inst,items,fun){
+                    const self = this;
+                    $.contextMenu({
+                        selector: `#${tId} tr td:not(:nth-child(1))`,
+                        trigger: 'right',
+                        autoHide: true,
+                        delay: 5,
+                        hideOnSecondTrigger: true,
+                        className: `animated slideIn ${tId} context-menu-list`,
+                        build: function($trigger, e) {
+            
+                            return {
+                                callback: function(key, opt) {
+                                    
+                                    if(_.includes(key,'diagnosis')) {
+                                        self.detailAdd(inst.selectedRows);
+                                    } else if(_.includes(key,'action')) {
+                                        // 增加操作类型
+                                        let action = _.last(key.split("_"));
+                                        self.action({list: [inst.selectedRows], action:action});
+                                    }
+                                },
+                                items: items
+                            }
+                        },
+                        events: {
+                            show: function(opt) {
+            
+                                let $this = this;
+                                _.delay(function(){
+                                    new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                                },50)
+                            },
+                            hide: function(opt) {
+            
+                                let $this = this;
+            
+                            }
+                        }
+                    });
+                },
+                resizeConsole(){
+                    let evwH = $(window).height();
+                    let evcH = $("#log-view-container").height();
+                    let evsH = $("#log-view-summary").height();
+                    
+                    $("#log-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+                                                                    .css("max-height","-=260px")
+                                                                    .css("max-height","-=" + evsH + "px")
+                                                                    .css("min-height", evwH + "px")
+                                                                    .css("min-height","-=260px")
+                                                                    .css("min-height","-=" + evsH + "px");
+                }
             }
-        });
-    }
+        };
 
-    resizeEventConsole(){
-        let evwH = $(window).height();
-        let evcH = $("#log-view-container").height();
-        let evsH = $("#log-view-summary").height();
-        
-        $("#log-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("min-height", evwH + "px")
-                                                        .css("min-height","-=260px")
-                                                        .css("min-height","-=" + evsH + "px");
+        _.delay(() => {
+            this.app = new Vue(main).$mount("#app");
+        },500)
     }
-
 
 }
-
-let maxLog = new Log();
-maxLog.init();

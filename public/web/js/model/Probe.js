@@ -14,6 +14,8 @@ class Probe extends Matrix {
 
     constructor() {
         super();
+
+        this.app = null;
     }
 
     init() {
@@ -70,82 +72,102 @@ class Probe extends Matrix {
                 props: {
                     model: Object
                 },
-                template: `<div class="row">
-                            <div class="col-lg-2">
-                                <probe-tree-component id="probe-tree" :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}"></probe-tree-component>
-                            </div>
-
-                            <div class="col-lg-10 probe-container">
-                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 探针列表</h4 class="page-header">
-                                <probe-card-component :model="model.summary"></probe-card-component>
-                                <probe-list-datatables-component :model="model" id="probe-list-table"></probe-list-datatables-component>
-                            </div>
-                        </div>`
+                template: `<el-container style="height:calc(100vh - 140px);">
+                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
+                                    <probe-tree-component id="probe-tree" :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}"></probe-tree-component>
+                                </el-aside>
+                                <el-main class="probe-container" style="padding:0px;">
+                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 探针列表</h4 class="page-header"-->
+                                    <el-container>
+                                        <el-header style="height:120px;padding:0px;">
+                                            <probe-card-component :model="model.summary"></probe-card-component>
+                                        </el-header>
+                                        <el-main style="padding:0px;">
+                                            <probe-list-datatables-component :model="model" id="probe-list-table"></probe-list-datatables-component>
+                                        </el-main>
+                                    </el-container>
+                                </el-main>
+                            </el-container>`
             });
 
             Vue.component("policy-view", {
                 props: {
                     model: Object
                 },
-                template: `<div class="row">
-                            <div class="col-lg-2">
-                                <probe-tree-component id="policy-tree" :model="{parent:'/probe',name:'policy_tree_data.js',domain:'policy'}"></-tree-component>
-                            </div>
-
-                            <div class="col-lg-10 policy-container">
-                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 策略管理</h4 class="page-header">
-                                <policy-list-datatables-component :model="model" id="policy-list-table"></policy-list-datatables-component>
-                            </div>
-                        </div>`
+                template: `<el-container style="height:calc(100vh - 140px);">
+                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
+                                    <probe-tree-component id="policy-tree" :model="{parent:'/probe',name:'policy_tree_data.js',domain:'policy'}"></-tree-component>
+                                </el-aside>
+                                <el-main class="policy-container" style="padding:0px;">
+                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 策略管理</h4 class="page-header"-->
+                                    <policy-list-datatables-component :model="model" id="policy-list-table"></policy-list-datatables-component>
+                                </el-main>
+                            </el-container>`
             });
 
             Vue.component("log-view", {
                 props: {
                     model: Object
                 },
-                template: `<div class="row">
-                          <div class="col-lg-2">
-                            <probe-tree-component id="log-tree" :model="{parent:'/probe',name:'log_tree_data.js',domain:'log'}"></-tree-component>
-                          </div>
-
-                          <div class="col-lg-10 log-container">
-                            <h4 class="page-header"><i class="fas fa-angle-right"></i> 日志管理</h4 class="page-header">
-                            <log-list-datatables-component :model="model" id="log-list-table"></log-list-datatables-component>
-                          </div>
-                       </div>`
+                template: `<el-container style="height:calc(100vh - 140px);">
+                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
+                                    <probe-tree-component id="log-tree" :model="{parent:'/probe',name:'log_tree_data.js',domain:'log'}"></-tree-component>
+                                </el-aside>
+                                <el-main class="log-container" style="padding:0px;">
+                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 日志管理</h4 class="page-header"-->
+                                    <log-list-datatables-component :model="model" id="log-list-table"></log-list-datatables-component>
+                                </el-main>
+                            </el-container>`
             });
 
             Vue.component("script-view", {
                 props: {
                     model: Object
                 },
-                template: `<div class="row">
-                            <div class="col-lg-2">
-                                <probe-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}"></-tree-component>
-                            </div>
-                            <div class="col-lg-10 script-container">
-                                <h4 class="page-header"><i class="fas fa-angle-right"></i> 脚本管理</h4 class="page-header">
-                                <script-list-datatables-component :model="model" id="script-list-table"></script-list-datatables-component>
-                            </div>
-                        </div>`
+                template: `<el-container style="height:calc(100vh - 140px);">
+                                <el-aside style="width:200px;margin:-15px -10px -15px -15px;">
+                                    <probe-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}"></-tree-component>
+                                </el-aside>
+                                <el-main class="script-container" style="padding:0px;">
+                                    <!--h4 class="page-header"><i class="fas fa-angle-right"></i> 脚本管理</h4 class="page-header"-->
+                                    <script-list-datatables-component :model="model" id="script-list-table"></script-list-datatables-component>
+                                </el-main>
+                            </el-container>`
             });
 
             $(function () {
 
-                var appVue = new Vue({
+                this.app = new Vue({
                     delimiters: ['${', '}'],
-                    el: "#app",
-                    template: "#app-template",
+                    template: ` <el-container style="background:#ffffff;">
+                                    <el-main style="padding:0 10px;overflow:hidden;">
+                                        <el-tabs v-model="tabs.activeName" class="el-tabs-bottom-line">
+                                            <el-tab-pane label="探针列表" name="probe">
+                                                <probe-view :model="probe"></probe-view>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="策略管理" name="policy">
+                                                <policy-view :model="policy"></policy-view>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="日志配置" name="log">
+                                                <log-view :model="log"></log-view>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="脚本管理" name="script">
+                                                <script-view :model="script"></script-view>
+                                            </el-tab-pane>
+                                        </el-tabs>
+                                    </el-main>
+                                </el-container>`,
                     data: {
                         probe: {},
                         policy: {},
                         log: {},
-                        script: {}
+                        script: {},
+                        tabs:{
+                            activeName: 'probe',
+                        }
                     },
                     created: function () {
-                        let self = this;
-
-                        eventHub.$on("PROBE-REFRESH-EVENT", self.initData);
+                        eventHub.$on("PROBE-REFRESH-EVENT", this.initData);
                     },
                     mounted: function () {
                         let self = this;
@@ -188,7 +210,7 @@ class Probe extends Matrix {
 
                         }
                     }
-                })
+                }).$mount("#app");
 
             });
 

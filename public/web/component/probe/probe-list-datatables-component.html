@@ -9,6 +9,10 @@
 
 		.probe-list-datatables-component table.dataTable tbody>tr.selected, table.dataTable tbody>tr.selected td, table.dataTable tbody>tr>.selected {
 			background: rgb(196, 235, 253)!important;
+        }
+        
+        .probe-list-datatables-component .dataTables_scrollHead{
+			background: rgb(241, 241, 241);
 		}
 
 		div.dataTables_wrapper div.dataTables_info {
@@ -164,8 +168,8 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="probe-list-datatables-component"  ----------*/
 	<template>
-		<div class="container-fluid">
-			<input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus>
+		<div>
+			<!--input :id="id+'_tags_input'" name="tags" placeholder="" :value="model | pickTags" autofocus-->
 			<table :id="id" class="display" width="100%"></table>
 		</div>
 	</template>
@@ -188,19 +192,44 @@
 		},
         watch: {
             'model.list.dataset': {
+
                 handler: function(val,oldVal){
-                    let self = this;
 
-                    if(val === oldVal) return false;
+                    // 数据无更新
+                    if(val === oldVal) {
+                        //console.log(111)
+                        return false;
+                    }
 
-                    if(self.datatable){
-                        self.datatable.destroy();
-                        $(`#${self.id}`).empty();
-                        self.init();
+                    // 数据为空 
+                    // Table置空
+                    if( _.isEmpty(val)) {
+                        //console.log(222)
+                        this.datatable.rows().remove().draw();
+                        return false;
+                    }
+
+                    // 表格已经初始化
+                    if(this.datatable instanceof $.fn.dataTable.Api) {
+                        //console.log(333)
+                        this.datatable.clear();
+                        this.datatable.rows.add(val);
+                        this.datatable.draw();
+
+                        // 数据行重新生成，所以需要再次实例化可拖拽功能
+                        this.dragHandle();
+
+                        let datatable = $("#"+self.id).DataTable();
+                        script.detail(self.id,datatable);
+
+                    } else {
+                        //console.log(444)
+                        //this.init();
                     }
                 },
+                immediate: true,
                 deep:true
-            },
+                }, 
             'model.tags':{
                 handler:function(val,oldVal){
                     let self = this;
@@ -228,6 +257,7 @@
         created: function(){
             let self = this;
 
+            eventHub.$on("WINDOW-RESIZE-EVENT", self.resize);
             eventHub.$on("COMPONENT-REDRAW-EVENT", self.redraw);
             eventHub.$on(`DATATABLE-FILTER-BY-probe-EVENT`, self.filterColumn);
         },
@@ -238,7 +268,6 @@
 
                 _.delay(function() {
                     self.init();
-                    self.initPlugin();
                 },500);
 
             })
@@ -283,7 +312,8 @@
                 let self = this;
 
                 self.datatable = $("#"+self.id).DataTable( _.extend({
-                    			data: self.model.list.dataset,
+                                destroy: true,
+                                data: self.model.list.dataset,
                                 columns: self._columns,
                                 //stripeClasses: [],
                                 responsive: false,
@@ -296,7 +326,7 @@
 								paging: false,
 								info: true,
                     			scrollX: true,
-								scrollY: '37vh',
+								scrollY: '55vh',
 								scrollCollapse: true,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                                 language : {
@@ -351,7 +381,6 @@
                                     // init ContextMenu
                                     self.initMenu();
 
-
                                     // init effect for table
                                     $("#"+self.id).find("tbody").on("mouseover","tr", function(event) {
 
@@ -367,25 +396,13 @@
                                         self.selectedRow = self.datatable.row( this ).data();
                                     });
 
-                                    // init draggable for tr
-                                    let elFrom = $("#"+self.id).find("tbody tr");
-                                    elFrom.attr("draggable","true");
+                                    self.dragHandle();
+                                    self.dropHandle();
 
-                                    addEvent(elFrom, 'dragstart', function (e) {
-                                        e.dataTransfer.effectAllowed = 'copy';
-
-                                        let sendList = [];
-
-                                        _.forEach(self.datatable.rows('.selected').data(), function(v) {
-                                            sendList.push(v);
-                                        });
-
-                                        e.dataTransfer.setData("item", JSON.stringify(sendList));
-                                    });
-	                            },
-                                drawCallback:function(settings){
-                                    //self.redraw();
-                                }
+                                    self.initPlugin();
+                                    
+                                    self.resize();
+	                            }
                     },self.options)).columns.adjust().draw();
 
 			},
@@ -395,49 +412,15 @@
 			initPlugin: function(){
                 let self = this;
 
-				self.tagsInput();
-
-                // init drop for tree
-                var treeName = "probe-tree";
-                let elTo = $(`#${treeName} li`);
-
-                addEvent(elTo, 'dragleave', function (e) {
-                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
-
-                    $(`#${tId}`).removeClass("curSelectedNode");
+                //self.tagsInput();
+                
+                // button样式调整
+                $(".dt-button",self.$el).removeClass("dt-button");
+                $(".dt-buttons",self.$el).css({
+                    "margin": "5px 0"
                 });
-
-
-                addEvent(elTo, 'dragover', function (e) {
-                    e.preventDefault();
-                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
-
-                    $(`#${tId}`).addClass("curSelectedNode");
-                });
-
-                addEvent(elTo, 'drop', function (e) {
-                    e.preventDefault();
-                    // 接收数据
-                    let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
-
-                    e.dataTransfer.clearData();
-
-                    // 获取tree tID
-                    let tId = $(e.target).attr("id").replace(/_span/g,"");
-                    let treeObj = $.fn.zTree.getZTreeObj(treeName);
-                    let node = treeObj.getNodeByTId(tId);
-
-                    // 打标签
-	                let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
-
-                    if(rtn.status == 'ok'){
-                        eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
-                    }
-
-
-                    $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
-
+                $(".btn-white",self.$el).css({
+                    "border": "1px solid #dddddd"
                 });
 
 			},
@@ -495,7 +478,78 @@
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
             },
-			tagsInput: function(){
+            dragHandle: function(){
+                const self = this;
+
+                // init draggable for tr
+                let datatable = $("#"+self.id).DataTable();
+                let elFrom = $("#"+self.id).find("tbody tr");
+                elFrom.attr("draggable","true");
+
+                addEvent(elFrom, 'dragstart', function (e) {
+                    e.dataTransfer.effectAllowed = 'copy';
+
+                    let sendList = [];
+                    _.forEach(datatable.rows('.selected').data(), function(v) {
+                        sendList.push(v);
+                    });
+
+                    e.dataTransfer.setData("item", JSON.stringify(sendList));
+                });
+            },
+            dropHandle: function(){
+                const self = this;
+
+                // init drop for tree
+                var treeName = "probe-tree";
+                let elTo = $(`#${treeName} li`);
+
+                addEvent(elTo, 'dragleave', function (e) {
+                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                    $(`#${tId}`).removeClass("curSelectedNode");
+                });
+
+
+                addEvent(elTo, 'dragover', function (e) {
+                    e.preventDefault();
+                    let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+
+                    $(`#${tId}`).addClass("curSelectedNode");
+                });
+
+                addEvent(elTo, 'drop', function (e) {
+                    e.preventDefault();
+                    // 接收数据
+                    let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
+                    e.dataTransfer.clearData();
+
+                    // 获取tree tID
+                    let tId = $(e.target).attr("id").replace(/_span/g,"");
+                    let treeObj = $.fn.zTree.getZTreeObj(treeName);
+                    let node = treeObj.getNodeByTId(tId);
+
+                    let input = null;
+                    // 删除标签
+                    if(node.cid == 'A3'){
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                    } 
+                    // 打标签
+                    else {
+                        input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                    }
+                    
+                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+
+                    if(rtn.status == 'ok'){
+                        eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
+                    }
+
+                    $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
+
+                });
+            },
+            tagsInput: function(){
 
                 let self = this;
 
@@ -680,7 +734,11 @@
                     }
                 };
 
-			}
+			},
+            resize(){
+                let parentHeight = $(this.$el).closest("section").height() - 170;
+                $(this.$el).find(".dataTables_scrollBody").css("max-height",parentHeight+'px').css("min-height",parentHeight+'px');
+            }
 		}
 	
 	}

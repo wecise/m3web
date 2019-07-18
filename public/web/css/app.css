@@ -1273,4 +1273,77 @@ body.bjzdgt .jsPanel-controlbar span.jsglyph{
 body.bjzdgt .thumbnail>.company-logo-bg{
     background-color: #007a77;
 }
-  
+ 
+
+/* YSKJ Theme */
+body.yskj .navbar.navbar-default.navbar-fixed-top {
+    background-color: rgb(255,255,255);
+}
+
+body.yskj #sidebar {
+    background-color:rgb(37, 45, 71);!important;
+}
+
+body.yskj #sidebar-bg {
+    background-color:rgb(37, 45, 71);!important;
+}
+
+body.yskj .sidebar-toggle i {
+    color: rgb(141, 146, 151);
+}
+
+body.yskj .layer.btn.btn-primary {
+    background-color:rgb(37, 45, 71);;
+}
+
+body.yskj .layer > .dropdown > a {
+    color: rgb(255,255,255);
+}
+
+body.yskj .layer > .dropdown > i {
+    color: rgba(255,255,255,0.5);
+}
+
+body.yskj .layer a {
+    color: rgb(255,255,255);
+}
+
+body.yskj .row .btn.btn-primary {
+    background-color:rgb(37, 45, 71);;
+    border-color:rgb(37, 45, 71);;
+}
+
+body.yskj .navbar.navbar-default.navbar-fixed-bottom {
+    background-color:rgb(37, 45, 71);;
+}
+
+body.yskj .navbar.navbar-default.navbar-fixed-bottom span {
+    color: #f9f9f9;
+}
+body.yskj .navbar.navbar-default.navbar-fixed-bottom a {
+    color: #f9f9f9;
+}
+
+body.yskj .modal-header{
+    background-color: rgb(37, 45, 71);
+    color: #ffffff;
+}
+
+body.yskj .jsPanel-hdr{
+    background-color: rgb(37, 45, 71)!important;
+}
+body.yskj .jsPanel-content a>img{
+    filter: grayscale(100%) brightness(70%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8)!important;
+}
+
+body.yskj .jsPanel-titlebar h3{
+    color: #ffffff!important;
+}
+
+body.yskj .jsPanel-controlbar span.jsglyph{
+    color: #ffffff!important;
+}
+
+body.yskj .thumbnail>.company-logo-bg{
+    background-color: rgb(37, 45, 71);
+}

@@ -248,9 +248,8 @@
     <el-container style="padding:3em 0;">
             <el-main>
                 {{.CsrfTokenHtml}}
-                
-                <el-row :gutter="20" style="padding:20px 0px;">
-                    <el-col :span="18" :offset="3">
+                <el-row type="flex" justify="center" style="padding:20px 0px;">
+                    <el-col :span="18">
                         <div class="grid-content">
                             <div class="input-group">
                                 <!--div class="input-group-btn">
@@ -274,8 +273,8 @@
                     </el-col>
                 </el-row>
                 
-                <el-row :gutter="20" style="padding:20px 0px;">
-                    <el-col :span="16" :offset="4"> 
+                <el-row type="flex" justify="center" style="padding:20px 0px;">
+                    <el-col :span="16"> 
                         <div class="grid-content">
                             <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
                                 <a :href="item.url" :target="item.target" style="color:#ffffff;">
@@ -284,7 +283,7 @@
                                         <p class="small">#{item.{{.i18n.Tr "mxhome_portlet_name"}}}#</p>
                                     </div>
                                 </a>
-                                <div class="list-context-menu" :data-item="item.url">
+                                <div class="list-context-menu" :data-item="item.id">
                                     <i class="fa fa-angle-down"></i>
                                 </div>
                             </div>

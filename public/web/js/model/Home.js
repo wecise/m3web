@@ -14,7 +14,6 @@ class Home extends Matrix {
 
     constructor() {
         super();
-
         this.app = null;
     }
 
@@ -27,7 +26,7 @@ class Home extends Matrix {
 
                 var timeoutId = 0;
 
-                mxHome.app = {
+                let main = {
                     delimiters: ['#{', '}#'],
                     template: '#app-template',
                     data: {
@@ -61,6 +60,11 @@ class Home extends Matrix {
                     },
                     created: function(){
                         let self = this;
+
+                        // 刷新应用列表
+                        eventHub.$on("APP-REFRESH-EVENT",()=>{
+                            this.loadApps();
+                        });
 
                         eventHub.$on('preset-selected-event', self.setPresetDefault);
 
@@ -107,30 +111,71 @@ class Home extends Matrix {
 
                             //App.init();
                         },
-                        initContextMenu: function(){
-                            let self = this;
-
+                        initContextMenu(){
+                            const self = this;
+        
                             $.contextMenu({
                                 selector: '.list-context-menu',
                                 trigger: 'left',
+                                autoHide: true,
+                                delay: 10,
+                                hideOnSecondTrigger: true,
                                 build: function($trigger, e) {
-                                    // this callback is executed every time the menu is to be shown
-                                    // its results are destroyed every time the menu is hidden
-                                    // e is the original contextmenu event, containing e.pageX and e.pageY (amongst other data)
-                                    let _item = e.target.attributes.getNamedItem('data-item').value;
-
+                                    
+                                    let id = e.target.attributes.getNamedItem('data-item').value;
+                                    let item = _.find(self.user.appList,{id:id});
+                                    
                                     return {
-
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,"running")){
+                                                sideBar.appRunning(item);
+                                            } else if(_.includes(key,"running-plus")){
+                                                sideBar.appRunningPlus(item);
+                                            } else if(_.includes(key,"uninstall")){
+                                                sideBar.appUninstall(item);
+                                            } else if(_.includes(key,"home")){
+                                                sideBar.appAsHome(item);
+                                            } else if(_.includes(key,"share")){
+                                                sideBar.appShare(item);
+                                            }
+                                        },
                                         items: {
-                                            "default": {name: '设为首页', icon: "fas fa-home", callback: function(key, opt) {
-                                                    mx.setDefaultHome('janesware/' + _item.split("/")[2], self.path._csrf);
-                                                }
+                                            "m10_running": {
+                                                "name": "当前窗口运行",
+                                                "icon": "fas fa-walking"
+                                            },
+                                            "m20_running-plus": {
+                                                "name": "打开新窗口运行",
+                                                "icon": "fas fa-running"
+                                            },
+                                            "m30":"----------",
+                                            "m40_home": {
+                                                name: '设为首页', 
+                                                icon: "fas fa-home"
+                                            },
+                                            "m50":"----------",
+                                            "m60_uninstall": {
+                                                "name": "卸载应用",
+                                                "icon": "fas fa-trash"
+                                            },
+                                            "m70":"----------",
+                                            "m80_share": {
+                                                "name": "分享",
+                                                "icon": "fas fa-share"
                                             }
                                         }
-                                    };
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                                        let $this = this;
+                                    },
+                                    hide: function(opt) {
+                                        let $this = this;
+                                    }
                                 }
                             });
-
                         },
                         setPresetDefault: function(event){
                             let self = this;
@@ -387,7 +432,7 @@ class Home extends Matrix {
                     }
                 };
                 
-                new Vue(mxHome.app).$mount("#app");
+                this.app = new Vue(main).$mount("#app");
             })
         })
     }

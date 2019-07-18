@@ -60,6 +60,43 @@ class OmdbHandler {
     *
     *
     * */
+    classListField(event){
+        let rtn = null;
+        
+        Pace.restart();
+
+        jQuery.ajax({
+            url: "/mxobject/schema/class/fields?id="+event,
+            dataType: 'json',
+            type: 'GET',
+            async: false,
+            beforeSend:function(xhr){
+                Pace.restart();
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                if (!_.isEmpty(data.message)){
+                    rtn = data.message;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        return rtn;
+    };
+
+    /*
+    *   类管理
+    *
+    *   树
+    *
+    *
+    * */
     classTree(event){
         let rtn = null;
         
@@ -450,13 +487,13 @@ class OmdbHandler {
     classDataExport(event){
         let rtn = null;
 
-        let fileName = _.last(event.split("/")) + `_${moment().format("YYYY-MM-DD HH:mm:SS")}.mql`;
+        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.mql`;
 
         Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=true&class=${encodeURIComponent(event)}&limit=0`, true);
+            xhr.open("GET", `/mxobject/export?recursive=true&class=${encodeURIComponent(event)}&limit=-1`, true);
             xhr.setRequestHeader("Content-type","text/csv");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.onreadystatechange = function() {
@@ -517,6 +554,82 @@ class OmdbHandler {
         })
         return rtn;
     };
+
+
+    /*
+    *   类数据导出为excel
+    *
+    * */
+    classTemplateExportToExcel(event){
+        let rtn = null;
+
+        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_实体模板_${moment().format("YYYY-MM-DD HH:mm:SS")}.xlsx`;
+
+        Pace.restart();
+
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", `/mxobject/export?recursive=true&filetype=xlsx&templdate=true&class=${event}`, true);
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded; charset=UTF-8");
+            xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+            xhr.setRequestHeader("Accept", "*/*");
+            xhr.setRequestHeader("Cache-Control", "no-cache");
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    var blob = new Blob([xhr.response], {type: "application/vnd.ms-excel"});
+                    saveAs(blob, fileName);
+                    alertify.success("导出成功" + " " + fileName);
+                    rtn = 1;
+                }
+            }
+            xhr.responseType = "arraybuffer";
+            xhr.send();
+        } catch(err){
+            
+        }
+        return rtn;
+
+    }
+     /*
+    *   类数据从excel导入
+    *
+    * */
+    classDataImportFromExcel(file){
+    
+        let rtn = null;
+
+        let fm = new FormData();
+        fm.append("uploadfile", file);
+
+        jQuery.ajax({
+            url: '/mxobject/import',
+            dataType: 'json',
+            type: 'POST',
+            data: fm,
+            mimeType: "multipart/form-data",
+            async: false,
+            processData:false,
+            contentType: false,
+            beforeSend:function(xhr){
+                Pace.restart();
+            },
+            complete: function(xhr, textStatus) {
+            },
+            success: function(data, textStatus, xhr) {
+
+                userHandler.ifSignIn(data);
+
+                rtn = data;
+
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                rtn = xhr.responseText;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            }
+        })
+        return rtn;
+        
+    }
 
 }
 

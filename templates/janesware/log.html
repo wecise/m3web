@@ -229,7 +229,6 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/probe/probe-tree-component.html"></link>
 
-
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
 		<el-row :gutter="10">
@@ -323,5 +322,12 @@
 	<div>${id}</div>
 </script>
 
+<script>
+	$(function(){
+		let mxLog = new Log();
+		mxLog.init();
+		mxLog.mount("#app");
+	})
+</script>
 
 {{template "base/footer" .}}

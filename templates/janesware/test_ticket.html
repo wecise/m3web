@@ -1,0 +1,95 @@
+<!--
+
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[    CODE BY WANGZD    ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [:::::[                      ]:::::]
+    [::::::[[[[[[[:      :]]]]]]]::::::]
+    [::::::::::::::      ::::::::::::::]
+    [::::::::::::::      ::::::::::::::]
+    [[[[[[[[[[[[[[[      ]]]]]]]]]]]]]]]
+
+-->
+{{template "base/head" .}}
+
+<!-- zTree Core CSS -->
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+
+<style>
+	
+	body {
+		background-color: #d9e0e7;
+	}
+
+</style>
+<main id="content" class="content">
+	<div id="app"></div>
+</main>
+
+<!-- ECharts单文件引入 --> 
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<script type="text/javascript">
+	
+	$(function() {
+
+		new Vue({
+			delimiters: ['#{', '}#'],
+			template: `<main>hello</main>`,
+			data:{
+				token: ""
+			},
+			created(){
+				this.init();
+			},
+			methods:{
+				init(){
+					const self = this;
+
+					jQuery.ajax({
+						url: `http://poc04.readysoft.cn/readydesk-restServer/oauth/token?client_id=readysoft_Interface_1&client_secret=readysoft_secret_readysoft_Interface_1&grant_type=password&username=interface&password=d68285239cb3b1808e3039d38b11b7be`,
+						dataType: 'json',
+						type: 'POST',
+						contentType: false,
+						success: function (data) {
+							self.token = data.access_token;
+
+							self.genTicket();
+						}
+					})
+				},
+				genTicket(){
+					
+					jQuery.ajax({
+						url: 'http://poc04.readysoft.cn/readydesk-restServer/service/interface/flow/add?access_token='+this.token+'&messageid=inc_start_ticket_id&templateid=b223c78b-3107-11e6-8487-446d577ed81c&INC_SUMMARY=ups_host02&INC_DESCRIPTION=Batch for ups_host is of size 118.876KiB, exceeding specified threshold of 8.000KiB by 110.876KiB&INC_CUSTOMER_ID=interface&INC_OMDB_MESSAGEID=11502326755843165072&and_RS_DESTINATION_ID=ups_host:ups_host02',
+						dataType: 'json',
+						type: 'POST',
+						contentType: false,
+						success: function (data) {
+							console.log(data)
+						}
+					})
+
+				}
+			}
+
+		}).$mount("#app");
+
+		
+	});
+
+</script>
+
+
+{{template "base/footer" .}}

@@ -60,7 +60,7 @@
     }
 
     .ivu-layout-content {
-        height: calc(100vh - 170px)!important;
+        height: calc(100vh - 165px)!important;
         background: rgb(255, 255, 255);
     }
     .ivu-layout-header {
@@ -159,6 +159,13 @@
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/config/dropdown-tree-component.html"></link>
+
+<script>
+    $(function(){
+        let mxConfig = new Config();
+        mxConfig.init();
+    })
+</script>
 
 <script type="text/x-template" id="config-manage-template">
     <div>

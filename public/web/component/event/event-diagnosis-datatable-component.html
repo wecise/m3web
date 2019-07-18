@@ -163,8 +163,7 @@
           	return {
                 datatable: null,
                 selectedRows: [],
-	            model: {},
-				selectedRows: []
+	            model: {}
 			}
 		},
 		mounted () {
@@ -175,34 +174,40 @@
 				eventHub.$on("WINDOW-RESIZE-EVENT",self.resize);
 				setInterval(function(){
 					self.resize();
-				},5000)
+				},2000)
             });
         },
 		watch: {
             model: {
 				handler: function(val,oldVal){
+
 					// 数据无更新
-					if(val === oldVal) {
-						return false;
+					if(val == oldVal) {
+						//console.log(111)
+						//return false;
 					}
 
 					// 数据为空
 					if( _.isEmpty(val)) {
+						//console.log(222)
 						this.datatable.rows().remove().draw();
 						return false;
 					}
 
 					// 表格已经初始化
 					if(this.datatable instanceof $.fn.dataTable.Api) {
+						//console.log(333)
 						this.datatable.clear();
 						this.datatable.rows.add(val.rows);
 						this.datatable.draw();
 
 					} else {
-						this.init();
+						//console.log(444)
+						//this.init();
 					}
 				},
-				immediate: true
+				immediate: true,
+				deep:true
             }
 		},
 		methods: {

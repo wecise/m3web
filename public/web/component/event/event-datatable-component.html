@@ -170,7 +170,7 @@
 		table.dataTable thead td,
 		.dataTables_wrapper.no-footer .dataTables_scrollBody,
 		table.dataTable.no-footer {
-			border-bottom: none;;
+			/* border-bottom: none;; */
         }
         
         .tagify {
@@ -278,7 +278,7 @@
             init: function(){
                 const self = this;
 
-                self.columns = self.model.columns[self.model.rootClass];
+                self.columns = self.model.columns[self.model.rootClass] || self.model.columns[_.chain(self.model.columns).keys().take(1).value()];
                 if(_.isEmpty(self.model) || _.isEmpty(self.model.rows) || _.isEmpty(self.columns)) return false;
                 
                 let temp = {};
@@ -370,7 +370,6 @@
 	                                
                                     // 注册右键菜单
                                     self.$root.contextMenu(self.id, self, self.model.contextMenu.event, self.refresh);
-                                    
                                     
                                     self.dragHandle();
                                     self.dropHandle();

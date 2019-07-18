@@ -130,6 +130,7 @@
 			window.COMPANY_LOGO = "{{.logo}}";
 			window.COMPANY_TITLE = "{{.SignedUser.Company.Fullname}}";
 			window.ASSETS_ICON = '/fs/assets/images';
+			window.CsrfToken = "{{.CsrfToken}}";
 			localStorage.setItem("SIGNEDUSER", JSON.stringify( { usrename:window.SignedUser_UserName, fullname:window.SignedUser_FullName, isadmin:window.SignedUser_IsAdmin, assets_icon: window.ASSETS_ICON, lang:window.MATRIX_LANG, companyLogo:window.COMPANY_LOGO}) );
 		} catch(err){
 
@@ -219,7 +220,8 @@
 	<script src="{{AppSubUrl}}/web/vendor/js-search/js-search.min.js" type="text/javascript"></script>
 
 	<!-- App CSS -->
-	<link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet">
+	<!-- <link href="{{AppSubUrl}}/web/css/app.css" rel="stylesheet"> -->
+	<link href="/fs/app/matrix/assets/css/app.css?issys=true&type=open" rel="stylesheet">
 
 
 	<title></title>
@@ -298,7 +300,7 @@
 
 
 							<li>
-								<a target="_blank" href="javascript:mx.setDefaultHome('home','{{.CsrfToken}}')">
+								<a target="_blank" href="javascript:sideBar.appAsHome({url:'/home'})">
 									<i class="fa fa-home"></i> {{.i18n.Tr "defaulthome"}}
 								</a>
 							</li>
@@ -371,7 +373,7 @@
 		<div class="sidebar-toggle-play" onclick="sideBar.toggleSideBar();" data-tooltip="tooltip" title="切换导航栏" style="display: none;">
 			<img src="/fs/assets/images/apps/png/play.png?type=download&issys=true"></i>
 		</div>
-		<div id="sidebar-bg" class="sidebar-bg"></div>
+		<!-- <div id="sidebar-bg" class="sidebar-bg"></div> -->
 	</aside>
 
 

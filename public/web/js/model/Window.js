@@ -558,6 +558,70 @@ class Window {
         return win;
     }
 
+    winGraphAction(title, template, position, container){
+
+        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-GRAPH-POSITION")));
+
+        let _position = "center 0 0";
+
+        if(!_.isEmpty(_tmp)){
+            _position = _tmp;
+        }
+
+        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[3] = this.height * 0.3;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-graphAction',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',
+            headerControls: { maximize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
+                opacity: 0.8
+            },
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-GRAPH-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none",
+                    "overflow":"auto"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
     winPaths(title, template, position, container){
 
         let pos = localStorage.getItem("WINDOW_PATHS_POSITION");
@@ -624,22 +688,29 @@ class Window {
             theme:          maxWindow.theme.light,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
-            position: _position,
-            container: $(`.${container}`),
+            //position: _position,
+            //container: $(`.${container}`),
+            position: {
+                my: "center",
+                at: "center"
+            },
+            container: "body",
             headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
             draggable: {
-                disabled:  true
+                disabled:  false
             },
             callback: function(){
                 $(".jsPanel").addClass("animated fadeInDown");
 
                 $(".jsPanel").css({
-                    "left":"0px",
-                    "box-shadow":"none"
+                    "top":"55px",
+                    "box-shadow":"0 2px 12px 0 rgba(0, 0, 0, 0.1)"
                 });
-                
+                $(".jsPanel-hdr",this).css({
+                    "background-color": "#ffffff!important;"
+                });
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",
                     "border": "none",
@@ -653,7 +724,7 @@ class Window {
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "16px",
-                    "color": "#999999"
+                    "color": "#333333!important;"
                 });
 
             }
@@ -1144,6 +1215,112 @@ class Window {
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winAppShare(title, template, position, container){
+
+        let _position = { my: "center", at: "center" };
+
+        this.lrwh[2] = this.width * 0.55;
+        this.lrwh[3] = this.height * 0.5;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-appShare',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: 'body',//$(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  false
+            },
+            callback: function(){
+
+                this.addClass("animated fadeInDown");
+                
+                $(".jsPanel").css({
+                    "position":"absolute",
+                    "z-index": "10001"
+                });
+
+                this.find(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                });
+                this.find(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+
+                this.find(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                this.find(".jsPanel-titlebar h3").css({
+                    "font-size": "12px",
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winCompany(title, template, position, container){
+
+        let _position = { my: "center", at: "center" };
+
+        this.lrwh[2] = this.width * 0.5;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-company',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            container: '#content',//$(`.${container}`),
+            headerControls: { controls: 'closeonly' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                disabled:  false
+            },
+            callback: function(){
+
+                this.addClass("animated fadeInDown");
+                
+                $(".jsPanel").css({
+                    "position":"absolute",
+                    "z-index": "10001"
+                });
+
+                this.find(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                });
+                this.find(".jsPanel-content",this).css({
+                    "border": "none",
+                    "overflow": "auto"
+                });
+
+                this.find(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                this.find(".jsPanel-titlebar h3").css({
+                    "font-size": "12px",
                 });
 
             },

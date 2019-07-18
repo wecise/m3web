@@ -71,12 +71,12 @@
 	/*----------  最外层element会自动增加组件同名 class="fs-editor-component"  ----------*/
 	<template>
 		<div class="editor-container">
-			<div class="editor-toolbar"></div>
+            <div class="editor-toolbar"></div>
             <div class="editor-content">
-				<div :id="id"></div>
-			</div>
-			<div id="statusBar"></div>
-		</div>
+                <div :id="id"></div>
+            </div>
+            <div id="statusBar"></div>
+        </div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -692,8 +692,8 @@
                         let rtn = fsHandler.callFsJScript([self.model.fs.parent, self.model.fs.name].join("/").replace(/\/script/g, ""), '');
                         eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, rtn);
                     }
-                    catch(error){
-                        eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, error);
+                    catch(err) {
+                        eventHub.$emit(`FS-EDITOR-RUN-EVENT-${self.bid}`, err);
 	                }
 	            }
 

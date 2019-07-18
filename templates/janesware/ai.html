@@ -35,6 +35,16 @@
         color: #333333;
     }
 
+    /* Split Style */
+	.gutter.gutter-horizontal{
+		background-color: rgb(241, 241, 241);
+		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+		background-size: 7px;
+		background-position-x: 50%;
+		background-position-y: 50%;
+		background-repeat: no-repeat;
+	}
+
     .el-menu.transition.ElMenu{
         border-right: unset;
     }
@@ -96,5 +106,12 @@
 <script src="{{AppSubUrl}}/web/js/handler/BaseLineHandler.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
+<script>
+    $(function(){
+        let mxAI = new AI();
+        mxAI.init();
+        mxAI.mount("#app");
+    })
+</script>
 
 {{template "base/footer" .}}

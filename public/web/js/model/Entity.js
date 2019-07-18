@@ -21,9 +21,14 @@ class Entity extends Matrix {
         
         this.app = null;
         this.detail = null;
+
+        this.URL_PARAMS_ITEM = null;
+        this.URL_PARAMS_CFG = null;
+        this.URL_PARAMS_GRAPH = null;
     }
 
     init() {
+        const inst = this;
 
         VueLoader.onloaded(["ai-robot-component",
                             "event-graph-component",
@@ -35,6 +40,72 @@ class Entity extends Matrix {
                             "probe-tree-component",
                             "vue-timeline-component"],function() {
             $(function() {
+
+                // 智能图谱
+                Vue.component("entity-view-graph",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object,
+                    },
+                    data(){
+                        return {
+                            rId: _.now(),
+                            topological: null
+                        }
+                    },
+                    template:`<div :id="'topological-app-' + id + '-' + rId"></div>`,
+                    watch: {
+                        model:{
+                            handler: function(val,oldVal){
+                                this.initData();
+                            },
+                            immediate:true
+                        }
+                    },
+                    methods: {
+                        initData(){
+                            
+                            // 从业务开始绘制图谱
+                            // 取出所有业务名称
+                            let bizs = `"${_.map(_.slice(this.model.rows,0,50),'id').join('","')}"`;
+                            
+                            try {
+                                
+                                if(!this.topological){
+                                    
+                                    this.topological = new Topological();
+                                    this.topological.init();
+                                    this.topological.graphScript = [
+                                        {value: `match (${bizs}) - [*1] -> (${bizs})`}
+                                    ];
+                                    
+                                    this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
+
+                                } else {
+                                    console.log(22)
+                                    this.topological.graphScript = [ {value: `match (${bizs}) - [*1] -> (${bizs})`} ];
+                                    this.topological.search(this.topological.graphScript[0].value);
+                                }
+
+                            } catch(err){
+                                
+                            } finally {
+                                _.delay(() => {
+                                    $("[id^='pane-graph']").css({
+                                        "height": "calc(100vh - 150px)",
+                                        "margin": "-15px"
+                                    })
+                                    this.topological.setStyle();
+                                },500)
+                            }
+                            
+                        }
+                    },
+                    destroyed() {
+                        this.topological.destroy();
+                    }
+                })
 
                 // 时间轴
                 Vue.component("event-timeline",{
@@ -191,7 +262,6 @@ class Entity extends Matrix {
                                         });
                                 })
                             });
-                            console.log(self.circles)
                         },
                         search(event){
                             this.$root.options.term = event;
@@ -223,11 +293,11 @@ class Entity extends Matrix {
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main>
-                                        <el-row :gutter="10">
+                                    <el-main style="padding:0px;">
+                                        <el-row type="flex" justify="center">
                                             <el-col :span="6">
                                                 <div class="grid-content" style="text-align:center;">
-                                                    <img :src="model.rows.class | pickIcon" class="image">
+                                                    <img :src="model.rows.class | pickIcon" class="image" style="width:120px;">
                                                     <p><h3>#{model.rows.host}#</h3></p>
                                                     <p>类型：#{model.rows.class}#</p>
                                                 </div>
@@ -236,7 +306,7 @@ class Entity extends Matrix {
                                                 <div class="grid-content">
                                                     <el-form label-width="100px">
                                                         <el-form-item :label="item.title" v-for="item in template" v-if="item.visible" style="height:50px;">
-                                                            <el-input type="text" v-model="rows[item.data]" :placeholder="item.data" v-if="item.type==='text'"></el-input>
+                                                            <el-input type="text" v-model="rows[item.data]" :placeholder="item.data" v-if="item.type==='text'" :disabled="item.disabled"></el-input>
                                                             <el-date-picker type="date" v-model="rows[item.data]" :placeholder="item.data" v-else-if="item.type==='datetime'"></el-date-picker>
                                                             <el-switch v-model="rows[item.data]" :placeholder="item.data" v-else-if="item.type==='switch'"></el-switch>
                                                         </el-form-item>
@@ -326,6 +396,7 @@ class Entity extends Matrix {
                         }
                     }
                 });
+
                 // 详情 管理信息
                 Vue.component("entity-diagnosis-manager",{
                     delimiters: ['#{', '}#'],
@@ -386,12 +457,20 @@ class Entity extends Matrix {
                     mounted(){
                     }
                 });
+
                 // 详情 实体信息
                 Vue.component("entity-diagnosis-config",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model:Object
+                    },
+                    data(){
+                        return {
+                            config: {},
+                            files: {},
+                            element: {}
+                        }
                     },
                     template: `<el-container style="height: calc(100vh - 230px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -400,7 +479,12 @@ class Entity extends Matrix {
                                         </el-tooltip>
                                     </el-header>
                                     <el-main>
-                                        <el-row :gutter="10">
+                                        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                                            <el-form-item label="活动名称" prop="name">
+                                                <el-input v-model="ruleForm.name"></el-input>
+                                            </el-form-item>
+                                        </el-form>
+                                        /* <el-row :gutter="10">
                                             <el-col :span="24">
                                                 <div class="grid-content">
                                                     <form class="form-horizontal">
@@ -421,7 +505,7 @@ class Entity extends Matrix {
                                                     </form>
                                                 </div>
                                             </el-col>
-                                        </el-row>
+                                        </el-row> */
                                     </el-main>
                                 </el-container>`,
                     filters:{
@@ -442,6 +526,9 @@ class Entity extends Matrix {
                                 return evt;
                             }
                         }
+                    },
+                    created(){
+
                     },
                     mounted(){
                     }
@@ -554,7 +641,6 @@ class Entity extends Matrix {
                     
                 });
                 
-
                 // 配置比对
                 Vue.component("entity-diagnosis-compare",{
                     delimiters: ['#{', '}#'],
@@ -674,7 +760,7 @@ class Entity extends Matrix {
                     
                 });
                 
-                maxEntity.app = {
+                let main = {
                     delimiters: ['${', '}'],
                     template: "#app-template",
                     data: {
@@ -696,13 +782,13 @@ class Entity extends Matrix {
                                 tabIndex: 1,
                                 activeIndex: 'entity-view-radar',
                                 tabs:[
-                                    {name: 'entity-view-radar', title:'雷达', type: 'radar'},
-                                    {name: 'entity-view-pie', title:'统计', type: 'pie'}
+                                    {name: 'entity-view-radar', title:'雷达', type: 'radar'}
                                 ]
                             }
                         },
                         control: {
                             ifSmart: '0',
+                            ifGraph: '0'
                         },
                         // 搜索组件结构
                         model: {
@@ -770,10 +856,53 @@ class Entity extends Matrix {
                         }
                     },
                     created(){
+                        try {
+                            if(mx.urlParams['cfg']){
+                                inst.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
+                            }
+
+                            if(mx.urlParams['item']){
+                                inst.URL_PARAMS_ITEM = window.URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
+                            }
+        
+                            if(mx.urlParams['data']) {
+                                inst.graphScript = [{value:decodeURIComponent(window.atob(mx.urlParams['data']))}];
+                            }
+                            
+                            let init = (function(){
+                    
+                                _.forEach(inst.URL_PARAMS_CFG,function(v,k){
+                    
+                                    if("false" == String(v)){
+                                        $(`#${k}`).hide();
+                                        $(".page-header-fixed").css({
+                                            "paddingTop": "0px"
+                                        })
+                                        $(".page-sidebar-minified .sidebar-bg").css({
+                                            "width": "0px"
+                                        })
+                                        $(".page-sidebar-minified .content").css({
+                                            "marginLeft": "0px"
+                                        })
+
+                                        $("body").css({
+                                            "background": "transparent"
+                                        })
+                                    }
+                                })
+                    
+                            })();
+                        } catch(err){
+                            inst.URL_PARAMS_ITEM = null;
+                            inst.URL_PARAMS_CFG = null;
+                            inst.graphScript = null;
+                            inst.URL_PARAMS_GRAPH = null;
+                        }
+
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT",maxEntity.resizeEventConsole);
+                        eventHub.$on("WINDOW-RESIZE-EVENT",this.resizeEventConsole);
                     },
                     mounted(){
                         $(this.$el).addClass('view-normal');
@@ -788,6 +917,16 @@ class Entity extends Matrix {
                         _.delay(function(){
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
+
+                            Split(['#entity-view-left', '#entity-view-main'], {
+                                sizes: [25, 75],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true
+                            });
                         },2000);
                         
                     },
@@ -811,6 +950,31 @@ class Entity extends Matrix {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
+                        toggleSummaryByGraph(evt){
+                            if(evt==1) {
+                                this.aiGraph();
+                                $("#entity-view-graph").css("height","200px").css("display","");
+                            } else {
+                                $("#entity-view-graph").css("height","0px").css("display","none");
+
+                                //关闭智能分组
+                                try {
+                                    let id = _.find(this.layout.main.tabs,{type:'graph'}).name;
+                                    if(id){
+                                        this.detailRemove(id);
+                                    }
+                                } catch(err){
+
+                                }
+                            }
+                            this.control.ifGraph = evt;
+                            
+                            // RESIZE Event Summary
+                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // RESIZE Event Console
+                            
+                            this.resizeEventConsole();
+                        },
                         toggleSummaryBySmart(evt){
                             if(evt==1) {
                                 $("#entity-view-summary").css("height","200px").css("display","");
@@ -822,7 +986,21 @@ class Entity extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
-                            maxEntity.resizeEventConsole();
+                            this.resizeEventConsole();
+                        },
+                        aiGraph(){
+                            try {
+                                let id = _.now();
+                                
+                                // 添加tab
+                                let graph = {title:`实体图谱`, name:`graph-${id}`, type: 'graph', child:[]};
+                                
+                                this.layout.main.tabs.push(graph);
+                                this.layout.main.activeIndex = `graph-${id}`;
+                                
+                            } catch(error){
+                                this.layout.main.tabs = [];
+                            }
                         },
                         detailAdd(event){
                             try {
@@ -853,53 +1031,149 @@ class Entity extends Matrix {
                             }
                         },
                         detailRemove(targetName) {
-                            let tabs = this.layout.main.tabs;
-                            let activeIndex = this.layout.main.activeIndex;
-                            if (activeIndex === targetName) {
-                              tabs.forEach((tab, index) => {
-                                if (tab.name === targetName) {
-                                  let nextTab = tabs[index + 1] || tabs[index - 1];
-                                  if (nextTab) {
-                                    activeIndex = nextTab.name;
-                                  }
+                            try{
+                                let tabs = this.layout.main.tabs;
+                                let activeIndex = this.layout.main.activeIndex;
+                                if (activeIndex === targetName) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeIndex = nextTab.name;
+                                    }
+                                    }
+                                });
                                 }
-                              });
-                            }
-                            
-                            this.layout.main.activeIndex = activeIndex;
-                            this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                                
+                                this.layout.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                                this.layout.main.activeIndex = activeIndex;
+                                this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
 
+                            } catch(err){
+
+                            } finally {
+                                // Graph
+                                if(_.includes(targetName,'graph')){
+                                    this.control.ifGraph = '0';
+                                }
+                            }
+                        },
+                        toggleTab(targetName){
+                            this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
+                        },
+                        contextMenu(tId,inst,items,fun){
+                            const self = this;
+
+                            $.contextMenu({
+                                selector: `#${tId} tr td:not(:nth-child(1))`,
+                                trigger: 'right',
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${tId} context-menu-list`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.detailAdd(inst.mouseOverSelectedRows);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                if(action == 'update'){
+                                                    self.detailAdd(inst.mouseOverSelectedRows);
+                                                } else if(action == 'delete'){
+                                                    self.entityDelete({list: [inst.mouseOverSelectedRows], action:action});
+                                                }
+                                                
+                                            }
+                                        },
+                                        items: items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                    
+                                        let $this = this;
+                                        _.delay(function(){
+                                            new Vue(mx.tagInput(`${tId}_single_tags`, `.${tId} input`, inst.selectedRows, fun));
+                                        },50)
+                                    },
+                                    hide: function(opt) {
+                    
+                                        let $this = this;
+                    
+                                    }
+                                }
+                            });
+                        },
+                        resizeEventConsole(){
+                            let evwH = $(window).height();
+                            let evcH = $("#entity-view-container").height();
+                            let evsH = $("#entity-view-summary").height();
+                            
+                            $("#entity-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+                                                                            .css("max-height","-=225px")
+                                                                            .css("max-height","-=" + evsH + "px")
+                                                                            .css("min-height", evwH + "px")
+                                                                            .css("min-height","-=225px")
+                                                                            .css("min-height","-=" + evsH + "px");
+                        },
+                        entityDelete(item){
+                            const self = this;
+                            let ids = _.map(item.list,'id').join("<br><br>");
+                            
+                            alertify.confirm(`确认要删除以下实体，请确认！<br><br>
+                                                删除实体数量：${item.list.length}<br><br>
+                                                实体ID：<br><br>${ids}`, function (e) {
+                                
+                                if (e) {
+                                    _.extend(item, {list:_.map(item.list,'id')});
+                                    
+                                    let rtn = fsHandler.callFsJScript("/entity/action.js",encodeURIComponent(JSON.stringify(item))).status;
+                                    
+                                    if(rtn == 'ok'){
+                                        alertify.success(`实体${ids}删除成功！`);
+                                        // 更新页面
+                                        self.$refs.searchRef.search();
+                                    }
+                                } else {
+                                    
+                                }
+
+                            });
+
+                            $(".alertify-confirm .alertify-header i").addClass("fas fa-sync-alt fa-spin").css({
+                                "color":"#ffffff",
+                                "fontSize": "14px"
+                            });
+                            
                         }
                     }
                 };
-                new Vue(maxEntity.app).$mount("#app");    
+                
+                this.app = new Vue(main).$mount("#app");    
             });
         })
 
         window.addEventListener('resize', () => { 
-            maxEntity.resizeEventConsole();
-
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
+            
+            let evwH = $(window).height();
+            let evcH = $("#entity-view-container").height();
+            let evsH = $("#entity-view-summary").height();
+            
+            $("#entity-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+                                                            .css("max-height","-=225px")
+                                                            .css("max-height","-=" + evsH + "px")
+                                                            .css("min-height", evwH + "px")
+                                                            .css("min-height","-=225px")
+                                                            .css("min-height","-=" + evsH + "px");
         })
 
         
     }
 
-    resizeEventConsole(){
-        let evwH = $(window).height();
-        let evcH = $("#entity-view-container").height();
-        let evsH = $("#entity-view-summary").height();
-        
-        $("#entity-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=260px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("min-height", evwH + "px")
-                                                        .css("min-height","-=260px")
-                                                        .css("min-height","-=" + evsH + "px");
-    }
-
 }
-
-let maxEntity = new Entity();
-maxEntity.init();
