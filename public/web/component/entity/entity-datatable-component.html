@@ -381,7 +381,7 @@
 
                 table.on('mouseenter','tr',function(e) {
                     self.mouseOverSelectedRows = table.row( this ).data();
-                    console.log(4,self.mouseOverSelectedRows)
+                    
                     $(`#${self.id} tbody tr`).removeClass("selected-highlight");
                     $(this).addClass("selected-highlight");
                 })
@@ -541,9 +541,8 @@
                                             </a>
                                         </el-tooltip>
                                         <el-tooltip content="导入实体">
-                                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" style="padding: 8px 5px 6px 2px;">
+                                            <a href="javascript:void(0);" class="btn btn-link fileinput-button" style="padding: 8px 5px 6px 2px;" @click="importIt">
                                                 <i class="fas fa-cloud-upload-alt" style=""></i>
-                                                <input type="file" name="loadfile" multiple @change="importIt">
                                             </a>
                                         </el-tooltip>
                                     </div>`,
@@ -554,7 +553,7 @@
                                 if (event.target.matches('.entity-refresh')) {
                                     self.$root.$refs.searchRef.search();
                                 } else if (event.target.matches('.template-download')) {
-                                    omdbHandler.classTemplateExportToExcel('/matrix/entity');    
+                                    me.exportIt();
                                 } else if (event.target.matches('.entity-delete')) {
                                     if(_.isEmpty(self.selectedRows)){
                                         alertify.log("请选择删除实体！");
@@ -564,11 +563,78 @@
                                     self.$root.entityDelete({list:self.selectedRows,action:'delete'});
                                 }
                             },
-                            importIt(event){
+                            exportIt(){
+                                const me = this;
+                                let wnd = null;
+
+                                try{
+                                    if(jsPanel.activePanels.getPanel('jsPanel-entity-template')){
+                                        jsPanel.activePanels.getPanel('jsPanel-entity-template').close();
+                                    }
+                                } catch(error){
+
+                                }
+                                finally{
+                                    wnd = maxWindow.winEntityTemplate('导出实体模板', `<div id="entity-template-export"></div>`, null, null, null);
+                                }
+
+                                new Vue({
+                                    data:{
+                                        classList: fsHandler.callFsJScript("/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
+                                        defaultProps: {
+                                            children: 'children',
+                                            label: 'alias'
+                                        },
+                                        model: {
+                                            ifData: false, 
+                                            limit: 0,
+                                            recursive: true,
+                                            filetype: 'xlsx',
+                                            template: true,
+                                            class: '/matrix/entity'
+                                        }
+                                    },
+                                    template: `<el-container style="height:100%;">
+                                                    <el-header style="height:40px;line-height:40px;">
+                                                        <el-switch v-model="model.ifData" active-text="导出样例数据"></el-switch>
+                                                    </el-header>
+                                                    <el-main style="padding:10px;background-color:#f7f7f7;">
+                                                        <el-tree
+                                                            :data="classList"
+                                                            show-checkbox
+                                                            node-key="id"
+                                                            :default-expanded-keys="[_.first(classList).id]"
+                                                            :default-checked-keys="[]"
+                                                            :props="defaultProps"
+                                                            style="background-color:transparent;">
+                                                        </el-tree>
+                                                    </el-main>
+                                                    <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                        <el-button type="default" @click="onCancel">取消</el-button>
+                                                        <el-button type="primary" @click="onExport">导出</el-button>
+                                                    </el-footer>
+                                                </el-container>`,
+                                    methods:{
+                                        onCancel(){
+                                            wnd.close();
+                                        },
+                                        onExport(){
+                                            if(this.model.ifData){
+                                                this.model.limit = -1;
+                                            } else {
+                                                this.model.limit = 0;
+                                            }
+                                            omdbHandler.classTemplateExportToExcel(this.model);
+                                        }
+                                    }
+                                }).$mount("#entity-template-export");
                                 
-                                let file = event.target.files[0];
-                    
-                                alertify.confirm(`确认要导入 ${file.name} 实体文件，导入后将覆盖原有实体信息，请确认！<br><br>
+                            },
+                            importIt(){
+                                
+                                self.$root.entityDataImport();
+                                
+                                /* alertify.confirm(`确认要导入 ${file.name} 实体文件，导入后将覆盖原有实体信息，请确认！<br><br>
                                                     文件名称：${file.name}<br><br>
                                                     修改时间：${file.lastModifiedDate}<br><br>
                                                     文件大小：${mx.bytesToSize(file.size)}`, function (e) {
@@ -595,12 +661,12 @@
 
                                     event.target.value = null;
                 
-                                });
+                                }); */
 
-                                $(".fas.fa-exclamation-circle").css({
+                                /* $(".fas.fa-exclamation-circle").css({
                                     "color":"#31c8f1",
                                     "fontSize":"14px"
-                                }).addClass("fa-spin")
+                                }).addClass("fa-spin") */
                             }
 
                         }

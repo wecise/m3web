@@ -388,6 +388,64 @@ class Window {
         return win;
     }
 
+    winFileAction(title, template, position, container){
+
+        let _position = "center 0 0";
+
+        this.lrwh[2] = this.width * 0.35;
+        this.lrwh[3] = this.height * 0.47;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-fileAction',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            maximizedMargin: [100, 100, 100, 100],
+            container: 'body',
+            headerControls: { maximize: 'remove',minimize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            draggable: {
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
+                opacity: 0.8
+            },
+            dragit: {
+                drag: function (panel, position) {
+                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
+                }
+            },
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "10000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    // "border": "1px solid rgb(221, 221, 221)",
+                    // "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    // "border": "1px solid #dddddd",
+                    "border-top": "none"
+                });
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
     winRobot(title, template, position, container){
 
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
@@ -558,18 +616,108 @@ class Window {
         return win;
     }
 
-    winGraphAction(title, template, position, container){
-
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-GRAPH-POSITION")));
-
-        let _position = "center 0 0";
-
-        if(!_.isEmpty(_tmp)){
-            _position = _tmp;
-        }
+    winEntityTemplate(title, template, position, container){
 
         this.lrwh[2] = this.width * 0.4;
-        this.lrwh[3] = this.height * 0.3;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-entity-template',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: "center 0 0",
+            container: 'body',
+            headerControls: { maximize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winClassTemplate(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[3] = this.height * 0.6;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-class-template',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: "center 0 0",
+            container: 'body',
+            headerControls: { maximize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winGraphAction(title, template, position, container){
+
+        let _position = {
+                            my: "left-top",
+                            at: "left-top",
+                            of: container
+                        };
+
+        this.lrwh[2] = "30em";//this.width * 0.2;
+        this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
             id: 'jsPanel-graphAction',
@@ -577,20 +725,11 @@ class Window {
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
-            container: 'body',
             headerControls: { maximize: 'remove' },
-            headerRemove:  false,
+            headerRemove:  true,
             content:        template,
-            draggable: {
-                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
-                opacity: 0.8
-            },
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-GRAPH-POSITION",JSON.stringify(position));
-                }
-            },
-            callback: function(){
+            callback: function(panel){
+
                 $(".jsPanel").css({
                     "position":"absoulate",
                     "z-index": "1000"
@@ -613,9 +752,13 @@ class Window {
                     "font-size": "12px"
                 });
 
+                $(".jsPanel-ftr a",this).click(function(){
+                    win.close();
+                })
+
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div style="width:100%;text-align:center;"><a href="javascript:void(0);" class="el-button el-button--small el-button-default">关闭</a></div>`;
             }
         });
 

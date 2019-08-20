@@ -105,497 +105,6 @@ class Omdb{
     init() {
         const odb = this;
 
-        //function(id, bid, template, model)
-        Vue.component("omdb-log-console",{
-            delimiters: ['#{', '}#'],
-            props:{
-                id: String,
-                model: Array
-            },
-            template:   `<div :class="'log-console '+ theme">
-                            <div class="logToolBar">
-                                <div class="btn-group" role="group" aria-label="...">
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题" data-tooltip="tooltip"><i class="fas fa-sun"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fa fa-copy"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary debug" @click="debugIt" title="调试" data-tooltip="tooltip"><i class="fa fa-desktop"></i></a>
-                                </div>
-                            </div>
-                            <div contenteditable="true" :class="'log-console-content '+ theme" v-if="!_.isEmpty(model)">
-                                <p v-for="item in model"> [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>] <span v-if="_.isEmpty(item[2].content)">#{item[2].short}#</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">#{item[2].short}#</a><span class="collapse animated fadeInUp" :id="item[2].id">#{item[2].content}#</span></span>
-                                </p>
-                            </div>
-                        </div>`,
-            data(){
-                return {
-                    theme: 'light',
-                    debug: {
-                        mql: [],
-                        flag: [],
-                        crontab: {
-                            sched: '30 second',
-                            timer: null
-                        }
-                    }
-                }
-            },
-            watch: {
-                'debug.mql': {
-                    handler: function(val,oldVal){
-                        const self = this;
-
-                        if(val !== oldVal){
-                            self.debugIt(val);
-                        }
-
-                        if(_.isEmpty(val)){
-                            self.debug.crontab.sched = null;
-                            self.debug.crontab.timer = null;
-                        } else {
-                            self.debug.crontab.sched = later.parse.text(`every ${self.debug.crontab.sched}`);
-                            self.debug.crontab.timer = later.setInterval(self.refresh, self.debug.crontab.sched);
-                        }
-                    },
-                    deep:true
-                }
-            },
-            created: function(){
-                const self = this;
-
-                eventHub.$on("LOG-CONSOLE-APPEND-EVENT", self.append);
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-                    self.init();
-                    self.initPlugin();
-                })
-            },
-            filters: {
-                format: function(value){
-                    return value.join('\n\n');
-                }
-            },
-            methods: {
-                init: function(){
-                    const self = this;
-
-                    self.model.push(self.log('info','加载完成'));
-
-                    self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
-
-                },
-                initPlugin: function(){
-                    const self = this;
-
-                    $(self.$el).contextMenu({
-                        selector: 'a.debug',
-                        trigger: 'left',
-                        build: function($trigger, e) {
-
-                            $(".context-menu-input-refresh").eq(3).prop('selected', true);
-
-                            let _items = {
-                                "trigger": {
-                                    name: "调式触发器", type: "checkbox", selected: false
-                                },
-                                "scriptjs": {
-                                    name: "调式脚本", type: "checkbox", selected: false
-                                },
-                                "itil": {
-                                    name: "调式流程", type: "checkbox", selected: false
-                                },
-                                "rule": {
-                                    name: "调式规则", type: "checkbox", selected: false
-                                },
-                                "webcontext": {
-                                    name: "调式缓存", type: "checkbox", selected: false
-                                },
-                                "scriptlua": {
-                                    name: "调式脚本Lua", type: "checkbox", selected: false
-                                },
-                                "refresh": {
-                                    name: "刷新时间",
-                                    type: 'select',
-                                    options: {1: '5 second', 2: '15 second', 3: '30 second', 4: '1 mins'},
-                                    selected: 3,
-                                    events: {
-                                        change: function (e) {
-                                            self.debug.crontab.sched = e.target.options[e.target.selectedIndex].label;
-                                        }
-                                    }
-                                }
-                            };
-
-                            if(!_.isEmpty(self.debug.flag)){
-                                _.forEach(self.debug.flag,function(v,k){
-                                    _items[v].selected = true;
-                                })
-                            }
-
-                            return {
-                                items: _items
-                            }
-                        },
-                        events: {
-                            show: function(opt) {
-                                let $this = this;
-
-                                $.contextMenu.setInputValues(opt, $this.data());
-
-                            },
-                            hide: function(opt) {
-                                let $this = this;
-
-                                $.contextMenu.getInputValues(opt, $this.data());
-
-                                self.debugs($this.data());
-
-
-                            }
-                        }
-                    });
-                },
-                refresh: function(){
-                    const self = this;
-
-                    self.debugIt(self.debug.mql);
-                },
-                debugs: function(key){
-                    const self = this;
-
-                    self.debug.mql = [];
-                    self.debug.flag = [];
-
-                    _.forEach(key, function(v,k){
-                        if(k !== 'contextMenu' && v != false){
-                            self.debug.mql.push(`#/matrix/consolelog/${k}: | nearest 1 day | sort ctime desc`);
-                            self.debug.flag.push(k);
-                        }
-                    });
-
-                },
-                append: function(level, event){
-                    const self = this;
-                    let _log = null;
-
-                    _log = self.log(level, event);
-
-                    self.model.unshift(_log);
-
-                    // $(".log-console-content").scrollTop(function() { return this.scrollHeight; });
-
-                },
-                log: function(level, event){
-                    const self = this;
-                    let _content = event;
-
-                    if(typeof(event) === 'object'){
-                        _content = JSON.stringify(event);
-                    }
-
-                    let _short = _.truncate(_content, {
-                        'length': 130,
-                        'separator': ' ',
-                        'omission': ''
-                    });
-
-                    let _id = objectHash.sha1(level + _content + _.now());
-
-                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
-                },
-                copyIt: function(event){
-                    const self = this;
-
-                    new Clipboard(".copy", {
-                        text: function(trigger) {
-                            alertify.log("已复制");
-                            let _rtn = _.map(self.model,function(v){
-                                return [v[0],v[1],v[2].short + v[2].content];
-                            });
-                            return _rtn.join("\n");
-                        }
-                    });
-
-                },
-                clearIt: function(){
-                    const self = this;
-
-                    self.model = [];
-
-                },
-                debugIt: function(event){
-                    const self = this;
-
-                    _.forEach(event,function(v){
-                        let _list = omdbHandler.fetchData(v);
-
-                        _.forEach(_list.message,function(v){
-
-                            let _content = `[${v.name}] [${v.class}] ${v.msg}`;
-
-                            let _short = _.truncate(_content, {
-                                'length': 130,
-                                'separator': ' ',
-                                'omission': ''
-                            });
-
-                            let _id = objectHash.sha1(v.level + _content + _.now());
-
-                            let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(v.level), {id:_id, short: _short, content: _content.replace(_short,'')}];
-
-                            self.model.unshift(_log);
-                        })
-                    })
-
-                },
-                toggleTheme: function(){
-                    const self = this;
-
-                    if(self.theme === 'light') {
-
-                        $(self.$el).removeClass("light");
-                        $(self.$el).addClass("dark");
-
-                        $(self.$el).find(".light").addClass("dark");
-                        $(self.$el).find(".light").removeClass("light");
-
-                        self.theme = 'dark';
-
-                    } else {
-
-                        $(self.$el).removeClass("dark");
-                        $(self.$el).addClass("light");
-
-                        $(self.$el).find(".dark").addClass("light");
-                        $(self.$el).find(".dark").removeClass("dark");
-
-                        self.theme = 'light';
-                    }
-
-                    localStorage.setItem("LOG-CONSOLE-THEME", self.theme);
-
-                }
-            }
-            
-        })
-
-        Vue.component("omdb-query-console",{
-            delimiters: ['${', '}'],
-            props: {
-                id: String,
-                node: Object
-            },
-            template: `<el-container style="height:calc(100vh - 110px);">
-                            <el-header :id="id+'-header'" style="padding:0px;">
-                                <omdb-editor-component :id="id" :bid="id"
-                                :model="model"
-                                showToolsBar="true"
-                                showStatusBar="true"></omdb-editor-component>
-                            </el-header>
-                            <el-main :id="id+'-main'" style="padding:0px;">
-                                <el-tabs v-model="main.activeIndex" type="border-card">
-                                    <el-tab-pane
-                                        :key="item.name"
-                                        v-for="(item, index) in main.tabs"
-                                        :label="item.title"
-                                        :name="item.name">
-                                        <omdb-log-console :id="id+'-log-'+item.name" :node="item.model"></omdb-log-console>
-                                    </el-tab-pane>
-                                </el-tabs>
-                            </el-main>
-                        </el-container>`,
-            data(){
-                return {
-                    main: {
-                        tabs: [
-                                {title: '日志', name: `log`, type: 'omdb-log-console', model: {node:null, pnode:null, pattern: null}}
-                            ],
-                        activeIndex: 'log'
-                    },
-                    model: {
-                        oldInput: "",
-                        newInput: "",
-                        mode: "mql",
-                        theme: "tomorrow",
-                        printMargin: false,
-                        readOnly: false,
-                    },
-                    keys: []
-                }
-            },
-            created: function(){
-                const self = this;
-
-                let _diff = null;
-
-                if(!_.isEmpty(self.node.pnode)){
-                    if(self.node.node.fieldsObj && self.node.pnode.fieldsObj) {
-                        _diff = _.differenceBy(self.node.node.fieldsObj, self.node.pnode.fieldsObj, 'name');
-                        self.node.node["fieldsObj"] = _.uniqBy(_diff,'name');
-                    }
-                }
-
-                if(self.node.pattern === 'ddl') {
-                    self.model.readOnly = true;
-                }
-
-                self.initKeys();
-            },
-            mounted: function () {
-                const self = this;
-
-                self.$nextTick(function () {
-                    self.init();
-                })
-            },
-            methods: {
-                init: function(){
-                    const self = this;
-
-                    /* layout */
-                    Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
-                        sizes: [60, 40],
-                        minSize: [0, 0],
-                        gutterSize: 5,
-                        cursor: 'col-resize',
-                        direction: 'vertical',
-                    });
-
-                    if(_.isEmpty(self.node.node)) return false;
-
-                    let colms = _.without(self.node.node.fields,"_tokens") || self.node.node.fields;
-
-                    let cls = "";
-                    if(_.isEmpty(colms)){
-                        cls = "*";
-                    } else {
-                        cls = colms.join(",");
-                    }
-                    let mql = "";
-
-                    if(self.node.pattern === 'data') {
-                        mql = `SELECT\n\t ${cls} \nFROM\n\t ${self.node.node.name} limit 50`;
-                    } else if(self.node.pattern === 'select') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.node.node.name;
-                    } else if(self.node.pattern === 'select-edge') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.node.node.name.split("[")[0];
-                    } else if(self.node.pattern === 'insert') {
-                        mql = "INSERT INTO " + self.node.node.name + "\n" + _.map(self.node.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
-                    } else if(self.node.pattern === 'update') {
-                        mql = "UPDATE " + self.node.node.name + "\nSET " + _.map(self.node.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
-                    } else if(self.node.pattern === 'delete') {
-                        mql = "DELETE FROM\n\t " + self.node.node.name;
-                    } else if(self.node.pattern === 'ddl') {
-
-                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.node.node.name + " (\n\t" + _.map(self.node.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.node.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.node.node.keys.join(",") + ")\n);";
-
-                        _.forEach(self.keys,function(v){
-
-                            if(_.includes(v,'time')) {
-                                mql += `\n\n#${_.startCase(v)}\n${v}=${moment(self.node.node[v]).format("LLL")}`;
-                                return;
-                            }
-
-                            let _value = self.node.node[v];
-
-                            if(_value === 1){
-                                _value = true;
-                            } else if(_value === 0){
-                                _value = false;
-                            }
-
-                            if(v === 'keymethod'){
-                                if(_value === 1){
-                                    _value = 'uuid';
-                                } else {
-                                    _value = 'md5';
-                                }
-                            }
-
-                            mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
-                        })
-
-                    } else if(self.node.pattern === 'create-class') {
-                        let _rand = _.now();
-                        mql = `CREATE CLASS IF NOT EXISTS  ${self.node.node.name}/new_${_rand}();`;
-                        mql = _.replace(mql, "//", "/");
-                    } else if(self.node.pattern === 'drop-class') {
-                        mql = "DROP CLASS IF NOT EXISTS " + self.node.node.name + ";";
-                    } else if(self.node.pattern === 'alter') {
-                        mql = `#设置类属性`;
-
-                        let _keys = _.remove(self.keys, function(v){
-                            return !_.includes(['cid','pid','fields','keys','mtime','fieldsObj','child', 'loption', 'subclass','vtimebase','tags', 'name'],v)
-                        })
-
-                        _.forEach(_keys,function(v){
-                            let _value = self.node.node[v];
-
-                            if(_value === 1){
-                                _value = true;
-                            } else if(_value === 0){
-                                _value = false;
-                            }
-
-                            if(v === 'keymethod'){
-                                if(_value === 1){
-                                    _value = 'uuid';
-                                } else {
-                                    _value = 'md5';
-                                }
-                            }
-
-                            if(_.includes(['alias','keymethod','remedy'],v)){
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.node.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
-                            } else {
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.node.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
-                            }
-                        })
-                    } else if(self.node.pattern === 'alter-add-column') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD COLUMN column_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-column') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP COLUMN column_name;\n\n";
-                    } else if(self.node.pattern === 'alter-add-index') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD INDEX index_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-index') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP INDEX index_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-add-key') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD KEY key_name;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-key') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP KEY key_name;\n\n";
-                    } else if(self.node.pattern === 'g') {  // edge  query
-                        mql = `g.V(" ").In("${self.node.node.title}").All();`;
-                    } else if(self.node.pattern === 'create-edge-type') {  // edge  new edge type
-                        mql = `CREATE EDGE TYPE  type_name 'type_remedy';`;
-                    } else if(self.node.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE ${self.node.node.title};`;
-                    } else if(self.node.pattern === 'edge-insert') {  // edge  create
-                        mql = `INSERT INTO class_name id="",${self.node.node.title}=[""];`;
-                    } else if(self.node.pattern === 'edge-update') {  // edge  update
-                        mql = `UPDATE class_name SET ${self.node.node.title}='' WHERE ID='';`;
-                    } else if(self.node.pattern === 'edge-g') {  // edge query all
-                        mql = GLOBAL_CONFIG.global.gremlin;
-                    }
-
-                    self.model.newInput = mql;
-                },
-                initKeys: function(){
-                    const self = this;
-
-                    let rtn = omdbHandler.classList(-1)[0];
-                    console.log(rtn, _.sortBy(_.keys(rtn)))
-                    self.keys = _.sortBy(_.keys(rtn));
-                },
-                dropClass: function(){
-                    const self = this;
-
-
-                }
-            }
-        })
-
         VueLoader.onloaded([
             "omdb-path-datatables-component",
             "omdb-output-datatables-component",
@@ -756,7 +265,189 @@ class Omdb{
                 };
             };
 
-            
+            let queryConsole = function(id, bid, template, event){
+
+                let _readOnly = false;
+                let _diff = null;
+
+                if(!_.isEmpty(event.model.pnode)){
+                    if(event.model.node.fieldsObj && event.model.pnode.fieldsObj) {
+                        _diff = _.differenceBy(event.model.node.fieldsObj, event.model.pnode.fieldsObj, 'name');
+                        event.model.node["fieldsObj"] = _.uniqBy(_diff,'name');
+                    }
+                }
+
+                if(event.model.pattern === 'ddl') {
+                    _readOnly = true;
+                }
+
+                return {
+
+                    delimiters: ['${', '}'],
+                    el: '#' + id,
+                    template: `#query-console-template`,
+                    data: {
+                        id: id,
+                        bid: bid,
+                        model: {
+                            oldInput: "",
+                            newInput: "",
+                            mode: "mql",
+                            theme: "tomorrow",
+                            printMargin: false,
+                            readOnly: _readOnly,
+                        },
+                        keys: []
+                    },
+                    created: function(){
+                        const self = this;
+
+                        self.initKeys();
+                    },
+                    mounted: function () {
+                        const self = this;
+
+                        self.$nextTick(function () {
+                            self.init();
+                        })
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+
+                            if(_.isEmpty(event.model.node)) return false;
+
+                            let colms = _.without(event.model.node.fields,"_tokens") || event.model.node.fields;
+
+                            let cls = "";
+                            if(_.isEmpty(colms)){
+                                cls = "*";
+                            } else {
+                                cls = colms.join(",");
+                            }
+                            let mql = "";
+
+                            if(event.model.pattern === 'data') {
+                                mql = `SELECT\n\t ${cls} \nFROM\n\t ${event.model.node.name} limit 50`;
+                            } else if(event.model.pattern === 'select') {
+                                mql = "SELECT\n\t " + cls + "\nFROM\n\t " + event.model.node.name;
+                            } else if(event.model.pattern === 'select-edge') {
+                                mql = "SELECT\n\t " + cls + "\nFROM\n\t " + event.model.node.name.split("[")[0];
+                            } else if(event.model.pattern === 'insert') {
+                                mql = "INSERT INTO " + event.model.node.name + "\n" + _.map(event.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
+                            } else if(event.model.pattern === 'update') {
+                                mql = "UPDATE " + event.model.node.name + "\nSET " + _.map(event.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
+                            } else if(event.model.pattern === 'delete') {
+                                mql = "DELETE FROM\n\t " + event.model.node.name;
+                            } else if(event.model.pattern === 'ddl') {
+
+                                mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + event.model.node.name + " (\n\t" + _.map(event.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(event.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + event.model.node.keys.join(",") + ")\n);";
+
+                                _.forEach(self.keys,function(v){
+
+                                    if(_.includes(v,'time')) {
+                                        mql += `\n\n#${_.startCase(v)}\n${v}=${moment(event.model.node[v]).format("LLL")}`;
+                                        return;
+                                    }
+
+                                    let _value = event.model.node[v];
+
+                                    if(_value === 1){
+                                        _value = true;
+                                    } else if(_value === 0){
+                                        _value = false;
+                                    }
+
+                                    if(v === 'keymethod'){
+                                        if(_value === 1){
+                                            _value = 'uuid';
+                                        } else {
+                                            _value = 'md5';
+                                        }
+                                    }
+
+                                    mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                })
+
+                            } else if(event.model.pattern === 'create-class') {
+                                let _rand = _.now();
+                                mql = `CREATE CLASS IF NOT EXISTS  ${event.model.node.name}/new_${_rand}();`;
+                                mql = _.replace(mql, "//", "/");
+                            } else if(event.model.pattern === 'drop-class') {
+                                mql = "DROP CLASS IF NOT EXISTS " + event.model.node.name + ";";
+                            } else if(event.model.pattern === 'alter') {
+                                mql = `#设置类属性`;
+
+                                let _keys = _.remove(self.keys, function(v){
+                                    return !_.includes(['cid','pid','fields','keys','mtime','fieldsObj','child', 'loption', 'subclass','vtimebase','tags', 'name'],v)
+                                })
+
+                                _.forEach(_keys,function(v){
+                                    let _value = event.model.node[v];
+
+                                    if(_value === 1){
+                                        _value = true;
+                                    } else if(_value === 0){
+                                        _value = false;
+                                    }
+
+                                    if(v === 'keymethod'){
+                                        if(_value === 1){
+                                            _value = 'uuid';
+                                        } else {
+                                            _value = 'md5';
+                                        }
+                                    }
+
+                                    if(_.includes(['alias','keymethod','remedy'],v)){
+                                        mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${event.model.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                    } else {
+                                        mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${event.model.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                    }
+                                })
+                            } else if(event.model.pattern === 'alter-add-column') {
+                                mql = "ALTER CLASS " + event.model.node.name + " ADD COLUMN column_name type;\n\n";
+                            } else if(event.model.pattern === 'alter-drop-column') {
+                                mql = "ALTER CLASS " + event.model.node.name + " DROP COLUMN column_name;\n\n";
+                            } else if(event.model.pattern === 'alter-add-index') {
+                                mql = "ALTER CLASS " + event.model.node.name + " ADD INDEX index_name type;\n\n";
+                            } else if(event.model.pattern === 'alter-drop-index') {
+                                mql = "ALTER CLASS " + event.model.node.name + " DROP INDEX index_name type;\n\n";
+                            } else if(event.model.pattern === 'alter-add-key') {
+                                mql = "ALTER CLASS " + event.model.node.name + " ADD KEY key_name;\n\n";
+                            } else if(event.model.pattern === 'alter-drop-key') {
+                                mql = "ALTER CLASS " + event.model.node.name + " DROP KEY key_name;\n\n";
+                            } else if(event.model.pattern === 'g') {  // edge  query
+                                mql = `g.V(" ").In("${event.model.node.title}").All();`;
+                            } else if(event.model.pattern === 'create-edge-type') {  // edge  new edge type
+                                mql = `CREATE EDGE TYPE  type_name 'type_remedy';`;
+                            } else if(event.model.pattern === 'drop-edge-type') {  // edge drop edge type
+                                mql = `DROP EDGE TYPE ${event.model.node.title};`;
+                            } else if(event.model.pattern === 'edge-insert') {  // edge  create
+                                mql = `INSERT INTO class_name id="",${event.model.node.title}=[""];`;
+                            } else if(event.model.pattern === 'edge-update') {  // edge  update
+                                mql = `UPDATE class_name SET ${event.model.node.title}='' WHERE ID='';`;
+                            } else if(event.model.pattern === 'edge-g') {  // edge query all
+                                mql = GLOBAL_CONFIG.global.gremlin;
+                            }
+
+                            self.model.newInput = mql;
+                        },
+                        initKeys: function(){
+                            const self = this;
+
+                            let rtn = omdbHandler.classList(-1)[0];
+                            console.log(rtn, _.sortBy(_.keys(rtn)))
+                            self.keys = _.sortBy(_.keys(rtn));
+                        },
+                        dropClass: function(){
+                            const self = this;
+
+
+                        }
+                    }
+                };
+            };
 
             let outPutByJson = function(id, bid, json){
 
@@ -956,7 +647,268 @@ class Omdb{
                 };
             };
 
-            
+            let logConsole = function(id, bid, template, model){
+
+                return {
+
+                    delimiters: ['${', '}'],
+                    el: '#' + id,
+                    template: `#${template}-template`,
+                    data: {
+                        id: id,
+                        bid: bid,
+                        model: [],
+                        theme: 'light',
+                        debug: {
+                            mql: [],
+                            flag: [],
+                            crontab: {
+                                sched: '30 second',
+                                timer: null
+                            }
+                        }
+                    },
+                    watch: {
+                        'debug.mql': {
+                            handler: function(val,oldVal){
+                                const self = this;
+
+                                if(val !== oldVal){
+                                    self.debugIt(val);
+                                }
+
+                                if(_.isEmpty(val)){
+                                    self.debug.crontab.sched = null;
+                                    self.debug.crontab.timer = null;
+                                } else {
+                                    self.debug.crontab.sched = later.parse.text(`every ${self.debug.crontab.sched}`);
+                                    self.debug.crontab.timer = later.setInterval(self.refresh, self.debug.crontab.sched);
+                                }
+                            },
+                            deep:true
+                        }
+                    },
+                    created: function(){
+                        const self = this;
+
+                        eventHub.$on("LOG-CONSOLE-APPEND-EVENT", self.append);
+                    },
+                    mounted: function () {
+                        const self = this;
+
+                        self.$nextTick(function () {
+                            self.init();
+                            self.initPlugin();
+                        })
+                    },
+                    filters: {
+                        format: function(value){
+                            return value.join('\n\n');
+                        }
+                    },
+                    methods: {
+                        init: function(){
+                            const self = this;
+
+                            self.model.push(self.log('info','加载完成'));
+
+                            self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
+
+                        },
+                        initPlugin: function(){
+                            const self = this;
+
+                            $(self.$el).contextMenu({
+                                selector: 'a.debug',
+                                trigger: 'left',
+                                build: function($trigger, e) {
+
+                                    $(".context-menu-input-refresh").eq(3).prop('selected', true);
+
+                                    let _items = {
+                                        "trigger": {
+                                            name: "调式触发器", type: "checkbox", selected: false
+                                        },
+                                        "scriptjs": {
+                                            name: "调式脚本", type: "checkbox", selected: false
+                                        },
+                                        "itil": {
+                                            name: "调式流程", type: "checkbox", selected: false
+                                        },
+                                        "rule": {
+                                            name: "调式规则", type: "checkbox", selected: false
+                                        },
+                                        "webcontext": {
+                                            name: "调式缓存", type: "checkbox", selected: false
+                                        },
+                                        "scriptlua": {
+                                            name: "调式脚本Lua", type: "checkbox", selected: false
+                                        },
+                                        "refresh": {
+                                            name: "刷新时间",
+                                            type: 'select',
+                                            options: {1: '5 second', 2: '15 second', 3: '30 second', 4: '1 mins'},
+                                            selected: 3,
+                                            events: {
+                                                change: function (e) {
+                                                    self.debug.crontab.sched = e.target.options[e.target.selectedIndex].label;
+                                                }
+                                            }
+                                        }
+                                    };
+
+                                    if(!_.isEmpty(self.debug.flag)){
+                                        _.forEach(self.debug.flag,function(v,k){
+                                            _items[v].selected = true;
+                                        })
+                                    }
+
+                                    return {
+                                        items: _items
+                                    }
+                                },
+                                events: {
+                                    show: function(opt) {
+                                        let $this = this;
+
+                                        $.contextMenu.setInputValues(opt, $this.data());
+
+                                    },
+                                    hide: function(opt) {
+                                        let $this = this;
+
+                                        $.contextMenu.getInputValues(opt, $this.data());
+
+                                        self.debugs($this.data());
+
+
+                                    }
+                                }
+                            });
+                        },
+                        refresh: function(){
+                            const self = this;
+
+                            self.debugIt(self.debug.mql);
+                        },
+                        debugs: function(key){
+                            const self = this;
+
+                            self.debug.mql = [];
+                            self.debug.flag = [];
+
+                            _.forEach(key, function(v,k){
+                                if(k !== 'contextMenu' && v != false){
+                                    self.debug.mql.push(`#/matrix/consolelog/${k}: | nearest 1 day | sort ctime desc`);
+                                    self.debug.flag.push(k);
+                                }
+                            });
+
+                        },
+                        append: function(level, event){
+                            const self = this;
+                            let _log = null;
+
+                            _log = self.log(level, event);
+
+                            self.model.unshift(_log);
+
+                            // $(".log-console-content").scrollTop(function() { return this.scrollHeight; });
+
+                        },
+                        log: function(level, event){
+                            const self = this;
+                            let _content = event;
+
+                            if(typeof(event) === 'object'){
+                                _content = JSON.stringify(event);
+                            }
+
+                            let _short = _.truncate(_content, {
+                                'length': 130,
+                                'separator': ' ',
+                                'omission': ''
+                            });
+
+                            let _id = objectHash.sha1(level + _content + _.now());
+
+                            return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
+                        },
+                        copyIt: function(event){
+                            const self = this;
+
+                            new Clipboard(".copy", {
+                                text: function(trigger) {
+                                    alertify.log("已复制");
+                                    let _rtn = _.map(self.model,function(v){
+                                        return [v[0],v[1],v[2].short + v[2].content];
+                                    });
+                                    return _rtn.join("\n");
+                                }
+                            });
+
+                        },
+                        clearIt: function(){
+                            const self = this;
+
+                            self.model = [];
+
+                        },
+                        debugIt: function(event){
+                            const self = this;
+
+                            _.forEach(event,function(v){
+                                let _list = omdbHandler.fetchData(v);
+
+                                _.forEach(_list.message,function(v){
+
+                                    let _content = `[${v.name}] [${v.class}] ${v.msg}`;
+
+                                    let _short = _.truncate(_content, {
+                                        'length': 130,
+                                        'separator': ' ',
+                                        'omission': ''
+                                    });
+
+                                    let _id = objectHash.sha1(v.level + _content + _.now());
+
+                                    let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(v.level), {id:_id, short: _short, content: _content.replace(_short,'')}];
+
+                                    self.model.unshift(_log);
+                                })
+                            })
+
+                        },
+                        toggleTheme: function(){
+                            const self = this;
+
+                            if(self.theme === 'light') {
+
+                                $(self.$el).removeClass("light");
+                                $(self.$el).addClass("dark");
+
+                                $(self.$el).find(".light").addClass("dark");
+                                $(self.$el).find(".light").removeClass("light");
+
+                                self.theme = 'dark';
+
+                            } else {
+
+                                $(self.$el).removeClass("dark");
+                                $(self.$el).addClass("light");
+
+                                $(self.$el).find(".dark").addClass("light");
+                                $(self.$el).find(".dark").removeClass("dark");
+
+                                self.theme = 'light';
+                            }
+
+                            localStorage.setItem("LOG-CONSOLE-THEME", self.theme);
+
+                        }
+                    }
+                };
+            };
 
             let textConsole = function(id, bid, model){
 
@@ -1032,31 +984,91 @@ class Omdb{
                 })
                 
                 odb.app = new Vue({
-                    delimiters: ['#{', '}#'],
-                    template:   `<el-container style="calc(100vh - 140px);">
-                                    <el-aside :id="id+'-aside'">
-                                        <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
-                                    </el-aside>
-                                    <el-main :id="id+'-main'" style="padding:0px;">
-                                        <el-tabs v-model="main.activeIndex" type="border-card">
-                                            <el-tab-pane
-                                                :key="item.name"
-                                                v-for="(item, index) in main.tabs"
-                                                :label="item.title"
-                                                :name="item.name">
-                                                <omdb-query-console :id="id+'-'+item.name" :node="item.model"></omdb-query-console>
-                                            </el-tab-pane>
-                                        </el-tabs>
-                                    </el-main>
-                                </el-container>`,
+                    delimiters: ['${', '}'],
                     data: {
-                        id: 'omdb',
-                        main: {
-                            tabs: [
-                                    {title: '查询', name: `query`, type: 'omdb-query-console', model: {node:null, pnode:null, pattern: 'select'}}
-                                ],
-                            activeIndex: 'query'
+                        layout: null,
+                        id: null,
+                        config: {
+                            settings:{
+                                showPopoutIcon: false,
+                                showCloseIcon: false,
+                                selectionEnabled: false,
+                                constrainDragToContainer: false
+                            },
+                            dimensions:{
+                                borderWidth:3
+                            },
+                            content: [{
+                                type: 'row',
+                                content:[
+                                    {
+                                        type: 'stack',
+                                        width: 18,
+                                        content:[{
+                                            id: 'class-tree',
+                                            type: 'component',
+                                            componentName: 'omdbComponent',
+                                            title:`<i class="fas fa-sitemap"></i> 对象管理`,
+                                            isClosable: false,
+                                            componentState: {
+                                                id: 'class-tree',
+                                                type: 'class-tree',
+                                                pattern: null,
+                                                model: { pattern: '', node: null, pnode: null }
+                                            }
+                                        }]
+                                    },
+                                    {
+                                        type: 'stack',
+                                        content: [
+                                            {
+                                                type: 'column',
+                                                title: '<i class="fas fa-laptop-code"></i> 查询',
+                                                content:[{
+                                                    type: 'component',
+                                                    title: '',
+                                                    id: 'layout_search_no_header',
+                                                    componentName: 'omdbComponent',
+                                                    componentState: {
+                                                        id: `div_query_000000`,
+                                                        bid: `batch_000000`,
+                                                        type: 'query-console',
+                                                        model: { pattern: '', node: null, pnode: null }
+                                                    }
+                                                },
+                                                    {
+                                                        type: 'stack',
+                                                        activeItemIndex: 1,
+                                                        content: [
+                                                            {
+                                                                type: 'component',
+                                                                title: `<i class="fas fa-newspaper"></i> 日志`,
+                                                                componentName: 'omdbComponent',
+                                                                componentState: {
+                                                                    id: `div_log_000000`,
+                                                                    bid: `batch_000000`,
+                                                                    type: 'log-console',
+                                                                    model: null
+                                                                }
+                                                            },
+                                                            {
+                                                                type: 'component',
+                                                                title: `<i class="fas fa-list-alt"></i> 结果`,
+                                                                componentName: 'omdbComponent',
+                                                                componentState: {
+                                                                    id: `div_output_000000`,
+                                                                    bid: `batch_000000`,
+                                                                    type: 'output-console',
+                                                                    model: null
+                                                                }
+                                                            }]
+                                                    }]
+                                            }]
+                                    }
+                                ]
+                            }]
                         }
+    
                     },
                     created: function(){
                         const self = this;
@@ -1064,24 +1076,147 @@ class Omdb{
                         eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
                         eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
                         eventHub.$on("QUERY-JSON-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
+    
+                        eventHub.$on("LAYOUT-RESIZE-EVENT",self.resizeLayout);
                     },
                     mounted: function() {
                         const self = this;
     
                         self.$nextTick(function() {
-                            self.init();
+                            setTimeout(function () {
+                                self.init();
+                            });
                         })
                     },
                     methods: {
                         init(){
-
-                            self.splitInst = Split([`#${this.id}-aside`, `#${this.id}-main`], {
-                                sizes: [20, 80],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
+                            const self = this;
+    
+                            self.layout = new GoldenLayout(self.config, self.$el);
+    
+                            self.layout.registerComponent('omdbComponent', function (container, state) {
+    
+                                // console.log(state)
+    
                             });
+    
+                            self.layout.on( 'stackCreated', function( stack ){
+    
+                                try {
+                                    if(stack.config.content[0].id === 'layout_search_no_header') {
+    
+                                        $(stack.element[0].childNodes[0]).remove();//css("display","none");
+    
+                                        _.delay(function(){
+                                            //console.log($(stack.element[0])[0].style.height,$(stack.element[0])[0])
+                                            self.resizeLayout();
+                                        },1000)
+    
+                                    }
+                                }catch(error){
+    
+                                }
+    
+                            });
+    
+                            self.layout.on( 'itemCreated', function( item ){
+                                // console.log('item',item.config)
+    
+                            });
+    
+                            self.layout.on( 'columnCreated', function( column ){
+                                //console.log('column',column)
+    
+                            });
+    
+                            self.layout.on( 'componentCreated', function( component ){
+    
+                                let _state = component.config;
+                                let _id = _state.componentState.id;
+                                let _bid = _state.componentState.bid;
+    
+                                let html = `<div id="${_id}"></div>`;
+                                let _comp = null;
+    
+                                component.container.getElement().html(html);
+    
+                                if(_state.componentState.type === 'class-tree'){
+    
+                                    _comp = classTree(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'class-edit'){
+    
+                                    _comp = classEdit(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'query-console'){
+    
+                                    _comp = queryConsole(_id, _bid, _state.componentState.type, _state.componentState);
+    
+                                } else if(_state.componentState.type === 'output-console'){
+                                    
+                                    _comp = outPut(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'output-json-console'){
+                                    
+                                    _comp = outPutByJson(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'text-console'){
+    
+                                    _comp = textConsole(_id, _bid, _state.componentState.model);
+    
+                                } else if(_state.componentState.type === 'graph'){
+    
+                                    _comp = graph(_id, _bid, _state.componentState.model);
+    
+    
+                                } else if(_state.componentState.type === 'log-console'){
+    
+                                    _comp = logConsole(_id, _bid, _state.componentState.type, _state.componentState);
+    
+    
+                                } else if(_state.componentState.type === 'trigger-console'){
+    
+                                    _comp = triggerConsole(_id, _bid, _state.componentState.model.node);
+    
+                                }
+    
+                                setTimeout(function(){
+                                    new Vue(_comp);
+                                });
+    
+                                component.container.on('resize',function(event) {
+    
+                                    // container height
+                                    window.layout_container_layoutHeight =  component.container.layoutManager.height - 80 - 20;
+                                    // container_top height
+                                    window.layout_container_topHeight =  window.layout_container_layoutHeight - component.container.height;
+                                    // container_bottom height
+                                    window.layout_container_bottomHeight =  component.container.height;
+    
+                                    //console.log(_id, component.container.layoutManager.height, component.container.height, component.container.layoutManager.height - component.container.height)
+                                    // console.log(_id, window.layout_container_layoutHeight, window.layout_container_topHeight, window.layout_container_bottomHeight)
+                                    // container change trigger datatable redraw
+                                    eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT-${_id}`, { container:window.layout_container_layoutHeight, top:window.layout_container_topHeight, bottom:window.layout_container_bottomHeight  });
+                                });
+    
+    
+                            });
+    
+                            //  Initialize GL
+                            self.layout.init();
+    
+                            //  Update GL on window resize
+                            window.addEventListener('resize', function () { self.layout.updateSize(); });
+    
+                        },
+                        resetLayout () {
+                            localStorage.removeItem('savedState');
+                            window.location.reload(true);
+                        },
+                        resizeLayout(){
+                            const self = this;
+    
+                            self.layout.updateSize();
                         },
                         addStackFromTree( event ) {
                             const self = this;

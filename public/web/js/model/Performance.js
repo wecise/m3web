@@ -239,10 +239,13 @@ class Performance extends Matrix {
                                                     <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
                                                     <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
                                                         <div v-if="item.data==='value' && model.rows[item.data] <= 100">
-                                                            <progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b>
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else>
+                                                            <!--progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b-->
                                                         </div>
                                                         <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else>
                                                         </div>
                                                         <div v-else>
                                                             <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
@@ -254,10 +257,13 @@ class Performance extends Matrix {
                                                     <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
                                                     <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
                                                         <div v-if="key==='value' && value <= 100">
-                                                            <progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b>
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize" v-else>
+                                                            <!--progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b-->
                                                         </div>
                                                         <div v-else-if="key==='value' && value > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'">
+                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize" v-else>
                                                         </div>
                                                         <div v-else>
                                                             <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
@@ -322,27 +328,41 @@ class Performance extends Matrix {
                                             </el-option>
                                         </el-select>
                                     </el-header>
-                                    <el-main style="padding:10px 0px;float: left;display: flex;flex-wrap: wrap;">
-                                        
-                                        <el-card class="box-card" style="width: 49.5%;height:auto;padding:5px;margin:2px;border:1px solid #f5f5f5;" v-for="item in model.trends">
-                                            <div slot="header" class="clearfix">
-                                                <span>历史性能 <small>#{item.title}#</small></span>
-                                                <el-tooltip :content="item.detail">
-                                                    <span class="fas fa-question-circle"></span>
-                                                </el-tooltip>    
-                                                <el-tooltip content="设置">
-                                                    <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
-                                                </el-tooltip>
+                                    <el-main style="padding:10px 0px;">
+                                        <div class="grid-stack">
+                                            <div class="grid-stack-item"
+                                                data-gs-auto-position="true"
+                                                data-gs-width="6" data-gs-height="4"
+                                                v-for="item,index in model.trends">
+                                                    <div class="grid-stack-item-content" style="border:1px solid #dddddd;">
+                                                        <el-card class="box-card" style="width: 100%;height:100%;" >
+                                                            <div slot="header" class="clearfix">
+                                                                <span>历史性能 <small>#{item.title}#</small></span>
+                                                                <el-tooltip :content="item.detail">
+                                                                    <span class="fas fa-question-circle"></span>
+                                                                </el-tooltip>    
+                                                                <el-tooltip content="设置">
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
+                                                                </el-tooltip>
+                                                            </div>
+                                                            <performance-history-chart :id="id + 'performance-history-chart-' + item.value" 
+                                                                                        :model="model.rows[item.value]" 
+                                                                                        :config="item.config"></performance-history-chart>
+                                                        </el-card>
+                                                    </div>
                                             </div>
-                                            <performance-history-chart :id="id + 'performance-history-chart-' + item.value" 
-                                                                        :model="model.rows[item.value]" 
-                                                                        :config="item.config"></performance-history-chart>
-                                        </el-card>
+                                        </div>
+                                        
                                     
                                     </el-main>
                                 </el-container>`,
                     mounted(){
-                        
+                        _.delay(()=>{
+                            $('.grid-stack').gridstack();
+                            $('.grid-stack').on('gsresizestop', function(event, elem) {
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            });
+                        },500)
                     },
                     methods: {
                         
@@ -472,7 +492,7 @@ class Performance extends Matrix {
                         init(){
                             let mxTopological = new Topological();
                             mxTopological.init();
-                            mxTopological.graphScript = _.map(this.model.rows,function(v){
+                            mxTopological.graphScript = _.map([this.model.rows],function(v){
                                 return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
                             });
                             mxTopological.mount(`#topological-app-${this.id}`);
@@ -537,7 +557,7 @@ class Performance extends Matrix {
                             // 输入
                             term: "top 500",
                             // 指定类
-                            class: "#/matrix/devops/performance:",
+                            class: "#/matrix/devops/performance/:",
                             // 指定api
                             api: "performance",
                             // 时间窗口

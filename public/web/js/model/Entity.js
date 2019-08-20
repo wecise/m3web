@@ -31,14 +31,10 @@ class Entity extends Matrix {
         const inst = this;
 
         VueLoader.onloaded(["ai-robot-component",
-                            "event-graph-component",
                             "entity-datatable-component",
-                            "event-diagnosis-datatable-component",
-                            "event-summary-component",
+                            "entity-tree-component",
                             "search-preset-component",
-                            "search-base-component",
-                            "probe-tree-component",
-                            "vue-timeline-component"],function() {
+                            "search-base-component"],function() {
             $(function() {
 
                 // 智能图谱
@@ -137,7 +133,6 @@ class Entity extends Matrix {
                             progress:[]
                         }
                     },
-                    //template: `<event-summary-component :id="id" :model='model'></event-summary-component>`,
                     template:   `<div>
                                     <div class="progress" 
                                          v-for="pg in progress" 
@@ -298,8 +293,11 @@ class Entity extends Matrix {
                                             <el-col :span="6">
                                                 <div class="grid-content" style="text-align:center;">
                                                     <img :src="model.rows.class | pickIcon" class="image" style="width:120px;">
-                                                    <p><h3>#{model.rows.host}#</h3></p>
-                                                    <p>类型：#{model.rows.class}#</p>
+                                                    <span style="text-align:left;">
+                                                        <p><h4>#{model.rows.name}#</h4></p>
+                                                        <p>名称：#{model.rows.alias}#</p>
+                                                        <p>类型：#{model.rows.class}#</p>
+                                                    </span>
                                                 </div>
                                             </el-col>
                                             <el-col :span="18" style="border-left: 1px solid rgb(235, 235, 244);">
@@ -759,6 +757,44 @@ class Entity extends Matrix {
                     }
                     
                 });
+
+                // 资源信息
+                let entityDiagnosisTopological = Vue.extend({
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    template:  `<el-container style="height: calc(100vh - 230px);">
+                                    <el-main style="padding:0px;">
+                                        <div :id="'topological-app-'+rId"></div>
+                                    </el-main>
+                                </el-container>`,
+                    computed:{
+                        rId(){
+                            console.log(11,this.id,objectHash.sha1(this.id),this.model.rows)
+                            return objectHash.sha1(this.id);
+                        }
+                    },
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init(){    
+                            var mxTopological = new Topological();
+                            mxTopological.init();
+                            mxTopological.graphScript = _.map([this.model.rows],function(v){
+                                return {value: `match () - [*1] -> ("${v.id}") - [*1] -> ()`};
+                            });
+                            mxTopological.mount(`#topological-app-${this.rId}`);
+                            
+                            _.delay(()=>{
+                                mxTopological.app.contextMenu();
+                            },500)
+
+                        }
+                    }
+                });
                 
                 let main = {
                     delimiters: ['${', '}'],
@@ -819,6 +855,9 @@ class Entity extends Matrix {
                                 forTime:  ' for vtime ',
                             }
                         }
+                    },
+                    components: {
+                        'entity-diagnosis-topological': entityDiagnosisTopological,
                     },
                     watch:{
                         'layout.main.tabs':{
@@ -919,7 +958,7 @@ class Entity extends Matrix {
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
                             Split(['#entity-view-left', '#entity-view-main'], {
-                                sizes: [25, 75],
+                                sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 gutterAlign: 'end',
@@ -1018,7 +1057,7 @@ class Entity extends Matrix {
                                                 {title:'管理信息', name:`diagnosis-manager-${id}`, type: 'manager', model:model},
                                                 {title:'配置信息', name:`diagnosis-cofig-${id}`, type: 'cofig', model:model},
                                                 {title:'配置比对', name:`diagnosis-compare-${id}`, type: 'compare', model:model},
-                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological'},
+                                                {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
                                                 {title:'实体发现', name:`diagnosis-discover-${id}`, type: 'discover', model:model},
                                             ]};
                                 this.layout.main.detail.activeIndex = _.first(detail.child).name;
@@ -1149,6 +1188,68 @@ class Entity extends Matrix {
                                 "fontSize": "14px"
                             });
                             
+                        },
+                        entityDataImport(){
+                            const me = this;
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
+                                    jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winClassTemplate('导入实体数据', `<div id="class-template-import"></div>`, null, null, null);
+                            }
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data:{
+                                    fileList: [],
+                                    rtnInfo: null
+                                },
+                                template: `<el-container style="height:100%;">
+                                                <el-main style="padding:10px;">
+                                                    <div v-if="!_.isEmpty(rtnInfo)">
+                                                        <el-button type="text" icon="el-icon-close" @click="clearInfo"></el-button>
+                                                        <section>
+                                                            <code>#{rtnInfo.message.join(",")}#</code>
+                                                        </section>
+                                                    </div>
+                                                    <el-upload
+                                                        class="upload-demo"
+                                                        drag
+                                                        :auto-upload="false"
+                                                        :on-change="onChange"
+                                                        :file-list="fileList"
+                                                        v-else>
+                                                        <i class="el-icon-upload"></i>
+                                                        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                                                        <div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
+                                                    </el-upload>
+                                                </el-main>
+                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                    <el-button type="default" @click="onCancel">取消</el-button>
+                                                    <el-button type="primary" @click="onImport">导入</el-button>
+                                                </el-footer>
+                                            </el-container>`,
+                                methods:{
+                                    onChange(file) {
+                                        this.fileList = [file.raw];
+                                    },
+                                    onCancel(){
+                                        wnd.close();
+                                    },
+                                    onImport(){
+                                        this.rtnInfo = JSON.parse(omdbHandler.classDataImport(this.fileList[0]));
+                                    },
+                                    clearInfo(){
+                                        this.rtnInfo = null;
+                                    }
+                                }
+                            }).$mount("#class-template-import");
                         }
                     }
                 };

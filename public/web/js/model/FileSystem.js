@@ -97,6 +97,158 @@ class FileSystem {
         
     }
 
+    fileCopyTo(app, sourceList, loadCallBack){
+        let wnd = null;
+
+        try{
+            if(jsPanel.activePanels.getPanel('jsPanel-fileAction')){
+                jsPanel.activePanels.getPanel('jsPanel-fileAction').close();
+            }
+        }catch(error){
+
+        }
+        finally{
+           wnd = maxWindow.winFileAction('复制到', '<div class="animated slideInDown" id="file-action-win"></div>', null,null);
+        }
+
+        new Vue({
+            delimiters: ['#{', '}#'],
+            data:{
+                classList: fsHandler.callFsJScript("/fs/fs_list.js",encodeURIComponent(app)).message,
+                defaultProps: {
+                    children: 'children',
+                    label: 'alias'
+                },
+                node: {}
+            },
+            template: `<el-container style="height:100%;">
+                            <el-header style="height:40px;line-height:40px;">
+                                复制到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
+                            </el-header>
+                            <el-main style="padding:10px;" style="background-color:#f7f7f7;">
+                                <el-tree
+                                    :data="classList"
+                                    node-key="id"
+                                    :default-expanded-keys="[_.first(classList).id]"
+                                    :props="defaultProps"
+                                    @node-click="onNodeClick"
+                                    style="background-color:transparent;">
+                                </el-tree>
+                            </el-main>
+                            <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                <el-button type="default" @click="onCancel">取消</el-button>
+                                <el-button type="primary" @click="onCopy">复制</el-button>
+                            </el-footer>
+                        </el-container>`,
+            methods:{
+                onNodeClick(node){
+                    this.node = node;
+                },
+                onCancel(){
+                    wnd.close();
+                },
+                onCopy(){
+                    try {
+                        let rtn = true;
+                        
+                        _.forEach(sourceList,(v) => {
+                            let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), this.node.fullname);
+                            if(_rtn===0){
+                                rtn = false;
+                            }
+                        })
+                        if(rtn){
+                            alertify.success("复制成功 " + this.node.fullname);
+                            loadCallBack;
+                            wnd.close();
+                        }
+                    }
+                    catch(error){}
+                    finally{
+                        sourceList = [];
+                    }
+                }
+            }
+        }).$mount("#file-action-win");
+        
+    }
+
+    fileMoveTo(app, sourceList,loadCallBack){
+        
+        let wnd = null;
+
+        try{
+            if(jsPanel.activePanels.getPanel('jsPanel-fileAction')){
+                jsPanel.activePanels.getPanel('jsPanel-fileAction').close();
+            }
+        }catch(error){
+
+        }
+        finally{
+           wnd = maxWindow.winFileAction('移动到', '<div class="animated slideInDown" id="file-action-win"></div>', null,null);
+        }
+
+        new Vue({
+            delimiters: ['#{', '}#'],
+            data:{
+                classList: fsHandler.callFsJScript("/fs/fs_list.js",encodeURIComponent(app)).message,
+                defaultProps: {
+                    children: 'children',
+                    label: 'alias'
+                },
+                node: {}
+            },
+            template: `<el-container style="height:100%;">
+                            <el-header style="height:40px;line-height:40px;">
+                                移动到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
+                            </el-header>
+                            <el-main style="padding:10px;" style="background-color:#f7f7f7;">
+                                <el-tree
+                                    :data="classList"
+                                    node-key="id"
+                                    :default-expanded-keys="[_.first(classList).id]"
+                                    :props="defaultProps"
+                                    @node-click="onNodeClick"
+                                    style="background-color:transparent;">
+                                </el-tree>
+                            </el-main>
+                            <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                <el-button type="default" @click="onCancel">取消</el-button>
+                                <el-button type="primary" @click="onMove">移动</el-button>
+                            </el-footer>
+                        </el-container>`,
+            methods:{
+                onNodeClick(node){
+                    this.node = node;
+                },
+                onCancel(){
+                    wnd.close();
+                },
+                onMove(){
+                    try {
+                        let rtn = true;
+                        
+                        _.forEach(sourceList,(v) => {
+                            let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), this.node.fullname);
+                            if(_rtn===0){
+                                rtn = false;
+                            }
+                        })
+                        if(rtn){
+                            alertify.success("移动成功 " + this.node.fullname);
+                            loadCallBack;
+                            wnd.close();
+                        }
+                    }
+                    catch(error){}
+                    finally{
+                        sourceList = [];
+                    }
+                }
+            }
+        }).$mount("#file-action-win");
+        
+    }
 }
 
 let fileSystem = new FileSystem();

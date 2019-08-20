@@ -1,0 +1,857 @@
+{{template "base/head" .}}
+
+	<!--MXClient JS & CSS-->
+    <script>
+        mxBasePath = '{{AppSubUrl}}/web/creative/src';
+        mxLanguage = window.MATRIX_LANG.replace(/en/g,"eg").split("-")[0];
+    </script>
+    
+    <script src="{{AppSubUrl}}/web/creative/src/js/mxClient.js" type="text/javascript"></script>
+    <link href="{{AppSubUrl}}/web/creative/graph/styles/grapheditor.css" type="text/css" rel="stylesheet">
+    
+    <script>
+        mxResources.add('{{AppSubUrl}}/web/creative/graph/resources/grapheditor');
+    </script>
+	
+	<script type="text/javascript">
+		// If connect preview is not moved away then getCellAt is used to detect the cell under
+		// the mouse if the mouse is over the preview shape in IE (no event transparency), ie.
+		// the built-in hit-detection of the HTML document will not be used in this case.
+		mxConnectionHandler.prototype.movePreviewAway = false;
+		mxConnectionHandler.prototype.waypointsEnabled = true;
+		mxGraph.prototype.resetEdgesOnConnect = false;
+		mxConstants.SHADOWCOLOR = '#C0C0C0';
+		mxConnector.prototype.crisp = true;
+		mxLine.prototype.crisp = true;
+		var joinNodeSize = 7;
+		var strokeWidth = 2;
+		
+		// 替换接口处图标
+		mxConstraintHandler.prototype.pointImage = new mxImage('images/dot.gif', 10, 10);
+		
+		// 启用导航线
+		mxGraphHandler.prototype.guidesEnabled = true;
+		
+	    // Alt键按下禁用导航线
+	    mxGuide.prototype.isEnabledForEvent = function(evt)
+	    {
+	    	return !mxEvent.isAltDown(evt);
+	    };
+		
+		// 是否自动连接目标
+		mxEdgeHandler.prototype.snapToTerminals = true;
+		
+		// 程序启动
+		function main(container)
+		{
+			var graph = new mxGraph(container);
+			graph.view.scale = 1;
+			graph.setPanning(true);
+			graph.setConnectable(true);
+			graph.setConnectableEdges(true);
+			graph.setDisconnectOnMove(false);
+			graph.foldingEnabled = false;
+			
+			//最大尺寸
+			graph.maximumGraphBounds = new mxRectangle(0, 0, 800, 600)
+			graph.border = 50;
+ 
+			// 禁用下拉菜单
+			graph.panningHandler.isPopupTrigger = function() { return false; };
+			
+			// 启用回车键停止编辑（用shift输入的换行）
+			graph.setEnterStopsCellEditing(true);
+ 
+			// 使用浏览器默认菜单
+			new mxRubberband(graph);
+			
+			// 执行无子单元格的连接点的替代解决方案。 如所示portrefs.html例如以允许为每个端口的呼入/呼出的方向，这可以扩展。
+			graph.getAllConnectionConstraints = function(terminal)
+			{
+			   var geo = (terminal != null) ? this.getCellGeometry(terminal.cell) : null;
+ 
+			   if ((geo != null ? !geo.relative : false) &&
+				   this.getModel().isVertex(terminal.cell) &&
+				   this.getModel().getChildCount(terminal.cell) == 0)
+			   {
+					return [new mxConnectionConstraint(new mxPoint(0, 0.5), false),
+				    	new mxConnectionConstraint(new mxPoint(1, 0.5), false)];
+			    }
+ 
+				return null;
+			};
+ 
+			// 约束连接
+			graph.connectionHandler.isConnectableCell = function(cell)
+			{
+				if (this.graph.getModel().isEdge(cell))
+				{
+					return true;
+				}
+				else
+				{
+					var geo = (cell != null) ? this.graph.getCellGeometry(cell) : null;
+					
+					return (geo != null) ? geo.relative : false;
+				}
+			};
+			mxEdgeHandler.prototype.isConnectableCell = function(cell)
+			{
+				return graph.connectionHandler.isConnectableCell(cell);
+			};
+			
+			// 添加提示
+			graph.setTooltips(true);
+			
+			var getTooltipForCell = graph.getTooltipForCell;
+			graph.getTooltipForCell = function(cell)
+			{
+				var tip = '';
+				
+				if (cell != null)
+				{
+					var src = this.getModel().getTerminal(cell, true);
+					
+					if (src != null)
+					{
+						tip += this.getTooltipForCell(src) + ' ';
+					}
+					
+					var parent = this.getModel().getParent(cell);
+					
+					if (this.getModel().isVertex(parent))
+					{
+						tip += this.getTooltipForCell(parent) + '.';
+					}
+	
+					tip += getTooltipForCell.apply(this, arguments);
+					
+					var trg = this.getModel().getTerminal(cell, false);
+					
+					if (trg != null)
+					{
+						tip += ' ' + this.getTooltipForCell(trg);
+					}
+				}
+ 
+				return tip;
+			};
+ 
+			// 在黑色背景和明亮的风格间切换
+			var invert = false;
+			
+			if (invert)
+			{
+				container.style.backgroundColor = 'black';
+				
+				// 白色就地编辑文本
+				mxCellEditorStartEditing = mxCellEditor.prototype.startEditing;
+				mxCellEditor.prototype.startEditing = function (cell, trigger)
+				{
+					mxCellEditorStartEditing.apply(this, arguments);
+					
+					if (this.textarea != null)
+					{
+						this.textarea.style.color = '#FFFFFF';					
+					}
+				};
+				
+				mxGraphHandler.prototype.previewColor = 'white';
+			}
+			
+			var labelBackground = (invert) ? '#000000' : '#FFFFFF';
+			var fontColor = (invert) ? '#FFFFFF' : '#000000';
+			var strokeColor = (invert) ? '#C0C0C0' : '#000000';
+			var fillColor = (invert) ? 'none' : '#FFFFFF';
+			
+			var style = graph.getStylesheet().getDefaultEdgeStyle();
+			delete style['endArrow'];
+			style['strokeColor'] = strokeColor;
+			style['labelBackgroundColor'] = labelBackground;
+			style['edgeStyle'] = 'wireEdgeStyle';
+			style['fontColor'] = fontColor;
+			style['fontSize'] = '9';
+			style['movable'] = '0';
+			style['strokeWidth'] = strokeWidth;
+			//style['rounded'] = '1';
+			
+			// Sets join node size
+			style['startSize'] = joinNodeSize;
+			style['endSize'] = joinNodeSize;
+			
+			style = graph.getStylesheet().getDefaultVertexStyle();
+			style['gradientDirection'] = 'south';
+			//style['gradientColor'] = '#909090';
+			style['strokeColor'] = strokeColor;
+			//style['fillColor'] = '#e0e0e0';
+			style['fillColor'] = 'none';
+			style['fontColor'] = fontColor;
+			style['fontStyle'] = '1';
+			style['fontSize'] = '12';
+			style['resizable'] = '0';
+			style['rounded'] = '1';
+			style['strokeWidth'] = strokeWidth;
+ 
+			var parent = graph.getDefaultParent();
+			
+			graph.getModel().beginUpdate();
+			try
+			{
+				var v1 = graph.insertVertex(parent, null, 'J1', 80, 40, 40, 80,
+						'verticalLabelPosition=top;verticalAlign=bottom;shadow=1;fillColor=' + fillColor);
+				v1.setConnectable(false);
+ 
+				var v11 = graph.insertVertex(v1, null, '1', 0, 0, 10, 16,
+						'shape=line;align=left;verticalAlign=middle;fontSize=10;routingCenterX=-0.5;'+
+						'spacingLeft=12;fontColor=' + fontColor + ';strokeColor=' + strokeColor);
+				v11.geometry.relative = true;
+				v11.geometry.offset = new mxPoint(-v11.geometry.width, 2);
+				var v12 = v11.clone();
+				v12.value = '2';
+				v12.geometry.offset = new mxPoint(-v11.geometry.width, 22);
+				v1.insert(v12);
+				var v13 = v11.clone();
+				v13.value = '3';
+				v13.geometry.offset = new mxPoint(-v11.geometry.width, 42);
+				v1.insert(v13);
+				var v14 = v11.clone();
+				v14.value = '4';
+				v14.geometry.offset = new mxPoint(-v11.geometry.width, 62);
+				v1.insert(v14);
+ 
+				var v15 = v11.clone();
+				v15.value = '5';
+				v15.geometry.x = 1;
+				v15.style =	'shape=line;align=right;verticalAlign=middle;fontSize=10;routingCenterX=0.5;'+
+					'spacingRight=12;fontColor=' + fontColor + ';strokeColor=' + strokeColor;
+				v15.geometry.offset = new mxPoint(0, 2);
+				v1.insert(v15);
+				var v16 = v15.clone();
+				v16.value = '6';
+				v16.geometry.offset = new mxPoint(0, 22);
+				v1.insert(v16);
+				var v17 = v15.clone();
+				v17.value = '7';
+				v17.geometry.offset = new mxPoint(0, 42);
+				v1.insert(v17);
+				var v18 = v15.clone();
+				v18.value = '8';
+				v18.geometry.offset = new mxPoint(0, 62);
+				v1.insert(v18);
+				
+				var v19 = v15.clone();
+				v19.value = 'clk';
+				v19.geometry.x = 0.5;
+				v19.geometry.y = 1;
+				v19.geometry.width = 10;
+				v19.geometry.height = 4;
+				// NOTE:端口约束被定义为正东方向，所以这里必须插入
+				v19.style = 'shape=triangle;direction=north;spacingBottom=12;align=center;portConstraint=horizontal;'+
+					'fontSize=8;strokeColor=' + strokeColor + ';routingCenterY=0.5;';
+				v19.geometry.offset = new mxPoint(-4, -4);
+				v1.insert(v19);
+				
+				var v2 = graph.insertVertex(parent, null, 'R1', 220, 220, 80, 20,
+					'shape=resistor;verticalLabelPosition=top;verticalAlign=bottom;');
+				
+				// 执行通过约束的连接点（参见上述）
+				//v2.setConnectable(false);
+ 
+ 				/*var v21 = graph.insertVertex(v2, null, 'A', 0, 0.5, 10, 1,
+ 					'shape=none;spacingBottom=11;spacingLeft=1;align=left;fontSize=8;'+
+ 					'fontColor=#4c4c4c;strokeColor=#909090;');
+ 				v21.geometry.relative = true;
+ 				v21.geometry.offset = new mxPoint(0, -1);
+				
+ 				var v22 = graph.insertVertex(v2, null, 'B', 1, 0.5, 10, 1,
+ 					'spacingBottom=11;spacingLeft=1;align=left;fontSize=8;'+
+ 					'fontColor=#4c4c4c;strokeColor=#909090;');
+ 				v22.geometry.relative = true;
+ 				v22.geometry.offset = new mxPoint(-10, -1);*/
+ 
+				var v3 = graph.addCell(graph.getModel().cloneCell(v1));
+				v3.value = 'J3';
+				v3.geometry.x = 420;
+				v3.geometry.y = 340;
+				
+				// 连接线终点实施的限制，或者可以使用引用，请参阅：portrefs.html
+				var e1 = graph.insertEdge(parent, null, 'e1', v1.getChildAt(7), v2,
+					'entryX=0;entryY=0.5;entryPerimeter=0;');
+				e1.geometry.points = [new mxPoint(180, 110)];
+				
+				var e2 = graph.insertEdge(parent, null, 'e2', v1.getChildAt(4), v2,
+					'entryX=1;entryY=0.5;entryPerimeter=0;');
+				e2.geometry.points = [new mxPoint(320, 50), new mxPoint(320, 230)];
+				
+				var e3 = graph.insertEdge(parent, null, 'crossover', e1, e2);
+				e3.geometry.setTerminalPoint(new mxPoint(180, 140), true);
+				e3.geometry.setTerminalPoint(new mxPoint(320, 140), false);
+				
+// 				var e1 = graph.insertEdge(parent, null, 'e1', v1.getChildAt(7), v2.getChildAt(0));
+// 				e1.geometry.points = [new mxPoint(180, 140)];
+				
+// 				var e2 = graph.insertEdge(parent, null, '', v1.getChildAt(4), v2.getChildAt(1));
+// 				e2.geometry.points = [new mxPoint(320, 80)];
+				
+// 				var e3 = graph.insertEdge(parent, null, 'crossover', e1, e2);
+// 				e3.geometry.setTerminalPoint(new mxPoint(180, 160), true);
+// 				e3.geometry.setTerminalPoint(new mxPoint(320, 160), false);
+				
+				var e4 = graph.insertEdge(parent, null, 'e4', v2, v3.getChildAt(0),
+					'exitX=1;exitY=0.5;entryPerimeter=0;');
+				e4.geometry.points = [new mxPoint(380, 230)];
+				
+				var e5 = graph.insertEdge(parent, null, 'e5', v3.getChildAt(5), v1.getChildAt(0));
+				e5.geometry.points = [new mxPoint(500, 310), new mxPoint(500, 20), new mxPoint(50, 20)];
+				
+				var e6 = graph.insertEdge(parent, null, '');
+				e6.geometry.setTerminalPoint(new mxPoint(100, 500), true);
+				e6.geometry.setTerminalPoint(new mxPoint(600, 500), false);
+				
+				var e7 = graph.insertEdge(parent, null, 'e7', v3.getChildAt(7), e6);
+				e7.geometry.setTerminalPoint(new mxPoint(500, 500), false);
+				e7.geometry.points = [new mxPoint(500, 350)];
+			}
+			finally
+			{
+				graph.getModel().endUpdate();
+			}
+			
+			document.body.appendChild(mxUtils.button('放大Zoom In', function()
+			{
+				graph.zoomIn();
+			}));
+			
+			document.body.appendChild(mxUtils.button('缩小Zoom Out', function()
+			{
+				graph.zoomOut();
+			}));
+			
+			// Undo/redo 撤销/复位
+			var undoManager = new mxUndoManager();
+			var listener = function(sender, evt)
+			{
+				undoManager.undoableEditHappened(evt.getProperty('edit'));
+			};
+			graph.getModel().addListener(mxEvent.UNDO, listener);
+			graph.getView().addListener(mxEvent.UNDO, listener);
+			
+			document.body.appendChild(mxUtils.button('撤销Undo', function()
+			{
+				undoManager.undo();
+			}));
+			
+			document.body.appendChild(mxUtils.button('上一步Redo', function()
+			{
+				undoManager.redo();
+			}));
+ 
+			// 显示XML调试的实际模型
+			document.body.appendChild(mxUtils.button('删除Delete', function()  
+			{
+				graph.removeCells();
+			}));
+			
+			// 连接模式
+			var checkbox = document.createElement('input');
+			checkbox.setAttribute('type', 'checkbox');
+			
+			document.body.appendChild(checkbox);
+			mxUtils.write(document.body, 'Wire Mode');
+			
+			// Starts connections on the background in wire-mode
+			var connectionHandlerIsStartEvent = graph.connectionHandler.isStartEvent;
+			graph.connectionHandler.isStartEvent = function(me)
+			{
+				return checkbox.checked || connectionHandlerIsStartEvent.apply(this, arguments);
+			};
+			
+			// Avoids any connections for gestures within tolerance except when in wire-mode
+			// or when over a port which
+			var connectionHandlerMouseUp = graph.connectionHandler.mouseUp;
+			graph.connectionHandler.mouseUp = function(sender, me)
+			{
+				if (this.first != null && this.previous != null)
+				{
+					var point = mxUtils.convertPoint(this.graph.container, me.getX(), me.getY());
+					var dx = Math.abs(point.x - this.first.x);
+					var dy = Math.abs(point.y - this.first.y);
+ 
+					if (dx < this.graph.tolerance && dy < this.graph.tolerance)
+					{
+						// Selects edges in non-wire mode for single clicks, but starts
+						// connecting for non-edges regardless of wire-mode
+						if (!checkbox.checked && this.graph.getModel().isEdge(this.previous.cell))
+						{
+							this.reset();
+						}
+						
+						return;
+					}
+				}
+				
+				connectionHandlerMouseUp.apply(this, arguments);
+			};
+			
+			// 网格
+			var checkbox2 = document.createElement('input');
+			checkbox2.setAttribute('type', 'checkbox');
+			checkbox2.setAttribute('checked', 'true');
+			
+			document.body.appendChild(checkbox2);
+			mxUtils.write(document.body, 'Grid');
+			
+			mxEvent.addListener(checkbox2, 'click', function(evt)
+			{
+				if (checkbox2.checked)
+				{
+					container.style.background = 'url(\'images/wires-grid.gif\')';
+				}
+				else
+				{
+					container.style.background = '';
+				}
+				
+				container.style.backgroundColor = (invert) ? 'black' : 'white';
+			});
+			
+			mxEvent.disableContextMenu(container);
+		};
+	</script>
+<!--  
+		更新连接点
+-->
+	<script type="text/javascript">
+		// 计算的连接线到连接线的两点之间的位置。
+		mxGraphView.prototype.updateFixedTerminalPoint = function(edge, terminal, source, constraint)
+		{
+			var pt = null;
+			
+			if (constraint != null)
+			{
+				pt = this.graph.getConnectionPoint(terminal, constraint);
+			}
+ 
+			if (source)
+			{
+				edge.sourceSegment = null;
+			}
+			else
+			{
+				edge.targetSegment = null;
+			}
+			
+			if (pt == null)
+			{
+				var s = this.scale;
+				var tr = this.translate;
+				var orig = edge.origin;
+				var geo = this.graph.getCellGeometry(edge.cell);
+				pt = geo.getTerminalPoint(source);
+ 
+				// 计算两个连接点
+				if (pt != null)
+				{
+					pt = new mxPoint(s * (tr.x + pt.x + orig.x),
+									 s * (tr.y + pt.y + orig.y));
+					
+					// 查找最近的连接线，并计算交叉点
+					if (terminal != null && terminal.absolutePoints != null)
+					{
+						var seg = mxUtils.findNearestSegment(terminal, pt.x, pt.y);
+ 
+						// Finds orientation of the segment
+						var p0 = terminal.absolutePoints[seg];
+						var pe = terminal.absolutePoints[seg + 1];
+						var horizontal = (p0.x - pe.x == 0);
+						
+						// 储存连接线状态
+						var key = (source) ? 'sourceConstraint' : 'targetConstraint';
+						var value = (horizontal) ? 'horizontal' : 'vertical';
+						edge.style[key] = value;
+						
+						// Keeps the coordinate within the segment bounds
+						if (horizontal)
+						{
+							pt.x = p0.x;
+							pt.y = Math.min(pt.y, Math.max(p0.y, pe.y));
+							pt.y = Math.max(pt.y, Math.min(p0.y, pe.y));
+						}
+						else
+						{
+							pt.y = p0.y;
+							pt.x = Math.min(pt.x, Math.max(p0.x, pe.x));
+							pt.x = Math.max(pt.x, Math.min(p0.x, pe.x));
+						}
+					}
+				}
+				// 计算连接线和点
+				else if (terminal != null && terminal.cell.geometry.relative)
+				{
+					pt = new mxPoint(this.getRoutingCenterX(terminal),
+						this.getRoutingCenterY(terminal));
+				}
+ 
+				// 捕捉元素点到网格
+				/*if (pt != null)
+				{
+					var tr = this.graph.view.translate;
+					var s = this.graph.view.scale;
+					
+					pt.x = (this.graph.snap(pt.x / s - tr.x) + tr.x) * s;
+					pt.y = (this.graph.snap(pt.y / s - tr.y) + tr.y) * s;
+				}*/
+			}
+ 
+			edge.setAbsoluteTerminalPoint(pt, source);
+		};
+	</script>
+<!--  
+	预览新建的连接线。
+-->
+	<script type="text/javascript">
+		// 设置元素源端到连接线的连接点
+		mxConnectionHandler.prototype.createEdgeState = function(me)
+		{
+			var edge = this.graph.createEdge();
+			
+			if (this.sourceConstraint != null && this.previous != null)
+			{
+				edge.style = mxConstants.STYLE_EXIT_X+'='+this.sourceConstraint.point.x+';'+
+					mxConstants.STYLE_EXIT_Y+'='+this.sourceConstraint.point.y+';';
+			}
+			else if (this.graph.model.isEdge(me.getCell()))
+			{
+				var scale = this.graph.view.scale;
+				var tr = this.graph.view.translate;
+				var pt = new mxPoint(this.graph.snap(me.getGraphX() / scale) - tr.x,
+						this.graph.snap(me.getGraphY() / scale) - tr.y);
+				edge.geometry.setTerminalPoint(pt, true);
+			}
+			
+			return this.graph.view.createState(edge);
+		};
+		
+		// 使用鼠标右键，创建连接线
+		mxConnectionHandler.prototype.isStopEvent = function(me)
+		{
+			return me.getState() != null || mxEvent.isRightMouseButton(me.getEvent());
+		};
+		
+		// 更新目标终端边到边缘的连接点。
+		mxConnectionHandlerUpdateCurrentState = mxConnectionHandler.prototype.updateCurrentState;
+		mxConnectionHandler.prototype.updateCurrentState = function(me)
+		{
+			mxConnectionHandlerUpdateCurrentState.apply(this, arguments);
+ 
+			if (this.edgeState != null)
+			{
+				this.edgeState.cell.geometry.setTerminalPoint(null, false);
+			
+				if (this.shape != null && this.currentState != null &&
+					this.currentState.view.graph.model.isEdge(this.currentState.cell))
+				{
+					var scale = this.graph.view.scale;
+					var tr = this.graph.view.translate;
+					var pt = new mxPoint(this.graph.snap(me.getGraphX() / scale) - tr.x,
+							this.graph.snap(me.getGraphY() / scale) - tr.y);
+					this.edgeState.cell.geometry.setTerminalPoint(pt, false);
+				}
+			}
+		};
+ 
+		// 点到线的预览
+		mxEdgeSegmentHandler.prototype.clonePreviewState = function(point, terminal)
+		{
+			var clone = mxEdgeHandler.prototype.clonePreviewState.apply(this, arguments);
+			clone.cell = clone.cell.clone();
+			
+			if (this.isSource || this.isTarget)
+			{
+				clone.cell.geometry = clone.cell.geometry.clone();
+				
+				// Sets the terminal point of an edge if we're moving one of the endpoints
+				if (this.graph.getModel().isEdge(clone.cell))
+				{
+					// TODO: Only set this if the target or source terminal is an edge
+					clone.cell.geometry.setTerminalPoint(point, this.isSource);
+				}
+				else
+				{
+					clone.cell.geometry.setTerminalPoint(null, this.isSource);				
+				}
+			}
+ 
+			return clone;
+		};
+	</script>
+<!--  
+	高亮完整的单元区域（热点）。
+-->
+	<script type="text/javascript">
+		mxConnectionHandlerCreateMarker = mxConnectionHandler.prototype.createMarker;
+		mxConnectionHandler.prototype.createMarker = function()
+		{
+			var marker = mxConnectionHandlerCreateMarker.apply(this, arguments);
+			
+			// 使用完整的区域的单元为新的连接（没有热点）
+			marker.intersects = function(state, evt)
+			{
+				return true;
+			};
+			
+			// 添加高亮
+			mxCellHighlightHighlight = mxCellHighlight.prototype.highlight;
+			marker.highlight.highlight = function(state)
+			{
+				if (this.state != state)
+				{
+					if (this.state != null)
+					{
+						this.state.style = this.lastStyle;
+						
+						// 使用当前描边宽度，如果没有定义的描边宽度形状的解决方法
+						this.state.style['strokeWidth'] = this.state.style['strokeWidth'] || '1';
+						this.state.style['strokeColor'] = this.state.style['strokeColor'] || 'none';
+						
+						if (this.state.shape != null)
+						{
+							this.state.view.graph.cellRenderer.configureShape(this.state);
+							this.state.shape.reconfigure();
+							this.state.shape.redraw();
+						}
+					}
+					
+					if (state != null)
+					{
+						this.lastStyle = state.style;
+						state.style = mxUtils.clone(state.style);
+						state.style['strokeColor'] = '#00ff00';
+						state.style['strokeWidth'] = '3';
+						
+						if (state.shape != null)
+						{
+							state.view.graph.cellRenderer.configureShape(state);
+							state.shape.reconfigure();
+							state.shape.redraw();
+						}
+					}
+					
+					this.state = state;
+				}
+			};
+			
+			return marker;
+		};
+		
+		mxEdgeHandlerCreateMarker = mxEdgeHandler.prototype.createMarker;
+		mxEdgeHandler.prototype.createMarker = function()
+		{
+			var marker = mxEdgeHandlerCreateMarker.apply(this, arguments);
+			
+			// 重新连接时，现有的边添加高亮
+			marker.highlight.highlight = this.graph.connectionHandler.marker.highlight.highlight;
+			
+			return marker;
+		}
+	</script>
+<!--  
+	添加椭圆形标记边到边连接。
+-->
+	<script type="text/javascript">
+		mxGraphGetCellStyle = mxGraph.prototype.getCellStyle;
+		mxGraph.prototype.getCellStyle = function(cell)
+		{
+			var style = mxGraphGetCellStyle.apply(this, arguments);
+			
+			if (style != null && this.model.isEdge(cell))
+			{
+				style = mxUtils.clone(style);
+				
+				if (this.model.isEdge(this.model.getTerminal(cell, true)))
+				{
+					style['startArrow'] = 'oval';
+				}
+		
+				if (this.model.isEdge(this.model.getTerminal(cell, false)))
+				{
+					style['endArrow'] = 'oval';
+				}
+			}
+			
+			return style;
+		};
+	</script>
+<!--  
+	自定义的电阻形状，目前这里被忽略。
+-->
+	<script type="text/javascript">
+		function ResistorShape() { };
+		ResistorShape.prototype = new mxCylinder();
+		ResistorShape.prototype.constructor = ResistorShape;
+		ResistorShape.prototype.crisp = false;
+ 
+		ResistorShape.prototype.redrawPath = function(path, x, y, w, h, isForeground)
+		{
+			var dx = w / 16;
+ 
+			if (isForeground)
+			{
+				path.moveTo(0, h / 2);
+				path.lineTo(2 * dx, h / 2);
+				path.lineTo(3 * dx, 0);
+				path.lineTo(5 * dx, h);
+				path.lineTo(7 * dx, 0);
+				path.lineTo(9 * dx, h);
+				path.lineTo(11 * dx, 0);
+				path.lineTo(13 * dx, h);
+				path.lineTo(14 * dx, h / 2);
+				path.lineTo(16 * dx, h / 2);
+ 
+				path.end();
+			}
+		};
+ 
+		mxCellRenderer.prototype.defaultShapes['resistor'] = ResistorShape;
+	</script>
+<!--  
+	自定义的电阻形状。目前这里被忽略。
+-->
+	<script type="text/javascript">
+	mxEdgeStyle.WireConnector = function(state, source, target, hints, result)
+	{
+		// 建立一个数组，所有的方式和终点
+		var pts = state.absolutePoints;
+		var horizontal = true;
+		var hint = null;
+		
+		// Gets the initial connection from the source terminal or edge
+		if (source != null && state.view.graph.model.isEdge(source.cell))
+		{
+			horizontal = state.style['sourceConstraint'] == 'horizontal';
+		}
+		else if (source != null)
+		{
+			horizontal = source.style['portConstraint'] != 'vertical';
+			
+			// 检查的方向的形状和旋转
+			var direction = source.style[mxConstants.STYLE_DIRECTION];
+			
+			if (direction == 'north' || direction == 'south')
+			{
+				horizontal = !horizontal;
+			}
+		}
+		
+		// 添加的第一个点
+		// TODO: 应沿着相连的网段
+		var pt = pts[0];
+		
+		if (pt == null && source != null)
+		{
+			pt = new mxPoint(state.view.getRoutingCenterX(source), state.view.getRoutingCenterY(source));
+		}
+		else if (pt != null)
+		{
+			pt = pt.clone();
+		}
+		
+		var first = pt;
+ 
+		// 添加路径点
+		if (hints != null && hints.length > 0)
+		{
+			// FIXME: 第一个段不可移动
+			/*hint = state.view.transformControlPoint(state, hints[0]);
+			mxLog.show();
+			mxLog.debug(hints.length,'hints0.y='+hint.y, pt.y)
+			
+			if (horizontal && Math.floor(hint.y) != Math.floor(pt.y))
+			{
+				mxLog.show();
+				mxLog.debug('add waypoint');
+				pt = new mxPoint(pt.x, hint.y);
+				result.push(pt);
+				pt = pt.clone();
+				//horizontal = !horizontal;
+			}*/
+			
+			for (var i = 0; i < hints.length; i++)
+			{
+				horizontal = !horizontal;
+				hint = state.view.transformControlPoint(state, hints[i]);
+ 
+				if (horizontal)
+				{
+					if (pt.y != hint.y)
+					{
+						pt.y = hint.y;
+						result.push(pt.clone());
+					}
+				}
+				else if (pt.x != hint.x)
+				{
+					pt.x = hint.x;
+					result.push(pt.clone());
+				}
+			}
+		}
+		else
+		{
+			hint = pt;
+		}
+ 
+		// 添加的最后一个点
+		pt = pts[pts.length - 1];
+ 
+		// TODO: 应沿着相连的网段
+		if (pt == null && target != null)
+		{
+			pt = new mxPoint(state.view.getRoutingCenterX(target), state.view.getRoutingCenterY(target));
+		}
+ 
+		if (horizontal)
+		{
+			if (pt.y != hint.y && first.x != pt.x)
+			{
+				result.push(new mxPoint(pt.x, hint.y));
+			}
+		}
+		else if (pt.x != hint.x && first.y != pt.y)
+		{
+			result.push(new mxPoint(hint.x, pt.y));
+		}
+	};
+	
+	mxStyleRegistry.putValue('wireEdgeStyle', mxEdgeStyle.WireConnector);
+	
+	// 该连接器需要的MX边缘片段的处理程序
+	mxGraphCreateHandler = mxGraph.prototype.createHandler;
+	mxGraph.prototype.createHandler = function(state)
+	{
+		var result = null;
+		
+		if (state != null)
+		{
+			if (this.model.isEdge(state.cell))
+			{
+				var style = this.view.getEdgeStyle(state);
+				
+				if (style == mxEdgeStyle.WireConnector)
+				{
+					return new mxEdgeSegmentHandler(state);
+				}
+			}
+		}
+		
+		return mxGraphCreateHandler.apply(this, arguments);
+	};
+	</script>
+</head>
+<!-- 页面载入后启动程序. -->
+<body οnlοad="main(document.getElementById('graphContainer'))">
+	<div id="graphContainer"
+		style="overflow:auto;position:relative;width:800px;height:600px;border:1px solid gray;background:url('images/wires-grid.gif');background-position:-1px 0px;cursor:crosshair;">
+	</div>
+</body>
+</html>

@@ -785,10 +785,13 @@ class System {
 											<el-tooltip content="刷新列表">
 												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="initData"><i class="fas fa-sync-alt fa-fw"></i> 刷新</a>
 											</el-tooltip>
-											<el-tooltip content="新增公司">
+											<el-tooltip content="新增公司信息">
 												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyNew" ><i class="fas fa-plus fa-fw"></i> 新增</a>
 											</el-tooltip>
-											<el-tooltip content="删除公司">
+											<el-tooltip content="更新公司信息">
+												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyUpdate" ><i class="fas fa-plus fa-sync-alt"></i> 更新</a>
+											</el-tooltip>
+											<el-tooltip content="删除公司信息">
 												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyDelete" ><i class="fas fa-plus fa-fw"></i> 删除</a>
 											</el-tooltip>
 											<el-tooltip content="更新文件系统">
@@ -889,6 +892,121 @@ class System {
 							} ).on( 'deselect', function ( e, dt, type, indexes ) {
 								self.tableSelectedRows = self.datatable.rows( '.selected' ).data().toArray();
 							} );
+						},
+						companyUpdate(){
+							const self = this;
+							let rId = `system-company-container-${_.now()}`;
+							let wnd = null;
+
+							try{
+								if(jsPanel.activePanels.getPanel('jsPanel-company')){
+									jsPanel.activePanels.getPanel('jsPanel-company').close();
+								}
+							}catch(error){
+			
+							}
+							finally{
+								wnd = maxWindow.winCompany("更新公司",`<div id="${rId}"></div>`,null,null); 
+							}
+							let main = {
+								data: {
+									form: {
+										fullname: '',
+										name: '',
+										ospace: '',
+										title: '',
+										web: '',
+										logo: '',
+										icon: '',
+										config: {},
+									},
+									upload: {
+										preLogoImageUrl: '',
+										preIconImageUrl: ''
+									}
+								},
+								template: 	`<el-container>
+												<el-main>
+													<el-form ref="form" :model="form" label-width="80px">
+														<el-form-item label="公司全称">
+															<el-input v-model="form.fullname"></el-input>
+														</el-form-item>
+														<el-form-item label="名称">
+															<el-input v-model="form.name" :disabled="true"></el-input>
+														</el-form-item>
+														<el-form-item label="应用">
+															<el-input v-model="form.ospace" :disabled="true"></el-input>
+														</el-form-item>
+														<el-form-item label="网站">
+															<el-input v-model="form.web"></el-input>
+														</el-form-item>
+														<el-form-item label="标题">
+															<el-input v-model="form.title"></el-input>
+														</el-form-item>
+														<el-form-item label="配置">
+															<el-input v-model="form.config"></el-input>
+														</el-form-item>
+														<el-form-item label="Logo">
+															<img :src="upload.preLogoImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
+															<input type="file" @change="encodeLogoFileAsURL" >
+														</el-form-item>
+														<el-form-item label="Icon">
+															<img :src="upload.preIconImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
+															<input type="file" @change="encodeIconFileAsURL" >
+														</el-form-item>
+														<el-form-item>
+															<el-tooltip content="更新">
+																<a href="javascript:void(0);" class="btn btn-xs btn-success" @click="companySave"><i class="fas fa-update fa-fw"></i> 更新</a>
+															</el-tooltip>
+															<el-tooltip content="取消">
+																<a href="javascript:void(0);" class="btn btn-xs btn-default" @click="closeMe" ><i class="fas fa-plus fa-fw"></i> 取消</a>
+															</el-tooltip>
+														</el-form-item>
+													</el-form>
+												</el-main>
+											</el-container>`,
+								created(){
+									_.extend(this.form,self.tableSelectedRows[0]);
+									this.upload.preLogoImageUrl = this.form.logo;
+									this.upload.preIconImageUrl = this.form.icon;
+								},
+								methods: {
+									encodeLogoFileAsURL(event) {
+										const me = this;
+										var file = event.target.files[0];
+										var reader = new FileReader();
+
+										reader.onloadend = function(){
+											me.upload.preLogoImageUrl = reader.result;
+											_.extend(me.form, {logo: reader.result});
+										}
+										reader.readAsDataURL(file);
+									},
+									encodeIconFileAsURL(event) {
+										const me = this;
+										var file = event.target.files[0];
+										var reader = new FileReader();
+
+										reader.onloadend = function(){
+											me.upload.preIconImageUrl = reader.result;
+											_.extend(me.form, {icon: reader.result});
+										}
+										reader.readAsDataURL(file);
+									},
+									companySave() {
+										let rtn = companyHandler.companyUpdate(this.form);
+										if(rtn == 1){
+											self.initData();
+											wnd.close();
+										}
+									},
+									closeMe(){
+										wnd.close();
+									}
+								}
+							};
+
+							new Vue(main).$mount(`#${rId}`);
 						},
 						companyNew(){
 							const self = this;

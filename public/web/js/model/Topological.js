@@ -25,6 +25,39 @@ class Topological {
     init() {
         const inst = this;
 
+        // 拓扑分析
+        Vue.component("topological-analysis",{
+            delimiters: ['${', '}'],
+            template:  `<el-container>
+                            <el-header style="height:50px;line-height:50px;padding:0 10px;">
+                                <el-input placeholder="请输入内容" v-model="search.term" class="input-with-select">
+                                    <el-select v-model="search.select" slot="prepend" placeholder="请选择">
+                                        <el-option label="所有" value="#/matrix/"></el-option>
+                                        <el-option label="事件" value="#/matrix/devops/event/"></el-option>
+                                        <el-option label="性能" value="#/matrix/devops/performance/"></el-option>
+                                        <el-option label="日志" value="#/matrix/devops/log/"></el-option>
+                                    </el-select>
+                                    <el-button slot="append" icon="el-icon-search"></el-button>
+                                    <el-divider direction="vertical"></el-divider>
+                                    <el-button slot="append" icon="fas fa-location-arrow" style="color:#2b90e1;"></el-button>
+                                </el-input>
+                            </el-header>
+                            <el-main>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+                    search: {
+                        term: "",
+                        select: ""
+                    }
+                }
+            },
+            methods:{
+
+            }
+        })
+
         // 拓扑分析搜索框
         Vue.component("graph-view-search",{
             delimiters: ['${', '}'],
@@ -40,12 +73,13 @@ class Topological {
                                 :fetch-suggestions="querySearch"
                                 placeholder="图搜索"
                                 @select="handleSelect"
-                                style="width:93%;">
+                                style="width:96%;">
                             </el-autocomplete>
-                            <a href="javascript:void(0);" class="btn btn-sm btn-primary" @click="search">搜索</a>
+                            <el-button slot="append" type="success" icon="fas fa-search"  @click="search" size="default"></el-button>
                         </div>`,
             data(){
                 return{
+                    value: "",
                     terms: [],
                     term: "",
                 }
@@ -85,10 +119,22 @@ class Topological {
                         self.search();
                     }
                 })
+
+                // $(".el-input--small .el-input__inner,.el-select-dropdown__item").css({
+                //     "fontSize": "12px",
+                //     "height": "29px",
+                //     "lineHeight": "28px",
+                //     "background": "#f7f7f7",
+                //     "borderRadius": "0px",
+                //     "border": "unset"
+                // })
             },
             methods:{
                 search(){
                     this.$root.$refs.graphViewRef.search( encodeURIComponent(this.term) );
+
+                    //加入搜索历史
+                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.history.push({id:objectHash.sha1(this.term), term:this.term, time: _.now()});
                 },
                 querySearch(queryString, cb) {
                     var terms = this.terms;
@@ -102,7 +148,9 @@ class Topological {
                     };
                 },
                 loadAll() {
+                    let step = !_.isEmpty(this.step)?this.step:'';
                     return [
+                        { value: `match("biz*")-[*${step}]->()`},
                         // { value: `match (m:"biz:查账系统")-[*]->(p:"linux:linux[1-5]")-[*]->(q:"esx:esx4") return status path m,p,q ALL PATH`},
                         // { value: `match ("biz:查账系统")-[*]->("esx:esx1") return name,status`},
                         // { value: `match ("biz:查账系统")-[*]->("linux:linux[0-9]")-[*1]->("esx:esx[1-4]")`},
@@ -830,7 +878,7 @@ class Topological {
             props:{
                 id: String
             },
-            template: `<probe-tree-component :id="'graph-tree-'+id" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></probe-tree-component>`
+            template: `<entity-tree-component :id="'graph-tree-'+id" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>`
         })
 
         //edges关系维护
@@ -950,7 +998,7 @@ class Topological {
                             "event-summary-component",
                             "search-preset-component",
                             "search-base-component",
-                            "probe-tree-component"],function() {
+                            "entity-tree-component"],function() {
             $(function() {
 
                 
@@ -974,7 +1022,7 @@ class Topological {
                     model: null
                 }
             },
-            template: `<topological-graph-component :id="id" :graphData="model"></topological-graph-component>`,
+            template: `<topological-graph-component :id="id" :graphData="model" ref="graphViewContainerInst"></topological-graph-component>`,
             mounted() {
                 
             },
@@ -1081,19 +1129,21 @@ class Topological {
                         }
 
                         let tab = {
-                            title: node.value, name: `diagnosis-${id}`, type: 'diagnosis', child:[
-                            {title:'属性', name:`diagnosis-profile-${id}`, type: 'profile', model: self.model},
-                            {title:'事件', name:`diagnosis-event-${id}`, type: 'event', model: self.model},
-                            {title:'性能', name:`diagnosis-performance-${id}`, type: 'performance', model: self.model},
-                            {title:'日志', name:`diagnosis-log-${id}`, type: 'log', model: self.model},
-                            {title:'工单', name:`diagnosis-ticket-${id}`, type: 'ticket', model: self.model},
-                            {title:'文件', name:`diagnosis-file-${id}`, type: 'file', model: self.model}
-                        ]};
+                            title: node.value, name: `diagnosis-${id}`, type: 'diagnosis', child:_.map(self.model.template,function(v){
+                                return {title: v.title, name:`diagnosis-${v.name}-${id}`, type: v.type, model: self.model};
+                            })};
+
                         self.activeIndex = tab.name;
                         self.tabs.push(tab);
                         self.subIndex = _.first(tab.child).name;
+                        
                     } catch(err){
                         console.log(err)
+                    } finally{
+                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                        //graph.getView().setTranslate(20,20);//将画布放到容器中间
+                        var highlight = new mxCellHighlight(graph, '#ff0000', 3);
+                        highlight.highlight(graph.view.getState(node.cell));
                     }
                     
                 },
@@ -1246,9 +1296,7 @@ class Topological {
                                 <graph-view-edges :id="'graph-view-edges-'+id" ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :id="'topological-view-main-'+id">
-                                <el-main style="overflow:hidden;padding: 0px;">
-                                    <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
-                                </el-main>
+                                <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
                             </el-container>
                             <el-aside :id="'topological-view-right-'+id" style="height:100%;overflow:hidden;">
                                 <graph-view-diagnosis :id="'graph-diagnosis-'+id" ref="graphDiagnosisRef"></graph-view-diagnosis>
@@ -1257,8 +1305,7 @@ class Topological {
             data: {
                 id: randomId,
                 splitInst: null,
-                model: null,
-                selectedCell: null
+                model: null
             },
             components:{
                 'graph-view-diagnosis': graphViewDiagnosis,
@@ -1266,21 +1313,23 @@ class Topological {
                 'graph-view-edges': graphViewEdges
             },
             created(){
+                
                 try {
-                    if(mx.urlParams['item']){
+                    
+                    if(!_.isEmpty(mx.urlParams['item'])){
                         inst.URL_PARAMS_ITEM = window.URL_PARAMS_ITEM = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['item']))));
                         inst.graphScript = [ { value: `${inst.URL_PARAMS_ITEM.fullname}` } ];
                     }
-
-                    if(mx.urlParams['data']) {
+                    
+                    if(!_.isEmpty(mx.urlParams['data'])) {
                         inst.graphScript = [{value:decodeURIComponent(window.atob(mx.urlParams['data']))}];
                     }
                     
-                    if(mx.urlParams['cfg']){
+                    if(!_.isEmpty(mx.urlParams['cfg'])){
                         inst.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
                     }
 
-                    if(mx.urlParams['graph']){
+                    if(!_.isEmpty(mx.urlParams['graph'])){
                         inst.URL_PARAMS_GRAPH = window.URL_PARAMS_GRAPH = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['graph']))));
                     }
                     
@@ -1308,10 +1357,10 @@ class Topological {
             
                     })();
                 } catch(err){
-                    inst.URL_PARAMS_ITEM = null;
-                    inst.URL_PARAMS_CFG = null;
-                    inst.graphScript = null;
-                    inst.URL_PARAMS_GRAPH = null;
+                    // inst.URL_PARAMS_ITEM = null;
+                    // inst.URL_PARAMS_CFG = null;
+                    // inst.graphScript = null;
+                    // inst.URL_PARAMS_GRAPH = null;
                 }
             },
             mounted(){
@@ -1418,6 +1467,44 @@ class Topological {
                         }
                     };
                 },
+                cellSelect(cell){
+                    let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                    
+                    if (cell != null){
+						var overlays = graph.getCellOverlays(cell);
+						
+						if (overlays == null) {
+							// Creates a new overlay with an image and a tooltip
+							var overlay = new mxCellOverlay(new mxImage('/fs/assets/images/files/png/check.png?type=open&issys=true', 16, 16),'Overlay tooltip');
+
+							// Installs a handler for clicks on the overlay							
+							overlay.addListener(mxEvent.CLICK, function(sender, evt2)
+							{
+								
+							});
+							
+							// Sets the overlay for the cell in the graph
+							graph.addCellOverlay(cell, overlay);
+						} else {
+							graph.removeCellOverlays(cell);
+						}
+                    }
+
+                    try {
+                        if( window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`) ){
+                            window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).close();
+                        }
+                    } catch(err){
+                        
+                    }
+                    let wnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`);
+                    
+                    new Vue({
+                        delimiters: ['#{', '}#'],
+                        template: `<topological-analysis></topological-analysis>`,
+                    }).$mount("#topological-analysis-container")
+                    
+                },
                 contextMenu(){
                     const self = this;
 
@@ -1428,7 +1515,8 @@ class Topological {
                         delay: 10,
                         hideOnSecondTrigger: true,
                         build: function($trigger, e) {
-                            let cell = self.selectedCell;
+                            let graph = self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph;
+                            let cell = graph.selectedCell;
                             
                             if(!cell) return false;
 
@@ -1446,6 +1534,8 @@ class Topological {
                                         self.edgesSearch({direction:"in",node:node});
                                     } else if(_.includes(key,'edges_new')){
                                         self.$root.$refs.graphEdgesRef.edgesTabAdd( node );
+                                    } else if(_.includes(key,'select_cell')){
+                                        self.cellSelect( cell );
                                     }
                                 },
                                 items: {
@@ -1455,27 +1545,23 @@ class Topological {
                                     },
                                     "m20":"----------",
                                     "m30_search_out": {
-                                        "name": "出度查询",
+                                        "name": "起点图查询",
                                         "icon": "fas fa-angle-up"
                                     },
                                     "m40_search_in": {
-                                        "name": "入度查询",
+                                        "name": "终点图查询",
                                         "icon": "fas fa-angle-down"
                                     },
                                     "m50":"----------",
                                     "m60_edges_new": {
                                         "name": "关系维护",
-                                        "icon": "fas fa-angle-up"
+                                        "icon": "fas fa-network-wired"
                                     },
-                                    // "m70":"----------",
-                                    // "m80_clone": {
-                                    //     "name": "克隆实体",
-                                    //     "icon": "fas fa-plus"
-                                    // },
-                                    // "m90_delete": {
-                                    //     "name": "删除实体",
-                                    //     "icon": "fas fa-minus"
-                                    // },
+                                    "m70":"----------",
+                                    "m80_select_cell": {
+                                        "name": "选择/取消实体",
+                                        "icon": "far fa-check-square"
+                                    },
                                     "m100":"----------",
                                     "m110_spath": {
                                         "name": "选定为路径查询起点",
@@ -1505,26 +1591,19 @@ class Topological {
                     } else{
                         term = `match ('${node.node.id}') <- [*] - ()`;
                     }
-                    console.log(123,term, this.$root.$refs.graphViewRef.$data)
+                    
                     //this.$root.$refs.graphViewRef.term.push(term);
                     this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
-                },
-                toggleTheme(){
-                    let theme = localStorage.getItem("TOPOLOGICAL-GRAPH-THEME");
-            
-                    if(theme === 'dark'){
-                        $(this.app.$el).find(".panel").removeClass("panel-inverse");
-                        $(this.app.$el).find(".panel").addClass("panel-default");
-                        $("body").css("background","#EBEBF3");
-                        theme = 'light';
-                    } else {
-                        $(this.app.$el).find(".panel").removeClass("panel-default");
-                        $(this.app.$el).find(".panel").addClass("panel-inverse");
-                        $("body").css("background","#000000");
-                        theme = 'dark';
-                    }
-            
-                    localStorage.setItem("TOPOLOGICAL-GRAPH-THEME",theme);
+                    //加入搜索历史
+                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.history.push({id:objectHash.sha1(term),term:term, time: _.now()});
+
+                    _.delay(()=>{
+                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                        let graphModel = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph.getModel();
+                        let geo = graph.getCellGeometry(node.cell);
+                        graphModel.setGeometry(node.cell, geo);
+                        graph.refresh();
+                    },1000)
                 }
             },
             destroyed: function () {

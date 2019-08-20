@@ -28,26 +28,6 @@
 
 <style>
 	
-	/* 全屏模式 */
-	header#header{
-		display:none;
-	}
-	aside>#sidebar{
-		display:none;
-	}
-	.page-header-fixed{
-		padding-top: 0px;
-	}
-
-	.page-sidebar-minified .sidebar-bg{
-		width: 0px;
-	}
-
-	.page-sidebar-minified .content{
-		margin-left: 0px;
-	)
-
-
 	body {
 		background-color: #d9e0e7;
 	}
@@ -64,34 +44,44 @@
   }
 
 
-		.el-table .warning-row {
-			background: rgb(120, 250, 137);
-		}
+	.el-table .warning-row {
+		background: rgb(120, 250, 137);
+	}
 
-		.el-table .success-row {
-			background: #50bd15;
-		}
-		.el-row {
-			margin-bottom: 20px;
-		}
-		.el-col {
-		  border-radius: 4px;
-		}
-		
-		.grid-content {
-			background: #f7f7f7;
-		  	border-radius: 4px;
-		  	min-height: 360px;
-		}
-		.row-bg {
-		  padding: 10px 0;
-		  background-color: #f9fafc;
-		}
-		.divcss5{position:relative}
-		.divcss5-c1explain{position:absolute;right:10px;bottom:10px} 
-		.divcss5-c2explain{position:absolute;right:10px;bottom:10px} 
-		.divcss5-c5explain{position:absolute;right:10px;top:10px}
+	.el-table .success-row {
+		background: #50bd15;
+	}
+	.el-row {
+		margin-bottom: 20px;
+	}
+	.el-col {
+		border-radius: 4px;
+	}
+	
+	.grid-content {
+		background: #f7f7f7;
+		border-radius: 4px;
+		min-height: 360px;
+	}
+	.row-bg {
+		padding: 10px 0;
+		background-color: #f9fafc;
+	}
+	.divcss5{position:relative}
+	.divcss5-c1explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c2explain{position:absolute;right:10px;bottom:10px} 
+	.divcss5-c5explain{position:absolute;right:10px;top:10px}
 
+		/* 全屏模式 */
+	header#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+	footer#footer{
+        display:flex!important;
+    }
 </style>
 <main id="content" class="content">
 	<div id="app">	
@@ -114,13 +104,13 @@
 			},
 			template: `<el-container>
 							<el-header style="height: 40px;line-height:40px;" > 
-								<el-row :gutter="20">
-									<el-col :span="5"  ><font  color="50bd15"><b>能耗监测</b></font></el-col>
-									<el-col :span="3"  :offset="5" >
+								<el-row :gutter="10">
+									<el-col :span="2" ><font  color="50bd15"><b>能耗监测</b></font></el-col>
+									<el-col :span="2"  :offset="13" >
 										<el-tag ref="echart_1" style="cursor:pointer" type="success" >详 情</el-tag>
 									</el-col>
-									<el-col :span="7" :offset="3" > 
-										<el-select v-model="value_rl" clearable   @change="upecharts($event)"  placeholder="请选择">
+									<el-col :span="7"  > 
+										<el-select v-model="value_rl"   placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
 											:key="item.value"
@@ -132,23 +122,20 @@
 								</el-row>
 								<hr>
 							</el-header>
-							<el-main>
-
-								<el-row :gutter="1">
-									<el-col :span="8"><div id="echart-container1_Pic" style="width:98%;height:280px;"></div></el-col>
-									<el-col :span="8"><div id="echart-container2_Pic" style="width:98%;height:280px;"></div></el-col>
-									<el-col :span="8"><div id="echart-container3_Pic" style="width:98%;height:280px;"></div></el-col>
-								</el-row>
+							<el-main style="padding:5px;"><div class="divcss5"> 
+								<div :id="id+'echart-container'" style="width:98%;height:300px;"></div>
+						
+								</div>
 								</el-main>	
 						</el-container>	`,
 			data(){
 				return {
 					value_rl: '',
 					selectVal:[],			//下拉框数据
-					option1 : {
+					option : {
 						title : {
-							text: '多园区PUE',
-							x:'center',
+							text: '多园区PUE                              北京基地                         国际信息港数据中心（1号地）',
+							x:'115px',
 							y:'240px'
 						},
 						tooltip : {
@@ -161,73 +148,9 @@
 								z: 3,
 								min: 1,
 								max: 2,
+								center: ['20%', '50%'],    // 默认全局居中
 								splitNumber: 5,
-								
-								axisLine: {            // 坐标轴线
-									lineStyle: {       // 属性lineStyle控制线条样式
-										width: 7
-									}
-								},
-								axisTick: {            // 坐标轴小标记
-									length: 10,        // 属性length控制线长
-									lineStyle: {       // 属性lineStyle控制线条样式
-										color: 'auto'
-									}
-								},
-								splitLine: {           // 分隔线
-									length: 10,         // 属性length控制线长
-									lineStyle: {       // 属性lineStyle（详见lineStyle）控制线条样式
-										color: 'auto'
-									}
-								},
-								axisLabel: {
-									backgroundColor: 'auto',
-									borderRadius: 2,
-									color: '#eee',
-									padding: 3,
-									textShadowBlur: 2,
-									textShadowOffsetX: 1,
-									textShadowOffsetY: 1,
-									textShadowColor: '#222'
-								},
-								pointer: {
-								width:3
-								},
-								title : {
-									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
-									offsetCenter: ['0', '-120'],
-									fontWeight: 'bolder',
-									fontSize: 15,
-									fontStyle: 'italic'
-								},
-								detail : {
-									textStyle: {
-                               		 fontSize: 15,
-                            		},
-									offsetCenter: ['0', '70'],
-								},
-								data:[	]
-							}
-						]
-					},
-					option2 : {
-						title : {
-							text: '',
-							x:'center',
-							y:'240px'
-						},
-						tooltip : {
-							formatter: "{a} <br/>{c} {b}"
-						},
-						series : [
-							{
-								name: '',
-								type: 'gauge',
-								z: 3,
-								min: 1,
-								max: 2,
-								splitNumber: 5,
-							
+								radius: '65%',
 								axisLine: {            // 坐标轴线
 									lineStyle: {       // 属性lineStyle控制线条样式
 										width: 10
@@ -255,9 +178,6 @@
 									textShadowOffsetY: 1,
 									textShadowColor: '#222'
 								},
-								pointer: {
-									width:3
-								},
 								title : {
 									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
 									offsetCenter: ['0', '-120'],
@@ -272,27 +192,16 @@
 									offsetCenter: ['0', '70'],
 								},
 								data:[	]
-							}
-						]
-					},
-					option3 : {
-						title : {
-							text: '',
-							x:'center',
-							y:'240px'
-						},
-						tooltip : {
-							formatter: "{a} <br/>{c} {b}"
-						},
-						series : [
+							},
 							{
 								name: '',
 								type: 'gauge',
 								z: 3,
 								min: 1,
 								max: 2,
+								center: ['50%', '50%'],    // 默认全局居中
 								splitNumber: 5,
-							
+								radius: '65%',
 								axisLine: {            // 坐标轴线
 									lineStyle: {       // 属性lineStyle控制线条样式
 										width: 10
@@ -320,16 +229,13 @@
 									textShadowOffsetY: 1,
 									textShadowColor: '#222'
 								},
-								pointer: {
-									width:3
-								},
 								title : {
 									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
 									offsetCenter: ['0', '-120'],
 									fontWeight: 'bolder',
 									fontSize: 15,
 									fontStyle: 'italic'
-								},
+								},	
 								detail : {
 									textStyle: {
                                		 fontSize: 15,
@@ -337,7 +243,60 @@
 									offsetCenter: ['0', '70'],
 								},
 								data:[	]
-							}
+							},
+							{
+								name: '',
+								type: 'gauge',
+								z: 3,
+								min: 1,
+								max: 2,
+								center: ['80%', '50%'],    // 默认全局居中
+								splitNumber: 5,
+								radius: '65%',
+								axisLine: {            // 坐标轴线
+									lineStyle: {       // 属性lineStyle控制线条样式
+										width: 10
+									}
+								},
+								axisTick: {            // 坐标轴小标记
+									length: 15,        // 属性length控制线长
+									lineStyle: {       // 属性lineStyle控制线条样式
+										color: 'auto'
+									}
+								},
+								splitLine: {           // 分隔线
+									length: 15,         // 属性length控制线长
+									lineStyle: {       // 属性lineStyle（详见lineStyle）控制线条样式
+										color: 'auto'
+									}
+								},
+								axisLabel: {
+									backgroundColor: 'auto',
+									borderRadius: 2,
+									color: '#eee',
+									padding: 3,
+									textShadowBlur: 2,
+									textShadowOffsetX: 1,
+									textShadowOffsetY: 1,
+									textShadowColor: '#222'
+								},
+								title : {
+									// 其余属性默认使用全局文本样式，详见TEXTSTYLE
+									offsetCenter: ['0', '-120'],
+									fontWeight: 'bolder',
+									fontSize: 15,
+									fontStyle: 'italic'
+								},  
+								detail : {
+									textStyle: {
+                               		 fontSize: 15,
+                            		},
+									offsetCenter: ['0', '70'],
+								},
+								data:[]
+							},
+
+						
 						]
 					}	
 				}
@@ -350,64 +309,26 @@
 			},
 			methods:{
 				upecharts(value_rl){   
-
-						 myChart1 = echarts.init(document.getElementById("echart-container1_Pic"));
-						 myChart2 = echarts.init(document.getElementById("echart-container2_Pic"));
-						 myChart3 = echarts.init(document.getElementById("echart-container3_Pic"));
-					if (value_rl == '选项2') {  
-						this.modelC1_1 = fsHandler.callFsJScript("/capacityRs/consumptionCharts1_1.js", null).message;
+					if (value_rl == '选项1') {  
 						
-					
-						this.selectVal=this.modelC1_1.selectData;
-						this.option1.title.text = this.modelC1_1.tittle[0],
-						this.option1.series[0].name = this.modelC1_1.seriesData[0].name,
-						this.option1.series[0].data = this.modelC1_1.seriesData[0].data,
-
-						this.option2.title.text = this.modelC1_1.tittle[1],
-						this.option2.series[0].name = this.modelC1_1.seriesData[1].name,
-						this.option2.series[0].data = this.modelC1_1.seriesData[1].data,
-
-						this.option3.title.text = this.modelC1_1.tittle[2],
-						this.option3.series[0].name = this.modelC1_1.seriesData[2].name,
-						this.option3.series[0].data = this.modelC1_1.seriesData[2].data,
-
-						myChart1.setOption(this.option1,true);
-						myChart2.setOption(this.option2,true);
-						myChart3.setOption(this.option3,true);
-
-
-
-
 					} else {
 
 						this.selectVal=this.modelC1.selectData;
 
+						let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
+						
+						console.log('name1'+this.modelC1.seriesData[0].name)
+						this.option.series[0].name = this.modelC1.seriesData[0].name,
+						this.option.series[0].data = this.modelC1.seriesData[0].data,
+						this.option.series[1].name = this.modelC1.seriesData[0].name,
+						this.option.series[1].data = this.modelC1.seriesData[0].data,
+						this.option.series[2].name = this.modelC1.seriesData[0].name,
+						this.option.series[2].data = this.modelC1.seriesData[0].data,
 
-						this.option1.title.text = this.modelC1.tittle[0],
-						this.option1.series[0].name = this.modelC1.seriesData[0].name,
-						this.option1.series[0].data = this.modelC1.seriesData[0].data,
-
-						this.option2.title.text = this.modelC1.tittle[1],
-						this.option2.series[0].name = this.modelC1.seriesData[1].name,
-						this.option2.series[0].data = this.modelC1.seriesData[1].data,
-
-						this.option3.title.text = this.modelC1.tittle[2],
-						this.option3.series[0].name = this.modelC1.seriesData[2].name,
-						this.option3.series[0].data = this.modelC1.seriesData[2].data,
 					
-						myChart1.setOption(this.option1,true);
-						myChart2.setOption(this.option2,true);
-						myChart3.setOption(this.option3,true);
-
+						myChart.setOption(this.option);
+						window.addEventListener('resize',function() {myChart.resize()});
 					}
-
-					
-					window.addEventListener('resize',function() {
-								myChart1.resize(),
-								myChart2.resize(),
-								myChart3.resize()
-							}
-							);
 				}
 			}
 		})
@@ -422,15 +343,15 @@
 			},
 			template: `<el-container>
 							<el-header style="height: 40px;line-height:40px;" > 
-								<el-row :gutter="20">
-									<el-col :span="4" ><font  color="50bd15"><b>能耗占比</b></font>
+								<el-row :gutter="10">
+									<el-col :span="2" ><font  color="50bd15"><b>能耗占比</b></font>
 									</el-col>
-									<el-col :span="6"  :offset="5" >
+									<el-col :span="5"  :offset="7" >
 										<el-tag ref="echart_2" style="cursor:pointer" type="success" v-on:click="upbutton('echart2_container')">结 构</el-tag>
 										<el-tag ref="echart_3" style="cursor:pointer" type="info" 	v-on:click="upbutton('echart3_container')">园 区</el-tag>
 									</el-col>
 
-									<el-col :span="7" :offset="1" > 
+									<el-col :span="7" :offset="3" > 
 										<el-select v-model="value_rl"  multiple placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
@@ -443,7 +364,7 @@
 								</el-row>
 								<hr>
 							</el-header>
-							<el-main><div id="echart2_container"  style="width:99%;height:300px; "></div></el-main>	
+							<el-main style="padding:5px;"><div id="echart2_container"  style="width:99%;height:300px; "></div></el-main>	
 						</el-container>	`,
 			data(){
 				return {
@@ -451,6 +372,8 @@
 					value_rl: '',
 					selectVal:[],			//下拉框数据
 					option:{}
+					
+
 				}
 
 			},
@@ -529,7 +452,7 @@
 							 optionBar.legend.data =this.modelC2.legendVal_Bar,  
 							 optionBar.xAxis.data =this.modelC2.xAxisVal_Bar,  //X轴名称
 							 optionBar.series = this.modelC2.seriesVal_bar,//柱状图展示数据	
-							 this.option=optionBar;
+							this.option=optionBar;
 							myChart.setOption(this.option,true);
 							this.$refs.echart_2.type = 'info'
 							this.$refs.echart_3.type = 'success'
@@ -556,7 +479,7 @@
 									<el-col :span="8" ><font  color="50bd15"><b>功率曲线</b></font>
 									</el-col>
 									<el-col :span="8" :offset="8" > 
-										<el-select v-model="value_rl"  clearable   @change="upecharts($event)"   placeholder="请选择">
+										<el-select v-model="value_rl" placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
 											:key="item.value"
@@ -568,7 +491,7 @@
 								</el-row>
 								<hr>
 							</el-header>
-							<el-main>	<div :id="id+'echart-container'" style="width:98%;height:300px;"></div> </el-main>	
+							<el-main style="padding:5px;">	<div :id="id+'echart-container'" style="width:98%;height:300px;"></div> </el-main>	
 						</el-container>	`,
 			data(){
 				return {
@@ -576,7 +499,6 @@
 					c2_jfgs:'', 			//主机房机柜数目35个
 					c2hxjfjgsm:'',			//核心机房机柜数目0个
 					selectVal:[],			//下拉框数据
-					modelC4_1: Object,
 
 					option : {
 						tooltip: {
@@ -593,7 +515,7 @@
 						},
 						xAxis: {
 							type: 'category',
-							
+							boundaryGap: false,
 							data: []
 						},
 						yAxis: {
@@ -612,31 +534,18 @@
 			},
 			methods:{
 				upecharts(value_rl){   
-					 myChart = echarts.init(document.getElementById(this.id+'echart-container'));
 					if (value_rl == '选项1') {  
-
-						this.modelC4_1 = fsHandler.callFsJScript("/capacityRs/consumptionCharts3_1.js", null).message;
-
-						console.log("modelC4_1"+this.modelC4_1.selectData);
-						this.selectVal=this.modelC4_1.selectData;
-							//趋势图
-							
-						this.option.legend.data =this.modelC4_1.legendVal_line,  
-						this.option.xAxis.data =this.modelC4_1.xAxisVal_line,  //X轴名称
-						this.option.series = this.modelC4_1.seriesVal_line,	
-						myChart.setOption(this.option,true)
 						
-
 					} else {
 							this.selectVal=this.modelC4.selectData;
 							//趋势图
-							
+							let myChart = echarts.init(document.getElementById(this.id+'echart-container'));
 							this.option.legend.data =this.modelC4.legendVal_line,  
 							this.option.xAxis.data =this.modelC4.xAxisVal_line,  //X轴名称
 							this.option.series = this.modelC4.seriesVal_line,	
 							myChart.setOption(this.option,true)
+							window.addEventListener('resize',function() {myChart.resize()});
 					}
-					window.addEventListener('resize',function() {myChart.resize()});
 				}
 			}
 		})
@@ -646,14 +555,13 @@
 		new Vue({
 
 			delimiters: ['#{', '}#'],
-			template: `<el-container style="background:#ffffff;height:calc(100vh - 90px);">
+			template: `<el-container style="background:#ffffff;height:calc(100vh - 30px);">
 							<el-main>
-							
-								<el-row :gutter="20">
-									<el-col :span="12"><div class="grid-content">  <echart_1 id="echart_1" :modelC1="modelC1" ></echart_1></div></el-col>
-									<el-col :span="12"><div class="grid-content">  <echart_2 id="echart_2" :modelC2="modelC2" ></echart_2></div></el-col>
+								<el-row :gutter="10">
+									<el-col :span="14"><div class="grid-content">  <echart_1 id="echart_1" :modelC1="modelC1" ></echart_1></div></el-col>
+									<el-col :span="10"><div class="grid-content">  <echart_2 id="echart_2" :modelC2="modelC2" ></echart_2></div></el-col>
 								</el-row>
-								<el-row :gutter="20">
+								<el-row :gutter="10">
 									<el-col :span="24"><div class="grid-content"><echart_4 id="echart_4" :modelC4="modelC4" ></echart_4></div></el-col> 
 								</el-row>
 							</el-main>
@@ -668,7 +576,7 @@
 			},
 			created(){
 
-					let init = function(){
+				let init = function(){
                     let cfg = {"header":false, "sidebar":false, "sidebar-bg": false, "footer": false};
 					_.forEach(cfg,function(v,k){
 		
@@ -699,9 +607,7 @@
 				_.delay(()=>{
 					init();
 				},500)
-
-
-
+				
 				this.modelC1 = fsHandler.callFsJScript("/capacityRs/consumptionCharts1.js", null).message;
 				this.modelC2 = fsHandler.callFsJScript("/capacityRs/consumptionCharts2.js", null).message;
 				this.modelC4 = fsHandler.callFsJScript("/capacityRs/consumptionCharts3.js", null).message;

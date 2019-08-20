@@ -253,6 +253,10 @@
             .fs-view-component{
                 height: 100%;
             }
+
+            .el-icon-caret-right:before{
+                color: #333333;
+            }
     
         </style>
     
@@ -1711,7 +1715,7 @@
     
                     $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
                 },
-                newDir: function() {
+                newDir() {
                     const self = this
     
                     let _name = '新文件夹_' + _.now();
@@ -1724,10 +1728,10 @@
                         self.load();
                     }
                 },
-                newFile: function() {
+                newFile() {
                     fileSystem.fileNew(this.rootPath,this.load);
                 },
-                info: function(node){
+                info(node){
                     const self = this
     
                     let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
@@ -1922,7 +1926,7 @@
                     })
     
                 },
-                copyIt: function(item){
+                copyIt(item){
                     const self = this;
     
                     self.selectedItem = [];
@@ -1937,7 +1941,7 @@
                     window.fsSelectedItem = _.cloneDeep(self.selectedItem);
                     alertify.log(`已复制 ${window.fsSelectedItem.length} 项`);
                 },
-                moveIt: function(){
+                moveIt(){
                     const self = this;
                     
                     
@@ -1970,7 +1974,7 @@
                         }
                     });
                 },
-                pasteIt: function(){
+                pasteIt(){
                     const self = this
     
                     if(_.isEmpty(window.fsSelectedItem)) {
@@ -2002,86 +2006,26 @@
                         }
                     });
                 },
-                moveTo: function(){
+                moveTo(){
                     const self = this;
                     
                     if(_.isEmpty(window.fsSelectedItem)) {
                         alertify.log("请选择移动内容")
                         return false;
                     }
-                    
-                    alertify.prompt("请输入目标目录", function (evt, str) {
-                        // str is the input text
-                        if (evt) {
-                            alertify.confirm(`确认要将下列所选目录或文件移动到 ${str}? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
-                                if (e) {
-                                    try {
-                                        let rtn = true;
-                                        _.forEach(window.fsSelectedItem,function(v){
-                                            let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), str);
-                                            if(_rtn===0){
-                                                rtn = false;
-                                            }
-                                        })
-                                        if(rtn){
-                                            alertify.success("移动成功 " + str);
-                                            self.load();
-                                        }
-                                    }
-                                    catch(error){}
-                                    finally{
-                                        window.fsSelectedItem = [];
-                                    }
-                                } else {
-                                    
-                                }
-                            });
-                        } else {
-                            // user clicked "cancel"
-                        }
-                    }, self.rootPath);
-                    $(".alertify-prompt .alertify-message").css('height','5vh');
+                    const app = self.root;
+                    fileSystem.fileMoveTo(app,window.fsSelectedItem,this.load);
     
                 },
-                copyTo: function(){
+                copyTo(){
                     const self = this
     
                     if(_.isEmpty(window.fsSelectedItem)) {
                         alertify.log("请选择复制内容")
                         return false;
                     }
-    
-                    alertify.prompt("请输入目标目录", function (evt, str) {
-                        // str is the input text
-                        if (evt) {
-                            alertify.confirm(`确认要将下列所选目录或文件复制到 ${str}? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
-                                if (e) {
-                                    try {
-                                        let rtn = true;
-                                        _.forEach(window.fsSelectedItem,function(v){
-                                            let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), str);
-                                            if(_rtn===0){
-                                                rtn = false;
-                                            }
-                                        })
-                                        if(rtn){
-                                            alertify.success("复制成功 " + str);
-                                            self.load();
-                                        }
-                                    }
-                                    catch(error){}
-                                    finally{
-                                        window.fsSelectedItem = [];
-                                    }
-                                } else {
-                                    
-                                }
-                            });
-                        } else {
-                            // user clicked "cancel"
-                        }
-                    }, self.rootPath);
-                    $(".alertify-prompt .alertify-message").css('height','5vh');
+                    
+                    fileSystem.fileCopyTo(null,window.fsSelectedItem,this.load);
     
                 },
                 deleteThem: function() {

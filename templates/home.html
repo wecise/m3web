@@ -225,6 +225,14 @@
         display:none;
     }
 
+    /* 全屏模式 */
+	header#header{
+		display:initial!important;
+	}
+    footer#footer{
+		display:flex!important;
+	}
+	
 </style>
 
 <main id="content" class="content">
@@ -234,8 +242,8 @@
 <!-- Sortable JS-->
 <script src="{{AppSubUrl}}/web/vendor/Sortable/Sortable.min.js"></script>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-editor-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
@@ -257,7 +265,7 @@
                                         <i class="fa fa-question"></i>
                                     </a>
                                 </div-->
-                                <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;border-left:none;">
+                                <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;">
                                 <div class="input-group-btn">
                                     <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                                 </div>

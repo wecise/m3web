@@ -33,8 +33,7 @@ class Event {
                             "event-diagnosis-datatable-component",
                             "event-summary-component",
                             "search-preset-component",
-                            "search-base-component",
-                            "vue-timeline-component"],function() {
+                            "search-base-component"],function() {
             $(function() {
 
                 // 告警轨迹
@@ -776,6 +775,7 @@ class Event {
                         self.tableData = self.model;
 
                         self.init();
+
                     },
                     methods: {
                         init(){    
@@ -790,36 +790,38 @@ class Event {
                             self.menuData = _.groupBy(_.keys(self.model.rows[0]),function(v){
                                 return v.substr(0,1);
                             })
-                            
-                            //初始化维度选择Table
-                            var table = $(`#${self.id}-table`).DataTable(_.extend(
-                                                                        self.dimensionData.options,{
-                                                                            data: self.dimensionData.rows,
-                                                                            columns: self.dimensionData.columns
-                                                                        }));
-                            
-                            table.on( 'select', function ( e, dt, type, indexes ) {
-                                self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
+
+                            _.delay(function(){
+                                //初始化维度选择Table
+                                let table = $(`#${self.id}-table`).DataTable(_.extend(self.dimensionData.options,{
+                                                                                data: self.dimensionData.rows,
+                                                                                columns: self.dimensionData.columns
+                                                                            }));
+                                
+                                table.on( 'select', function ( e, dt, type, indexes ) {
+                                    self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
+                                    self.handlerFetchData(self.dimensionData.selected);
+                                } ).on( 'deselect', function ( e, dt, type, indexes ) {
+                                    self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
+                                    self.handlerFetchData(self.dimensionData.selected);
+                                } );
+
+                                // table style
+                                $(self.$el).find("thead:eq(0)").css("display","none");
+
+                                Split(['#left-panel', '#right-panel'], {
+                                    sizes: [45, 55],
+                                    gutterSize: 5,
+                                    cursor: 'col-resize',
+                                    direction: 'horizontal',
+                                });
+
+                                // 默认选择第一行
+                                $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
+                                self.dimensionData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
                                 self.handlerFetchData(self.dimensionData.selected);
-                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
-                                self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
-                                self.handlerFetchData(self.dimensionData.selected);
-                            } );
-
-                            // table style
-                            $(self.$el).find("thead").css("display","none");
-
-                            Split(['#left-panel', '#right-panel'], {
-                                sizes: [45, 55],
-                                gutterSize: 5,
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                            });
-
-                            // 默认选择第一行
-                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
-                            self.dimensionData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
-                            self.handlerFetchData(self.dimensionData.selected);
+                            },500)
+                            
                             
                         },
                         handlerFetchData(event){
@@ -930,15 +932,16 @@ class Event {
                     },
                     methods: {
                         init(){    
-                            var mxTopological = new Topological();
-                            mxTopological.init();
-                            mxTopological.graphScript = _.map(this.model.rows,function(v){
+                            let mxTopo= new Topological();
+                            mxTopo.init();
+                            mxTopo.graphScript = _.map(this.model.rows,function(v){
                                 return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
                             });
-                            mxTopological.mount(`#topological-app-${this.id}`);
+                            console.log(2,mxTopo.graphScript)
+                            mxTopo.mount(`#topological-app-${this.id}`);
                             
                             _.delay(()=>{
-                                mxTopological.app.contextMenu();
+                                mxTopo.app.contextMenu();
                             },500)
 
                         }
@@ -1552,6 +1555,7 @@ class Event {
 
         
         window.addEventListener('resize', () => { 
+            
             event.resizeEventConsole();
 
             // RESIZE Event Summary
@@ -1569,19 +1573,46 @@ class Event {
         let evsH = $("#event-view-summary").height();
         
         $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=260px")
+                                                        .css("max-height","-=250px")
                                                         .css("max-height","-=" + evsH + "px")
                                                         .css("min-height", evwH + "px")
-                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=250px")
                                                         .css("min-height","-=" + evsH + "px");
     }
+
+    /* resizeEventConsole(){
+        let evcH = $("#event-view-container").height();
+        let evsH = $("#event-view-summary").height();
+        let otherH = 120;
+        console.log(1,evcH)
+        $("#event-view-console .dataTables_scrollBody").css("max-height", evcH + "px")
+                                                        .css("max-height","-=" + evsH + "px")
+                                                        .css("max-height","-=" + otherH + "px")
+                                                        .css("min-height", evcH + "px")
+                                                        .css("min-height","-=" + evsH + "px")
+                                                        .css("min-height","-=" + otherH + "px");
+    } */
 
     checkContainer(){
         if($('#event-view-container').is(':visible')) {
             this.layout();
+            this.resizeContainer();
         } else {
             setTimeout(this.checkContainer, 50);
         }
     }
 
+    resizeContainer(){
+        
+        let evwH = $(window).height();
+        let headerH = $("header#header").height();
+        let footerH = $("footer#footer").height();
+        let otherH = 45;
+
+        $("#event-view-container").css("min-height",evwH + "px")
+                                    .css("min-height","-=" + headerH + "px")
+                                    .css("min-height","-=" + footerH + "px")
+                                    .css("min-height","-=" + otherH + "px");
+        
+    }
 }

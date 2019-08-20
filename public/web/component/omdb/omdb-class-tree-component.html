@@ -118,7 +118,7 @@
             }
         },
         created: function(){
-            let self = this;
+            const self = this;
 
             eventHub.$on("OMDB-CLASS-REFRESH-EVENT", self.refresh);
 
@@ -134,7 +134,7 @@
         },
         methods:{
             init: function () {
-                let self = this;
+                const self = this;
 
                 if(!_.isEmpty(self.zTree)){
                     self.zTree.destroy();
@@ -150,9 +150,9 @@
 
             },
 	        initPlugIn: function(){
-                let self = this;
+                const self = this;
 
-                $("#class-tree").contextMenu({
+                $("#omdb-class-tree").contextMenu({
                     selector: 'span.class.more',
                     trigger: 'left',
                     items: {
@@ -359,65 +359,57 @@
                         "导出数据结构": {
                             name: "导出数据结构", icon: `fas fa-file-export`, callback: function (key, opt) {
 
-                                alertify.confirm(`确认要导出类的数据结构? <br><br>
-                                                  类名称：${self.selectedNode.name}`, function (e) {
-                                    if (e) {
-                                        let event = `${self.selectedNode.name}`;
-                                        let _list = omdbHandler.classDataExport(event);
-                                    } else {
-                                        
-                                    }
-                                });
+                                omdb.app.classDataExport(self.selectedNode.name);
                                 
                             }
                         },
                         "导入数据结构": {
-                            name: "导入数据结构", type:'text', callback: function (key, opt) {
-
+                            name: "导入数据结构", icon: 'fas fa-file-import', callback: function (key, opt) {
+                                omdb.app.classDataImport();
                             }
                         }
                     },
                     events: {
                         show: function(opt) {
                             // this is the trigger element
-                            var $this = this;
-                            // import states from data store
-                            $.contextMenu.setInputValues(opt, $this.data());
+                            // var $this = this;
+                            // // import states from data store
+                            // $.contextMenu.setInputValues(opt, $this.data());
 
-                            $(`li.context-menu-input input`).attr("type","file");
-                            $(`li.context-menu-input input`).attr("value","");
-                            $(`li.context-menu-input input`).css("display","none");
-                            // $(`li.context-menu-input label`).addClass("fas fa-file-import").css("color","rgb(32, 148, 243").css("margin-left", "-28px");
+                            // $(`li.context-menu-input input`).attr("type","file");
+                            // $(`li.context-menu-input input`).attr("value","");
+                            // $(`li.context-menu-input input`).css("display","none");
+                            // // $(`li.context-menu-input label`).addClass("fas fa-file-import").css("color","rgb(32, 148, 243").css("margin-left", "-28px");
                             
-                            $(`li.context-menu-input input`).change(function(event){
-                                let file = event.target.files[0];
+                            // $(`li.context-menu-input input`).change(function(event){
+                            //     let file = event.target.files[0];
                 
-                                alertify.confirm(`确认要导入类文件！<br><br>
-                                                    文件名称：${file.name}<br><br>
-                                                    修改时间：${file.lastModifiedDate}<br><br>
-                                                    文件大小：${mx.bytesToSize(file.size)}`, function (e) {
-                                    if (e) {
+                            //     alertify.confirm(`确认要导入类文件！<br><br>
+                            //                         文件名称：${file.name}<br><br>
+                            //                         修改时间：${file.lastModifiedDate}<br><br>
+                            //                         文件大小：${mx.bytesToSize(file.size)}`, function (e) {
+                            //         if (e) {
 
-                                        let rtn = omdbHandler.classDataImport(file);
+                            //             let rtn = omdbHandler.classDataImport(file);
 
-                                    } else {
+                            //         } else {
                                         
-                                    }
+                            //         }
 
-                                });
-                            });
+                            //     });
+                            // });
 
                         },
                         hide: function(opt) {
                             // this is the trigger element
-                            var $this = this;
-                            // export states to data store
-                            $.contextMenu.getInputValues(opt, $this.data());
+                            // var $this = this;
+                            // // export states to data store
+                            // $.contextMenu.getInputValues(opt, $this.data());
                         }
                     }
                 });
 
-                $("#class-tree").contextMenu({
+                $("#omdb-class-tree").contextMenu({
                     selector: 'span.edge.more',
                     trigger: 'left',
                     items: {
@@ -494,7 +486,7 @@
 
 	        },
             initData: function(node){
-				let self = this;
+				const self = this;
 
                 _.forEach(node, function(v,k){
 
@@ -530,7 +522,7 @@
 
 	        },
 	        edgeList: function(){
-                let self = this;
+                const self = this;
                 let _rtn = null;
                 let _list = omdbHandler.fetchDataByMql('select edge type');
 
@@ -541,7 +533,7 @@
                 return _rtn;
 	        },
 	        ruleList: function(){
-                let self = this;
+                const self = this;
 
                 let _list = ruleHandler.ruleList();
 
@@ -552,7 +544,7 @@
                 return _rtn;
 	        },
             onClick: function (event, treeId, treeNode, clickFlisParentag) {
-                let self = this;
+                const self = this;
 
                 self.selectedNode = treeNode;
 
@@ -749,7 +741,7 @@
 
             },
             addCountDom: function (treeId, treeNode) {
-                let self = this;
+                const self = this;
                 let aObj = $("#" + treeNode.tId + "_a");
 
                 if(!_.isEmpty(treeNode.child)){
@@ -763,7 +755,7 @@
                 $("#toolbars_"+treeNode.tId).unbind().remove();
             },
             refresh: function(event) {
-                let self = this;
+                const self = this;
 
                 let pNode = self.selectedNode;
 

@@ -28,6 +28,24 @@
 
 <style>
 	
+	/* 全屏模式 */
+	header#header{
+		display:none;
+	}
+	aside>#sidebar{
+		display:none;
+	}
+	.page-header-fixed{
+		padding-top: 0px;
+	}
+
+	.page-sidebar-minified .sidebar-bg{
+		width: 0px;
+	}
+
+	.page-sidebar-minified .content{
+		margin-left: 0px;
+	)
 	body {
 		background-color: #d9e0e7;
 	}
@@ -99,7 +117,7 @@
 									
 									</el-col>
 									<el-col :span="8" :offset="8" > 
-										<el-select v-model="value_rl" placeholder="请选择">
+										<el-select v-model="value_rl" clearable placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
 											:key="item.value"
@@ -207,7 +225,7 @@
 									<el-col :span="8" ><font  color="50bd15"><b>机柜负荷率</b></font>
 									</el-col>
 									<el-col :span="8" :offset="8" > 
-										<el-select v-model="value_rl" placeholder="请选择">
+										<el-select v-model="value_rl" clearable placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
 											:key="item.value"
@@ -472,7 +490,7 @@
 									</el-col>
 
 									<el-col :span="5"> 
-										<el-select v-model="value_rl" placeholder="请选择">
+										<el-select v-model="value_rl" clearable placeholder="请选择">
 											<el-option
 											v-for="item in selectVal"
 											:key="item.value"
@@ -604,7 +622,7 @@
 		new Vue({
 
 			delimiters: ['#{', '}#'],
-			template: `<el-container style="background:#ffffff;height:calc(100vh - 30px);">
+			template: `<el-container style="background:#ffffff;height:calc(100vh - 90px);">
 							<el-main>
 								<el-row :gutter="20">
 									<el-col :span="8"><div class="grid-content">  <echart_1 id="echart_1" :modelC1="modelC1" ></echart_1></div></el-col>
@@ -659,7 +677,7 @@
 				_.delay(()=>{
 					init();
 				},500)
-				
+
 				this.modelC1 = fsHandler.callFsJScript("/capacityRs/capacityCharts1.js", null).message;
 				this.modelC2 = fsHandler.callFsJScript("/capacityRs/capacityCharts2.js", null).message;
 				this.modelC3 = fsHandler.callFsJScript("/capacityRs/capacityCharts3.js", null).message;

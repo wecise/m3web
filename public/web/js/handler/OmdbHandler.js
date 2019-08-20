@@ -428,8 +428,8 @@ class OmdbHandler {
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseJSON;
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseText;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         });
 
@@ -487,18 +487,18 @@ class OmdbHandler {
     classDataExport(event){
         let rtn = null;
 
-        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.mql`;
+        let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
 
         Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=true&class=${encodeURIComponent(event)}&limit=-1`, true);
+            xhr.open("GET", `/mxobject/export?recursive=true&filetype=${event.filetype}&class=${encodeURIComponent(event.class)}&limit=${event.limit}`, true);
             xhr.setRequestHeader("Content-type","text/csv");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4 && xhr.status == 200) {
-                    var blob = new Blob([xhr.response], {type: "octet/stream"});
+                    var blob = new Blob([xhr.response], event.filetype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
                     saveAs(blob, fileName);
                     alertify.success("导出成功" + " " + fileName);
                     rtn = 1;
@@ -517,7 +517,7 @@ class OmdbHandler {
     *
     * */
    classDataImport(file){
-        let rtn = 0;
+        let rtn = null;
 
         let fm = new FormData();
         fm.append("uploadfile", file);
@@ -541,15 +541,14 @@ class OmdbHandler {
                 userHandler.ifSignIn(data);
 
                 if( _.lowerCase(data.status) == "ok"){
-                    rtn = 1;
-                    alertify.success("导入成功" + " " + file.name + " " + moment().format("LLL"));
+                    rtn = data.message;
+                    alertify.success("导入成功" + " " + file.name);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("导入失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseText;
+                alertify.error("导入失败");
             }
         })
         return rtn;
@@ -569,7 +568,7 @@ class OmdbHandler {
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=true&filetype=xlsx&templdate=true&class=${event}`, true);
+            xhr.open("GET", `/mxobject/export?recursive=${event.recursive}&filetype=${event.filetype}&template=${event.template}&class=${event.class}&limit=${event.limit}`, true);
             xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded; charset=UTF-8");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.setRequestHeader("Accept", "*/*");
@@ -624,7 +623,6 @@ class OmdbHandler {
             },
             error: function(xhr, textStatus, errorThrown) {
                 rtn = xhr.responseText;
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
             }
         })
         return rtn;

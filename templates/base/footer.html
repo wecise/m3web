@@ -1,5 +1,30 @@
 <style>
 
+	.el-tree-node__content>.el-checkbox{
+		margin: 5px 8px 5px 0px;
+	}
+
+	.el-tree-node__content>.el-checkbox,.el-tree-node__label{
+		font-size: 12px;
+	}
+
+	.el-tree-node__children.transition{
+		box-shadow: unset;
+	}
+
+	.el-upload,.el-upload-dragger{
+		width: 100%;
+	}
+	
+	.el-upload__input{
+		display: none!important;
+	}
+
+	header>.el-switch {
+    	font-size: 12px;
+    	padding: 15px 5px;
+	}
+
 	footer ul {
 		text-align: left;
 		display: inline;
@@ -71,12 +96,13 @@
 	}
 
 </style>
-<footer style="position:fixed;
-				bottom: 0px;
-				right: 0px;
-				height: 30px;
-				line-height: 30px;
-				display: flex;">
+<footer id="footer"
+		style="position:fixed;
+		bottom: 0px;
+		right: 0px;
+		height: 30px;
+		line-height: 30px;
+		display: none;">
 	
 	<a href="javascript:void(0);" style="text-decoration-line: none;padding-right: 20px;font-size: 12px;color: rgb(51, 51, 51);">
 	<i class="fas fa-copyright"></i> 2018 {{.i18n.Tr "app_name"}} {{if (or .ShowFooterVersion .PageIsAdmin)}}{{.i18n.Tr "version"}}: {{AppVer}}{{end}}

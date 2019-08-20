@@ -352,6 +352,17 @@
         min-height: 200px;
     }
 
+	/* 全屏模式 */
+	header#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+	footer#footer{
+        display:flex!important;
+    }
+
 </style>
 
 <div id="app"></div>
@@ -383,13 +394,13 @@
 <script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-contextmenu.min.js"></script>
 <!--<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-fixed-columns.js"></script>-->
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-input-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-search-preset-component_{{.Lang}}.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-bootstrap-table.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-common-form-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-object-detail-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-timeline-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-search-input-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-bootstrap-table.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-common-form-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-object-detail-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-datatable-component.html"></link>

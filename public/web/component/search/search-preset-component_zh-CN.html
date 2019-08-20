@@ -3,31 +3,10 @@
     <style scoped>
 
         /* For Search Dropdown Panel */
-        .search-preset-component .dropdown-menu {
-            padding: 0;
-            font-size: 12px;
-            background-color: #fff;
-            border: 0px solid #ccc;
-            border: 0px solid rgba(0,0,0,.15);
-            border-radius: 0px;
-        }
-        .search-preset-component .dropdown-menu > .panel-group {
-            margin-bottom: 0px;
-        }
-
-        .search-preset-component .dropdown-menu > .panel-group .panel {
-            margin-bottom: 0px;
-            background-color: #fff;
-            border: 0px solid transparent;
-            border-radius: 0px;
-        }
-        .search-preset-component .dropdown-menu > .panel-group .panel+.panel {
-            margin-top: 0px;
-        }
-
-        .search-preset-component .panel-default>.panel-heading{
-            padding-top: 5px;
-            padding-bottom: 5px;
+        .search-preset .el-collapse-item__header{
+            height:32px;
+            line-height: 32px;
+            padding:5px;
 
             border: 1px solid #ccc;
             border-bottom: 0px;
@@ -41,7 +20,7 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
         }
 
-        .search-preset-component .panel-default>.panel-heading.active {
+        .search-preset .el-collapse-item__header.is-active {
             color: #333;
             background-color: #def1fb;
             border: 1px solid #ccc;
@@ -50,159 +29,126 @@
 
         }
 
-        .search-preset-component .panel-group .panel-heading+.panel-collapse>.list-group,
-        .search-preset-component .panel-group .panel-heading+.panel-collapse>.panel-body {
-            border-top: 0px;
-        }
-
-        .search-preset-component .panel-default>.collapse {
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-        }
-
-        .search-preset-component code {
+        .search-preset dl > dd > a:hover {
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
         }
 
-        .search-preset-component dl > dd > a:hover {
-            cursor: pointer;
+        .search-preset.el-dropdown-menu--small{
+            left: unset!important;
+            width: 40vw;
+            top: 82px!important;
+            right: 83px!important;
+        }
+
+        .search-preset .el-collapse-item__content{
+            padding: 10px;
+        }
+
+        .search-preset .el-button--small{
+            border-radius: 0px;
         }
     </style>
 
 
     /*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
     <template>
-        <div>
-            <button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-left:none;">${preset.default.name} <span class="caret"></span></button>
-            <div class="dropdown-menu dropdown-menu-right" style="width: 40vw;">
+        <el-dropdown placement="bottom">
+            <el-button type="default">${preset.default.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+            <el-dropdown-menu slot="dropdown" class="search-preset">
 
-                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-                    <div class="panel panel-default">
-                        <div class="panel-heading active" role="tab" id="headingOne">
-		          <span>
-		            <i class="fa fa-angle-down"></i>
-		            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-		              预设值
-		            </a>
-		          </span>
+                <el-collapse value="1" accordion>
+                    <el-collapse-item title="预设值" name="1">
+                        <el-row :gutter="20">
+                            <el-col :span="8">
+                                <dl>
+                                    <dt>最近</dt>
+                                    <dd v-for="item in preset.nearest"><a @click="setByWindow(item)">${item.name}</a></dd>
+                                </dl>
+                            </el-col>
+                            <el-col :span="8" style="border-left:1px dashed #ccc;">
+                                <dl>
+                                    <dt>实时</dt>
+                                    <dd v-for="item in preset.realtime"><a @click="setByWindow(item)">${item.name}</a></dd>
+                                </dl>
+                            </el-col>
+                            <el-col :span="8" style="border-left:1px dashed #ccc;">
+                                <dl>
+                                    <dt>区间</dt>
+                                    <dd v-for="item in preset.relative"><a @click="setByWindow(item)">${item.name}</a></dd>
+                                </dl>
+                            </el-col>
                         </div>
-                        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                        <dl>
-                                            <dt>最近</dt>
-                                            <dd v-for="item in preset.nearest"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                        </dl>
-                                    </div>
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-                                        <dl>
-                                            <dt>实时</dt>
-                                            <dd v-for="item in preset.realtime"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                        </dl>
-                                    </div>
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-                                        <dl>
-                                            <dt>区间</dt>
-                                            <dd v-for="item in preset.relative"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                        </dl>
-                                    </div>
+                    </el-collapse-item>
+                    <el-collapse-item title="时间区间" name="2">
+                        <el-container>
+                            <el-main>
+                                <div style="display:flex;">
+                                    <input class="range_from" type="text" placeholder="选择时间.."></p>
+                                    <i class="fa fa-cogs" style="padding: 0px 10px;"></i>
+                                    <input class="range_to" type="text" placeholder="选择时间.."></p>
+                                    <a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">应用</a>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="headingTwo">
-		          <span>
-		            <i class="fa fa-angle-right"></i>
-		            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-		              时间区间
-		            </a>
-		          </span>
-                        </div>
-                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                            <div class="panel-body">
-		                <span style="display: -webkit-box;">
-		                    <input class="range_from" type="text" placeholder="选择时间.."></p>
-                            <i class="fa fa-cogs" style="padding: 0px 10px;"></i>
-		                    <input class="range_to" type="text" placeholder="选择时间.."></p>
-                            <a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">应用</a>
-		                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="headingThree">
-		          <span>
-		            <i class="fa fa-angle-right"></i>
-		            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-		              高级
-		            </a>
-		          </span>
-                        </div>
-                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                            <div class="panel-body">
-                                <div class="row">
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                        <dl>
-                                            <dt>搜索时间</dt>
-                                            <dd>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" id="input-systime" value=" for vtime " v-model="preset.default.others.forTime" checked> 系统时间(vtime)
-                                                    </label>
-                                                </div>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" id="input-usertime" value=" for ctime " v-model="preset.default.others.forTime" checked> User Time(ctime)
-                                                    </label>
-                                                </div>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" id="input-biztime" value=" for firstoccurrence " v-model="preset.default.others.forTime" > Firstoccurrence
-                                                    </label>
-                                                </div>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" id="input-biztime" value=" for lastoccurrence " v-model="preset.default.others.forTime" > Lastoccurrence
-                                                    </label>
-                                                </div>
-                                                <div class="radio">
-                                                    <label>
-                                                        <input type="radio" id="input-nonetime" value="" v-model="preset.default.others.forTime" checked> 不要时间
-                                                    </label>
-                                                </div>
-                                            </dd>
-                                        </dl>
-                                    </div>
-                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-                                        <dl>
-                                            <dt>其它条件</dt>
-                                            <dd>
-                                                <form>
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" id="input-hisdata" v-model="preset.default.others.ifHistory" checked> 包含历史数据
-                                                        </label>
-                                                    </div>
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" id="input-debug" v-model="preset.default.others.ifDebug"> 调试
-                                                        </label>
-                                                    </div>
-                                                </form>
-                                            </dd>
-                                        </dl>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            </el-main>
+                        <el-container>
+                    </el-collapse-item>
+                    <el-collapse-item title="高级" name="3">
+                        <el-row :gutter="20">
+                            <el-col :span="12">
+                                <dl>
+                                    <dt>搜索时间</dt>
+                                    <dd>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" id="input-systime" value=" for vtime " v-model="preset.default.others.forTime" checked> 系统时间(vtime)
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" id="input-usertime" value=" for ctime " v-model="preset.default.others.forTime" checked> User Time(ctime)
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" id="input-biztime" value=" for firstoccurrence " v-model="preset.default.others.forTime" > Firstoccurrence
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" id="input-biztime" value=" for lastoccurrence " v-model="preset.default.others.forTime" > Lastoccurrence
+                                            </label>
+                                        </div>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" id="input-nonetime" value="" v-model="preset.default.others.forTime" checked> 不要时间
+                                            </label>
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </el-col>
+                            <el-col :span="12" style="border-left:1px dashed #ccc;">
+                                <dl>
+                                    <dt>其它条件</dt>
+                                    <dd>
+                                        <form>
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" id="input-hisdata" v-model="preset.default.others.ifHistory" checked> 包含历史数据
+                                                </label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" id="input-debug" v-model="preset.default.others.ifDebug"> 调试
+                                                </label>
+                                            </div>
+                                        </form>
+                                    </dd>
+                                </dl>
+                            </el-col>
+                        </el-row>
+                    </el-collapse-item>
+                </el-collapse>
+            </el-dropdown-menu>
+        </el-dropdown>
     </template>
 
     /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/

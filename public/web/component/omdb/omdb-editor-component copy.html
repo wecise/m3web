@@ -72,78 +72,53 @@
 			background: rgb(246, 246, 246);
 		}
 
-        .el-tabs__content{
-            padding: 1px!important;
-        }
-
-        .el-tabs__item{
-            height: 30px;
-            line-height: 30px;
-        }
-
-        .el-button-group>.el-button:not(:last-child), .el-tabs--left .el-tabs__nav-wrap.is-left{
-            margin-right: 10px;
-        }
 		
-        .el-button-group>.el-button{
-            float: unset;
-        }
-
-        .gutter.gutter-horizontal {
-            background-image: url('{{AppSubUrl}}/web/vendor/split/grips/vertical.png');
-            cursor: ew-resize;
-        }
-
-        .gutter.gutter-vertical {
-            background-image: url('{{AppSubUrl}}/web/vendor/split/grips/horizontal.png');
-            cursor: ns-resize;
-        }
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-editor-component"  ----------*/
 	<template>
-		<el-container>
-			<el-header id="editorToolBar" style="padding:0px 10px;height:30px;line-height: 30px;">
-				<el-button-group>
+		<div class="editor-container">
+			<div class="editorToolBar" id="editorToolBar">
+				<div class="btn-group" role="group">
                     <el-tooltip content="另存到文件系统" placement="bottom" open-delay="500">
-                        <el-button type="text" class="saveas" @click="saveToFs"><i class="fas fa-save"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary saveas" @click="saveToFs" title="另存到文件系统" data-tooltip="tooltip"><i class="fas fa-save"></i></a>
                     </el-tooltip>
                     <el-tooltip content="加载" placement="bottom" open-delay="500">
-                        <el-button type="text" class="load" @click="loadFromFs"><i class="fas fa-arrow-circle-down"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary load" @click="loadFromFs" title="加载" data-tooltip="tooltip"><i class="fas fa-arrow-circle-down"></i></a>
                     </el-tooltip>
                     <el-tooltip content="复制" placement="bottom" open-delay="500">
-                        <el-button type="text" class="copy" @click="copyIt"><i class="fas fa-copy"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fas fa-copy"></i></a>
                     </el-tooltip>
                     <el-tooltip content="粘贴" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="paste" @click="pasteIt"><i class="fas fa-paste"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary paste" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fas fa-paste"></i></a>
                     </el-tooltip>
 					<el-tooltip content="全选" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="selectAll" @click="selectAll"><i class="fas fa-check"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary selectAll" @click="selectAll" title="全选" data-tooltip="tooltip"><i class="fas fa-check"></i></a>
                     </el-tooltip>
                     <el-tooltip content="清空" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="clear" @click="clearIt"><i class="fas fa-trash"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fas fa-trash"></i></a>
                     </el-tooltip>
                     <el-tooltip content="执行输出为表格" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="query" @click="query"><i class="fas fa-play"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary query" @click="query"  title="执行" data-tooltip="tooltip"><i class="fas fa-play"></i></a>
                     </el-tooltip>
                     <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="queryByJson" @click="queryByJson"><i class="fas fa-play-circle"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary queryByJson" @click="queryByJson"  title="执行输出为JSON" data-tooltip="tooltip"><i class="fas fa-play-circle"></i></a>
                     </el-tooltip>
 					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="500">
-                        <!--<el-button type="text"  class="queryPlus" @click="queryPlus"><i class="fa fa-play"></i>+</el-button>-->
+                        <!--<a href="javascript:void(0);" class="btn btn-sm btn-primary queryPlus" @click="queryPlus"  title="在新窗口执行"><i class="fa fa-play"></i>+</a>-->
                     </el-tooltip>
                     <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-forward"></i></el-button>
+                        <a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件" data-tooltip="tooltip"><i class="fas fa-forward"></i></a>
                     </el-tooltip>
                     <el-tooltip content="主题" placement="bottom" open-delay="500">
-                        <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
+                        <a href="javascript:void(0)" :class="'btn btn-sm btn-link pull-right editor-select-theme-'+objectHash.sha1(id)" title="主题" data-tooltip="tooltip"><i class="fas fa-tshirt"></i></a>
                     </el-tooltip>
-				</el-button-group>
-			</el-header>
-			<el-main :id="id" style="padding:0px;"></el-main>
-			<el-footer :id="id+'_statusBar'" style="padding:0px;height:30px;line-height: 30px;"></el-footer>
-		</el-container>
+				</div>
+			</div>
+			<div :id="id" ></div>
+			<div :id="id+'_statusBar'" class="statusBar"></div>
+		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/

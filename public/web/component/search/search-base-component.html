@@ -2,37 +2,37 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.search-base-component {
-
-		}
-
-		.search-base-component.input-group > input {
-			padding-left: 15px;
-		}
-
-		.search-base-component .history{
-			position: absolute;
-			left: 4px;
-			top: 5px;
-			z-index: 1000;
-			cursor: pointer;
-		}
-
-		.search-base-component .context-menu-list {
-			-webkit-box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
-			box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
-		}
-
-		.search-base-component .context-menu-list.history {
-			min-width: 45em;
-			max-width: 26em;
-			padding: .25em 0;
-			border-top: none;
-			-webkit-box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
-			box-shadow: 0 2px 5px -1px rgba(0,0,0,.5);
+		.search-base-component .el-input__inner{
 			border-radius: 0px;
-			top: 83px!important;
-			left:63px!important;
+			border: unset;
+		}
+
+		.search-base-component .el-dropdown,.el-input--small{
+			font-size:12px;
+		}
+
+		.search-base-component .search-base .el-autocomplete .el-input--small>.el-input__inner{
+			height: 30px;
+			line-height: 30px;
+			border: unset;
+		}
+
+		.search-base div.search-base--select{
+			width: 20%;
+		}
+
+		.search-base div.el-autocomplete{
+			width: 80%;
+		}
+
+		.search-base-component .el-input--small .el-input__inner{
+			height: 30px;
+			line-height: 30px;
+		}
+
+		.search-base-component .el-dropdown.search-preset-component>.el-button--small{
+			border-radius: 0px;
+			border: unset;
 		}
 
 	</style>
@@ -40,30 +40,30 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="search-base-component"  ----------*/
 	<template>
-		<div class="input-group">
-			<a href="javascript:;" :class="'history history_'+id" @click="fromCache"><i class="fas fa-caret-down"></i></a>
+		<div style="display:flex;height: 32px;line-height: 32px;width:100%;" class="search-base">
+			<!--搜索范围-->
+			<el-select v-model="options.class" placeholder="请选择" class="search-base--select">
+				<el-option label="" value="1"></el-option>
+				<el-option label="" value="2"></el-option>
+				<el-option label="" value="3"></el-option>
+			</el-select>
 			<!--搜索框-->
-			<input type="text" class="form-control" v-model.trim="options.term" placeholder="搜索" autofocus="autofocus">
-			<!--重置过滤条件-->
-			<div class="input-group-btn" v-if="options.term" style="position: absolute;z-index: 100;right: 207px;">
-				<a href="javascript:void(0);" class="btn btn-sm btn-no-border" @click="resetTerm"><i class="fas fa-times"></i></a>
-			</div>
+			<el-autocomplete class="inline-input" placeholder="搜索" 
+							v-model.trim="options.term" 
+							:fetch-suggestions="suggestionsSearch"
+							:trigger-on-focus="false"
+							@select="search"
+							@clear="search"
+							clearable></el-autocomplete>
 			<!--搜索条件预设置-->
-			<div class="input-group-btn">
-				<search-preset-component :id="id+'-preset'"
-				                         :options='options'
-				                         ref="preSetRef">
-				</search-preset-component>
-			</div>
+			<search-preset-component :id="id+'-preset'"
+									:options='options'
+									ref="preSetRef">
+			</search-preset-component>
 			<!--快速过滤条件设置-->
-			<div class="input-group-btn">
-				<a href="javascript:void(0);" class="btn btn-sm btn-default"><i class="fas fa-filter"></i>筛选</a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-default"><i class="caret"></i></a>
-			</div>
+
 			<!--搜索按钮-->
-			<div class="input-group-btn">
-				<a href="javascript:void(0);" class="btn btn-sm btn-primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</span></a>
-			</div>
+			<a href="javascript:void(0);" class="btn btn-sm btn-primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</a>
 		</div>
 	</template>
 
@@ -99,9 +99,6 @@
 	    mounted: function () {
 	   	    const self = this;
 
-	   	    // 自动搜索
-	   	    this.$refs.searchNowRef.click();
-
 	   	    // 搜索Button Enter事件
             $(document).keypress(function(event) {
                 var keycode = (event.keyCode ? event.keyCode : event.which);
@@ -115,6 +112,8 @@
 		    // 设置body class
 			$("body").addClass("search-base-component");
 
+			this.$refs.searchNowRef.click();
+
 	    },
 	    watch: {
 	   	    // 搜索结果变化，更新view
@@ -124,8 +123,10 @@
             }
 	    },
 	    methods: {
-			search: function(){
+			suggestionsSearch(){
 
+			},
+			search(){
 			    // 预设值
 			    this.result.preset = this.$refs.preSetRef.preset.default;
                 let ifHistory = this.result.preset.others.ifHistory?"":"#";
@@ -150,12 +151,12 @@
 				this.search();
 				mx.windowResize();
 			},
-		    toCache: function(event){
+		    toCache(event){
 			    let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
 
 			    localStorage.setItem(this.cacheID, JSON.stringify(_.uniq(_.concat(cacheTerm, [event]))));
 		    },
-		    fromCache: function(){
+		    fromCache(){
                 let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
 
                 let items = {};
@@ -177,7 +178,7 @@
 
                 contextMenu.build(this.id, {select:'history', items: items, handle: setTerm});
 		    },
-		    removeCache: function(){
+		    removeCache(){
                 localStorage.setItem(this.cacheID, '[]');
 		    }
 

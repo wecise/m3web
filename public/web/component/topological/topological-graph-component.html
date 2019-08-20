@@ -68,33 +68,15 @@
 
 		.topological-graph-component .nav{
 			background: rgb(255, 255, 255);
+            border-bottom: 1px solid #f7f7f7;
             position: relative;
             top: 0;
             left: 0;
             height: 32px;
             line-height: 32px;
-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            /* box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
             display: flex;
         }
-
-        .topological-graph-component .tools {
-			/* z-index: 100;
-            position: absolute; */
-            overflow: hidden;
-            top: 0px;
-            left: 0px;
-            width: 45%;
-            height: 100%;
-            display: flex;
-            padding: 7px 0px;
-		}
-
-		.topological-graph-component .tools > img {
-			width:18px;
-			height:18px;
-			margin: 0px 5px;
-            filter: opacity(1) invert(0.5);
-		}
 
         .topological-graph-component .tools-search {
 			width: 50%;
@@ -109,20 +91,214 @@
 			background: transparent;
         }
 
+        /* ToolBar */
+        .topological-graph-component .tools {
+			overflow: hidden;
+            width: 45%;
+            height: 100%;
+            display: flex;
+            padding: 0px;
+		}
+
+        .topological-graph-component .tools .el-color-picker__trigger{
+            width: 18px;
+            height: 18px;
+            padding: 0px;
+            border: unset;
+        }
+        .topological-graph-component .tools > a + a {
+            padding: 0 5px;
+        }
+        .topological-graph-component .tools > a{
+            line-height: 24px;
+            height:24px;
+        }
+
+        .topological-graph-component .vertical-toolbar{
+            position: fixed;
+            width: 29px;
+            height: 57px;
+            bottom: 8em;
+            background: #ffffff;
+            z-index: 22224;
+            right: 3em;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 0px 6px;
+        }
+
+        .topological-graph-component .horizontal-toolbar{
+            position: fixed;
+            width: auto;
+            height: 29px;
+            bottom: 5em;
+            background: #ffffff;
+            z-index: 22224;
+            right: 3em;
+            -webkit-transform: translateZ(0);
+            box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 0px 6px;
+        }
+
+        .topological-graph-component .footerbar {
+            height: 40px!important;
+            line-height:40px;
+            position: absolute;
+            z-index:20;
+            bottom: 4.5em;
+            width: 87vw;
+            display:flex;
+            padding: 5px;
+        }
+        .topological-graph-component .footerbar > a{
+            padding: 0px 10px 0px 5px;
+            background: #fff;
+            height: 30px;
+            line-height: 30px;
+            overflow-y: auto;
+            border-radius: 20px;
+        }
+        .topological-graph-component .footerbar > a:hover{
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        .topological-graph-component .footerbar > a > span{
+            background: #ddd;
+            padding: 5px 8px;
+            border-radius: 15px;
+        }
+        .topological-graph-component .footerbar > a + a{
+            margin-left: 5px;
+        }
+
+        .el-tooltip__popper.is-light {
+            background: #FFF;
+            /* border: 1px solid #303133; */
+            padding: 10px;
+            position: absolute;
+            background: #fff;
+            min-width: 150px;
+            border-radius: 4px;
+            border: 1px solid #ebeef5;
+            padding: 12px;
+            z-index: 2000;
+            color: #606266;
+            line-height: 1.4;
+            text-align: justify;
+            font-size: 14px;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+            word-break: break-all;
+        }
+
+        .el-tooltip__popper is-light .popper__arrow, .el-popper .popper__arrow:after {
+            position: absolute;
+            display: block;
+            width: 0;
+            height: 0;
+            border-color: transparent!important;
+            border-style: solid;
+        }
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
-		<div :id="id">
-			<div :id="id+'-container'" class="graph-container"></div>
-			<div class="nav" :id="id+'-nav'">
-                <div class="tools" :id="id+'-tools'"></div>
-                <graph-view-manager class="tools-manager" :id="id+'-tools-manager'"></graph-view-manager>
-                <graph-view-search class="tools-search" :id="id+'-tools-search'"></graph-view-search>
-				<div class="outlineContainer" :id="id+'-outlineContainer'"></div>
-			</div>
-		</div>
+		<el-main style="overflow:hidden;padding: 0px;">
+            <el-container :id="id">
+                <el-header class="nav" :id="id+'-nav'" style="height:30px;line-height: 30px;padding:0px 0px 0px 10px;">
+                    <div class="tools" :id="id+'-tools'">
+                        <el-tooltip content="编辑" open-delay="500">
+                            <a href="javascript:void(0);" @click="editIt">
+                                <img :src="'design' | genFileName" style="width:18px;height:18px;"></el-button>
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="另存为" open-delay="500">
+                            <a href="javascript:void(0);" @click="saveas">
+                                <img :src="'saveas' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="刷新" open-delay="500">
+                            <a href="javascript:void(0);" @click="reload">
+                                <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="自适应" open-delay="500">
+                            <a href="javascript:void(0);" @click="fit">
+                                <img :src="'fullscreen' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="调整图方向" open-delay="500">
+                            <a href="javascript:void(0);" @click="layout">
+                                <img :src="'direction' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="查看图路径" open-delay="500">
+                            <a href="javascript:void(0);" @click="path">
+                                <img :src="'path' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="打印" open-delay="500">
+                            <a href="javascript:void(0);" @click="print">
+                                <img :src="'print' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-tooltip content="调整图背景" open-delay="500">
+                            <el-color-picker
+                                v-model="model.graph.theme.color"
+                                show-alpha
+                                :predefine="model.graph.theme.predefineColors"
+                                @change="theme"
+                                style="padding:4px 8px;">
+                            </el-color-picker>
+                        </el-tooltip>
+                        <el-tooltip content="图节点显示名称选择" open-delay="500">
+                            <div :id="'attributes-select-'+id"></div>
+                        </el-tooltip>
+                    </div>
+                    <graph-view-manager class="tools-manager" :id="id+'-tools-manager'"></graph-view-manager>
+                    <graph-view-search class="tools-search" :id="id+'-tools-search'"></graph-view-search>
+                    <div class="outlineContainer" :id="id+'-outlineContainer'"></div>
+                    <div class="vertical-toolbar">
+                        <el-tooltip content="放大" open-delay="500" placement="left">
+                            <a href="javascript:void(0);" @click="zoomIn">
+                                <img :src="'zoom_out' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="缩小" open-delay="500" placement="left">
+                            <a href="javascript:void(0);" @click="zoomOut">
+                                <img :src="'zoom_in' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                    </div>
+                    <div class="horizontal-toolbar">
+                            <el-tooltip content="展开" open-delay="500" placement="left">
+                                <a href="javascript:void(0);" @click="expandHorizontalBar">
+                                    <i :class="['animated fadeIn fas', model.graph.footbar.show ? 'fa-angle-double-down' : 'fa-angle-double-up']" style="width: 20px;
+                                                                            height: 22px;
+                                                                            line-height: 22px;
+                                                                            text-align: center;">
+                                </a>
+                            </el-tooltip>
+                            
+                            <a href="javascript:void(0);" @click="expandHorizontalBar">
+                                历史 ${_.size(model.graph.history)}
+                            </a>
+                            
+                    </div>
+                </el-header>
+                <el-main :id="id+'-container'" style="height:calc(100vh - 110px);padding:0px;">
+                </el-main>
+                <transition-group tag="el-footer" class="footerbar animated fadeInRight" :style="{display: model.graph.footbar.show?'':'none'}">
+                    <el-tooltip :content="item.term" v-for="(item,index) in model.graph.history" effect="light" :key="item.id" class="animated fadeIn">
+                        <a href="javascript:void(0);" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")}</a>
+                    </el-tooltip>
+                </transition-group>
+            </el-container>
+		</el-main>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -167,15 +343,37 @@
 	                        list:['north','south']
                         },
 	                    parent: null,
-                        theme: "",
                         outline: null,
                         default: {
                             title: 'id'
+                        },
+                        theme:{
+                            color: "#FFFFFF",
+                            predefineColors: [
+                                                '#ffffff',
+                                                '#f7f7f7',
+                                                '#dddddd',
+                                                '#e7e7e7',
+                                                '#c7c7c7',
+                                                '#6b778d',
+                                                '#263859',
+                                                '#17223b',
+                                                '#333333',
+                                                ]
+                        },
+                        history:[],
+                        footbar:{
+                            show: false
                         }
                     }
                 }
 	        }
-	    },
+        },
+        filters: {
+            genFileName(event){
+                return `${window.ASSETS_ICON}/tools/png/${event}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+            }
+        },
 	    watch:{
 	        graphData:{
                 handler:function(val,oldVal){
@@ -186,7 +384,10 @@
             }
         },
         created(){
-	        eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
+            eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
+            
+            //初始化theme
+            this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
 	    },
 	    mounted() {
 	        const self = this;
@@ -196,7 +397,7 @@
                 _.delay(function(){
                     self.init();
                     self.initPlugIn();
-                },1000)
+                },500)
 	            
 	        })
 	    },
@@ -231,20 +432,36 @@
 
                     // self.model.graph.model = new mxGraphModel(self.model.graph.layers.root);
                     self.model.graph.graph = new mxGraph(self.model.graph.container);
-                    //self.model.graph.graph.resizeContainer = true;
+                    
+                    // 容器大小自适应
+                    //self.model.graph.graph.setResizeContainer(true);
+
+                    // 节点大小调整
+				    self.model.graph.graph.setCellsResizable(false);
 
                     // Enables automatic sizing for vertices after editing and
                     // panning by using the left mouse button.
-                    self.model.graph.graph.setEnabled(false);
-                    self.model.graph.graph.setCellsMovable(false);
-                    self.model.graph.graph.setAutoSizeCells(true);
-                    self.model.graph.graph.setPanning(true);
-                    self.model.graph.graph.centerZoom = true;
-                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
-                    // // Disables tooltips on touch devices
-                    self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
-                    self.model.graph.graph.htmlLabels = true;
+                    // self.model.graph.graph.setEnabled(false);
+                    // self.model.graph.graph.setCellsMovable(false);
+                    // self.model.graph.graph.setAutoSizeCells(true);
 
+                    //是否可以移动 
+                    mxGraphHandler.prototype.setMoveEnabled(true);
+                    //显示节点位置标尺  
+                    mxGraphHandler.prototype.guidesEnabled = true;
+                    
+                    self.model.graph.graph.centerZoom = true;
+                    // 右键移动镜头
+                    self.model.graph.graph.setPanning(true);
+                    // 左键移动镜头
+                    self.model.graph.graph.panningHandler.useLeftButtonForPanning = true;
+                    // Disables tooltips on touch devices
+                    self.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
+                    // 支持Html
+                    self.model.graph.graph.setHtmlLabels(true);
+
+                    // 鼠标框选
+                    new mxRubberband(self.model.graph.graph);
 
                     // Sets global styles
                     var style = self.model.graph.graph.getStylesheet().getDefaultEdgeStyle();
@@ -268,6 +485,7 @@
                     
                     new mxCellTracker(self.model.graph.graph);
 
+                    // 预览时鼠标悬浮到节点时，改变鼠标样式
                     self.model.graph.graph.getCursorForCell = function(cell){
                         if (cell != null && cell.value != null && cell.vertex ==1 ){
                             return 'pointer';
@@ -526,8 +744,16 @@
             },
             initPlugIn(){
                 this.outline();
-                this.toolBars();
+                
+                //右键菜单
                 this.$root.contextMenu();
+                
+                _.delay(()=>{
+                    //设置主题
+                    this.theme(this.model.graph.theme.color);
+                    // 初始化ToolBar
+                    this.toolBars();
+                },500)
             },
             reload(){
                 $(this.$el).find(`#${this.id}-container`).empty();
@@ -563,7 +789,7 @@
                     let id = cell.getId();
                     let value = cell.getValue();
 
-                    self.$root.$data.selectedCell = cell;
+                    self.model.graph.selectedCell = cell;
 
                     // copy to copyboard
                     let clipboard2 = new Clipboard('g image',{
@@ -571,28 +797,6 @@
                             return id;
                         }
                     });
-
-                    /*
-					if (cell != null){
-						var overlays = self.model.graph.graph.getCellOverlays(cell);
-						
-						if (overlays == null) {
-							// Creates a new overlay with an image and a tooltip
-							var overlay = new mxCellOverlay(new mxImage('/fs/assets/images/files/png/check.png?type=open&issys=true', 16, 16),'Overlay tooltip');
-
-							// Installs a handler for clicks on the overlay							
-							overlay.addListener(mxEvent.CLICK, function(sender, evt2)
-							{
-								
-							});
-							
-							// Sets the overlay for the cell in the graph
-							self.model.graph.graph.addCellOverlay(cell, overlay);
-						} else {
-							self.model.graph.graph.removeCellOverlays(cell);
-						}
-                    }
-                    */
 
                 });
 
@@ -604,13 +808,22 @@
                     
                     if(!cell) return;
                     
-                    self.$root.$data.selectedCell = cell;
+                    self.model.graph.selectedCell = cell;
                     
                 };
             },
             tip(event){
                 const self = this;
                 alertify.log(event + ' ' + moment().format("LLL"));
+            },
+            expandHorizontalBar(){
+                this.model.graph.footbar.show = !this.model.graph.footbar.show;
+            },
+            forward(item){
+                if(this.model.graph.history.length > 1){
+                    this.model.graph.history = _.slice(this.model.graph.history,0,_.findIndex(this.model.graph.history,{id:item.id})+1);
+                }
+                this.$root.$refs.graphViewRef.search( encodeURIComponent(item.term));
             },
             outline(){
                 const self = this;
@@ -655,98 +868,9 @@
             toolBars() {
                 const self = this;
 
-                let content = document.getElementById(`${self.id}-tools`);
-                
-                let tb = new mxToolbar(content);
-
-                tb.addItem('{{.i18n.Tr "creative-tools-theme"}}', `${window.ASSETS_ICON}/tools/png/design.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.editIt();
-
-                },null,'tools-item');   
-
-                tb.addItem('{{.i18n.Tr "creative-saveas"}}', `${window.ASSETS_ICON}/tools/png/saveas.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.saveas();
-
-                },null,'tools-item');
-
-
-                tb.addItem('{{.i18n.Tr "creative-tools-refresh"}}', `${window.ASSETS_ICON}/tools/png/refresh.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.reload();
-
-                },null,'tools-item');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_in"}}', `${window.ASSETS_ICON}/tools/png/zoom_out.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.model.graph.graph.zoomIn();
-                },null,'tools-item');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-zoom_out"}}', `${window.ASSETS_ICON}/tools/png/zoom_in.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.model.graph.graph.zoomOut();
-                },null,'tools-item');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-print"}}', `${window.ASSETS_ICON}/tools/png/print.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    var scale = mxUtils.getScaleForPageCount(1, self.model.graph.graph);
-                    var preview = new mxPrintPreview(self.model.graph.graph, scale);
-                    preview.open();
-
-                },null,'tools-item');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-fullscreen"}}', `${window.ASSETS_ICON}/tools/png/fullscreen.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.model.graph.graph.fit();
-
-                },null,'tools-item');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-direction"}}', `${window.ASSETS_ICON}/tools/png/direction.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-
-                    self.model.graph.graph.getModel().beginUpdate();
-
-                    try
-                    {
-                        if(self.model.graph.orientation.value == 0){
-                            self.model.graph.orientation.value = 1;
-                        } else {
-                            self.model.graph.orientation.value = 0;
-                        }
-
-                        self.model.graph.layout.default.orientation = self.model.graph.orientation.list[self.model.graph.orientation.value];
-
-                        // Executes the layout
-                        self.model.graph.layout.default.execute(self.model.graph.parent);
-                    }
-                    finally
-                    {
-                        self.model.graph.graph.getModel().endUpdate();
-
-                        self.toCenter();
-
-                    }
-
-
-                },null,'tools-item-direction');
-
-                tb.addItem('{{.i18n.Tr "creative-tools-path"}}', `${window.ASSETS_ICON}/tools/png/path.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    self.path();
-
-                },null,'tools-item');
-                
-                tb.addItem('主题', `${window.ASSETS_ICON}/tools/png/theme.png?type=download&issys=${window.SignedUser_IsAdmin}`,function(evt)
-                {
-                    inst.toggleTheme();
-
-                },null,'tools-item');
-
                 // 插入属性选择
                 let id = `attributes-select-${self.id}`;
-                $(content).append(`<div style="width:100%;"><div id="${id}"></div></div>`).ready(function(){
-                    new Vue({
+                new Vue({
                         data: {
                             options: [],
                             value: 'id'
@@ -757,17 +881,15 @@
                                 self.reload();
                             }
                         },
-                        template:   `<el-tooltip content="选择图节点显示名称">
-                                        <el-select v-model="value" placeholder="请选择">
-                                            <span class="fas fa-bars" slot="prefix"></span>
-                                            <el-option
-                                            v-for="item in options"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                            </el-option>
-                                        </el-select>
-                                    </el-tooltip>`,
+                        template:   `<el-select v-model="value" placeholder="请选择" style="padding-left:5px;">
+                                        <span class="fas fa-bars" slot="prefix"></span>
+                                        <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                        </el-option>
+                                    </el-select>`,
                         created(){
                             const me = this;
 
@@ -792,12 +914,10 @@
                         mounted(){
                             _.delay(() => {
                                 $(".el-input--small .el-input__inner",this.$el).css({
-                                    "height": "22px",
-                                    "line-height": "22px",
                                     "border":"unset",
                                     "backgroundColor": "transparent"
                                 });
-
+                                /* 
                                 $(".el-input--small",this.$el).css({
                                     "fontSize": "12px"
                                 });
@@ -812,12 +932,11 @@
                                 $(".el-input__suffix",this.$el).css({
                                     "display": "none"
                                 });
-
+                                */
                             },50)
                         }                                    
 
                     }).$mount(`#${id}`);
-                });
 
             },
             toCenter(){
@@ -933,6 +1052,49 @@
                 {
                     self.model.graph.graph.removeCells(cells, true);
                 }
+            },
+            layout(){
+                this.model.graph.graph.getModel().beginUpdate();
+
+                try
+                {
+                    if(this.model.graph.orientation.value == 0){
+                        this.model.graph.orientation.value = 1;
+                    } else {
+                        this.model.graph.orientation.value = 0;
+                    }
+
+                    this.model.graph.layout.default.orientation = this.model.graph.orientation.list[this.model.graph.orientation.value];
+
+                    // Executes the layout
+                    this.model.graph.layout.default.execute(this.model.graph.parent);
+                }
+                finally
+                {
+                    this.model.graph.graph.getModel().endUpdate();
+                    this.toCenter();
+                }
+            },
+            print(){
+                let scale = mxUtils.getScaleForPageCount(1, this.model.graph.graph);
+                let preview = new mxPrintPreview(this.model.graph.graph, scale);
+                preview.open();
+            },
+            theme(event){
+                $(`#${this.id}-container`).css({
+                    "backgroundColor":event
+                })
+
+                localStorage.setItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`,event);
+            },
+            zoomIn(){
+                this.model.graph.graph.zoomIn();
+            },
+            zoomOut(){
+                this.model.graph.graph.zoomOut();
+            },
+            fit(){
+                this.model.graph.graph.fit();
             },
             editIt(){
                 let item = { 

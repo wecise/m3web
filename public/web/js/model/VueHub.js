@@ -28,3 +28,11 @@ let eventHub = vue.hub();
 
 // Element UI Setup
 Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000};
+
+setInterval(()=>{
+    $(".el-input--small").addClass("el-input");
+    $(".el-select--small").addClass("el-select");
+    $(".el-button--small").addClass("el-button");
+    $(".el-transfer-panel__item").addClass("el-checkbox");
+    $("label[role='checkbox']").addClass("el-checkbox");
+},50)
