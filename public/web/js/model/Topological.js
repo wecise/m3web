@@ -233,64 +233,58 @@ class Topological {
             },
             data(){
                 return {
-                    upload:{
-                        option: {
-                            url: '/fs/temp?issys=true',
-                            dataType: 'json',
-                            autoUpload: true,
-                            acceptFileTypes: /(\.|\/)(gif|jpe?g|png|csv|log|pdf|html|txt|iso|mp3|mp4)$/i,
-                            disableImageResize: /Android(?!.*Chrome)|Opera/.test(window.navigator.userAgent),
-                            previewMaxWidth: 100,
-                            previewMaxHeight: 100,
-                            previewCrop: true
-                        }
-                    }
+                    
                 }
             },
-            template:   `<div><div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <div class="btn-group" style="padding:0 11px;float:right;">
-                                    <a href="#" class="btn btn-link fs-order" title="排序" data-tooltip="tooltip">
-                                        <i class="fas fa-list-ol"></i>
-                                    </a>
-                                    <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" data-tooltip="tooltip">
-                                        <i class="fas fa-upload"></i>
-                                        <input :id="id+'-file-upload'" type="file" name="uploadfile" multiple>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" v-if="model && model.rows">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <div id="grid" style="padding:0 5px;"><ul>
-                                    <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-                                        :id="'fs_node_'+item.id"
-                                        style="cursor: pointer;"
-                                        :title="item.name"
-                                        v-for="item in model.rows">
-                                        <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @dblclick="openIt(item, item.parent+'/'+item.name);" >
-                                            <div class="stats-info">
-                                                <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';" style="width:32px;"></p>
-                                            </div>
-                                            <div class="stats-link">
-                                                <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name" :data-info="JSON.stringify(item)">
-                                                    #{item.name}#
-                                                </a>
-                                            </div>
-                                            <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                <i class="fa fa-bars"></i>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul></div>
-                            </div>
-                        </div></div>`,
+            template:   `<el-container :id="id">
+                            <el-header style="height:30px;line-height:30px;padding:0px 10px;">
+                                <el-button-group>
+                                    <el-tooltip content="排序">
+                                        <el-button type="text" class="fs-order">
+                                            <i class="fas fa-list-ol"></i>
+                                        </el-button>
+                                    </el-tooltip>    
+                                    <el-button type="text" style="width: 10px;">
+                                    </el-button>
+                                    <el-tooltip content="上传文件">
+                                        <el-button type="text" class="fileinput-button" @click="fileUpload">
+                                            <i class="fas fa-upload"></i>
+                                        </el-button>
+                                    </el-tooltip>    
+                                </el-button-group>
+                            </el-header>
+                            <el-main style="padding:10px;height:calc(100vh - 205px);">
+                                <el-row v-if="model && model.rows">
+                                    <el-col :span="24" id="grid">
+                                        <ul>
+                                            <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
+                                                :id="'fs_node_'+item.id"
+                                                style="cursor: pointer;"
+                                                :title="item.name"
+                                                v-for="item in model.rows">
+                                                <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @dblclick="openIt(item, item.parent+'/'+item.name);" >
+                                                    <div class="stats-info">
+                                                        <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';" style="width:32px;"></p>
+                                                    </div>
+                                                    <div class="stats-link">
+                                                        <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name">
+                                                            #{item.name}#
+                                                        </a>
+                                                    </div>
+                                                    <div class="list-context-menu" :data-id="item.id" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
+                                                        <i class="fa fa-bars"></i>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </el-col>
+                                </el-row>
+                            </el-main>
+                        </el-container>`,
             created(){
-                this.upload.option.url = `/fs/storage/entity/files/${this.node.value}?issys=true`;
-                eventHub.$on("GRAPH-DIAGNOSIS-DATA-TRIGGER",this.reloadData);
+                console.log(_.now(),this.node)
             },
             mounted(){
-                this.initFileUpload();
                 this.initContextMenu();
                 this.orderIt();
             },
@@ -333,13 +327,14 @@ class Topological {
                     const self = this;
 
                     $.contextMenu({
-                        selector: '.list-context-menu',
+                        selector: `#${self.id} .list-context-menu`,
                         trigger: 'left',
                         build: function($trigger, e) {
-                            let _item = null;
+                            let item = null;
     
-                            if(!_.isEmpty(e.target.attributes.getNamedItem('data-item').value)) {
-                                _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
+                            if(!_.isEmpty(e.target.attributes.getNamedItem('data-id').value)) {
+                                let id = e.target.attributes.getNamedItem('data-id').value;
+                                item = _.find(self.model.rows,{id:id});
                             }
                             
                             return {
@@ -347,19 +342,19 @@ class Topological {
     
                                     "read": {
                                         name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                            self.downloadIt(_item,true);
+                                            self.downloadIt(item,true);
                                         }
                                     },                                               
                                     "sep1": "---------",
                                     "delete": {
                                         name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                            self.deleteIt(_item,true);
+                                            self.deleteIt(item,true);
                                         }
                                     },
                                     "sep2": "---------",
                                     "info": {
                                         name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                            self.info(_item);
+                                            self.info(item);
                                         }
                                     }
                                 }
@@ -417,7 +412,7 @@ class Topological {
                     const self = this;
     
                     $.contextMenu({
-                        selector: '.fs-order',
+                        selector: `#${self.id} .fs-order`,
                         trigger: 'left',
                         callback: function (key, options) {
                             if(key == 'byNameAsc'){
@@ -442,154 +437,66 @@ class Topological {
                     });
     
                 },
-                initFileUpload: function(){
+                fileUpload: function(){
                     const self = this;
 
-                    let uploadButton = $('<button/>')
-                        .addClass('btn btn-xs btn-primary')
-                        .prop('disabled', true)
-                        .text('准备中...')
-                        .on('click', function () {
-                            var $this = $(this),
-                                data = $this.data();
-                            $this
-                                .off('click')
-                                .text('中止')
-                                .on('click', function () {
-                                    $this.remove();
-                                    data.abort();
-                                });
-                            data.submit().always(function () {
-                                $this.remove();
-                            });
-                        });
-    
-                    $(`#${self.id}-file-upload`).fileupload(self.upload.option)
-                        .on('fileuploadadd', function (e, data) {
-    
-                            let title = "上传";
-    
-                            let wnd = maxWindow.winUpload(title, `<div id="files-${self.id}" class="files"></div>`, null,null);
-    
-                            // 更新信息栏信息
-                            new Vue({
-                                delimiters: ['#{', '}#'],
-                                el: `#jsPanel-upload-footer-${objectHash.sha1(title)}`,
-                                template: `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> #{stime}# | 上传文件：#{total}# </div>`,
-                                data: {
-                                    stime: moment().format("LLL"),
-                                    utime: '',
-                                    upload: 0,
-                                    total: data.originalFiles.length,
-                                    interval: null
-                                },
-                                created: function(){
-                                },
-                                methods: {
-                                    update: function(event){
-    
-                                        if(event.stop){
-                                            //clearInterval(this.interval);
-                                        }
-    
-                                        if(event.upload){
-                                            this.upload += event.upload;
-                                        }
-    
-                                    }
-                                }
-                            });
-    
-                            data.context = $('<ul/>').appendTo(`#files-${self.id}`);
-    
-                            $.each(data.files, function (index, file) {
-    
-                                let _name = file.name;
-    
-                                if(!_.isEmpty(file.name) && _.size(file.name) > 9){
-                                    _name = _.split(file.name,"",9).join("")+"..."
-                                }
-    
-                                var node = $('<li/>')
-                                    .append($(`<a href="#" class="thumbnail" style="margin-bottom:0px;border:none;-webkit-box-shadow: unset;box-shadow: unset;"/>`)
-                                        .text(_name))
-                                    .attr("title",file.name)
-                                    .append($(`<div id="progress_${objectHash.sha1(file.name)}" class="progress">
-                                                    <div class="progress-bar progress-bar-success"></div>
-                                               </div>`));
-                                if (!index) {
-                                    node
-                                        .append(uploadButton.clone(true).data(data));
-                                }
-                                node.appendTo(data.context);
-                            });
-                        })
-                        .on('fileuploadprocessalways', function (e, data) {
-                            var index = data.index,
-                                file = data.files[index],
-                                node = $(data.context.children()[index]);
-    
-                            if (file.preview) {
-                                node
-                                    .prepend(file.preview);
-                            }else{
-                                node
-                                    .prepend(`<span class="fa fa-file fa-4x preview-null"></span>`);
+                    let wnd = null;
+                    let wndID = `jsPanel-upload-${objectHash.sha1(self.node.value)}`;
+
+                    try{
+                        if(jsPanel.activePanels.getPanel(wndID)){
+                            jsPanel.activePanels.getPanel(wndID).close();
+                        }
+                    } catch(error){
+
+                    }
+                    finally{
+                        wnd = maxWindow.winUpload('文件上传', `<div id="${wndID}"></div>`, null, null);
+                    }
+                    
+                    new Vue({
+                        delimiters: ['#{', '}#'],
+                        template:   `<el-container>
+                                        <el-main>
+                                            <el-upload drag
+                                                multiple
+                                                :action="upload.url"
+                                                :on-success="onSuccess"
+                                                list-type="text"
+                                                name="uploadfile">
+                                                <i class="el-icon-upload"></i>
+                                            </el-upload>
+                                        </el-main>
+                                        <el-footer>
+                                            <i class="fas fa-clock"></i> 上传文件：#{upload.fileList.length}# 
+                                        </el-footer>
+                                    </el-container>`,
+                        data: {
+                            upload: {
+                                url: `/fs/storage/entity/files/${self.node.value}?issys=true`,
+                                fileList: []
                             }
-    
-                            if (file.error) {
-                                node
-                                    .append('<hr>')
-                                    .append($('<span class="text-danger"/>').text(file.error));
+                        },
+                        created(){
+                            
+                        },
+                        methods: {
+                            beforeUpload(file){
+                                
+                            },
+                            onSuccess(res,file,FileList){
+                                this.upload.fileList = FileList;
+                                self.updateEntity(file.raw,"+");
+                            },
+                            onRemove(file, fileList) {
+                                console.log(file, fileList);
+                            },
+                            onPreview(file) {
+                                console.log(file);
                             }
-                            if (index + 1 === data.files.length) {
-                                data.context.find('button')
-                                    .text('上传')
-                                    .css('display','none')
-                                    .prop('disabled', !!data.files.error);
-                            }
-    
-                        })
-                        .on('fileuploadprogress', function (e, data) {
-    
-                            let _name = objectHash.sha1(data.files[0].name);
-                            let progress = parseInt(data.loaded / data.total * 100, 10);
-                            $(`#progress_${_name} .progress-bar`).css(
-                                'width',
-                                progress + '%'
-                            ).html(`<small>${parseInt(data.loaded/1024,10)} KB / ${parseInt(data.total/1024,10)} KB</small>`);
-    
-                        })
-                        .on('fileuploaddone', function (e, data) {
-                            $.each(data.files, function (index, file) {
-                                if (file.name) {
-                                    // var link = $('<a>')
-                                    //     .attr('target', '_blank')
-                                    //     .prop('href', file.name);
-                                    // $(data.context.children()[index])
-                                    //     .wrap(link);
-                                    $(`#progress_${objectHash.sha1(file.name)} .progress-bar`).html(`<small>已完成</small>`);
-                                    self.updateEntity(file,'+');
-                                } else if (file.error) {
-                                    var error = $('<span class="text-danger"/>').text(file.error);
-                                    $(data.context.children()[index])
-                                        .append('<br>')
-                                        .append(error);
-                                }
-                            });
-                        })
-                        .on('fileuploadfail', function (e, data) {
-                            $.each(data.files, function (index) {
-                                var error = $('<span class="text-danger"/>').text('上传失败。');
-                                $(data.context.children()[index])
-                                    .append('<br>')
-                                    .append(error);
-                            });
-                            // close upload win
-    
-                        })
-                        .prop('disabled', !$.support.fileInput)
-                        .parent().addClass($.support.fileInput ? undefined : 'disabled');
+                        }
+                    }).$mount(`#${wndID}`);
+                    
                 },  
                 // 上传完毕，更新/matrix/entity   
                 updateEntity(event,action){
@@ -859,14 +766,21 @@ class Topological {
     
                 },
                 reload(){
+                    const self = this;
+                    
                     try {
                         let id = this.node.id;
                         let value = this.node.value;
-                        this.model = fsHandler.callFsJScript("/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
+                        let model = fsHandler.callFsJScript("/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
                         
-                        eventHub.$emit("GRAPH-DIAGNOSIS-DATA-TRIGGER",model);
+                        // 更新当前数据
+                        _.extend(this.model, model['file']);
+
+                        // 更新父-父-父数据
+                        _.extend(this.$parent.$parent.$parent.model,model);
                         
                     } catch(error){
+                        console.log(_.now(),error)
                     }
                 }
             }
@@ -1052,22 +966,19 @@ class Topological {
         let graphViewDiagnosis = Vue.extend({
             delimiters: ['#{', '}#'],
             props: {
-                id: String,
-                node: Object
+                id: String
             },
             template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="diagnosisRemove">
                             <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
                                 <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
                                     <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
-                                        <div v-if="it.type === 'profile'">
-                                            <profile-view :id="item.name" :model="model[it.type]" v-if="it.model[it.type]"></profile-view>
-                                        </div>
-                                        <div v-else-if="_.includes(['event','performance','log','ticket'],it.type)">
-                                            <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></event-diagnosis-datatable-component>
-                                        </div>
-                                        <div v-else-if="it.type === 'file'">
-                                            <file-view :id="it.id" :model="it.model[it.type]" :node="node" v-if="it.model[it.type]""></file-view>
-                                        </div>
+                                        
+                                        <profile-view :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></profile-view>
+                                        
+                                        <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></event-diagnosis-datatable-component>
+                                        
+                                        <file-view :id="it.name" :model="it.model[it.type]" :node="item.node" v-if="it.type === 'file'"></file-view>
+                                        
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-tab-pane>
@@ -1077,7 +988,6 @@ class Topological {
                     tabs:   [],
                     activeIndex: '',
                     subIndex: '',
-                    node: null,
                     model: null
                 }
             },
@@ -1113,8 +1023,6 @@ class Topological {
                     const self = this;
 
                     try{
-                        self.node = node;
-
                         self.model = fsHandler.callFsJScript('/graph/diagnosis-by-id.js', encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
 
                         let id = objectHash.sha1(node);
@@ -1123,20 +1031,18 @@ class Topological {
                         let name = `diagnosis-${id}`;
                         let find = _.find(self.tabs,{name: name});
                         if(find){
-                            self.activeIndex = name;
-                            self.subIndex = _.first(find.child).name;  
-                            return false;  
+                            self.diagnosisRemove(name);
                         }
 
                         let tab = {
-                            title: node.value, name: `diagnosis-${id}`, type: 'diagnosis', child:_.map(self.model.template,function(v){
+                            title: node.value, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child:_.map(self.model.template,function(v){
                                 return {title: v.title, name:`diagnosis-${v.name}-${id}`, type: v.type, model: self.model};
                             })};
 
                         self.activeIndex = tab.name;
                         self.tabs.push(tab);
                         self.subIndex = _.first(tab.child).name;
-                        
+
                     } catch(err){
                         console.log(err)
                     } finally{
@@ -1180,21 +1086,16 @@ class Topological {
             delimiters: ['#{', '}#'],
             props: {
                 id: String,
-                node: Object
             },
-            template:   `<el-container>
-                            <el-main style="padding: 5px 0px 0px 0px;">
-                                <el-tabs v-model="activeIndex" type="board-card" closable @tab-remove="edgesTabRemove">
-                                    <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
-                                        <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
-                                            <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
-                                                <edges-maintain :id="id+'-maintain'" :parent="node" :type="it.type" :model="it.model"></edges-maintain>    
-                                            </el-tab-pane>
-                                        </el-tabs>
+            template:   `<el-tabs v-model="activeIndex" type="board-card" closable @tab-remove="edgesTabRemove" class="topological-view-edges-tabs">
+                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
+                                <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
+                                    <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
+                                        <edges-maintain :id="id+'-maintain'" :parent="node" :type="it.type" :model="it.model"></edges-maintain>    
                                     </el-tab-pane>
                                 </el-tabs>
-                            </el-main>
-                        </el-container>`,
+                            </el-tab-pane>
+                        </el-tabs>`,
             data(){
                 return {
                     tabs:   [],
@@ -1291,14 +1192,14 @@ class Topological {
         let component =  {
             delimiters: ['${', '}'],
             template: `<el-container style="background: transparent;height: 100%;">
-                            <el-aside :id="'topological-view-left-'+id">
+                            <el-aside :id="'topological-view-left-'+id" style="border-right:1px solid #ddd;background-color:#f6f6f6;" class="topological-view-edges">
                                 <!--graph-view-nav :id="'graph-view-nav-'+id"></graph-view-nav-->
                                 <graph-view-edges :id="'graph-view-edges-'+id" ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :id="'topological-view-main-'+id">
                                 <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside :id="'topological-view-right-'+id" style="height:100%;overflow:hidden;">
+                            <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;border-left:1px solid #ddd;background-color:#f6f6f6;" class="topological-view-diagnosis">
                                 <graph-view-diagnosis :id="'graph-diagnosis-'+id" ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
@@ -1337,9 +1238,9 @@ class Topological {
                     let init = (function(){
             
                         _.forEach(inst.URL_PARAMS_CFG,function(v,k){
-            
+                            
                             if("false" == String(v)){
-                                $(`#${k}`).hide();
+                                $(`#${k}`).remove();
                                 $(".page-header-fixed").css({
                                     "paddingTop": "0px"
                                 })
@@ -1375,7 +1276,7 @@ class Topological {
                         direction: 'horizontal',
                     });
 
-                },500)
+                },1500)
                 
             },
             methods: {

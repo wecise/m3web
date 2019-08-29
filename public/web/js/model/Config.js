@@ -423,75 +423,71 @@ class Config {
     
                 let main = {
                     delimiters: ['#{', '}#'],
-                    template:   `<div class="layout">
-                                    <Layout>
-                                        <Header>
-                                            <Dropdown placement="top-start">
-                                                <Button type="text" size="small"><i class="fas fa-grip-vertical"></i></Button>
-                                                <DropdownMenu slot="list">
-                                                    <DropdownItem>
-                                                        <label for="auto-file-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
-                                                            <i class="fas fa-file-import"></i> 导入
-                                                        </label>
-                                                        <input id="auto-file-upload" type="file" @change="configImport" required="required" style="display:none;" />
-                                                    </DropdownItem>
-                                                    <DropdownItem>
-                                                        <Button type="text" size="small" @click="configExport"><i class="fas fa-file-export"></i> 导出</Button>
-                                                    </DropdownItem>
-                                                </DropdownMenu>
-                                            </Dropdown>
-                                            <ButtonGroup>
-                                                <Button type="text" size="small" @click="configNew"><i class="fas fa-plus"></i> 新增</Button>
-                                                <Button type="text" size="small" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-save"></i> 保存</Button>
-                                                <Button type="text" size="small" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-trash"></i> 删除</Button>
-                                                <Button type="text" size="small" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tv"></i> 调试</Button>
-                                                <Button type="text" size="small" :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tshirt"></i> 主题</Button>
-                                            </ButtonGroup>
-                                            <Dropdown placement="top-start">
-                                                <Button type="text" size="small" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-boxes"></i> 模板</Button>
-                                                <DropdownMenu slot="list">
-                                                    <DropdownItem>屏蔽规则</DropdownItem>
-                                                    <DropdownItem>过滤规则</DropdownItem>
-                                                    <DropdownItem>压缩规则</DropdownItem>
-                                                </DropdownMenu>
-                                            </Dropdown>
-                                            <Dropdown placement="top-start">
-                                                <Button type="text" size="small" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-grip-vertical"></i> 插入</Button>
-                                                <DropdownMenu slot="list">
-                                                    <DropdownItem>属性</DropdownItem>
-                                                    <DropdownItem>函数</DropdownItem>
-                                                </DropdownMenu>
-                                            </Dropdown>
-                                        </Header>
-                                        <Content>
-                                            <Split v-model="split1">
-                                                <div slot="left" style="height: 100%;overflow: auto;">
-                                                    <config-tree-component id="config-tree" :zNodes="configTreeNodes"></config-tree-component>
-                                                </div>
-                                                <div slot="right">
-                                                    <el-container>
-                                                        <el-main>
-                                                            <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" @tab-click="configToggle">
-                                                                <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
-                                                                    <span slot="label" v-if="item.dir">
-                                                                        <i class="fas fa-folder" style="color:rgb(64, 158, 255);"></i> #{item.title}#
-                                                                    </span>
-                                                                    <span slot="label" v-else>
-                                                                        <i class="fas fa-file-invoice" style="color:rgb(64, 158, 255);"></i> #{item.title}#
-                                                                    </span>
-                                                                    <config-manage :id="item.name" :model="item.model"></config-manage>
-                                                                </el-tab-pane>
-                                                            </el-tabs>
-                                                        </el-main>
-                                                    </el-container>
-                                                </div>
-                                            </Split>
-                                        </Content>
-                                        <Footer style="padding-top: 20px!important;"><i class="fas fa-user"></i> #{window.SignedUser_UserName}#    <i class="fas fa-clock"></i> #{moment().format("LLL")}# </Footer>
-                                    </Layout>     
-                                </div>`,
+                    template:   `<el-container style="height: calc(100vh - 85px);background-color:#f6f6f6;">
+                                    <el-header style="height: 30px;line-height: 30px;background:transparent;border-bottom:1px solid #dddddd;padding: 0px;">
+                                        <el-dropdown placement="top-start">
+                                            <el-button type="text"><i class="fas fa-grip-vertical"></i> 文件</el-button>
+                                            <el-dropdown-menu slot="dropdown">
+                                                <el-dropdown-item>
+                                                    <label for="auto-file-upload" class="custom-file-upload" style="border: 1px dashed rgb(204, 204, 204);display: inline-block;padding: 6px 12px;cursor: pointer;">
+                                                        <i class="fas fa-file-import"></i> 导入
+                                                    </label>
+                                                    <input id="auto-file-upload" type="file" @change="configImport" required="required" style="display:none;" />
+                                                </el-dropdown-item>
+                                                <el-dropdown-item>
+                                                    <el-button type="text" @click="configExport"><i class="fas fa-file-export"></i> 导出</el-button>
+                                                </el-dropdown-item>
+                                            </el-dropdown-menu>
+                                        </el-dropdown>
+                                        <el-button-group>
+                                            <el-button type="text" @click="configNew"><i class="fas fa-plus"></i> 新增</el-button>
+                                            <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-save"></i> 保存</el-button>
+                                            <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-trash"></i> 删除</el-button>
+                                            <el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tv"></i> 调试</el-button>
+                                            <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tshirt"></i> 主题</el-button>
+                                        </el-button-group>
+                                        <el-dropdown placement="top-start">
+                                            <el-button type="text" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-boxes"></i> 模板</el-button>
+                                            <el-dropdown-menu slot="dropdown">
+                                                <DropdownItem>屏蔽规则</DropdownItem>
+                                                <DropdownItem>过滤规则</DropdownItem>
+                                                <DropdownItem>压缩规则</DropdownItem>
+                                            </el-dropdown-menu>
+                                        </el-dropdown>
+                                        <el-dropdown placement="top-start">
+                                            <el-button type="text" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-grip-vertical"></i> 插入</el-button>
+                                            <el-dropdown-menu slot="dropdown">
+                                                <DropdownItem>属性</DropdownItem>
+                                                <DropdownItem>函数</DropdownItem>
+                                            </el-dropdown-menu>
+                                        </el-dropdown>
+                                    </el-header>
+                                    <el-main style="padding:0px;border-top:1px solid #ffffff;">
+                                        <el-container>
+                                            <el-aside id="config-tree-view-left">
+                                                <config-tree-component id="config-tree" :zNodes="configTreeNodes" style="height: calc(100vh - 150px);"></config-tree-component>
+                                            </el-aside>
+                                            <el-main style="padding:0px;" id="config-tree-view-main">                            
+                                                <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" @tab-click="configToggle">
+                                                    <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
+                                                        <span slot="label" v-if="item.dir">
+                                                            <i class="fas fa-folder" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                        </span>
+                                                        <span slot="label" v-else>
+                                                            <i class="fas fa-file-invoice" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                        </span>
+                                                        <config-manage :id="item.name" :model="item.model"></config-manage>
+                                                    </el-tab-pane>
+                                                </el-tabs>
+                                            </e-main>
+                                        </el-container>
+                                    </el-main>
+                                    <el-footer style="height: 30px;line-height: 30px;padding: 0 10px;">
+                                        <i class="fas fa-user"></i> #{window.SignedUser_UserName}#    <i class="fas fa-clock"></i> #{moment().format("LLL")}# </Footer>
+                                    </el-footer>     
+                                </el-container>`,
                     data: {
-                        split1: 0.2,
+                        splitInst: null,
                         configTabs: {
                             tabs:[],
                             activeIndex: '',
@@ -512,6 +508,14 @@ class Config {
                             } else {
                                 this.configTreeNodes = configHandler.configGet("/"+window.COMPANY_OSPACE);
                             }
+
+                            self.splitInst = Split([`#config-tree-view-left`, `#config-tree-view-main`], {
+                                sizes: [20, 80],
+                                minSize: [0, 0],
+                                gutterSize: 3,
+                                cursor: 'col-resize',
+                                direction: 'vertical'
+                            });
                         })
                     },
                     methods: {

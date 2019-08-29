@@ -1,0 +1,274 @@
+<code>
+
+        <style scoped>
+            /*----------  style  ----------*/
+            .omdb-editor-base-component {
+                background-color: rgb(246, 246, 246);
+                width:100%;
+                height: 100%;
+                position: relative;
+            }
+    
+            .omdb-editor-base-component .ace_editor{
+                border: none;
+                margin: 0px 0px 0px 0px;
+                width: 100%;
+                height: calc(100vh - 302px);/* calc(100% - 50px)!important; */
+                position: relative !important;
+                overflow: auto;
+            }
+    
+            .ace_keyword {
+                color: #a70909!important;
+            }
+    
+            .scrollmargin {
+                height: 500px;
+                text-align: center;
+            }
+    
+            .editor-container{
+                width: 100%;
+                height: 100%;
+            }
+    
+            .omdb-editor-base-component .statusBar {
+                display: -webkit-box;
+                position: fixed;
+                width: 100%;
+                height: 30px;
+                padding: 7px;
+                background: rgb(246, 246, 246);
+            }
+    
+            .el-tabs__content{
+                padding: 1px!important;
+            }
+    
+            .el-tabs__item,
+            .el-tabs__nav-next, 
+            .el-tabs__nav-prev {
+                height: 30px;
+                line-height: 30px;
+            }
+    
+            .el-button-group>.el-button:not(:last-child), .el-tabs--left .el-tabs__nav-wrap.is-left{
+                margin-right: 10px;
+            }
+            
+            .el-button-group>.el-button{
+                float: unset;
+            }
+    
+            .el-tabs--border-card {
+                -webkit-box-shadow: unset;
+                box-shadow: unset;
+                border:unset;
+            }
+    
+            .gutter.gutter-horizontal {
+                cursor: ew-resize;
+                background-color: rgb(241, 241, 241);
+                background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+                background-size: 7px;
+                background-position-x: 50%;
+                background-position-y: 50%;
+                background-repeat: no-repeat;
+                z-index: 100;
+            }
+    
+            .gutter.gutter-vertical {
+                cursor: ns-resize;
+                background-color: rgb(241, 241, 241);
+                background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+                background-size: 7px;
+                background-position-x: 50%;
+                background-position-y: 50%;
+                background-repeat: no-repeat;
+                z-index: 100;
+            }
+        </style>
+    
+        
+        /*----------  最外层element会自动增加组件同名 class="omdb-editor-base-component"  ----------*/
+        <template>
+            <el-container>
+                <el-header style="height:30px;line-height:30px;background:#f6f6f6;">
+                    <el-button-group>
+                        <el-tooltip content="复制" placement="bottom" open-delay="500">
+                            <el-button type="text" class="copy" @click="onCopy"><i class="fas fa-copy"></i></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="新建" placement="bottom" open-delay="500">
+                            <el-button type="text"><i class="fas fa-plus"></i></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="删除" placement="bottom" open-delay="500">
+                            <el-button type="text"><i class="fas fa-trash"></i></el-button>
+                        </el-tooltip>
+                    </el-button-group>
+                </el-header>
+                <el-main :id="id" style="padding:0px;"></el-main>
+                <el-footer :id="id+'_statusBar'" style="padding:0px 10px;height:30px;line-height: 30px;"></el-footer>
+            </el-container>
+        </template>
+    
+        /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+        <script id="omdb-editor-base-component">
+        {
+            delimiters: ['${', '}'],
+            props: {
+                id: String,
+                bid: String,
+                model: Object,
+                showToolsBar: Boolean,
+                showStatusBar: Boolean
+            },
+            data(){
+                return {
+                    langTools:null,
+                    editor: null,
+                    inputText: "",
+                    result: null
+                }
+            },
+            mounted(){
+                var self = this;
+    
+                self.$nextTick(function(){
+                    self.init();
+                })
+            },
+            watch: {
+                'model.newInput': {
+                    handler:function(val,oldVal){
+                        const self = this;
+                        
+                        self.editor.setValue(val);
+                    },
+                    deep:true
+                }
+    
+            },
+            created () {
+                const self = this;
+    
+            },
+            methods: {
+                init() {
+                    const self = this;
+    
+                    self.langTools = ace.require("ace/ext/language_tools");
+                    self.editor = ace.edit(self.id);
+                    
+                    self.editor.setOptions({
+                        // maxLines: 1000,
+                        // minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: false
+                    });
+                    //self.editor.$blockScrolling = Infinity;
+                    self.editor.setShowPrintMargin(self.model.printMargin);
+                    self.editor.setReadOnly(self.model.readOnly);
+                    self.editor.getSession().setUseSoftTabs(true);
+    
+                    self.editor.getSession().setTabSize(2);
+                    self.editor.getSession().setUseWrapMode(true);
+    
+                    self.setTheme();
+                    self.setMode();
+                    self.setOptions();
+    
+                    self.toggleToolsBar();
+    
+                    self.toggleStatusBar();
+    
+                
+    
+                    
+                },
+                setOptions(){
+                    const self = this;
+    
+                    if(!_.isEmpty(self.model.options)){
+                        self.editor.setOptions(self.model.options);
+                    } 
+                },
+                setTheme(){
+                    const self = this;
+    
+                    let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(self.id)}`);
+    
+                    if(localTheme){
+                        self.editor.setTheme("ace/theme/" + localTheme);
+                        return false;
+                    }
+    
+                    if(_.isEmpty(self.model.theme)){
+                        self.editor.setTheme("ace/theme/tomorrow");
+                    } else {
+                        self.editor.setTheme("ace/theme/"+self.model.theme);
+                    }
+                    
+                },
+                setMode(){
+                    const self = this;
+    
+                    if(_.isEmpty(self.model.mode)){
+                        self.editor.getSession().setMode("ace/mode/json");
+                    } else {
+                        self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                    }
+                    
+                },
+                setValue(){
+                    const self = this;
+    
+                    self.editor.setValue(self.model.oldInput);
+                },
+                getSelected(){
+                    const self = this;
+                    var temp = self.editor.getSelectedText();
+    
+                    if(_.isEmpty(temp)){
+                        self.inputText = self.editor.getValue();
+                    } else {
+                        self.inputText = temp;
+                    }
+                },
+                toggleToolsBar(){
+                    const self = this;
+    
+                    if(self.showToolsBar){
+                        $(".editorToolBar").show();
+                    } else {
+                        $(".editorToolBar").hide();
+                    }
+                },
+                toggleStatusBar(){
+                    const self = this;
+    
+                    if(self.showStatusBar) {
+                        let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
+                        let statusBar = new StatusBar(self.editor, document.getElementById(`${self.id}_statusBar`));
+                    }
+                },
+                onCopy(){
+                    const self = this;
+
+                    new Clipboard("button.copy", {
+                        text: function(trigger) {
+                            self.$message("已复制");
+                            console.log(self.editor.getValue())
+                            return self.editor.getValue();
+                        }
+                    });
+                }
+            }
+        
+        
+        }
+        </script>
+    
+    </code>
+    

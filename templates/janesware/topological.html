@@ -49,26 +49,42 @@
 		padding: 0px!important;
 	}
 
-    .gutter {
-        background-color: #f9f9f9!important;
+    .gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
         background-repeat: no-repeat;
-        background-position: 50%;
+        z-index: 100;
     }
 
-    .gutter:hover {
-        background-color: #e7e7e7!important;
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
         background-repeat: no-repeat;
-        background-position: 50%;
+        z-index: 100;
     }
 
-	.topological-view-detail.el-tabs--border-card {
-		background: rgba(0, 0, 0, 0);
+	.topological-view-edges  .el-tabs--border-card,
+    .topological-view-diagnosis .el-tabs--border-card {
+		background:transparent;
 		border: unset;
-		-webkit-box-shadow: unset;
+        -webkit-box-shadow: unset;
 		box-shadow: unset;
 	}
 
-	.el-tabs--border-card{
+    .topological-view-edges .el-tabs--border-card>.el-tabs__content,
+    .topological-view-diagnosis .el-tabs--border-card>.el-tabs__content {
+        padding: 0px;
+    }
+
+    .el-tabs--border-card{
 		background: rgb(255, 255, 255);
 		border: unset;
 		-webkit-box-shadow: unset;
@@ -85,6 +101,10 @@
 		height:32px;
 		line-height:32px;
 	}
+
+    .el-tabs__nav-next, .el-tabs__nav-prev{
+        line-height: 30px;
+    }
 
     .el-autocomplete .el-input__inner{
         height: 30px;

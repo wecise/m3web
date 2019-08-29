@@ -591,15 +591,17 @@
                                             recursive: true,
                                             filetype: 'xlsx',
                                             template: true,
-                                            class: '/matrix/entity'
+                                            class: '/matrix/entity',
+                                            ignoreClass: ''
                                         }
                                     },
                                     template: `<el-container style="height:100%;">
-                                                    <el-header style="height:40px;line-height:40px;">
-                                                        <el-switch v-model="model.ifData" active-text="导出样例数据"></el-switch>
+                                                    <el-header style="height:35px;line-height:35px;padding: 0px 5px;background: #f6f6f6;">
+                                                        <el-switch v-model="model.ifData" active-text="导出样例数据" active-color="#13ce66"></el-switch>
                                                     </el-header>
-                                                    <el-main style="padding:10px;background-color:#f7f7f7;">
+                                                    <el-main style="padding:10px;">
                                                         <el-tree
+                                                            ref="entityTree"
                                                             :data="classList"
                                                             show-checkbox
                                                             node-key="id"
@@ -615,16 +617,28 @@
                                                     </el-footer>
                                                 </el-container>`,
                                     methods:{
+                                        getCheckedNodes() {
+                                            console.log(-1, this.$refs.entityTree.getNode())
+                                            console.log(0, this.$el.innerText.split("\n"))
+                                            console.log(1, this.$refs.entityTree.data)
+                                            console.log(2, this.$refs.entityTree.getCheckedNodes());
+                                        },
                                         onCancel(){
                                             wnd.close();
                                         },
                                         onExport(){
+                                            let allNodes = _.map(this.classList,'class');
+                                            let checkedClass = _.map(this.$refs.entityTree.getCheckedNodes(),'class');
+                                            console.log(1, allNodes)
+                                            console.log(2, checkedClass);
+                                            _.extend(this.model, {ignoreClass: _.xor(allNodes,checkedClass) } );
+                                            
                                             if(this.model.ifData){
                                                 this.model.limit = -1;
                                             } else {
                                                 this.model.limit = 0;
                                             }
-                                            omdbHandler.classTemplateExportToExcel(this.model);
+                                            omdbHandler.classDataExport(this.model);
                                         }
                                     }
                                 }).$mount("#entity-template-export");
@@ -634,39 +648,6 @@
                                 
                                 self.$root.entityDataImport();
                                 
-                                /* alertify.confirm(`确认要导入 ${file.name} 实体文件，导入后将覆盖原有实体信息，请确认！<br><br>
-                                                    文件名称：${file.name}<br><br>
-                                                    修改时间：${file.lastModifiedDate}<br><br>
-                                                    文件大小：${mx.bytesToSize(file.size)}`, function (e) {
-                                    if (e) {
-                                        
-                                        let rtn = JSON.parse(omdbHandler.classDataImportFromExcel(file));
-                                        
-                                        if(rtn.status == 'ok'){
-                                            self.$root.$refs.searchRef.search();
-                                        }else{
-                                            alertify.confirm(`导入 ${file.name} 实体文件失败，错误信息如下：<br><br>
-                                                                ${rtn.message.join("<br><br>")}`, function (e) {
-                                                if (e) {
-                                                    
-                                                } else {
-                                                    
-                                                }
-                            
-                                            });
-                                        }
-                                    } else {
-                                        
-                                    }
-
-                                    event.target.value = null;
-                
-                                }); */
-
-                                /* $(".fas.fa-exclamation-circle").css({
-                                    "color":"#31c8f1",
-                                    "fontSize":"14px"
-                                }).addClass("fa-spin") */
                             }
 
                         }

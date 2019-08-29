@@ -207,7 +207,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;">
-            <el-container :id="id">
+            <el-container :id="id" style="height:100%;">
                 <el-header class="nav" :id="id+'-nav'" style="height:30px;line-height: 30px;padding:0px 0px 0px 10px;">
                     <div class="tools" :id="id+'-tools'">
                         <el-tooltip content="编辑" open-delay="500">
@@ -415,7 +415,16 @@
                 {
 
                     self.model.graph.container = document.getElementById(`${self.id}-container`);
-                    self.model.graph.container.style.minHeight = "80vh";
+                    // 滚动效果
+                    // self.model.graph.container.style.minHeight = "80vh";
+                    
+                    // 拖拽效果
+                    self.model.graph.container.style.position = 'releative';
+                    self.model.graph.container.style.overflow = 'hidden';
+                    self.model.graph.container.style.left = '0px';
+                    self.model.graph.container.style.top = '0px';
+                    self.model.graph.container.style.right = '0px';
+                    self.model.graph.container.style.bottom = '0px';
                     document.getElementById(self.id).appendChild(self.model.graph.container);
 
                     //mxEvent.disableContextMenu(self.model.graph.container);

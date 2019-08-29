@@ -481,6 +481,45 @@ class OmdbHandler {
     };
 
     /*
+    *   导出DDL
+    *
+    *       参数：
+    *           mql
+    */
+   classToDDL(param) {
+
+    let rtn = null;
+    
+    jQuery.ajax({
+        url: `/mxobject/export?recursive=false&filetype=mql&class=${encodeURIComponent(param)}&limit=0`,
+        dataType: 'json',
+        type: 'GET',
+        async: false,
+        beforeSend:function(xhr){
+            Pace.restart();
+        },
+        complete: function(xhr, textStatus) {
+        },
+        success: function (data, status) {
+
+            userHandler.ifSignIn(data);
+
+            if(_.lowerCase(data.status) == "ok"){
+                rtn = data;
+            }
+
+        },
+        error: function(xhr, textStatus, errorThrown){
+            rtn = xhr.responseText;
+        }
+    });
+
+    return rtn;
+};
+
+
+
+    /*
     *   类数据导出
     *
     * */
@@ -493,7 +532,7 @@ class OmdbHandler {
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=true&filetype=${event.filetype}&class=${encodeURIComponent(event.class)}&limit=${event.limit}`, true);
+            xhr.open("GET", `/mxobject/export?recursive=true&filetype=${event.filetype}&template=${event.template}&class=${encodeURIComponent(event.class)}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
             xhr.setRequestHeader("Content-type","text/csv");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.onreadystatechange = function() {
@@ -568,7 +607,7 @@ class OmdbHandler {
 
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", `/mxobject/export?recursive=${event.recursive}&filetype=${event.filetype}&template=${event.template}&class=${event.class}&limit=${event.limit}`, true);
+            xhr.open("GET", `/mxobject/export?recursive=${event.recursive}&filetype=${event.filetype}&template=${event.template}&class=${event.class}&ignoreclass=${encodeURIComponent(event.ignoreClass)}&limit=${event.limit}`, true);
             xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded; charset=UTF-8");
             xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
             xhr.setRequestHeader("Accept", "*/*");
@@ -588,45 +627,6 @@ class OmdbHandler {
         }
         return rtn;
 
-    }
-     /*
-    *   类数据从excel导入
-    *
-    * */
-    classDataImportFromExcel(file){
-    
-        let rtn = null;
-
-        let fm = new FormData();
-        fm.append("uploadfile", file);
-
-        jQuery.ajax({
-            url: '/mxobject/import',
-            dataType: 'json',
-            type: 'POST',
-            data: fm,
-            mimeType: "multipart/form-data",
-            async: false,
-            processData:false,
-            contentType: false,
-            beforeSend:function(xhr){
-                Pace.restart();
-            },
-            complete: function(xhr, textStatus) {
-            },
-            success: function(data, textStatus, xhr) {
-
-                userHandler.ifSignIn(data);
-
-                rtn = data;
-
-            },
-            error: function(xhr, textStatus, errorThrown) {
-                rtn = xhr.responseText;
-            }
-        })
-        return rtn;
-        
     }
 
 }

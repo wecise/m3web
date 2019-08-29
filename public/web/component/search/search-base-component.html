@@ -49,7 +49,7 @@
 			</el-select>
 			<!--搜索框-->
 			<el-autocomplete class="inline-input" placeholder="搜索" 
-							v-model.trim="options.term" 
+							v-model="options.term" 
 							:fetch-suggestions="suggestionsSearch"
 							:trigger-on-focus="false"
 							@select="search"
@@ -123,8 +123,8 @@
             }
 	    },
 	    methods: {
-			suggestionsSearch(){
-
+			suggestionsSearch(queryString, cb){
+				cb([]);
 			},
 			search(){
 			    // 预设值

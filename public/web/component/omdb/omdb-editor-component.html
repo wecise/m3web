@@ -11,16 +11,7 @@
 
 		.omdb-editor-component .ace_editor{
 			border: none;
-			margin: 0px 0px 10px 0px;
-			width: 100%;
-			height:calc(100% - 50px)!important;
-			position: relative !important;
-			overflow: auto;
-		}
-
-		.lm_maximised .omdb-editor-component .ace_editor{
-			border: none;
-			margin: 0px 0px 10px 0px;
+			margin: 0px 0px 0px 0px;
 			width: 100%;
 			height:calc(100% - 50px)!important;
 			position: relative !important;
@@ -29,28 +20,6 @@
 
 		.ace_keyword {
 			color: #a70909!important;
-		}
-
-		.editorToolBar{
-			height: 30px;
-			background-color: rgb(246, 246, 246);/*rgb(33, 149, 243);*/
-			width: 100%;
-		}
-
-		.editorToolBar .btn-primary,
-		.editorToolBar .btn-primary:hover{
-			background-color: rgb(246, 246, 246);
-			color: #333333;
-			border:none;
-		}
-
-		.editorToolBar > .btn-group {
-			top: 1px;
-			width: 100%;
-		}
-
-		.editorToolBar .btn-group > a > i{
-			color: #666666;
 		}
 
 		.scrollmargin {
@@ -76,7 +45,9 @@
             padding: 1px!important;
         }
 
-        .el-tabs__item{
+        .el-tabs__item,
+        .el-tabs__nav-next, 
+        .el-tabs__nav-prev {
             height: 30px;
             line-height: 30px;
         }
@@ -89,14 +60,24 @@
             float: unset;
         }
 
+        .el-tabs--border-card {
+            -webkit-box-shadow: unset;
+            box-shadow: unset;
+            border:unset;
+        }
+
         .gutter.gutter-horizontal {
-            background-image: url('{{AppSubUrl}}/web/vendor/split/grips/vertical.png');
             cursor: ew-resize;
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
         }
 
         .gutter.gutter-vertical {
-            background-image: url('{{AppSubUrl}}/web/vendor/split/grips/horizontal.png');
             cursor: ns-resize;
+            background-color: #eee;
+            background-repeat: no-repeat;
+            background-position: 50%;
         }
 	</style>
 
@@ -127,14 +108,17 @@
                     <el-tooltip content="执行输出为表格" placement="bottom" open-delay="500">
                         <el-button type="text"  class="query" @click="query"><i class="fas fa-play"></i></el-button>
                     </el-tooltip>
+                    <!--el-tooltip content="执行输出为新表格" placement="bottom" open-delay="500">
+                        <el-button type="text"  class="query" @click="queryPlus"><i class="fas fa-play-circle"></i></el-button>
+                    </el-tooltip-->
                     <el-tooltip content="执行输出为JSON" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="queryByJson" @click="queryByJson"><i class="fas fa-play-circle"></i></el-button>
+                        <el-button type="text"  class="queryByJson" @click="queryByJson"><i class="fas fa-file-code"></i></el-button>
                     </el-tooltip>
 					<el-tooltip content="在新窗口执行" placement="bottom" open-delay="500">
                         <!--<el-button type="text"  class="queryPlus" @click="queryPlus"><i class="fa fa-play"></i>+</el-button>-->
                     </el-tooltip>
                     <el-tooltip content="执行并保存到文件" placement="bottom" open-delay="500">
-                        <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-forward"></i></el-button>
+                        <el-button type="text"  class="queryAndSave" @click="queryAndSave"><i class="fas fa-file-export"></i></el-button>
                     </el-tooltip>
                     <el-tooltip content="主题" placement="bottom" open-delay="500">
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
@@ -142,7 +126,7 @@
 				</el-button-group>
 			</el-header>
 			<el-main :id="id" style="padding:0px;"></el-main>
-			<el-footer :id="id+'_statusBar'" style="padding:0px;height:30px;line-height: 30px;"></el-footer>
+			<el-footer :id="id+'_statusBar'" style="padding:0px 10px;height:30px;line-height: 30px;"></el-footer>
 		</el-container>
 	</template>
 
@@ -367,15 +351,161 @@
                     return false;
                 }
 
-                // if(_.includes(_mql,'limit -1')){
-                //     alertify.confirm(`确认要查询所有记录？`, function (e) {
-                //         if (e) {
-                //             return;
-                //         } else {
-                //             return false;
-                //         }
-                //     });
-                // }
+                if( self.editor.getSelectedText().length > 0 ) {
+                    _mql = self.editor.getSelectedText();
+                }
+
+                let _list = omdbHandler.fetchDataByMql(_mql);
+
+                if(_list.status === 'ok'){
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('info',_list);
+
+                } else {
+                    // 输出日志
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
+	                return false;
+                }
+
+                if(_.isEmpty(_list)) {
+                    alertify.log("查询结果为空");
+                    return false;
+                }
+
+                // MQL for  CRUD
+                if(_.includes(['create'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    return false;
+                }
+
+                if(_.includes(['create edge'],_list.meta.type)){
+                    alertify.success("创建成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+                    return false;
+                }
+
+                if(_.includes(['drop edge'],_list.meta.type)){
+                    alertify.success("删除成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'alter'){
+                    alertify.success("修改成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+                    return false;
+                }
+
+                if(_list.meta.type === 'insert'){
+                    alertify.success("插入成功");
+                    eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    return false;
+                }
+
+
+                let _data = _list.message;
+
+                let _columns = mx.columnsParse(_list.meta);
+
+
+                // Graph
+                if(_list.meta.type === 'graph'){
+
+                    //有数据
+                    if(!_.isEmpty(_data)){   
+                        
+                        self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                            type: 'omdb-query-graph-console',
+                                                            name: self.id+'-graph',
+                                                            title: `结果_GRAPH_${moment().format("LT")}`,
+                                                            model: _data[0].graph
+                                                        });
+                        return false;
+                    }
+                    // 没数据 
+                    else {
+                        self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-graph-console',
+                                                                        name: self.id+'-graph',
+                                                                        title: `结果_GRAPH_${moment().format("LT")}`,
+                                                                        model: {nodes:[],edges:[]}
+                                                                    });
+                        return false;
+                    }
+                }
+
+                // Graph-PATH
+                if(_list.meta.type === 'path'){
+
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-graph-console',
+                                                                        name: self.id+'-graph',
+                                                                        title: `结果_GRAPH_${moment().format("LT")}`,
+                                                                        model: _data[0].graph
+                                                                    });
+
+                    return false;
+                }
+
+                // For Select count Pattern
+	            // 判断数据中没有返回class属性，如果没有将meta中的class属性赋值到数据中，构造Table所需要的结构
+	            let temp = _list.message;
+
+                if(!_.has(temp[0],'class')) {
+                    _data = _.map(_data,function(v){ return _.merge(v,{class:_.keys(_list.meta.classes)[0]})});
+                }
+
+                // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
+                if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
+                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
+                                    点击【确认】以文本形式输出`, function (e) {
+                        if (e) {
+                            self.queryByJson();
+                        } else {
+                            
+                        }
+                    });
+                    return false;
+                }
+                // 正常Table显示 
+                else {
+                    //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
+                    self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
+                }
+
+                // 更新当前实例
+                self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_TABLE_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
+
+            },
+            queryPlus(){
+                const self = this;
+                
+                let _mql = self.editor.getValue();
+
+                if(_.isEmpty(self.editor.getValue())){
+                    return false;
+                }
 
                 if( self.editor.getSelectedText().length > 0 ) {
                     _mql = self.editor.getSelectedText();
@@ -508,12 +638,14 @@
                     //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
                     self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
                 }
-                
-                // 初始化生成table
-                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
-                // 更新table
-                eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
 
+                // 更新当前实例
+                self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-console',
+                                                                        name: self.id+'-output-table',
+                                                                        title: `结果_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
             },
             queryByJson(){
                 const self = this;
@@ -532,23 +664,32 @@
 
                 if(_list.status === 'ok'){
                     // 输出日志
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('info',_list);
 
                     // 输出结果
                     self.result = { id:self.id, bid: self.bid, type: 'json-update', data: _list};
+                    
                     // 初始化生成JSON
-                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
                     // 更新table
-                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-json-console',
+                                                                        name: self.id+'-output-json',
+                                                                        title: `结果_JSON_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
 
                 } else {
                     // 设置为空
                     self.result = { id:self.id, bid: self.bid, type: 'json-update', data: null };
-                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT`,self.result);
-                    eventHub.$emit(`QUERY-JSON-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
+                                                                        type: 'omdb-query-output-json-console',
+                                                                        name: self.id+'-output-json',
+                                                                        title: `结果_JSON_${moment().format("LT")}`,
+                                                                        model: self.result
+                                                                    });
 
                     // 输出日志
-                    eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+                    self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
 	                return false;
                 }        
             },

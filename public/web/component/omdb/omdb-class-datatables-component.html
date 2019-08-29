@@ -52,7 +52,7 @@
 			margin: 10px 0px 0px 5px;
 		}
 
-		.omdb-class-datatables-component .dataTables_info{
+		/* .omdb-class-datatables-component .dataTables_info{
 			position: absolute;
 			height: 28px;
 			background-color: rgb(246, 246, 246);
@@ -60,7 +60,7 @@
 			text-align: left;
 			border-top: 1px solid rgb(226, 231, 236);
 			padding: 5px;
-		}
+		} */
 
 		.omdb-class-datatables-component .datatables-toolbars {
 			height: 30px;
@@ -92,9 +92,21 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="omdb-class-datatables-component"  ----------*/
 	<template>
-        <section class="omdb-class-datatables-component">
-            <table :id="id" class="cell-border" width="100%"></table>
-        </section>
+        <el-container class="omdb-class-datatables-component">
+            <el-header style="height:30px;line-height:30px;background:#f6f6f6;">
+                <el-button-group>
+                    <el-tooltip content="新建属性" placement="bottom" open-delay="500">
+                        <el-button type="text"><i class="fas fa-plus"></i></el-button>
+                    </el-tooltip>
+                    <el-tooltip content="删除属性" placement="bottom" open-delay="500">
+                        <el-button type="text"><i class="fas fa-trash"></i></el-button>
+                    </el-tooltip>
+                </el-button-group>
+            </el-header>
+            <el-main style="padding:0px;">
+                <table :id="id" class="cell-border" width="100%"></table>
+            </el-main>
+        </el-container>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -118,14 +130,12 @@
 			}
 		},
         created: function(){
-            let self = this;
+            const self = this;
 
-            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT-${self.id}`, self.resize);
-            eventHub.$on("DATATABLE-RESIZE-EVENT", self.redraw);
-            eventHub.$on("DATATABLES-REFRESH-DATA-EVENT", self.refresh);
+            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT`, self.resize);
         },
 		mounted: function () {
-            let self = this;
+            const self = this;
 
             self.$nextTick(function () {
 
@@ -141,7 +151,7 @@
         },
 		computed: {
             _columns: function(){
-                let self = this;
+                const self = this;
 
                 let _cols = _.map(self.columns,function(v,k){
 
@@ -176,48 +186,44 @@
 		watch: {
           	dataset: {
                 handler: function(val,oldVal){
-                      	    let self = this;
 
-                      	    if(val === oldVal) return false;
-
-		                    self.datatable.destroy();
-		                    $(`#${self.id}`).empty();
-		                    self.init();
-
-                },
-                deep:true
-			}/*,
-            columns: function(val,oldVal){
-                let self = this;
-
-                if(self.datatable){
-                    self.datatable.clear().draw();
-                    self.datatable.draw();
-                    //self.datatable.rows.add(val); // Add new data
-                    self.datatable.columns.adjust().draw(); // Redraw the DataTable
+                // 数据无更新
+                if(val === oldVal) {
+                    //console.log(111)
+                    return false;
                 }
 
-            }*/,
-            options: {
-                handler: function(val,oldVal){
-                    let self = this;
+                // 数据为空 
+                // Table置空
+                if( _.isEmpty(val)) {
+                    //console.log(222)
+                    this.datatable.rows().remove().draw();
+                    return false;
+                }
 
-                    //if(val == oldVal) return false;
+                // 表格已经初始化
+                if(this.datatable instanceof $.fn.dataTable.Api) {
+                    //console.log(333)
+                    this.datatable.clear();
+                    this.datatable.rows.add(val);
+                    this.datatable.draw();
 
-	                //self.datatable.destroy();
-                    //self.init();
-
+                } else {
+                    //console.log(444)
+                    //this.init();
+                }
                 },
-                deep:true
-            }
-
+                deep: true,
+                immediate: true
+			}
 		},
 		methods: {
             init: function(){
-                let self = this;
+                const self = this;
 
                 self.datatable = $("#"+self.id).DataTable( _.extend({
-                    			data: self.dataset,
+                                destroy: true,
+                                data: self.dataset,
                                 columns: self._columns,
                                 responsive: false,
                                 searching: false,
@@ -228,7 +234,7 @@
                                 scrollX: true,
                                 scrollY: 'auto',
 								scrollCollapse: true,
-	                            paging: false,
+	                            paging: true,
                                 info: false,
                                 aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
                                 language : {
@@ -306,15 +312,11 @@
 			                    ]*/
                     },self.options)).columns.adjust().draw();
 
-	            /*_.delay(function(){
-                    self.datatable.buttons().container().appendTo( `.datatables-toolbars` );
-                },200)*/
-
 				self.initPlugin();
 
 			},
 			initPlugin: function(){
-                let self = this;
+                const self = this;
 
                 //self.initClassMenu();
 
@@ -381,25 +383,25 @@
 
 			},
             redraw: function(){
-                let self = this;
+                const self = this;
 
                 self.datatable.columns.adjust().draw(); // Redraw the DataTable
 
             },
-			resize: function(event){
-                let self = this;
+			resize: function(){
+                const self = this;
 
-                console.table(event)
-
-				$(self.$el).parent().css("height", event.top);
+                /* $(self.$el).parent().css("height", event.top);
                 $(self.$el).parent().parent().css("height", event.top);
                 $(self.$el).parent().parent().parent().css("height", event.top);
                 $(self.$el).parent().parent().parent().parent().css("height", event.top);
 
-                $('.omdb-class-datatables-component .dataTables_scrollBody').css("max-height", event.top - 65).css("min-height", event.top - 65);
+                $('.omdb-class-datatables-component .dataTables_scrollBody').css("max-height", event.top - 65).css("min-height", event.top - 65); */
+
+                $('.omdb-class-datatables-component .dataTables_scrollBody').css("max-height", "calc(100vh - 350px)!important").css("min-height", "calc(100vh - 350px)!important");
 			},
 			refresh: function(event){
-                let self = this;
+                const self = this;
 
                 self.columns = self.result.columns[event];
                 self.dataset = self.result.data[event];
@@ -411,7 +413,7 @@
 
 			},
 			toolBars: function(){
-                let self = this;
+                const self = this;
                 let _keys = _.keys(self.result.columns);
                 let _items = {};
 
@@ -468,7 +470,7 @@
                             });
                         },
                         selectAll: function () {
-                            let self = this;
+                            const self = this;
 
                             self.datatable.rows({ page: 'current' }).nodes();
 
@@ -509,7 +511,7 @@
 
                         },
 	                    exportIt: function(){
-                            let self = this;
+                            const self = this;
 
                             self.datatable.buttons('.buttons-excel').trigger();
 	                    }
@@ -518,7 +520,7 @@
 
 			},
 			initClassMenu: function(){
-                let self = this;
+                const self = this;
 
                 if(_.isEmpty(self.result)) return false;
 

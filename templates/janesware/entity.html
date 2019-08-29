@@ -424,7 +424,7 @@
 		<el-main id="entity-view-container" style="padding: 5px 0px 0px 0px;">
 			<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 				<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" style="padding:0px;">
-					<div v-if="item.type==='main'" style="margin-top:-15px;">
+					<div v-if="item.type==='main'" style="padding: 5px 9px;">
 						<div class="entity-view-summary-control">
 							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
 								<div>
@@ -480,7 +480,7 @@
 							</el-col>
 						</el-row>
 					</div>
-					<div v-if="item.type==='diagnosis'">
+					<div v-if="item.type==='diagnosis'" style="padding: 5px 9px;">
 						<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
 							<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
 								<div v-if="it.type==='base'">
@@ -501,7 +501,7 @@
 							</el-tab-pane>
 						</el-tabs>
 					</div>
-					<div v-else-if="item.type==='graph'">
+					<div v-else-if="item.type==='graph'" style="padding: 5px 9px;">
 						<entity-view-graph id="entity-view-graph" :model="model.message"></entity-view-graph>
 					</div>
 				</tab>

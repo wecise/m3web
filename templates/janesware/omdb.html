@@ -43,100 +43,11 @@
 
 	body {
 		overflow: hidden;
+		background: #f6f6f6;
 	}
 
-	.lm_goldenlayout {
-		background: none;
-		background-color: rgb(249, 249, 249);
-	}
-
-	.lm_content {
-		background: rgb(255, 255, 255);
-		border: none;
-		overflow: hidden;
-	}
-
-	.lm_maximised .lm_header {
-		background-color: rgb(246, 246, 246);
-	}
-
-	.lm_header{
-		height: 26px!important;
-		background-color: rgb(246, 246, 246);
-		border-bottom: 1px solid rgb(221, 221, 221);
-	}
-
-	.lm_header .lm_tab {
-		border: none;
-		height: 15px;
-	}
-
-	.lm_tab {
-		height: 18px !important;
-		line-height:20px;
-	}
-
-	.lm_close_tab {
-		height: 16px !important;
-	}
-
-	.lm_controls {
-		top:5px;
-	}
-
-	.lm_item .lm_column > .lm_stack:nth-child(1) > .lm_header{
-		/*display: none!important;*/
-	}
-
-	.lm_header .lm_tab{
-		background-color: rgb(246, 246, 246);
-	}
-
-	.lm_header .lm_tab i {
-		width: 14px;
-		position: relative;
-	}
-
-	.lm_header .lm_tab.lm_active {
-		border-bottom: none;
-		box-shadow: none;
-		padding-bottom: 6px;
-		border-bottom: 1px solid rgb(255, 0, 0);
-		background-color: rgb(246, 246, 246);
-	}
-
-	.lm_tab:hover, .lm_tab.lm_active {
-		background: rgb(255, 255, 255);
-		color: rgb(119, 119, 119);
-	}
-
-
-	.lm_selected .lm_header {
-		background-color: rgb(230, 230, 230);
-	}
-
-	.lm_item .lm_stack {
-		background-color: rgb(246, 246, 246);
-	}
-
-	.lm_splitter {
-		z-index: 1;
-	}
-
-	/*.lm_header .lm_tab .lm_close_tab {
-		top: 7px!important;
-	}*/
-
-
-	.lm_tabs > li[title^="结果"] .lm_close_tab,
-	.lm_tabs > li[title=查询] .lm_close_tab,
-	.lm_tabs > li[title=日志] .lm_close_tab {
-		display:none;
-	}
-
-	[id="app"] {
-		width: 100%;
-		height: 100vh;
+	#content.content{
+		padding: 0px;
 	}
 
 	.logToolBar {
@@ -145,7 +56,9 @@
 		background-color: rgb(33, 149, 243);
 	}
 
-	.log-console {
+
+	.log-console,
+	.el-tabs__content{
 		height: 100%;
 	}
 
@@ -227,12 +140,32 @@
 		color: #666666;
 	}
 
-	.content {
-		padding: 0px 0px;
-	}
-
 	.el-tabs--card>.el-tabs__header{
 		margin: 0px;
+	}
+
+	.el-tabs--border-card>.el-tabs__header{
+		background-color: #f6f6f6;
+	}
+
+	.el-tabs--left .el-tabs__header.is-left,
+	.el-tabs--left .el-tabs__nav-wrap.is-left {
+		margin-right: 0px;
+	}
+
+	.el-tabs--left.el-tabs--card .el-tabs__item.is-left.is-active {
+            border-right: 2px solid #252d47;
+        }
+
+	.el-tabs--card>.el-tabs__header .el-tabs__nav {
+		border: unset;/* 1px solid #E4E7ED; */
+	}
+
+	.el-tabs--left.el-tabs--card .el-tabs__nav {
+		border-radius: 0;
+		border-bottom: unset;
+		border-right: none;
+		margin-top: 1px;
 	}
 
 	/* 全屏模式 */
@@ -254,6 +187,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-class-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-editor-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/omdb/omdb-trigger-editor-component.html"></link>
 
@@ -264,82 +198,12 @@
 	<div id="app"></div>
 </main>
 
+
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Omdb.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 <script src="{{AppSubUrl}}/web/js/handler/TriggerHandler.js"></script>
 <script src="{{AppSubUrl}}/web/js/util/JsonParse.js"></script>
-
-<script type="text/x-template"  id="class-tree-template">
-	<omdb-class-tree-component :id="id"></omdb-class-tree-component>
-</script>
-
-<script type="text/x-template"  id="query-console-template">
-	<omdb-editor-component :id="id" :bid="bid"
-	                      :model="model"
-	                      showToolsBar="true"
-	                      showStatusBar="true"></omdb-editor-component>
-</script>
-
-<script type="text/x-template"  id="class-edit-template">
-	<omdb-class-datatables-component :id="id" :bid="bid"
-	                               :dataset="model.dataset"
-	                               :columns="model.columns"
-	                               :options="model.options"
-	                               contextmenu="null"
-	                               :result="result"></omdb-class-datatables-component>
-</script>
-
-<script type="text/x-template"  id="output-console-template">
-	<omdb-output-datatables-component :id="id" :bid="bid"
-	                               :dataset="model.dataset"
-	                               :columns="model.columns"
-	                               :options="model.options"
-	                               contextmenu="null"
-	                               :result="result"></omdb-output-datatables-component>
-</script>
-
-<script type="text/x-template"  id="graph-template">
-	<omdb-graph-component :id="id" :bid="bid"
-	                     :graphData="model"></omdb-graph-component>
-</script>
-
-<script type="text/x-template" id="log-console-template">
-	<div :class="'log-console '+ theme">
-		<div class="logToolBar">
-			<div class="btn-group" role="group" aria-label="...">
-				<a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题" data-tooltip="tooltip"><i class="fas fa-sun"></i></a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fa fa-copy"></i></a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
-				<a href="javascript:void(0);" class="btn btn-sm btn-primary debug" @click="debugIt" title="调试" data-tooltip="tooltip"><i class="fa fa-desktop"></i></a>
-			</div>
-		</div>
-		<div contenteditable="true" :class="'log-console-content '+ theme">
-			<p v-for="item in model"> [${item[0]}] [<span :class="'log-severity '+item[1]">${item[1]}</span>] <span v-if="_.isEmpty(item[2].content)">${item[2].short}</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">${item[2].short}</a><span class="collapse animated fadeInUp" :id="item[2].id">${item[2].content}</span></span>
-			</p>
-		</div>
-	</div>
-</script>
-
-<script type="text/x-template" id="text-console-template">
-	<div class="container-fluid">
-		<p>
-			<div v-for="item in output">
-				<div v-for="(v,k) in item">
-					<dt>${k}：${v}</dt>
-				</div>
-			</div>
-		</p>
-		<p>输出时间：${moment().format("LLL")}</p>
-	</div>
-</script>
-
-<script type="text/x-template" id="trigger-template">
-    <omdb-trigger-editor-component :id="id"
-                                   :className="className"
-                                   :model="editor"
-                                   showToolsBar="true"
-                                   showStatusBar="false"></omdb-trigger-editor-component>
-</script>
 
 
 {{template "base/footer" .}}

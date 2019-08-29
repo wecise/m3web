@@ -72,8 +72,8 @@ class SideBar {
 
     // 应用盒子
     appBox(){
-        
         const inst = this;
+
         return {
             delimiters: ['#{', '}#'],
             data: {
@@ -96,7 +96,7 @@ class SideBar {
                         {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
                     ]
             },
-            template: ` <el-container style="height:100%;width:100%;">
+            template: ` <el-container>
                             <el-header style="height:30px;line-height:30px;">
                                 <input type="text" class="form-control-transparent" placeholder="请输入关键词" v-model="term">
                             </el-header>
@@ -137,7 +137,7 @@ class SideBar {
                                     </el-aside>
                                 </el-container>
                             </el-main>
-                            <el-footer style="height:30px;line-height:30px;">
+                            <el-footer>
                                 <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
                             </el-footer>
                         </el-container>`,
@@ -282,42 +282,82 @@ class SideBar {
                 model: null,
                 preFixIcon: `${window.ASSETS_ICON}/apps/png/`,
                 postFixIcon: `?type=open&issys=${window.SignedUser_IsAdmin}`,
-                isCollapse: true,
-                defaultActive: '/janesware/home'
+                isCollapse: true
             },
-            template:   `<el-menu :default-active="defaultActive"
-                                mode="vertical"
-                                @select="onSelect"
-                                @open="onOpen" 
-                                @close="onClose" 
-                                :collapse="isCollapse"
-                                class="el-menu-vertical-sidebar"
-                                background-color="transparent"
-                                text-color="#fff"
-                                active-text-color="#ffd04b">
-                            <el-menu-item index="toggle">
+            template:   `<el-menu default-active="1-4-1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
+                            <el-menu-item index="0" @click="sideBar.toggleSideBar()">
                                 <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img>
                                 <span slot="title">切换</span>
                             </el-menu-item>
-                            <el-menu-item index="apps">
-                                <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> 
-                                <span slot="title">应用</span>
+                            <el-menu-item index="0" @click="sideBar.toggleSideBar()">
+                                <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img>
+                                <span slot="title">切换</span>
                             </el-menu-item>
-                            <el-menu-item index="/">
-                                <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
-                                <span slot="title">首页</span>
+                            <el-submenu index="1">
+                                <template slot="title">
+                                    <i class="el-icon-location"></i>
+                                    <span slot="title">导航一</span>
+                                </template>
+                                <el-menu-item-group>
+                                    <span slot="title">分组一</span>
+                                    <el-menu-item index="1-1">选项1</el-menu-item>
+                                    <el-menu-item index="1-2">选项2</el-menu-item>
+                                </el-menu-item-group>
+                                <el-menu-item-group title="分组2">
+                                    <el-menu-item index="1-3">选项3</el-menu-item>
+                                </el-menu-item-group>
+                                <el-submenu index="1-4">
+                                    <span slot="title">选项4</span>
+                                    <el-menu-item index="1-4-1">选项1</el-menu-item>
+                                </el-submenu>
+                            </el-submenu>
+                            <el-menu-item index="2">
+                                <i class="el-icon-menu"></i>
+                                <span slot="title">导航二</span>
                             </el-menu-item>
-                            <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model">
-                                <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                <span slot="title">#{item.cnname}#</span>
+                            <el-menu-item index="3" disabled>
+                                <i class="el-icon-document"></i>
+                                <span slot="title">导航三</span>
                             </el-menu-item>
-                        </el-menu>`,
-            created(){
+                            <el-menu-item index="4">
+                                <i class="el-icon-setting"></i>
+                                <span slot="title">导航四</span>
+                            </el-menu-item>
+                        </el-menu>
+                        <ul class="nav animated bounceIn">
+                        <li class="dropdown top-bar">
+                            <el-tooltip content="切换导航栏" placement="right" open-delay="500">
+                                <a class="sidebar-toggle" href="javascript:sideBar.toggleSideBar();">
+                                    <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">切换</span>
+                                </a>
+                            </el-tooltip>
+                        </li>
+                        <li class="dropdown top-bar">
+                            <el-tooltip content="应用" placement="right" open-delay="500">
+                                <a  href="javascript:void(0);"  
+                                    @click="initWnd">
+                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">应用</span>
+                                </a>
+                            </el-tooltip>
+                        </li>
+                        <li>
+                            <el-tooltip content="首页" placement="right" open-delay="500">
+                                <a href="/">
+                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img> <span class="nav-label">首页</span>
+                                </a>
+                            </el-tooltip>
+                        </li>
+                        <li v-for="(item,index) in model" :class="item.status">
+                            <el-tooltip :content="item.cnname" placement="right" open-delay="500">
+                                <a :href="item.url" :target="item.target">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img> <span class="nav-label">#{item.cnname}#</span>
+                                </a>
+                            </el-tooltip>
+                        </li>
+                    </ul>`,
+            created: function(){
                 this.init();
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);
-            },
-            mounted(){
-                this.defaultActive = window.location.pathname;
             },
             filters:{
                 pickIcon:function(icon){
@@ -350,43 +390,10 @@ class SideBar {
                 refresh: function(){
                     this.init();
                 },
-                onToggle(){
-                    this.isCollapse=!this.isCollapse;
-                    console.log(1,this.isCollapse)
-                    $(".sidebar-toggle-play").removeClass("toggle animated flash");
-                    $("#sidebar").css('display','');
-                    $("#sidebar-bg").css('display','');
-
-                    var a = "page-sidebar-minified",
-                        t = "#page-container";
-                    $(t).hasClass(a) ? ($(t).removeClass(a), $(t).hasClass("page-sidebar-fixed") && (generateSlimScroll($('#sidebar [data-scrollbar="true"]')), $("#sidebar [data-scrollbar=true]").trigger("mouseover"), $("#sidebar [data-scrollbar=true]").stop(), $("#sidebar [data-scrollbar=true]").css("margin-top", "0"))) : ($(t).addClass(a), /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? ($('#sidebar [data-scrollbar="true"]').css("margin-top", "0"), $('#sidebar [data-scrollbar="true"]').css("overflow", "visible")) : ($(t).hasClass("page-sidebar-fixed") && ($('#sidebar [data-scrollbar="true"]').slimScroll({
-                        destroy: !0
-                    }), $('#sidebar [data-scrollbar="true"]').removeAttr("style")), $("#sidebar [data-scrollbar=true]").trigger("mouseover"))), $(window).trigger("resize")
-    
-                    if(this.isCollapse){
-                        $("#content").css("margin-left","60px");
-                    } else {
-                        $("#content").css("margin-left","220px");
-                    }
-                    // container layout resize trigger child component redraw
-                    eventHub.$emit("LAYOUT-RESIZE-EVENT");
-            
-                    eventHub.$emit("DATATABLE-RESIZE-EVENT");
-                },
-                onSelect(index,indexPath){
-                    console.log(index, indexPath)
-                    if(index == 'toggle'){
-                        this.onToggle();
-                    } else if(index == 'apps'){
-                        this.initWnd();
-                    } else {
-                        window.open(index,'_parent')
-                    }
-                },
-                onOpen(key, keyPath) {
+                handleOpen(key, keyPath) {
                     console.log(key, keyPath);
                 },
-                onClose(key, keyPath) {
+                handleClose(key, keyPath) {
                     console.log(key, keyPath);
                 }
             }
@@ -394,7 +401,7 @@ class SideBar {
     };
 
     init(){
-        this.app = new Vue(this.sideMenu()).$mount("#sidebar-menu");
+        new Vue(this.sideMenu()).$mount("#sidebar-menu");
     }
 
     appRunning(event){
@@ -424,8 +431,6 @@ class SideBar {
             success: function(data, textStatus, xhr) {
 
                 userHandler.ifSignIn(data);
-
-                sideBar.app.$message("首页已设置为：" + item.url);
 
                 rtn = data;
             },
@@ -560,7 +565,7 @@ class SideBar {
 
 }
 
-var sideBar = new SideBar();
+let sideBar = new SideBar();
 
 document.addEventListener('DOMContentLoaded', function(){
     sideBar.init();

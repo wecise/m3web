@@ -30,8 +30,7 @@ class Job extends Matrix {
                             "job-diagnosis-datatable-component",
                             "search-preset-component",
                             "search-base-component",
-                            "probe-tree-component",
-                            "vue-timeline-component"],function() {
+                            "probe-tree-component"],function() {
             $(function() {
 
                 Vue.component('job-history-chart', {

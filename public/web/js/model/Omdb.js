@@ -105,14 +105,14 @@ class Omdb{
     init() {
         const odb = this;
 
-        //function(id, bid, template, model)
-        Vue.component("omdb-log-console",{
+        // 日志控制台
+        Vue.component("omdb-log-console", {
             delimiters: ['#{', '}#'],
             props:{
                 id: String,
-                model: Array
+                model: Object
             },
-            template:   `<div :class="'log-console '+ theme">
+            template:   `<div :class="'log-console '+ theme" style="height:100%;">
                             <div class="logToolBar">
                                 <div class="btn-group" role="group" aria-label="...">
                                     <a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题" data-tooltip="tooltip"><i class="fas fa-sun"></i></a>
@@ -121,13 +121,16 @@ class Omdb{
                                     <a href="javascript:void(0);" class="btn btn-sm btn-primary debug" @click="debugIt" title="调试" data-tooltip="tooltip"><i class="fa fa-desktop"></i></a>
                                 </div>
                             </div>
-                            <div contenteditable="true" :class="'log-console-content '+ theme" v-if="!_.isEmpty(model)">
-                                <p v-for="item in model"> [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>] <span v-if="_.isEmpty(item[2].content)">#{item[2].short}#</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">#{item[2].short}#</a><span class="collapse animated fadeInUp" :id="item[2].id">#{item[2].content}#</span></span>
+                            <div contenteditable="true" :class="'log-console-content '+ theme" v-if="!_.isEmpty(log.msg)">
+                                <p v-for="item in log.msg"> [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>] <span v-if="_.isEmpty(item[2].content)">#{item[2].short}#</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">#{item[2].short}#</a><span class="collapse animated fadeInUp" :id="item[2].id">#{item[2].content}#</span></span>
                                 </p>
                             </div>
                         </div>`,
             data(){
                 return {
+                    log: {
+                        msg: []
+                    },
                     theme: 'light',
                     debug: {
                         mql: [],
@@ -157,12 +160,19 @@ class Omdb{
                         }
                     },
                     deep:true
+                },
+                model: {
+                    handler:function(val,oldVal){
+                        const self = this;
+                        // 追加
+                        self.append(_.last(val).level, _.last(val).msg);
+                    },
+                    deep:true,
+                    immediate:true
                 }
             },
             created: function(){
-                const self = this;
-
-                eventHub.$on("LOG-CONSOLE-APPEND-EVENT", self.append);
+                
             },
             mounted: function () {
                 const self = this;
@@ -178,15 +188,13 @@ class Omdb{
                 }
             },
             methods: {
-                init: function(){
+                init(){
                     const self = this;
-
-                    self.model.push(self.log('info','加载完成'));
 
                     self.theme = localStorage.getItem("LOG-CONSOLE-THEME");
 
                 },
-                initPlugin: function(){
+                initPlugin(){
                     const self = this;
 
                     $(self.$el).contextMenu({
@@ -257,12 +265,12 @@ class Omdb{
                         }
                     });
                 },
-                refresh: function(){
+                refresh(){
                     const self = this;
 
                     self.debugIt(self.debug.mql);
                 },
-                debugs: function(key){
+                debugs(key){
                     const self = this;
 
                     self.debug.mql = [];
@@ -276,18 +284,16 @@ class Omdb{
                     });
 
                 },
-                append: function(level, event){
+                append(level, event){
                     const self = this;
                     let _log = null;
 
-                    _log = self.log(level, event);
+                    _log = self.logFormat(level, event);
 
-                    self.model.unshift(_log);
-
-                    // $(".log-console-content").scrollTop(function() { return this.scrollHeight; });
+                    self.log.msg.unshift(_log);
 
                 },
-                log: function(level, event){
+                logFormat(level, event){
                     const self = this;
                     let _content = event;
 
@@ -305,13 +311,13 @@ class Omdb{
 
                     return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
                 },
-                copyIt: function(event){
+                copyIt(event){
                     const self = this;
 
                     new Clipboard(".copy", {
                         text: function(trigger) {
                             alertify.log("已复制");
-                            let _rtn = _.map(self.model,function(v){
+                            let _rtn = _.map(self.log.msg,function(v){
                                 return [v[0],v[1],v[2].short + v[2].content];
                             });
                             return _rtn.join("\n");
@@ -319,13 +325,13 @@ class Omdb{
                     });
 
                 },
-                clearIt: function(){
+                clearIt(){
                     const self = this;
 
-                    self.model = [];
+                    self.log.msg = [];
 
                 },
-                debugIt: function(event){
+                debugIt(event){
                     const self = this;
 
                     _.forEach(event,function(v){
@@ -345,12 +351,12 @@ class Omdb{
 
                             let _log = [moment(v.ctime).format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(v.level), {id:_id, short: _short, content: _content.replace(_short,'')}];
 
-                            self.model.unshift(_log);
+                            self.log.msg.unshift(_log);
                         })
                     })
 
                 },
-                toggleTheme: function(){
+                toggleTheme(){
                     const self = this;
 
                     if(self.theme === 'light') {
@@ -381,27 +387,554 @@ class Omdb{
             
         })
 
-        Vue.component("omdb-query-console",{
+        // Trigger
+        Vue.component("omdb-trigger-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Object
+            },
+            template: `<omdb-trigger-editor-component :id="id"
+                                                        :className="model.node.name"
+                                                        :model="editor"
+                                                        showToolsBar="true"
+                                                        showStatusBar="false"></omdb-trigger-editor-component>`,
+            data(){
+                return {
+                    editor: {
+                        mode: "lua",
+                        theme: "tomorrow",
+                        readOnly: false,
+                    }
+                }
+            },
+            created(){
+                
+            }
+            
+        })
+
+        // JSON输出控制台
+        Vue.component("omdb-query-output-json-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Object
+            },
+            template: `<el-container style="height: 100%;">
+                            <el-header style="height:30px;line-height:30px;background: #f6f6f6;">
+                                <el-button-group>
+                                    <el-tooltip content="复制" placement="bottom" open-delay="500">
+                                        <el-button type="text" icon="fas fa-copy" class="btn-copy"></el-button>
+                                    </el-tooltip>
+                                </el-button-group>
+                            </el-header>
+                            <el-main style="padding:0px;height:100%;">
+                                <pre style="background:transparent;border:none;">#{JSON.stringify(model,null,4).replace(/   /g, ' ')}#</pre>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+
+                }
+            },
+            created: function(){
+                const self = this;
+
+            },
+            mounted: function() {
+                const self = this;
+
+                new Clipboard('.el-button.btn-copy',{
+                    text: function(trigger) {
+                        self.$message('已复制');
+                        return JSON.stringify(self.model,null,4).replace(/   /g, ' ');
+                    }
+                });
+            },
+            methods: {
+                init: function(){
+                    const self = this;
+
+                    if(!_.isEmpty(content)) {
+                        self.model = content;
+                    } else {
+                        self.model = '';
+                    }
+
+                },
+                setData: function(event){
+                    const self = this;
+                    self.model = event.data;
+                }
+            }
+        })
+
+        // 文本输出控制台
+        Vue.component("omdb-query-output-text-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Array
+            },
+            template:   `<el-container>
+                            <el-main>
+                                <p>
+                                    <div v-for="item in model">
+                                        <div v-for="(v,k) in item">
+                                            <dt>#{k}#：#{v}#</dt>
+                                        </div>
+                                    </div>
+                                </p>
+                                <p>输出时间：#{moment().format("LLL")}#</p>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+
+                }
+            }  
+        })
+
+        // 类编辑控制台 
+        Vue.component("omdb-class-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Object
+            },
+            template:   `<el-container style="height: calc(100vh - 110px);">
+                            <el-main style="padding:0px;overflow:hidden;background:#f6f6f6;">
+                                <el-form label-width="80px" :model="formModel" style="width:70%;padding: 10px 0px;">
+                                    <el-form-item label="类名称">
+                                        <el-input v-model="formModel.name" :disabled="true"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="类别名">
+                                        <el-input v-model="formModel.alias"></el-input>
+                                    </el-form-item>
+                                    <el-form-item label="备注">
+                                        <el-input v-model="formModel.remedy"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                                <el-tabs v-model="tabs.activeName" type="card" tab-position="left" @tab-click="onClick" style="border-top:1px solid #dddddd;">
+                                    <el-tab-pane name="columns">
+                                        <span slot="label"><i class="fas fa-columns"></i> 属性</span>
+                                        <omdb-class-datatables-component :id="id" :bid="id"
+                                                                        :dataset="dtModel.datatable.dataset"
+                                                                        :columns="dtModel.datatable.columns"
+                                                                        :options="dtModel.datatable.options"
+                                                                        contextmenu="null"
+                                                                        :result="dtModel.result">
+                                        </omdb-class-datatables-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="keys">
+                                        <span slot="label"><i class="fas fa-key"></i> 主键</span>
+                                        <omdb-editor-base-component :id="id+'-keys'" :bid="id+'-keys'"
+                                                                    :model="keysModel"
+                                                                    showToolsBar="true"
+                                                                    showStatusBar="true">
+                                        </omdb-editor-base-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="indexes">
+                                        <span slot="label"><i class="fas fa-indent"></i> 索引</span>
+                                        <omdb-editor-base-component :id="id+'-indexes'" :bid="id+'-indexes'"
+                                                                    :model="indexesModel"
+                                                                    showToolsBar="true"
+                                                                    showStatusBar="true">
+                                        </omdb-editor-base-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="subClass">
+                                        <span slot="label"><i class="fas fa-cube"></i> 子类</span>
+                                        <omdb-editor-base-component :id="id+'-subClass'" :bid="id+'-subClass'"
+                                                                    :model="subClassModel"
+                                                                    showToolsBar="true"
+                                                                    showStatusBar="true">
+                                        </omdb-editor-base-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="options">
+                                        <span slot="label"><i class="fas fa-cog"></i> 设置</span>
+                                        <omdb-editor-base-component :id="id+'-options'" :bid="id+'-options'"
+                                                                    :model="optionsModel"
+                                                                    showToolsBar="true"
+                                                                    showStatusBar="true">
+                                        </omdb-editor-base-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="ddl">
+                                        <span slot="label"><i class="fas fa-table"></i> DDL</span>
+                                        <omdb-editor-base-component :id="id+'-ddl'" :bid="id+'-ddl'"
+                                                                    :model="ddlModel"
+                                                                    showToolsBar="true"
+                                                                    showStatusBar="true">
+                                        </omdb-editor-base-component>
+                                    </el-tab-pane>
+                                    <el-tab-pane name="trigger">
+                                        <span slot="label"><i class="fas fa-stopwatch"></i> 触发器</span>
+                                        <omdb-trigger-console :id="id+'-trigger'" :model="model"></omdb-trigger-console>
+                                    </el-tab-pane>
+                                </el-tabs>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+                    tabs:{
+                        activeName: 'columns'
+                    },
+                    dtModel: {
+                        datatable: {
+                            dataset: [],
+                            columns: [],
+                            options: {
+                                info:true,
+                                pageing:true,
+                                scrollY: 'calc(100vh - 350px)',
+                                searching: false,
+                                rowCallback: function( row, data ) {
+                                    if( data.icon === "parent" ) {
+                                        $('td', row).css('background-color', '#f9f9f9');
+                                    }
+                                }
+                            }
+                        },
+                        result: {},
+                        keys: [],
+                    },
+                    formModel: {},
+                    keysModel: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "mql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: true,
+                    },
+                    indexesModel: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "mql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: true,
+                    },
+                    subClassModel: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "mql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: true,
+                    },
+                    optionsModel: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "mql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: true,
+                    },
+                    ddlModel: {
+                        oldInput: "",
+                        newInput: "",
+                        mode: "mql",
+                        theme: "tomorrow",
+                        printMargin: false,
+                        readOnly: true,
+                    }
+                }
+            },
+            created(){
+                const self = this;
+                
+                // columns
+                self.initColumns();
+
+                // keys
+                self.initKeys();
+
+                // form
+                self.initForm();
+            },
+            mounted() {
+                const self = this;
+            },
+            methods: {
+                initColumns(){
+                    const self = this;
+
+                    if(!_.isEmpty(self.model.node.fieldsObj) && !_.isEmpty(self.model.pnode.fieldsObj)) {
+
+                        let _node = _.cloneDeep(self.model.node.fieldsObj);
+                        let _pnode = _.cloneDeep(self.model.pnode.fieldsObj);
+        
+                        if(self.model.node.fieldsObj == self.model.pnode.fieldsObj) {
+                            self.dtModel.datatable.dataset = _.map(self.model.node.fieldsObj, function (v) {
+                                return _.merge(v, {icon: 'parent'});
+                            });
+                        } else {
+                            let _diff =  _.differenceWith(self.model.node.fieldsObj, self.model.pnode.fieldsObj, function(v1,v2){return v1.name === v2.name;});
+        
+                            if(_.isEmpty(_diff)){
+                                self.dtModel.datatable.dataset = _.map(_node, function (v) {
+                                    return _.merge(v, {icon: 'parent'});
+                                });
+        
+                            } else {
+                                self.dtModel.datatable.dataset = _.concat(_.map(_pnode,function(v){return _.merge(v, {icon: 'parent'});}), _.map(_diff,function(v){return _.merge(v, {icon: 'child'});}));
+                            }
+                        }
+                    } else{
+                        self.dtModel.datatable.dataset = _.map(self.model.node.fieldsObj, function (v) {
+                            return _.merge(v, {icon: 'parent'});
+                        });
+                    }
+        
+                    self.dtModel.datatable.dataset = _.map(_.uniqBy(self.dtModel.datatable.dataset,'name'),function(v){
+                        if(_.indexOf(self.model.node.keys,v.name) > -1){
+                            _.extend(v,{iskey:1});
+                        }
+                        return v;
+                    });
+    
+                    self.dtModel.datatable.columns = [
+                                                {"field": "id", render: function (data, type, row, meta) {
+                                                        return meta.row + meta.settings._iDisplayStart + 1;
+                                                    }
+                                                },
+                                                {"field": "icon", "title": "Inherit", render: function (data, type, row) {
+                                                        return `<img src="${window.ASSETS_ICON}/tools/png/${data}.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:22px;height:22px;">`;
+                                                    }
+                                                },
+                                                {"field": "name", "title": "Name"},
+                                                {"field": "title", "title": "Title"},
+                                                {"field": "colname", "title": "ColName", visible: false},
+                                                {"field": "ftype", "title": "Ftype",render: function (data, type, row) {
+                                                        return data==='smallint'?'enum':data;
+                                                    }
+                                                },
+                                                {"field": "loption", "title": "Loption"},
+                                                {"field": "fparam", "title": "Fparam"},
+                                                {"field": "isindex", "title": "Index",render: function (data, type, row) {
+                                                        return data===1?'是':'否';
+                                                    }
+                                                },
+                                                {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
+                                                        return data===1?'是':'否';
+                                                    }
+                                                },
+                                                {"field": "note", "title": "Note"},
+                                                {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
+                                                        return moment(data).format("LLL");
+                                                    }
+                                                },
+                                                {"field": "class", "title": "Class", "visible": false},
+                                                {"field": "dispname", "title": "Dispname", "visible": false},
+                                                {"field": "tags", "title": "Tags", "visible": false},
+                                                {"field": "isrel", "title": "Rel", "visible": false},
+                                                {"field": "btype", "title": "Btype", "visible": false}
+                                            ];
+    
+                    self.dtModel.datatable.columns = _.uniqBy(self.dtModel.datatable.columns, 'field');
+    
+                    self.dtModel.result = self.model.node;
+                    
+                    _.delay(()=>{
+                        eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`);
+                    },1500)
+                },
+                initKeys: function(){
+                    const self = this;
+
+                    let rtn = omdbHandler.classList(-1)[0];
+                    self.dtModel.keys = _.sortBy(_.keys(rtn));
+                },
+                initForm(){
+                    this.formModel = this.model.node;
+                },
+                onClick(tab, event){
+                    const self = this;
+                    
+                    if(tab.name == 'keys'){
+                        self.keysModel.newInput = self.model.node.keys.join(",\n");
+                    } else if(tab.name == 'indexes'){
+                        self.indexesModel.newInput = _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",\n");
+                    } else if(tab.name == 'subClass'){
+                        self.subClassModel.newInput = self.model.node.child.join(",\n");
+                    } else if(tab.name == 'options'){
+                        let options = "";
+                        _.forEach(self.dtModel.keys,function(v){
+
+                            if(_.includes(v,'time')) {
+                                options += `#${_.startCase(v)}\n${v}=${moment(self.model.node[v]).format("LLL")}`;
+                                return;
+                            }
+    
+                            let _value = self.model.node[v];
+    
+                            if(_value === 1){
+                                _value = true;
+                            } else if(_value === 0){
+                                _value = false;
+                            }
+    
+                            if(v === 'keymethod'){
+                                if(_value === 1){
+                                    _value = 'uuid';
+                                } else {
+                                    _value = 'md5';
+                                }
+                            }
+    
+                            options += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                        })
+                        self.optionsModel.newInput = options;
+                    } else if(tab.name == 'ddl'){
+                        self.ddlModel.newInput = omdbHandler.classToDDL(self.model.node.name);
+                    }
+                }
+            }  
+        })
+
+        // 图谱控制台
+        Vue.component("omdb-graph-console",{
             delimiters: ['${', '}'],
             props: {
                 id: String,
-                node: Object
+                model: Object
+            },
+            template: `<omdb-graph-component :id="id" :bid="id" :graphData="graphModel"></omdb-graph-component>`,
+            data(){
+                return {
+                    graphModel: {},
+                }
+            },
+            watch: {
+                model:{
+                    handler: function(val,oldVal){
+                        this.init();
+                    },
+                    deep:true
+                }
+            },
+            created(){
+                this.init();
+            },
+            mounted() {
+                const self = this;
+
+                self.$nextTick(function () {
+                    self.init();
+                })
+            },
+            methods: {
+                init(){
+                    const self = this;
+
+                    _.extend(self.graphModel, {nodes: self.model.nodes || [], edges: self.model.edges || [], paths: self.model.paths || [], pathtags: self.model.pathtags || [], diff: self.model.diff || [] } );
+
+                }
+            }
+        })
+
+        // 查询输出控制台
+        Vue.component("omdb-query-output-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Object
+            },
+            template: `<omdb-output-datatables-component :id="id" :bid="id"
+                                                        :dataset="datatable.dataset"
+                                                        :columns="datatable.columns"
+                                                        :options="datatable.options"
+                                                        contextmenu="null"
+                                                        :result="result"></omdb-output-datatables-component>`,
+            data(){
+                return {
+                    datatable: {
+                        dataset: [],
+                        columns: [],
+                        options: {
+                            info:true,
+                            pageing: false,
+                            scrollY: '148px',
+                            searching: false,
+                        }
+                    },
+                    result: []
+                }
+            },
+            watch: {
+                model:{
+                    handler: function(val,oldVal){
+                        this.datatable.dataset = val.data;
+                    },
+                    deep:true
+                }
+            },
+            created(){
+                const self = this;
+
+                if(!_.isEmpty(self.model)) {
+                    self.datatable.dataset = self.model.data;
+                    self.datatable.columns = self.model.columns[_.keys(self.model.columns)[0]];
+                    self.result = self.model;
+                }
+
+            },
+            mounted() {
+                const self = this;
+                self.init();
+            },
+            methods: {
+                init(){
+                    const self = this;
+
+                    if(!_.isEmpty(self.model)) {
+                        self.datatable.dataset = self.result.data;//[_.keys(self.result.columns)[0]];
+                        self.datatable.columns = self.result.columns[_.keys(self.result.columns)[0]];
+                    } else {
+                        self.datatable.dataset = [];
+                        self.datatable.columns = [];
+                    }
+
+                },
+                setData(event){
+                    const self = this;
+
+                    self.datatable.dataset = event.data;//[_.keys(event.columns)[0]] || [];
+                    self.datatable.columns = event.columns[_.keys(event.columns)[0]] || [];
+                    self.result = event;
+
+                }
+            }
+        })
+
+        
+        // 查询控制台
+        Vue.component("omdb-query-console",{
+            delimiters: ['#{', '}#'],
+            props: {
+                id: String,
+                model: Object
             },
             template: `<el-container style="height:calc(100vh - 110px);">
-                            <el-header :id="id+'-header'" style="padding:0px;">
+                            <el-header :id="id+'-header'" style="padding:0px;height:50vh;">
                                 <omdb-editor-component :id="id" :bid="id"
-                                :model="model"
-                                showToolsBar="true"
-                                showStatusBar="true"></omdb-editor-component>
+                                                        :model="editorModel"
+                                                        showToolsBar="true"
+                                                        showStatusBar="true"></omdb-editor-component>
                             </el-header>
-                            <el-main :id="id+'-main'" style="padding:0px;">
-                                <el-tabs v-model="main.activeIndex" type="border-card">
+                            <el-main :id="id+'-main'" style="padding:0px;height:30vh;overflow:hidden;">
+                                <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick"  style="height:100%;">
                                     <el-tab-pane
                                         :key="item.name"
                                         v-for="(item, index) in main.tabs"
-                                        :label="item.title"
-                                        :name="item.name">
-                                        <omdb-log-console :id="id+'-log-'+item.name" :node="item.model"></omdb-log-console>
+                                        :name="item.name"
+                                        style="height:100%;">
+                                        <span slot="label"><i class="fas fa-list-alt"></i> #{item.title}#</span>
+                                        <omdb-log-console :id="id+'-log-'+item.name" :model="item.model" v-if="item.type=='omdb-log-console'" :ref="'omdbQueryLogRef-'+id"></omdb-log-console>
+                                        <omdb-query-output-console :id="id+'-output-'+item.name" :model="item.model" v-if="item.type=='omdb-query-output-console'" :ref="'omdbQueryOutputRef-'+id"></omdb-query-output-console>
+                                        <omdb-graph-console :id="id+'-graph-'+item.name" :model="item.model" v-if="item.type=='omdb-query-graph-console'"  :ref="'omdbQueryGraphRef-'+id"></omdb-graph-console>
+                                        <omdb-query-output-json-console :id="id+'-output-json-'+item.name" :model="item.model" v-if="item.type=='omdb-query-output-json-console'"  :ref="'omdbQueryOutputJsonRef-'+id"></omdb-class-console>
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-main>
@@ -410,11 +943,12 @@ class Omdb{
                 return {
                     main: {
                         tabs: [
-                                {title: '日志', name: `log`, type: 'omdb-log-console', model: {node:null, pnode:null, pattern: null}}
+                                {title: '日志', name: `log`, type: 'omdb-log-console', model: []}
                             ],
-                        activeIndex: 'log'
+                        activeIndex: 'log',
+                        splitInst: null
                     },
-                    model: {
+                    editorModel: {
                         oldInput: "",
                         newInput: "",
                         mode: "mql",
@@ -425,20 +959,28 @@ class Omdb{
                     keys: []
                 }
             },
+            watch: {
+                model: {
+                    handler:function(val,oldVal){
+                        console.log(2,val)
+                    },
+                    deep:true
+                }
+            },
             created: function(){
                 const self = this;
 
                 let _diff = null;
-
-                if(!_.isEmpty(self.node.pnode)){
-                    if(self.node.node.fieldsObj && self.node.pnode.fieldsObj) {
-                        _diff = _.differenceBy(self.node.node.fieldsObj, self.node.pnode.fieldsObj, 'name');
-                        self.node.node["fieldsObj"] = _.uniqBy(_diff,'name');
+                
+                if(!_.isEmpty(self.model.pnode)){
+                    if(self.model.node.fieldsObj && self.model.pnode.fieldsObj) {
+                        _diff = _.differenceBy(self.model.node.fieldsObj, self.model.pnode.fieldsObj, 'name');
+                        self.model.node["fieldsObj"] = _.uniqBy(_diff,'name');
                     }
                 }
 
-                if(self.node.pattern === 'ddl') {
-                    self.model.readOnly = true;
+                if(self.model.pattern === 'ddl') {
+                    self.editorModel.readOnly = true;
                 }
 
                 self.initKeys();
@@ -455,17 +997,13 @@ class Omdb{
                     const self = this;
 
                     /* layout */
-                    Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
-                        sizes: [60, 40],
-                        minSize: [0, 0],
-                        gutterSize: 5,
-                        cursor: 'col-resize',
-                        direction: 'vertical',
-                    });
+                    _.delay(()=>{
+                        self.layout();
+                    },1000)
 
-                    if(_.isEmpty(self.node.node)) return false;
+                    if(_.isEmpty(self.model.node)) return false;
 
-                    let colms = _.without(self.node.node.fields,"_tokens") || self.node.node.fields;
+                    let colms = _.without(self.model.node.fields,"_tokens") || self.model.node.fields;
 
                     let cls = "";
                     if(_.isEmpty(colms)){
@@ -475,30 +1013,30 @@ class Omdb{
                     }
                     let mql = "";
 
-                    if(self.node.pattern === 'data') {
-                        mql = `SELECT\n\t ${cls} \nFROM\n\t ${self.node.node.name} limit 50`;
-                    } else if(self.node.pattern === 'select') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.node.node.name;
-                    } else if(self.node.pattern === 'select-edge') {
-                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.node.node.name.split("[")[0];
-                    } else if(self.node.pattern === 'insert') {
-                        mql = "INSERT INTO " + self.node.node.name + "\n" + _.map(self.node.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
-                    } else if(self.node.pattern === 'update') {
-                        mql = "UPDATE " + self.node.node.name + "\nSET " + _.map(self.node.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
-                    } else if(self.node.pattern === 'delete') {
-                        mql = "DELETE FROM\n\t " + self.node.node.name;
-                    } else if(self.node.pattern === 'ddl') {
+                    if(self.model.pattern === 'data') {
+                        mql = `SELECT\n\t ${cls} \nFROM\n\t ${self.model.node.name} limit 50`;
+                    } else if(self.model.pattern === 'select') {
+                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.model.node.name;
+                    } else if(self.model.pattern === 'select-edge') {
+                        mql = "SELECT\n\t " + cls + "\nFROM\n\t " + self.model.node.name.split("[")[0];
+                    } else if(self.model.pattern === 'insert') {
+                        mql = "INSERT INTO " + self.model.node.name + "\n" + _.map(self.model.node.fields, function(v){return `${v}=''`;}).join(", ") + ";";
+                    } else if(self.model.pattern === 'update') {
+                        mql = "UPDATE " + self.model.node.name + "\nSET " + _.map(self.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
+                    } else if(self.model.pattern === 'delete') {
+                        mql = "DELETE FROM\n\t " + self.model.node.name;
+                    } else if(self.model.pattern === 'ddl') {
 
-                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.node.node.name + " (\n\t" + _.map(self.node.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.node.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.node.node.keys.join(",") + ")\n);";
+                        mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.model.node.name + " (\n\t" + _.map(self.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.model.node.keys.join(",") + ")\n);";
 
                         _.forEach(self.keys,function(v){
 
                             if(_.includes(v,'time')) {
-                                mql += `\n\n#${_.startCase(v)}\n${v}=${moment(self.node.node[v]).format("LLL")}`;
+                                mql += `\n\n#${_.startCase(v)}\n${v}=${moment(self.model.node[v]).format("LLL")}`;
                                 return;
                             }
 
-                            let _value = self.node.node[v];
+                            let _value = self.model.node[v];
 
                             if(_value === 1){
                                 _value = true;
@@ -517,13 +1055,13 @@ class Omdb{
                             mql += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                         })
 
-                    } else if(self.node.pattern === 'create-class') {
-                        let _rand = _.now();
-                        mql = `CREATE CLASS IF NOT EXISTS  ${self.node.node.name}/new_${_rand}();`;
+                    } else if(self.model.pattern === 'create-class') {
+                        let _modelName = `new_${_.now()}`
+                        mql = `CREATE CLASS IF NOT EXISTS  ${self.model.node.name}/${_modelName}(\n\tfield1\tdate\t"日期",\n\tfield2\ttimestamp\t"时间戳",\n\tfield3\tint\t     "整形值",\n\tfield4\tfloat\t"浮点值",\n\tfield5\tenum {\n\t"1000":["item1", "item1描述"],\n\t"1001":["item2", "item2描述"]}\t"枚举值",\n\tfield6\tvarchar\t"字符串",\n\tkeys(field1,field2,field3,field4,field6),\n\tindex(field1,field2,field3,field4,field6)\n)with ttl=366 day , autosearch=true , alias='${_modelName}', nickname='${_modelName}';`;
                         mql = _.replace(mql, "//", "/");
-                    } else if(self.node.pattern === 'drop-class') {
-                        mql = "DROP CLASS IF NOT EXISTS " + self.node.node.name + ";";
-                    } else if(self.node.pattern === 'alter') {
+                    } else if(self.model.pattern === 'drop-class') {
+                        mql = "DROP CLASS IF EXISTS " + self.model.node.name + ";";
+                    } else if(self.model.pattern === 'alter') {
                         mql = `#设置类属性`;
 
                         let _keys = _.remove(self.keys, function(v){
@@ -531,7 +1069,7 @@ class Omdb{
                         })
 
                         _.forEach(_keys,function(v){
-                            let _value = self.node.node[v];
+                            let _value = self.model.node[v];
 
                             if(_value === 1){
                                 _value = true;
@@ -548,50 +1086,116 @@ class Omdb{
                             }
 
                             if(_.includes(['alias','keymethod','remedy'],v)){
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.node.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.model.node.name} SET ${v}='${_value}';`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                             } else {
-                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.node.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
+                                mql += `\n\n#${_.startCase(v)}\nALTER CLASS ${self.model.node.name} SET ${v}=${_value};`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
                             }
                         })
-                    } else if(self.node.pattern === 'alter-add-column') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD COLUMN column_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-column') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP COLUMN column_name;\n\n";
-                    } else if(self.node.pattern === 'alter-add-index') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD INDEX index_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-index') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP INDEX index_name type;\n\n";
-                    } else if(self.node.pattern === 'alter-add-key') {
-                        mql = "ALTER CLASS " + self.node.node.name + " ADD KEY key_name;\n\n";
-                    } else if(self.node.pattern === 'alter-drop-key') {
-                        mql = "ALTER CLASS " + self.node.node.name + " DROP KEY key_name;\n\n";
-                    } else if(self.node.pattern === 'g') {  // edge  query
-                        mql = `g.V(" ").In("${self.node.node.title}").All();`;
-                    } else if(self.node.pattern === 'create-edge-type') {  // edge  new edge type
+                    } else if(self.model.pattern === 'alter-add-column') {
+                        mql = "ALTER CLASS " + self.model.node.name + " ADD COLUMN column_name type;\n\n";
+                    } else if(self.model.pattern === 'alter-drop-column') {
+                        mql = "ALTER CLASS " + self.model.node.name + " DROP COLUMN column_name;\n\n";
+                    } else if(self.model.pattern === 'alter-add-index') {
+                        mql = "ALTER CLASS " + self.model.node.name + " ADD INDEX index_name type;\n\n";
+                    } else if(self.model.pattern === 'alter-drop-index') {
+                        mql = "ALTER CLASS " + self.model.node.name + " DROP INDEX index_name type;\n\n";
+                    } else if(self.model.pattern === 'alter-add-key') {
+                        mql = "ALTER CLASS " + self.model.node.name + " ADD KEY key_name;\n\n";
+                    } else if(self.model.pattern === 'alter-drop-key') {
+                        mql = "ALTER CLASS " + self.model.node.name + " DROP KEY key_name;\n\n";
+                    } else if(self.model.pattern === 'g') {  // edge  query
+                        mql = `g.V(" ").In("${self.model.node.title}").All();`;
+                    } else if(self.model.pattern === 'create-edge-type') {  // edge  new edge type
                         mql = `CREATE EDGE TYPE  type_name 'type_remedy';`;
-                    } else if(self.node.pattern === 'drop-edge-type') {  // edge drop edge type
-                        mql = `DROP EDGE TYPE ${self.node.node.title};`;
-                    } else if(self.node.pattern === 'edge-insert') {  // edge  create
-                        mql = `INSERT INTO class_name id="",${self.node.node.title}=[""];`;
-                    } else if(self.node.pattern === 'edge-update') {  // edge  update
-                        mql = `UPDATE class_name SET ${self.node.node.title}='' WHERE ID='';`;
-                    } else if(self.node.pattern === 'edge-g') {  // edge query all
+                    } else if(self.model.pattern === 'drop-edge-type') {  // edge drop edge type
+                        mql = `DROP EDGE TYPE ${self.model.node.title};`;
+                    } else if(self.model.pattern === 'edge-insert') {  // edge  create
+                        mql = `INSERT INTO class_name id="",${self.model.node.title}=[""];`;
+                    } else if(self.model.pattern === 'edge-update') {  // edge  update
+                        mql = `UPDATE class_name SET ${self.model.node.title}='' WHERE ID='';`;
+                    } else if(self.model.pattern === 'edge-g') {  // edge query all
                         mql = GLOBAL_CONFIG.global.gremlin;
                     }
 
-                    self.model.newInput = mql;
+                    self.editorModel.newInput = mql;
                 },
                 initKeys: function(){
                     const self = this;
 
                     let rtn = omdbHandler.classList(-1)[0];
-                    console.log(rtn, _.sortBy(_.keys(rtn)))
                     self.keys = _.sortBy(_.keys(rtn));
                 },
-                dropClass: function(){
+                layout(){
                     const self = this;
+                    
+                    self.main.splitInst = Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
+                        sizes: [50, 50],
+                        minSize: [0, 0],
+                        gutterSize: 3,
+                        cursor: 'col-resize',
+                        direction: 'vertical',
+                        onDragEnd:function(sizes) {
+                            eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`,sizes[1]);
+                        }
+                    });
+                },
+                logAppend(level,list){
+                    const self = this;
+                    
+                    let log = _.find(self.main.tabs,{name:'log'});
+                    
+                    if(_.isEmpty(log)){
+                        self.main.tabs.push({title: '日志', name: `log`, type: 'omdb-log-console', model: []});
+                        log = _.find(self.main.tabs,{name:'log'});   
+                    }
+                    
+                    log.model.push({level:level,msg:list});
+                },
+                mainTabsClick(tab, event) {
 
+                },
+                mainTabsAdd(node){
+                    const self = this;
+                    
+                    // 已经打开
+                    if(_.find(self.main.tabs,{name: node.name})){
+                        self.mainTabsRemove(node.name);
 
+                        _.delay(()=>{
+                            self.main.tabs.push(node);
+                            self.main.activeIndex = node.name;
+                        },50)
+                    } else {
+                        self.main.tabs.push(node);
+                        self.main.activeIndex = node.name;
+                    }
+
+                },
+                mainTabsRemove(targetName){
+                    const self = this;
+                    
+                    try{
+                        let tabs = self.main.tabs;
+                        let activeIndex = self.main.activeIndex;
+                        if (activeIndex === targetName) {
+                        tabs.forEach((tab, index) => {
+                            if (tab.name === targetName) {
+                            let nextTab = tabs[index + 1] || tabs[index - 1];
+                            if (nextTab) {
+                                activeIndex = nextTab.name;
+                            }
+                            }
+                        });
+                        }
+                        
+                        self.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                        self.main.activeIndex = activeIndex;
+
+                        console.log(targetName,self.main.tabs)
+                        
+                    } catch(err){
+                        
+                    } 
                 }
             }
         })
@@ -602,449 +1206,40 @@ class Omdb{
             "omdb-class-datatables-component",
             "omdb-class-tree-component",
             "omdb-editor-component",
+            "omdb-editor-base-component",
             "omdb-graph-component",
             "omdb-trigger-editor-component",
             "ai-robot-component"], function() {
-
-            let classTree = function(id, bid, template, event){
-
-                return {
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: `#${template}-template`,
-                    data: {
-                        id: id,
-                    },
-                    mounted: function() {
-                        const self = this;
-
-                        self.$nextTick(function() {
-                            $(self.$el).click(function(){
-                                self.click();
-                            })
-                        })
-                    },
-                    methods: {
-                        click: function(){
-
-                        }
-                    }
-                };
-            };
-
-            let classEdit = function(id, bid, template, event){
-
-                let _dataset = [];
-                let _columns = [];
-
-                _columns = [
-                    {"field": "id", render: function (data, type, row, meta) {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        }
-                    },
-                    {"field": "icon", "title": "Inherit", render: function (data, type, row) {
-                            return `<img src="${window.ASSETS_ICON}/tools/png/${data}.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:22px;height:22px;">`;
-                        }
-                    },
-                    {"field": "name", "title": "Name"},
-                    {"field": "title", "title": "Title"},
-                    {"field": "colname", "title": "ColName", visible: false},
-                    {"field": "ftype", "title": "Ftype",render: function (data, type, row) {
-                            return data==='smallint'?'enum':data;
-                        }
-                    },
-                    {"field": "loption", "title": "Loption"},
-                    {"field": "fparam", "title": "Fparam"},
-                    {"field": "isindex", "title": "Index",render: function (data, type, row) {
-                            return data===1?'是':'否';
-                        }
-                    },
-                    {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
-                            return data===1?'是':'否';
-                        }
-                    },
-                    {"field": "note", "title": "Note"},
-                    {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
-                            return moment(data).format("LLL");
-                        }
-                    },
-                    {"field": "class", "title": "Class", "visible": false},
-                    {"field": "dispname", "title": "Dispname", "visible": false},
-                    {"field": "tags", "title": "Tags", "visible": false},
-                    {"field": "isrel", "title": "Rel", "visible": false},
-                    {"field": "btype", "title": "Btype", "visible": false}
-                ];
-                
-                if(!_.isEmpty(event.model.node.fieldsObj) && !_.isEmpty(event.model.pnode.fieldsObj)) {
-
-                    let _node = _.cloneDeep(event.model.node.fieldsObj);
-                    let _pnode = _.cloneDeep(event.model.pnode.fieldsObj);
-
-                    if(event.model.node.fieldsObj == event.model.pnode.fieldsObj) {
-                        _dataset = _.map(event.model.node.fieldsObj, function (v) {
-                            return _.merge(v, {icon: 'parent'});
-                        });
-                    } else {
-                        let _diff =  _.differenceWith(event.model.node.fieldsObj, event.model.pnode.fieldsObj, function(v1,v2){return v1.name === v2.name;});
-
-                        if(_.isEmpty(_diff)){
-                            _dataset = _.map(_node, function (v) {
-                                return _.merge(v, {icon: 'parent'});
-                            });
-
-                        } else {
-                            _dataset = _.concat(_.map(_pnode,function(v){return _.merge(v, {icon: 'parent'});}), _.map(_diff,function(v){return _.merge(v, {icon: 'child'});}));
-                        }
-                    }
-                } else{
-                    _dataset = _.map(event.model.node.fieldsObj, function (v) {
-                        return _.merge(v, {icon: 'parent'});
-                    });
-                }
-
-                _dataset = _.map(_.uniqBy(_dataset,'name'),function(v){
-                    if(_.indexOf(event.model.node.keys,v.name) > -1){
-                        _.extend(v,{iskey:1});
-                    }
-                    return v;
-                });
-
-                _columns = _.uniqBy(_columns, 'field');
-
-                return {
-
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: `#${template}-template`,
-                    data: {
-                        id: id,
-                        bid: bid,
-                        model: {
-                            dataset: _dataset,
-                            columns: _columns,
-                            options: {
-                                info:true,
-                                scrollY: '282px',
-                                searching: false,
-                                rowCallback: function( row, data ) {
-                                    if( data.icon === "parent" ) {
-                                        $('td', row).css('background-color', '#f9f9f9');
-                                    }
-                                }
-                            }
-                        },
-                        result: event.model.node
-                    },
-                    created: function(){
-                        const self = this;
-
-                    },
-                    mounted: function() {
-                        const self = this;
-
-                        self.$nextTick(function() {
-                            self.init();
-                        })
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-
-
-                        }
-                    }
-                };
-            };
-
-            
-
-            let outPutByJson = function(id, bid, json){
-
-                let content = null;
-
-                if(!_.isEmpty(json)) {
-                    content = json.data;
-                }
-
-                return {
-
-                    delimiters: ['#{', '}#'],
-                    el: '#' + id,
-                    template: `<el-container style="height: 48vh;">
-                                    <el-main style="padding:0px;">
-                                        <pre style="background:transparent;border:none;">#{JSON.stringify(model,null,4).replace(/   /g, ' ')}#</pre>
-                                    </el-main>
-                                </el-container>`,
-                    data: {
-                        id: id,
-                        bid: bid,
-                        model: null
-                    },
-                    created: function(){
-                        const self = this;
-
-                        eventHub.$on(`QUERY-JSON-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                        eventHub.$on(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                    },
-                    mounted: function() {
-                        const self = this;
-
-                        self.$nextTick(function() {
-                            self.init();
-                        })
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-
-                            if(!_.isEmpty(content)) {
-                                self.model = content;
-                            } else {
-                                self.model = '';
-                            }
-
-                        },
-                        setData: function(event){
-                            const self = this;
-                            self.model = event.data;
-                        }
-                    }
-                };
-            };
-
-            let outPut = function(id, bid, node){
-
-                //if(_.isEmpty(node)) return false;
-                
-                let _dataset = [];
-                let _columns = [];
-                let _node = {};
-
-                if(!_.isEmpty(node)) {
-                    _dataset = node.data;//[_.keys(node.columns)[0]];
-                    _columns = node.columns[_.keys(node.columns)[0]];
-                    _node = node;
-                }
-
-                _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    }
-                });
-
-                return {
-
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: `#output-console-template`,
-                    data: {
-                        id: id,
-                        bid: bid,
-                        model: {
-                            dataset: _dataset,
-                            columns: _columns,
-                            options: {
-                                info:true,
-                                scrollY: '148px',
-                                searching: false,
-                            }
-                        },
-                        result: _node
-                    },
-                    created(){
-                        const self = this;
-
-                        eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
-
-                        eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                        eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                    },
-                    mounted() {
-                        const self = this;
-
-                        self.$nextTick(function() {
-                            self.init();
-                        })
-                    },
-                    methods: {
-                        init(){
-                            const self = this;
-
-                            if(!_.isEmpty(node)) {
-                                self.model.dataset = self.result.data;//[_.keys(self.result.columns)[0]];
-                                self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
-                            } else {
-                                self.model.dataset = [];
-                                self.model.columns = [];
-                            }
-
-                        },
-                        setData(event){
-                            const self = this;
-
-                            self.model.dataset = event.data;//[_.keys(event.columns)[0]] || [];
-                            self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
-                            self.result = event;
-
-                        },
-                        setScrollY(event){
-                            const self = this;
-
-                            self.model.options.scrollY = event.scrollY;
-                        }
-                    }
-                };
-            };
-
-            let graph = function(id, bid, node){
-
-                let _data = {nodes:[], edges:[], paths: [], pathtags:[], diff:{}};
-
-                if(!_.isEmpty(node)){
-                    _data.nodes = node.nodes;
-                };
-
-                if(!_.isEmpty(node.edges)){
-                    _data.edges = node.edges;
-                };
-
-                if(!_.isEmpty(node.paths)){
-                    _data.paths = node.paths;
-                };
-
-                if(!_.isEmpty(node.pathtags)){
-                    _data.pathtags = node.pathtags;
-                };
-
-                if(!_.isEmpty(node.diff)){
-                    _data.diff = node.diff;
-                };
-
-                return {
-
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: '#graph-template',
-                    data: {
-                        id: id,
-                        bid: bid,
-                        model: _data,
-                    },
-                    created: function(){
-                        const self = this;
-
-                        //eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`, self.setData);
-                    },
-                    mounted: function () {
-                        const self = this;
-
-                        self.$nextTick(function () {
-                            self.init();
-                        })
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-
-
-                        },
-                        setData: function(event){
-                            const self = this;
-
-                            self.model = event.data;
-                        }
-                    }
-                };
-            };
-
-            
-
-            let textConsole = function(id, bid, model){
-
-                return {
-
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: `#text-console-template`,
-                    data: {
-                        id: id,
-                        bid: bid,
-                        output: model
-                    }
-                };
-            };
-
-            let triggerConsole = function(id, bid, node){
-
-                let _readOnly = false;
-
-                return {
-                    delimiters: ['${', '}'],
-                    el: '#' + id,
-                    template: "#trigger-template",
-                    data: {
-                        id: id,
-                        className: node,
-                        editor: {
-                            mode: "lua",
-                            theme: "tomorrow",
-                            readOnly: _readOnly,
-                        }
-                    }
-                };
-            };
+    
 
             $(function() {
 
-                // 主管理页 包括：查询 日志 结果
-                Vue.component("omdb-main-view",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            // 布局
-                            layout:{
-                                tabIndex: 1,
-                                activeIndex: '1',
-                                tabs:[
-                                    {name: 'event-view-console', title:'日志', type: 'main'}
-                                ]
-                            },
-                            splitUpBottom: 0.5
-                        }
-                    },
-                    template:   `<el-container style="height: 75vh;">
-                                    
-                                    <el-main>
-                                        <Split v-model="splitUpBottom">
-                                            <div slot="top">
-                                                
-                                            </div>
-                                            <div slot="bottom">
-                                                
-                                            </div>
-                                        </Split>
-                                    </el-main>
-                                    
-                                </el-container>`
-                })
-                
                 odb.app = new Vue({
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="calc(100vh - 140px);">
                                     <el-aside :id="id+'-aside'">
-                                        <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
+                                        <el-container>
+                                            <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;">
+                                                <h5><i class="fas fa-cubes"></i> 对象管理</h5>
+                                            </el-header>
+                                            <el-main style="padding:0px;height:80vh;border-top:1px solid #ffffff;">
+                                                <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
+                                            </el-main>
+                                            <el-footer style="height:30px;line-height:30px;padding:0 5px;">
+                                            ${window.COMPANY_OSPACE} | ${window.SignedUser_UserName} | #{moment().format("LLL")}#
+                                            </el-footer>
+                                        </el-container>
                                     </el-aside>
                                     <el-main :id="id+'-main'" style="padding:0px;">
-                                        <el-tabs v-model="main.activeIndex" type="border-card">
+                                        <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick">
                                             <el-tab-pane
                                                 :key="item.name"
                                                 v-for="(item, index) in main.tabs"
-                                                :label="item.title"
                                                 :name="item.name">
-                                                <omdb-query-console :id="id+'-'+item.name" :node="item.model"></omdb-query-console>
+                                                <span slot="label">#{item.title}#</span>
+                                                <omdb-query-console :id="id+'-query-'+item.name" :model="item.model" v-if="item.type=='omdb-query-console'" :ref="'omdbQueryConsoleRef-'+id+'-query-'+item.name"></omdb-query-console>
+                                                <omdb-trigger-console :id="id+'-trigger-'+item.name" :model="item.model" v-if="item.type=='omdb-trigger-console'"></omdb-trigger-console>
+                                                <omdb-class-console :id="id+'-class-'+item.name" :model="item.model" v-if="item.type=='omdb-class-console'"  :ref="'omdbClassRef-'+id+'-class-'+item.name""></omdb-class-console>
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-main>
@@ -1058,14 +1253,7 @@ class Omdb{
                             activeIndex: 'query'
                         }
                     },
-                    created: function(){
-                        const self = this;
-    
-                        eventHub.$on("OMDB-CLASS-TRIGGER-EVENT",self.addStackFromTree);
-                        eventHub.$on("QUERY-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
-                        eventHub.$on("QUERY-JSON-RESULT-TRIGGER-EVENT", self.addStackFromQuery);
-                    },
-                    mounted: function() {
+                    mounted() {
                         const self = this;
     
                         self.$nextTick(function() {
@@ -1078,189 +1266,51 @@ class Omdb{
                             self.splitInst = Split([`#${this.id}-aside`, `#${this.id}-main`], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
-                                gutterSize: 5,
+                                gutterSize: 3,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
                         },
-                        addStackFromTree( event ) {
+                        mainTabsClick(tab, event) {
+                            
+                        },
+                        mainTabsAdd(node){
+                            const self = this;
+                            
+                            // 已经打开
+                            if(_.find(self.main.tabs,{name:node.name})){
+                                self.main.activeIndex = node.name;
+                                return false;
+                            }
+
+                            self.main.tabs.push(_.extend(node,{ name: [node.name,node.model.pattern].join("-"), title: [node.title,node.model.pattern].join("-") }));
+                            self.main.activeIndex = node.name;
+                        },
+                        mainTabsRemove(targetName){
                             const self = this;
 
                             try{
-                                let _bid = `batch_${_.now()}`;
-    
-                                let newItemConfig = {
-                                    type: 'column',
-                                    title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                                    content:[{
-                                        type: 'component',
-                                        height:50,
-                                        title: `<i class="fas fa-laptop-code"></i> ${event.title}`,
-                                        id: 'layout_search_no_header',
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_query_${_.now()}`,
-                                            bid: _bid,
-                                            type: event.type,
-                                            model: event.model
-                                        }
-                                    },{
-                                        type: 'stack',
-                                        height:50,
-                                        activeItemIndex: 1,
-                                        content: [{
-                                            type: 'component',
-                                            title: `<i class="fas fa-newspaper"></i> 日志`,
-                                            componentName: 'omdbComponent',
-                                            componentState: {
-                                                id: `div_log_${_.now()}`,
-                                                bid: _bid,
-                                                type: 'log-console',
-                                                model: null
-                                            }
-                                        },{
-                                            type: 'component',
-                                            title: `<i class="fas fa-list-alt"></i> 结果`,
-                                            componentName: 'omdbComponent',
-                                            componentState: {
-                                                id: `div_output_${_.now()}`,
-                                                bid: _bid,
-                                                type: 'output-console',
-                                                model: null
-                                            }
-                                        }]
-                                    }]
-                                };
-        
-                                if(_.includes(['trigger-console','class-edit'],event.type)){
-                                    newItemConfig = {
-                                        type: 'column',
-                                        title: `<i class="fas fa-table"></i> ${event.title}`,
-                                        content:[{
-                                            type: 'component',
-                                            title: event.title,
-                                            id: 'layout_search_no_header',
-                                            height:55,
-                                            componentName: 'omdbComponent',
-                                            componentState: {
-                                                id: `div_query_${_.now()}`,
-                                                bid: _bid,
-                                                type: event.type,
-                                                model: event.model
-                                            }
-                                        },{
-                                            type: 'stack',
-                                            height:45,
-                                            content: [{
-                                                type: 'component',
-                                                title: `<i class="fas fa-newspaper"></i> 日志`,
-                                                componentName: 'omdbComponent',
-                                                componentState: {
-                                                    id: `div_log_${_.now()}`,
-                                                    bid: _bid,
-                                                    type: 'log-console',
-                                                    model: null
-                                                }
-                                            }]
-                                        }]
-                                    };
+                                let tabs = this.main.tabs;
+                                let activeIndex = this.main.activeIndex;
+                                if (activeIndex === targetName) {
+                                tabs.forEach((tab, index) => {
+                                    if (tab.name === targetName) {
+                                    let nextTab = tabs[index + 1] || tabs[index - 1];
+                                    if (nextTab) {
+                                        activeIndex = nextTab.name;
+                                    }
+                                    }
+                                });
                                 }
-        
-                                if(_.size($(`li[title="${event.title}"]`)) > 0 ){
-                                    //return false;
-                                }
-        
-                                self.layout.root.contentItems[0].contentItems[1].addChild(newItemConfig);
-
+                                
+                                this.main.tabs = tabs.filter(tab => tab.name !== targetName);
+                                this.main.activeIndex = activeIndex;
+                                
                             } catch(err){
-
+                                
+                            } finally{
+                                
                             }
-    
-                        },
-                        addStackFromQuery( event ) {
-                            const self = this;
-                            
-                            try {
-
-                                let _bid = `batch_${_.now()}`;
-    
-                                if(event.type == "table-update"){
-                                    let newItemConfig =  {
-                                        type: 'component',
-                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_output_${_.now()}`,
-                                            bid: event.bid,
-                                            type: 'output-console',
-                                            model: event.model
-                                        }
-                                    };
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                                }
-
-                                if(event.type == "json-update"){
-                                    let newItemConfig =  {
-                                        type: 'component',
-                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_output_${_.now()}`,
-                                            bid: event.bid,
-                                            type: 'output-json-console',
-                                            model: event.model
-                                        }
-                                    };
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                                }
-        
-                                if(event.type == "graph-update"){
-        
-                                    let newItemConfig =  {
-                                        type: 'component',
-                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_output_${_.now()}`,
-                                            bid: event.bid,
-                                            type: 'graph',
-                                            model: event.data
-                                        }
-                                    };
-        
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-        
-                                }
-        
-                                if(event.type == "text-console"){
-        
-                                    let newItemConfig =  {
-                                        type: 'component',
-                                        title: `<i class="fas fa-list-alt"></i> 结果_${moment().format("LT")}`,
-                                        componentName: 'omdbComponent',
-                                        componentState: {
-                                            id: `div_output_${_.now()}`,
-                                            bid: event.bid,
-                                            type: 'text-console',
-                                            model: event.data
-                                        }
-                                    };
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].removeChild(self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].contentItems[1]);
-                                    self.layout.root.contentItems[0].contentItems[1].getActiveContentItem().contentItems[1].addChild(newItemConfig);
-                                }
-        
-                                _.delay(function(){
-                                    eventHub.$emit(`NEW-QUERY-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                                    eventHub.$emit(`NEW-QUERY-JSON-RESULT-TRIGGER-EVENT-${event.bid}`, event);
-                                },500)
-
-                            } catch (err){
-
-                            } 
-    
                         },
                         classDataExport(selectedNode){
                             const me = this;
@@ -1291,14 +1341,16 @@ class Omdb{
                                         recursive: true,
                                         filetype: 'mql',
                                         template: true,
-                                        class: selectedNode
+                                        class: selectedNode,
+                                        ignoreClass: ''
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
-                                                <el-header style="height: 45px;line-height: 45px;padding: 0 5px;">
-                                                    <el-switch v-model="model.ifData" active-text="导出数据" style="background: #f7f7f7;"></el-switch>
+                                                <el-header style="height: 35px;line-height: 35px;padding: 0 5px;background: #f6f6f6;">
+                                                    <el-switch v-model="model.ifData" active-text="导出数据" active-color="#13ce66" style="background: #f7f7f7;"></el-switch>
                                                     <el-switch v-model="model.filetype" 
                                                                 active-text="导出MQL" inactive-text="导出Excel"
+                                                                active-color="#13ce66"
                                                                 active-value="mql" inactive-value="xlsx"
                                                                 style="background: #f7f7f7;"></el-switch>
                                                 </el-header>

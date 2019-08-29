@@ -35,16 +35,8 @@
         padding: 5px 5px 0px 5px;
     }
     
-    .ivu-split-trigger-vertical{
-        width: 3px!important;
-    }
-
-    .ivu-split-trigger-bar{
-        background: transparent!important;
-    }
-
-    .ivu-split-trigger{
-        border:none!important;
+    .el-button--text{
+        margin-left: 10px!important;
     }
 
     .el-tabs--border-card>.el-tabs__header{
@@ -55,34 +47,9 @@
         border-bottom: none;
     }
 
-    .ivu-layout{
-        background: #ffffff;
-    }
-
-    .ivu-layout-content {
-        height: calc(100vh - 165px)!important;
-        background: rgb(255, 255, 255);
-    }
-    .ivu-layout-header {
-        background: rgb(246, 246, 246)!important;
-        padding: 0px!important;
-        height: 34px!important;
-        line-height: 34px!important;
-    }
 
     .el-tabs--border-card {
         border-top: none!important;
-    }
-
-    .ivu-layout-footer {
-        background: rgb(255, 255, 255)!important;
-        padding: 10px 10px!important;
-        color: rgb(81, 90, 110)!important;
-        font-size: 12px!important;
-    }
-
-    .ivu-form-item{
-        margin-bottom: 15px!important;
     }
 
     ul {
@@ -92,7 +59,7 @@
     }
 
     .config-value {
-        height: calc(100vh - 215px);
+        height: calc(100vh - 205px);
     }
 
     .el-main{
@@ -132,13 +99,35 @@
         box-shadow:unset;
     }
     .el-tabs--border-card>.el-tabs__content {
-        padding: 0px 0px 10px 0px;
+        padding: 0px;
     }
     
     .el-aside {
         background-color: #FFFFFF!important;
         color: #333333;
         border-right:1px solid rgb(220, 223, 230);
+    }
+
+    .gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+    }
+
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
     }
     
     /* 全屏模式 */
@@ -158,11 +147,6 @@
     <div id="app"></div>
 </main>
 
-<!-- iView import stylesheet -->
-<link rel="stylesheet" href="{{AppSubUrl}}/web/vendor/iView/iview.css">
-<!-- iView import iView -->
-<script src="{{AppSubUrl}}/web/vendor/iView/iview.min.js"></script>
-
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Config.js" type="text/javascript"></script>
 <script src="{{AppSubUrl}}/web/js/handler/ConfigHandler.js" type="text/javascript"></script>
@@ -175,15 +159,6 @@
         let mxConfig = new Config();
         mxConfig.init();
     })
-</script>
-
-<script type="text/x-template" id="config-manage-template">
-    <div>
-        
-        <div class="config-value" :id="id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;"></div>
-        <div class="config-status-footer" :id="'statusBar-'+id" style="height: 30px;line-height: 2;background: rgb(246, 246, 246);"></div>
-
-    </div>
 </script>
 
 {{template "base/footer" .}}

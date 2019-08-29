@@ -79,7 +79,6 @@ class Entity extends Matrix {
                                     this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
 
                                 } else {
-                                    console.log(22)
                                     this.topological.graphScript = [ {value: `match (${bizs}) - [*1] -> (${bizs})`} ];
                                     this.topological.search(this.topological.graphScript[0].value);
                                 }
@@ -772,7 +771,6 @@ class Entity extends Matrix {
                                 </el-container>`,
                     computed:{
                         rId(){
-                            console.log(11,this.id,objectHash.sha1(this.id),this.model.rows)
                             return objectHash.sha1(this.id);
                         }
                     },

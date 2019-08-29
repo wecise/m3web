@@ -128,9 +128,9 @@ class Home extends Matrix {
                                     return {
                                         callback: function(key, opt) {
                                             
-                                            if(_.includes(key,"running")){
+                                            if(_.includes(key,"walking")){
                                                 sideBar.appRunning(item);
-                                            } else if(_.includes(key,"running-plus")){
+                                            } else if(_.includes(key,"running")){
                                                 sideBar.appRunningPlus(item);
                                             } else if(_.includes(key,"uninstall")){
                                                 sideBar.appUninstall(item);
