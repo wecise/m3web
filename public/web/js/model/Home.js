@@ -51,7 +51,8 @@ class Home extends Matrix {
                         path: {
                             view: "event.html",
                             _csrf: "{{.CsrfToken}}"
-                        }
+                        },
+                        dialogFormVisible: false
                     },
                     filters:{
                         pickIcon:function(icon){
@@ -141,11 +142,11 @@ class Home extends Matrix {
                                             }
                                         },
                                         items: {
-                                            "m10_running": {
+                                            "m10_walking": {
                                                 "name": "当前窗口运行",
                                                 "icon": "fas fa-walking"
                                             },
-                                            "m20_running-plus": {
+                                            "m20_running": {
                                                 "name": "打开新窗口运行",
                                                 "icon": "fas fa-running"
                                             },

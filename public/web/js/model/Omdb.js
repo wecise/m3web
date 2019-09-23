@@ -510,10 +510,14 @@ class Omdb{
                                         <el-input v-model="formModel.name" :disabled="true"></el-input>
                                     </el-form-item>
                                     <el-form-item label="类别名">
-                                        <el-input v-model="formModel.alias"></el-input>
+                                        <el-input v-model="formModel.alias">
+                                            <el-button slot="append" icon="fas fa-save" @click="onUpdate('alias')"></el-button>
+                                        </el-input>
                                     </el-form-item>
                                     <el-form-item label="备注">
-                                        <el-input v-model="formModel.remedy"></el-input>
+                                        <el-input v-model="formModel.remedy">
+                                            <el-button slot="append" icon="fas fa-save" @click="onUpdate('remedy')"></el-button>
+                                        </el-input>
                                     </el-form-item>
                                 </el-form>
                                 <el-tabs v-model="tabs.activeName" type="card" tab-position="left" @tab-click="onClick" style="border-top:1px solid #dddddd;">
@@ -751,44 +755,49 @@ class Omdb{
                 },
                 onClick(tab, event){
                     const self = this;
-                    
-                    if(tab.name == 'keys'){
-                        self.keysModel.newInput = self.model.node.keys.join(",\n");
-                    } else if(tab.name == 'indexes'){
-                        self.indexesModel.newInput = _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",\n");
-                    } else if(tab.name == 'subClass'){
-                        self.subClassModel.newInput = self.model.node.child.join(",\n");
-                    } else if(tab.name == 'options'){
-                        let options = "";
-                        _.forEach(self.dtModel.keys,function(v){
+                    const splitTab = "\t| ";
+                    const endWord = "\n";
+                    const spaceWord = function(n){return n<=20?_.fill(Array(20 - n)," ").join(""):"" ;};
+                    const headerWord = _.fill(Array(100),"-").join("");
 
-                            if(_.includes(v,'time')) {
-                                options += `#${_.startCase(v)}\n${v}=${moment(self.model.node[v]).format("LLL")}`;
-                                return;
-                            }
-    
-                            let _value = self.model.node[v];
-    
-                            if(_value === 1){
-                                _value = true;
-                            } else if(_value === 0){
-                                _value = false;
-                            }
-    
-                            if(v === 'keymethod'){
-                                if(_value === 1){
-                                    _value = 'uuid';
+                    if(tab.name == 'keys'){
+                        self.keysModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Type`,headerWord],_.map(self.model.node.keys,function(v){
+                            return `${v}${spaceWord(v.length)}${splitTab}Primary Key`;
+                        })).join(endWord);
+                    } else if(tab.name == 'indexes'){
+                        self.indexesModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Query`,headerWord],_.map(_.filter(self.model.node.fieldsObj,function(v){
+                            return v.isindex == 1;
+                        }),function(w){
+                            return `${w.name}${spaceWord(w.name.length)}${splitTab}CREATE INDEX ${w.name} ON ${window.COMPANY_OSPACE}(${w.name});`;
+                        })).join(endWord);
+                    } else if(tab.name == 'subClass'){
+                        self.subClassModel.newInput = _.concat([`Name[${self.model.node.child.length}]`,headerWord],_.map(self.model.node.child,function(v){
+                            return `${v}`;
+                        })).join(endWord);
+                    } else if(tab.name == 'options'){
+                        self.dtModel.keys = _.without(self.dtModel.keys,'child','fields');
+                        self.optionsModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Value`,headerWord],_.map(self.dtModel.keys,function(v){
+                            let value = self.model.node[v];
+
+                            if(v === 'mtime'){
+                                value = moment(self.model.node[v]).format("LLL");
+                            } else if(v === 'keymethod'){
+                                if(self.model.node[v] === 1){
+                                    value = 'uuid';
                                 } else {
-                                    _value = 'md5';
+                                    value = 'md5';
                                 }
                             }
-    
-                            options += `\n\n#${_.startCase(v)}\n${v}=${_value}`.replace(/keymode/gi,"largepartition").replace(/keymethod/gi,"key");
-                        })
-                        self.optionsModel.newInput = options;
+                            
+                            return `${v}${spaceWord(v.length)}${splitTab}${value}`;
+                        })).join(endWord);;
                     } else if(tab.name == 'ddl'){
                         self.ddlModel.newInput = omdbHandler.classToDDL(self.model.node.name);
                     }
+                },
+                onUpdate(column){
+                    let item = {action:'update', class: this.formModel.name, name: column, value: this.formModel[column]};
+                    let rtn = fsHandler.callFsJScript("/matrix/omdb/updateClass.js",encodeURIComponent(JSON.stringify(item))).message;
                 }
             }  
         })
@@ -1219,8 +1228,19 @@ class Omdb{
                     template:   `<el-container style="calc(100vh - 140px);">
                                     <el-aside :id="id+'-aside'">
                                         <el-container>
-                                            <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;">
-                                                <h5><i class="fas fa-cubes"></i> 对象管理</h5>
+                                            <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
+                                                <h4 style="width:50%;font-size:12px;">
+                                                    <i class="fas fa-cubes"></i> 对象管理
+                                                </h4>
+                                                <el-dropdown style="width: 50%;text-align: right;font-size:12px;">
+                                                    <span class="el-dropdown-link">
+                                                        <i class="fas fa-angle-down"></i>
+                                                    </span>
+                                                    <el-dropdown-menu slot="dropdown">
+                                                        <el-dropdown-item @click.native="classDataExport('/matrix')"><i class="fas fa-file-export"></i> 导出</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classDataImport"><i class="fas fa-file-import"></i> 导入</el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                                </el-dropdown>
                                             </el-header>
                                             <el-main style="padding:0px;height:80vh;border-top:1px solid #ffffff;">
                                                 <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
@@ -1330,10 +1350,10 @@ class Omdb{
                             new Vue({
                                 delimiters: ['#{', '}#'],
                                 data:{
-                                    classList: fsHandler.callFsJScript("/entity/entity_class.js",encodeURIComponent("/")).message,
+                                    classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent("/")).message,
                                     defaultProps: {
                                         children: 'children',
-                                        label: 'alias'
+                                        label: 'class'
                                     },
                                     model: {
                                         ifData: false, 
@@ -1341,22 +1361,22 @@ class Omdb{
                                         recursive: true,
                                         filetype: 'mql',
                                         template: true,
-                                        class: selectedNode,
-                                        ignoreClass: ''
+                                        class: '',
+                                        ignoreClass: '/matrix/filesystem'
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
                                                 <el-header style="height: 35px;line-height: 35px;padding: 0 5px;background: #f6f6f6;">
-                                                    <el-switch v-model="model.ifData" active-text="导出数据" active-color="#13ce66" style="background: #f7f7f7;"></el-switch>
-                                                    <el-switch v-model="model.filetype" 
-                                                                active-text="导出MQL" inactive-text="导出Excel"
-                                                                active-color="#13ce66"
-                                                                active-value="mql" inactive-value="xlsx"
-                                                                style="background: #f7f7f7;"></el-switch>
+                                                    <el-checkbox v-model="model.ifData" style="height: 35px;line-height: 35px;">导出数据</el-checkbox>
+                                                    <el-radio-group v-model="model.filetype" style="height: 35px;line-height: 35px;padding: 3px;">
+                                                        <el-radio label="mql">导出MQL</el-radio>
+                                                        <el-radio label="xlsx">导出Excel</el-radio>
+                                                    </el-radio-group>
                                                 </el-header>
                                                 <el-main style="padding:10px;">
                                                     <el-tree
                                                         :data="classList"
+                                                        ref="classTree"
                                                         show-checkbox
                                                         node-key="alias"
                                                         :default-expanded-keys="[_.first(classList).id]"
@@ -1369,11 +1389,15 @@ class Omdb{
                                                     </el-tree>
                                                 </el-main>
                                                 <el-footer style="height:40px;line-height:40px;text-align:right;">
-                                                    <label style="float:left;">导出：#{model.class}#</label>
                                                     <el-button type="default" @click="onCancel">取消</el-button>
                                                     <el-button type="primary" @click="onExport">导出</el-button>
                                                 </el-footer>
                                             </el-container>`,
+                                created(){
+                                    if(!_.isEmpty(selectedNode)){
+                                        this.model.class = selectedNode;
+                                    }
+                                },
                                 methods:{
                                     onNodeClick(node){
                                         this.model.class = node.alias;
@@ -1382,9 +1406,17 @@ class Omdb{
                                         wnd.close();
                                     },
                                     onExport(){
+
+                                        let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",this.model.class).message;
+                                        let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
+                                        
+                                        _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
+                                        
                                         if(this.model.ifData){
                                             this.model.limit = -1;
+                                            this.model.template = false;
                                         } else {
+                                            this.model.template = true;
                                             this.model.limit = 0;
                                         }
                                         omdbHandler.classDataExport(this.model);

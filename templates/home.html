@@ -225,6 +225,21 @@
         display:none;
     }
 
+    /* el-dialog__body */
+    .el-dialog__body {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .el-dialog__body > .el-button--primary {
+        padding: 10px 5px 0px 5px;
+        margin: 5px;
+        min-width: 120px;
+        max-width: 120px;
+        height: 80px;
+        background-color: #242d47;
+        border-radius: 3px;
+    }
+
     /* 全屏模式 */
 	header#header{
 		display:initial!important;
@@ -254,83 +269,69 @@
 
 <script type="text/x-template" id="app-template">
     <el-container style="padding:3em 0;">
-            <el-main>
-                {{.CsrfTokenHtml}}
-                <el-row type="flex" justify="center" style="padding:20px 0px;">
-                    <el-col :span="18">
-                        <div class="grid-content">
-                            <div class="input-group">
-                                <!--div class="input-group-btn">
-                                    <a href="javascript:void(0)" @click="openHelpPanel" class="btn btn-xs btn-help" style="background-color: rgb(240, 243, 244);border-top: 1px solid rgb(204, 204, 204);border-right: none;border-bottom: 1px solid rgb(204, 204, 204);border-left: 1px solid rgb(204, 204, 204);border-image: initial;width: 24px;height: 36px;border-radius: 0px;padding: 10px 5px;">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </div-->
-                                <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;">
-                                <div class="input-group-btn">
-                                    <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
-                                </div>
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
-                                </div>
-                            </div>
-                            <!-- /.input-group -->
-                            <div class="collapse collapseShowresult" id="search-result-panel" v-on:blur="hideSearch">
-                                <div id="search-result-content"></div>
-                            </div>
-                        </div>
-                    </el-col>
-                </el-row>
-                
-                <el-row type="flex" justify="center" style="padding:20px 0px;">
-                    <el-col :span="16"> 
-                        <div class="grid-content">
-                            <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
-                                <a :href="item.url" :target="item.target" style="color:#ffffff;">
-                                    <div class="tile_name">
-                                        <img style="width:30px" :src="item.icon | pickIcon"></img>
-                                        <p class="small">#{item.{{.i18n.Tr "mxhome_portlet_name"}}}#</p>
-                                    </div>
+        <el-main>
+            {{.CsrfTokenHtml}}
+            <el-row type="flex" justify="center" style="padding:20px 0px;">
+                <el-col :span="18">
+                    <div class="grid-content">
+                        <div class="input-group">
+                            <!--div class="input-group-btn">
+                                <a href="javascript:void(0)" @click="openHelpPanel" class="btn btn-xs btn-help" style="background-color: rgb(240, 243, 244);border-top: 1px solid rgb(204, 204, 204);border-right: none;border-bottom: 1px solid rgb(204, 204, 204);border-left: 1px solid rgb(204, 204, 204);border-image: initial;width: 24px;height: 36px;border-radius: 0px;padding: 10px 5px;">
+                                    <i class="fa fa-question"></i>
                                 </a>
-                                <div class="list-context-menu" :data-item="item.id">
-                                    <i class="fa fa-angle-down"></i>
-                                </div>
+                            </div-->
+                            <input class="form-control search" type="text" placeholder='{{.i18n.Tr "search.search"}}' @click="hideSearch" style="border: 1px solid #b6c2ca;">
+                            <div class="input-group-btn">
+                                <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
                             </div>
-                            <a class="layer btn btn-primary" href="#addAppModal" data-toggle="modal" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;">
-                                <span class="fa fa-plus" style="font-size: 20px;"></span>
-                            </a>
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
+                            </div>
                         </div>
-                    </el-col>
-                </el-row>
-                
-                <div class="modal fade" id="addAppModal" tabindex="-1" role="dialog">
-                    <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title" id="exampleModalLabel">{{.i18n.Tr "add_app"}}</h4>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <a href="javascript:void(0);" :target="item.target" class="layer select btn btn-primary" v-for="item in user.appList" @click="triggerInput(item.name)">
-                                            <img :src="item.icon | pickIcon" style="width:28px;"></img>
-                                            <p class="small">
-                                                #{item.{{.i18n.Tr "mxhome_portlet_name"}}}#
-                                            </p>
-                                            <p>
-                                                <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)">
-                                            </p>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- /.input-group -->
+                        <div class="collapse collapseShowresult" id="search-result-panel" v-on:blur="hideSearch">
+                            <div id="search-result-content"></div>
                         </div>
                     </div>
-                </div>
-                
-            </el-main>
-    
-        </el-container>
+                </el-col>
+            </el-row>
+            
+            <el-row type="flex" justify="center" style="padding:20px 0px;">
+                <el-col :span="16"> 
+                    <div class="grid-content">
+                        <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
+                            <a :href="item.url" :target="item.target" style="color:#ffffff;">
+                                <div class="tile_name">
+                                    <img style="width:30px" :src="item.icon | pickIcon"></img>
+                                    <p class="small">#{item.{{.i18n.Tr "mxhome_portlet_name"}}}#</p>
+                                </div>
+                            </a>
+                            <div class="list-context-menu" :data-item="item.id">
+                                <i class="fa fa-angle-down"></i>
+                            </div>
+                        </div>
+                        <a class="layer btn btn-primary" href="javascript:void(0);" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;" @click="dialogFormVisible = true">
+                            <span class="fa fa-plus" style="font-size: 20px;"></span>
+                        </a>
+                    </div>
+                </el-col>
+            </el-row>
+            
+            <el-dialog title="应用" :visible.sync="dialogFormVisible" width="60%">
+                <el-button :target="item.target" type="primary" v-for="item in user.appList" @click="triggerInput(item.name)">
+                    <img :src="item.icon | pickIcon" style="width:28px;"></img>
+                    <p class="small">
+                        #{item.{{.i18n.Tr "mxhome_portlet_name"}}}#
+                    </p>
+                    <p>
+                        <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)">
+                    </p>
+                </el-button>
+            </el-dialog>
+            
+        </el-main>
+
+    </el-container>
 </script>
 
 <script type="text/x-template" id="search-result-content-template">

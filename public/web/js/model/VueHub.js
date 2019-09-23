@@ -35,7 +35,9 @@ setInterval(()=>{
     $(".el-button--small").addClass("el-button");
     $(".el-transfer-panel__item").addClass("el-checkbox");
     $("label[role='checkbox']").addClass("el-checkbox");
+    $("label[role='radio']").addClass("el-radio");
     $(".el-dropdown-menu--small").addClass("el-dropdown-menu el-popper");
     $(".topological-view-edges-tabs.el-tabs.el-tabs--top").addClass("el-tabs--border-card");
+    $(".el-dialog__wrapper.transition.ElDialog").removeClass("transition ElDialog");
 //    $(".el-tabs__nav.is-left > div:eq(0)").addClass("el-tabs__active-bar");
 },50)

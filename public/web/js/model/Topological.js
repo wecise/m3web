@@ -28,10 +28,13 @@ class Topological {
         // 拓扑分析
         Vue.component("topological-analysis",{
             delimiters: ['${', '}'],
+            props: {
+                model: Object
+            },
             template:  `<el-container>
                             <el-header style="height:50px;line-height:50px;padding:0 10px;">
-                                <el-input placeholder="请输入内容" v-model="search.term" class="input-with-select">
-                                    <el-select v-model="search.select" slot="prepend" placeholder="请选择">
+                                <el-input placeholder="请输入内容" v-model="model.id" class="input-with-select">
+                                    <el-select v-model="model.value" slot="prepend" placeholder="请选择">
                                         <el-option label="所有" value="#/matrix/"></el-option>
                                         <el-option label="事件" value="#/matrix/devops/event/"></el-option>
                                         <el-option label="性能" value="#/matrix/devops/performance/"></el-option>
@@ -93,7 +96,7 @@ class Topological {
                 });
 
                 // 初始化图搜索脚本
-                this.terms = _.union(inst.graphScript, this.loadAll());
+                this.terms = _.union(inst.graphScript, this.loadDefault());
                 // 默认选择第一条
                 this.term = _.first(this.terms).value;
 
@@ -113,21 +116,13 @@ class Topological {
 
                 this.search();
 
-                $(document).keypress(function(event) {
-                    var keycode = (event.keyCode ? event.keyCode : event.which);
-                    if (keycode == 13) {
-                        self.search();
-                    }
-                })
-
-                // $(".el-input--small .el-input__inner,.el-select-dropdown__item").css({
-                //     "fontSize": "12px",
-                //     "height": "29px",
-                //     "lineHeight": "28px",
-                //     "background": "#f7f7f7",
-                //     "borderRadius": "0px",
-                //     "border": "unset"
+                // $(document).keypress(function(event) {
+                //     var keycode = (event.keyCode ? event.keyCode : event.which);
+                //     if (keycode == 13) {
+                //         self.search();
+                //     }
                 // })
+
             },
             methods:{
                 search(){
@@ -147,26 +142,11 @@ class Topological {
                       return (term.value.indexOf(queryString) === 0);
                     };
                 },
-                loadAll() {
+                loadDefault() {
                     let step = !_.isEmpty(this.step)?this.step:'';
                     return [
-                        { value: `match("biz*")-[*${step}]->()`},
-                        // { value: `match (m:"biz:查账系统")-[*]->(p:"linux:linux[1-5]")-[*]->(q:"esx:esx4") return status path m,p,q ALL PATH`},
-                        // { value: `match ("biz:查账系统")-[*]->("esx:esx1") return name,status`},
-                        // { value: `match ("biz:查账系统")-[*]->("linux:linux[0-9]")-[*1]->("esx:esx[1-4]")`},
-                        // { value: `match ("biz:查账系统")-[*]->("linux:*")-[*1]->("esx:esx4")`},
-                        // { value: `match ("biz:查账系统")-[:contain*1]->()-[*]->("esx:*")-[*1]->('switch:*')`},
-                        // { value: `match ("biz:查账系统")-[:contain*1]->()-[*]->("esx:*","linux:*")-[*1]->('switch:*')`},
-                        // { value: `match ("biz:查账系统")-[:contain*1]->()-[*]->("esx:*","linux:*")-[*1]->('switch:*') until "sanswitch:*"`},
-                        // { value: `match (b:"biz:*")-[*]->(e:"esx:*")-[*1]->(s:"switch:*") return name,status short path b,e,s`},
-                        // { value: `match (b:"biz:*")-[*]->(e:"esx:*")-[*1]->(s:"switch:*") return name,status path b,e,s`},
-                        // { value: `match ("linux:*")-[*1]->("esx:*")`},
-                        // { value: `match ("biz:查账系统")-[:contain]->("cluster:查账系统web集群")-[*]->() until "switch:*"`},
-                        // { value: `match ('biz:*')-[*10]->()`},
-                        // { value: `match ("biz:B查账系统")-[:contain]->("cluster:B查账系统web集群")-[*]->() until "switch:*" diff '2019-05-28 14:30:00'`},
-                        // { value: `match (m:"biz:查账系统")-[*]->(p:"linux:linux[1-5]")-[*]->(q:"esx:esx4") return status path m,p,q`}
-                        
-                    ];
+                            { value: mx.global.register.topological.default.match},
+                        ];
                 },
                 handleSelect(item) {
                     this.term = item.value;
@@ -502,7 +482,7 @@ class Topological {
                 updateEntity(event,action){
                     let id = this.node.id;
                     let fs = {action: action, class: `/matrix/entity/${this.node.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${this.node.value}/${event.name}`};
-                    let rtn = fsHandler.callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
                     this.reload();
                 },                     
                 openIt: function(item, path){
@@ -771,7 +751,7 @@ class Topological {
                     try {
                         let id = this.node.id;
                         let value = this.node.value;
-                        let model = fsHandler.callFsJScript("/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
+                        let model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
                         
                         // 更新当前数据
                         _.extend(this.model, model['file']);
@@ -792,7 +772,7 @@ class Topological {
             props:{
                 id: String
             },
-            template: `<entity-tree-component :id="'graph-tree-'+id" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>`
+            template: `<entity-tree-component :id="'graph-tree-'+id" :model="{parent:'/matrix/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>`
         })
 
         //edges关系维护
@@ -835,45 +815,12 @@ class Topological {
                 
             },
             mounted(){
-                setInterval(()=>{
-                    $(".el-transfer__buttons",this.$el).css({
-                        "padding": "0 15px"
-                    })
-                    $(".el-transfer__buttons > .el-transfer__button",this.$el).css({
-                        "padding": "5px"
-                    })
-    
-                    $(".el-transfer-panel .el-transfer-panel__header",this.$el).css({
-                        "height":"30px",
-                        "line-height":"30px"
-                    })
-                    $(".el-transfer__button span,.el-checkbox__label,.el-transfer",this.$el).css({
-                        "fontSize":"12px"
-                    })
-    
-                    $(".el-transfer-panel__filter",this.$el).css({
-                        "margin":"5px"
-                    })
-                    $(".el-transfer-panel__filter .el-input__inner",this.$el).css({
-                        "height":"26px"
-                    })
-                    $(".el-tabs__header").css({
-                        "margin":"0px"
-                    })
-
-                    $(".el-transfer-panel").css({
-                        "width":"42.5%!important"
-                    })
-
-                    $(".el-transfer-panel__item.el-checkbox .el-checkbox__label").css({
-                        "overflow":"unset"
-                    })
-                },100)
+               
                 
             },
             methods: {
                 searchByTerm(){
-                    let rtn = fsHandler.callFsJScript("/graph/entity-search-by-term.js",encodeURIComponent(this.term)).message;
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.term)).message;
                     
                     //如果已有选择
                     if(this.selected.length){
@@ -884,11 +831,7 @@ class Topological {
                         this.list = _.map(rtn,function(v){
                             return {key: v.id, label: v.id+":"+v.name, class:v.class, disabled: 0};
                         })
-                    }
-
-                    setInterval(()=>{
-                        $(".el-transfer-panel__item",this.$el).addClass("el-checkbox");
-                    },300)
+                    } 
                     
                 },
                 updateEdges(value, direction, movedKeys) {
@@ -897,9 +840,8 @@ class Topological {
                                     return _.find(this.list,{key:v});
                                 })};
                     
-                    let rtn = fsHandler.callFsJScript("/graph/edges-action.js",encodeURIComponent(JSON.stringify(edges))).message;
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/edges-action.js",encodeURIComponent(JSON.stringify(edges))).message;
                     this.$root.$refs.graphViewRef.search();
-                    console.log(rtn)
                 }
             }
         })
@@ -950,7 +892,7 @@ class Topological {
                         if( !_.isEmpty(inst.URL_PARAMS_ITEM) ){
                             self.model = fsHandler.fsContent(inst.URL_PARAMS_ITEM.parent, inst.URL_PARAMS_ITEM.name);
                         } else {
-                            self.model = fsHandler.callFsJScript('/graph/graph_service.js', term).message[0].graph;
+                            self.model = fsHandler.callFsJScript("/matrix/graph/graph_service.js", term).message[0].graph;
                         }
 
                     } catch(error) {
@@ -1023,7 +965,7 @@ class Topological {
                     const self = this;
 
                     try{
-                        self.model = fsHandler.callFsJScript('/graph/diagnosis-by-id.js', encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
+                        self.model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
 
                         let id = objectHash.sha1(node);
 
@@ -1149,7 +1091,7 @@ class Topological {
                             return false;  
                         }
 
-                        let tab = fsHandler.callFsJScript("/graph/edges-list.js",encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
+                        let tab = fsHandler.callFsJScript("/matrix/graph/edges-list.js",encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
                         
                         self.activeIndex = tab.name;
                         self.tabs.push(tab);
@@ -1402,7 +1344,13 @@ class Topological {
                     
                     new Vue({
                         delimiters: ['#{', '}#'],
-                        template: `<topological-analysis></topological-analysis>`,
+                        template: `<topological-analysis class="graphAction" :model="model"></topological-analysis>`,
+                        data: {
+                            model: {}
+                        },
+                        created(){
+                            _.extend(this.model, {id:cell.getId(),value: cell.getValue(),cell: cell});
+                        }
                     }).$mount("#topological-analysis-container")
                     
                 },

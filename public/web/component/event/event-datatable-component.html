@@ -170,7 +170,7 @@
 		table.dataTable thead td,
 		.dataTables_wrapper.no-footer .dataTables_scrollBody,
 		table.dataTable.no-footer {
-			/* border-bottom: none;; */
+			border-bottom: unset;
         }
         
         .tagify {
@@ -178,7 +178,7 @@
         }
 
         .event-datatable-component div.dt-buttons {
-            padding-bottom: 5px;
+            padding-bottom: 10px;
         }
 
         .event-datatable-component .dataTables_filter{
@@ -478,7 +478,7 @@
                         input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
                     }
                     
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
 						self.$root.$refs.searchRef.search();
@@ -506,15 +506,6 @@
 				                        className: `btn-white class-group_${self.id}`,
 				                        titleAttr: '运行模式切换'
 				                    },
-				                    // {
-				                    //     text: '<i class="fas fa-sitemap"></i>',
-				                    //     action: function (e, dt, node, config) {
-					                //         self.buildContextMenu();
-					                //     },
-				                    //     enabled: true,
-				                    //     className: `btn-white class-group_${self.id}`,
-                                    //     titleAttr: '按类显示'
-				                    // },
 				                    {
 				                        extend: 'colvis',
 				                        text: '<i class="fas fa-list"></i>',
@@ -549,29 +540,6 @@
                     })
                 }
 
-				// 添加Severity控制
-				// if(this.model.severity){
-                //     buttons.push({text: '|', enabled: false, className: ''});
-                //     _.forEach(this.model.severity,function(v){
-                //         if(!v) return;
-                //         buttons.push({text:v.cnname, actions: function(e,dt,node,config){
-                //             console.log(e,dt,node,config)
-                //         }, className: `btn-white ${v.class}`, titleAttr: v.cname})
-                //     })
-				// };
-
-                // 添加Status控制
-                // if(this.model.status) {
-                //     buttons.push({text: '|', enabled: false, className: ''});
-                //     _.forEach(this.model.status, function (v) {
-                //         if(!v) return;
-                //         buttons.push({
-                //             text: v.cnname, actions: function (e, dt, node, config) {
-                //             }, className: `btn-white ${v.class}`, titleAttr: v.cname
-                //         })
-                //     })
-                // }
-
                 new $.fn.dataTable.Buttons(datatable, {
                     dom: {
                         button: {
@@ -593,24 +561,6 @@
                 $(".event-datatable-component a.dt-button").removeClass("dt-button");
 
 			},
-            // Class分组menu
-			buildContextMenu: function(){
-				const self = this;
-
-                let items = {};
-
-                // 整理为 jquery contextMenu items结构
-                _.map(this.model.classes,function(v,k){
-                    return _.merge(items, {[k]:{name:k,icon:'fas fa-tasks'}});
-                })
-
-                contextMenu.build(this.id, {select:'class-group', items: items, handle: self.setDefaultClass});
-			},
-			setDefaultClass: function(event){
-                this.rootClass = event;
-            },
-            selectColumns: function(){
-            },
             resize(){
                 $("#"+this.id).DataTable().draw();
 			}

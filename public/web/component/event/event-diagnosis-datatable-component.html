@@ -302,7 +302,7 @@
 
 			},
 			refresh: function(){
-				this.model = fsHandler.callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
+				this.model = fsHandler.callFsJScript("/matrix/event/event_diagnosis.js", null).message[self.type] || [];
 			},
 			handleRow: function(){
                 const self = this;

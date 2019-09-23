@@ -349,16 +349,16 @@
                         }, */
                         "导出数据结构": {
                             name: "导出数据结构", icon: `fas fa-file-export`, callback: function (key, opt) {
-
+                                
                                 omdb.app.classDataExport(self.selectedNode.name);
                                 
                             }
-                        },
-                        "导入数据结构": {
-                            name: "导入数据结构", icon: 'fas fa-file-import', callback: function (key, opt) {
-                                omdb.app.classDataImport();
-                            }
-                        }
+                        }//,
+                        // "导入数据结构": {
+                        //     name: "导入数据结构", icon: 'fas fa-file-import', callback: function (key, opt) {
+                        //         omdb.app.classDataImport();
+                        //     }
+                        // }
                     },
                     events: {
                         show: function(opt) {

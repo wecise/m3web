@@ -199,7 +199,7 @@ class Probe extends Matrix {
                             let self = this;
 
                             _.forEach(event, function (v) {
-                                window[v] = fsHandler.callFsJScript(`/probe/probe_summary_by_${v}.js`, '');
+                                window[v] = fsHandler.callFsJScript(`/matrix/probe/probe_summary_by_${v}.js`, '');
 
                                 if (window[v].status == 'ok') {
                                     self[v] = window[v].message;

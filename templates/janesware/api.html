@@ -44,10 +44,27 @@
     }
 
     /* Split Style */
-	.gutter.gutter-horizontal{
-		width: 5px;
-		background: rgb(249, 249, 249)
-	}
+	.gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+    }
+
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+    }
 
     /* 全屏模式 */
 	header#header{
@@ -88,6 +105,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-view-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-output-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-datatable-component.html"></link>
 

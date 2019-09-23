@@ -323,6 +323,11 @@
         vertical-align: bottom;
     }
     /* el-menu */
+    .el-menu.transition{
+        background: transparent;
+        box-shadow: unset;
+        border-right: unset;
+    }
     .el-submenu__title{
         font-size: 12px;
     }
@@ -441,29 +446,6 @@
 
         </el-main>
     </el-container>
-</script>
-
-<script type="text/x-template" id="creative-saveas-template">
-    <div>
-        <div class="row">
-            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8 col-lg-offset-2">
-                <form class="form-horizontal" style="padding:15px;">
-                
-                    <div class="form-group">
-                        <input type="text" name="name" class="form-control" placeholder="{{.i18n.Tr "mxdashboard_modal_title"}}" autofocus="true" v-model="model.name" style="border:1px solid #dddddd;">
-                    </div>
-                    
-                    <div class="form-group">
-                        <input type="checkbox" v-model="model.astemplate" value="0">&nbsp;{{.i18n.Tr "mxdashboard_modal_astemplate"}}
-                    </div>
-
-                    <div class="form-group pull-right">
-                        <a href="javascript:void" class="btn btn-xs btn-info" @click="save">{{.i18n.Tr "creative-save"}}</a>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 </script>
 
 {{template "base/footer" .}}

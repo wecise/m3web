@@ -64,7 +64,7 @@
             showToolsBar: Boolean,
 			showStatusBar: Boolean
         },
-        data: function(){
+        data(){
             return {
                 langTools:null,
                 editor: null,
@@ -72,7 +72,7 @@
 	            result: null
             }
         },
-        mounted: function(){
+        mounted(){
             var self = this;
 
             self.$nextTick(function(){
@@ -83,19 +83,19 @@
             model: {
             	handler:function(val,oldVal){
                     let self = this;
-                    console.log(1,val)
                     self.editor.setValue(val.newInput);
                 },
-                deep:true
+                deep:true,
+                immediate:true
             }
 
         },
-        created: function () {
+        created () {
             let self = this;
 
         },
         methods: {
-            init: function() {
+            init() {
                 let self = this;
 
                 self.langTools = ace.require("ace/ext/language_tools");

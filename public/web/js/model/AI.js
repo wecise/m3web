@@ -119,7 +119,7 @@ class AI {
                         eventHub.$on("win-close-event",self.wsClose);
         
                         // 初始化主题
-                        self.message.subject = fsHandler.callFsJScript("/ai/subscribe.js", null).message;
+                        self.message.subject = fsHandler.callFsJScript("/matrix/ai/subscribe.js", null).message;
                         
                     },
                     mounted: function(){
@@ -127,7 +127,7 @@ class AI {
                         
                         // 默认主题消息
                         let item = _.first(self.message.subject);
-                        let message = fsHandler.callFsJScript("/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
+                        let message = fsHandler.callFsJScript("/matrix/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
                         self.message.defaultSubject = _.extend(item, {msgs:message});
         
                         // 初始化默认WS
@@ -209,7 +209,7 @@ class AI {
                             $(`#${objectHash.sha1(item)}`).addClass("selected");
                             
                             // 获取最新主题消息
-                            let message = fsHandler.callFsJScript("/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
+                            let message = fsHandler.callFsJScript("/matrix/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
                             this.message.defaultSubject = _.extend(item, {msgs: message});
         
                             // 接收消息
@@ -1715,8 +1715,8 @@ class AI {
                     },
                     template:   `<el-container style="background-color:#ffffff;height:calc(100vh - 85px);">
                                     
-                                    <el-aside width="20%" style="height:100%;overflow: auto;" :id="'matrix-ai-setup-left-'+id">
-                                        <el-container>
+                                    <el-aside width="20%" style="height:100%;overflow: hidden;background:#f6f6f6" :id="'matrix-ai-setup-left-'+id">
+                                        <el-container style="height:100%;">
                                             <el-header style="height: 30px;padding: 0px 0px 0px 5px;line-height: 30px;font-weight: 900;">
                                                 <i class="fas fa-braille"></i> 规则分类
                                                 <div style="float:right;">
@@ -1725,7 +1725,7 @@ class AI {
                                                     </el-tooltip>
                                                 </div>
                                             </el-header>
-                                            <el-main style="padding:0px;">
+                                            <el-main style="padding:0px;overflow:auto;height:100%;">
                                                 <el-menu @open="open" @close="open">
                                                     <el-submenu :index="item.id" v-for="item in ruleList" @open="select">
                                                         <template slot="title">
@@ -1746,22 +1746,22 @@ class AI {
                                                             </div>
                                                         </template>
                                                         <el-menu-item :index="subItem.id" v-for="subItem in item.child" @click="select(subItem)">
-                                                            <i class="fas fa-tasks"></i> #{subItem.name}#</el-menu-item>   
+                                                            <i class="fas fa-tasks"></i> #{subItem.name.split(".")[0]}#</el-menu-item>   
                                                     </el-submenu>
                                                 </el-menu>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container style="background: rgb(247, 247, 247);" :id="'matrix-ai-setup-main-'+id">
+                                    <el-container style="height:100%;" :id="'matrix-ai-setup-main-'+id">
                                         <!--el-header style="height: 30px;padding:0 10px;line-height:30px;">
                                             #{[selectedRule.label,selectedRule.name].join("/").replace(/\\//g," / ")}#
                                         </el-header-->
-                                        <el-main style="padding:0px;">
+                                        <el-main style="padding:0px;overflow:hidden;height:100%;background: #ffffff;">
                                             <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close">
-                                                <el-tab-pane :label="tab.name" :key="tab.id" :name="tab.id" v-for="tab in main.tabs">
+                                                <el-tab-pane :label="tab.name" :key="tab.id" :name="tab.id" v-for="tab in main.tabs" style="height:100%;overflow:auto;">
                                                     <span slot="label">
                                                         <img :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 20px;height: 20px;"> 
-                                                        #{tab.name}#
+                                                        #{tab.name.split(".")[0]}#
                                                     </span>
                                                     <matrix-ai-setup-words :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='words'" transition="fade" transition-mode="out-in"></matrix-ai-setup-words>
                                                     <matrix-ai-setup-neural :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='neural'" transition="fade" transition-mode="out-in"></matrix-ai-setup-neural>
@@ -1874,7 +1874,7 @@ class AI {
                             }).$mount("#ai-rule-new");
                         },
                         load(){
-                            this.ruleList = fsHandler.callFsJScript("/ai/ai-rule-list.js",null).message;
+                            this.ruleList = fsHandler.callFsJScript("/matrix/ai/ai-rule-list.js",null).message;
                         },
                         clickMe(item){
                             

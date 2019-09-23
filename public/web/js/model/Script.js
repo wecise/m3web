@@ -25,7 +25,7 @@ class Script {
     upload(){
         let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 上传`, `<div id="script-add-container"></div>`, null, 'script-container');
 
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_script_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
         
         let wizard = {
             data: {
@@ -184,7 +184,7 @@ class Script {
         
         let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
 
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_script_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
 
         let wizard = {
             data: {
@@ -295,7 +295,7 @@ class Script {
         
         let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-add-container"></div>`, null, 'script-container');
         
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_script_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
 
         let node = _.cloneDeep(event);
 

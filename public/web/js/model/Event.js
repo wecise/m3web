@@ -43,7 +43,7 @@ class Event {
                         id: String,
                         model: Object
                     },
-                    template:   `<el-container style="height: calc(100vh - 230px);">
+                    template:   `<el-container style="height: calc(100vh - 200px);">
                                     <el-main>
                                         <div class="block">
                                             <el-timeline>
@@ -277,7 +277,7 @@ class Event {
                         id: String,
                         model:String
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main>
                                         <form class="form-horizontal">
                                             <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
@@ -412,7 +412,7 @@ class Event {
                             
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-main style="padding:0px;">
                                         <event-diagnosis-datatable-component :id="id" :model="model" type="event"></event-diagnosis-datatable-component>
                                     </el-main>
@@ -478,7 +478,7 @@ class Event {
                                 // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
                                 let where = _.map(event,'ids').join(";");//`biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
+                                self.tableData = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
                             } catch(err){
                                 self.tableData = null;
                             }
@@ -526,7 +526,7 @@ class Event {
                                 // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
                                 let where = _.map(this.model,'ids').join(";");//`biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
+                                self.tableData = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
 
                                 if(!this.topological){
                                     this.topological = new Topological();
@@ -590,8 +590,8 @@ class Event {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 155px);margin: -15px;">
-                                    <el-aside style="width:300px;background: rgb(255, 255, 255);overflow:hidden;" class="split" id="aigroup-left-panel">
+                    template: `<el-container style="height: calc(100vh - 155px);padding:1px;">
+                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
                                                 <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
@@ -599,7 +599,7 @@ class Event {
                                         </el-container>
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
-                                        <el-header style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;">
+                                        <el-header style="height:36px;line-height:36px;background: #f6f6f6;display:;">
                                             <el-tooltip :content="control.ifGraph==0?'列表':'图'" placement="top" open-delay="500">
                                                 <div style="float:right;">
                                                     #{control.ifGraph==0?'列表':'图'}#
@@ -631,7 +631,7 @@ class Event {
 
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        let aiGroup = fsHandler.callFsJScript("/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
+                        let aiGroup = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
                         self.aiGroupData.rows = aiGroup.rows;
                         self.aiGroupData.columns = [
                                                         {data:'type',title:'',sortable:true, width:'5',render: function(data,type,row){
@@ -742,7 +742,7 @@ class Event {
                             tableData: {},
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" id="left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height: 30px;
@@ -845,7 +845,7 @@ class Event {
                                 // let where = temp.join(` ${self.dimensionData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
                                 let where = temp.join(` ${self.dimensionData.ifOR=='1'?' | ':'; '} `);
-                                self.tableData = fsHandler.callFsJScript("/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
+                                self.tableData = fsHandler.callFsJScript("/matrix/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
                             } catch(err){
                                 self.tableData = [];
                             }
@@ -866,7 +866,7 @@ class Event {
                             tableData: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-aside class="split" :id="'probability-left-panel-'+id">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -922,7 +922,7 @@ class Event {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+id"></div>
                                     </el-main>
@@ -985,7 +985,7 @@ class Event {
                             }
                         }
                     },
-                    template:  ` <el-container style="height:calc(100vh - 230px);">
+                    template:  ` <el-container style="height:calc(100vh - 200px);">
                                     <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" :id="id+'-left-panel'">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
@@ -1277,6 +1277,16 @@ class Event {
                         _.delay(function(){
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
+
+                            Split(['#event-view-left', '#event-view-main'], {
+                                sizes: [20, 80],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true
+                            });
                         },2000);
                         
                     },
@@ -1388,7 +1398,7 @@ class Event {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript('/event/diagnosis-by-id.js',term).message;
+                                let model = fsHandler.callFsJScript("/matrix/event/diagnosis-by-id.js",term).message;
                                 
                                 // 添加tab
                                 let detail = {title:`告警分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
@@ -1468,7 +1478,7 @@ class Event {
 
                             alertify.confirm(`${tip}`, function (e) {
                                 if (e) {
-                                    let rtn = fsHandler.callFsJScript("/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).message;
+                                    let rtn = fsHandler.callFsJScript("/matrix/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).message;
                                     if(rtn == 1){
                                         self.options.term = _.map(list,'id').join(";");
                                         self.$refs.searchRef.search();
@@ -1573,10 +1583,10 @@ class Event {
         let evsH = $("#event-view-summary").height();
         
         $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=250px")
+                                                        .css("max-height","-=225px")
                                                         .css("max-height","-=" + evsH + "px")
                                                         .css("min-height", evwH + "px")
-                                                        .css("min-height","-=250px")
+                                                        .css("min-height","-=225px")
                                                         .css("min-height","-=" + evsH + "px");
     }
 

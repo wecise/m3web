@@ -1,0 +1,237 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+
+		/* For Tree */
+		.ztree li {
+			padding:3px;
+		}
+
+		.context-menu-list{
+			padding: 3px!important;
+		}
+
+		.context-menu-item {
+			padding: 0.5em 2em!important;
+		}
+
+		.context-menu-item.context-menu-hover{
+			background-color: rgb(246,246,246)!important;
+		}
+
+		.context-menu-separator{
+			padding: 0px!important;
+			margin: 0px!important;
+		}
+
+        .fs-editor-tree-component .el-input--mini .el-input__inner{
+            border: unset;
+        }
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="fs-editor-tree-component"  ----------*/
+	<template>
+		<el-container>
+            <el-header style="height:30px;line-height:30px;padding:5px 8px;margin-bottom: 5px;">
+                <el-input placeholder="搜索" size="mini"></el-input>
+            </el-header>
+            <el-main style="padding: 5px;height: calc(100vh - 175px);">
+                <ul class="ztree" :id="id"></ul>
+            </el-main>
+		</el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="fs-editor-tree-component">
+	{
+        delimiters: ['${', '}'],
+		props: {
+			root: String,
+			id: String,
+			checkEnable: Boolean,
+			contextMenu: Object
+		},
+		data: function () {
+			return {
+                treeObj: null,
+				treeNodes: null,
+				selectedNode: null,
+				setting: {
+                    view: {
+                        showLine: true,
+                        selectedMulti: false,
+                        dblClickExpand: false
+                    },
+                    edit: {
+                        simpleData: {
+                            enable: true
+                        },
+                        key: {
+                            name: 'title',
+                            title: "title"
+                        }
+                    },
+                    data: {
+                        simpleData: {
+                            enable: true
+                        }
+                    },
+                    check: {
+                        enable: self.checkEnable,
+                        chkStyle: "checkbox",
+                        chkboxType: { "Y": "s", "N": "s" }
+                    },
+                    callback: {
+                        onClick: this.onClick,
+                    }
+                },
+                contextMenuItems: {
+                    "projectNew": {name: "新增项目", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+
+                        }
+                    },
+                    "sep1": "---------",
+	                "fileNew": {name: "新增文件", icon: "fa-plus",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"create",node: nodes[0]};
+
+                            if(nodes[0].type !== 'dir'){
+                                return false;
+                            }
+
+                        }
+                    },
+	                "fileEdit": {name: "编辑文件", icon: "fa-edit",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+
+                        }
+                    },
+                    "sep2": "---------",
+                    "projectDelete": {name: "删除项目", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    },
+                    "sep3": "---------",
+                    "fileDelete": {name: "删除文件", icon: "fa-trash",
+                        callback: function (itemKey, opt, rootMenu, originalEvent) {
+                            let treeObj = $.fn.zTree.getZTreeObj($(this).attr("id"));
+                            let nodes = treeObj.getSelectedNodes();
+                            let _item = {id:$(this).attr("id"),action:"remove",node: nodes[0]};
+
+
+
+                        }
+                    }
+                }
+			}
+		},
+		mounted: function () {
+            let self = this;
+
+            self.$nextTick(function () {
+
+				self.init();
+
+                self.initPlugIn();
+
+			})
+		},
+		watch: {
+			root: function (val,oldVal) {
+			    let self = this;
+
+				if(val !== '/home') return false;
+
+                if(!_.isEmpty(self.treeObj)){
+                    self.treeObj.destroy();
+                }
+			    self.init();
+			}
+		},
+		methods: {
+			init: function(){
+                let self = this;
+                let _rtn = fsHandler.fsList(self.root);
+
+                if(_.isEmpty(_rtn)){
+                    self.treeNodes = [];
+                } else {
+                    self.treeNodes = _.sortBy(_.map(_rtn,function(v,k){
+			                            let _type = "dir";
+
+			                            if(!_.isEmpty(v.ftype)){
+                                            _type = v.ftype;
+			                            }
+
+			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+			                        }),[v => v.title.toLowerCase()], ['asc']);
+                }
+				self.treeObj = $.fn.zTree.init($(self.$el).find($("#" + self.id)), self.setting, self.treeNodes);
+
+
+			},
+			initPlugIn: function(){
+			    let self = this;
+
+			    /*if (!_.isEmpty(self.contextMenuItems)){
+                    $.contextMenu({
+                        selector: "#"+self.id,
+                        items: self.contextMenuItems
+                    });
+				}*/
+
+			},
+            onClick: function(event, treeId, treeNode) {
+                let self = this;
+
+                if(treeNode.ftype !=='dir') {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", treeNode,treeNode.parent);
+                } else {
+
+                    let _root = treeNode.parent + "/" + treeNode.name;
+                    let _rtn = fsHandler.fsList(_root);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", treeNode,_root);
+
+                    self.treeObj.removeChildNodes(treeNode);
+
+                    if(!_.isEmpty(_rtn)) {
+
+                        let _nodes = _.map(_rtn,function(v,k){
+                                                let _type = "dir";
+
+                                                if(!_.isEmpty(v.ftype)){
+                                                    _type = v.ftype;
+                                                }
+
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                    });
+
+                        // append sub nodesGr
+                        self.treeObj.addNodes(treeNode, _.sortBy(_nodes,[v => v.title.toLowerCase()], ['asc']));
+
+                    }
+                }
+
+            }
+		}
+	
+	}
+	</script>
+
+</code>

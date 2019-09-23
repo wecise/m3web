@@ -33,7 +33,7 @@ class Api {
                         id: String
                     },
                     delimiters: ['${', '}'],
-                    template: `<fs-tree-component :id="id+'file-fs-tree'" :root="root" :checkEnable="false" :contextMenu="null"></fs-tree-component>`,
+                    template: `<fs-editor-tree-component :id="id+'file-fs-tree'" :root="root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>`,
                     data() {
                         return {
                             root: "/script",
@@ -242,7 +242,7 @@ class Api {
                 mxApi.app = new Vue({
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
-                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;" id="api-view-left">
+                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" id="api-view-left">
                                         <api-view-tree id="api-view-tree"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;" id="api-view-right">
@@ -258,6 +258,7 @@ class Api {
                     mounted: function() {
                         Split(['#api-view-left', '#api-view-right'], {
                             sizes: [18, 82],
+                            minSize: [0, 0],
                             gutterSize: 5,
                             cursor: 'col-resize',
                             direction: 'horizontal',

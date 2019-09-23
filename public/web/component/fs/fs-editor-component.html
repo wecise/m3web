@@ -22,7 +22,6 @@
 
         .editor-toolbar {
             border: none;
-	        border-top: 1px solid #ddd;
             margin: auto;
             width: 100%;
             position: relative;
@@ -99,12 +98,8 @@
                 refs: {}
             }
         },
-        mounted: function(){
-            var self = this;
-
-            self.$nextTick(function(){
-                self.init();
-            })
+        mounted(){
+            this.init();
         },
         watch: {
             'model.newInput': {
@@ -113,17 +108,18 @@
                     
                     self.editor.setValue(val);
                 },
-                deep:true
+                deep:true,
+                immediate:true
             }
 
         },
-        created: function () {
+        created() {
             let self = this;
 
             eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",self.refresh);
         },
         methods: {
-            init: function() {
+            init() {
                 let self = this;
 
                 self.langTools = ace.require("ace/ext/language_tools");
@@ -148,10 +144,10 @@
                 self.setTheme();
                 self.setMode();
                 self.setOptions();
-
+                
 				self.toggleToolsBar();
 
-				//self.toggleStatusBar();
+				self.toggleStatusBar();
 
 
                 // Customer Auto Completer
@@ -180,7 +176,7 @@
                 self.langTools.addCompleter(customerCompleter);
 
 
-                self.editor.on("input", self.updateToolbar);
+                //self.editor.on("input", self.updateToolbar);
 
                 self.editor.commands.addCommand({
                     name: "save",
@@ -188,8 +184,12 @@
                     bindKey: { win: "ctrl-s", mac: "cmd-s" }
                 });
 
+                self.editor.setValue(this.model.newInput);
+                
                 /*ToolBar*/
+                /*
                 self.editorDom = ace.require("ace/lib/dom");
+                
                 self.editorDom.buildDom(["div", { class: "editor-toolbar btn-group" },
                     ["a", {
                         href: "javascript:void(0)",
@@ -223,7 +223,7 @@
                         class: "btn btn-sm btn-link",
                         ref: ""
                     }, "|"],
-                    /*["a", {
+                    ["a", {
                         href: "javascript:void(0)",
                         class: "btn btn-sm btn-link",
                         title: "粗体",
@@ -240,7 +240,7 @@
                             self.editor.insertSnippet("*${1:$SELECTION}*");
                             self.editor.renderer.scrollCursorIntoView()
                         }
-                    }, ["i",{class:"fas fa-italic"},""]],*/
+                    }, ["i",{class:"fas fa-italic"},""]],
                     ["a", {
                         href: "javascript:void(0)",
                         class: "btn btn-sm btn-link",
@@ -308,43 +308,32 @@
                         class: `btn btn-sm btn-link pull-right editor-select-theme-${self.id}`,
                         title: "主题",
                     }, ["i",{class:"fas fa-tshirt"},""]]
-                ], $(`#jsPanel-${self.id}`).find(".jsPanel-hdr")[0], self.refs);
-
-
-                // 增加工具提示标签
-                _.delay(function(){
-                    $("a").attr("data-tooltip","tooltip");
-
-                    $('a[data-tooltip="tooltip"]').tooltip({
-                        container: 'body'
-                    });
-
-                    self.initTheme();
-                },500);
+                ], $(`#jsPanel-editor`).find(".jsPanel-hdr")[0], self.refs);
+                */
 
             },
-            updateToolbar:function () {
+            updateToolbar () {
                 let self = this;
 
                 self.refs.saveButton.disabled = self.editor.session.getUndoManager().isClean();
                 self.refs.undoButton.disabled = !self.editor.session.getUndoManager().hasUndo();
                 self.refs.redoButton.disabled = !self.editor.session.getUndoManager().hasRedo();
             },
-	        refresh: function(){
+	        refresh(){
                 let self = this;
 
                 if(self.editor){
                     self.editor.resize();
                 }
 	        },
-            setOptions: function(){
+            setOptions(){
                 let self = this;
 
                 if(!_.isEmpty(self.model.options)){
                     self.editor.setOptions(self.model.options);
                 } 
             },
-            setTheme: function(){
+            setTheme(){
                 let self = this;
 
                 let localTheme = localStorage.getItem(`editor-select-theme-${self.id}`);
@@ -362,7 +351,7 @@
                 }
                 
             },
-            setMode: function(){
+            setMode(){
                 let self = this;
 
                 if(_.isEmpty(self.model.mode)){
@@ -372,12 +361,12 @@
                 }
                 
             },
-            setValue: function(){
+            setValue(){
                 let self = this;
 
                 self.editor.setValue(self.model.oldInput);
             },
-            getSelected: function(){
+            getSelected(){
                 let self = this;
                 var temp = self.editor.getSelectedText();
 
@@ -387,7 +376,7 @@
                     self.inputText = temp;
                 }
             },
-            toggleToolsBar: function(){
+            toggleToolsBar(){
                 let self = this;
 
                 if(self.showToolsBar){
@@ -396,7 +385,7 @@
                     $(".editorToolBar").hide();
                 }
             },
-	        toggleStatusBar: function(){
+	        toggleStatusBar(){
                 let self = this;
 
                 if(self.showStatusBar) {
@@ -404,7 +393,7 @@
                     let statusBar = new StatusBar(self.editor, document.getElementById("statusBar"));
                 }
 	        },
-	        copyIt: function(){
+	        copyIt(){
 		        let self = this;
 
                 new Clipboard(".copy", {
@@ -415,91 +404,31 @@
                 });
 
 	        },
-            pasteIt: function(){
+            pasteIt(){
                 let self = this;
 
                 document.execCommand("paste");
                 alertify.log("已粘贴");
             },
-	        selectAll: function(){
+	        selectAll(){
                 let self = this;
 
                 self.editor.selection.selectAll();
             },
-            clearIt: function(){
+            clearIt(){
                 let self = this;
 
                 self.editor.setValue();
                 alertify.log("已清空");
             },
-            reload: function(){
+            reload(){
 				let self = this;
 
                 let rtn = fsHandler.fsContent(self.model.fs.parent,self.model.fs.name);
 
                 self.editor.setValue(rtn);
             },
-	        initTheme: function(){
-                let self = this;
-
-                $.contextMenu({
-                    selector: `.editor-select-theme-${self.id}`,
-	                trigger: 'left',
-                    callback: function (key, options) {
-                        if(key !== 'bright' && key !== 'dark'){
-                            self.editor.setTheme("ace/theme/"+key);
-
-                            localStorage.setItem(`editor-select-theme-${self.id}`,key);
-                        }
-                    },
-                    items: {
-                        "bright": { name: "亮色", items: {
-                                "chrome": { name: "chrome"},
-                                "clouds": { name: "clouds"},
-                                "crimson_editor": { name: "crimson_editor"},
-                                "dawn": { name: "dawn"},
-                                "dreamweaver": { name: "dreamweaver"},
-                                "eclipse": { name: "eclipse"},
-                                "github": { name: "github"},
-                                "iplastic": { name: "iplastic"},
-                                "solarized_light": { name: "solarized_light"},
-                                "textmate": { name: "textmate"},
-                                "tomorrow": { name: "tomorrow"},
-                                "xcode": { name: "xcode"},
-                                "kuroir": { name: "kuroir"},
-                                "katzenmilch": { name: "katzenmilch"},
-                                "sqlserver": { name: "sqlserver"}
-	                        }
-                        },
-						"dark": { name: "暗色", items: {
-                                "ambiance": { name: "ambiance"},
-                                "chaos": { name: "chaos"},
-                                "clouds_midnight": { name: "clouds_midnight"},
-                                "dracula": { name: "dracula"},
-                                "cobalt": { name: "cobalt"},
-                                "gruvbox": { name: "gruvbox"},
-                                "gob": { name: "gob"},
-                                "idle_fingers": { name: "idle_fingers"},
-                                "kr_theme": { name: "kr_theme"},
-                                "merbivore": { name: "merbivore"},
-                                "merbivore_soft": { name: "merbivore_soft"},
-                                "mono_industrial": { name: "mono_industrial"},
-                                "monokai": { name: "monokai"},
-                                "pastel_on_dark": { name: "pastel_on_dark"},
-                                "solarized_dark": { name: "solarized_dark"},
-                                "terminal": { name: "terminal"},
-                                "tomorrow_night": { name: "tomorrow_night"},
-                                "tomorrow_night_blue": { name: "tomorrow_night_blue"},
-                                "tomorrow_night_bright": { name: "tomorrow_night_bright"},
-                                "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
-                                "twilight": { name: "twilight"},
-                                "vibrant_ink": { name: "vibrant_ink"}
-							}
-                        }
-                    }
-                });
-	        },
-            deployIt: function(item){
+	        deployIt(item){
                 let self = this;
 
                 let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
@@ -609,7 +538,7 @@
                         deploy: function(){
                             let me = this;
 
-                            let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;
+                            let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;
 
                             if(check==1){
                                 alertify.log("应用已经发布，请确认。")
@@ -624,7 +553,7 @@
                                 url: me.app.url
                             };
 
-                            let rtn = fsHandler.callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                            let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
                             if( _.lowerCase(rtn.status) == "ok"){
                                 alertify.success("应用发布成功");
                                 eventHub.$emit("APP-REFRESH-EVENT");
@@ -650,7 +579,7 @@
                 new Vue(form);
 
             },
-	        saveIt: function(){
+	        saveIt(){
                 let self = this;
 
                 let sc = self.editor.getValue();
@@ -675,7 +604,7 @@
                 self.updateToolbar();
 
             },
-            runIt: function(){
+            runIt(){
                 let self = this;
 
                 $(".fas.fa-play").addClass("fa-spin");

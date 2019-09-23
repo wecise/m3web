@@ -53,7 +53,7 @@
 
 	/* Event view */
 	.tree-view {
-		padding: 0 15px;
+		padding: 0px;
 	}
 
 	/* 运维模式 */
@@ -171,8 +171,8 @@
 		height: 22px;
 		line-height: 22px;
 		width: 50%;
-		right: 15px;
-		top: 20px;
+		right: 5px;
+		top: 10px;
 		flex-direction: row-reverse;
 		z-index: 100;
 	}
@@ -186,11 +186,17 @@
 		overflow-y:auto;
 	}
 
+	#performance-view-container .el-tabs__content{
+		padding: 0px;
+	}
+
 	.el-tabs__item {
     	height: 30px;
 		line-height: 30px;
 		font-size: 12px;
 	}
+
+
 	.el-tabs__nav-prev,
 	.el-tabs__nav-next{
 		line-height: 30px;
@@ -207,6 +213,16 @@
 	/* 属性选择，隐藏第一列checkbox */
 	.dt-button-collection.fixed.four-column > a:nth-child(1){
 		display: none;
+	}
+
+	/* Split Style */
+	.gutter.gutter-horizontal{
+		background-color: rgb(241, 241, 241);
+		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+		background-size: 7px;
+		background-position-x: 50%;
+		background-position-y: 50%;
+		background-repeat: no-repeat;
 	}
 	
 	/* el-select input */
@@ -376,14 +392,14 @@
 
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
-		<el-row :gutter="10">
-			<el-col :xl="24" style="padding-bottom:7px;">
+		<el-container>
+			<el-header style="height: 30px;line-height: 30px;padding: 0px;">
 				<search-base-component :id="model.id"
 				                       :options="options"
 									   ref="searchRef"
 									   class="grid-content"></search-base-component>
-			</el-col>
-			<el-col :xl="24" style="min-height: 85vh;" id="performance-view-container">
+			</el-header>
+			<el-main id="performance-view-container" style="padding: 5px 0px 0px 0px;">
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name"  lazy=true>
 						<div v-if="item.type==='main'">
@@ -415,8 +431,9 @@
 									</div>
 								</el-tooltip>
 							</div>
-							<el-row :gutter="10" id="performance-view-summary">
-								<el-col :xl="24">
+
+							<el-container id="performance-view-summary">
+								<el-main>
 									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
 										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
 											<div v-if="item.type=='radar'">
@@ -427,16 +444,16 @@
 											</div>
 										</el-tab-pane>
 									</el-tabs>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10" id="performance-view-console">
-								<el-col :xl="8" class="tree-view animated fadeInRight">
+								</el-main>
+							</el-container>
+							<el-container id="performance-view-console">
+								<el-aside class="tree-view" id="performance-view-left" style="background-color:#f6f6f6;">
 									<entity-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></entity-tree-component>
-								</el-col>
-								<el-col :xl="16" class="table-view animated fadeInLeft">
+								</el-aside>
+								<el-main class="table-view" id="performance-view-main" style="padding:5px;">
 									<performance-datatable-component id="performance-list" :model="model.message"></performance-datatable-component>
-								</el-col>
-							</el-row>
+								</el-main>
+							</el-container>
 						</div>
 						<div v-if="item.type==='diagnosis'">
 							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggle" lazy="true">
@@ -458,8 +475,8 @@
 						</div>
 					</tab>
 				</el-tabs>
-			</el-col>
-		</el-row>
+			</el-main>
+		</el-container>
 	</main>
 </script>
 

@@ -451,7 +451,7 @@
                         input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
                     }
                     
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
 						self.$root.$refs.searchRef.search();
@@ -535,14 +535,19 @@
                             actions: this.model.actions
                         },
                         template: `<div @click="handleClick" style="margin-top:-5px;">
-                                        <el-tooltip :content="item.content" v-for="item in actions" open-delay="500">
+                                        <el-tooltip :content="item.content" v-for="item in actions" placement="top" open-delay="500">
                                             <a class="btn btn-xs animated fadeInLeft btn-white" href="#">
                                                 <i :class="item.icon + ' ' + item.action"></i>
                                             </a>
                                         </el-tooltip>
-                                        <el-tooltip content="导入实体">
+                                        <el-tooltip content="导入实体" placement="top" open-delay="500">
                                             <a href="javascript:void(0);" class="btn btn-link fileinput-button" style="padding: 8px 5px 6px 2px;" @click="importIt">
                                                 <i class="fas fa-cloud-upload-alt" style=""></i>
+                                            </a>
+                                        </el-tooltip>
+                                        <el-tooltip content="新增实体" placement="top" open-delay="500">
+                                            <a href="javascript:void(0);" class="btn btn-link" style="padding: 8px 5px 6px 2px;" @click="newIt">
+                                                <i class="fas fa-plus" style=""></i>
                                             </a>
                                         </el-tooltip>
                                     </div>`,
@@ -580,7 +585,7 @@
 
                                 new Vue({
                                     data:{
-                                        classList: fsHandler.callFsJScript("/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
+                                        classList: fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
                                         defaultProps: {
                                             children: 'children',
                                             label: 'alias'
@@ -617,25 +622,20 @@
                                                     </el-footer>
                                                 </el-container>`,
                                     methods:{
-                                        getCheckedNodes() {
-                                            console.log(-1, this.$refs.entityTree.getNode())
-                                            console.log(0, this.$el.innerText.split("\n"))
-                                            console.log(1, this.$refs.entityTree.data)
-                                            console.log(2, this.$refs.entityTree.getCheckedNodes());
-                                        },
                                         onCancel(){
                                             wnd.close();
                                         },
                                         onExport(){
-                                            let allNodes = _.map(this.classList,'class');
+                                            let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",this.model.class).message;
                                             let checkedClass = _.map(this.$refs.entityTree.getCheckedNodes(),'class');
-                                            console.log(1, allNodes)
-                                            console.log(2, checkedClass);
+                                            
                                             _.extend(this.model, {ignoreClass: _.xor(allNodes,checkedClass) } );
                                             
                                             if(this.model.ifData){
-                                                this.model.limit = -1;
+                                                this.model.limit = 5;
+                                                this.model.template = false;
                                             } else {
+                                                this.model.template = true;
                                                 this.model.limit = 0;
                                             }
                                             omdbHandler.classDataExport(this.model);
@@ -645,9 +645,10 @@
                                 
                             },
                             importIt(){
-                                
                                 self.$root.entityDataImport();
-                                
+                            },
+                            newIt(){
+                                self.$root.entityNew();
                             }
 
                         }

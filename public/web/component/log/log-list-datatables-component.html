@@ -484,7 +484,7 @@
                 initMenu: function(){
                     let self = this;
 
-                    let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.log;
+                    let items = fsHandler.callFsJScript("/matrix/probe/toolbar.js", "").message.probe.log;
                     let id = self.id;
 
                     $.contextMenu({
@@ -603,7 +603,7 @@
                             input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
                         }
                         
-                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             eventHub.$emit("PROBE-REFRESH-EVENT", ['log']);
@@ -669,7 +669,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['log']);
@@ -679,7 +679,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['log']);
@@ -925,7 +925,7 @@
 
                     let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 添加`, `<div id="log-add-container"></div>`, null, 'log-container');
 
-                    let conf = fsHandler.callFsJScript('/probe/probe_summary_log_conf.js', '').message;
+                    let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_log_conf.js", "").message;
 
                     let wizard = {
                         delimiters: ['#{', '}#'],

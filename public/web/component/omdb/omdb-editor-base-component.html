@@ -259,7 +259,6 @@
                     new Clipboard("button.copy", {
                         text: function(trigger) {
                             self.$message("已复制");
-                            console.log(self.editor.getValue())
                             return self.editor.getValue();
                         }
                     });

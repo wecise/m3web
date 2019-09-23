@@ -1,7 +1,25 @@
 <style>
-
+	.el-menu--vertical > .el-menu.el-menu--popup.el-menu--popup-right-start{
+        background-color: #262e48!important;
+    }
+	.el-submenu > .el-submenu__title:hover{
+		background-color:#57a3f3!important;
+	}
+	.el-menu-item:focus, .el-menu-item:hover{
+		background-color:#57a3f3!important;
+	}
 	.el-menu--collapse {
 		width: 60px;
+	}
+	.el-checkbox__label{
+		font-size: 12px;
+	}
+	.el-radio{
+		margin-right: 10px;
+	}
+	.el-radio__input.is-checked .el-radio__inner {
+		border-color: #b3dcfc;
+		background: #b3dcfc;
 	}
 	.el-checkbox__input.is-checked .el-checkbox__inner, .el-checkbox__input.is-indeterminate .el-checkbox__inner {
 		background-color: #b3dcfc;
@@ -24,8 +42,8 @@
 	}
 
 	.el-menu-item, .el-submenu__title{
-		height: 45px;
-		line-height: 45px;
+		height: 40px;
+		line-height: 40px;
 	}
 
 	.el-menu-vertical-sidebar{

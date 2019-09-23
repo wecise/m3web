@@ -223,7 +223,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main><el-row :gutter="10">
                                     <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
                                         <div class="grid-content" style="text-align:center;">
@@ -315,7 +315,7 @@ class Performance extends Matrix {
                             trends: []
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-header style="height: 30px;
                                                         padding: 0px 10px;
                                                         line-height: 20px;">
@@ -376,7 +376,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main><el-card class="box-card">
                                         <div slot="header" class="clearfix">
                                             <h4>
@@ -475,7 +475,7 @@ class Performance extends Matrix {
                             splitInst: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-aside class="split" :id="id+'-topological-view-left'">
                                         
                                     </el-aside>
@@ -637,7 +637,17 @@ class Performance extends Matrix {
                         _.delay(function(){
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                        },500);
+
+                            Split(['#performance-view-left', '#performance-view-main'], {
+                                sizes: [20, 80],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true
+                            });
+                        },2000);
 
                         // Document mouse listener
                         $(document).click(function(evt) {
@@ -707,7 +717,7 @@ class Performance extends Matrix {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript('/performance/diagnosis-by-id.js',term).message;
+                                let model = fsHandler.callFsJScript("/matrix/performance/diagnosis-by-id.js",term).message;
                                 
                                 // 添加tab
                                 let detail = {title:`性能分析 ${event.host}/${event.inst}/${event.param}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
@@ -828,10 +838,10 @@ class Performance extends Matrix {
         let evsH = $("#performance-view-summary").height();
         
         $("#performance-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=260px")
+                                                        .css("max-height","-=230px")
                                                         .css("max-height","-=" + evsH + "px")
                                                         .css("min-height", evwH + "px")
-                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=230px")
                                                         .css("min-height","-=" + evsH + "px");
     }
 

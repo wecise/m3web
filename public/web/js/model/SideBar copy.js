@@ -554,7 +554,7 @@ class SideBar {
                         应用名称：${event.cnname}<br><br>
                         地址：${event.url}<br><br>`, function (e) {
             if (e) {
-                let rtn = fsHandler.callFsJScript("/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
+                let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
                 eventHub.$emit("APP-REFRESH-EVENT");
             } else {
                 

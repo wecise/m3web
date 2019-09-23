@@ -158,7 +158,7 @@ class SideBar {
                     let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
                     let user = window.SignedUser_UserName;//$("#signed-user-name").val();
 
-                    this.selectedApps = fsHandler.callFsJScript("/user/user.js",user).message.split(",");
+                    this.selectedApps = fsHandler.callFsJScript("/matrix/user/user.js",user).message.split(",");
                     let _selectedApps = this.selectedApps;
 
                     this.model = _.map(_list.message,function(v){
@@ -218,7 +218,6 @@ class SideBar {
                             
                             return {
                                 callback: function(key, opt) {
-                                            
                                     if(_.includes(key,"walking")){
                                         inst.appRunning(item);
                                     } else if(_.includes(key,"running")){
@@ -232,11 +231,11 @@ class SideBar {
                                     }
                                 },
                                 items: {
-                                    "m10_running": {
+                                    "m10_walking": {
                                         "name": "当前窗口运行",
                                         "icon": "fas fa-walking"
                                     },
-                                    "m20_running-plus": {
+                                    "m20_running": {
                                         "name": "打开新窗口运行",
                                         "icon": "fas fa-running"
                                     },
@@ -294,7 +293,8 @@ class SideBar {
                                 class="el-menu-vertical-sidebar"
                                 background-color="transparent"
                                 text-color="#fff"
-                                active-text-color="#ffd04b">
+                                active-text-color="#ffd04b"
+                                style="height:100vh;overflow-y:auto;float:left;">
                             <el-menu-item index="toggle">
                                 <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img>
                                 <span slot="title">切换</span>
@@ -307,7 +307,17 @@ class SideBar {
                                 <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
                                 <span slot="title">首页</span>
                             </el-menu-item>
-                            <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model">
+                            <el-submenu index="appList" v-if="model.length > mx.global.register.sidebar.menuCollapse">
+                                <template slot="title">
+                                    <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
+                                    <span>应用</span>
+                                </template>
+                                <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <span slot="title">#{item.cnname}#</span>
+                                </el-menu-item>
+                            </el-submenu>
+                            <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model" v-else>
                                 <img :src="item.icon | pickIcon" style="width:17px;"></img>
                                 <span slot="title">#{item.cnname}#</span>
                             </el-menu-item>
@@ -327,7 +337,7 @@ class SideBar {
             methods: {
                 init: function(){
                     let user = window.SignedUser_UserName;
-                    let selectedApps = fsHandler.callFsJScript("/user/user.js",user).message.replace(/,/g,";");
+                    let selectedApps = fsHandler.callFsJScript("/matrix/user/user.js",user).message.replace(/,/g,";");
                     let _list = omdbHandler.fetchData(`#/matrix/portal/tools/: | ${selectedApps}| sort by seat asc`);
                     this.model = _.map(_list.message,function(v){
                         let _page = _.last(mx.getPage().split("/"));
@@ -352,7 +362,7 @@ class SideBar {
                 },
                 onToggle(){
                     this.isCollapse=!this.isCollapse;
-                    console.log(1,this.isCollapse)
+                    
                     $(".sidebar-toggle-play").removeClass("toggle animated flash");
                     $("#sidebar").css('display','');
                     $("#sidebar-bg").css('display','');
@@ -374,7 +384,6 @@ class SideBar {
                     eventHub.$emit("DATATABLE-RESIZE-EVENT");
                 },
                 onSelect(index,indexPath){
-                    console.log(index, indexPath)
                     if(index == 'toggle'){
                         this.onToggle();
                     } else if(index == 'apps'){
@@ -402,7 +411,7 @@ class SideBar {
     }
 
     appRunningPlus(event){
-        let win = window.open(event.url, '_blank');
+        let win = window.open(event.url, "_blank");
         win.focus();
     }
 
@@ -549,7 +558,7 @@ class SideBar {
                         应用名称：${event.cnname}<br><br>
                         地址：${event.url}<br><br>`, function (e) {
             if (e) {
-                let rtn = fsHandler.callFsJScript("/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
+                let rtn = fsHandler.callFsJScript("/matrix/apps/app_delete.js",encodeURIComponent(JSON.stringify(event)));
                 eventHub.$emit("APP-REFRESH-EVENT");
             } else {
                 

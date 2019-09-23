@@ -95,6 +95,7 @@ class Config {
                             }
                         },
                         zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
+                            
                             const self = this;
                             let node = self.zTree.getSelectedNodes();
                             
@@ -159,6 +160,115 @@ class Config {
                         }
                     }
                 })
+
+                Vue.component('config-log-console',{
+                    delimiters: ['${', '}'],
+                    props: {
+                        id: String,
+                        ifLog: Boolean
+                    },
+                    template: `<table :id="'log-table-'+cid" class="hover" width="100%"></table>`,
+                    data(){
+                        return {
+                            cid: "",
+                            rows: [],
+                            columns: [],
+                            options: {
+                                destroy: true,
+                                searching: false,
+                                aDataSort: true,
+                                bSort: true,
+                                bAutoWidth: true,
+                                colReorder: true,
+                                scrollX: true,
+                                scrollY: '30vh',
+                                scrollCollapse: true,
+                                paging: false,
+                                info: false,
+                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
+                                language : {
+                                    "sProcessing" : "处理中...",
+                                    "sLengthMenu" : "显示 _MENU_ 项结果",
+                                    "sZeroRecords" : "没有匹配结果",
+                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
+                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
+                                    "sInfoPostFix" : "",
+                                    "sSearch" : "过滤:",
+                                    "sUrl" : "",
+                                    "sEmptyTable" : "表中数据为空",
+                                    "sLoadingRecords" : "载入中...",
+                                    "sInfoThousands" : ",",
+                                    "oPaginate" : {
+                                        "sFirst" : "首页",
+                                        "sPrevious" : "上页",
+                                        "sNext" : "下页",
+                                        "sLast" : "末页"
+                                    },
+                                    "oAria" : {
+                                        "sSortAscending" : ": 以升序排列此列",
+                                        "sSortDescending" : ": 以降序排列此列"
+                                    },
+                                    buttons: {
+                                        copyTitle: '已拷贝到剪切板',
+                                        copyKeys: '已拷贝',
+                                        copySuccess: {
+                                            _: '已拷贝 %d 项',
+                                            1: '1 已拷贝'
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    watch: {
+                        ifLog:{
+                            handler:function(val,oldVal){
+                                if(val){
+                                    //this.initDT();
+                                }
+                            },
+                            immediate:true
+                        }
+                    },
+                    created: function(){
+                        this.cid = objectHash.sha1(this.id);
+                        let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
+                        this.rows = rtn.rows;
+                        this.columns = _.map(rtn.columns,function(v){
+                                            if(v.render){
+                                                v.render = eval(v.render);
+                                            }
+                                            return v;
+                                        });
+                        _.extend(this.options,rtn.options);
+                    },
+                    mounted: function() {
+                        this.initDT();
+                    },
+                    methods:{
+                        initDT(){
+                            const self = this;
+
+                            //初始化维度选择Table
+                            var table = $(`#log-table-${self.cid}`).DataTable(_.extend(
+                                self.options,{
+                                data: self.rows,
+                                columns: self.columns
+                            }));
+
+                            
+
+                            $(`#log-table-${self.cid}_wrapper input[type="search"]`).css({
+                                "height":"20px"
+                            });
+
+                            $(`#log-table-${self.cid}_wrapper`).css({
+                                "padding":"10px 0px"
+                            });
+                        }
+                    }
+                })
     
                 Vue.component('config-manage',{
                     delimiters: ['#{', '}#'],
@@ -166,13 +276,24 @@ class Config {
                         id: String,
                         model: Object
                     },
-                    template: ` <div>
-                                    <div class="config-value" :id="'editor-'+id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;"></div>
-                                    <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
-                                </div>`,
+                    template: ` <el-container style="height:calc(100vh - 174px);">
+                                    <el-main :id="'config-manage-view-main-'+cid">
+                                        <div class="config-value" :id="'editor-'+id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;height:100%"></div>
+                                        <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
+                                    </el-main>
+                                    <el-footer :id="'config-manage-view-footer-'+cid" style="padding:0px;height:200px;">
+                                        <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose">
+                                            <el-tab-pane label="日志" name="log" style="padding:10px;">
+                                                <config-log-console :id="id" :ifLog="ifLog" v-if="!_.isEmpty(id)"></config-log-console> 
+                                            </el-tab-pane>
+                                            <el-tab-pane label="调式" name="debug" style="padding:10px;"></el-tab-pane>
+                                        </el-tabs>
+                                    </el-footer>
+                                </el-container>`,
                     data() {
                         return {
                             editor: Object,
+                            mode: "toml",
                             etcd: {
                                 key: null,
                                 value: null,
@@ -180,18 +301,52 @@ class Config {
                                 isDir: true
                             },
                             breadcrumb: [],
+                            cid: "",
+                            splitInst: null,
+                            ifLog: true,
+                            debug:{
+                                tabs: {
+                                    list: [],
+                                    activeIndex: 'log'
+                                }
+                            }
                         }
+                    },
+                    watch: {
+                        ifLog: {
+                            handler:function(val,oldVal){
+                                if(val){
+                                    this.splitInst.setSizes([55,45]);
+                                } else {
+                                    this.splitInst.setSizes([100,0]);
+                                }
+                            },
+                            immediate:true
+                        }
+                    },
+                    created(){
+                        
+                        if(_.startsWith(this.model.key,"/matrix/rules")){
+                            this.mode = "lua";
+                        }
+                        this.cid = objectHash.sha1(this.id);
                     },
                     mounted(){
                         // 选择节点
                         if(_.has(this.model,'key')){
                             this.initEditer();
+
+                            _.delay(()=>{
+                                this.splitInst = Split([`#config-manage-view-main-${this.cid}`, `#config-manage-view-footer-${this.cid}`], {
+                                    sizes: [100, 0],
+                                    minSize: [0, 0],
+                                    gutterSize: 3,
+                                    cursor: 'col-resize',
+                                    direction: 'vertical',
+                                });
+                            },50)
+                            
                         }
-                    },
-                    created(){
-                        const self = this;
-    
-                        //eventHub.$on("CONFIG-TREE-CLICK-EVENT", self.setEditor);
                     },
                     methods: {
                         initEditer(){
@@ -207,7 +362,7 @@ class Config {
                                 minLines: 10,
                                 autoScrollEditorIntoView: true,
                                 enableBasicAutocompletion: true,
-                                enableLiveAutocompletion: false,
+                                enableLiveAutocompletion: true,
                                 enableSnippets: true
                             });
                             self.editor.commands.addCommands([{
@@ -223,7 +378,7 @@ class Config {
                             }]);
                             self.editor.$blockScrolling = Infinity;
                             self.editor.setTheme("ace/theme/tomorrow");
-                            self.editor.getSession().setMode("ace/mode/toml");
+                            self.editor.getSession().setMode(`ace/mode/${this.mode}`);
                             self.editor.getSession().setTabSize(2);
                             self.editor.getSession().setUseWrapMode(true);
                             
@@ -417,6 +572,9 @@ class Config {
                             debugMe();
                             let _sched = later.parse.text('every 15 sec');
                             let _timer = later.setInterval(debugMe, _sched);
+                        },
+                        logClose(){
+                            this.splitInst.setSizes([100,0]);
                         }
                     }
                 })
@@ -443,28 +601,28 @@ class Config {
                                             <el-button type="text" @click="configNew"><i class="fas fa-plus"></i> 新增</el-button>
                                             <el-button type="text" @click="configUpdate" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-save"></i> 保存</el-button>
                                             <el-button type="text" @click="configDelete" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-trash"></i> 删除</el-button>
-                                            <el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tv"></i> 调试</el-button>
+                                            <!--el-button type="text" @click="configDegug" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tv"></i> 调试</el-button-->
                                             <el-button type="text" :class="'editor-select-theme-'+objectHash.sha1(configTabs.activeIndex)" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-tshirt"></i> 主题</el-button>
                                         </el-button-group>
                                         <el-dropdown placement="top-start">
                                             <el-button type="text" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-boxes"></i> 模板</el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                                <DropdownItem>屏蔽规则</DropdownItem>
-                                                <DropdownItem>过滤规则</DropdownItem>
-                                                <DropdownItem>压缩规则</DropdownItem>
+                                                <el-dropdown-item>屏蔽规则</el-dropdown-item>
+                                                <el-dropdown-item>过滤规则</el-dropdown-item>
+                                                <el-dropdown-item>压缩规则</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                         <el-dropdown placement="top-start">
                                             <el-button type="text" v-show="!_.isEmpty(configTabs.tabs)"><i class="fas fa-grip-vertical"></i> 插入</el-button>
                                             <el-dropdown-menu slot="dropdown">
-                                                <DropdownItem>属性</DropdownItem>
-                                                <DropdownItem>函数</DropdownItem>
+                                                <el-dropdown-item>属性</el-dropdown-item>
+                                                <el-dropdown-item>函数</el-dropdown-item>
                                             </el-dropdown-menu>
                                         </el-dropdown>
                                     </el-header>
-                                    <el-main style="padding:0px;border-top:1px solid #ffffff;">
-                                        <el-container>
-                                            <el-aside id="config-tree-view-left">
+                                    <el-main style="padding:0px;border-top:1px solid #ffffff;background: #ffffff;">
+                                        <el-container style="height:100%;">
+                                            <el-aside id="config-tree-view-left" style="background-color:#f6f6f6!important;">
                                                 <config-tree-component id="config-tree" :zNodes="configTreeNodes" style="height: calc(100vh - 150px);"></config-tree-component>
                                             </el-aside>
                                             <el-main style="padding:0px;" id="config-tree-view-main">                            
@@ -472,11 +630,29 @@ class Config {
                                                     <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
                                                         <span slot="label" v-if="item.dir">
                                                             <i class="fas fa-folder" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                            <el-dropdown trigger="click">
+                                                                <span class="el-dropdown-link">
+                                                                    <i class="el-icon-arrow-down"></i>
+                                                                </span>
+                                                                <el-dropdown-menu slot="dropdown">
+                                                                    <el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item>
+                                                                    <el-dropdown-item divided @click.native="configDegug(item.name)">调试</el-dropdown-item>
+                                                                </el-dropdown-menu>
+                                                            </el-dropdown>
                                                         </span>
                                                         <span slot="label" v-else>
                                                             <i class="fas fa-file-invoice" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                            <el-dropdown trigger="click">
+                                                                <span class="el-dropdown-link">
+                                                                    <i class="el-icon-arrow-down"></i>
+                                                                </span>
+                                                                <el-dropdown-menu slot="dropdown">
+                                                                    <el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item>
+                                                                    <el-dropdown-item divided @click.native="configDegug(item.name)">调试</el-dropdown-item>
+                                                                </el-dropdown-menu>
+                                                            </el-dropdown>
                                                         </span>
-                                                        <config-manage :id="item.name" :model="item.model"></config-manage>
+                                                        <config-manage :id="item.name" :model="item.model" :ref="'configManageRef'+objectHash.sha1(item.name)"></config-manage>
                                                     </el-tab-pane>
                                                 </el-tabs>
                                             </e-main>
@@ -514,9 +690,10 @@ class Config {
                                 minSize: [0, 0],
                                 gutterSize: 3,
                                 cursor: 'col-resize',
-                                direction: 'vertical'
+                                direction: 'horizontal'
                             });
                         })
+                        
                     },
                     methods: {
                         configImport(event){
@@ -676,31 +853,34 @@ class Config {
 
                             new Vue({
                                 delimiters: ['#{', '}#'],
-                                template:   `<Form :label-width="80" style="padding:30px 30px 0px 0px;">
-                                                <FormItem label="位置" prop="parent">
-                                                    <Input v-model="parent" placeholder="位置"></Input>
-                                                    <!--dropdown-tree-component id="config-select-parent" v-model="parent" ref="refConfigParent"></dropdown-tree-component-->
-                                                </FormItem>
-                                                <FormItem label="名称" prop="name">
-                                                    <Input v-model="name" placeholder="节点名称"></Input>
-                                                </FormItem>
-                                                <FormItem :label="formItem.ifDir?'目录':'节点'">
-                                                    <i-switch v-model="formItem.ifDir" size="small">
-                                                        <span slot="true">是</span>
-                                                        <span slot="false">否</span>
-                                                    </i-switch>
-                                                </FormItem>
-                                                <FormItem label="TTL" prop="ttl">
-                                                    <Input v-model="formItem.ttl" placeholder="TTL"></Input>
-                                                </FormItem>
-                                                <FormItem label="值" prop="value">
-                                                    <Input v-model="formItem.value" type="textarea" :autosize="{minRows: 1,maxRows: 3}" placeholder="输入值。。。"></Input>
-                                                </FormItem>
-                                                <FormItem style="text-align:right;">
-                                                    <Button type="primary" @click="save">保存</Button>
-                                                    <Button @click="cancel" style="margin-left: 8px">取消</Button>
-                                                </FormItem>
-                                            </Form>`,
+                                template:   `<el-container>
+                                                <el-main style="padding:0px 20px;">
+                                                    <el-form label-width="80">
+                                                        <el-form-item label="位置" prop="parent">
+                                                            <el-input v-model="parent" placeholder="位置"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item label="名称" prop="name">
+                                                            <el-input v-model="name" placeholder="节点名称"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item :label="formItem.ifDir?'目录':'节点'">
+                                                            <el-switch v-model="formItem.ifDir" active-color="#13ce66">
+                                                                <span slot="true">是</span>
+                                                                <span slot="false">否</span>
+                                                            </el-switch>
+                                                        </el-form-item>
+                                                        <el-form-item label="TTL" prop="ttl">
+                                                            <el-input v-model="formItem.ttl" placeholder="TTL"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item label="值" prop="value">
+                                                            <el-input v-model="formItem.value" type="textarea" placeholder="输入值。。。"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item style="text-align:right;margin-top:10px;">
+                                                            <el-button @click="cancel" style="margin-left: 8px">取消</el-button>
+                                                            <el-button type="primary" @click="save">保存</el-button>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </el-main>
+                                            </el-container>`,
                                 data: {
                                     parent: '',
                                     name: '',
@@ -796,8 +976,22 @@ class Config {
                                 }
                             });
                         },
-                        configDegug(){
+                        configCopy(item){
+                            const self = this;
 
+                            new Clipboard(`.copy${objectHash.sha1(item)}`, {
+                                text: function(trigger) {
+                                    self.$message("已复制");
+                                    let editor = ace.edit('editor-' + self.configTabs.activeIndex);
+                                    console.log(12,editor.getValue())
+                                    return editor.getValue();
+                                }
+                            });
+                        },
+                        configDegug(item){
+                            let name = objectHash.sha1(item);
+                            console.log(this.$refs);
+                            this.$refs[`configManageRef${name}`][0].ifLog = !this.$refs[`configManageRef${name}`][0].ifLog;
                         }
                     }
                 };

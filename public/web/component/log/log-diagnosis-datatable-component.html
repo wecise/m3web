@@ -307,7 +307,7 @@
 				} );
 			},
 			refresh: function(){
-				this.model = fsHandler.callFsJScript('/log/log_diagnosis.js', null).message[self.type] || [];
+				this.model = fsHandler.callFsJScript("/matrix/log/log_diagnosis.js", null).message[self.type] || [];
 			},
 			detail: function(){
                 this.$root.detail(this.selectedRows);
@@ -319,7 +319,7 @@
             contextMenu: function(){
                 const self = this;
 
-                let items = fsHandler.callFsJScript('/log/context-menu.js', '').message.log;
+                let items = fsHandler.callFsJScript("/matrix/log/context-menu.js", "").message.log;
                 let id = self.id;
 
                 $.contextMenu({

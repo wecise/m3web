@@ -316,9 +316,17 @@ class Creative {
                                                 </el-aside-->
                                                 
                                                 
-                                                    <el-header style="text-align: right; font-size: 12px">
-                                                        <el-button type="text" @click="save"><i class="fas fa-save"></i> 保存</el-button>
-                                                        <el-button type="text" @click="cancel"><i class="fas fa-window-close"></i> 取消</el-button>
+                                                    <el-header style="text-align: right; font-size: 12px;background:#f6f6f6;">
+                                                        <el-tooltip content="取消" placement="top">
+                                                            <a href="javascript:void(0);" class="btn btn-link" title="取消" @click="cancel">
+                                                                <i class="fas fa-window-close"></i> 取消
+                                                            </a>
+                                                        </el-tooltip>
+                                                        <el-tooltip content="保存" placement="top">
+                                                            <a href="javascript:void(0);" class="btn btn-link" title="保存" @click="save">
+                                                                <i class="fas fa-save"></i> 保存
+                                                            </a>
+                                                        </el-tooltip>    
                                                     </el-header>
                                                 
                                                     <el-main>
@@ -495,9 +503,8 @@ class Creative {
                             new Vue({
                                 delimiters: ['#{', '}#'],
                                 template: `<el-container style="height: 500px; border: 1px solid #eee">
-                                                <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-                                                    <el-menu :default-openeds="['imap']" 
-                                                            @open="menuOpen"
+                                                <el-aside width="200px" style="background-color: #f6f6f6;">
+                                                    <el-menu @open="menuOpen"
                                                             active-text-color="#ffd04b"
                                                             unique-opened="true">
                                                         <el-submenu :index="item.value" v-for="item in _.filter(mx.global.register.file,{type:'private'})">
@@ -506,15 +513,15 @@ class Creative {
                                                     </el-menu>
                                                 </el-aside>
                                                 <el-container>
-                                                    <el-header style="text-align: right; font-size: 12px">
-                                                        <el-tooltip content="保存" placement="top">
-                                                            <a href="javascript:void(0);" class="btn btn-link" title="保存" @click="save">
-                                                                <i class="fas fa-save"></i> 保存
-                                                            </a>
-                                                        </el-tooltip>
+                                                    <el-header style="text-align: right; font-size: 12px;background:#f6f6f6;">
                                                         <el-tooltip content="取消" placement="top">
                                                             <a href="javascript:void(0);" class="btn btn-link" title="取消" @click="cancel">
                                                                 <i class="fas fa-window-close"></i> 取消
+                                                            </a>
+                                                        </el-tooltip>
+                                                        <el-tooltip content="保存" placement="top">
+                                                            <a href="javascript:void(0);" class="btn btn-link" title="保存" @click="save">
+                                                                <i class="fas fa-save"></i> 保存
                                                             </a>
                                                         </el-tooltip>
                                                     </el-header>

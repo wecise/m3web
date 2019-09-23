@@ -434,6 +434,16 @@ class Log extends Matrix {
                 _.delay(() => {
                     this.resizeConsole();
                     eventHub.$emit("WINDOW-RESIZE-EVENT");
+
+                    Split(['#log-view-left', '#log-view-main'], {
+                        sizes: [20, 80],
+                        minSize: [0, 0],
+                        gutterSize: 5,
+                        gutterAlign: 'end',
+                        cursor: 'col-resize',
+                        direction: 'horizontal',
+                        expandToMin: true
+                    });
                 },2000)
             },
             methods: {
@@ -495,7 +505,7 @@ class Log extends Matrix {
                         // event
                         let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                         // 根据event获取关联信息
-                        let model = fsHandler.callFsJScript('/log/diagnosis-by-id.js',term).message;
+                        let model = fsHandler.callFsJScript("/matrix/log/diagnosis-by-id.js",term).message;
                         
                         // 添加tab
                         let detail = {title:`日志分析 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
@@ -579,10 +589,10 @@ class Log extends Matrix {
                     let evsH = $("#log-view-summary").height();
                     
                     $("#log-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                                    .css("max-height","-=260px")
+                                                                    .css("max-height","-=230px")
                                                                     .css("max-height","-=" + evsH + "px")
                                                                     .css("min-height", evwH + "px")
-                                                                    .css("min-height","-=260px")
+                                                                    .css("min-height","-=230px")
                                                                     .css("min-height","-=" + evsH + "px");
                 }
             }

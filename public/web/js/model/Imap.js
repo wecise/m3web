@@ -640,7 +640,7 @@ class Imap extends Matrix {
                         updateEntity(event,action){
                             let id = mxImap.app.model.graph.selectedCell.id;
                             let fs = {action: action, class: `/matrix/entity/${mxImap.app.model.graph.selectedCell.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${mxImap.app.model.graph.selectedCell.value}/${event.name}`};
-                            let rtn = fsHandler.callFsJScript('/graph/update-files-by-id.js', encodeURIComponent(JSON.stringify(fs))).message;
+                            let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
                             mxImap.app.reloadData();
                         },                     
                         openIt: function(item, path){
@@ -999,7 +999,7 @@ class Imap extends Matrix {
     
                             // 根据查询参数获取图
                             if( !_.isEmpty(URL_PARAMS_DATA) ){
-                                self.model.graph.data = fsHandler.callFsJScript('/graph/graph_service.js', encodeURIComponent(URL_PARAMS_DATA)).message[0].graph;
+                                self.model.graph.data = fsHandler.callFsJScript("/matrix/graph/graph_service.js", encodeURIComponent(URL_PARAMS_DATA)).message[0].graph;
                             }
                             // 根据文件获取图
                             else {
@@ -1315,7 +1315,7 @@ class Imap extends Matrix {
                                     }
                                 },
                                 created(){
-                                    this.model.value = fsHandler.callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify(node))).message;
+                                    this.model.value = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify(node))).message;
                                     this.model.list =   _.map(self.model.graph.graph.getChildVertices(self.model.graph.graph.getDefaultParent()),function(v,k){
                                                             return {gid: v.id, name: v.value};
                                                         });
@@ -1338,14 +1338,14 @@ class Imap extends Matrix {
     
                             let input = "('" + `${cells.join("','")}` + "')";
     
-                            self.model.graph.appData = fsHandler.callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
+                            self.model.graph.appData = fsHandler.callFsJScript("/matrix/graph/graph_imap_data.js", encodeURIComponent(JSON.stringify(cells))).message;
                             
                         },
                         reloadData(){
                             try {
                                 let id = this.model.graph.selectedCell.getId();
                                 let value = this.model.graph.selectedCell.getValue();
-                                let model =fsHandler. callFsJScript("/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
+                                let model =fsHandler. callFsJScript("/matrix/graph/diagnosis-by-id.js",encodeURIComponent(JSON.stringify({id:id,value:value}))).message;
                                 
                                 eventHub.$emit("GRAPH-DIAGNOSIS-DATA-TRIGGER",model);
                                 
@@ -1470,7 +1470,7 @@ class Imap extends Matrix {
                                 try{
                                             
                                     let term = _.map(self.model.graph.paths.ports,'id');
-                                    let paths = fsHandler.callFsJScript('/graph/paths-by-id.js',encodeURIComponent(JSON.stringify(term))).message.data[0].graph;
+                                    let paths = fsHandler.callFsJScript("/matrix/graph/paths-by-id.js",encodeURIComponent(JSON.stringify(term))).message.data[0].graph;
 
                                     let rows = [];
                                     let cols = null;

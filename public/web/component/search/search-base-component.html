@@ -142,7 +142,7 @@
                 this.toCache(this.options.term);
 
 			    // 搜索
-				let rtn = fsHandler.callFsJScript(`/${this.options.api}/${this.options.api}_list.js`, encodeURIComponent(this.result.term)).message;
+				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api}/${this.options.api}_list.js`, encodeURIComponent(this.result.term)).message;
 				// 结果
 				this.result.message = rtn;
 			},

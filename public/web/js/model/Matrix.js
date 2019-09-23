@@ -91,7 +91,7 @@ class Matrix {
             }, false);
 
             _.delay(function(){
-                mx.handleDraggablePanel();
+                //mx.handleDraggablePanel();
                 // mx.handleLocalStorage();
                 // mx.handleResetLocalStorage();
                 //mx.handleSlimScroll();
@@ -237,7 +237,7 @@ class Matrix {
 
 
                     let input = {class: row.class, action: "+", tag: event.detail.value, id: row.id};
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         fn();
@@ -247,7 +247,7 @@ class Matrix {
                 onRemoveTag: function(event){
 
                     let input = {class: row.class, action: "-", tag: event.detail.value, id: row.id};
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         fn();
@@ -347,7 +347,7 @@ class Matrix {
 
             let getStatus = function(){
                 try{
-                    let count = fsHandler.callFsJScript("/ai/status.js",'aiStatusGet').message.count;
+                    let count = fsHandler.callFsJScript("/matrix/ai/status.js",'aiStatusGet').message.count;
                     if(count < 1){
                         $("#ai-robot span").remove();
                     } else {
@@ -483,7 +483,7 @@ class Matrix {
     footerApiContextMenu(){
 
         let open = function(url){ window.open(url,"_blank");};
-        let rtn = fsHandler.callFsJScript('/footer/api_contextmenu.js', null).message || [];
+        let rtn = fsHandler.callFsJScript('/matrix/footer/api_contextmenu.js', null).message || [];
         
         contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
     }
@@ -1001,30 +1001,23 @@ class Matrix {
 
     //初始化全局配置
     global(){
-
-        let _url = '/fs/etc/global/global.json';
-
-        if(window.SignedUser_IsAdmin){
-            _url += '?issys=true';
-        }
-
+        
         jQuery.ajax({
-            url: _url,
-            type: 'GET',
+            url: `/script/exec/js?input=null&isfile=true`,
+            type: "POST",
+            async: false,
+            data: "/matrix/utils/global.js",
             dataType: 'json',
-            async:false,
-            data: {
-                type: 'file'
+            contentType: false,
+            beforeSend: function(xhr) {
             },
-            beforeSend: function (xhr) {
+            complete: function(xhr, textStatus) {
             },
-            complete: function (xhr, textStatus) {
+            success: function(data, textStatus, xhr) {
+                mx.global = data.message;
             },
-            success: function (data, textStatus, xhr) {
-                mx.global = _.attempt(JSON.parse.bind(null, data.message));
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+            error: function(xhr, textStatus, errorThrown) {
+                console.log(xhr.responseText);
             }
         })
         

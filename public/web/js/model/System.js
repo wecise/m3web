@@ -857,7 +857,7 @@ class System {
 								_.extend(this.tableData, {rows:companyHandler.companyList().message});
 
 								// columns & options
-								let ext = fsHandler.callFsJScript("/company/company-list.js",null).message;
+								let ext = fsHandler.callFsJScript("/matrix/company/company-list.js",null).message;
 								_.extend(this.tableData,ext);
 
 								_.map(this.tableData.columns,function(v){
@@ -2407,7 +2407,7 @@ class System {
 
 				let main = {
 					template: `<el-container style="background-color:#ffffff;height: calc(100vh - 85px);">
-									<el-aside id="system-view-left-panel">
+									<el-aside id="system-view-left-panel" style="background-color:#f6f6f6;">
 										<el-collapse value="user-manage" accordion @change="toggleView">
 											
 											<el-collapse-item name="user-manage">

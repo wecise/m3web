@@ -129,7 +129,7 @@ class Robot {
                 eventHub.$on("win-close-event",self.wsClose);
 
                 // 初始化主题
-                self.message.subject = fsHandler.callFsJScript("/ai/subscribe.js", null).message;
+                self.message.subject = fsHandler.callFsJScript("/matrix/ai/subscribe.js", null).message;
                 
             },
             mounted: function(){
@@ -137,7 +137,7 @@ class Robot {
                 
                 // 默认主题消息
                 let item = _.first(self.message.subject);
-                let message = fsHandler.callFsJScript("/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
+                let message = fsHandler.callFsJScript("/matrix/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
                 self.message.defaultSubject = _.extend(item, {msgs:message});
 
                 // 初始化默认WS
@@ -219,7 +219,7 @@ class Robot {
                     $(`#${objectHash.sha1(item)}`).addClass("selected");
                     
                     // 获取最新主题消息
-                    let message = fsHandler.callFsJScript("/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
+                    let message = fsHandler.callFsJScript("/matrix/ai/getMessage.js", encodeURIComponent(JSON.stringify(item)) ).message;
                     this.message.defaultSubject = _.extend(item, {msgs: message});
 
                     // 接收消息

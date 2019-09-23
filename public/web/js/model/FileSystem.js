@@ -114,7 +114,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/fs/fs_list.js",encodeURIComponent(app)).message,
+                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(app)).message,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -122,17 +122,28 @@ class FileSystem {
                 node: {}
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:40px;line-height:40px;">
+                            <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
                                 复制到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
                             </el-header>
-                            <el-main style="padding:10px;" style="background-color:#f7f7f7;">
+                            <el-main style="padding:10px;">
                                 <el-tree
                                     :data="classList"
                                     node-key="id"
                                     :default-expanded-keys="[_.first(classList).id]"
                                     :props="defaultProps"
                                     @node-click="onNodeClick"
+                                    accordion="true"
                                     style="background-color:transparent;">
+                                    <span slot-scope="{ node, data }" 
+                                            style="flex: 1;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: space-between;
+                                            font-size: 12px;
+                                            padding-right: 8px;">
+                                        <span>#{ node.label }#</span>
+                                        <span style="color:#999;">#{ data.name }#</span>
+                                    </span>
                                 </el-tree>
                             </el-main>
                             <el-footer style="height:40px;line-height:40px;text-align:right;">
@@ -158,7 +169,10 @@ class FileSystem {
                             }
                         })
                         if(rtn){
-                            alertify.success("复制成功 " + this.node.fullname);
+                            this.$message({
+                                message: "复制成功 " + this.node.fullname,
+                                type: 'success'
+                            });
                             loadCallBack;
                             wnd.close();
                         }
@@ -191,7 +205,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/fs/fs_list.js",encodeURIComponent(app)).message,
+                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(app)).message,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -199,17 +213,28 @@ class FileSystem {
                 node: {}
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:40px;line-height:40px;">
+                            <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
                                 移动到：<span v-if="!_.isEmpty(node.fullname)">#{node.fullname}#</span>
                             </el-header>
-                            <el-main style="padding:10px;" style="background-color:#f7f7f7;">
+                            <el-main style="padding:10px;">
                                 <el-tree
                                     :data="classList"
                                     node-key="id"
                                     :default-expanded-keys="[_.first(classList).id]"
                                     :props="defaultProps"
                                     @node-click="onNodeClick"
+                                    accordion="true"
                                     style="background-color:transparent;">
+                                    <span slot-scope="{ node, data }" 
+                                            style="flex: 1;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: space-between;
+                                            font-size: 12px;
+                                            padding-right: 8px;">
+                                        <span>#{ node.label }#</span>
+                                        <span style="color:#999;">#{ data.name }#</span>
+                                    </span>
                                 </el-tree>
                             </el-main>
                             <el-footer style="height:40px;line-height:40px;text-align:right;">
@@ -235,7 +260,10 @@ class FileSystem {
                             }
                         })
                         if(rtn){
-                            alertify.success("移动成功 " + this.node.fullname);
+                            this.$message({
+                                message: "移动成功 " + this.node.fullname,
+                                type: 'success'
+                            });
                             loadCallBack;
                             wnd.close();
                         }

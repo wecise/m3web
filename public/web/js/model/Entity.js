@@ -37,6 +37,24 @@ class Entity extends Matrix {
                             "search-base-component"],function() {
             $(function() {
 
+                // 实体录入
+                Vue.component("entity-new",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    template:   `<div class="block"><el-timeline>
+                                    <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model">
+                                        <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                            <h4>#{item.value}#</h4>
+                                            <p>#{item.biz}# #{item.host}#</p>
+                                            <p>#{item.msg}#</p>
+                                        </el-card>
+                                    </el-timeline-item>
+                                </el-timeline></div>`
+                })
+
                 // 智能图谱
                 Vue.component("entity-view-graph",{
                     delimiters: ['#{', '}#'],
@@ -87,18 +105,11 @@ class Entity extends Matrix {
                                 
                             } finally {
                                 _.delay(() => {
-                                    $("[id^='pane-graph']").css({
-                                        "height": "calc(100vh - 150px)",
-                                        "margin": "-15px"
-                                    })
                                     this.topological.setStyle();
                                 },500)
                             }
                             
                         }
-                    },
-                    destroyed() {
-                        this.topological.destroy();
                     }
                 })
 
@@ -281,13 +292,13 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main style="padding:0px;">
+                                    <el-main>
                                         <el-row type="flex" justify="center">
                                             <el-col :span="6">
                                                 <div class="grid-content" style="text-align:center;">
@@ -365,7 +376,7 @@ class Entity extends Matrix {
                             
                             // Tags Handler
                             let input = {class: self.rows.class, action: "-", tag: tag, id: self.rows.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                         },
                         tagsInputShow() {
@@ -385,7 +396,7 @@ class Entity extends Matrix {
 
                                 // Tags Handler
                                 let input = {class: self.rows.class, action: "+", tag: inputValue, id: self.rows.id};
-                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
                             }
 
                             self.tags.inputVisible = false;
@@ -401,7 +412,7 @@ class Entity extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
@@ -469,7 +480,7 @@ class Entity extends Matrix {
                             element: {}
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
@@ -669,7 +680,7 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template:   `<el-container style="height: calc(100vh - 230px);"><el-main>
+                    template:   `<el-container style="height: calc(100vh - 200px);"><el-main>
                                     <el-timeline>
                                         <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.history.rows">
                                             <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
@@ -764,7 +775,7 @@ class Entity extends Matrix {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 230px);">
+                    template:  `<el-container style="height: calc(100vh - 200px);">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+rId"></div>
                                     </el-main>
@@ -1047,7 +1058,7 @@ class Entity extends Matrix {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event));
                                 // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript('/entity/diagnosis-by-id.js',term).message;
+                                let model = fsHandler.callFsJScript("/matrix/entity/diagnosis-by-id.js",term).message;
                                 
                                 // 添加tab
                                 let detail = {title:`实体卡片 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
@@ -1168,7 +1179,7 @@ class Entity extends Matrix {
                                 if (e) {
                                     _.extend(item, {list:_.map(item.list,'id')});
                                     
-                                    let rtn = fsHandler.callFsJScript("/entity/action.js",encodeURIComponent(JSON.stringify(item))).status;
+                                    let rtn = fsHandler.callFsJScript("/matrix/entity/action.js",encodeURIComponent(JSON.stringify(item))).status;
                                     
                                     if(rtn == 'ok'){
                                         alertify.success(`实体${ids}删除成功！`);
@@ -1248,6 +1259,99 @@ class Entity extends Matrix {
                                     }
                                 }
                             }).$mount("#class-template-import");
+                        },
+                        entityNew(){
+                            const me = this;
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-entityNew')){
+                                    jsPanel.activePanels.getPanel('jsPanel-entityNew').close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winEntityNew('新增实体', `<div id="entity-template-new"></div>`, null, null, null);
+                            }
+
+                            new Vue({
+                                data:{
+                                    classList: fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
+                                    defaultProps: {
+                                        children: 'children',
+                                        label: 'alias'
+                                    },
+                                    model: {
+                                        selectedNode: {},
+                                        node: {}
+                                    }
+                                },
+                                template: `<el-container style="height:100%;">
+                                                <el-aside style="background: #f6f6f6;" id="entity-view-new-left">
+                                                    <el-container>
+                                                        <el-header style="height:30px;line-height:30px;padding: 0px 10px;">
+                                                            选择类
+                                                        </el-header>
+                                                        <el-main style="padding:0px;">
+                                                            <el-tree
+                                                                ref="entityTree"
+                                                                :data="classList"
+                                                                node-key="id"
+                                                                accordion
+                                                                @node-click="onNodeClick"
+                                                                :props="defaultProps"
+                                                                style="background-color:transparent;">
+                                                            </el-tree>
+                                                        </el-main>
+                                                    </el-container>
+                                                </el-aside>
+                                                <el-container id="entity-view-new-main">
+                                                    <el-main style="padding:10px;">
+                                                        <el-form ref="form" :model="model.node" label-width="80px">
+                                                            <el-form-item :label="item.name" v-for="item in model.node">
+                                                                <el-input v-model="item.value" style="border:1px solid #f7f7f7;"></el-input>
+                                                            </el-form-item>
+                                                        </el-form>
+                                                    </el-main>
+                                                    <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                        <el-button type="default" @click="onCancel">取消</el-button>
+                                                        <el-button type="primary" @click="onSave">提交</el-button>
+                                                    </el-footer>
+                                                </el-container>
+                                            </el-container>`,
+                                mounted(){
+                                    Split([`#entity-view-new-left`, `#entity-view-new-main`], {
+                                        sizes: [20, 80],
+                                        minSize: [0, 0],
+                                        gutterSize: 5,
+                                        cursor: 'col-resize',
+                                        direction: 'horizontal',
+                                    });
+                                },
+                                methods:{
+                                    onNodeClick(node){
+                                        console.log(1,node,node.id)
+                                        this.model.selectedNode = node;
+                                        this.model.node = fsHandler.callFsJScript("/matrix/entity/entity_class_by_cid.js",encodeURIComponent(encodeURIComponent(node.id))).message;
+                                    },
+                                    onCancel(){
+                                        wnd.close();
+                                    },
+                                    onSave(){
+                                        let mql =   _.concat(["INSERT INTO", this.model.selectedNode.class],_.map(this.model.node,function(v){
+                                                            if(v.type == 'int'){
+                                                                return `${v.name}='${v.value}'`;
+                                                            } else if(v.type == 'map' || v.type == 'list' || v.type == 'set'){
+                                                                return `${v.name}='${v.value}'`;
+                                                            } else {
+                                                                return `${v.name}='${v.value}'`;
+                                                            }
+                                                    }).join(", ")).join(" ");
+                                        console.log(mql)
+                                    }
+                                }
+                            }).$mount("#entity-template-new");
                         }
                     }
                 };

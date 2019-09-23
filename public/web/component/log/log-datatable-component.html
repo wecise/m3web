@@ -448,7 +448,7 @@
                         input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
                     }
                     
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
 						self.$root.$refs.searchRef.search();

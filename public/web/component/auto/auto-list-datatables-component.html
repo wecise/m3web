@@ -509,7 +509,7 @@
 
                         // 打标签
                         let input = {class: data[0].class, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
-                        let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                        let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                         if(rtn.status == 'ok'){
                             eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -526,7 +526,7 @@
                 initMenu: function(){
                     const self = this;
 
-                    let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.script;
+                    let items = fsHandler.callFsJScript("/matrix/probe/toolbar.js", "").message.probe.script;
                     let id = self.id;
 
                     $.contextMenu({
@@ -628,7 +628,7 @@
                             onAddTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
@@ -638,7 +638,7 @@
                             onRemoveTag: function(event){
 
                                 let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                                let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                                let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                                 if(rtn.status == 'ok'){
                                     eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);

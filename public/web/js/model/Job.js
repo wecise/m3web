@@ -277,7 +277,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main>
                                         <el-row :gutter="10">
                                             <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
@@ -348,7 +348,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
@@ -373,7 +373,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 230px);">
+                    template: `<el-container style="height: calc(100vh - 200px);">
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
@@ -516,6 +516,16 @@ class Job extends Matrix {
                         _.delay(function(){
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
+
+                            Split(['#job-view-left', '#job-view-main'], {
+                                sizes: [20, 80],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true
+                            });
                         },2000);
                         
                     },
@@ -578,7 +588,7 @@ class Job extends Matrix {
                                 // event
                                 let term = encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'));
                                 // 根据event获取关联信息
-                                let model = fsHandler.callFsJScript('/job/diagnosis-by-id.js',term).message;
+                                let model = fsHandler.callFsJScript("/matrix/job/diagnosis-by-id.js",term).message;
                                 
                                 // 添加tab
                                 let detail = {title:`作业分析 ${event.name}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
@@ -642,10 +652,10 @@ class Job extends Matrix {
         let evsH = $("#job-view-summary").height();
         
         $("#job-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=260px")
+                                                        .css("max-height","-=230px")
                                                         .css("max-height","-=" + evsH + "px")
                                                         .css("min-height", evwH + "px")
-                                                        .css("min-height","-=260px")
+                                                        .css("min-height","-=230px")
                                                         .css("min-height","-=" + evsH + "px");
     }
 

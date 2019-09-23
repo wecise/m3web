@@ -128,7 +128,7 @@
             init: function () {
                 let self = this;
 
-                self.zNodes = fsHandler.callFsJScript(`/config/dropDownTree_for_rules.js`).message;
+                self.zNodes = fsHandler.callFsJScript("/matrix/config/dropDownTree_for_rules.js").message;
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
                 self.zTree.expandAll(false);
 

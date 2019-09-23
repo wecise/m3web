@@ -257,6 +257,51 @@
             .el-icon-caret-right:before{
                 color: #333333;
             }
+
+            /* el tabs */
+            .el-tabs__item {
+                height: 30px;
+                line-height: 30px;
+                font-size: 12px;
+            }
+            .el-tabs__nav-prev,
+            .el-tabs__nav-next{
+                line-height: 30px;
+            }
+
+            .el-card__header{
+                padding:0 5px;
+            }
+            .el-card__header > .clearfix > span {
+                font-size: 14px;
+                font-weight: 600;
+            }
+            
+            .el-tabs--border-card{
+                border:none;
+                -webkit-box-shadow:unset;
+                box-shadow:unset;
+            }
+            .el-tabs--border-card>.el-tabs__content {
+                padding: 0px;
+                height: 100%;
+            }
+
+            .el-tabs--border-card>.el-tabs__header {
+                border-bottom: unset;
+            }
+
+            .el-tabs--border-card>.el-tabs__header .el-tabs__item.is-active {
+                border-right-color: #ffffff;
+                border-left-color: #ffffff;
+            }
+
+            .el-tree-node__content:hover {
+                background-color: #f6f6f6;
+            }
+            .el-tree-node:focus>.el-tree-node__content {
+                background-color: #b2dcfa;
+            }
     
         </style>
     
@@ -539,7 +584,7 @@
                             let item = $(event.currentTarget).parent().parent().data("info");
     
                             let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
     
                             if(rtn.status == 'ok'){
                                 me.$parent.init();
@@ -550,7 +595,7 @@
                             const me = this;
                             let item = $(event.currentTarget).parent().parent().data("info");
                             let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
     
                             if(rtn.status == 'ok'){
                                 me.$parent.init();
@@ -683,7 +728,7 @@
                             let item = $(event.currentTarget).parent().parent().data("info");
     
                             let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
     
                             if(rtn.status == 'ok'){
                                 me.$parent.init();
@@ -694,7 +739,7 @@
                             const me = this;
                             let item = $(event.currentTarget).parent().parent().data("info");
                             let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
     
                             if(rtn.status == 'ok'){
                                 me.$parent.init();
@@ -782,7 +827,7 @@
                     computed: {
                         datatable: function(){
     
-                            let _list = fsHandler.callFsJScript(`/fs/fs_data.js`, '').message;
+                            let _list = fsHandler.callFsJScript("/matrix/fs/fs_data.js", "").message;
     
                             _list.dataset =  this.model;
     
@@ -822,7 +867,8 @@
                 Vue.component('fs-editor-view-by-other',{
                     delimiters: ['#{', '}#'],
                     props:{
-                        id: String
+                        id: String,
+                        output: Object
                     },
                     template: `<fs-output-component :id="'editor-output-'+id" :bid="id"
                                     :model="model"
@@ -840,9 +886,17 @@
                             }
                         }
                     },
-                    created() {
-                        console.log(222,`FS-EDITOR-RUN-EVENT-${this.id}`)
-                        eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setData)
+                    watch: {
+                        output: {
+                            handler(val,oldVal){
+                                console.log(77,val)
+                                _.extend(this.model,{newInput: JSON.stringify(this.output, null, 2)});
+                                //eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setData)
+                                //this.setData(val);
+                            },
+                            deep:true,
+                            immediate:true
+                        }
                     },
                     mounted() {
                         const self = this;
@@ -878,21 +932,21 @@
     
                 })
                 
-                Vue.component('fs-editor-view',{
+                Vue.component("fs-editor-view",{
                     props:{
-                        id:String,
+                        id: String,
                         item: Object
                     },
-                    template: `<el-container style="height: 100%;">
-                                    <el-main :id="'fs-editor-view-main-'+id" style="padding:0px;overflow:auto;">
+                    template: `<el-container style="height:100%;">
+                                    <el-main :id="'fs-editor-view-main-'+id" style="padding:1px 0px 0px 0px;overflow:hidden;">
                                         <fs-editor-component :id="'editor-'+id" :bid="'output-'+id"
                                             :model="model"
                                             showToolsBar="false"
                                             showStatusBar="false"></fs-editor-component>
                                     </el-main>
                                     <el-footer :id="'fs-editor-view-footer-'+id" style="background-color:#ddd;overflow:auto;padding:0px;">
-                                        <fs-editor-view-by-html :id="'output-'+id" v-if="item.ftype=='html'"></fs-editor-view-by-html>
-                                        <fs-editor-view-by-other :id="'output-'+id" v-else></fs-editor-view-by-other>
+                                        <fs-editor-view-by-html :id="'output-'+id" :output="model.fs.output" v-if="item.ftype=='html'"></fs-editor-view-by-html>
+                                        <fs-editor-view-by-other :id="'output-'+id" :output="model.fs.output" v-else></fs-editor-view-by-other>
                                     </el-footer>
                                 </el-container>`,
                     data() {
@@ -907,30 +961,34 @@
                             }
                         }
                     },
-                    created(){
-                        this.model.fs = this.item;
-                        this.model.mode = this.mode();
+                    watch: {
+                        item: {
+                            handler(val,oldVal){
+                                _.extend(this.model,{fs: val, mode: this.mode()});
+                            },
+                            deep: true,
+                            immediate:true
+                        }
                     },
                     mounted() {
                         this.init();
+                        this.initSplit();
                     },
                     methods: {
                         init() {
                             let rtn = fsHandler.fsContent(this.item.parent, this.item.name);
     
-                            this.model.newInput = rtn;
-    
+                            _.extend(this.model, {newInput:rtn});
+                            
+                        },
+                        initSplit(){
                             Split([`#fs-editor-view-main-${this.id}`, `#fs-editor-view-footer-${this.id}`], {
                                 sizes: [75, 25],
                                 minSize: [0, 0],
-                                gutterSize: 5,
+                                gutterSize: 3,
                                 cursor: 'row-resize',
                                 direction: 'vertical',
                             });
-    
-                            $(".gutter").css({
-                                "backgroundColor": "#dddddd"
-                            })
                         },
                         // 应用扩展名影射不同的编辑模式
                         mode(){
@@ -968,7 +1026,7 @@
                     currentView: 'grid-view'
                 }
             },
-            created: function() {
+            created() {
                 const self = this
     
                 self.init();
@@ -982,7 +1040,7 @@
                 eventHub.$on("FS-FORWARD-EVENT", self.openIt);
                 eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
             },
-            mounted: function () {
+            mounted() {
                 const self = this
     
                 self.$nextTick(function () {
@@ -1031,16 +1089,16 @@
                 }
             },
             computed: {
-                filePath: function(){
+                filePath(){
                     return this.rootPath.split("/");
                 }
             },
             methods: {
-                init: function(){
+                init(){
                     this.load();
                     this.signedUserName = window.SignedUser_UserName;
                 },
-                initPlugIn: function(){
+                initPlugIn(){
                     const self = this;
     
                     self.initFileUpload();
@@ -1072,12 +1130,12 @@
                     });
     
                 },
-                toggleView: function(view){
+                toggleView(view){
                     const self = this
     
                     self.currentView = view;
                 },
-                initContextMenu: function(){
+                initContextMenu(){
                     const self = this
     
                     $.contextMenu({
@@ -1315,7 +1373,7 @@
                         }
                     });
                 },
-                initEditName: function(){
+                initEditName(){
                     const self = this
     
                     $(".fs-name[data-edit='true']").editable({
@@ -1357,7 +1415,7 @@
                     });
     
                 },
-                initFileUpload: function(){
+                initFileUpload(){
                     const self = this
                     let uploadButton = $('<button/>')
                         .addClass('btn btn-xs btn-primary')
@@ -1520,12 +1578,12 @@
                         .prop('disabled', !$.support.fileInput)
                         .parent().addClass($.support.fileInput ? undefined : 'disabled');
                 },
-                resetStatus: function(){
+                resetStatus(){
                     const self = this
     
                     self.selectedItem = [];
                 },
-                orderIt: function(){
+                orderIt(){
                     const self = this
     
                     $.contextMenu({
@@ -1554,7 +1612,7 @@
                     });
     
                 },
-                openIt: function(item, path){
+                openIt(item, path){
                     const self = this
     
                     event.preventDefault();
@@ -1630,13 +1688,13 @@
                     }
     
                 },
-                runHtml: function(item){
+                runHtml(item){
                     const self = this
     
                     let file = [item.parent, item.name].join("/");
                     window.open(`/fs${file}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,'_blank');
                 },
-                copyUrl: function(item){
+                copyUrl(item){
                     const self = this
     
                     let file = `/fs${[item.parent, item.name].join("/")}?type=open&issys=${window.SignedUser_IsAdmin}`;
@@ -1668,7 +1726,7 @@
                     $(".alertify-prompt .alertify-message").css('height','5vh');
     
                 },
-                load: function() {
+                load() {
                     const self = this
     
                     // 临时解决view刷新问题 & destroy editable
@@ -1697,20 +1755,20 @@
                     },100)
     
                 },
-                refresh: function() {
+                refresh() {
                     const self = this
     
                     // 重新实例化 editable
                     self.initEditName();
                 },
-                mouseOver: function(item){
+                mouseOver(item){
                     const self = this
     
                     $(self.$el).find('.fs-node-highlight').removeClass('fs-node-highlight');
                     $('#fs_node_'+item.id).find('.widget').addClass('fs-node-highlight');
     
                 },
-                mouseOut: function(item){
+                mouseOut(item){
                     const self = this
     
                     $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
@@ -2028,7 +2086,7 @@
                     fileSystem.fileCopyTo(null,window.fsSelectedItem,this.load);
     
                 },
-                deleteThem: function() {
+                deleteThem() {
                     const self = this
     
                     if(_.includes([['app','extend','assets','opt','script']],self.selectedItem[0].name)){
@@ -2053,7 +2111,7 @@
                     });
     
                 },
-                deleteIt: function(event, prompt) {
+                deleteIt(event, prompt) {
                     const self = this
     
                     if(_.includes(['admin','app','extend','assets','opt','script'],event.name)){
@@ -2090,7 +2148,7 @@
                     }
     
                 },
-                shareIt: function(event){
+                shareIt(event){
                     const self = this
     
                     alertify.prompt("共享设置", function (e, str) {
@@ -2103,7 +2161,7 @@
                     }, "admin;");
                     $(".alertify-prompt .alertify-message").css('height','5vh');
                 },
-                deployIt: function(item){
+                deployIt(item){
                     const self = this
     
                     let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
@@ -2203,7 +2261,7 @@
                             deploy: function(){
                                 const me = this;
     
-                                let check = fsHandler.callFsJScript("/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
+                                let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
     
                                 if(check==1){
                                     alertify.log("应用已经发布，请确认。")
@@ -2218,7 +2276,7 @@
                                     url: me.app.url
                                 };
     
-                                let rtn = fsHandler.callFsJScript("/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                                let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
                                 if( _.lowerCase(rtn.status) == "ok"){
                                     alertify.success("应用发布成功");
                                     eventHub.$emit("APP-REFRESH-EVENT");
@@ -2245,35 +2303,14 @@
                     new Vue(form);
     
                 },
-                editIt: function(item){
+                editIt(node){
                     const self = this
-    
-                    // 不同窗体对应各自的ID，由窗体ID生成各窗体组件的子ID
-                    // 子ID：
-                    //      fs-editor-main-top-${ID}
-                    //      fs-editor-main-bottom-${ID}
-                    let pID = objectHash.sha1([item.parent,item.name].join("/"));
-    
-                    // 模板，作为vue组件容器
-                    let content = `<div id="fs-editor-template-${pID}" style="width: 100%;height: 100%;"></div>`;
-    
-                    // 判断是否已有窗体打开
-                    try {
-                        if( window.jsPanel.activePanels.getPanel(`jsPanel-editor-${pID}`) ){
-                            window.jsPanel.activePanels.getPanel(`jsPanel-editor-${pID}`).front();
-                            alertify.log("该内容窗体已经打开");
-                        }
-                    }
-                    catch(err){
-                        // 打开窗体
-                        let win = maxWindow.winEditor(`${item.parent}/${item.name}`, content, null,null);
-    
-                        // 生成布局、vue组件配置，根据不同的文件类型，需要对应不同的编辑器
-                        let editor = {
+                    
+                    // 生成布局、vue组件配置，根据不同的文件类型，需要对应不同的编辑器
+                    let editor = {
                             normal: {
                                 delimiters: ['#{', '}#'],
                                 data: {
-                                    id: pID,
                                     tabs: {
                                         list:[],
                                         activeIndex: ''
@@ -2282,84 +2319,281 @@
                                         root: "/"
                                     }
                                 },
-                                template:  `<el-container class="editor-container">
-                                                <el-aside id="fs-editor-${pID}-left">
-                                                    <fs-tree-component :id="'fs-editor-tree-'+id" :root="tree.root" :checkEnable="false" :contextMenu="null"></fs-tree-component>
-                                                </el-aside>
-                                                <el-main style="padding:0px;overflow:hidden;" id="fs-editor-${pID}-main">
-                                                    <el-tabs v-model="tabs.activeIndex" type="border-card" style="height:100%;">
-                                                        <el-tab-pane
-                                                            :key="item.name"
-                                                            v-for="(item, index) in tabs.list"
-                                                            :label="item.title"
-                                                            :name="item.name"
-                                                            style="height:100%;">
-                                                            <span slot="label"><i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.title}#</span>
-                                                            <fs-editor-view :id="item.name" :item="item.model"></fs-view-editor>
-                                                        </el-tab-pane>
-                                                    </el-tabs>
-                                                </el-main>
-                                                <el-aside id="fs-editor-${pID}-right">
-                                                </el-aside>
+                                template:  `<el-container style="height: 100%;">
+                                                <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
+                                                    <el-tooltip content="文件" open-delay="500">
+                                                        <el-button type="text" @click="onReload"><i class="fas fa-file"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="重新加载" open-delay="500">
+                                                        <el-button type="text" @click="onReload"><i class="fas fa-sync"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="撤销" open-delay="500">
+                                                        <el-button type="text" @click="onUndo"><i class="fas fa-undo"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="重做" open-delay="500">
+                                                        <el-button type="text" @click="onRedo"><i class="fas fa-redo"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="复制" open-delay="500">
+                                                        <el-button type="text" :class="'copy-'+tabs.activeIndex" @click="onCopy"><i class="fas fa-copy"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="粘贴" open-delay="500">
+                                                        <el-button type="text" @click="onPaste"><i class="fas fa-paste"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="选择" open-delay="500">
+                                                        <el-button type="text" @click="onSelect"><i class="fas fa-check"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="清除" open-delay="500">
+                                                        <el-button type="text" @click="onRemove"><i class="fas fa-trash"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="保存" open-delay="500">
+                                                        <el-button type="text" @click="onSave"><i class="fas fa-save"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="保存并运行" open-delay="500">
+                                                        <el-button type="text" @click="onSaveAndPlay"><i class="fas fa-play"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="发布为应用" open-delay="500">
+                                                        <el-button type="text" @click="onDeploy"><i class="fab fa-codepen"></i></el-button>
+                                                    </el-tooltip>
+                                                    <el-tooltip content="主题" open-delay="500">
+                                                        <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)"><i class="fas fa-tshirt"></i> 主题</el-button>
+                                                    </el-tooltip>
+                                                </el-header>
+                                                <el-container style="height: 100%;">
+                                                    <el-aside id="fs-editor-left" style="background-color:#f6f6f6;">
+                                                        <fs-editor-tree-component id="fs-editor-tree" :root="tree.root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>
+                                                    </el-aside>
+                                                    <el-main style="padding:0px;overflow:hidden;" id="fs-editor-main">
+                                                        <el-tabs v-model="tabs.activeIndex" type="border-card" style="height:100%;" closable @tab-remove="tabRemove">
+                                                            <el-tab-pane
+                                                                :key="item.name"
+                                                                v-for="(item, index) in tabs.list"
+                                                                :label="item.title"
+                                                                :name="item.name"
+                                                                style="height:100%;">
+                                                                <span slot="label"><i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.title}#</span>
+                                                                <fs-editor-view :id="item.name" :item="item.model"></fs-editor-view>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                    </el-main>
+                                                </el-container>
                                             </el-container>`,
-                                created: function () {
-                                    this.tabs.list.push({name:pID, title: [item.parent,item.name].join("/"), model: item})
-                                    this.tabs.activeIndex = _.first(this.tabs.list).name;
+                                created() {
+                                    this.tree.root = self.root;
                                 },
-                                mounted: function () {
+                                mounted() {
                                     const me = this;
     
-                                    me.$nextTick(function () {
+                                    _.delay(()=>{
                                         
-                                        Split([`#fs-editor-${pID}-left`, `#fs-editor-${pID}-main`, `#fs-editor-${pID}-right`], {
-                                            sizes: [0, 100, 0],
+                                        me.tabAdd(node);
+
+                                        Split([`#fs-editor-left`, `#fs-editor-main`], {
+                                            sizes: [15, 85],
                                             minSize: [0, 0],
                                             gutterSize: 3,
                                             cursor: 'col-resize',
                                             direction: 'horizontal',
                                         });
-    
-                                        $(".gutter",me.$el).css({
-                                            "backgroundColor": "#dddddd"
-                                        })
-    
-                                        $(".el-tabs__item",me.$el).css({
-                                            "height": "24px",
-                                            "lineHeight": "24px"
-                                        })
-    
-                                        $(".el-tabs__header",me.$el).css({
-                                            "margin": "0px"
-                                        })
-    
-                                        $(".el-tabs--border-card>.el-tabs__header",me.$el).css({
-                                            "borderBottom":"0px",
-                                            "backgroundColor": "rgb(235, 235, 235)"
-                                        })
-    
-                                        $(".el-tabs--card>.el-tabs__header .el-tabs__nav",me.$el).css({
-                                            "borderRadius":"0px"
-                                        })
-    
-                                        $(".el-tabs--card>.el-tabs__header",me.$el).css({
-                                            "border": "unset"
-                                        })
-    
-                                        $(".el-tabs--border-card>.el-tabs__content",me.$el).css({
-                                            "padding": "0px"
-                                        })
-    
-                                        $(".el-tabs__content",me.$el).css({
-                                            "height": "100%"
-                                        })
-                                        
-                                    })
+                                    },50)
                                 },
                                 methods: {
-                                    
+                                    tabAdd(item){
+                                        try {
+                                            let pID = objectHash.sha1([item.parent,item.name].join("/"));
+                                            
+                                            // 已经打开
+                                            if(_.find(this.tabs.list,{name:pID})){
+                                                this.tabs.activeIndex = pID;
+                                                return false;
+                                            }
+                                            
+                                            // 添加tab
+                                            this.tabs.list.push({name: pID, title: [item.parent,item.name].join("/"), model: _.extend(item,{output:null})})
+                                            this.tabs.activeIndex = _.last(this.tabs.list).name;
+
+                                            _.delay(()=>{
+                                                this.initTheme();
+                                            },500)
+                                            
+
+                                        } catch(error){
+                                            this.tabs.list = [];
+                                        } 
+                                        
+                                    },
+                                    tabRemove(targetName){
+                                        try{
+                                            let tabs = this.tabs.list;
+                                            let activeIndex = this.tabs.activeIndex;
+                                            if (activeIndex === targetName) {
+                                            tabs.forEach((tab, index) => {
+                                                if (tab.name === targetName) {
+                                                let nextTab = tabs[index + 1] || tabs[index - 1];
+                                                if (nextTab) {
+                                                    activeIndex = nextTab.name;
+                                                }
+                                                }
+                                            });
+                                            }
+                                            
+                                            this.tabs.list = tabs.filter(tab => tab.name !== targetName);
+                                            this.tabs.activeIndex = activeIndex;
+                                            
+                                        } catch(err){
+                                            
+                                        } finally{
+                                            
+                                        }
+                                    },
+                                    onReload(){
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        let rtn = fsHandler.fsContent(node.parent,node.name);
+
+                                        editor.setValue(rtn);
+                                    },
+                                    onUndo(){
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        editor.undo();
+                                    },
+                                    onRedo(){
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        editor.redo();
+                                    },
+                                    onCopy(){
+                                        const me = this;
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        new Clipboard(`.copy-%{this.tabs.activeIndex}`, {
+                                            text: function(trigger) {
+                                                me.$message("已复制");
+                                                return editor.getValue();
+                                            }
+                                        });
+                                    },
+                                    onPaste(){
+                                        document.execCommand("paste");
+                                        this.$message("已粘贴");
+                                    },
+                                    onSelect(){
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        editor.selection.selectAll();
+                                    },
+                                    onRemove(){
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        editor.setValue();
+                                        this.$message("已清空");
+                                    },
+                                    onSave(){
+                                        let me = this;
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        let sc = editor.getValue();
+
+                                        if(_.isEmpty(editor.getValue())){
+                                            return false;
+                                        }
+
+                                        // save
+                                        let sRtn = fsHandler.fsNew(node.ftype, node.parent, node.name, sc, _.attempt(JSON.parse.bind(null, node.attr)));
+
+                                        if(sRtn == 0){
+                                            this.$message("请确认脚本！");
+                                            return false;
+                                        }
+
+                                        editor.session.getUndoManager().markClean();
+                                        //self.updateToolbar();
+                                    },
+                                    onSaveAndPlay(){
+                                        
+                                        // $(".fas.fa-play").addClass("fa-spin");
+
+                                        // 先保存
+                                        this.onSave();
+
+                                        // 后运行 depend ftype: js/html
+                                        if(_.includes(['html','html'],node.ftype)){
+                                            eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[node.parent,node.name].join("/")}?issys=true&type=open`);
+                                        } else {
+
+                                            try {
+                                                let rtn = fsHandler.callFsJScript([node.parent, node.name].join("/").replace(/\/script/g, ""), '');
+                                                
+                                                _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:rtn});
+                                                //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, rtn);
+                                            } catch(err) {
+                                                //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, err);
+                                                _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
+                                            }
+                                        }
+
+                                        // $(".fas.fa-play.fa-spin").removeClass("fa-spin");
+                                    },
+                                    onDeploy(){
+                                        
+                                    },
+                                    initTheme(){
+                                        
+                                        let id = this.tabs.activeIndex;
+                                        
+                                        $.contextMenu({
+                                            selector: `.editor-select-theme-${id}`,
+                                            trigger: 'left',
+                                            callback: function (key, options) {
+                                                if(key !== 'bright' && key !== 'dark'){
+                                                    let editor = ace.edit('editor-'+id);
+                                                    editor.setTheme("ace/theme/"+key);
+                                                    localStorage.setItem(`editor-select-theme-${id}`,key);
+                                                }
+                                            },
+                                            items: {
+                                                "bright": { name: "亮色", items: {
+                                                        "chrome": { name: "chrome"},
+                                                        "clouds": { name: "clouds"},
+                                                        "crimson_editor": { name: "crimson_editor"},
+                                                        "dawn": { name: "dawn"},
+                                                        "dreamweaver": { name: "dreamweaver"},
+                                                        "eclipse": { name: "eclipse"},
+                                                        "github": { name: "github"},
+                                                        "iplastic": { name: "iplastic"},
+                                                        "solarized_light": { name: "solarized_light"},
+                                                        "textmate": { name: "textmate"},
+                                                        "tomorrow": { name: "tomorrow"},
+                                                        "xcode": { name: "xcode"},
+                                                        "kuroir": { name: "kuroir"},
+                                                        "katzenmilch": { name: "katzenmilch"},
+                                                        "sqlserver": { name: "sqlserver"}
+                                                    }
+                                                },
+                                                "dark": { name: "暗色", items: {
+                                                        "ambiance": { name: "ambiance"},
+                                                        "chaos": { name: "chaos"},
+                                                        "clouds_midnight": { name: "clouds_midnight"},
+                                                        "dracula": { name: "dracula"},
+                                                        "cobalt": { name: "cobalt"},
+                                                        "gruvbox": { name: "gruvbox"},
+                                                        "gob": { name: "gob"},
+                                                        "idle_fingers": { name: "idle_fingers"},
+                                                        "kr_theme": { name: "kr_theme"},
+                                                        "merbivore": { name: "merbivore"},
+                                                        "merbivore_soft": { name: "merbivore_soft"},
+                                                        "mono_industrial": { name: "mono_industrial"},
+                                                        "monokai": { name: "monokai"},
+                                                        "pastel_on_dark": { name: "pastel_on_dark"},
+                                                        "solarized_dark": { name: "solarized_dark"},
+                                                        "terminal": { name: "terminal"},
+                                                        "tomorrow_night": { name: "tomorrow_night"},
+                                                        "tomorrow_night_blue": { name: "tomorrow_night_blue"},
+                                                        "tomorrow_night_bright": { name: "tomorrow_night_bright"},
+                                                        "tomorrow_night_eighties": { name: "tomorrow_night_eighties"},
+                                                        "twilight": { name: "twilight"},
+                                                        "vibrant_ink": { name: "vibrant_ink"}
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
                                 }
                             },
-                            md: {
+                            /* md: { 
                                 data: {
                                     layout: null,
                                     config: {
@@ -2414,7 +2648,7 @@
                                                 theme: "tomorrow",
                                                 printMargin: false,
                                                 readOnly: false,
-                                                fs: item
+                                                fs: node
                                             }
                                         },
                                         mounted: function () {
@@ -2428,7 +2662,7 @@
                                             init: function () {
                                                 const me = this;
     
-                                                let rtn = fsHandler.fsContent(item.parent, item.name);
+                                                let rtn = fsHandler.fsContent(node.parent, node.name);
     
                                                 me.model.newInput = rtn;
     
@@ -2517,17 +2751,30 @@
                                         me.layout.updateSize();
                                     }
                                 }
-                            }
+                            }*/
                         };
     
+                    
+                    // 判断是否已有窗体打开
+                    try {
+                        if( window.jsPanel.activePanels.getPanel(`jsPanel-editor`) ){
+                            window.jsPanel.activePanels.getPanel(`jsPanel-editor`).front();
+                            window.editorApp.tabAdd(node);
+                        } 
+                    } catch(err){
+                        // 模板，作为vue组件容器
+                        let content = `<div id="fs-editor-template" style="width: 100%;height: 100%;"></div>`;
+                        
+                        // 打开窗体
+                        let win = maxWindow.winEditor("M³ Devops", content, null, null);
                         // vue组件实例化
-                        let ed = item.ftype==='md' ? editor[item.ftype] : editor['normal'];
-    
-                        new Vue(ed).$mount(`#fs-editor-template-${pID}`);
-                    }
+                        let ed = node.ftype==='md' ? editor[node.ftype] : editor['normal'];
+                        window.editorApp = new Vue(ed).$mount(`#fs-editor-template`);
+                        
+                    } 
     
                 },
-                downloadIt: function(item, prompt) {
+                downloadIt(item, prompt) {
                     const self = this
     
                     if(item.ftype == 'dir'){
@@ -2644,7 +2891,7 @@
                     }, "url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;");
                     $(".alertify-prompt .alertify-message").css('height','5vh');
                 },
-                selectIt: function(item){
+                selectIt(item){
                     const self = this
                     
                     if(_.find(self.selectedItem,item)) {
@@ -2656,7 +2903,7 @@
                     window.fsSelectedItem = self.selectedItem;//[];
                     
                 },
-                selectAll: function(){
+                selectAll(){
                     const self = this
     
                     let items = $("li.fs-node").find('.fs-name');
@@ -2672,7 +2919,7 @@
                     //window.fsSelectedItem = self.selectedItem;//[];
     
                 },
-                setRootPath: function(item) {
+                setRootPath(item) {
                     const self = this;
                     
                     let _item = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(item))));
@@ -2680,7 +2927,7 @@
                     self.openIt(_item, [_item.parent,_item.name].join("/"));
     
                 },
-                toggleLeft: function() {
+                toggleLeft() {
                     const self = this;
     
                     if(self.toggle.left) {

@@ -182,7 +182,7 @@ class Window {
 
     winConfig(title, template, position, container){
 
-        this.lrwh[2] = this.width * 0.55;
+        this.lrwh[2] = this.width * 0.4;
         this.lrwh[3] = this.height * 0.56;
 
         let win = $.jsPanel({
@@ -218,6 +218,9 @@ class Window {
                     "font-size": "12px"
                 });
 
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
             }
         });
 
@@ -226,7 +229,7 @@ class Window {
 
     winEditor(title, template, position, container){
 
-        let id = `jsPanel-editor-${objectHash.sha1(title)}`;
+        let id = `jsPanel-editor`;
 
         let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
 
@@ -277,6 +280,10 @@ class Window {
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
                 });
+                $(".jsPanel .jsPanel-ftr").css({
+                    "border-top": "unset"
+                });
+                
 
             },
             footerToolbar: function (footer) {
@@ -428,13 +435,16 @@ class Window {
                 });
                 $(".jsPanel-content",this).css({
                     // "border": "1px solid #dddddd",
-                    "border-top": "none"
+                    "border": "unset"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
+                });
+                $(".jsPanel .jsPanel-ftr").css({
+                    "border": "unset"
                 });
 
             },
@@ -662,6 +672,52 @@ class Window {
         return win;
     }
 
+    winEntityNew(title, template, position, container){
+
+        this.lrwh[2] = this.width * 0.7;
+        this.lrwh[3] = this.height * 0.7;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-entityNew',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: "center 0 0",
+            container: 'body',
+            headerControls: { maximize: 'remove' },
+            headerRemove:  false,
+            content:        template,
+            callback: function(){
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+            },
+            footerToolbar: function (footer) {
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            }
+        });
+
+        return win;
+    }
+
     winClassTemplate(title, template, position, container){
 
         this.lrwh[2] = this.width * 0.4;
@@ -713,7 +769,9 @@ class Window {
         let _position = {
                             my: "left-top",
                             at: "left-top",
-                            of: container
+                            of: container,
+                            offsetX: 5,
+                            offsetY: 5
                         };
 
         this.lrwh[2] = "30em";//this.width * 0.2;
@@ -727,6 +785,7 @@ class Window {
             position: _position,
             headerControls: { maximize: 'remove' },
             headerRemove:  true,
+            container: container,
             content:        template,
             callback: function(panel){
 
@@ -953,7 +1012,7 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd",
+                    "border": "unset",
                     "overflow": "hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
@@ -961,6 +1020,9 @@ class Window {
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
+                });
+                $(".jsPanel .jsPanel-ftr").css({
+                    "border": "unset"
                 });
 
             },
@@ -999,7 +1061,7 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-content",this).css({
-                    "border": "1px solid #dddddd",
+                    "border": "unset",
                     "overflow": "hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
@@ -1007,6 +1069,9 @@ class Window {
                 });
                 $(".jsPanel-titlebar h3").css({
                     "font-size": "12px"
+                });
+                $(".jsPanel .jsPanel-ftr").css({
+                    "border": "unset"
                 });
 
             },

@@ -46,12 +46,12 @@
 
 	/* content */
 	#content.content {
-		padding: 5px 10px 0px 5px!important;
+		padding: 5px 5px 0px 5px!important;
 	}
 
 	/* Event view */
 	.tree-view {
-		padding: 0 15px;
+		padding: 0px;
 	}
 
 	/* 运维模式 */
@@ -169,8 +169,8 @@
 		height: 22px;
 		line-height: 22px;
 		width: 50%;
-		right: 15px;
-		top: 20px;
+		right: 5px;
+		top: 10px;
 		flex-direction: row-reverse;
 		z-index: 100;
 	}
@@ -183,6 +183,10 @@
 	#log-view-summary .el-tabs__content{
 		max-height:160px;
 		overflow-y:auto;
+	}
+
+	#log-view-container .el-tabs__content{
+		padding: 0px;
 	}
 
 	.el-tabs__item {
@@ -198,6 +202,16 @@
 	/* 属性选择，隐藏第一列checkbox */
 	.dt-button-collection.fixed.four-column > a:nth-child(1){
 		display: none;
+	}
+
+	/* Split Style */
+	.gutter.gutter-horizontal{
+		background-color: rgb(241, 241, 241);
+		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+		background-size: 7px;
+		background-position-x: 50%;
+		background-position-y: 50%;
+		background-repeat: no-repeat;
 	}
 
 	/* 全屏模式 */
@@ -233,7 +247,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/log/log-graph-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/log/log-summary-component.html"></link>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/vue-timeline-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-timeline-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
@@ -242,19 +256,19 @@
 
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
-		<el-row :gutter="10">
-			<el-col :xl="24" style="padding-bottom:7px;">
+		<el-container>
+			<el-header style="height: 30px;line-height: 30px;padding: 0px;">
 				<search-base-component :id="model.id"
 				                       :options="options"
 									   ref="searchRef"
 									   class="grid-content"></search-base-component>
-			</el-col>
-			<el-col :xl="24" style="min-height: 85vh;" id="log-view-container">
+			</el-header>
+			<el-main id="log-view-container" style="padding: 5px 0px 0px 0px;">
 				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
 					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
 						<div v-if="item.type==='main'">
 							<div class="log-view-summary-control">
-								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top">
+								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
 									<div>
 										${control.ifRefresh==1?'自动刷新':'自动刷新'}
 										<el-switch
@@ -267,7 +281,7 @@
 										</el-switch>
 									</div>
 								</el-tooltip>
-								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top">
+								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
 									<div>
 										${control.ifSmart==1?'智能分析':'智能分析'}
 										<el-switch
@@ -281,8 +295,8 @@
 									</div>
 								</el-tooltip>
 							</div>
-							<el-row :gutter="10" id="log-view-summary">
-								<el-col :xl="24">
+							<el-container id="log-view-summary">
+								<el-main>
 									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
 										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
 											<div v-if="item.type=='radar'">
@@ -293,16 +307,16 @@
 											</div>
 										</el-tab-pane>
 									</el-tabs>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10" id="log-view-console">
-								<el-col :xl="8" class="tree-view animated fadeInRight">
+								</el-main>
+							</el-container>
+							<el-container id="log-view-console">
+								<el-aside class="tree-view" id="log-view-left" style="background-color:#f6f6f6;">
 									<probe-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
-								</el-col>
-								<el-col :xl="16" class="table-view animated fadeInLeft">
+								</el-aside>
+								<el-main class="table-view" id="log-view-main" style="padding:5px;">
 									<log-datatable-component id="log-list" :model="model.message"></log-datatable-component>
-								</el-col>
-							</el-row>
+								</el-main>
+							</el-container>
 						</div>
 						<div v-if="item.type==='diagnosis'">
 							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">
@@ -324,8 +338,8 @@
 						</div>
 					</tab>
 				</el-tabs>
-			</el-col>
-		</el-row>
+			</el-main>
+		</el-container>
 	</main>
 </script>
 

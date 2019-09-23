@@ -146,9 +146,9 @@
         .topological-graph-component .footerbar {
             height: 40px!important;
             line-height:40px;
-            position: absolute;
+            position: fixed;
             z-index:20;
-            bottom: 4.5em;
+            bottom: 30px;
             width: 87vw;
             display:flex;
             padding: 5px;
@@ -199,6 +199,15 @@
             height: 0;
             border-color: transparent!important;
             border-style: solid;
+        }
+
+        /* jsPanel graphAction */
+        .graphAction .input-with-select.el-input.el-input--small{
+            border-bottom: 1px solid #ddd!important;
+        }
+        .graphAction .el-input-group__append, .graphAction .el-input-group__prepend, .graphAction .el-input__inner {
+            background-color: transparent!important;
+            border: unset!important;
         }
 
 	</style>
@@ -285,7 +294,7 @@
                             </el-tooltip>
                             
                             <a href="javascript:void(0);" @click="expandHorizontalBar">
-                                历史 ${_.size(model.graph.history)}
+                                历史 ${_.size(model.graph.history)} 
                             </a>
                             
                     </div>
@@ -294,7 +303,7 @@
                 </el-main>
                 <transition-group tag="el-footer" class="footerbar animated fadeInRight" :style="{display: model.graph.footbar.show?'':'none'}">
                     <el-tooltip :content="item.term" v-for="(item,index) in model.graph.history" effect="light" :key="item.id" class="animated fadeIn">
-                        <a href="javascript:void(0);" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")}</a>
+                        <a href="javascript:void(0);" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")} <span class="fas fa-copy copy" @click="onCopy(item.term)"></span></a>
                     </el-tooltip>
                 </transition-group>
             </el-container>
@@ -713,7 +722,7 @@
     
                 let input = "('" + `${cells.join("','")}` + "')";
 
-                let status = fsHandler.callFsJScript('/graph/graph_imap_data.js', encodeURIComponent(JSON.stringify(cells))).message;
+                let status = fsHandler.callFsJScript("/matrix/graph/graph_imap_data.js", encodeURIComponent(JSON.stringify(cells))).message;
 
                 self.model.graph.graph.getModel().beginUpdate();
 
@@ -1118,6 +1127,15 @@
                 let url = fsHandler.genFsUrl(item,null,null);
 
                 window.open(url, "_parent");
+            },
+            onCopy(item){
+                const self = this;
+                new Clipboard("span.copy", {
+                    text: function(trigger) {
+                        self.$message("已复制");
+                        return item;
+                    }
+                });
             }
 	    }
 	

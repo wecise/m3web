@@ -427,7 +427,7 @@
             initMenu: function(){
                 let self = this;
 
-                let items = fsHandler.callFsJScript('/probe/toolbar.js', '').message.probe.probe;
+                let items = fsHandler.callFsJScript("/matrix/probe/toolbar.js", "").message.probe.probe;
                 let id = self.id;
 
                 $.contextMenu({
@@ -539,7 +539,7 @@
                         input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
                     }
                     
-                    let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                    let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                     if(rtn.status == 'ok'){
                         eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -605,7 +605,7 @@
                         onAddTag: function(event){
 
 	                        let input = {class: self.selectedRow.class, action: "+", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);
@@ -615,7 +615,7 @@
                         onRemoveTag: function(event){
 
                             let input = {class: self.selectedRow.class, action: "-", tag: event.detail.value, id: self.selectedRow.id};
-                            let rtn = fsHandler.callFsJScript('/tags/tag_service.js', encodeURIComponent(JSON.stringify(input)));
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
 
                             if(rtn.status == 'ok'){
                                 eventHub.$emit("PROBE-REFRESH-EVENT", ['probe']);

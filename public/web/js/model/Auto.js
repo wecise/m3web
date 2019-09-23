@@ -122,7 +122,7 @@ class Auto {
                             let self = this;
 
                             _.forEach(event, function (v) {
-                                window[v] = fsHandler.callFsJScript(`/probe/probe_summary_by_${v}.js`, '');
+                                window[v] = fsHandler.callFsJScript(`/matrix/probe/probe_summary_by_${v}.js`, '');
 
                                 if (window[v].status == 'ok') {
                                     self[v] = window[v].message;
@@ -143,7 +143,7 @@ class Auto {
     upload(){
         let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 上传`, `<div id="auto-add-container"></div>`, null, 'auto-container');
 
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_auto_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_auto_conf.js", mx.urlParams['userid']).message;
         
         let wizard = {
             data: {
@@ -373,7 +373,7 @@ class Auto {
         
         let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="auto-add-container"></div>`, null, 'auto-container');
 
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_auto_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_auto_conf.js", mx.urlParams['userid']).message;
 
         let wizard = {
             data: {
@@ -484,7 +484,7 @@ class Auto {
         
         let wnd = maxWindow.winProbe(`<i class="fas fa-plus-circle"></i> 编辑`, `<div id="auto-add-container"></div>`, null, 'auto-container');
 
-        let conf = fsHandler.callFsJScript('/probe/probe_summary_auto_conf.js', mx.urlParams['userid']).message;
+        let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_auto_conf.js", mx.urlParams['userid']).message;
 
         let node = _.cloneDeep(event);
 

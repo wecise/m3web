@@ -299,7 +299,7 @@
                 let table = $("#"+self.id).DataTable();
 			},
 			refresh: function(){
-				this.model = fsHandler.callFsJScript('/event/event_diagnosis.js', null).message[self.type] || [];
+				this.model = fsHandler.callFsJScript("/matrix/event/event_diagnosis.js", null).message[self.type] || [];
 			},
 			detail: function(){
                 this.$root.detail(this.selectedRows);

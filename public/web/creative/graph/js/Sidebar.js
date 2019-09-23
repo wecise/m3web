@@ -119,9 +119,10 @@ Sidebar.prototype.init = function()
         self.addSearchPalette(true);
 
 		// entity
-		let temp = omdbHandler.classList("/matrix/entity")[0].child;
+		let temp = omdbHandler.classList("/matrix/entity");
+		
 		entity = _.sortBy(_.map(temp,function(v){
-			return { name:v, alias: _.last(v.split("/")) };
+			return { name:v.name, alias: v.alias };
 		}),['alias'],['asc']);
 		
         this.imapConfig = _.map(entity,'alias')
@@ -144,7 +145,7 @@ Sidebar.prototype.init = function()
                         tags[val.name] = _.values(val).join(" ");
                     })
 
-                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', _.last(_.split(v.name,"/")), '.png', _data, _data, tags, false);
+                    self.addEntitiesMatrixPalette('entities', v.alias, dir + '/matrix/12/', v.alias, '.png', _data, _data, tags, false);
                 })
 
             }
@@ -179,6 +180,19 @@ Sidebar.prototype.init = function()
                     'Router_Icon': 'router switch'});
         },500)
     } else if(window.URL_PARAMS_ITEM.ftype == 'iepc'){
+
+        self.addSearchPalette(false);
+
+        _.delay(function(){
+            $("#imap-tabs ul").remove();
+
+            $("#imap-config").removeClass("active");
+            $("#imap-shape").addClass("active");
+
+            self.addEpcPalette(true);
+
+        },500)
+    } else if(window.URL_PARAMS_ITEM.ftype == 'iflow'){
 
         self.addSearchPalette(false);
 

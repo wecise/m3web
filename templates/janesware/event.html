@@ -49,12 +49,12 @@
 
 	/* content */
 	#content.content {
-		padding: 5px 10px 0px 5px!important;
+		padding: 5px 5px 0px 5px!important;
 	}
 
 	/* Event view */
 	.tree-view {
-		padding: 0 15px;
+		padding: 0px;
 	}
 
 	/* 运维模式 */
@@ -181,8 +181,8 @@
 		height: 22px;
 		line-height: 22px;
 		width: 50%;
-		right: 15px;
-		top: 20px;
+		right: 5px;
+		top: 10px;
 		flex-direction: row-reverse;
 		z-index: 100;
 	}
@@ -195,6 +195,17 @@
 	#event-view-summary .el-tabs__content{
 		max-height:160px;
 		overflow-y:auto;
+	}
+
+	#event-view-summary .el-tabs__header{
+		margin-bottom: 0px;
+	}
+	#event-view-summary .el-tabs__header .el-tabs__nav-scroll{
+		padding-top: 10px;
+	}
+
+	#event-view-container .el-tabs__content{
+		padding: 0px;
 	}
 
 	.el-tabs__item {
@@ -414,16 +425,16 @@
 
 <script type="text/x-template" id="app-template">
 	<main id="content" class="content">
-		<el-row :gutter="10">
-			<el-col :xl="24" style="padding-bottom:7px;">
+		<el-container>
+			<el-header style="height: 30px;line-height: 30px;padding: 0px;">
 				<search-base-component :id="model.id"
 				                       :options="options"
 									   ref="searchRef"
 									   class="grid-content"></search-base-component>
-			</el-col>
-			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
-				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
-					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
+			</el-header>
+			<el-main id="event-view-container" style="padding: 5px 0px 0px 0px;">
+				<el-tabs v-model="layout.main.activeIndex" class="eventViewContainer" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
+					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true style="padding:0px;">
 						<div v-if="item.type==='main'">
 							<div class="event-view-summary-control">
 								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
@@ -466,8 +477,8 @@
 									</div>
 								</el-tooltip>
 							</div>
-							<el-row :gutter="10" id="event-view-summary">
-								<el-col :xl="24">
+							<el-container id="event-view-summary">
+								<el-main>
 									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
 										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
 											<div v-if="item.type=='radar'">
@@ -481,16 +492,16 @@
 											</div>
 										</el-tab-pane>
 									</el-tabs>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10" id="event-view-console">
-								<el-col :xl="8" class="tree-view animated fadeInRight">
-									<entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
-								</el-col>
-								<el-col :xl="16" class="table-view animated fadeInLeft">
+									</el-main>
+							</el-container>
+							<el-container id="event-view-console">
+								<el-aside class="tree-view" id="event-view-left" style="background-color:#f6f6f6;">
+									<entity-tree-component id="event-tree" :model="{parent:'/matrix/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
+								</el-aside>
+								<el-main class="table-view" id="event-view-main" style="padding:5px;">
 									<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
-								</el-col>
-							</el-row>
+								</el-main>
+							</el-container>
 						</div>
 						<div v-else-if="item.type==='diagnosis'">
 							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line"> 
@@ -524,8 +535,8 @@
 						</div>
 					</tab>
 				</el-tabs>
-			</el-col>
-		</el-row>
+			</el-main>
+		</el-container>
 	</main>
 </script>
 
