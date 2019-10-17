@@ -132,7 +132,7 @@
                         enable: false
                     }
                 },
-                zNodes: fsHandler.callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
+                zNodes: fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
                 curTarget: null,
                 curTmpTarget: null,

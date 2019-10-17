@@ -20,37 +20,13 @@
 			overflow: auto;
 		}
 
-        .editor-toolbar {
-            border: none;
-            margin: auto;
-            width: 100%;
-            position: relative;
-            background-color: rgb(246, 246, 246);
-        }
-
-        .editor-toolbar .btn-link,
-        .editor-toolbar .btn-link:hover{
-            background-color: rgb(246, 246, 246);
-            color: #333333;
-            border:none;
-        }
-
-        .editor-toolbar .btn-group > a > i{
-            color: #666666;
-        }
-
-
-        .lm_maximised .fs-editor-component .ace_editor{
+        .fs-editor-component .ace_editor{
 			border: none;
 			margin: 0px 0px 10px 0px;
 			width: 100%;
 			/*height:calc(100% - 50px)!important;*/
 			position: relative !important;
 			overflow: auto;
-		}
-
-		.lm_header {
-			background-color: rgb(246, 246, 246);
 		}
 
 		.ace_keyword {
@@ -70,7 +46,6 @@
 	/*----------  最外层element会自动增加组件同名 class="fs-editor-component"  ----------*/
 	<template>
 		<div class="editor-container">
-            <div class="editor-toolbar"></div>
             <div class="editor-content">
                 <div :id="id"></div>
             </div>
@@ -104,7 +79,7 @@
         watch: {
             'model.newInput': {
             	handler:function(val,oldVal){
-                    let self = this;
+                    const self = this;
                     
                     self.editor.setValue(val);
                 },
@@ -114,13 +89,13 @@
 
         },
         created() {
-            let self = this;
+            const self = this;
 
             eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",self.refresh);
         },
         methods: {
             init() {
-                let self = this;
+                const self = this;
 
                 self.langTools = ace.require("ace/ext/language_tools");
                 self.editor = ace.edit(self.id);
@@ -186,155 +161,30 @@
 
                 self.editor.setValue(this.model.newInput);
                 
-                /*ToolBar*/
-                /*
-                self.editorDom = ace.require("ace/lib/dom");
-                
-                self.editorDom.buildDom(["div", { class: "editor-toolbar btn-group" },
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: "undoButton",
-	                    title: "重新加载",
-                        onclick: function() {
-                            self.reload();
-                        }
-                    }, ["i",{class:"fas fa-sync"},""]],
-	                ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: "undoButton",
-                        title: "撤销",
-		                onclick: function() {
-                            self.editor.undo();
-                        }
-                    }, ["i",{class:"fas fa-undo"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: "redoButton",
-                        title: "重做",
-                        onclick: function() {
-                            self.editor.redo();
-                        }
-                    }, ["i",{class:"fas fa-redo"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: ""
-                    }, "|"],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "粗体",
-                        onclick: function() {
-                            self.editor.insertSnippet("**${1:$SELECTION}**");
-                            self.editor.renderer.scrollCursorIntoView()
-                        }
-                    }, ["i",{class:"fas fa-bold"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "斜体",
-                        onclick: function() {
-                            self.editor.insertSnippet("*${1:$SELECTION}*");
-                            self.editor.renderer.scrollCursorIntoView()
-                        }
-                    }, ["i",{class:"fas fa-italic"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "复制",
-                        onclick: function() {
-                            self.copyIt();
-                        }
-                    }, ["i",{class:"fas fa-copy"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "粘贴",
-                        onclick: function() {
-                            self.pasteIt();
-                        }
-                    }, ["i",{class:"fas fa-paste"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "选择",
-                        onclick: function() {
-                            self.selectAll();
-                        }
-                    }, ["i",{class:"fas fa-check"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "清除",
-                        onclick: function() {
-                            self.clearIt();
-                        }
-                    }, ["i",{class:"fas fa-trash"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: ""
-                    }, "|"],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        ref: "saveButton",
-                        title: "保存",
-                        onclick: function() {
-                            self.saveIt();
-                        }
-                    }, ["i",{class:"fas fa-save"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "保存并运行",
-                        onclick: function() {
-                            self.runIt();
-                        }
-                    }, ["i",{class:"fas fa-play"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: "btn btn-sm btn-link",
-                        title: "发布为应用",
-                        onclick: function() {
-                            self.deployIt(self.model.fs);
-                        }
-                    }, ["i",{class:"fab fa-codepen"},""]],
-                    ["a", {
-                        href: "javascript:void(0)",
-                        class: `btn btn-sm btn-link pull-right editor-select-theme-${self.id}`,
-                        title: "主题",
-                    }, ["i",{class:"fas fa-tshirt"},""]]
-                ], $(`#jsPanel-editor`).find(".jsPanel-hdr")[0], self.refs);
-                */
-
             },
             updateToolbar () {
-                let self = this;
+                const self = this;
 
                 self.refs.saveButton.disabled = self.editor.session.getUndoManager().isClean();
                 self.refs.undoButton.disabled = !self.editor.session.getUndoManager().hasUndo();
                 self.refs.redoButton.disabled = !self.editor.session.getUndoManager().hasRedo();
             },
 	        refresh(){
-                let self = this;
+                const self = this;
 
                 if(self.editor){
                     self.editor.resize();
                 }
 	        },
             setOptions(){
-                let self = this;
+                const self = this;
 
                 if(!_.isEmpty(self.model.options)){
                     self.editor.setOptions(self.model.options);
                 } 
             },
             setTheme(){
-                let self = this;
+                const self = this;
 
                 let localTheme = localStorage.getItem(`editor-select-theme-${self.id}`);
 
@@ -352,7 +202,7 @@
                 
             },
             setMode(){
-                let self = this;
+                const self = this;
 
                 if(_.isEmpty(self.model.mode)){
                 	self.editor.getSession().setMode("ace/mode/json");
@@ -362,12 +212,12 @@
                 
             },
             setValue(){
-                let self = this;
+                const self = this;
 
                 self.editor.setValue(self.model.oldInput);
             },
             getSelected(){
-                let self = this;
+                const self = this;
                 var temp = self.editor.getSelectedText();
 
                 if(_.isEmpty(temp)){
@@ -377,7 +227,7 @@
                 }
             },
             toggleToolsBar(){
-                let self = this;
+                const self = this;
 
                 if(self.showToolsBar){
                     $(".editorToolBar").show();
@@ -386,7 +236,7 @@
                 }
             },
 	        toggleStatusBar(){
-                let self = this;
+                const self = this;
 
                 if(self.showStatusBar) {
                     let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
@@ -394,7 +244,7 @@
                 }
 	        },
 	        copyIt(){
-		        let self = this;
+		        const self = this;
 
                 new Clipboard(".copy", {
                     text: function(trigger) {
@@ -405,31 +255,31 @@
 
 	        },
             pasteIt(){
-                let self = this;
+                const self = this;
 
                 document.execCommand("paste");
                 alertify.log("已粘贴");
             },
 	        selectAll(){
-                let self = this;
+                const self = this;
 
                 self.editor.selection.selectAll();
             },
             clearIt(){
-                let self = this;
+                const self = this;
 
                 self.editor.setValue();
                 alertify.log("已清空");
             },
             reload(){
-				let self = this;
+				const self = this;
 
                 let rtn = fsHandler.fsContent(self.model.fs.parent,self.model.fs.name);
 
                 self.editor.setValue(rtn);
             },
 	        deployIt(item){
-                let self = this;
+                const self = this;
 
                 let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy-${self.bid}"></div>`, null, 'editor-container');
 
@@ -580,7 +430,7 @@
 
             },
 	        saveIt(){
-                let self = this;
+                const self = this;
 
                 let sc = self.editor.getValue();
 
@@ -605,7 +455,7 @@
 
             },
             runIt(){
-                let self = this;
+                const self = this;
 
                 $(".fas.fa-play").addClass("fa-spin");
 

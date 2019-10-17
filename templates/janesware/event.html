@@ -496,7 +496,7 @@
 							</el-container>
 							<el-container id="event-view-console">
 								<el-aside class="tree-view" id="event-view-left" style="background-color:#f6f6f6;">
-									<entity-tree-component id="event-tree" :model="{parent:'/matrix/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
+									<entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
 								</el-aside>
 								<el-main class="table-view" id="event-view-main" style="padding:5px;">
 									<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>

@@ -524,7 +524,7 @@ class OmdbHandler {
     *
     * */
     classDataExport(event){
-        let rtn = null;
+        let rtn = 1;
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
 
@@ -540,13 +540,12 @@ class OmdbHandler {
                     var blob = new Blob([xhr.response], event.filetype=='mql'?{type: "octet/stream"}:{type: "application/vnd.ms-excel"});
                     saveAs(blob, fileName);
                     alertify.success("导出成功" + " " + fileName);
-                    rtn = 1;
                 }
             }
             xhr.responseType = "arraybuffer";
             xhr.send();
         } catch(err){
-            
+            rtn = 0;
         }
         return rtn;
     };

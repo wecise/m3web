@@ -127,17 +127,16 @@
                         enable: false
                     }
                 },
-                zNodes: fsHandler.callFsJScript(`${[this.model.parent,this.model.name].join("/")}`).message,
+                zNodes: fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
                 curTarget: null,
                 curTmpTarget: null,
             }
         },
-        created: function(){
-            const self = this;
-
+        created(){
+            
         },
-        mounted: function () {
+        mounted() {
             const self =  this;
 
             self.$nextTick(function () {
@@ -150,12 +149,12 @@
             })
         },
         methods:{
-            init: function () {
+            init() {
                 const self = this;
 
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
             },
-	        initPlugIn: function(){
+	        initPlugIn(){
                 const self = this;
 
                 $(self.$el).contextMenu({
@@ -192,12 +191,12 @@
                 });
 
 	        },
-            initData: function(node){
+            initData(node){
                 const self = this;
                 
                 self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
             },
-            initSubNode: function(node){
+            initSubNode(node){
 				const self = this;
 
                 _.forEach(node, function(v,k){
@@ -236,7 +235,7 @@
                 })
 
 	        },
-            onExpand: function(event, treeId, treeNode) {
+            onExpand(event, treeId, treeNode) {
                 const self = this;
 
                 let recursiveTraverse = function (node) {
@@ -262,7 +261,7 @@
 
                 }
             },
-            onClick: function (event, treeId, treeNode, clickFlisParentag) {
+            onClick(event, treeId, treeNode, clickFlisParentag) {
                 const self = this;
 
                 self.selectedNode = treeNode;

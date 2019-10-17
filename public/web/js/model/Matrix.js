@@ -370,6 +370,7 @@ class Matrix {
     getPage(){
         let path = window.location.pathname;
         let page = path.split("/").pop();
+        $("body").addClass(`page-${page}`);
         return page;
     }
 

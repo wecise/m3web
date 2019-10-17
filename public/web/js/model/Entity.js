@@ -1288,7 +1288,7 @@ class Entity extends Matrix {
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
-                                                <el-aside style="background: #f6f6f6;" id="entity-view-new-left">
+                                                <el-aside style="background: #f6f6f6;width:200px;" id="entity-view-new-left">
                                                     <el-container>
                                                         <el-header style="height:30px;line-height:30px;padding: 0px 10px;">
                                                             选择类
@@ -1308,9 +1308,14 @@ class Entity extends Matrix {
                                                 </el-aside>
                                                 <el-container id="entity-view-new-main">
                                                     <el-main style="padding:10px;">
-                                                        <el-form ref="form" :model="model.node" label-width="80px">
-                                                            <el-form-item :label="item.name" v-for="item in model.node">
-                                                                <el-input v-model="item.value" style="border:1px solid #f7f7f7;"></el-input>
+                                                        <el-form ref="form" :model="model.node" label-width="100px">
+                                                            <el-form-item :label="item.dispname" v-for="item in model.node" style="margin:5px 0px;">
+                                                                <el-date-picker type="datetime" v-model="item.value" v-if="item.type==='date'"></el-date-picker>
+                                                                <el-input type="number" v-model="item.value" v-if="item.type==='smallint'" ></el-input>
+                                                                <el-input type="string" v-model="item.value" v-if="item.type==='varchar'"></el-input>
+                                                                <el-input type="textarea" v-model="item.value" v-if="item.type==='map'" show-word-limit></el-input>
+                                                                <el-input type="textarea" v-model="item.value" v-if="item.type==='list'" show-word-limit></el-input>
+                                                                <el-input type="textarea" v-model="item.value" v-if="item.type==='set'" show-word-limit></el-input>
                                                             </el-form-item>
                                                         </el-form>
                                                     </el-main>
@@ -1320,20 +1325,26 @@ class Entity extends Matrix {
                                                     </el-footer>
                                                 </el-container>
                                             </el-container>`,
+                                filters:{
+                                    format(item){
+                                        return JSON.stringify(item.value,null,2);
+                                    }
+                                },
                                 mounted(){
-                                    Split([`#entity-view-new-left`, `#entity-view-new-main`], {
-                                        sizes: [20, 80],
-                                        minSize: [0, 0],
-                                        gutterSize: 5,
-                                        cursor: 'col-resize',
-                                        direction: 'horizontal',
-                                    });
+                                    _.delay(()=>{
+                                        Split([`#entity-view-new-left`, `#entity-view-new-main`], {
+                                            sizes: [20, 80],
+                                            minSize: [0, 0],
+                                            gutterSize: 5,
+                                            cursor: 'col-resize',
+                                            direction: 'horizontal',
+                                        });
+                                    },1000)
                                 },
                                 methods:{
                                     onNodeClick(node){
-                                        console.log(1,node,node.id)
                                         this.model.selectedNode = node;
-                                        this.model.node = fsHandler.callFsJScript("/matrix/entity/entity_class_by_cid.js",encodeURIComponent(encodeURIComponent(node.id))).message;
+                                        this.model.node = fsHandler.callFsJScript("/matrix/entity/entity_class_by_cid.js",encodeURIComponent(node.id)).message;
                                     },
                                     onCancel(){
                                         wnd.close();

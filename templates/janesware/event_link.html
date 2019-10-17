@@ -495,7 +495,7 @@
 							</el-row>
 							<el-row :gutter="10" id="event-view-console">
 								<el-col :xl="8" class="tree-view animated fadeInRight">
-									<entity-tree-component id="event-tree" :model="{parent:'/matrix/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
+									<entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
 								</el-col>
 								<el-col :xl="16" class="table-view animated fadeInLeft">
 									<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>

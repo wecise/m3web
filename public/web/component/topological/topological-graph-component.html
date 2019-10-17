@@ -702,7 +702,9 @@
 
                     self.toCenter();
 
-                    self.updateStatus();
+                    setInterval(()=>{
+                        this.updateStatus();
+                    },15000);
                     
                 }
             },

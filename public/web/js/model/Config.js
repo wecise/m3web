@@ -161,78 +161,53 @@ class Config {
                     }
                 })
 
+                // 日志
                 Vue.component('config-log-console',{
                     delimiters: ['${', '}'],
                     props: {
-                        id: String,
-                        ifLog: Boolean
+                        //规则名称
+                        id: String   
                     },
-                    template: `<table :id="'log-table-'+cid" class="hover" width="100%"></table>`,
+                    template:   `<el-container>
+                                    <el-header style="height:30px;line-height:30px;padding:0px;">
+                                        <el-tooltip content="清空" open-delay="500">
+                                            <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="重新加载" open-delay="500">
+                                            <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-table :data="rows" style="width: 100%" max-height="200" stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
+                                                :row-class-name="rowClassName"
+                                                :header-cell-style="headerRender"
+                                                @selection-change="handleSelectionChange">
+                                            <el-table-column type="selection" width="55"></el-table-column>                                                
+                                            <el-table-column :label="item.title" 
+                                                            :prop="item.data" 
+                                                            v-for="(item,index) in columns" 
+                                                            :formatter="item.render" 
+                                                            sortable 
+                                                            :width="item.width"
+                                                            v-if="item.visible">
+                                            </el-table-column>
+                                            <!--el-table-column align="right">
+                                                <template slot="header" slot-scope="scope">
+                                                    <el-input size="mini" placeholder="输入关键字搜索"/>
+                                                </template>
+                                            </el-table-column-->
+                                        </el-table>
+                                    </el-main>
+                                </el-container>`,
                     data(){
                         return {
-                            cid: "",
                             rows: [],
                             columns: [],
-                            options: {
-                                destroy: true,
-                                searching: false,
-                                aDataSort: true,
-                                bSort: true,
-                                bAutoWidth: true,
-                                colReorder: true,
-                                scrollX: true,
-                                scrollY: '30vh',
-                                scrollCollapse: true,
-                                paging: false,
-                                info: false,
-                                aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-                                language : {
-                                    "sProcessing" : "处理中...",
-                                    "sLengthMenu" : "显示 _MENU_ 项结果",
-                                    "sZeroRecords" : "没有匹配结果",
-                                    "sInfo" : "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
-                                    "sInfoEmpty" : "显示第 0 至 0 项结果，共 0 项",
-                                    "sInfoFiltered" : "(由 _MAX_ 项结果过滤)",
-                                    "sInfoPostFix" : "",
-                                    "sSearch" : "过滤:",
-                                    "sUrl" : "",
-                                    "sEmptyTable" : "表中数据为空",
-                                    "sLoadingRecords" : "载入中...",
-                                    "sInfoThousands" : ",",
-                                    "oPaginate" : {
-                                        "sFirst" : "首页",
-                                        "sPrevious" : "上页",
-                                        "sNext" : "下页",
-                                        "sLast" : "末页"
-                                    },
-                                    "oAria" : {
-                                        "sSortAscending" : ": 以升序排列此列",
-                                        "sSortDescending" : ": 以降序排列此列"
-                                    },
-                                    buttons: {
-                                        copyTitle: '已拷贝到剪切板',
-                                        copyKeys: '已拷贝',
-                                        copySuccess: {
-                                            _: '已拷贝 %d 项',
-                                            1: '1 已拷贝'
-                                        }
-                                    }
-                                }
-                            }
+                            selectedRows: [],
+                            ifDeleteVersionData: false
                         }
                     },
-                    watch: {
-                        ifLog:{
-                            handler:function(val,oldVal){
-                                if(val){
-                                    //this.initDT();
-                                }
-                            },
-                            immediate:true
-                        }
-                    },
-                    created: function(){
-                        this.cid = objectHash.sha1(this.id);
+                    created(){
                         let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
                         this.rows = rtn.rows;
                         this.columns = _.map(rtn.columns,function(v){
@@ -241,31 +216,186 @@ class Config {
                                             }
                                             return v;
                                         });
-                        _.extend(this.options,rtn.options);
-                    },
-                    mounted: function() {
-                        this.initDT();
+                        
+                        // 更新DataTable
+                        eventHub.$on("CONFIG-LOG-UPDATE-EVENT",()=>{
+                            let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
+                            this.rows = rtn.rows;
+                        })
                     },
                     methods:{
-                        initDT(){
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onReset(){
+                            let item = {class:"/matrix/consolelog/", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData}
+                            let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
+                            _.delay(()=>{
+                                let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
+                                this.rows = rtn.rows;
+                            })
+                        },
+                        onLoad(){
+                            let rtn = fsHandler.callFsJScript("/matrix/config/log-by-name.js", encodeURIComponent(this.id)).message;
+                            this.rows = rtn.rows;
+                        },
+                        handleSelectionChange(val) {
+                            console.log(val);
+                            this.selectedRows = val;
+                        }
+                    }
+                })
+
+                // 调试
+                Vue.component('config-debug-console',{
+                    delimiters: ['${', '}'],
+                    props: {
+                        id: String,
+                        rule: String
+                    },
+                    template:   `<el-container>
+                                    <el-main>
+                                        <el-input type="textarea"
+                                            placeholder="请输入"
+                                            v-model="debug"
+                                            maxlength="3000"
+                                            show-word-limit
+                                            style="border:unset;background:#f9f9f9;">
+                                        </el-input>
+                                    </el-main>
+                                    <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                        <el-button type="default" @click="onReset">重置</el-button>
+                                        <el-button type="primary" @click="onSubmit">提交</el-button>
+                                    </el-footer>
+                                </el-container>`,
+                    data(){
+                        return {
+                            debug: ""
+                        }
+                    },
+                    created(){
+                        
+                    },
+                    mounted: function() {
+                        
+                    },
+                    methods:{
+                        onReset(){
+                            this.debug = "";
+                        },
+                        onSubmit(){
+                            let term = encodeURIComponent(JSON.stringify(_.extend({},{rule:this.rule, term: this.debug})));
+                            let rtn = fsHandler.callFsJScript("/matrix/config/forwardDebug.js",term);
+                            if(rtn.status = 'ok'){
+                                eventHub.$emit("CONFIG-LOG-UPDATE-EVENT");
+                                //this.$root.$refs[`configManageRef${objectHash.sha1(this.id)}`][0].$refs.configLogConsoleRef.load();
+                            }
+                        }
+                    }
+                })
+
+                // 数据
+                Vue.component('config-data-console',{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        //class名称
+                        model: Object
+                    },
+                    template:   `<el-container>
+                                    <el-header style="height:30px;line-height:30px;padding:0px;">
+                                        <el-tooltip content="清空" open-delay="500">
+                                            <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="重新加载" open-delay="500">
+                                            <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="默认只删除对象数据，勾选此项同时删除版本数据。" open-delay="500">
+                                            <el-checkbox v-model="ifDeleteVersionData" style="height: 35px;line-height: 35px;float:right;">删除版本数据</el-checkbox>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-table :data="rows" style="width: 100%" max-height="200" stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
+                                                :row-class-name="rowClassName"
+                                                :header-cell-style="headerRender"
+                                                @selection-change="handleSelectionChange">
+                                            <el-table-column type="selection" width="55"></el-table-column>
+                                            <el-table-column :label="item.title" 
+                                                            :prop="item.data" 
+                                                            v-for="item in columns" 
+                                                            :formatter="item.render"
+                                                            v-if="item.visible">
+                                            </el-table-column>
+                                            <!--el-table-column align="right">
+                                                <template slot="header" slot-scope="scope">
+                                                    <el-input size="mini" placeholder="输入关键字搜索"/>
+                                                </template>
+                                            </el-table-column-->
+                                        </el-table>
+                                    </el-main>
+                                </el-container>`,
+                    data(){
+                        return {
+                            rows: [],
+                            columns: [],
+                            selectedRows: [],
+                            ifDeleteVersionData: false
+                        }
+                    },
+                    created(){
+                        
+                        let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
+                        this.rows = rtn.rows;
+                        this.columns = _.map(rtn.columns,function(v){
+                                            if(v.render){
+                                                v.render = eval(v.render);
+                                            }
+                                            return v;
+                                        });
+                        
+                        // 更新DataTable
+                        eventHub.$on("CONFIG-LOG-UPDATE-EVENT",()=>{
+                            let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
+                            this.rows = rtn.rows;
+                        })
+                    },
+                    methods:{
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0 && columnIndex !== 0) {
+                                //return 'text-align:right;';
+                            }
+                        },
+                        onReset(){
                             const self = this;
 
-                            //初始化维度选择Table
-                            var table = $(`#log-table-${self.cid}`).DataTable(_.extend(
-                                self.options,{
-                                data: self.rows,
-                                columns: self.columns
-                            }));
-
-                            
-
-                            $(`#log-table-${self.cid}_wrapper input[type="search"]`).css({
-                                "height":"20px"
+                            alertify.confirm(`确认要删除下列数据?<br><br>
+                                            ${_.map(self.selectedRows,'id').join("<br><br>")}`, function (e) {
+                                if (e) {
+                                    let item = {class:"/matrix/", ids: _.map(self.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData};
+                                    let act = fsHandler.callFsJScript("/matrix/config/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
+                                    _.delay(()=>{
+                                        let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(self.model.name)).message;
+                                        self.rows = rtn.rows;
+                                    })
+                                } else {
+                                    
+                                }
                             });
-
-                            $(`#log-table-${self.cid}_wrapper`).css({
-                                "padding":"10px 0px"
-                            });
+                        },
+                        onLoad(){
+                            let rtn = fsHandler.callFsJScript("/matrix/config/data-by-name.js", encodeURIComponent(this.model.name)).message;
+                            this.rows = rtn.rows;
+                        },
+                        handleSelectionChange(val) {
+                            this.selectedRows = val;
                         }
                     }
                 })
@@ -282,11 +412,17 @@ class Config {
                                         <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
                                     </el-main>
                                     <el-footer :id="'config-manage-view-footer-'+cid" style="padding:0px;height:200px;">
-                                        <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose">
-                                            <el-tab-pane label="日志" name="log" style="padding:10px;">
-                                                <config-log-console :id="id" :ifLog="ifLog" v-if="!_.isEmpty(id)"></config-log-console> 
+                                        <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
+                                            <el-tab-pane name="log" style="padding:10px;">
+                                                <span slot="label">日志 <i class="el-icon-date"></i></span>
+                                                <config-log-console :id="id" :model="classModel" v-if="!_.isEmpty(id)" ref="configLogConsoleRef"></config-log-console> 
                                             </el-tab-pane>
-                                            <el-tab-pane label="调式" name="debug" style="padding:10px;"></el-tab-pane>
+                                            <el-tab-pane label="测试" name="debug" style="padding:10px;">
+                                                <config-debug-console :id="id" :rule="id"></config-debug-console>
+                                            </el-tab-pane>
+                                            <el-tab-pane label="数据" name="data" style="padding:10px;">
+                                                <config-data-console :id="id" :model="classModel"></config-data-console>
+                                            </el-tab-pane>
                                         </el-tabs>
                                     </el-footer>
                                 </el-container>`,
@@ -303,25 +439,25 @@ class Config {
                             breadcrumb: [],
                             cid: "",
                             splitInst: null,
-                            ifLog: true,
+                            ifLog: false,
                             debug:{
                                 tabs: {
                                     list: [],
                                     activeIndex: 'log'
                                 }
-                            }
+                            },
+                            classModel: {}
                         }
                     },
                     watch: {
                         ifLog: {
                             handler:function(val,oldVal){
                                 if(val){
-                                    this.splitInst.setSizes([55,45]);
+                                    this.splitInst.setSizes([50,50]);
                                 } else {
                                     this.splitInst.setSizes([100,0]);
                                 }
-                            },
-                            immediate:true
+                            }
                         }
                     },
                     created(){
@@ -330,22 +466,26 @@ class Config {
                             this.mode = "lua";
                         }
                         this.cid = objectHash.sha1(this.id);
+                        try{
+                            let name = _.trim(_.split(_.first(this.model.value.match(/^--class.*/mgi)),"=",2)[1]);
+                            _.extend(this.classModel, {name:name});
+                        } catch(err){
+                            _.extend(this.classModel, {name:""});
+                        }
+                        
                     },
                     mounted(){
                         // 选择节点
                         if(_.has(this.model,'key')){
                             this.initEditer();
 
-                            _.delay(()=>{
-                                this.splitInst = Split([`#config-manage-view-main-${this.cid}`, `#config-manage-view-footer-${this.cid}`], {
-                                    sizes: [100, 0],
-                                    minSize: [0, 0],
-                                    gutterSize: 3,
-                                    cursor: 'col-resize',
-                                    direction: 'vertical',
-                                });
-                            },50)
-                            
+                            this.splitInst = Split([`#config-manage-view-main-${this.cid}`, `#config-manage-view-footer-${this.cid}`], {
+                                sizes: [100, 0],
+                                minSize: [0, 0],
+                                gutterSize: 3,
+                                cursor: 'col-resize',
+                                direction: 'vertical',
+                            });
                         }
                     },
                     methods: {
@@ -575,6 +715,9 @@ class Config {
                         },
                         logClose(){
                             this.splitInst.setSizes([100,0]);
+                        },
+                        handleClick(tab,event){
+                            eventHub.$emit("CONFIG-LOG-UPDATE-EVENT");
                         }
                     }
                 })
@@ -647,7 +790,7 @@ class Config {
                                                                     <i class="el-icon-arrow-down"></i>
                                                                 </span>
                                                                 <el-dropdown-menu slot="dropdown">
-                                                                    <el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item>
+                                                                    <!--el-dropdown-item @click.native="configCopy(item.name)" :class="'copy'+objectHash.sha1(item.name)">复制</el-dropdown-item-->
                                                                     <el-dropdown-item divided @click.native="configDegug(item.name)">调试</el-dropdown-item>
                                                                 </el-dropdown-menu>
                                                             </el-dropdown>
@@ -990,7 +1133,6 @@ class Config {
                         },
                         configDegug(item){
                             let name = objectHash.sha1(item);
-                            console.log(this.$refs);
                             this.$refs[`configManageRef${name}`][0].ifLog = !this.$refs[`configManageRef${name}`][0].ifLog;
                         }
                     }

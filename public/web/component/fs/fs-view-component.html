@@ -36,6 +36,11 @@
             .fs-view-component .fa-bars {
                 color: rgb(144, 144, 144);
             }
+
+            #fs-editor-main > .el-tabs > .el-tabs__header{
+                clear:both;
+                min-height: 30px;
+            }
     
             /* For note-view */
             #note {
@@ -937,16 +942,23 @@
                         id: String,
                         item: Object
                     },
-                    template: `<el-container style="height:100%;">
+                    template: `<el-container style="height:100%;min-height:300px;">
                                     <el-main :id="'fs-editor-view-main-'+id" style="padding:1px 0px 0px 0px;overflow:hidden;">
                                         <fs-editor-component :id="'editor-'+id" :bid="'output-'+id"
                                             :model="model"
                                             showToolsBar="false"
                                             showStatusBar="false"></fs-editor-component>
                                     </el-main>
-                                    <el-footer :id="'fs-editor-view-footer-'+id" style="background-color:#ddd;overflow:auto;padding:0px;">
-                                        <fs-editor-view-by-html :id="'output-'+id" :output="model.fs.output" v-if="item.ftype=='html'"></fs-editor-view-by-html>
-                                        <fs-editor-view-by-other :id="'output-'+id" :output="model.fs.output" v-else></fs-editor-view-by-other>
+                                    <el-footer :id="'fs-editor-view-footer-'+id" style="background-color:#ddd;overflow:hidden;padding:0px;height:200px;">
+                                        <el-tabs value="result" type="border-card" style="height:100%;">
+                                            <el-tab-pane label="日志" name="log" style="height:100%;">
+                                                
+                                            </el-tab-pane>
+                                            <el-tab-pane label="预览" name="result" style="height:100%;overflow:auto;padding-top: 1px;">
+                                                <fs-editor-view-by-html :id="'output-'+id" :output="model.fs.output" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
+                                                <fs-editor-view-by-other :id="'output-'+id" :output="model.fs.output" style="height:100%;" v-else></fs-editor-view-by-other>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-footer>
                                 </el-container>`,
                     data() {
@@ -983,9 +995,9 @@
                         },
                         initSplit(){
                             Split([`#fs-editor-view-main-${this.id}`, `#fs-editor-view-footer-${this.id}`], {
-                                sizes: [75, 25],
+                                sizes: [80, 20],
                                 minSize: [0, 0],
-                                gutterSize: 3,
+                                gutterSize: 5,
                                 cursor: 'row-resize',
                                 direction: 'vertical',
                             });
@@ -2321,10 +2333,34 @@
                                 },
                                 template:  `<el-container style="height: 100%;">
                                                 <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
-                                                    <el-tooltip content="文件" open-delay="500">
-                                                        <el-button type="text" @click="onReload"><i class="fas fa-file"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="重新加载" open-delay="500">
+                                                    <el-dropdown style="padding-right: 10px;" trigger="click">
+                                                        <span class="el-dropdown-link">
+                                                            文件
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="onReload">打开</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
+                                                            <el-dropdown-item divided>新建项目</el-dropdown-item>
+                                                            <el-dropdown-item>新建文件</el-dropdown-item>
+                                                            <el-dropdown-item divided @click.native="onSave">保存</el-dropdown-item>
+                                                            <el-dropdown-item>另存为</el-dropdown-item>
+                                                            <el-dropdown-item divided>关闭</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                    <el-dropdown style="padding-right: 10px;" trigger="click">
+                                                        <span class="el-dropdown-link">
+                                                            编辑
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="onUndo">撤销</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onUndo">重做</el-dropdown-item>
+                                                            <el-dropdown-item :class="'copy-'+tabs.activeIndex" @click="onCopy" divided>复制</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPaste">粘贴</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onSelect">选择</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onRemove" divided>清除</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                    <!--el-tooltip content="重新加载" open-delay="500">
                                                         <el-button type="text" @click="onReload"><i class="fas fa-sync"></i></el-button>
                                                     </el-tooltip>
                                                     <el-tooltip content="撤销" open-delay="500">
@@ -2349,17 +2385,33 @@
                                                         <el-button type="text" @click="onSave"><i class="fas fa-save"></i></el-button>
                                                     </el-tooltip>
                                                     <el-tooltip content="保存并运行" open-delay="500">
-                                                        <el-button type="text" @click="onSaveAndPlay"><i class="fas fa-play"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="发布为应用" open-delay="500">
-                                                        <el-button type="text" @click="onDeploy"><i class="fab fa-codepen"></i></el-button>
-                                                    </el-tooltip>
+                                                        <el-button type="text" @click="onSaveAndPlay">运行</el-button>
+                                                    </el-tooltip-->
+                                                    
+                                                    <el-dropdown style="padding-right: 10px;" trigger="click">
+                                                        <span class="el-dropdown-link">
+                                                            运行
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>   
+
+                                                    <el-dropdown style="padding-right: 10px;" trigger="click">
+                                                        <span class="el-dropdown-link">
+                                                            发布
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="onDeploy">发布为应用</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>    
+                                                    
                                                     <el-tooltip content="主题" open-delay="500">
-                                                        <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)"><i class="fas fa-tshirt"></i> 主题</el-button>
+                                                        <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
                                                     </el-tooltip>
                                                 </el-header>
-                                                <el-container style="height: 100%;">
-                                                    <el-aside id="fs-editor-left" style="background-color:#f6f6f6;">
+                                                <el-container style="height: 100%;min-height:300px;">
+                                                    <el-aside id="fs-editor-left" style="background-color:#f6f6f6;width:200px;overflow:hidden;">
                                                         <fs-editor-tree-component id="fs-editor-tree" :root="tree.root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>
                                                     </el-aside>
                                                     <el-main style="padding:0px;overflow:hidden;" id="fs-editor-main">
@@ -2390,7 +2442,7 @@
                                         Split([`#fs-editor-left`, `#fs-editor-main`], {
                                             sizes: [15, 85],
                                             minSize: [0, 0],
-                                            gutterSize: 3,
+                                            gutterSize: 5,
                                             cursor: 'col-resize',
                                             direction: 'horizontal',
                                         });

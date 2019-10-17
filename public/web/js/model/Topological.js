@@ -480,6 +480,7 @@ class Topological {
                 },  
                 // 上传完毕，更新/matrix/entity   
                 updateEntity(event,action){
+                    console.log(123,event,action,this.node)
                     let id = this.node.id;
                     let fs = {action: action, class: `/matrix/entity/${this.node.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${this.node.value}/${event.name}`};
                     let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
@@ -772,7 +773,7 @@ class Topological {
             props:{
                 id: String
             },
-            template: `<entity-tree-component :id="'graph-tree-'+id" :model="{parent:'/matrix/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>`
+            template: `<entity-tree-component :id="'graph-tree-'+id" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>`
         })
 
         //edges关系维护

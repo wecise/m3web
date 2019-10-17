@@ -207,8 +207,7 @@
 
                 self.model.graph.graph.getModel().beginUpdate();
 
-                try
-                {
+                try {
                     self.model.graph.graph.getModel()
 
                     //let nodes = {};
@@ -256,39 +255,53 @@
                         
                     })
 
-                    _.forEach(self.graphData.edges,function(k){
+                    // 合并所有edges，包括正常的、新增的、删除的
+                    let edges = _.map(self.graphData.edges,(v)=> {
+                        // 判断现有edge是否是新增的
+                        try{
+                            if(_.some(self.graphData.diff.add.edges,{id:v.id})){
+                                return _.merge(v,{type:'add'});
+                            } else {
+                                return v;
+                            }
+                        } catch(err){
+                            return v;
+                        } 
+                    });
+                    
+                    let edgesDel = [];
+                    
+                    try {
+                        edgesDel = _.map(self.graphData.diff.del.edges,(v)=> {return _.merge(v,{type:'del'})});
+                    } catch(err){
+                        edgesDel = [];
+                    }
+                    
+                    _.forEach(_.concat(edges,edgesDel),function(k){
                         let source = self.model.graph.nodes[k.source];
                         let target = self.model.graph.nodes[k.target];
+                        
 						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
+                        
                         if(k.twoway){
                             direction = 'startArrow=block;endArrow=block;endFill=1;';
                         }
-                        let dashed = 0;
                         
-                        try{
-                            //add
-                            if(_.some(self.graphData.diff.add.edges,{id: k.id})){
-                                direction += 'strokeColor=#58b368;strokeWidth=3;';
-                            }
-
-                            //delete
-                            if(_.some(self.graphData.diff.del.edges,{id: k.id})){
-                                direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=3;';
-                            }
-                        } catch(err){
-
+                        if(k.type=='add'){
+                            direction += 'strokeColor=#47fa28;strokeWidth=2;';
+                        } else if(k.type=='del'){
+                            direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=2;';
                         }
-                        
 
                         let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                     })
 
                     // Executes the layout
-	                self.model.graph.layout.default.execute(self.model.graph.parent);
-                }
-                finally
-                {
+                    self.model.graph.layout.default.execute(self.model.graph.parent);
+                    
+                } finally {
+
                     self.model.graph.graph.getModel().endUpdate();
 
                     self.toCenter();

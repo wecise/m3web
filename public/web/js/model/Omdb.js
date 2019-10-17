@@ -1140,7 +1140,7 @@ class Omdb{
                     self.main.splitInst = Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
                         sizes: [50, 50],
                         minSize: [0, 0],
-                        gutterSize: 3,
+                        gutterSize: 5,
                         cursor: 'col-resize',
                         direction: 'vertical',
                         onDragEnd:function(sizes) {
@@ -1226,7 +1226,7 @@ class Omdb{
                 odb.app = new Vue({
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="calc(100vh - 140px);">
-                                    <el-aside :id="id+'-aside'">
+                                    <el-aside :id="id+'-aside'" style="overflow:hidden;">
                                         <el-container>
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
                                                 <h4 style="width:50%;font-size:12px;">
@@ -1286,7 +1286,7 @@ class Omdb{
                             self.splitInst = Split([`#${this.id}-aside`, `#${this.id}-main`], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
-                                gutterSize: 3,
+                                gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
                             });
@@ -1350,7 +1350,7 @@ class Omdb{
                             new Vue({
                                 delimiters: ['#{', '}#'],
                                 data:{
-                                    classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent("/")).message,
+                                    classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent(selectedNode)).message,
                                     defaultProps: {
                                         children: 'children',
                                         label: 'class'
@@ -1378,13 +1378,12 @@ class Omdb{
                                                         :data="classList"
                                                         ref="classTree"
                                                         show-checkbox
-                                                        node-key="alias"
+                                                        node-key="class"
+                                                        check-strictly="true"
                                                         :default-expanded-keys="[_.first(classList).id]"
-                                                        :default-checked-keys="[model.class]"
                                                         :default-expanded-keys="[model.class]"
                                                         :props="defaultProps"
                                                         check-on-click-node="true"
-                                                        @node-click="onNodeClick"
                                                         style="background-color:transparent;">
                                                     </el-tree>
                                                 </el-main>
@@ -1398,20 +1397,23 @@ class Omdb{
                                         this.model.class = selectedNode;
                                     }
                                 },
+                                mounted(){
+                                    let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
+                                    this.$refs.classTree.setCheckedKeys(allNodes);
+                                },
                                 methods:{
-                                    onNodeClick(node){
-                                        this.model.class = node.alias;
-                                    },
                                     onCancel(){
                                         wnd.close();
                                     },
                                     onExport(){
-
-                                        let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",this.model.class).message;
+                                        //获取所有Class
+                                        let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
+                                        //checked Class
                                         let checkedClass = _.map(this.$refs.classTree.getCheckedNodes(),'class');
                                         
+                                        // 交集
                                         _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
-                                        
+
                                         if(this.model.ifData){
                                             this.model.limit = -1;
                                             this.model.template = false;
@@ -1419,7 +1421,10 @@ class Omdb{
                                             this.model.template = true;
                                             this.model.limit = 0;
                                         }
-                                        omdbHandler.classDataExport(this.model);
+                                        let rtn = omdbHandler.classDataExport(this.model);
+                                        if(rtn == 1){
+                                            wnd.close();
+                                        }
                                     }
                                 }
                             }).$mount("#class-template-export");
