@@ -24,6 +24,7 @@ class Files {
                         "fs-editor-tree-component",
                         "fs-output-component",
                         "fs-datatable-component",
+                        "devops-tree-component",
                         "ai-robot-component"
                         ],function() {
 

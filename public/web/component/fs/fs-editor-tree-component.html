@@ -139,9 +139,17 @@
                     }
                 }
 			}
-		},
+        },
+        created(){
+            // 接收刷新事件
+            eventHub.$on("FS-TREE-REFRESH-EVENT",()=>{
+                this.init();
+                // let treeObj = $.fn.zTree.getZTreeObj(this.id);
+                // treeObj.expandNode(this.selectedNode, true, true, true);
+            });
+        },
 		mounted: function () {
-            let self = this;
+            const self = this;
 
             self.$nextTick(function () {
 
@@ -150,10 +158,10 @@
                 self.initPlugIn();
 
 			})
-		},
+        },
 		watch: {
 			root: function (val,oldVal) {
-			    let self = this;
+			    const self = this;
 
 				if(val !== '/home') return false;
 
@@ -165,7 +173,7 @@
 		},
 		methods: {
 			init: function(){
-                let self = this;
+                const self = this;
                 let _rtn = fsHandler.fsList(self.root);
 
                 if(_.isEmpty(_rtn)){
@@ -182,11 +190,9 @@
 			                        }),[v => v.title.toLowerCase()], ['asc']);
                 }
 				self.treeObj = $.fn.zTree.init($(self.$el).find($("#" + self.id)), self.setting, self.treeNodes);
-
-
 			},
 			initPlugIn: function(){
-			    let self = this;
+			    const self = this;
 
 			    /*if (!_.isEmpty(self.contextMenuItems)){
                     $.contextMenu({
@@ -197,7 +203,7 @@
 
 			},
             onClick: function(event, treeId, treeNode) {
-                let self = this;
+                const self = this;
 
                 if(treeNode.ftype !=='dir') {
                     eventHub.$emit("FS-NODE-OPENIT-EVENT", treeNode,treeNode.parent);

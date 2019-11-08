@@ -147,22 +147,21 @@ class SideBar {
                 }
             },
             created: function(){
-                this.init();
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);
+                this.init();
             },
             mounted() {
                 this.contextMenu('li.slot-li-divider');
             },
             methods: {
-                init: function(){
-                    let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
-                    let user = window.SignedUser_UserName;//$("#signed-user-name").val();
-
-                    this.selectedApps = fsHandler.callFsJScript("/matrix/user/user.js",user).message.split(",");
-                    let _selectedApps = this.selectedApps;
-
-                    this.model = _.map(_list.message,function(v){
-                        if(_.includes(_selectedApps,v.id)){
+                init(){
+                    let rtn = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
+                    
+                    // appIds
+                    this.selectedApps = rtn.appIds;
+                    
+                    this.model = _.map(rtn.appList,function(v){
+                        if(_.includes(rtn.appIds,v.id)){
                             v.selected = 1;
                         }
                         return v;
@@ -282,7 +281,9 @@ class SideBar {
                 preFixIcon: `${window.ASSETS_ICON}/apps/png/`,
                 postFixIcon: `?type=open&issys=${window.SignedUser_IsAdmin}`,
                 isCollapse: true,
-                defaultActive: '/janesware/home'
+                defaultActive: '/janesware/home',
+                appConfig: [],
+                sideBarStatus: 2
             },
             template:   `<el-menu :default-active="defaultActive"
                                 mode="vertical"
@@ -307,20 +308,48 @@ class SideBar {
                                 <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
                                 <span slot="title">首页</span>
                             </el-menu-item>
-                            <el-submenu index="appList" v-if="model.length > mx.global.register.sidebar.menuCollapse">
+                            
+                            <!-- 有模板情况-->
+                            <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
+                                <template slot="title">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <span>#{item.title}#</span>
+                                </template>
+                                
+                                <el-menu-item-group>
+                                    <span slot="title">#{item.title}#</span>
+                                    <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
+                                        <img :src="subItem.icon | pickIcon" style="width:17px;"></img>
+                                        <span slot="title">
+                                            #{subItem.cnname}#
+                                        </span>
+                                        <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
+                                    </el-menu-item>
+                                <el-menu-item-group>
+                            </el-submenu>
+
+                            <!-- 没有模板情况，且菜单项数量超过阈值-->
+                            <el-submenu index="appList" v-show="sideBarStatus === 1">
                                 <template slot="title">
                                     <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
                                     <span>应用</span>
                                 </template>
-                                <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model">
-                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                    <span slot="title">#{item.cnname}#</span>
-                                </el-menu-item>
+
+                                <el-menu-item-group>
+                                    <span slot="title">应用</span>
+                                    <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
+                                        <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                        <span slot="title">#{item.cnname}#</span>
+                                    </el-menu-item>
+                                </el-menu-item-group>
                             </el-submenu>
-                            <el-menu-item :class="item.status" :index="item.url" v-for="(item,index) in model" v-else>
+
+                            <!-- 没有模板情况，且菜单项数量没超过阈值-->
+                            <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
                                 <img :src="item.icon | pickIcon" style="width:17px;"></img>
                                 <span slot="title">#{item.cnname}#</span>
                             </el-menu-item>
+
                         </el-menu>`,
             created(){
                 this.init();
@@ -336,18 +365,44 @@ class SideBar {
             },
             methods: {
                 init: function(){
-                    let user = window.SignedUser_UserName;
-                    let selectedApps = fsHandler.callFsJScript("/matrix/user/user.js",user).message.replace(/,/g,";");
-                    let _list = omdbHandler.fetchData(`#/matrix/portal/tools/: | ${selectedApps}| sort by seat asc`);
-                    this.model = _.map(_list.message,function(v){
-                        let _page = _.last(mx.getPage().split("/"));
+                    let rtn = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
+                    
+                    this.model = {
+                        list: _.map(rtn.appListSelected,function(v){
+                                let _page = _.last(mx.getPage().split("/"));
 
-                        if(_.endsWith(v.url,_page)){
-                            return _.merge(v, {status: "active"});
+                                if(_.endsWith(v.url,_page)){
+                                    return _.merge(v, {status: "active"});
+                                }
+
+                                return _.merge(v, {status: ""});
+                            }),
+                        template: rtn.template
+                    };
+
+                    this.setStatus();
+
+                    console.log(this.model)
+                },
+                setStatus(){
+                    // 有模板情况
+                    if(!_.isEmpty(this.model.template)){
+                        this.sideBarStatus = 0;
+                        console.log(0)
+                    } 
+                    // 没有模板情况
+                    else{
+                        // 菜单项超过阈值
+                        if(this.model.list.length > mx.global.register.sidebar.menuCollapse){
+                            this.sideBarStatus = 1;
+                            console.log(1)
                         }
-
-                        return _.merge(v, {status: ""});
-                    });
+                        // 菜单项没有超过阈值
+                        else {
+                            this.sideBarStatus = 2;
+                            console.log(2)
+                        }
+                    }
                 },
                 initWnd: function(){
 

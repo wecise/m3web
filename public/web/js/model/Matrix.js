@@ -360,7 +360,7 @@ class Matrix {
             }
 
             if(_.includes(['matrix'],window.COMPANY_OSPACE)){
-                setInterval(getStatus,15000);
+                setInterval(getStatus, mx.global.register.robot.interval);
             }
 
         },'text');

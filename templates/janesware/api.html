@@ -44,7 +44,7 @@
     }
 
     /* Split Style */
-	.gutter.gutter-horizontal {
+	.jsPanel .gutter.gutter-horizontal {
         cursor: ew-resize;
         background-color: rgb(241, 241, 241);
         background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
@@ -58,7 +58,7 @@
         border-bottom: unset;
     }
 
-    .gutter.gutter-vertical {
+    .jsPanel .gutter.gutter-vertical {
         cursor: ns-resize;
         background-color: rgb(241, 241, 241);
         background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
@@ -70,6 +70,35 @@
         border: 1px solid #ddd;
         border-left: unset;
         border-right: unset;
+    }
+
+    /* 首页Split样式 无border */
+    .gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: unset;
+    }
+
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: unset;
+    }
+
+    .ace_gutter{
+        background: transparent!important;
     }
 
     /* 全屏模式 */
@@ -114,6 +143,8 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-tree-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-output-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-datatable-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/devops/devops-tree-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 

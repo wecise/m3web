@@ -1,0 +1,177 @@
+<code>
+
+	<style>
+		/*----------  style  ----------*/
+
+		.devops-tree-component .el-input--mini .el-input__inner{
+            border: unset;
+        }
+
+        .devops-tree-component .el-tree{
+            background: transparent;
+        }
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="devops-tree-component"  ----------*/
+	<template>
+		<el-container style="height: 100%;">
+            <el-header style="height:30px;line-height:30px;padding:5px 8px;margin-bottom: 5px;display: flex;">
+                <el-input placeholder="搜索" size="mini">
+                </el-input>
+                <span><el-button slot="append" icon="el-icon-refresh" @click="onInit" style="border: unset;background: unset;"></el-button></span>
+            </el-header>
+            <el-main style="padding: 5px;height: 100%;">
+                <el-tree :data="treeData" 
+                        :props="defaultProps" 
+                        node-key="fullname"
+                        highlight-current="true"
+                        :default-expanded-keys="defaultExpandedKeys"
+                        @node-click="handleNodeClick"
+                        @node-contextmenu="handleNodeContextMenu">
+                    <span slot-scope="{ node, data }" style="width:100%;">
+                        <span v-if="data.ftype!=='dir'"><i class="el-icon-c-scale-to-original" style="color:burlywood;"></i> #{ node.label }#</span>
+                        <span v-else>#{ node.label }#</span>
+                    </span>
+                </el-tree>
+            </el-main>
+		</el-container>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="devops-tree-component">
+	{
+        delimiters: ['#{', '}#'],
+		props: {
+            root: String,
+            defaultExpandedKeys: Array
+		},
+		data: function () {
+			return {
+                defaultProps: {
+                    children: 'children',
+                    label: 'name'
+                },
+                treeData: []
+			}
+        },
+        created(){
+            this.onInit();
+
+            // 接收刷新事件
+            eventHub.$on("DEVOPS-TREE-REFRESH-EVENT",this.onInit);
+        },
+		mounted(){
+            _.delay(()=>{
+                this.onInitContextMenu();
+            },1000)
+        },
+		methods: {
+            handleNodeContextMenu(event,data,node,el){
+                this.onInitContextMenu();
+            },
+			handleNodeClick(data){
+                if(data.ftype !=='dir') {
+                    let item = {
+                                    alias: data.alias,
+                                    children: data.children,
+                                    ftype: data.ftype,
+                                    fullname: data.fullname,
+                                    id: data.id,
+                                    name: data.name,
+                                    parent: data.parent
+                                };
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", item, data.parent);
+                } else {
+
+                    let _root = data.parent + "/" + data.name;
+                    let _rtn = fsHandler.fsList(_root);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", data, _root);
+                }
+            },
+            onInitContextMenu(){
+                $.contextMenu({
+                    selector: "div.el-tree-node",
+                    trigger: 'right',
+                    autoHide: true,
+                    delay: 10,
+                    hideOnSecondTrigger: true,
+                    build: function($trigger, e) {
+                        
+                        return {
+                            callback: function(key, opt) {
+                                        
+                                
+                            },
+                            items: {
+                                "m10_running": {
+                                    "name": "当前窗口运行",
+                                    "icon": "fas fa-walking"
+                                },
+                                "m20_running-plus": {
+                                    "name": "打开新窗口运行",
+                                    "icon": "fas fa-running"
+                                },
+                                "m30":"----------",
+                                "m40_home": {
+                                    "name": '设为首页', 
+                                    "icon": "fas fa-home"
+                                },
+                                "m50":"----------",
+                                "m60_uninstall": {
+                                    "name": "卸载应用",
+                                    "icon": "fas fa-trash"
+                                },
+                                "m70":"----------",
+                                "m80_share": {
+                                    "name": "分享",
+                                    "icon": "fas fa-share"
+                                }
+                            }
+                        }
+                    }
+                });
+            },
+            onInit(){
+                this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+            },
+            onClick(event, treeId, treeNode) {
+                const self = this;
+
+                if(treeNode.ftype !=='dir') {
+                    eventHub.$emit("FS-NODE-OPENIT-EVENT", treeNode,treeNode.parent);
+                } else {
+
+                    let _root = treeNode.parent + "/" + treeNode.name;
+                    let _rtn = fsHandler.fsList(_root);
+
+                    eventHub.$emit("FS-FORWARD-EVENT", treeNode,_root);
+
+                    self.treeObj.removeChildNodes(treeNode);
+
+                    if(!_.isEmpty(_rtn)) {
+
+                        let _nodes = _.map(_rtn,function(v,k){
+                                                let _type = "dir";
+
+                                                if(!_.isEmpty(v.ftype)){
+                                                    _type = v.ftype;
+                                                }
+
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                    });
+
+                        // append sub nodesGr
+                        self.treeObj.addNodes(treeNode, _.sortBy(_nodes,[v => v.title.toLowerCase()], ['asc']));
+
+                    }
+                }
+
+            }
+		}
+	
+	}
+	</script>
+
+</code>

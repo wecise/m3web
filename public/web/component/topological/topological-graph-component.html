@@ -201,6 +201,10 @@
             border-style: solid;
         }
 
+        .el-divider.el-divider--horizontal{
+            margin: 0px;
+        }
+
         /* jsPanel graphAction */
         .graphAction .input-with-select.el-input.el-input--small{
             border-bottom: 1px solid #ddd!important;
@@ -704,7 +708,7 @@
 
                     setInterval(()=>{
                         this.updateStatus();
-                    },15000);
+                    },mx.global.register.topological.status_interval);
                     
                 }
             },
@@ -985,6 +989,11 @@
             },
             path(){
                 const self = this;
+                
+                self.$root.cellSelect(null);
+
+                return false;
+                
                 try{
                     if(jsPanel.activePanels.getPanel('jsPanel-路径')){
                         jsPanel.activePanels.getPanel('jsPanel-路径').close();
@@ -1021,8 +1030,7 @@
                 
                 self.model.graph.graph.getModel().beginUpdate();
                 
-                try
-                {
+                try{
                     self.model.graph.graph.getModel()
 
                     if(self.model.graph.paths.length){

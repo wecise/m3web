@@ -25,39 +25,136 @@ class Topological {
     init() {
         const inst = this;
 
-        // 拓扑分析
-        Vue.component("topological-analysis",{
-            delimiters: ['${', '}'],
+        // 拓扑分析输入组件
+        Vue.component("topological-analysis-input",{
+            delimiters: ['#{', '}#'],
             props: {
                 model: Object
             },
+            template:  `<el-input placeholder="请输入内容" v-model="model.id" class="input-with-select">
+                            <el-select v-model="model.value" slot="prepend" placeholder="请选择">
+                                <el-option label="所有" value="#/matrix/"></el-option>
+                                <el-option label="事件" value="#/matrix/devops/event/"></el-option>
+                                <el-option label="性能" value="#/matrix/devops/performance/"></el-option>
+                                <el-option label="日志" value="#/matrix/devops/log/"></el-option>
+                            </el-select>
+                            <el-button slot="append" icon="el-icon-search" @click="onDiagnosis(model)"></el-button>
+                            <el-button slot="append" icon="el-icon-close" @click="onRemove(model.id)"></el-button>
+                            <el-button slot="append" icon="el-icon-menu" class="handleSort"></el-button>
+                        </el-input>`,
+            data(){
+                return {
+                    
+                }
+            },
+            methods:{
+                onDiagnosis(node){
+                    const self = this;
+
+                    inst.app.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                },
+                onRemove(id){
+                    const self = this;
+                    self.$parent.$parent.$parent.trace.nodes.splice(_.findIndex(self.$parent.$parent.$parent.trace.nodes,{id:id}),1);
+                }
+            }
+        })
+
+        // 拓扑分析
+        Vue.component("topological-analysis",{
+            delimiters: ['${', '}'],
             template:  `<el-container>
-                            <el-header style="height:50px;line-height:50px;padding:0 10px;">
-                                <el-input placeholder="请输入内容" v-model="model.id" class="input-with-select">
-                                    <el-select v-model="model.value" slot="prepend" placeholder="请选择">
-                                        <el-option label="所有" value="#/matrix/"></el-option>
-                                        <el-option label="事件" value="#/matrix/devops/event/"></el-option>
-                                        <el-option label="性能" value="#/matrix/devops/performance/"></el-option>
-                                        <el-option label="日志" value="#/matrix/devops/log/"></el-option>
-                                    </el-select>
-                                    <el-button slot="append" icon="el-icon-search"></el-button>
-                                    <el-divider direction="vertical"></el-divider>
-                                    <el-button slot="append" icon="fas fa-location-arrow" style="color:#2b90e1;"></el-button>
-                                </el-input>
+                            <el-header style="height:100%;line-height:100%;padding:10px;">
+                                <div id="topologicalAnalysisInputList">    
+                                    <topological-analysis-input v-for="item in trace.nodes" :model="item" :data-id="item.id"></topological-analysis-input>
+                                </div>
+                                <el-button icon="fas fa-location-arrow" style="color:#2b90e1;float:right;margin-top:10px;" @click="pathTrace"></el-button>
                             </el-header>
-                            <el-main>
+                            <el-main style="padding:0px 10px;">
+                                <el-table :data="trace.paths.rows" 
+                                        ref="multipleTable"
+                                        tooltip-effect="dark"
+                                        @selection-change="onSelectionChange"
+                                        style="width: 100%"
+                                        v-if="trace.paths.rows.length > 0">
+                                    <el-table-column type="selection" width="55"></el-table-column>
+                                    <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
+                                </el-table>
                             </el-main>
                         </el-container>`,
             data(){
                 return {
-                    search: {
-                        term: "",
-                        select: ""
+                    trace: {
+                        nodes: [],
+                        paths: {
+                            rows: [], 
+                            columns: []
+                        },
+                        selectedPaths: []
                     }
                 }
             },
-            methods:{
+            created(){
+                eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
+            },
+            mounted(){
+                const self = this;
 
+                _.delay(()=>{
+                    let el = document.getElementById("topologicalAnalysisInputList");
+                    let sortable = Sortable.create(el,{
+                        handle: ".handleSort",
+                        dataIdAttr: 'data-id',
+                        onChange(evt) {
+                            let nodes = _.cloneDeep(self.trace.nodes);
+                            self.trace.nodes = _.map(sortable.toArray(),function(v){
+                                return _.find(nodes,{id:v});
+                            });
+                        }
+                    });
+                },1000)
+            },
+            methods:{
+                setTrace(node){
+                    const self = this;
+                    self.trace.nodes.push(node);
+                },
+                pathTrace(){
+                    const self = this;
+
+                    if(self.trace.nodes.length < 2){
+                        self.$message("请选择节点！");
+                        return false;
+                    }
+
+                    let term = _.map(self.trace.nodes,'id');
+                    let rtn = null;
+                    let rows = [];
+                    let cols = [];
+
+                    try{
+                        rtn = fsHandler.callFsJScript("/matrix/graph/paths-by-id.js",encodeURIComponent(JSON.stringify(term))).message.result.data[0].graph;
+
+                        if(!_.isEmpty(rtn.paths)){
+                            _.forEach(rtn.paths,function(v,index){
+                                rows.push( _.merge({num:`路径${++index}`,class:"path"},v));
+                            })
+                            cols = _.concat([{data:"num",title:"序号"}],_.map(rtn.pathtags,function(v){ return {data:v,title:v}}));
+                        }
+
+                        _.extend(self.trace.paths, {rows: rows,  columns: cols});
+
+                    } catch(err){
+                        _.extend(self.trace.paths, {rows: rows,  columns: cols});
+                    }
+                    
+                },
+                onSelectionChange(val){
+                    const self = this;
+                    self.trace.selectedPaths = val;
+                    console.log(1,inst)
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
+                }
             }
         })
 
@@ -188,18 +285,33 @@ class Topological {
                 id: String,
                 model:Object
             },
-            template: `<form class="form-horizontal">
-                            <div v-show="model.rows.length">
-                                <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                    <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
-                                    <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
-                                        <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+            template:   `<el-card :body-style="{ padding: '0px' }" v-show="model.rows.length">
+                            <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
+                            <div class="bottom clearfix">
+                                <form class="form-horizontal">
+                                    <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                        <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
+                                        <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
+                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                        </div>
                                     </div>
-                                </div>
-                            <div>
-                        </form>`,
-            mounted(){
-                
+                                </form>
+                            </div>
+                        </el-card>`,
+            filters: {
+                pickIcon(evt){
+                    try {
+                        return `/fs/assets/images/entity/png/${_.last(evt.rows[0].class.split("/"))}.png?issys=true&type=download`;
+                    } catch(err){
+                        return `/fs/assets/images/entity/png/matrix.png?issys=true&type=download`;
+                    }
+                    
+                }
+            },
+            methods:{
+                onErrorPickIcon(e){
+                    _.extend(this.model.rows[0],{class:"/matrix"});
+                }
             }
         });
 
@@ -262,7 +374,7 @@ class Topological {
                             </el-main>
                         </el-container>`,
             created(){
-                console.log(_.now(),this.node)
+                
             },
             mounted(){
                 this.initContextMenu();
@@ -480,11 +592,10 @@ class Topological {
                 },  
                 // 上传完毕，更新/matrix/entity   
                 updateEntity(event,action){
-                    console.log(123,event,action,this.node)
                     let id = this.node.id;
                     let fs = {action: action, class: `/matrix/entity/${this.node.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${this.node.value}/${event.name}`};
                     let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
-                    this.reload();
+                    _.delay(()=>{ this.reload() },1000);
                 },                     
                 openIt: function(item, path){
                     const self = this;
@@ -752,8 +863,16 @@ class Topological {
                     try {
                         let id = this.node.id;
                         let value = this.node.value;
-                        let model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
+                        let model = null;
                         
+                        // edge
+                        if(this.node.cell.edge){
+                            model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-edge-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
+                        } 
+                        // node
+                        else {
+                            model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(this.node,'cell')))).message;
+                        }
                         // 更新当前数据
                         _.extend(this.model, model['file']);
 
@@ -761,7 +880,7 @@ class Topological {
                         _.extend(this.$parent.$parent.$parent.model,model);
                         
                     } catch(error){
-                        console.log(_.now(),error)
+                       //console.log(_.now(),error)
                     }
                 }
             }
@@ -793,7 +912,7 @@ class Topological {
                 };
             },
             template:   `<el-container>
-                            <el-main style="padding: 10px 0px 0px 10px;">
+                            <el-main style="padding:10px;">
                                 <p><el-input v-model="term" clearable placeholder="实体关键字" @change="searchByTerm"></el-input></p>
                                 <el-transfer v-model="selected" 
                                 :titles="['实体列表',type]"
@@ -846,6 +965,23 @@ class Topological {
                 }
             }
         })
+
+        // 拓扑分析基本组件
+        // 列表形式
+        // 部件
+        Vue.component("diagnosis-base-table",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model:Object
+            },
+            template:  `<el-table :data="model.rows" 
+                            highlight-current-row
+                            style="width: 100%">
+                            <el-table-column v-for="item in model.template" :prop="item.data" :label="item.title"></el-table-column>
+                        </el-table>`
+
+        })
+
 
         VueLoader.onloaded(["ai-robot-component",
                             "topological-graph-component",
@@ -920,6 +1056,8 @@ class Topological {
                                         
                                         <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></event-diagnosis-datatable-component>
                                         
+                                        <diagnosis-base-table :model="it.model[it.type]" v-if=" _.includes(['element'],it.type) "></diagnosis-base-table>
+
                                         <file-view :id="it.name" :model="it.model[it.type]" :node="item.node" v-if="it.type === 'file'"></file-view>
                                         
                                     </el-tab-pane>
@@ -966,8 +1104,20 @@ class Topological {
                     const self = this;
 
                     try{
-                        self.model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
+                        if(node.cell.edge){
+                            // 构建 edge 属性
+                            _.extend(node,{
+                                type: node.class,
+                                class: `/${node.class}`
+                            });
+                            
+                            self.model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-edge-id.js", encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
+                        } else {
+                            // node
+                            self.model = fsHandler.callFsJScript("/matrix/graph/diagnosis-by-id.js", encodeURIComponent(JSON.stringify(_.omit(node,'cell')))).message;
+                        }
 
+                        
                         let id = objectHash.sha1(node);
 
                         // 检查是否已打开
@@ -978,7 +1128,7 @@ class Topological {
                         }
 
                         let tab = {
-                            title: node.value, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child:_.map(self.model.template,function(v){
+                            title: node.value || node.id, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child:_.map(self.model.template,function(v){
                                 return {title: v.title, name:`diagnosis-${v.name}-${id}`, type: v.type, model: self.model};
                             })};
 
@@ -991,7 +1141,8 @@ class Topological {
                     } finally{
                         let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
                         //graph.getView().setTranslate(20,20);//将画布放到容器中间
-                        var highlight = new mxCellHighlight(graph, '#ff0000', 3);
+                        // 访问过的节点高亮
+                        var highlight = new mxCellHighlight(graph, '#2790e1', 1);
                         highlight.highlight(graph.view.getState(node.cell));
                     }
                     
@@ -1135,21 +1286,25 @@ class Topological {
         let component =  {
             delimiters: ['${', '}'],
             template: `<el-container style="background: transparent;height: 100%;">
-                            <el-aside :id="'topological-view-left-'+id" style="border-right:1px solid #ddd;background-color:#f6f6f6;" class="topological-view-edges">
+                            <el-aside :id="'topological-view-left-'+id" style="background-color:#f6f6f6;" class="topological-view-edges">
                                 <!--graph-view-nav :id="'graph-view-nav-'+id"></graph-view-nav-->
                                 <graph-view-edges :id="'graph-view-edges-'+id" ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :id="'topological-view-main-'+id">
                                 <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;border-left:1px solid #ddd;background-color:#f6f6f6;" class="topological-view-diagnosis">
+                            <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;background-color:#f6f6f6;" class="topological-view-diagnosis">
                                 <graph-view-diagnosis :id="'graph-diagnosis-'+id" ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
             data: {
                 id: randomId,
                 splitInst: null,
-                model: null
+                model: null,
+                paths: {
+                    ports: [],
+                    list: []
+                }
             },
             components:{
                 'graph-view-diagnosis': graphViewDiagnosis,
@@ -1336,30 +1491,30 @@ class Topological {
 
                     try {
                         if( window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`) ){
-                            window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).close();
+                            window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).show();
                         }
                     } catch(err){
-                        
-                    }
-                    let wnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`);
+                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`);
                     
-                    new Vue({
-                        delimiters: ['#{', '}#'],
-                        template: `<topological-analysis class="graphAction" :model="model"></topological-analysis>`,
-                        data: {
-                            model: {}
-                        },
-                        created(){
-                            _.extend(this.model, {id:cell.getId(),value: cell.getValue(),cell: cell});
-                        }
-                    }).$mount("#topological-analysis-container")
+                        new Vue({
+                            delimiters: ['#{', '}#'],
+                            template: `<topological-analysis class="graphAction" :model="model"></topological-analysis>`,
+                            data: {
+                                model: {}
+                            },
+                            created(){
+                                _.extend(this.model, {id:cell.getId(),value: cell.getValue(),cell: cell});
+                            }
+                        }).$mount("#topological-analysis-container")
+                    }
+                    
                     
                 },
                 contextMenu(){
                     const self = this;
 
                     $.contextMenu({
-                        selector: `#graph-view-${self.id} svg g image`,
+                        selector: `#graph-view-${self.id} svg g`,//selector: `#graph-view-${self.id} svg g image`,
                         trigger: 'left',
                         autoHide: true,
                         delay: 10,
@@ -1370,59 +1525,74 @@ class Topological {
                             
                             if(!cell) return false;
 
-                            let id = cell.getId();
-                            let value = cell.getValue();
-                            let node = {id: id, value: value, type:'event', cell: cell};
-                            
-                            return {
-                                callback: function(key, opt) {
-                                    if(_.includes(key,'diagnosis')){
-                                        self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
-                                    } else if(_.includes(key,'search_out')){
-                                        self.edgesSearch({direction:"out",node:node});
-                                    } else if(_.includes(key,'search_in')){
-                                        self.edgesSearch({direction:"in",node:node});
-                                    } else if(_.includes(key,'edges_new')){
-                                        self.$root.$refs.graphEdgesRef.edgesTabAdd( node );
-                                    } else if(_.includes(key,'select_cell')){
-                                        self.cellSelect( cell );
+                            if(!cell.edge){
+                                // node
+                                let id = cell.getId();
+                                let value = cell.getValue();
+                                let node = {id: id, value: value, type:'event', cell: cell};
+                                
+                                return {
+                                    callback: function(key, opt) {
+                                        if(_.includes(key,'diagnosis')){
+                                            self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                                        } else if(_.includes(key,'search_out')){
+                                            self.edgesSearch({direction:"out",node:node});
+                                        } else if(_.includes(key,'search_in')){
+                                            self.edgesSearch({direction:"in",node:node});
+                                        } else if(_.includes(key,'edges_new')){
+                                            self.$root.$refs.graphEdgesRef.edgesTabAdd( node );
+                                        } else if(_.includes(key,'spath')){
+                                            self.cellSelect( cell );
+                                            eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                                        }
+                                    },
+                                    items: {
+                                        "m10_diagnosis": {
+                                            "name": "实体分析",
+                                            "icon": "fas fa-diagnoses"
+                                        },
+                                        "m20":"----------",
+                                        "m30_search_out": {
+                                            "name": "起点图查询",
+                                            "icon": "fas fa-angle-up"
+                                        },
+                                        "m40_search_in": {
+                                            "name": "终点图查询",
+                                            "icon": "fas fa-angle-down"
+                                        },
+                                        "m50":"----------",
+                                        "m60_edges_new": {
+                                            "name": "关系维护",
+                                            "icon": "fas fa-network-wired"
+                                        },
+                                        "m70":"----------",
+                                        "m80_spath": {
+                                            "name": "选定为路径查询点",
+                                            "icon": "fas fa-hourglass-start"
+                                        }
                                     }
-                                },
-                                items: {
-                                    "m10_diagnosis": {
-                                        "name": "实体分析",
-                                        "icon": "fas fa-diagnoses"
+                                }
+                            } else {
+
+                                let id = cell.getId();
+                                let value = cell.getValue();
+                                let node = _.extend(_.find(self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.graphData.edges,{id:id}), {type:'event', cell: cell});
+                                
+                                return {
+                                    callback: function(key, opt) {
+                                        if(_.includes(key,'diagnosis')){
+                                            self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                                        }
                                     },
-                                    "m20":"----------",
-                                    "m30_search_out": {
-                                        "name": "起点图查询",
-                                        "icon": "fas fa-angle-up"
-                                    },
-                                    "m40_search_in": {
-                                        "name": "终点图查询",
-                                        "icon": "fas fa-angle-down"
-                                    },
-                                    "m50":"----------",
-                                    "m60_edges_new": {
-                                        "name": "关系维护",
-                                        "icon": "fas fa-network-wired"
-                                    },
-                                    "m70":"----------",
-                                    "m80_select_cell": {
-                                        "name": "选择/取消实体",
-                                        "icon": "far fa-check-square"
-                                    },
-                                    "m100":"----------",
-                                    "m110_spath": {
-                                        "name": "选定为路径查询起点",
-                                        "icon": "fas fa-hourglass-start"
-                                    },
-                                    "m120_epath": {
-                                        "name": "选定为路径查询终点",
-                                        "icon": "fas fa-hourglass-end"
+                                    items: {
+                                        "m10_diagnosis": {
+                                            "name": "实体分析",
+                                            "icon": "fas fa-diagnoses"
+                                        }
                                     }
                                 }
                             }
+                            
                         },
                         events: {
                             show: function(opt) {

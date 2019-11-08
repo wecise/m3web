@@ -37,7 +37,10 @@ setInterval(()=>{
     $("label[role='checkbox']").addClass("el-checkbox");
     $("label[role='radio']").addClass("el-radio");
     $(".el-dropdown-menu--small").addClass("el-dropdown-menu el-popper");
+    $(".el-form-item--small").addClass("el-form-item");
+    $(".el-table--fit").addClass("el-table");
     $(".topological-view-edges-tabs.el-tabs.el-tabs--top").addClass("el-tabs--border-card");
     $(".el-dialog__wrapper.transition.ElDialog").removeClass("transition ElDialog");
+    $(".el-message-box__wrapper").removeClass("transition");
 //    $(".el-tabs__nav.is-left > div:eq(0)").addClass("el-tabs__active-bar");
 },50)

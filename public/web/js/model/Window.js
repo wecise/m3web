@@ -239,7 +239,7 @@ class Window {
             _position = _tmp;
         }
 
-        this.lrwh[2] = this.width * 0.7;
+        this.lrwh[2] = this.width * 0.85;
         this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
@@ -285,6 +285,9 @@ class Window {
                 });
                 
 
+            },
+            onclosed: function(){
+                window.editorApp = null;
             },
             footerToolbar: function (footer) {
                 return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
@@ -367,7 +370,7 @@ class Window {
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
-                    "z-index": "10000"
+                    "z-index": "1000"
                 });
                 
                 $(".jsPanel-headerbar",this).css({
@@ -774,8 +777,8 @@ class Window {
                             offsetY: 5
                         };
 
-        this.lrwh[2] = "30em";//this.width * 0.2;
-        this.lrwh[3] = this.height * 0.7;
+        this.lrwh[2] = $(container).width() * 0.3;//"30em";//this.width * 0.2;
+        this.lrwh[3] = $(container).height() * 0.8;//this.height * 0.55;
 
         let win = $.jsPanel({
             id: 'jsPanel-graphAction',

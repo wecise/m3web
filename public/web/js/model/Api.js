@@ -23,6 +23,7 @@ class Api {
                         "fs-editor-component",
                         "fs-output-component",
                         "fs-datatable-component",
+                        "devops-tree-component",
                         "ai-robot-component"
                         ],function() {
 

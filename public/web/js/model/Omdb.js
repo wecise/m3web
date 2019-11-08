@@ -590,7 +590,7 @@ class Omdb{
                             options: {
                                 info:true,
                                 pageing:true,
-                                scrollY: 'calc(100vh - 350px)',
+                                scrollY: 'calc(100vh - 400px)',
                                 searching: false,
                                 rowCallback: function( row, data ) {
                                     if( data.icon === "parent" ) {

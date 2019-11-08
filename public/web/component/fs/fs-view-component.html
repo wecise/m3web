@@ -337,7 +337,7 @@
                             <div class="btn-group" style="padding:0 11px;float:right;">
     
                                 <el-tooltip content="刷新" placement="top">
-                                    <a href="#" class="btn btn-link" @click="load" title="刷新">
+                                    <a href="#" class="btn btn-link" @click="load();refreshTree();" title="刷新">
                                         <i class="fas fa-sync-alt"></i>
                                     </a>
                                 </el-tooltip>
@@ -976,6 +976,7 @@
                     watch: {
                         item: {
                             handler(val,oldVal){
+                                console.log(66,val)
                                 _.extend(this.model,{fs: val, mode: this.mode()});
                             },
                             deep: true,
@@ -1738,11 +1739,15 @@
                     $(".alertify-prompt .alertify-message").css('height','5vh');
     
                 },
+                refreshTree(){
+                    // 发送Tree刷新事件
+                    eventHub.$emit("FS-TREE-REFRESH-EVENT");
+                },
                 load() {
                     const self = this
     
                     // 临时解决view刷新问题 & destroy editable
-                    self.currentView = '';
+                    self.currentView = "";
     
                     _.delay(function(){
     
@@ -1758,7 +1763,7 @@
     
                             return _.merge(v, {"username": `${self.signedUserName}`});
     
-                        }),[v => v.name.toLowerCase(),'vtime'],['asc','desc']);
+                        }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
     
                         _.delay(function(){
                             // 刷新
@@ -1786,7 +1791,7 @@
                     $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
                 },
                 newDir() {
-                    const self = this
+                    const self = this;
     
                     let _name = '新文件夹_' + _.now();
                     let _type = 'dir';
@@ -2325,7 +2330,8 @@
                                 data: {
                                     tabs: {
                                         list:[],
-                                        activeIndex: ''
+                                        activeIndex: '',
+                                        activeNode: null
                                     },
                                     tree: {
                                         root: "/"
@@ -2338,13 +2344,18 @@
                                                             文件
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item @click.native="onReload">打开</el-dropdown-item>
+                                                            
+                                                            <el-dropdown-item @click.native="onNewProject">新建项目</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onNewFile">新建文件</el-dropdown-item>
+
+                                                            <el-dropdown-item @click.native="onReload" divided>打开</el-dropdown-item>
                                                             <el-dropdown-item @click.native="onReload">重打开</el-dropdown-item>
-                                                            <el-dropdown-item divided>新建项目</el-dropdown-item>
-                                                            <el-dropdown-item>新建文件</el-dropdown-item>
-                                                            <el-dropdown-item divided @click.native="onSave">保存</el-dropdown-item>
-                                                            <el-dropdown-item>另存为</el-dropdown-item>
-                                                            <el-dropdown-item divided>关闭</el-dropdown-item>
+                                                            
+                                                            <el-dropdown-item @click.native="onSave" divided>保存  ctrl+s</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onSaveAs">另存为</el-dropdown-item>
+
+                                                            <el-dropdown-item @click.native="onCloseTab" divided>关闭当前页</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onCloseWin">关闭窗口</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                     <el-dropdown style="padding-right: 10px;" trigger="click">
@@ -2360,33 +2371,6 @@
                                                             <el-dropdown-item @click.native="onRemove" divided>清除</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
-                                                    <!--el-tooltip content="重新加载" open-delay="500">
-                                                        <el-button type="text" @click="onReload"><i class="fas fa-sync"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="撤销" open-delay="500">
-                                                        <el-button type="text" @click="onUndo"><i class="fas fa-undo"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="重做" open-delay="500">
-                                                        <el-button type="text" @click="onRedo"><i class="fas fa-redo"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="复制" open-delay="500">
-                                                        <el-button type="text" :class="'copy-'+tabs.activeIndex" @click="onCopy"><i class="fas fa-copy"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="粘贴" open-delay="500">
-                                                        <el-button type="text" @click="onPaste"><i class="fas fa-paste"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="选择" open-delay="500">
-                                                        <el-button type="text" @click="onSelect"><i class="fas fa-check"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="清除" open-delay="500">
-                                                        <el-button type="text" @click="onRemove"><i class="fas fa-trash"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="保存" open-delay="500">
-                                                        <el-button type="text" @click="onSave"><i class="fas fa-save"></i></el-button>
-                                                    </el-tooltip>
-                                                    <el-tooltip content="保存并运行" open-delay="500">
-                                                        <el-button type="text" @click="onSaveAndPlay">运行</el-button>
-                                                    </el-tooltip-->
                                                     
                                                     <el-dropdown style="padding-right: 10px;" trigger="click">
                                                         <span class="el-dropdown-link">
@@ -2394,6 +2378,8 @@
                                                         </span>
                                                         <el-dropdown-menu slot="dropdown">
                                                             <el-dropdown-item @click.native="onSaveAndPlay">运行</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onSaveAndPlay" divided>预览</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onSaveAndPlay" divided>日志</el-dropdown-item>
                                                         </el-dropdown-menu>
                                                     </el-dropdown>   
 
@@ -2412,10 +2398,13 @@
                                                 </el-header>
                                                 <el-container style="height: 100%;min-height:300px;">
                                                     <el-aside id="fs-editor-left" style="background-color:#f6f6f6;width:200px;overflow:hidden;">
-                                                        <fs-editor-tree-component id="fs-editor-tree" :root="tree.root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>
+                                                        <devops-tree-component :root="tree.root" :defaultExpandedKeys="[tabs.activeNode.fullname]"></devops-tree-component>
                                                     </el-aside>
                                                     <el-main style="padding:0px;overflow:hidden;" id="fs-editor-main">
-                                                        <el-tabs v-model="tabs.activeIndex" type="border-card" style="height:100%;" closable @tab-remove="tabRemove">
+                                                        <el-tabs v-model="tabs.activeIndex" type="border-card" 
+                                                                style="height:100%;" 
+                                                                closable 
+                                                                @tab-remove="tabRemove">
                                                             <el-tab-pane
                                                                 :key="item.name"
                                                                 v-for="(item, index) in tabs.list"
@@ -2432,6 +2421,15 @@
                                 created() {
                                     this.tree.root = self.root;
                                 },
+                                watch:{
+                                    'tabs.activeIndex':{
+                                        handler(val,oldVal){
+                                            // 默认展开节点
+                                            this.tabs.activeNode = _.find(this.tabs.list,{name:val}).model || null;
+                                        },
+                                        deep:true
+                                    }
+                                },
                                 mounted() {
                                     const me = this;
     
@@ -2439,13 +2437,16 @@
                                         
                                         me.tabAdd(node);
 
-                                        Split([`#fs-editor-left`, `#fs-editor-main`], {
-                                            sizes: [15, 85],
-                                            minSize: [0, 0],
-                                            gutterSize: 5,
-                                            cursor: 'col-resize',
-                                            direction: 'horizontal',
-                                        });
+                                        _.delay(()=>{
+                                            Split([`#fs-editor-left`, `#fs-editor-main`], {
+                                                sizes: [20, 80],
+                                                minSize: [0, 0],
+                                                gutterSize: 5,
+                                                cursor: 'col-resize',
+                                                direction: 'horizontal',
+                                            });
+                                        },500)
+                                        
                                     },50)
                                 },
                                 methods: {
@@ -2493,9 +2494,22 @@
                                             
                                         } catch(err){
                                             
-                                        } finally{
-                                            
                                         }
+                                    },
+                                    onNewProject(){
+                                        fileSystem.fileNewTo(this.tree.root,window.fsSelectedItem,self.load);
+                                    },
+                                    onNewFile(){
+                                        fileSystem.fileNew(node.parent,self.load);
+                                    },
+                                    onCloseTab(){
+                                        if(!_.isEmpty(this.tabs.activeIndex)){
+                                            this.tabRemove(this.tabs.activeIndex);
+                                        }
+                                    },
+                                    onCloseWin(){
+                                        let win = window.jsPanel.activePanels.getPanel(`jsPanel-editor`);
+                                        win.close();
                                     },
                                     onReload(){
                                         let editor = ace.edit('editor-'+this.tabs.activeIndex);
@@ -2543,8 +2557,32 @@
                                             return false;
                                         }
 
+                                        console.log(123,this.tabs.activeNode.parent, this.tabs.activeNode.name,sc);
+
                                         // save
-                                        let sRtn = fsHandler.fsNew(node.ftype, node.parent, node.name, sc, _.attempt(JSON.parse.bind(null, node.attr)));
+                                        let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
+
+                                        if(sRtn == 0){
+                                            this.$message("请确认脚本！");
+                                            return false;
+                                        }
+
+                                        editor.session.getUndoManager().markClean();
+                                        //self.updateToolbar();
+                                    },
+                                    onSaveAs(){
+                                        let me = this;
+                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        let sc = editor.getValue();
+
+                                        if(_.isEmpty(editor.getValue())){
+                                            return false;
+                                        }
+
+                                        console.log(123,this.tabs.activeNode.parent, this.tabs.activeNode.name,sc);
+
+                                        // save
+                                        let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
 
                                         if(sRtn == 0){
                                             this.$message("请确认脚本！");
@@ -2561,22 +2599,25 @@
                                         // 先保存
                                         this.onSave();
 
-                                        // 后运行 depend ftype: js/html
-                                        if(_.includes(['html','html'],node.ftype)){
-                                            eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[node.parent,node.name].join("/")}?issys=true&type=open`);
-                                        } else {
+                                        _.delay(()=>{
+                                            // 后运行 depend ftype: js/html
+                                            if(_.includes(['html','html'],this.tabs.activeNode.ftype)){
+                                                eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, `/fs${[this.tabs.activeNode.parent,this.tabs.activeNode.name].join("/")}?issys=true&type=open`);
+                                            } else {
 
-                                            try {
-                                                let rtn = fsHandler.callFsJScript([node.parent, node.name].join("/").replace(/\/script/g, ""), '');
-                                                
-                                                _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:rtn});
-                                                //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, rtn);
-                                            } catch(err) {
-                                                //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, err);
-                                                _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
+                                                try {
+                                                    let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script/g, ""), '');
+                                                    _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:rtn});
+                                                    console.log(223,this.tabs.activeNode.fullname,_.find(this.tabs.list,{name:this.tabs.activeIndex}).model)
+                                                    //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, rtn);
+                                                } catch(err) {
+                                                    //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, err);
+                                                    _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
+                                                    console.log(323,this.tabs.activeNode.fullname,_.find(this.tabs.list,{name:this.tabs.activeIndex}).model)
+                                                }
                                             }
-                                        }
-
+                                        },500)
+                                        
                                         // $(".fas.fa-play.fa-spin").removeClass("fa-spin");
                                     },
                                     onDeploy(){

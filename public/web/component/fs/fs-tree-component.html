@@ -154,7 +154,11 @@
                     }
                 }
 			}
-		},
+        },
+        created(){
+            // 接收刷新事件
+            eventHub.$on("FS-TREE-REFRESH-EVENT",this.init);
+        },
 		mounted: function () {
             let self = this;
 
