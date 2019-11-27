@@ -284,21 +284,19 @@ class Matrix {
             methods:{
                 onSearch: function() {
 
-                    if (_.isEmpty(this.term)) {
+                    if(_.isEmpty(this.term)) {
                         alertify.log("请输入搜索关键字");
                         $(self.$el).find("input").focus();
                         return false;
                     }
 
-                    localStorage.setItem("search-object",JSON.stringify({
-                            cond: this.term,
-                            preset: this.preset
-                        })
-                    );
-                    window.open(
-                        "/janesware/search",
-                        "_blank"
-                    );
+                    let url = `/janesware/search?term=${window.btoa(encodeURIComponent(JSON.stringify({
+                                    cond: this.term,
+                                    preset: this.preset
+                                })))}`;
+                    
+                    window.open(url,"_parent");
+                    
                 }
             }
 

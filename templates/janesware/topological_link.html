@@ -49,26 +49,20 @@
 		padding: 0px!important;
 	}
 
-    .gutter {
-        background-color: #f9f9f9!important;
-        background-repeat: no-repeat;
-        background-position: 50%;
-    }
-
-    .gutter:hover {
-        background-color: #e7e7e7!important;
-        background-repeat: no-repeat;
-        background-position: 50%;
-    }
-
-	.topological-view-detail.el-tabs--border-card {
-		background: rgba(0, 0, 0, 0);
+	.topological-view-edges  .el-tabs--border-card,
+    .topological-view-diagnosis .el-tabs--border-card {
+		background:transparent;
 		border: unset;
-		-webkit-box-shadow: unset;
+        -webkit-box-shadow: unset;
 		box-shadow: unset;
 	}
 
-	.el-tabs--border-card{
+    .topological-view-edges .el-tabs--border-card>.el-tabs__content,
+    .topological-view-diagnosis .el-tabs--border-card>.el-tabs__content {
+        padding: 0px 0px 0px 5px;
+    }
+
+    .el-tabs--border-card{
 		background: rgb(255, 255, 255);
 		border: unset;
 		-webkit-box-shadow: unset;
@@ -86,10 +80,30 @@
 		line-height:32px;
 	}
 
+    .el-tabs__nav-next, .el-tabs__nav-prev{
+        line-height: 30px;
+    }
+
     .el-autocomplete .el-input__inner{
         height: 30px;
         line-height: 30px;
         border: unset;
+    }
+
+    .topological-analysis{
+        padding: 10px 5px 0px 5px;
+    }
+
+    .topological-analysis .el-form-item--small.el-form-item {
+        margin-bottom: 10px;
+    }
+
+    .topological-analysis .el-form-item__content{
+        margin-left: 40px;
+    }
+
+    .topological-analysis .el-input.el-input--suffix, .topological-analysis .el-input-number{
+        border: 1px solid #ddd;
     }
 
 	/* For Table */
@@ -199,7 +213,7 @@
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
-    }
+    } 
 
     /* 全屏模式 */
 	header#header{

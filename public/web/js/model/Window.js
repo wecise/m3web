@@ -767,14 +767,14 @@ class Window {
         return win;
     }
 
-    winGraphAction(title, template, position, container){
+    winGraphAction(title, template, position, container, fun){
 
         let _position = {
                             my: "left-top",
                             at: "left-top",
                             of: container,
-                            offsetX: 5,
-                            offsetY: 5
+                            offsetX: 3,
+                            offsetY: 3
                         };
 
         this.lrwh[2] = $(container).width() * 0.3;//"30em";//this.width * 0.2;
@@ -814,13 +814,18 @@ class Window {
                     "font-size": "12px"
                 });
 
-                $(".jsPanel-ftr a",this).click(function(){
+                $(".jsPanel-ftr a.btn-close",this).click(function(){
+                    fun();
                     win.close();
+                })
+
+                $(".jsPanel-ftr a.btn-colspan",this).click(function(){
+                    win.hide();
                 })
 
             },
             footerToolbar: function (footer) {
-                return `<div style="width:100%;text-align:center;"><a href="javascript:void(0);" class="el-button el-button--small el-button-default">关闭</a></div>`;
+                return `<div style="width:100%;text-align:center;"><a href="javascript:void(0);" class="btn-close el-button el-button--small el-button-default">关闭</a><a href="javascript:void(0);" class="btn-colspan el-button el-button--small el-button-default">收起</a></div>`;
             }
         });
 

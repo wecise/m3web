@@ -482,7 +482,7 @@ class Config {
                             this.splitInst = Split([`#config-manage-view-main-${this.cid}`, `#config-manage-view-footer-${this.cid}`], {
                                 sizes: [100, 0],
                                 minSize: [0, 0],
-                                gutterSize: 3,
+                                gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'vertical',
                             });
@@ -521,6 +521,10 @@ class Config {
                             self.editor.getSession().setMode(`ace/mode/${this.mode}`);
                             self.editor.getSession().setTabSize(2);
                             self.editor.getSession().setUseWrapMode(true);
+
+                            self.editor.on('mousemove', function() {
+                                self.editor.resize();
+                            });
                             
                             // Add commands
                             self.editor.commands.addCommand(
@@ -831,7 +835,7 @@ class Config {
                             self.splitInst = Split([`#config-tree-view-left`, `#config-tree-view-main`], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
-                                gutterSize: 3,
+                                gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal'
                             });

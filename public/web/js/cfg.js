@@ -162,40 +162,41 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                         severity: {
                             name: ["severity"],
                             level: {
-                                "6": {name:"Fatal", color:"#333333"},
-                                "5": {name:"Critical", color:"#FF0000"},
-                                "4": {name:"Major", color:"#FFA500"},
-                                "3": {name:"Minor", color:"#FFD700"},
-                                "2": {name:"Warning", color:"#0000FF"},
-                                "1": {name:"Indeterminate", color:"#800080"},
-                                "0": {name:"Clear", color:"#008000"},
-                                "other": {name:"Unknown", color:"#808080"},
+                                "other":{name:"Unknown", 	title: "未知", color:"#67C23A"},
+                                "0":{name:"Unknown", 	title: "未知", color:"#67C23A"},
+                                "1":{name:"Trace",		title: "追踪", color:"#67C23A"},
+                                "2":{name:"Debug",		title: "调试", color:"#67C23A"},
+                                "3":{name:"Info",		title: "消息", color:"#67C23A"},
+                                "4":{name:"Warning",		title: "警告", color:"#ffa500"},
+                                "5":{name:"Minor",		title: "次要", color:"#FF0000"},
+                                "6":{name:"Error",		title: "错误", color:"#FB650E"},
+                                "7":{name:"Major",	    title: "重大错误", color:"#f90f00"},
+                                "8":{name:"Critical",	title: "严重错误", color:"#ff0000"},
+                                "9":{name:"Fatal",		title: "致命错误", color:"#333333"}
                             }
                         },
                         time: ["vtime"]
                     },
                     columns:[
+                        {field:"severity",title: "级别", visible: true, render: `var s=function(row, column, cellValue, index){ 
+                                                try{ 
+                                                    $('.row-'+index+' >.'+column.id).css("background-color",mx.global.register.event.severity[cellValue][2]);
+                                                    $('.row-'+index+' >.'+column.id).css("color", "#ffffff");    
+                                                    $('.row-'+index+' >.'+column.id).css("text-align", "center"); 
+                                                    
+                                                    return mx.global.register.event.severity[cellValue][1]; 
+                                                } catch(err) { 
+                                                    return null; 
+                                                }
+                            };eval(s);`
+                        },
                         {field:"biz",title: "业务", visible: true},
-                        {field:"app",title: "应用", visible: true},
+                        {field:"app",title: "系统", visible: true},
                         {field:"host",title: "服务器", visible: true},
                         {field:"ip",title: "IP", visible: true},
-                        {field:"severity",title: "级别", visible: true, formatter: function(value, row, index) {
-                                return window.GLOBAL_OBJECT.company.object.event.preconfig.severity.level[row.severity].name;
-                            },
-                            cellStyle: function(value,row,index){
-                                if(!_.isNull(value)){
-                                    return {classes: 'severity'+value};
-                                } else {
-                                    return {classes: 'severity_other'};
-                                }
-
-                            }
-                        },
-                        {field:"ctime",title: "告警时间", visible: true, formatter: function(value, row, index) {
-                                if(!_.isEmpty(value)){
-                                    return `<span style="white-space: nowrap;">`+moment(value).format('YYYY/MM/DD HH:mm:ss')+`</span>`;
-                                }
-                            }
+                        {field:"vtime",title: "发生时间", visible: true, render: `var s=function(row, column, cellValue, index){
+                                return moment(row.vtime).format("YYYY-MM-DD HH:mm:ss");
+                            };eval(s);`
                         },
                         {field:"msg",title: "摘要", visible: true}
                     ]
@@ -598,7 +599,7 @@ g.V("linux:wecise").As("a").Follow(path).Map(function (item) { if (item.id !== i
                             return row.severity;
                             },
                             cellStyle: function(value,row,index){
-                                console.log(value, _.isEmpty(value))
+                                
                                 if(value){
                                     return {classes: 'severity'+value};
                                 } else {

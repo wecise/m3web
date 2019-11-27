@@ -926,13 +926,13 @@ class Omdb{
                 model: Object
             },
             template: `<el-container style="height:calc(100vh - 110px);">
-                            <el-header :id="id+'-header'" style="padding:0px;height:50vh;">
+                            <el-header :id="id+'-header'" style="padding:0px;height:40%;">
                                 <omdb-editor-component :id="id" :bid="id"
                                                         :model="editorModel"
                                                         showToolsBar="true"
                                                         showStatusBar="true"></omdb-editor-component>
                             </el-header>
-                            <el-main :id="id+'-main'" style="padding:0px;height:30vh;overflow:hidden;">
+                            <el-main :id="id+'-main'" style="padding:0px;height:60%;overflow:hidden;">
                                 <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick"  style="height:100%;">
                                     <el-tab-pane
                                         :key="item.name"
@@ -969,9 +969,9 @@ class Omdb{
                 }
             },
             watch: {
-                model: {
+                'main.tabs': {
                     handler:function(val,oldVal){
-                        console.log(2,val)
+                        //let sizes = (localStorage.getItem(`OMDB-SPLIT-SIZES-${_.upperCase(this.id)}`)).split(",");
                     },
                     deep:true
                 }
@@ -1137,14 +1137,17 @@ class Omdb{
                 layout(){
                     const self = this;
                     
+                    let sizes = [40,60];
+                    
                     self.main.splitInst = Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
-                        sizes: [50, 50],
+                        sizes: sizes,
                         minSize: [0, 0],
                         gutterSize: 5,
                         cursor: 'col-resize',
                         direction: 'vertical',
-                        onDragEnd:function(sizes) {
-                            eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`,sizes[1]);
+                        onDragEnd:function(sz) {
+                            localStorage.setItem(`OMDB-SPLIT-SIZES-${_.upperCase(self.id)}`,sz);
+                            eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`,sz[1]);
                         }
                     });
                 },
@@ -1179,6 +1182,12 @@ class Omdb{
                         self.main.activeIndex = node.name;
                     }
 
+                    _.delay(()=>{
+                        eventHub.$emit("LAYOUT-DATATABLE-RESIZE-EVENT",self.main.splitInst.getSizes()[1]);
+                    },500)
+
+                    
+
                 },
                 mainTabsRemove(targetName){
                     const self = this;
@@ -1199,8 +1208,6 @@ class Omdb{
                         
                         self.main.tabs = tabs.filter(tab => tab.name !== targetName);
                         self.main.activeIndex = activeIndex;
-
-                        console.log(targetName,self.main.tabs)
                         
                     } catch(err){
                         
@@ -1230,7 +1237,7 @@ class Omdb{
                                         <el-container>
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
                                                 <h4 style="width:50%;font-size:12px;">
-                                                    <i class="fas fa-cubes"></i> 对象管理
+                                                    <i class="fas fa-cubes"></i> 对象管理 [${window.COMPANY_OSPACE}]
                                                 </h4>
                                                 <el-dropdown style="width: 50%;text-align: right;font-size:12px;">
                                                     <span class="el-dropdown-link">
@@ -1246,7 +1253,7 @@ class Omdb{
                                                 <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
                                             </el-main>
                                             <el-footer style="height:30px;line-height:30px;padding:0 5px;">
-                                            ${window.COMPANY_OSPACE} | ${window.SignedUser_UserName} | #{moment().format("LLL")}#
+                                            ${window.SignedUser_UserName} | #{moment().format("LLL")}#
                                             </el-footer>
                                         </el-container>
                                     </el-aside>

@@ -76,6 +76,7 @@
                         },
                         nodes:null,
                         edges:null,
+                        edgeList: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message,
                         paths:[],
                         colors:['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'],
 	                    layers: {
@@ -96,7 +97,7 @@
                         theme: "",
                         outline: null,
                         default: {
-                            title: 'id'
+                            title: 'name'
                         }
                     }
                 }
@@ -227,9 +228,9 @@
                         let _name =  '';
                         
                         try{
-                            _name = _.last(v[self.model.graph.default.title].split(":"));
+                            _name = v[self.model.graph.default.title];
                         } catch(err){
-                            _name = '';
+                            _name = v["id"];
                         }
 
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
@@ -294,7 +295,13 @@
                             direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=2;';
                         }
 
-                        let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                        let edge = null;
+                        try {
+                            let edgeName = _.find(self.model.graph.edgeList,{name:k.class}).remedy;
+                            edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
+                        } catch(err){
+                            edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                        }
                     })
 
                     // Executes the layout
@@ -663,7 +670,7 @@
                     new Vue({
                         data: {
                             options: [],
-                            value: 'id'
+                            value: 'name'
                         },
                         watch:{
                             value: function(val,oldVal){
@@ -685,8 +692,8 @@
                             const me = this;
 
                             me.options = _.sortBy(_.map(_.keys(self.graphData.nodes[0]),function(v){
-                                let k = v.replace(/_/g,"");
-                                return {value: k, label: _.capitalize(k)};
+                                let k = v;//.replace(/_/g,"");
+                                return {value: k, label: k};//_.capitalize(k)};
                             }),['value'])
                         },
                         mounted(){

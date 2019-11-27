@@ -382,32 +382,28 @@ class SideBar {
 
                     this.setStatus();
 
-                    console.log(this.model)
                 },
                 setStatus(){
                     // 有模板情况
                     if(!_.isEmpty(this.model.template)){
                         this.sideBarStatus = 0;
-                        console.log(0)
                     } 
                     // 没有模板情况
                     else{
                         // 菜单项超过阈值
                         if(this.model.list.length > mx.global.register.sidebar.menuCollapse){
                             this.sideBarStatus = 1;
-                            console.log(1)
                         }
                         // 菜单项没有超过阈值
                         else {
                             this.sideBarStatus = 2;
-                            console.log(2)
                         }
                     }
                 },
                 initWnd: function(){
 
                     setTimeout(() => {
-                        let wnd = maxWindow.winApps(`应用市场`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
+                        this.wnd = maxWindow.winApps(`应用市场`, `<div id="nav-menu-level1" style="width:100%;height:100%;"></div>`, null, 'apps-container');
                         inst.app = new Vue(inst.appBox()).$mount("#nav-menu-level1");
                     }, 50);
 
@@ -444,7 +440,7 @@ class SideBar {
                     } else if(index == 'apps'){
                         this.initWnd();
                     } else {
-                        window.open(index,'_parent')
+                        window.open(index,'_parent');
                     }
                 },
                 onOpen(key, keyPath) {
@@ -462,10 +458,28 @@ class SideBar {
     }
 
     appRunning(event){
+        const wndID = "jsPanel-robot";
+        try{
+            if(jsPanel.activePanels.getPanel(wndID)){
+                jsPanel.activePanels.getPanel(wndID).close();
+            }
+        } catch(error){
+
+        }
         window.open(event.url,"_parent");
     }
 
     appRunningPlus(event){
+        const wndID = "jsPanel-robot";
+        
+        try{
+            if(jsPanel.activePanels.getPanel(wndID)){
+                jsPanel.activePanels.getPanel(wndID).close();
+            }
+        } catch(error){
+
+        }
+        
         let win = window.open(event.url, "_blank");
         win.focus();
     }

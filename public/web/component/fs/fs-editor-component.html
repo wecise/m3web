@@ -89,9 +89,13 @@
 
         },
         created() {
-            const self = this;
+            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT`,()=>{
+                this.refresh();
+            });
 
-            eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",self.refresh);
+            eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",()=>{
+                this.refresh
+            });
         },
         methods: {
             init() {
@@ -115,6 +119,10 @@
 
                 self.editor.getSession().setTabSize(4);
                 self.editor.getSession().setUseWrapMode(true);
+
+                self.editor.on('mousemove', function() {
+                    self.editor.resize();
+                });
 
                 self.setTheme();
                 self.setMode();

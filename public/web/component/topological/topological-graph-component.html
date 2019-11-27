@@ -117,7 +117,7 @@
         .topological-graph-component .vertical-toolbar{
             position: fixed;
             width: 29px;
-            height: 57px;
+            height: auto;
             bottom: 8em;
             background: #ffffff;
             z-index: 22224;
@@ -205,6 +205,23 @@
             margin: 0px;
         }
 
+        /* 工具栏拾色器 */
+        .topological-graph-component .el-color-picker{
+            padding: unset!important;
+        }
+
+        .topological-graph-component .el-color-picker--small .el-color-picker__trigger {
+            height: 18px;
+            width: 18px;
+            padding: 2px;
+            margin-top: 4px;
+            border:none;
+        }
+
+        .el-color-dropdown.el-color-picker-dropdown.el-color-picker__panel{
+            z-index: 30000!important;
+        }
+
         /* jsPanel graphAction */
         .graphAction .input-with-select.el-input.el-input--small{
             border-bottom: 1px solid #ddd!important;
@@ -223,6 +240,9 @@
             <el-container :id="id" style="height:100%;">
                 <el-header class="nav" :id="id+'-nav'" style="height:30px;line-height: 30px;padding:0px 0px 0px 10px;">
                     <div class="tools" :id="id+'-tools'">
+                        <el-tooltip content="图查询" open-delay="500">
+                            <el-button type="text" @click="path" class="el-icon-search" style="font-size:18px;padding:0px 4px 4px 0px;"></el-button>
+                        </el-tooltip>
                         <el-tooltip content="编辑" open-delay="500">
                             <a href="javascript:void(0);" @click="editIt">
                                 <img :src="'design' | genFileName" style="width:18px;height:18px;"></el-button>
@@ -232,40 +252,6 @@
                             <a href="javascript:void(0);" @click="saveas">
                                 <img :src="'saveas' | genFileName" style="width:18px;height:18px;">
                             </a>
-                        </el-tooltip>
-                        <el-tooltip content="刷新" open-delay="500">
-                            <a href="javascript:void(0);" @click="reload">
-                                <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="自适应" open-delay="500">
-                            <a href="javascript:void(0);" @click="fit">
-                                <img :src="'fullscreen' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="调整图方向" open-delay="500">
-                            <a href="javascript:void(0);" @click="layout">
-                                <img :src="'direction' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="查看图路径" open-delay="500">
-                            <a href="javascript:void(0);" @click="path">
-                                <img :src="'path' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="打印" open-delay="500">
-                            <a href="javascript:void(0);" @click="print">
-                                <img :src="'print' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="调整图背景" open-delay="500">
-                            <el-color-picker
-                                v-model="model.graph.theme.color"
-                                show-alpha
-                                :predefine="model.graph.theme.predefineColors"
-                                @change="theme"
-                                style="padding:4px 8px;">
-                            </el-color-picker>
                         </el-tooltip>
                         <el-tooltip content="图节点显示名称选择" open-delay="500">
                             <div :id="'attributes-select-'+id"></div>
@@ -285,6 +271,40 @@
                             <a href="javascript:void(0);" @click="zoomOut">
                                 <img :src="'zoom_in' | genFileName" style="width:18px;height:18px;">
                             </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="刷新" open-delay="500" placement="left">
+                            <a href="javascript:void(0);" @click="reload">
+                                <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="自适应" open-delay="500">
+                            <a href="javascript:void(0);" @click="fit">
+                                <img :src="'fullscreen' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="调整图方向" open-delay="500">
+                            <a href="javascript:void(0);" @click="layout">
+                                <img :src="'direction' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="打印" open-delay="500">
+                            <a href="javascript:void(0);" @click="print">
+                                <img :src="'print' | genFileName" style="width:18px;height:18px;">
+                            </a>
+                        </el-tooltip>
+                        <el-divider></el-divider>
+                        <el-tooltip content="调整图背景" open-delay="500">
+                            <el-color-picker
+                                v-model="model.graph.theme.color"
+                                show-alpha
+                                :predefine="model.graph.theme.predefineColors"
+                                @change="theme"
+                                style="padding:4px 8px;">
+                            </el-color-picker>
                         </el-tooltip>
                     </div>
                     <div class="horizontal-toolbar">
@@ -339,6 +359,7 @@
                         },
                         nodes:null,
                         edges:null,
+                        edgeList: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message,
                         paths:[],
                         colors:['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'],
 	                    layers: {
@@ -358,7 +379,7 @@
 	                    parent: null,
                         outline: null,
                         default: {
-                            title: 'id'
+                            title: 'name'
                         },
                         theme:{
                             color: "#FFFFFF",
@@ -398,6 +419,8 @@
         },
         created(){
             eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
+
+            eventHub.$on("TOPOLOGICAL-ANALYSIS-CALLBACK", this.removePath);
             
             //初始化theme
             this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
@@ -557,10 +580,11 @@
             },
             deleteCells(includeEdges){
                 const self = this;
+                
                 // Cancels interactive operations
                 self.model.graph.graph.escape();
                 var cells = self.model.graph.graph.getDeletableCells(self.model.graph.graph.getSelectionCells());
-                
+
                 if (cells != null && cells.length > 0)
                 {
                     var parents = self.model.graph.graph.model.getParents(cells);
@@ -636,16 +660,16 @@
                             
                             try{
                                 if(window.URL_PARAMS_GRAPH){
-                                    _name = _.last(v[window.URL_PARAMS_GRAPH.title].split(":"));
+                                    _name = v[window.URL_PARAMS_GRAPH.title];//_.last(v[window.URL_PARAMS_GRAPH.title].split(":"));
                                 } else {
-                                    _name = _.last(v[self.model.graph.default.title].split(":"));
+                                    _name = v[self.model.graph.default.title];//_.last(v[self.model.graph.default.title].split(":"));
                                 }
                             } catch(err){
-                                _name = '';
+                                _name = v["id"];
                             }
 
                             let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                                `column;shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`,false);
+                                `column;shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`,false);
 
                             self.model.graph.nodes[v.id] = node;
 
@@ -655,16 +679,32 @@
                         })
 
                         // 边界
-                        _.forEach(self.graphData.edges,function(k){
+                        _.forEach(self.graphData.edges,function(k,index){
                             let source =  self.model.graph.nodes[k.source];
                             let target = self.model.graph.nodes[k.target];
                             let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+                            let edge = "";
                             let direction = '';
                             if(k.twoway){
                                 direction = 'startArrow=block;endArrow=block;endFill=1;';
                             }
 
-                            let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                            // edge为path的样式
+                            if(k.class === "path"){
+                                baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                                let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
+                                let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction+`strokeColor=${strokeColor}`);
+                                return;
+                            }
+                            
+                            let edge = null;
+                            try {
+                                let edgeName = _.find(self.model.graph.edgeList,{name:k.class}).remedy;
+                                edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
+                            } catch(err){
+                                edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
+                            }
+                            
                         })
 
                         // 创建组
@@ -710,11 +750,12 @@
                         this.updateStatus();
                     },mx.global.register.topological.status_interval);
                     
+                    self.updateStatus();
                 }
             },
             createOverlayByTip(image, tooltip) {
                             
-                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/severity/${image}.png?issys=true&type=download`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/severity/${image}.png?issys=true&type=open`,24,24), tooltip, mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
                 
                 return overlay;
             },
@@ -780,14 +821,15 @@
                 },500)
             },
             reload(){
-                $(this.$el).find(`#${this.id}-container`).empty();
-                $(this.$el).find(`#${this.id}-outlineContainer`).empty();
-                this.deleteCells();
-                this.init();
-                this.outline();
-
-                // 更新toobar属性选择列表
-                eventHub.$emit(`UPDATE-ATTRIBUTES-EVENT-${this.id}`,this.graphData);
+                if(this.model.graph.graph){
+                    $(this.$el).find(`#${this.id}-container`).empty();
+                    $(this.$el).find(`#${this.id}-outlineContainer`).empty();
+                    this.deleteCells();
+                    this.init();
+                    this.outline();
+                    // 更新toobar属性选择列表
+                    eventHub.$emit(`UPDATE-ATTRIBUTES-EVENT-${this.id}`,this.graphData);
+                }
             },
             cellsEvent(){
                 const self = this;
@@ -833,6 +875,9 @@
                     if(!cell) return;
                     
                     self.model.graph.selectedCell = cell;
+
+                    // 刷新状态
+                    self.updateStatus();
                     
                 };
             },
@@ -897,7 +942,7 @@
                 new Vue({
                         data: {
                             options: [],
-                            value: 'id'
+                            value: 'name'
                         },
                         watch:{
                             value: function(val,oldVal){
@@ -922,16 +967,16 @@
                                 me.options = [{value: "id", label: "ID"},{value: "value", label: "Value"}];    
                             } else {
                                 me.options = _.sortBy(_.map(_.keys(self.graphData.nodes[0]),function(v){
-                                    let k = v.replace(/_/g,"");
-                                    return {value: k, label: _.capitalize(k)};
+                                    let k = v;//.replace(/_/g,"");
+                                    return {value: k, label: k};//_.capitalize(k)};
                                 }),['value'])
                             }
 
                             // 图数据更行后，更新属性选择列表
                             eventHub.$on(`UPDATE-ATTRIBUTES-EVENT-${self.id}`,function(event){
                                 me.options = _.sortBy(_.map(_.keys(event.nodes[0]),function(v){
-                                    let k = v.replace(/_/g,"");
-                                    return {value: k, label: _.capitalize(k)};
+                                    let k = v;//v.replace(/_/g,"");
+                                    return {value: k, label: k};// _.capitalize(k)};
                                 }),['value'])
                             });
                         },
@@ -967,7 +1012,7 @@
 
                 const self = this;
 
-                self.model.graph.graph.center(true,true,0.5,0);//将画布放到容器中间
+                self.model.graph.graph.center(true,true,0,0);//将画布放到容器中间
 
                 /* 
                 //self.model.graph.graph.fit();
@@ -1020,9 +1065,58 @@
                 let path = self.$root.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
                 new Vue(path);
             },
+            /* addPath(event){
+                const self = this;
+                
+                // 过滤event
+                let paths = _.map(event,function(v){
+                                    return _.omit(v,['num','class']);
+                                });
+                console.log(12,paths)
+                self.model.graph.graph.getModel().beginUpdate();
+                
+                try{
+                    self.model.graph.graph.getModel()
+
+                    if(self.model.graph.paths.length){
+                        self.removePath();
+                    }
+                    
+                    _.forEach(paths,function(v,index){
+                        // keys
+                        var keys = _.keys(v);
+                        // values
+                        var values = _.values(v);
+                        
+                        for(var i=0;i<keys.length;i++){
+                            if(!_.isUndefined(v[keys[i+1]])){
+                                console.log(i, v[keys[i+1]])
+                                let id = `${v[keys[i]]}-${v[keys[i+1]]}`;
+                                let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                                let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
+                                
+                                // 绘制路径
+                                let cell = self.model.graph.graph.getModel().getCell(id);
+                                console.log(121, id, cell, self.model.graph.graph)
+                                if(cell){
+                                    cell.setStyle(baseEdgeStyle+`strokeColor=${strokeColor};`);
+                                    self.model.graph.paths.push(cell);
+                                }
+                            }
+                        }
+                    })
+
+                    // Executes the layout
+	                self.model.graph.layout.default.execute(self.model.graph.parent);
+                }
+                finally
+                {
+                    self.model.graph.graph.getModel().endUpdate();
+                }
+            }, */
             addPath(event){
                 const self = this;
-
+                
                 // 过滤event
                 let paths = _.map(event,function(v){
                                     return _.omit(v,['num','class']);
@@ -1033,10 +1127,8 @@
                 try{
                     self.model.graph.graph.getModel()
 
-                    if(self.model.graph.paths.length){
-                        self.removePath();
-                    }
-
+                    self.removePath();
+                    
                     _.forEach(paths,function(v,index){
                         // keys
                         var keys = _.keys(v);
@@ -1049,7 +1141,7 @@
                             if(_.isUndefined(target)){
                                 return;
                             }
-                            let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
+                            let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=2;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
                             let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
                             
                             // 绘制路径
@@ -1071,6 +1163,10 @@
             },
             removePath(){
                 const self = this;
+
+                if(self.model.graph.paths.length == 0){
+                    return false;
+                }
 
                 // Cancels interactive operations
                 self.model.graph.graph.escape();

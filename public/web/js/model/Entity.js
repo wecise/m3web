@@ -947,6 +947,14 @@ class Entity extends Matrix {
                             inst.URL_PARAMS_GRAPH = null;
                         }
 
+                        // 初始化term
+                        try{
+                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            this.options.term = term;
+                        } catch(err){
+
+                        }
+
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件

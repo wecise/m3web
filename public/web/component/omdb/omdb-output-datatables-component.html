@@ -421,13 +421,13 @@
 
 
 			},
-			resize: function(event){
+			resize(event){
                 const self = this;
-
+                
                 let conH = $("#content.content").height() * event / 100 - 152;
                 $('.omdb-output-datatables-component .dataTables_scrollBody').css("max-height", conH + 'px').css("min-height", conH + 'px');
 			},
-			toolBars: function(){
+			toolBars(){
                 const self = this;
                 let _keys = _.keys(self.result.columns);
                 let _items = {};

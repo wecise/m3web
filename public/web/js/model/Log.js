@@ -439,6 +439,11 @@ class Log extends Matrix {
                         sizes: [20, 80],
                         minSize: [0, 0],
                         gutterSize: 5,
+                        gutterStyle: function(dimension, gutterSize) {
+                            return {
+                                'display': 'none'
+                            }
+                        },
                         gutterAlign: 'end',
                         cursor: 'col-resize',
                         direction: 'horizontal',

@@ -1001,6 +1001,9 @@
                                 gutterSize: 5,
                                 cursor: 'row-resize',
                                 direction: 'vertical',
+                                onDragEnd:function(sizes) {
+                                    eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`,sizes[1]);
+                                }
                             });
                         },
                         // 应用扩展名影射不同的编辑模式
@@ -2338,7 +2341,7 @@
                                     }
                                 },
                                 template:  `<el-container style="height: 100%;">
-                                                <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;">
+                                                <el-header style="height:30px;line-height:30px;background-color:#f6f6f6;border-bottom:1px solid #ddd;">
                                                     <el-dropdown style="padding-right: 10px;" trigger="click">
                                                         <span class="el-dropdown-link">
                                                             文件
@@ -2396,7 +2399,7 @@
                                                         <el-button type="text" :class="'editor-select-theme-'+tabs.activeIndex" v-show="!_.isEmpty(tabs.list)" style="float:right;"><i class="fas fa-tshirt"></i> 主题</el-button>
                                                     </el-tooltip>
                                                 </el-header>
-                                                <el-container style="height: 100%;min-height:300px;">
+                                                <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
                                                     <el-aside id="fs-editor-left" style="background-color:#f6f6f6;width:200px;overflow:hidden;">
                                                         <devops-tree-component :root="tree.root" :defaultExpandedKeys="[tabs.activeNode.fullname]"></devops-tree-component>
                                                     </el-aside>

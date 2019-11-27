@@ -1740,9 +1740,7 @@ class AI {
                                                                 transition: transform .3s;
                                                                 transition: transform .3s,-webkit-transform .3s;
                                                                 font-size: 12px;">
-                                                                <el-tooltip content="新建规则">
-                                                                    <a href="javascript:void(0);" class="btn btn-link" @click="add(item,$event)"><i class="fas fa-plus"></i></a>
-                                                                <el-tooltip>
+                                                                <e-button class="el-icon-plus" @click="add(item,$event)" style="font-size:12px;"></e-button>
                                                             </div>
                                                         </template>
                                                         <el-menu-item :index="subItem.id" v-for="subItem in item.child" @click="select(subItem)">

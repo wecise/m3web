@@ -31,23 +31,91 @@ class Topological {
             props: {
                 model: Object
             },
-            template:  `<el-input placeholder="请输入内容" v-model="model.id" class="input-with-select">
-                            <el-select v-model="model.value" slot="prepend" placeholder="请选择">
-                                <el-option label="所有" value="#/matrix/"></el-option>
-                                <el-option label="事件" value="#/matrix/devops/event/"></el-option>
-                                <el-option label="性能" value="#/matrix/devops/performance/"></el-option>
-                                <el-option label="日志" value="#/matrix/devops/log/"></el-option>
-                            </el-select>
-                            <el-button slot="append" icon="el-icon-search" @click="onDiagnosis(model)"></el-button>
-                            <el-button slot="append" icon="el-icon-close" @click="onRemove(model.id)"></el-button>
-                            <el-button slot="append" icon="el-icon-menu" class="handleSort"></el-button>
-                        </el-input>`,
+            template:  `<el-container>
+                            <el-header style="height:30px;ling-height:30px;padding:0px;">
+                                <el-autocomplete placeholder="请输入实体" 
+                                                v-model="model.id" 
+                                                :fetch-suggestions="querySearchAsync"
+                                                @select="handleSelect"
+                                                style="width:100%;color:#ffffff;">
+                                    <el-button slot="prepend" icon="el-icon-menu" class="handleSort input-el-button" style="#ffffff;"></el-button>
+                                    
+                                    <el-button slot="append" icon="el-icon-arrow-down" @click="edge.show = !edge.show" v-if="edge.show"></el-button>
+                                    <el-button slot="append" icon="el-icon-arrow-right" @click="edge.show = !edge.show" v-else></el-button>
+                                    <el-button slot="append" icon="el-icon-postcard" @click="onDiagnosis(model)"></el-button>
+                                    <el-button slot="append" icon="el-icon-close" @click="onRemove(model.id)"></el-button>
+                                </el-autocomplete>
+                            </el-header>
+                            <el-main v-if="edge.show" style="padding:10px 5px 0px 5px;background:#ffffff;">
+                                <el-form label-width="50px">
+                                    <el-form-item label="关系" style="font-weight:noomal;">
+                                        <el-select v-model="edge.edgeType" placeholder="请选择关系类型">
+                                            <el-option
+                                                v-for="item in edge.list"
+                                                :key="item.name"
+                                                :label="item.remedy"
+                                                :value="item.name">
+                                                <span style="float: left">#{ item.remedy }#</span>
+                                                <span style="float: right; color: #8492a6; font-size: 13px">#{ item.name }#</span>
+                                            </el-option>
+                                        </el-select>
+                                        <el-popover
+                                            placement="top-start"
+                                            width="200"
+                                            trigger="hover"
+                                            content="实体连接关系选择">
+                                            <span slot="reference" class="el-icon-question" style="float:right;"></span>
+                                        </el-popover>
+                                    </el-form-item>
+                                    <el-form-item label="几跳" style="font-weight:normal;">
+                                        <el-input-number v-model="edge.edgeStep" :min="0"></el-input-number>
+                                        <el-popover
+                                            placement="top-start"
+                                            width="200"
+                                            trigger="hover"
+                                            content="实体连接层级设置，实体直接连接为1跳，间接连接为2跳，以此类推。">
+                                            <span slot="reference" class="el-icon-question" style="float:right;"></span>
+                                        </el-popover>
+                                    </el-form-item>
+                                    <el-form-item label="自定义" style="font-weight:normal;">
+                                        <el-input v-model="edge.edgeCustom" style="border: 1px solid #ddd!important;width:60%;" @blur="onBlur" clearable></el-input>
+                                        <el-popover
+                                            placement="top-start"
+                                            width="200"
+                                            trigger="hover"
+                                            content="请参考图查询文档，自定义关系类型及实体连接层级设置，举例：[:connect*1]">
+                                            <span slot="reference" class="el-icon-question" style="float:right;"></span>
+                                        </el-popover>
+                                    </el-form-item>
+                                </el-form>
+                            </el-main>
+                        </el-container>`,
             data(){
                 return {
-                    
+                    entity: {
+                        list: [],
+                        timeout:  null,
+                    },
+                    edge: {
+                        show: false,
+                        list: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message,
+                        edgeType: "*",
+                        edgeStep: 0,
+                        edgeCustom: ""
+                    }
+                }
+            },
+            watch:{
+                'edge.edgeCustom':function(val,oldVal){
+                    this.edge.edgeType = val.split("*")[0].replace(/:/,"");
+                    this.edge.edgeStep = val.split("*")[1];
                 }
             },
             methods:{
+                onBlur(){
+                    this.edge.edgeType = this.edge.edgeCustom?this.edge.edgeCustom.split("*")[0].replace(/:/,""):"*";
+                    this.edge.edgeStep = this.edge.edgeCustom?this.edge.edgeCustom.split("*")[1]:0;
+                },
                 onDiagnosis(node){
                     const self = this;
 
@@ -56,27 +124,132 @@ class Topological {
                 onRemove(id){
                     const self = this;
                     self.$parent.$parent.$parent.trace.nodes.splice(_.findIndex(self.$parent.$parent.$parent.trace.nodes,{id:id}),1);
+                },
+                querySearchAsync(term, cb) {
+                    
+                    if(_.isEmpty(term)){
+                        return false;
+                    }
+
+                    let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(term)).message;
+                    
+                    let results = term ? entitys.filter(this.createStateFilter(term)) : entitys;
+            
+                    clearTimeout(this.entity.timeout);
+                    this.entity.timeout = setTimeout(() => {
+                      cb(results);
+                    }, 50 * Math.random());
+                },
+                createStateFilter(term) {
+                    return (state) => {
+                      return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
+                    };
+                },
+                handleSelect(item) {
+                    console.log(item);
+                }
+            }
+        })
+
+        // 拓扑分析新增输入组件
+        Vue.component("topological-analysis-new-input",{
+            delimiters: ['#{', '}#'],
+            template:  `<el-autocomplete placeholder="请输入实体" 
+                                        v-model="newModel.id" 
+                                        autofocus
+                                        class="input-with-select"
+                                        :fetch-suggestions="querySearchAsync"
+                                        @select="handleSelect"
+                                        @keyup.enter.native="onNew">
+                            <template slot="prepend"><i class="el-icon-place"></i></template>
+                            <el-button slot="append" icon="el-icon-plus" @click="onNew"></el-button>
+                        </el-input>`,
+            data(){
+                return {
+                    newModel: {
+                        id: "",
+                        value: ""
+                    },
+                    entity: {
+                        list: [],
+                        timeout:  null
+                    }
+                }
+            },
+            methods:{
+                onNew(){
+                    const self = this;
+                    
+                    let id = this.newModel.id && this.newModel.id.trim()
+                    if (!id) {
+                        return;
+                    }
+                    self.$parent.$parent.$parent.trace.nodes.push({
+                        id: this.newModel.id,
+                        cell: {edge:false}
+                    })
+                    this.newModel.id = "";
+                    
+                },
+                querySearchAsync(term, cb) {
+                    
+                    if(_.isEmpty(term)){
+                        return false;
+                    }
+
+                    let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(term)).message;
+                    
+                    let results = term ? entitys.filter(this.createStateFilter(term)) : entitys;
+                    
+                    clearTimeout(this.entity.timeout);
+                    this.entity.timeout = setTimeout(() => {
+                      cb(results);
+                    }, 50 * Math.random());
+                },
+                createStateFilter(term) {
+                    return (state) => {
+                        return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
+                    };
+                },
+                handleSelect(item) {
+                    this.onNew();
                 }
             }
         })
 
         // 拓扑分析
         Vue.component("topological-analysis",{
-            delimiters: ['${', '}'],
+            delimiters: ['#{', '}#'],
             template:  `<el-container>
-                            <el-header style="height:100%;line-height:100%;padding:10px;">
+                            <el-header style="height:100%;line-height:100%;padding:10px;background:#2790e2!important;display:flex;flex-direction: column;">
                                 <div id="topologicalAnalysisInputList">    
-                                    <topological-analysis-input v-for="item in trace.nodes" :model="item" :data-id="item.id"></topological-analysis-input>
+                                    <topological-analysis-input v-for="item in trace.nodes" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
-                                <el-button icon="fas fa-location-arrow" style="color:#2b90e1;float:right;margin-top:10px;" @click="pathTrace"></el-button>
+                                <topological-analysis-new-input></topological-analysis-new-input>
+                                <div style="color:#2b90e1;padding:0px 10px;">
+                                    <el-button type="success" icon="el-icon-position" @click="pathTrace" style="float:right;"></el-button>
+                                    <el-button type="default" icon="el-icon-search" @click="pathTrace" style="float:right;margin-right:10px;"></el-button>
+                                </div>
                             </el-header>
-                            <el-main style="padding:0px 10px;">
+                            <el-main style="padding:0px 10px;" class="topological-analysis">
                                 <el-table :data="trace.paths.rows" 
                                         ref="multipleTable"
                                         tooltip-effect="dark"
                                         @selection-change="onSelectionChange"
                                         style="width: 100%"
                                         v-if="trace.paths.rows.length > 0">
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                          <el-form>
+                                            <el-form-item v-for="v,k in _.omit(props.row,['num','class'])">
+                                                <template slot="label">
+                                                    <i class="el-icon-place" style="color: #67c239;"></i>
+                                                </template>
+                                                <span>#{ v }#</span>
+                                            </el-form-item>
+                                          </el-form>
+                                        </template>
+                                    </el-table-column>
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
                                 </el-table>
@@ -85,6 +258,11 @@ class Topological {
             data(){
                 return {
                     trace: {
+                        newItem: {
+                            id: "",
+                            type: "",
+                            value: ""
+                        },
                         nodes: [],
                         paths: {
                             rows: [], 
@@ -126,8 +304,12 @@ class Topological {
                         self.$message("请选择节点！");
                         return false;
                     }
+                    let term = _.map(self.trace.nodes,(v)=>{
+                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(self.$refs[v.id][0].edge,["list","show"]) });
+                    });
 
-                    let term = _.map(self.trace.nodes,'id');
+                    console.log(1,term)
+                    
                     let rtn = null;
                     let rows = [];
                     let cols = [];
@@ -152,7 +334,6 @@ class Topological {
                 onSelectionChange(val){
                     const self = this;
                     self.trace.selectedPaths = val;
-                    console.log(1,inst)
                     inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
                 }
             }
@@ -285,7 +466,7 @@ class Topological {
                 id: String,
                 model:Object
             },
-            template:   `<el-card :body-style="{ padding: '0px' }" v-show="model.rows.length">
+            template:   `<el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
                             <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
                             <div class="bottom clearfix">
                                 <form class="form-horizontal">
@@ -533,7 +714,7 @@ class Topological {
                     const self = this;
 
                     let wnd = null;
-                    let wndID = `jsPanel-upload-${objectHash.sha1(self.node.value)}`;
+                    let wndID = `jsPanel-upload-${objectHash.sha1(self.node.id)}`;
 
                     try{
                         if(jsPanel.activePanels.getPanel(wndID)){
@@ -565,7 +746,7 @@ class Topological {
                                     </el-container>`,
                         data: {
                             upload: {
-                                url: `/fs/storage/entity/files/${self.node.value}?issys=true`,
+                                url: `/fs/storage/entity/files/${self.node.id}?issys=true`,
                                 fileList: []
                             }
                         },
@@ -593,7 +774,7 @@ class Topological {
                 // 上传完毕，更新/matrix/entity   
                 updateEntity(event,action){
                     let id = this.node.id;
-                    let fs = {action: action, class: `/matrix/entity/${this.node.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${this.node.value}/${event.name}`};
+                    let fs = {action: action, class: `/matrix/entity/${this.node.id.split(":")[0]}`, id:id, name: event.name, file: `/storage/entity/files/${this.node.id}/${event.name}`};
                     let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
                     _.delay(()=>{ this.reload() },1000);
                 },                     
@@ -1090,8 +1271,10 @@ class Topological {
                 tabs:function(val,oldVal){
                     if(val.length > 0){
                         this.$root.$data.splitInst.setSizes([0,60,40]);
+                        $(".gutter").show();
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);
+                        $(".gutter").hide();
                     }
                 }
             },
@@ -1102,7 +1285,7 @@ class Topological {
             methods:{
                 diagnosisAdd(node){
                     const self = this;
-
+                    
                     try{
                         if(node.cell.edge){
                             // 构建 edge 属性
@@ -1216,8 +1399,10 @@ class Topological {
                 tabs:function(val,oldVal){
                     if(val.length > 0){
                         this.$root.$data.splitInst.setSizes([44,56,0]);
+                        $(".gutter").show();
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);
+                        $(".gutter").hide();
                     }
                 }
             },
@@ -1286,14 +1471,14 @@ class Topological {
         let component =  {
             delimiters: ['${', '}'],
             template: `<el-container style="background: transparent;height: 100%;">
-                            <el-aside :id="'topological-view-left-'+id" style="background-color:#f6f6f6;" class="topological-view-edges">
+                            <el-aside :id="'topological-view-left-'+id" style="background-color:transparent;" class="topological-view-edges">
                                 <!--graph-view-nav :id="'graph-view-nav-'+id"></graph-view-nav-->
                                 <graph-view-edges :id="'graph-view-edges-'+id" ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :id="'topological-view-main-'+id">
                                 <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;background-color:#f6f6f6;" class="topological-view-diagnosis">
+                            <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;background-color:transparent;" class="topological-view-diagnosis">
                                 <graph-view-diagnosis :id="'graph-diagnosis-'+id" ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
@@ -1367,13 +1552,17 @@ class Topological {
 
                 _.delay(function(){
                     self.splitInst = Split([`#topological-view-left-${self.id}`, `#topological-view-main-${self.id}`,`#topological-view-right-${self.id}`], {
-                        sizes: [0, 100,0],
-                        minSize: [0, 0],
-                        gutterSize: 5,
+                        sizes: [0, 100, 0],
+                        minSize: [0, 0, 0],
                         cursor: 'col-resize',
                         direction: 'horizontal',
+                        gutterSize: 5,
+                        gutterStyle: function(dimension, gutterSize) {
+                            return {
+                                'display': 'none'
+                            }
+                        }
                     });
-
                 },1500)
                 
             },
@@ -1489,12 +1678,16 @@ class Topological {
 						}
                     }
 
+                    let callbackFun = function(){
+                        eventHub.$emit("TOPOLOGICAL-ANALYSIS-CALLBACK");
+                    };
+
                     try {
                         if( window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`) ){
                             window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).show();
                         }
                     } catch(err){
-                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`);
+                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`, callbackFun);
                     
                         new Vue({
                             delimiters: ['#{', '}#'],
@@ -1514,7 +1707,8 @@ class Topological {
                     const self = this;
 
                     $.contextMenu({
-                        selector: `#graph-view-${self.id} svg g`,//selector: `#graph-view-${self.id} svg g image`,
+                        //selector: `#graph-view-${self.id} svg g`,
+                        selector: `#graph-view-${self.id} svg g image,#graph-view-${self.id} svg g path`,
                         trigger: 'left',
                         autoHide: true,
                         delay: 10,

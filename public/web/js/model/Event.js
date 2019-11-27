@@ -283,7 +283,10 @@ class Event {
                                             <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
                                                 <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
                                                 <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-if="_.includes(key,'day')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'occurrence')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'time')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-else>
                                                 </div>
                                             </div>
                                         </form>
@@ -688,6 +691,11 @@ class Event {
                                 sizes: [35, 65],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        'display': 'none'
+                                    }
+                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
@@ -910,7 +918,6 @@ class Event {
                         },
                         toggleEvent(event){
                             _.extend(this.tableData, { rows: _.find(this.model.rows,{name:event}).events } );
-                            console.log(this.tableData.rows.length)
                         }
                     }
                 })

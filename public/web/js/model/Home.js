@@ -60,7 +60,7 @@ class Home extends Matrix {
                         }
                     },
                     created: function(){
-                        let self = this;
+                        const self = this;
 
                         // 刷新应用列表
                         eventHub.$on("APP-REFRESH-EVENT",()=>{
@@ -75,19 +75,27 @@ class Home extends Matrix {
 
                     },
                     mounted: function(){
-                        let self = this;
-
+                        const self = this;
 
                         self.$nextTick()
                             .then(function () {
                                 self.init();
                                 self.initPlugIn();
+
+                                let el = document.getElementById("grid-content");
+                                let sortable = Sortable.create(el,{
+                                    
+                                    dataIdAttr: 'data-id',
+                                    onChange(evt) {
+                                        
+                                    }
+                                });
                             })
 
                     },
                     methods: {
                         init: function() {
-                            let self = this;
+                            const self = this;
 
                             let $search = $(".search");
                             $search.off("keyup drop").on("keyup drop", function(event) {
@@ -104,7 +112,7 @@ class Home extends Matrix {
                             })
                         },
                         initPlugIn: function(){
-                            let self = this;
+                            const self = this;
 
                             self.loadApps();
 
@@ -179,12 +187,12 @@ class Home extends Matrix {
                             });
                         },
                         setPresetDefault: function(event){
-                            let self = this;
+                            const self = this;
 
                             self.search.preset = event;
                         },
                         nowSearch: function(term) {
-                            let self = this;
+                            const self = this;
                             let _param = "";
                             let _preset = self.search.preset.default;
                             let _ifHistory = self.search.preset.others.ifHistory?"":"#";
@@ -226,7 +234,7 @@ class Home extends Matrix {
                                     model:[],
                                 },
                                 mounted: function(){
-                                    let self = this;
+                                    const self = this;
 
                                     self.$nextTick(function(){
                                         self.init();
@@ -235,7 +243,7 @@ class Home extends Matrix {
                                 watch: {
                                     model: {
                                         handler: function(val,oldVal){
-                                            let self = this;
+                                            const self = this;
 
                                             if(_.isEmpty(val)){
 
@@ -246,7 +254,7 @@ class Home extends Matrix {
                                 },
                                 methods: {
                                     init: function(){
-                                        let self = this;
+                                        const self = this;
                                         var _groupByClass = _.omit(_.groupBy(result.message,'class'),["undefined",""]);
 
                                         self.model = _.map(_groupByClass, function(v,k){
@@ -256,7 +264,7 @@ class Home extends Matrix {
                                         });
                                     },
                                     copyToClipBoard: function() {
-                                        let self = this;
+                                        const self = this;
                                         var clipboard = new Clipboard('.btn-copy', {
                                             text: function() {
                                                 return self.model.list;
@@ -278,7 +286,7 @@ class Home extends Matrix {
                             $("#search-result-panel").hide();
                         },
                         onSearch: function() {
-                            let self = this;
+                            const self = this;
                             let _term = _.trim($(".search").val());
 
                             if (_term.length < 1) {
@@ -287,18 +295,15 @@ class Home extends Matrix {
                                 return false;
                             }
 
-                            localStorage.setItem("search-object",JSON.stringify({
-                                    cond:_term,
-                                    preset:self.search.preset
-                                })
-                            );
-                            window.open(
-                                "/janesware/search",
-                                "_parent"
-                            );
+                            let url = `/janesware/search?term=${window.btoa(encodeURIComponent(JSON.stringify({
+                                            cond:_term,
+                                            preset:self.search.preset
+                                        })))}`;
+                            
+                            window.open(url,"_parent");
                         },
                         loadApps: function() {
-                            let self = this;
+                            const self = this;
 
                             let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
 
@@ -325,7 +330,7 @@ class Home extends Matrix {
 
                         },
                         toogle: function(item) {
-                            let self = this;
+                            const self = this;
                             let ldap = new Object();
 
                             ldap.class = "/matrix/ldap";
@@ -347,7 +352,7 @@ class Home extends Matrix {
 
                         },
                         resetForm: function(){
-                            let self = this;
+                            const self = this;
 
                             var elements = $("form").find( "input,select,textarea" );
                             for( var i = 0; i < elements.length; ++i ) {
@@ -380,7 +385,7 @@ class Home extends Matrix {
                             return obj;
                         },
                         openHelpPanel: function(){
-                            let self = this;
+                            const self = this;
 
                             var w = $( window ).width();
                             var h = $( window ).height();
@@ -411,11 +416,11 @@ class Home extends Matrix {
                                     }
                                 },
                                 created: function(){
-                                    let self = this;
+                                    const self = this;
 
                                 },
                                 mounted: function(){
-                                    let self = this;
+                                    const self = this;
 
                                     self.$nextTick(function () {
                                         _.delay(function(){
@@ -426,7 +431,7 @@ class Home extends Matrix {
                             });
                         },
                         triggerInput: function(name){
-                            let self = this;
+                            const self = this;
 
                             $(self.$refs[name]).click();
                         }

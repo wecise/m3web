@@ -145,6 +145,10 @@
                 self.editor.getSession().setTabSize(4);
                 self.editor.getSession().setUseWrapMode(true);
 
+                self.editor.on('mousemove', function() {
+                    self.editor.resize();
+                });
+
                 self.setTheme();
                 self.setMode();
                 self.setOptions();

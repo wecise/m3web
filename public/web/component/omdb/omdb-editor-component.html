@@ -178,8 +178,13 @@
 
         },
         created () {
-            const self = this;
+            eventHub.$on(`LAYOUT-DATATABLE-RESIZE-EVENT`,()=>{
+                this.refresh();
+            });
 
+            eventHub.$on("WINDOW-STATUS-CHANGE-EVENT",()=>{
+                this.refresh
+            });
         },
         methods: {
             init() {
@@ -203,6 +208,14 @@
 
                 self.editor.getSession().setTabSize(2);
                 self.editor.getSession().setUseWrapMode(true);
+
+                self.editor.getSession().on('change', function() {
+                    _.debounce(self.editor.resize, 2000);
+                });
+
+                self.editor.on('mousemove', function() {
+                    self.editor.resize();
+                });
 
                 self.setTheme();
                 self.setMode();
@@ -307,6 +320,13 @@
                     self.inputText = temp;
                 }
             },
+            refresh(){
+                const self = this;
+
+                if(self.editor){
+                    self.editor.resize();
+                }
+	        },
             toggleToolsBar(){
                 const self = this;
 
@@ -506,7 +526,6 @@
                                                                         title: `结果_TABLE_${moment().format("LT")}`,
                                                                         model: self.result
                                                                     });
-
             },
             queryPlus(){
                 const self = this;
@@ -656,6 +675,7 @@
                                                                         title: `结果_${moment().format("LT")}`,
                                                                         model: self.result
                                                                     });
+                                                
             },
             queryByJson(){
                 const self = this;
@@ -701,7 +721,7 @@
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
 	                return false;
-                }        
+                }   
             },
             queryPlus(){
                 const self = this;
@@ -788,7 +808,6 @@
                 self.result = {id:self.id, bid: self.bid, type: 'table-new', data: _.groupBy(_data,'class'), columns: _columns};
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT`,self.result);
                 eventHub.$emit(`QUERY-RESULT-TRIGGER-EVENT-${self.bid}`,self.result);
-
             },
             queryAndSave(){
                 const self = this;
