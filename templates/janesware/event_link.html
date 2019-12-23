@@ -49,7 +49,8 @@
 
 	/* content */
 	#content.content {
-		padding: 5px 10px 0px 5px!important;
+		padding: 5px 5px 0px 5px!important;
+		margin-left:0!important;
 	}
 
 	/* Event view */
@@ -414,129 +415,23 @@
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
 <script>
-	$(function() {
-		_.delay(function(){
-			let mxEvent = new Event();
-			mxEvent.init();
-		},50)
+	$(function() {		
+		
+		
+		jQuery.ajax({
+			url: 'http://47.92.151.165/user/signin?company=wecise&username=admin&password=admin',
+			dataType: 'json',
+			type: 'GET',
+			contentType: false,
+			data: '',
+			success: function(data) {
+				sessionid = data.message;
+				let mxEvent = new Event();
+				mxEvent.init();
+			}
+		});
+		
 	})
-</script>
-
-<script type="text/x-template" id="app-template">
-	<main id="content" class="content">
-		<el-row :gutter="10">
-			<el-col :xl="24" style="padding-bottom:7px;">
-				<search-base-component :id="model.id"
-				                       :options="options"
-									   ref="searchRef"
-									   class="grid-content"></search-base-component>
-			</el-col>
-			<el-col :xl="24" style="min-height: 85vh;" id="event-view-container">
-				<el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
-					<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true>
-						<div v-if="item.type==='main'">
-							<div class="event-view-summary-control">
-								<el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
-									<div>
-										${control.ifRefresh==1?'自动刷新':'自动刷新'}
-										<el-switch
-										v-model="control.ifRefresh"
-										active-color="#13ce66"
-										inactive-color="#dddddd"
-										active-value="1"
-										inactive-value="0"
-										@change="toggleSummaryByRefresh">
-										</el-switch>
-									</div>
-								</el-tooltip>
-								<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-									<div>
-										${control.ifSmart==1?'智能分析':'智能分析'}
-										<el-switch
-										v-model="control.ifSmart"
-										active-color="#13ce66"
-										inactive-color="#dddddd"
-										active-value="1"
-										inactive-value="0"
-										@change="toggleSummaryBySmart">
-										</el-switch>
-									</div>
-								</el-tooltip>
-								<el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
-									<div>
-										${control.ifAiGroup==1?'智能分组':'智能分组'}
-										<el-switch
-										v-model="control.ifAiGroup"
-										active-color="#13ce66"
-										inactive-color="#dddddd"
-										active-value="1"
-										inactive-value="0"
-										@change="toggleSummaryByGroup">
-										</el-switch>
-									</div>
-								</el-tooltip>
-							</div>
-							<el-row :gutter="10" id="event-view-summary">
-								<el-col :xl="24">
-									<el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
-										<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-											<div v-if="item.type=='radar'">
-												<event-view-radar id="event-summary-radar" :model='model.message'></event-view-radar>
-											</div>
-											<div v-if="item.type=='pie'">
-												<event-view-pie id="event-summary-pie" :model='model.message'></event-view-pie>
-											</div>
-											<div v-if="item.type=='summary'">
-												<event-view-summary id="event-summary-summary" :model='model.message'></event-view-summary>
-											</div>
-										</el-tab-pane>
-									</el-tabs>
-								</el-col>
-							</el-row>
-							<el-row :gutter="10" id="event-view-console">
-								<el-col :xl="8" class="tree-view animated fadeInRight">
-									<entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
-								</el-col>
-								<el-col :xl="16" class="table-view animated fadeInLeft">
-									<event-datatable-component id="event-list" :model="model.message"></event-datatable-component>
-								</el-col>
-							</el-row>
-						</div>
-						<div v-else-if="item.type==='diagnosis'">
-							<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line"> 
-								<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name"  lazy=true>
-									<div v-if="it.type==='detail'">
-										<event-diagnosis-detail :id="it.name + '-detail'" :model="it.model.event"></event-diagnosis-detail>
-									</div>
-									<div v-else-if="it.type==='journal'">
-										<event-diagnosis-journal :id="it.name + '-journal'" :model="it.model.journal"></event-diagnosis-journal>
-									</div>
-									<div v-else-if="it.type==='history'">
-										<event-diagnosis-history :id="it.name + '-history'" :model="it.model.history"></event-diagnosis-history>
-									</div>
-									<div v-else-if="it.type==='dimension'">
-										<event-diagnosis-dimension :id="it.name + '-dimension'" :model="it.model.dimension"></event-diagnosis-dimension>
-									</div>
-									<div v-else-if="it.type==='probability'">
-										<event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
-									</div>
-									<div v-else-if="it.type==='topological'">
-										<event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
-									</div>
-									<div v-else-if="it.type==='script'">
-										<event-diagnosis-script :id="it.name + '-script'" :model="it.model.script"></event-diagnosis-script>
-									</div>
-								</el-tab-pane>
-							</el-tabs>
-						</div>
-						<div v-else-if="item.type==='aiGroup'">
-							<event-view-aigroup id="event-view-aigroup" :model="model.message"></event-view-aigroup>
-						</div>
-					</tab>
-				</el-tabs>
-			</el-col>
-		</el-row>
-	</main>
 </script>
 
 {{template "base/footer" .}}

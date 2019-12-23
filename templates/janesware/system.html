@@ -24,12 +24,6 @@
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
-<!-- FullCalendar CSS -->
-<link href='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.min.css' rel='stylesheet' />
-<link href='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.css' rel='stylesheet' />
-<!--<link href='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.print.min.css' rel='stylesheet' />-->
-
-
 <style type="text/css">
 
     #content.content {
@@ -84,7 +78,7 @@
     }
 
     .el-tabs--border-card {
-        border: 1px solid rgb(220, 223, 230);
+        border: unset;
         -webkit-box-shadow: unset;
         box-shadow: unset;
     }
@@ -116,15 +110,57 @@
         border: unset;
     }
 
+    /* Upload Input Style */
+    .avatar-uploader .el-upload {
+        border: 1px dashed #d9d9d9;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .avatar-uploader .el-upload:hover {
+        border-color: #409EFF;
+    }
+    .avatar-uploader-icon {
+        font-size: 18px;
+        color: #8c939d;
+        width: 128px;
+        height: 128px;
+        line-height: 128px;
+        text-align: center;
+    }
+    .avatar {
+        width: 128px;
+        height: 128px;
+        display: block;
+    }
+
     /* Split Style */
-	.mxSystem .gutter.gutter-horizontal{
-		background-color: rgb(241, 241, 241);
-		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
-		background-size: 7px;
-		background-position-x: 50%;
-		background-position-y: 50%;
-		background-repeat: no-repeat;
-	}
+	.gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+		width: 5px;
+		border: none!important;
+    }
+
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+		height: 5px;
+        border: none!important;
+    }
 
     /* 全屏模式 */
 	header#header{
@@ -171,11 +207,6 @@
 <!--script src="{{AppSubUrl}}/web/vendor/table/export/bootstrap-editable.js"></script-->
 <script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-contextmenu.min.js"></script>
 <!--<script src="{{AppSubUrl}}/web/vendor/table/bootstrap/bootstrap-table-fixed-columns.js"></script>-->
-
-<!-- FullCalendar JS-->
-<script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/fullcalendar.min.js'></script>
-<script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/scheduler/scheduler.min.js'></script>
-<script src='{{AppSubUrl}}/web/vendor/calendar/fullcalendar/3.8.2/locale-all.js'></script>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-base-datatables-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-common-form-component.html"></link>
@@ -410,84 +441,6 @@
         </div>
         <!-- /Config Add Modal -->
     </div>
-</script>
-
-<script type="text/x-template" id="tools-manage-template">
-    
-    <el-tabs type="border-card">
-        <el-tab-pane>
-            <span slot="label"><i class="el-icon-date"></i> 应用</span>
-            <div class="block__list_words">      
-                <transition-group id="ul-li" type="transition" tag="ul">
-                    <li class="col-lg-3" v-for="(item,index) in model" :key="index">
-                        <div class="widget widget-stats bg-blue">
-                            <div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
-                            <div class="stats-info">
-                                <h4>
-                                    <a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
-                                        ${item.cnname}
-                                    </a>
-                                </h4>
-                            </div>
-                            <div class="stats-link">
-                                <a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
-                            </div>
-                        </div>
-                        <div class="collapse block__list_collapse" :id="'collapse'+item.name">
-                            <form :class="item.name">
-                                <div class="form-group">
-                                    <label for="">中文名</label>
-                                    <input type="text" class="form-control" id="cnname" placeholder="中文名称" :value="item.cnname">
-                                    <label for="">英文名称</label>
-                                    <input type="text" class="form-control" id="enname" placeholder="English Name" :value="item.enname">
-                                    <label for="">位置</label>
-                                    <input type="text" class="form-control" id="seat" placeholder="位置" :value="item.seat">
-                                    <label for="">url</label>
-                                    <input type="text" class="form-control" id="url" placeholder="Url" :value="item.url">
-                                    <label for="">图标</label>
-                                    <input type="text" class="form-control" id="icon" placeholder="Icon" :value="item.icon">
-                                    <label for="">Target</label>
-                                    <input type="text" class="form-control" id="target" placeholder="Target" :value="item.target">
-                                    <label for="">是否选择</label>
-                                    <input type="number" name="" id="selected" class="form-control" value="" min="0" max="1" step="" required="required" title="" :value="item.selected">
-                                    <label for="">分组</label>
-                                    <input type="text" class="form-control" id="groups" placeholder="分组" :value="item.groups">
-                                </div>
-                            </form>
-                            <button class="btn btn-success" @click="update(item.name)">更新</button>
-                            <button class="btn btn-default" data-toggle="collapse" :data-target="'#collapse'+item.name">取消</button>
-                        </div>
-                    </li>
-                </transition-group>
-            </div>
-        </el-tab-pane>
-        <el-tab-pane label="tools-list">
-            <span slot="label"><i class="el-icon-date"></i> 发布</span>
-            <div>
-                <form class="tools-new">
-                    <div class="form-group">
-                        <label for="">中文名</label>
-                        <input type="text" class="form-control" id="cnname" placeholder="中文名称">
-                        <label for="">英文名称</label>
-                        <input type="text" class="form-control" id="enname" placeholder="English Name">
-                        <label for="">位置</label>
-                        <input type="text" class="form-control" id="seat" placeholder="位置">
-                        <label for="">url</label>
-                        <input type="text" class="form-control" id="url" placeholder="Url">
-                        <label for="">图标</label>
-                        <input type="text" class="form-control" id="icon" placeholder="Icon" value="fa fa-globe">
-                        <label for="">Target</label>
-                        <input type="text" class="form-control" id="target" placeholder="Target">
-                        <label for="">是否选择</label>
-                        <input type="number" name="" id="selected" class="form-control" value="0" min="0" max="1" step="" required="required" title="">
-                        <label for="">分组</label>
-                        <input type="text" class="form-control" id="groups" placeholder="分组">
-                    </div>
-                </form>
-                <button class="btn btn-success" @click="add('tools-new')">发布</button>
-            </div>    
-        </el-tab-pane>
-    </el-tabs>
 </script>
 
 <script type="text/x-template" id="calendar-manage-template">

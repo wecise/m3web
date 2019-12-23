@@ -278,23 +278,23 @@ class AI {
                                                 </el-option>
                                             </el-select>
                                         </el-form-item>
-                                        <el-form-item label="hostfield" prop="hostfield">
-                                            <el-input type="text" v-model="content.hostfield"></el-input>
+                                        <el-form-item label="idfield" prop="idfield">
+                                            <el-input type="text" v-model="content.idfield"></el-input>
                                         </el-form-item>
-                                        <el-form-item label="osfield" prop="osfield">
-                                            <el-input type="text" v-model="content.osfield"></el-input>
+                                        <el-form-item label="valuefield" prop="valuefield">
+                                            <el-input type="text" v-model="content.valuefield"></el-input>
                                         </el-form-item>
-                                        <el-form-item label="timefield" prop="timefield">
-                                            <el-input type="text" v-model="content.timefield"></el-input>
+                                        <el-form-item label="minpts" prop="minpts">
+                                            <el-input type="text" v-model="content.minpts"></el-input>
                                         </el-form-item>
-                                        <el-form-item label="nearest" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                        <el-form-item label="eps" prop="eps">
+                                            <el-input type="text" v-model="content.eps"></el-input>
                                         </el-form-item>
-                                        <el-form-item label="interval" prop="interval">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                        <el-form-item label="times" prop="times">
+                                            <el-input-number v-model="content.times" controls-position="right" :min="1"></el-input-number>
                                         </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                        <el-form-item label="isversion" prop="isversion">
+                                            <el-switch v-model="content.isversion"></el-switch>
                                         </el-form-item>
                                         <el-form-item label="时间" prop="time">
                                             <small>#{moment(content.time).format('LLL')}#</small>
@@ -366,7 +366,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'word';
+                            if(!term){
+                                term = 'word';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
@@ -504,7 +506,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'word';
+                            if(!term){
+                                term = 'word';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
@@ -642,7 +646,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'word';
+                            if(!term){
+                                term = 'word';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
@@ -780,7 +786,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'word';
+                            if(!term){
+                                term = 'word';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
@@ -989,7 +997,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'word';
+                            if(!term){
+                                term = 'word';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }
@@ -1687,7 +1697,9 @@ class AI {
                         },
                         job(term){
                             // 默认Job名称
-                            term = 'neural_network';
+                            if(!term){
+                                term = 'neural_network';
+                            }
                             let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
                             window.open(url,'_blank');
                         }

@@ -1186,7 +1186,7 @@ body.matrix .jsPanel-hdr{
     background-color: rgb(37, 45, 71)!important;
 }
 
-body.matrix #jsPanel-robot .jsPanel-content a>img{
+body.matrix #jsPanel-apps .jsPanel-content a>img{
     filter: grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8)!important;
 }
 

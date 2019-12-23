@@ -529,17 +529,17 @@ class Window {
         this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
-            id: 'jsPanel-robot',
+            id: 'jsPanel-apps',
             theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: {
-                left: 62,
-                top: 52,
+                left: 60,
+                top: 50,
             },
             //container: 'body',
             headerControls: { controls: 'closeonly' },
-            headerRemove:  false,
+            headerRemove:  true,
             content:        template,
             dragit: {
                 drag: function (panel, position) {
@@ -565,12 +565,16 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
-                    "font-size": "12px"
+                    "font-size": "12px",
                 });
 
-                this.mouseleave(function(){
-                    //win.close();
-                })
+                /* $(".jsPanel-hdr").css({
+                    "background-color": "#ffffff!important"
+                }); */
+
+                // this.mouseleave(function(){
+                //     win.close();
+                // })
 
             }
         });
@@ -977,7 +981,7 @@ class Window {
                 });
                 this.find(".jsPanel-content",this).css({
                     "border": "none",
-                    "overflow": "auto"
+                    "overflow": "hidden"
                 });
 
                 this.find(".jsPanel-titlebar",this).css({
@@ -1529,7 +1533,7 @@ class Window {
                 });
                 this.find(".jsPanel-content",this).css({
                     "border": "none",
-                    "overflow": "auto"
+                    "overflow": "hidden"
                 });
 
                 this.find(".jsPanel-titlebar",this).css({

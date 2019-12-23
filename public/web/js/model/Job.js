@@ -33,6 +33,256 @@ class Job extends Matrix {
                             "probe-tree-component"],function() {
             $(function() {
 
+                // JobList Table组件
+                Vue.component("el-joblist-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                            <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出" delay-time="500">
+                                            <el-dropdown @command="onExport">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-download el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                                    <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                                    <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                                    <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                                    <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                                    <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowContextmenu"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @row-click="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            ref="table">
+                                            <el-table-column type="selection" align="center"></el-table-column> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column :prop="item.field" 
+                                                :label="item.title" 
+                                                sortable 
+                                                show-overflow-tooltip
+                                                :formatter="item.render" 
+                                                v-for="item in dt.columns"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.template, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                                    
+                            };
+
+                            if(self.model && $("table",self.$el).is(':visible')){
+                                init();
+                            } else {
+                                setTimeout(init,50);
+                            }
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = val;
+                        },
+                        onAction(evt){
+                            if(_.isEmpty(this.dt.selected)){
+                                this.$message({
+                                    type: "info",
+                                    message: "请选择事件！"
+                                });
+                                return false;
+                            }
+
+                            this.$root.action( {list: this.dt.selected, action:evt});
+                        },
+                        onToggle(){
+                            this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.model.contextMenu.job
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
                 Vue.component('job-history-chart', {
                     template: `<div :id="id" style="width:100%;height:200px;"></div>`,
                     props:{
@@ -391,9 +641,96 @@ class Job extends Matrix {
                 });             
                 
                 maxJob.app = {
-                    delimiters: ['${', '}'],
-                    template: "#app-template",
+                    delimiters: ['#{', '}#'],
+                    template:   `<main id="content" class="content">
+                                    <el-container>
+                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                            <search-base-component :id="model.id"
+                                                                :options="options"
+                                                                ref="searchRef"
+                                                                class="grid-content"></search-base-component>
+                                        </el-header>
+                                        <el-main id="job-view-container" style="padding: 5px 0px 0px 0px;">
+                                            <el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
+                                                <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name">
+                                                    <div v-if="item.type==='main'">
+                                                        <div class="job-view-summary-control">
+                                                            <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifRefresh"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryByRefresh">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifSmart"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryBySmart">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                        </div>
+                                                        
+                                                        <el-container id="job-view-summary">
+                                                            <el-main>
+                                                                <el-tabs v-model="layout.summary.activeIndex" type="border">
+                                                                    <el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+                                                                        <div v-if="item.type=='radar'">
+                                                                            <job-radar id="job-radar" :model='model.message'></job-radar>
+                                                                        </div>
+                                                                        <div v-if="item.type=='gauge'">
+                                                                            <job-gauge id="performance-view-gauge"></job-gauge>
+                                                                        </div>
+                                                                    </el-tab-pane>
+                                                                </el-tabs>
+                                                            </el-main>
+                                                        </el-container>
+                                                        <el-container id="job-view-console">
+                                                            <el-aside :class="'tree-view job-view-left-'+id" style="background-color:#f6f6f6;">
+                                                                <probe-tree-component id="job-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>
+                                                            </el-aside>
+                                                            <el-main :class="'table-view job-view-main-'+id" style="padding:5px;">
+                                                                <el-joblist-component :model="model.message"></el-joblist-component>
+                                                            </el-main>
+                                                        </el-container>
+                                                    </div>
+                                                    <div v-if="item.type==='diagnosis'">
+                                                        <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line">
+                                                            <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
+                                                                <div v-if="it.type==='detail'">
+                                                                    <job-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></job-diagnosis-detail>
+                                                                </div>
+                                                                <div v-if="it.type==='journal'">
+                                                                    <job-diagnosis-journal :id="it.name+ '-journal'" :model="it.model"></job-diagnosis-journal>
+                                                                </div>
+                                                                <div v-if="it.type==='cmd'">
+                                                                    <job-diagnosis-cmd :id="it.name+ '-cmd'" :model="it.model"></job-diagnosis-cmd>
+                                                                </div>
+                                                                <div v-else>
+                                                                    <!-- <job-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]"></job-diagnosis-datatable-component> -->
+                                                                </div>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                    </div>
+                                                </tab>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>
+                                </main>`,
                     data: {
+                        id: _.now(),
                         // 布局
                         layout:{
                             main:{
@@ -502,8 +839,7 @@ class Job extends Matrix {
 
                     },
                     mounted(){
-                        const self = this;
-
+                        
                         $(this.$el).addClass('view-normal');
                         
                         // 没有详细页时，默认隐藏告警列表Title
@@ -517,10 +853,15 @@ class Job extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                            Split(['#job-view-left', '#job-view-main'], {
+                            Split([`.job-view-left-${this.id}`, `.job-view-main-${this.id}`], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        'display': 'none'
+                                    }
+                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',

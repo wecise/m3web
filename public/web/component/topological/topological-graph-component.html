@@ -2,6 +2,10 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
+        .pace{
+            display: none!important;
+        }
+        
         .topological-graph-component{
             height: 100%;
         }
@@ -339,13 +343,13 @@
 	{
 	    delimiters: ['${', '}'],
 	    props: {
-	        id: String,
-            graphData: Object,
+	        graphData: Object,
             inst: Object
 	    },
 	    data() {
             
             return {
+                id: _.now(),
                 model:{
                     graph:{
                         container: null,
@@ -612,20 +616,8 @@
             initGraph(){
                 const self = this;
 
-                // Extends mxGraphModel.getStyle to show an image when collapsed
-                /*
-                var modelGetStyle = self.model.graph.graph.model.getStyle;
-                self.model.graph.graph.model.getStyle = function(cell){
-                    if (cell != null){
-                        var style = modelGetStyle.apply(this, arguments);
-                        if (this.isCollapsed(cell)){
-                            style = style + `;shape=image;image=${window.ASSETS_ICON}/entity/png/${cell.value}.png?type=download&issys=${window.SignedUser_IsAdmin};imageBackground=#FFFFFF;imageBorder=#FFFFFF`;
-                        }
-                        return style;
-                    }
-                    return null;
-                };
-                */
+                let allNodes = [];
+                let allEdges = [];
 
                 self.model.graph.graph.getModel().beginUpdate();
 
@@ -641,17 +633,64 @@
 
                         $("foreignObject div").css("color","#849EB6");
                     } else {
-                        self.model.graph.graph.getModel()
-
-                        let groupList = {};
-                        let nodesList = {};
-                
-                        self.model.graph.nodes = {};
-                        let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
-                        //let orderNodes = _.groupBy(self.graphData.edges,'source');
                         
-                        // 节点
-                        _.forEach(orderNodes,function(v){
+                        self.model.graph.graph.getModel();
+                        self.model.graph.nodes = {};
+                        
+                        // 添加节点类型，是否是新增、删除或者正常
+                        allNodes =  _.map(self.graphData.nodes,(v)=>{
+                                            return _.extend(v,{type:'normal'});
+                                    });
+                        
+                        //合并新增节点
+                        try{
+                            allNodes = _.extend(allNodes,_.map(self.graphData.diff.add.nodes,(v)=>{
+                                return _.extend(v,{type:'add'});
+                            }))
+                        }catch(err){
+                            
+                        }
+                        
+                        //合并删除的节点
+                        try{
+                            allNodes =  _.concat(allNodes,_.map(self.graphData.diff.del.nodes,(v)=>{
+                                            return _.extend(v,{type:'del'});
+                                        }))
+                        } catch(err){
+                            
+                        }
+
+                        // 添加edge类型，包括正常的、新增的、删除的
+                        allEdges = _.map(self.graphData.edges,(v)=>{
+                            return _.extend(v,{type:"normal"});
+                        });
+
+                        //合并新增edge
+                        try{
+                            allEdges = _.map(allEdges,(v)=> {
+                                if(_.find(self.graphData.diff.add.edges,{id:v.id})){
+                                    return _.extend(v,{type:'add'});
+                                } else {
+                                    return v;
+                                }
+                            });
+                        }catch(err){
+
+                        }
+                        
+                        // 合并删除edge
+                        try {
+                            allEdges =  _.concat(allEdges,_.map(self.graphData.diff.del.edges,(v)=> {
+                                            return _.extend(v,{type:'del'});
+                                        }));
+                        } catch(err){
+                            
+                        }
+
+                        console.log("Nodes="+allNodes.length, "Edges="+allEdges.length);
+
+                        // 绘制节点
+                        _.forEach(allNodes,function(v){
 
                             let _type = v._icon || 'matrix';
                             
@@ -668,25 +707,47 @@
                                 _name = v["id"];
                             }
 
+                            // normal
                             let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
-                                `column;shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=open&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;fontColor=#849EB6;`,false);
+                            `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
 
-                            self.model.graph.nodes[v.id] = node;
+                            // node directory
+                            _.extend(self.model.graph.nodes,{[v.id]:node});
 
-                            // 分组
-                            _.merge(nodesList,{[v._icon]:[]});
-                            nodesList[v._icon].push(node);
+
+                            //add
+                            if(v.type && v.type === 'add'){
+                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                self.model.graph.graph.addCellOverlay(node, overlay);
+                            }
+
+                            //delete
+                            if(v.type && v.type === 'del'){
+                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                                self.model.graph.graph.addCellOverlay(node, overlay);
+                            }
+
                         })
 
                         // 边界
-                        _.forEach(self.graphData.edges,function(k,index){
-                            let source =  self.model.graph.nodes[k.source];
+                        _.forEach(allEdges,function(k,index){
+                            
+                            let source = self.model.graph.nodes[k.source];
                             let target = self.model.graph.nodes[k.target];
+
                             let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
-                            let edge = "";
                             let direction = '';
+
                             if(k.twoway){
                                 direction = 'startArrow=block;endArrow=block;endFill=1;';
+                            }
+
+                            if(k.type=='add'){
+                                direction += 'strokeColor=#47fa28;strokeWidth=2;';
+                            } else if(k.type=='del'){
+                                direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=2;';
+                            } else {
+                                direction += ''; 
                             }
 
                             // edge为path的样式
@@ -696,44 +757,16 @@
                                 let edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction+`strokeColor=${strokeColor}`);
                                 return;
                             }
-                            
+
                             let edge = null;
                             try {
-                                let edgeName = _.find(self.model.graph.edgeList,{name:k.class}).remedy;
+                                let edgeName = _.find(allEdges,{name:k.class}).remedy;
                                 edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, edgeName, source, target, baseEdgeStyle+direction);
                             } catch(err){
                                 edge = self.model.graph.graph.insertEdge(self.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                             }
                             
                         })
-
-                        // 创建组
-                        /*
-                        let groups = _.groupBy(self.graphData.nodes,'_icon');
-                        if(groups){
-                            _.forEach(groups,function(v,k){
-                                let cell = null;
-                                if(k==='biz'){
-                                    cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
-                                    cell.geometry.alternateBounds = new mxRectangle(0, 50, 120, 90);  
-                                } else if(k==='ha'){
-                                    cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
-                                    cell.geometry.alternateBounds = new mxRectangle(0, 100, 120, 90);  
-                                } else if(k==='weblogic'){
-                                    cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
-                                    cell.geometry.alternateBounds = new mxRectangle(0, 150, 120, 90);  
-                                } else {
-                                    cell = self.model.graph.graph.insertVertex(self.model.graph.parent, null, k, 0, 0, 220, 0, `shape=swimlane;`);
-                                    cell.geometry.alternateBounds = new mxRectangle(0, 200, 120, 90);  
-                                }
-                                
-                                _.merge(groupList,{[k]:[]});
-                                groupList[k].push(cell);
-
-                                self.model.graph.graph.groupCells(cell,0,nodesList[k]);
-                            })
-                        }
-                        */
 
                         // Executes the layout
                         self.model.graph.layout.hierarchical.execute(self.model.graph.parent);
@@ -1065,55 +1098,6 @@
                 let path = self.$root.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
                 new Vue(path);
             },
-            /* addPath(event){
-                const self = this;
-                
-                // 过滤event
-                let paths = _.map(event,function(v){
-                                    return _.omit(v,['num','class']);
-                                });
-                console.log(12,paths)
-                self.model.graph.graph.getModel().beginUpdate();
-                
-                try{
-                    self.model.graph.graph.getModel()
-
-                    if(self.model.graph.paths.length){
-                        self.removePath();
-                    }
-                    
-                    _.forEach(paths,function(v,index){
-                        // keys
-                        var keys = _.keys(v);
-                        // values
-                        var values = _.values(v);
-                        
-                        for(var i=0;i<keys.length;i++){
-                            if(!_.isUndefined(v[keys[i+1]])){
-                                console.log(i, v[keys[i+1]])
-                                let id = `${v[keys[i]]}-${v[keys[i+1]]}`;
-                                let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;orthogonalLoop=1;strokeWidth=1;dashed=1;startFill=0;endArrow=none;endFill=0;startArrow=none;orthogonal=1;elbow=vertical;';
-                                let strokeColor = self.model.graph.colors[index] || _.sample(self.model.graph.colors);
-                                
-                                // 绘制路径
-                                let cell = self.model.graph.graph.getModel().getCell(id);
-                                console.log(121, id, cell, self.model.graph.graph)
-                                if(cell){
-                                    cell.setStyle(baseEdgeStyle+`strokeColor=${strokeColor};`);
-                                    self.model.graph.paths.push(cell);
-                                }
-                            }
-                        }
-                    })
-
-                    // Executes the layout
-	                self.model.graph.layout.default.execute(self.model.graph.parent);
-                }
-                finally
-                {
-                    self.model.graph.graph.getModel().endUpdate();
-                }
-            }, */
             addPath(event){
                 const self = this;
                 

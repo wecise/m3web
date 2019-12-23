@@ -774,7 +774,7 @@ class System {
 
 				// 公司管理
 				Vue.component("company-manage",{
-					delimiters: ['${', '}'],
+					delimiters: ['#{', '}#'],
 					props: {
 						id: String
 					},
@@ -789,10 +789,10 @@ class System {
 												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyNew" ><i class="fas fa-plus fa-fw"></i> 新增</a>
 											</el-tooltip>
 											<el-tooltip content="更新公司信息">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyUpdate" ><i class="fas fa-plus fa-sync-alt"></i> 更新</a>
+												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyUpdate" ><i class="fas fa-plus fa-sync-alt"></i> 编辑</a>
 											</el-tooltip>
 											<el-tooltip content="删除公司信息">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyDelete" ><i class="fas fa-plus fa-fw"></i> 删除</a>
+												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyDelete" ><i class="fas fa-trash fa-fw"></i> 删除</a>
 											</el-tooltip>
 											<el-tooltip content="更新文件系统">
 												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="updateFs"><i class="fas fa-cloud-upload-alt fa-fw"></i> 更新</a>
@@ -801,66 +801,88 @@ class System {
 									</el-header>
 									
 									<el-main style="padding:10px;">
-										<table :id="id+'-table'" class="hover row-border" width="100%"></table>
+										<el-table
+											:data="dt.rows"
+											stripe
+											highlight-current-row
+											fit="true"
+											style="width: 100%"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@current-change="onSelectionChange">
+											<el-table-column type="index" label="序号" sortable align="center">
+												<template slot-scope="scope">
+													<div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
+												</template>
+											</el-table-column>
+											<!--el-table-column type="selection" align="center">
+											</el-table-column--> 
+											<el-table-column type="expand">
+												<template slot-scope="props">
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+														<el-form-item v-for="v,k in props.row" :label="k">
+															<el-input v-model="v"></el-input>
+														</el-form-item>
+													</el-form>
+												</template>
+											</el-table-column>
+											<el-table-column :prop="item.field" 
+												show-overflow-tooltip="true" 
+												:label="item.title"
+												sortable
+												resizable
+												v-for="item in dt.columns"
+												min-width="180">
+												<template slot-scope="scope" >
+													<span v-if="_.includes(['logo','icon'],item.field)">
+														<el-avatar shape="circle" size="48" :src="scope.row[item.field]"></el-avatar>
+													</span>
+													<span  v-else>#{scope.row[item.field]}#</el-avatar>
+												</template>
+											</el-table-column>
+										</el-table>
 									</el-main>
 									
 								</el-container>`,
 					data(){
 						return{
 							id: "",
-							datatable: null,
-							tableData: {},
-							tableSelectedRows: {}
+							dt: {
+								rows: [],
+								columns: [],
+								selected: null
+							}
 						}
 					},
-					watch: {
-						'tableData.rows': {
-
-							handler: function(val,oldVal){
-			
-								// 数据无更新
-								if(val === oldVal) {
-									return false;
-								}
-			
-								// 数据为空 
-								// Table置空
-								if( _.isEmpty(val)) {
-									this.datatable.rows().remove().draw();
-									return false;
-								}
-			
-								// 表格已经初始化
-								if(this.datatable instanceof $.fn.dataTable.Api) {
-									this.datatable.clear();
-									this.datatable.rows.add(val);
-									this.datatable.draw();		
-								} else {
-									
-								}
-							},
-							deep:true,
-							immediate: true
-						}
-					},
+					
 					created(){
-						this.id = `company-manage-${_.now()}`;
 						this.initData();
 					},
 					mounted(){
-						this.initTable();
+						
 					},
 					methods:{
+						rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+						},
+						onSelectionChange(val) {
+							this.dt.selected = val;
+						},
 						initData(){
 							try {
 								// rows
-								_.extend(this.tableData, {rows:companyHandler.companyList().message});
+								_.extend(this.dt, {rows:companyHandler.companyList().message});
 
-								// columns & options
+								// columns
 								let ext = fsHandler.callFsJScript("/matrix/company/company-list.js",null).message;
-								_.extend(this.tableData,ext);
+								_.extend(this.dt,ext);
 
-								_.map(this.tableData.columns,function(v){
+								_.map(this.dt.columns,function(v){
 									if(!v.render){
 										return v;
 									} else {
@@ -871,27 +893,6 @@ class System {
 							} catch(err){
 								
 							}
-						},
-						initTable(){
-							const self = this;
-							
-							self.datatable = $(`#${self.id}-table`).DataTable(_.extend(
-								self.tableData.options,{
-								data: self.tableData.rows,
-								columns: self.tableData.columns,
-			                    initComplete:function(){
-									
-									$(".dataTables_filter input").css({
-										"height":"28px"
-									})
-								}
-							}));
-
-							self.datatable.on( 'select', function ( e, dt, type, indexes ) {
-								self.tableSelectedRows = self.datatable.rows( '.selected' ).data().toArray();
-							} ).on( 'deselect', function ( e, dt, type, indexes ) {
-								self.tableSelectedRows = self.datatable.rows( '.selected' ).data().toArray();
-							} );
 						},
 						companyUpdate(){
 							const self = this;
@@ -925,9 +926,9 @@ class System {
 										preIconImageUrl: ''
 									}
 								},
-								template: 	`<el-container>
+								template: 	`<el-container style="height:100%;">
 												<el-main>
-													<el-form ref="form" :model="form" label-width="80px">
+													<el-form ref="form" :model="form" label-width="120px">
 														<el-form-item label="公司全称">
 															<el-input v-model="form.fullname"></el-input>
 														</el-form-item>
@@ -947,33 +948,37 @@ class System {
 															<el-input v-model="form.config"></el-input>
 														</el-form-item>
 														<el-form-item label="Logo">
-															<img :src="upload.preLogoImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
-															<input type="file" @change="encodeLogoFileAsURL" >
+															<el-upload :before-upload="encodeLogoFileAsURL" class="avatar-uploader" :show-file-list="false">
+																<img :src="upload.preLogoImageUrl" v-if="upload.preLogoImageUrl" class="avatar">
+																<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+															</el-upload>
 														</el-form-item>
 														<el-form-item label="Icon">
-															<img :src="upload.preIconImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
-															<input type="file" @change="encodeIconFileAsURL" >
-														</el-form-item>
-														<el-form-item>
-															<el-tooltip content="更新">
-																<a href="javascript:void(0);" class="btn btn-xs btn-success" @click="companySave"><i class="fas fa-update fa-fw"></i> 更新</a>
-															</el-tooltip>
-															<el-tooltip content="取消">
-																<a href="javascript:void(0);" class="btn btn-xs btn-default" @click="closeMe" ><i class="fas fa-plus fa-fw"></i> 取消</a>
-															</el-tooltip>
+															<el-upload :before-upload="encodeIconFileAsURL" class="avatar-uploader" :show-file-list="false">
+																<img :src="upload.preIconImageUrl" v-if="upload.preIconImageUrl" class="avatar">
+																<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+															</el-upload>
 														</el-form-item>
 													</el-form>
 												</el-main>
+												<el-footer style="text-align:right;">
+													<el-tooltip content="更新">
+														<el-button type="success" icon="fas fa-save fa-fw" @click="companySave">更新</el-button>
+													</el-tooltip>
+													<el-tooltip content="取消">
+														<el-button type="default" icon="fas fa-plus fa-fw" @click="closeMe" >取消</el-button>
+													</el-tooltip>
+												</el-footer>
 											</el-container>`,
 								created(){
-									_.extend(this.form,self.tableSelectedRows[0]);
+									_.extend(this.form,self.dt.selected);
 									this.upload.preLogoImageUrl = this.form.logo;
 									this.upload.preIconImageUrl = this.form.icon;
 								},
 								methods: {
-									encodeLogoFileAsURL(event) {
+									encodeLogoFileAsURL(file) {
 										const me = this;
-										var file = event.target.files[0];
+										
 										var reader = new FileReader();
 
 										reader.onloadend = function(){
@@ -982,9 +987,9 @@ class System {
 										}
 										reader.readAsDataURL(file);
 									},
-									encodeIconFileAsURL(event) {
+									encodeIconFileAsURL(file) {
 										const me = this;
-										var file = event.target.files[0];
+										
 										var reader = new FileReader();
 
 										reader.onloadend = function(){
@@ -994,11 +999,30 @@ class System {
 										reader.readAsDataURL(file);
 									},
 									companySave() {
-										let rtn = companyHandler.companyUpdate(this.form);
-										if(rtn == 1){
-											self.initData();
-											wnd.close();
-										}
+										const me = this;
+
+										alertify.confirm(`确定要更新该公司信息? <br><br> 
+															公司全称：${me.form.fullname}<br><br>
+															公司名称：${me.form.name}<br><br>
+															应用名称：${me.form.ospace}<br><br>
+															标题：${me.form.title}`, function (e) {
+											if (e) {
+												let rtn = companyHandler.companyUpdate(me.form);
+												
+												if(rtn == 1){
+													self.initData();
+												}
+												
+												me.$message({
+													type: "info",
+													message: "更新操作将提交至后台，请稍后刷新确认。。。"
+												});
+
+												wnd.close();
+											} else {
+												
+											}
+										});
 									},
 									closeMe(){
 										wnd.close();
@@ -1033,57 +1057,61 @@ class System {
 										web: '',
 										logo: '',
 										icon: '',
-										config: {},
+										config: null,
 									},
 									upload: {
 										preLogoImageUrl: '',
 										preIconImageUrl: ''
 									}
 								},
-								template: 	`<el-container>
+								template: 	`<el-container style="height:100%;">
 												<el-main>
-													<el-form ref="form" :model="form" label-width="80px">
-														<el-form-item label="公司全称">
-															<el-input v-model="form.fullname"></el-input>
+													<el-form ref="form" :model="form" label-width="120px">
+														<el-form-item label="公司全称(fullname)">
+															<el-input v-model="form.fullname" placeholder="公司全称" clearable></el-input>
 														</el-form-item>
-														<el-form-item label="名称">
-															<el-input v-model="form.name"></el-input>
+														<el-form-item label="名称(name)">
+															<el-input v-model="form.name" placeholder="公司简称" clearable></el-input>
 														</el-form-item>
-														<el-form-item label="应用">
-															<el-input v-model="form.ospace"></el-input>
+														<el-form-item label="应用(ospace)">
+															<el-input v-model="form.ospace" placeholder="应用" clearable></el-input>
 														</el-form-item>
 														<el-form-item label="网站">
-															<el-input v-model="form.web"></el-input>
+															<el-input v-model="form.web" placeholder="公司网站" clearable></el-input>
 														</el-form-item>
 														<el-form-item label="标题">
-															<el-input v-model="form.title"></el-input>
+															<el-input v-model="form.title" placeholder="标题" clearable></el-input>
 														</el-form-item>
 														<el-form-item label="配置">
-															<el-input v-model="form.config"></el-input>
+															<el-input type="textarea" v-model="form.config" placeholder="集群配置"></el-input>
 														</el-form-item>
 														<el-form-item label="Logo">
-															<img :src="upload.preLogoImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
-															<input type="file" @change="encodeLogoFileAsURL" >
+															<el-upload :before-upload="encodeLogoFileAsURL" class="avatar-uploader" :show-file-list="false">
+																<img :src="upload.preLogoImageUrl" v-if="upload.preLogoImageUrl" class="avatar">
+																<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+															</el-upload>
 														</el-form-item>
 														<el-form-item label="Icon">
-															<img :src="upload.preIconImageUrl" style="width: 120px;height: auto;border: 2px dashed rgb(221, 221, 221);">
-															<input type="file" @change="encodeIconFileAsURL" >
-														</el-form-item>
-														<el-form-item>
-															<el-tooltip content="创建">
-																<a href="javascript:void(0);" class="btn btn-xs btn-success" @click="companySave"><i class="fas fa-save fa-fw"></i> 创建</a>
-															</el-tooltip>
-															<el-tooltip content="取消">
-																<a href="javascript:void(0);" class="btn btn-xs btn-default" @click="closeMe" ><i class="fas fa-plus fa-fw"></i> 取消</a>
-															</el-tooltip>
+															<el-upload :before-upload="encodeIconFileAsURL" class="avatar-uploader" :show-file-list="false">
+																<img :src="upload.preIconImageUrl" v-if="upload.preIconImageUrl" class="avatar">
+																<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+															</el-upload>
 														</el-form-item>
 													</el-form>
 												</el-main>
+												<el-footer style="text-align:right;">
+													<el-tooltip content="创建">
+														<el-button type="success" icon="fas fa-save fa-fw" @click="companySave">创建</el-button>
+													</el-tooltip>
+													<el-tooltip content="取消">
+														<el-button type="default" icon="fas fa-plus fa-fw" @click="closeMe" >取消</el-button>
+													</el-tooltip>
+												</el-footer>
 											</el-container>`,
 								methods: {
-									encodeLogoFileAsURL(event) {
+									encodeLogoFileAsURL(file) {
 										const me = this;
-										var file = event.target.files[0];
+										
 										var reader = new FileReader();
 
 										reader.onloadend = function(){
@@ -1092,9 +1120,9 @@ class System {
 										}
 										reader.readAsDataURL(file);
 									},
-									encodeIconFileAsURL(event) {
+									encodeIconFileAsURL(file) {
 										const me = this;
-										var file = event.target.files[0];
+										
 										var reader = new FileReader();
 
 										reader.onloadend = function(){
@@ -1104,11 +1132,30 @@ class System {
 										reader.readAsDataURL(file);
 									},
 									companySave() {
-										let rtn = companyHandler.companyNew(this.form);
-										if(rtn == 1){
-											self.initData();
-											wnd.close();
-										}
+										const me = this;
+										
+										alertify.confirm(`确定要新建该公司? <br><br> 
+															公司全称：${me.form.fullname}<br><br>
+															公司名称：${me.form.name}<br><br>
+															应用名称：${me.form.ospace}<br><br>
+															标题：${me.form.title}`, function (e) {
+											if (e) {
+												let rtn = companyHandler.companyNew(me.form);
+												
+												me.$message({
+													type: "info",
+													message: "新建操作将提交至后台，请稍后刷新确认。。。"
+												});
+
+												if(rtn == 1){
+													self.initData();
+												}
+												
+												wnd.close();
+											} else {
+												
+											}
+										});
 									},
 									closeMe(){
 										wnd.close();
@@ -1121,18 +1168,24 @@ class System {
 						companyDelete() {
 							const self = this;
 
-							if(self.tableSelectedRows[0].ospace === 'matrix' || self.tableSelectedRows[0].name === 'wecise' ){
-								alertify.error("系统账户，不可以删除！")
+							if(self.dt.selected.ospace === 'matrix' || self.dt.selected.name === 'wecise' ){
+								self.$message({
+									message: "系统账户，不可以删除！",
+									type: 'error'});
 								return false;
 							} 
 
 							alertify.confirm(`确定要删除该公司? <br><br> 
-												${self.tableSelectedRows[0].fullname}<br><br>
-												${self.tableSelectedRows[0].name}<br><br>
-												${self.tableSelectedRows[0].ospace}<br><br>
-												${self.tableSelectedRows[0].title}<br><br>`, function (e) {
+												公司全称：${self.dt.selected.fullname}<br><br>
+												公司名称：${self.dt.selected.name}<br><br>
+												应用名称：${self.dt.selected.ospace}<br><br>
+												标题：${self.dt.selected.title}`, function (e) {
 								if (e) {
-									let rtn = companyHandler.companyDelete(self.tableSelectedRows[0].fullname);
+									let rtn = companyHandler.companyDelete(self.dt.selected.name);
+									self.$message({
+										type: "info",
+										message: "删除操作将提交至后台，请稍后刷新确认。。。"
+									});
 									if(rtn == 1){
 										self.initData();
 									}
@@ -1842,11 +1895,111 @@ class System {
 
 				// 应用管理
 				Vue.component('tools-manage',{
-					delimiters: ['${', '}'],
-					template: '#tools-manage-template',
-					data: function(){
+					delimiters: ['#{', '}#'],
+					template: 	`<el-tabs type="border-card">
+									<el-tab-pane>
+										<span slot="label"><i class="el-icon-date"></i> 应用</span>
+										<div class="block__list_words">      
+											<transition-group id="ul-li" type="transition" tag="ul">
+												<li class="col-lg-3" v-for="(item,index) in model.list" :key="index">
+													<div class="widget widget-stats bg-blue">
+														<div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
+														<div class="stats-info">
+															<h4>
+																<a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
+																#{item.cnname}#
+																</a>
+															</h4>
+														</div>
+														<div class="stats-link">
+															<a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
+														</div>
+													</div>
+													<div class="collapse block__list_collapse" :id="'collapse'+item.name">
+														<el-form ref="form" :model="item" label-width="80px">
+															<el-form-item label="中文名">
+																<el-input v-model="item.cnname"></el-input>
+															</el-form-item>
+															<el-form-item label="英文名称">
+																<el-input v-model="item.enname"></el-input>
+															</el-form-item>
+															<el-form-item label="Url">
+																<el-input v-model="item.url">
+																	
+																</el-input>
+															</el-form-item>
+															<el-form-item label="图标">
+																<el-input v-model="item.icon"></el-input>
+															</el-form-item>
+															<el-form-item label="Target">
+																<el-radio-group v-model="item.target">
+																	<el-radio label="_blank">打开新窗口</el-radio>
+																	<el-radio label="_parent">当前窗口打开</el-radio>
+																</el-radio-group>
+															</el-form-item>
+															<el-form-item label="分组">
+																<el-radio-group v-model="item.groups.group">
+																	#{item.groups.group}#
+																	<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+																</el-radio-group>
+															</el-form-item>
+															<el-form-item>
+																<el-button type="primary" @click="update(item)">发布</el-button>
+																<el-button type="defult" @click="hide(item.name)">取消</el-button>
+															</el-form-item>
+														</el-form> 
+													</div>
+												</li>
+											</transition-group>
+										</div>
+									</el-tab-pane>
+									<el-tab-pane label="tools-list">
+										<span slot="label"><i class="el-icon-date"></i> 发布</span>
+										<el-form ref="form" :model="form" label-width="80px">
+											<el-form-item label="中文名">
+												<el-input v-model="form.cnname"></el-input>
+											</el-form-item>
+											<el-form-item label="英文名称">
+												<el-input v-model="form.enname"></el-input>
+											</el-form-item>
+											<el-form-item label="Url">
+												<el-input v-model="form.url">
+
+												</el-input>
+											</el-form-item>
+											<el-form-item label="图标">
+												<el-input v-model="form.icon"></el-input>
+											</el-form-item>
+											<el-form-item label="Target">
+												<el-radio-group v-model="form.target">
+													<el-radio label="_blank">打开新窗口</el-radio>
+													<el-radio label="_parent">当前窗口打开</el-radio>
+												</el-radio-group>
+											</el-form-item>
+											<el-form-item label="分组">
+												<el-radio-group v-model="form.groups.group">
+													<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+												</el-radio-group>
+											</el-form-item>
+											<el-form-item>
+												<el-button type="primary" @click="add">发布</el-button>
+												<el-button type="defult">取消</el-button>
+											</el-form-item>
+										</el-form> 
+									</el-tab-pane>
+								</el-tabs>`,
+					data(){
 						return {
-							model: [],
+							form: {
+								cnname: "",
+								enname: "",
+								url: "",
+								icon: "",
+								target: "_blank",
+								selected: 1,
+								groups: {"group":"application"}
+							},
+							model: null,
 							isDragging: false,
 							delayedDragging:false,
 							layout:{
@@ -1855,7 +2008,7 @@ class System {
 							}
 						}
 					},
-					mounted: function() {
+					mounted() {
 						const self = this;
 
 						self.$nextTick( function(){
@@ -1881,95 +2034,64 @@ class System {
 						}
 					},
 					methods: {
-						init: function(){
+						init(){
+							const self = this;
+							self.model = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message;
+						},
+						add(){
 							const self = this;
 
-							jQuery.ajax({
-								url: '/mxobject/search',
-								type: 'POST',
-								dataType: 'json',
-								data: {
-									cond: `#/matrix/portal/tools:| sort name asc, vtime desc`
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									self.model = _.orderBy(data.message,["seat"],["asc"]);
-									
-									/*
-									_.delay(function(){
-										var list = document.getElementById("ul-li");
-										Sortable.create(list, {
-											handle: '.drag-handle',
-											animation: 150
-										});    
-									},500)
-									*/
-								},
-								error: function(xhr, textStatus, errorThrown) {
-								}
-							});
-						},
-						add: function(event){
-							const self = this;
-							var obj = _.assign({
-											class: '/matrix/portal/tools',
-											name: "tools_"+_.now()},
-										self.toJsonString(event));
+							let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(self.form)));
+							if( _.lowerCase(rtn.status) == "ok"){
+								self.$message({
+									type: "info",
+									message: "应用发布成功"
+								});
+								
+								eventHub.$emit("APP-REFRESH-EVENT");
 
-							jQuery.ajax({
-								url: '/mxobject/actiontoclass',
-								type: 'POST',
-								dataType: 'json',
-								data: {
-									data: JSON.stringify(obj),
-									ctype: "insert"
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									self.resetForm();
-									self.init();
-									alertify.success("发布成功!");
-								},
-								error: function(xhr, textStatus, errorThrown) {
-								}
-							})
+								$("ul.nav").find("li>a[title='应用']").popover({
+									container: "body",
+									title: "",
+									content: `${self.form.cnname} 应用发布成功！`
+								}).popover('show');
+
+								_.delay(function(){
+									$("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
+								},8000)
+
+								self.resetForm();
+							}
+
 						},
-						update: function(event){
+						update(item){
+
 							const self = this;
-							var obj = _.assign({
-											class: '/matrix/portal/tools',
-											name: event},
-										self.toJsonString(event));
-							
-							jQuery.ajax({
-								url: '/mxobject/actiontoclass',
-								type: 'POST',
-								dataType: 'json',
-								data: {
-									data: JSON.stringify(obj),
-									ctype: "insert"
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									self.resetForm();
-									self.init();
-									$("#collapse"+event).collapse("hide");
-									alertify.success("更新成功!");
-								},
-								error: function(xhr, textStatus, errorThrown) {
-								}
-							})
+
+							let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
+							if( _.lowerCase(rtn.status) == "ok"){
+								self.$message({
+									type: "info",
+									message: "应用更新成功"
+								});
+								
+								eventHub.$emit("APP-REFRESH-EVENT");
+
+								$("ul.nav").find("li>a[title='应用']").popover({
+									container: "body",
+									title: "",
+									content: `${item.cnname} 应用更新成功！`
+								}).popover('show');
+
+								_.delay(function(){
+									$("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
+								},8000)
+
+								self.hide(item.name);
+								self.resetForm();
+							}
 						},
-						remove: function(event) {
+						remove(event) {
 							const self = this;
 
 							alertify.confirm(`确定要删除？<br><br> ${event}`, function (e) {
@@ -1984,38 +2106,19 @@ class System {
 							});
 
 						},
-						resetForm: function(){
-							const self = this;
-
-							var elements = $("form.tools").find( "input,select,textarea" );
-							for( var i = 0; i < elements.length; ++i ) {
-								var element = elements[i];
-								var id = element.id;
-								var value = element.value;
-
-								if( id ) {
-									$(id).val("");
-								} 
-							}
+						resetForm(){
+							_.extend(this.form, {
+								cnname: "",
+								enname: "",
+								url: "",
+								icon: "",
+								target: "_blank",
+								selected: 1,
+								groups: "application"
+							});
 						},
-						toJsonString: function(event) {
-							var obj = {};                    
-							var elements = $("form."+event).find( "input,select,textarea" );
-							
-							for( var i = 0; i < elements.length; ++i ) {
-								var element = elements[i];
-								var id = element.id;
-								var value = element.value;
-
-								if( id ) {
-									if( id === "groups" ){
-										obj[id] = { id:value } ;
-									} else {
-										obj[id] = value;
-									}
-								} 
-							}
-							return obj;
+						hide(name){
+							$("#collapse"+name).collapse('hide');
 						}
 
 					}
@@ -2024,21 +2127,22 @@ class System {
 				// 日历管理
 				Vue.component('calendar-manage',{
 					delimiters: ['${', '}'],
-					template: '#calendar-manage-template',
-					data: function () {
+					template: '<el-calendar v-model="value"></el-calendar>',
+					data () {
 						return {
+							value: new Date(),
 							event: []
 						}
 					},
-					mounted: function(){
+					mounted(){
 						const self = this;
 
 						self.$nextTick(function(){
-							self.initCalendar();
+							
 						})
 					},
 					methods: {
-						init: function(){
+						init(){
 							const self = this;
 							let _menu = {
 								"open": {
@@ -2142,101 +2246,10 @@ class System {
 								items: _menu
 							});
 						},
-						load: function () {
+						load () {
 							const self = this;
 
 							self.event = omdbHandler.fetchData('#/matrix/system/calendar/: | top 200');
-						},
-						initCalendar: function(){
-							let _locale = `{{.Lang}}`;
-							let t = new Date;
-							let n = t.getMonth();
-							let r = t.getFullYear();
-							let i = $('#calendar').fullCalendar({
-										schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-										themeSystem:'bootstrap3',
-										header: {
-											left: 'prev,next today',
-											center: 'title',
-											right: 'month,agendaWeek,agendaDay,listMonth'
-										},
-										locale: _locale,
-										firstDay: 1,
-										businessHours: {
-											dow: [ 1, 2, 3, 4, 5 ], // Monday - Thursday
-											start: '08:30', // a start time (10am in this example)
-											end: '17:30', // an end time (6pm in this example)
-										},
-										selectable: true,
-										selectHelper: true,
-										droppable: true,
-										drop: function(e, t) {
-											var n = $(this).data("eventObject");
-											var r = $.extend({}, n);
-											r.start = e;
-											r.allDay = t;
-											$("#calendar").fullCalendar("renderEvent", r, true);
-											if ($("#drop-remove").is(":checked")) {
-												$(this).remove()
-											}
-										},
-										select: function(e, t, n) {
-											var r = prompt("Event Title:");
-											if (r) {
-												i.fullCalendar("renderEvent", {
-													title: r,
-													start: e,
-													end: t,
-													allDay: n
-												}, true)
-											}
-											i.fullCalendar("unselect")
-										},
-										eventClick: function(calEvent, jsEvent, view) {
-
-											alert('Event: ' + calEvent.title);
-											alert('Coordinates: ' + jsEvent.pageX + ',' + jsEvent.pageY);
-											alert('View: ' + view.name);
-
-											// change the border color just for fun
-											$(this).css('border-color', 'red');
-
-										},
-										eventRender: function(e, t, n) {
-											console.log(e,t,n)
-											var r = e.media ? e.media : "";
-											var i = e.description ? e.description : "";
-											t.find(".fc-event-title").after($('<span class="fc-event-icons"></span>').html(r));
-											t.find(".fc-event-title").append("<small>" + i + "</small>")
-										},
-										editable: true,
-										events: [{
-											title: "Event",
-											start: new Date(r, n, 0),
-											end: new Date(r, n, 1),
-											className: "bg-purple",
-											media: '<i class="fa fa-trophy"></i>',
-											description: "Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus."
-										}, {
-											title: "Daily Meeting",
-											start: new Date(r, n, 10),
-											end: new Date(r, n, 12),
-											allDay: false,
-											className: "bg-blue",
-											media: '<i class="fa fa-users"></i>',
-											description: "Lorem ipsum dolor sit amet adipiscing elit."
-										}, {
-											title: "Click for Google",
-											start: new Date(r, n, 15),
-											end: new Date(r, n, 17),
-											url: "",
-											className: "bg-green",
-											media: '<i class="fa fa-google-plus"></i>',
-											description: "Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos."
-										}]
-									});
-
-							_.delay(self.init,500);
 						}
 					}
 				})
@@ -2408,8 +2421,14 @@ class System {
 				let main = {
 					template: `<el-container style="background-color:#ffffff;height: calc(100vh - 85px);">
 									<el-aside id="system-view-left-panel" style="background-color:#f6f6f6;">
-										<el-collapse value="user-manage" accordion @change="toggleView">
+										<el-collapse value="company-manage" accordion @change="toggleView">
 											
+											<el-collapse-item name="company-manage" v-if="window.COMPANY_NAME=='wecise' && window.SignedUser_IsAdmin==true">
+												<template slot="title">
+													<i class="fas fa-building"></i> &nbsp;公司管理
+												</template>
+											</el-collapse-item>
+
 											<el-collapse-item name="user-manage">
 												<template slot="title">
 													<i class="fas fa-users"></i> &nbsp;用户和权限
@@ -2427,12 +2446,6 @@ class System {
 														<user-tree-component :zNodes="userTreeNodes" @click.native="toggleView('user-manage')"></user-tree-component>
 													</el-main>
 												</el-container>
-											</el-collapse-item>
-
-											<el-collapse-item name="company-manage" v-if="window.COMPANY_NAME=='wecise' && window.SignedUser_IsAdmin==true">
-												<template slot="title">
-													<i class="fas fa-building"></i> &nbsp;公司管理
-												</template>
 											</el-collapse-item>
 							
 											<el-collapse-item name="grok-manage">
@@ -2482,7 +2495,7 @@ class System {
 									</el-main>
 								</el-container>  `,
 					data: {
-						currentView: 'user-manage',
+						currentView: 'company-manage',
 						userTreeNodes: {},
 						configTreeNodes: {},
 						rulesTreeNodes: {},

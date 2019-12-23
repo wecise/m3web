@@ -37,6 +37,276 @@ class Entity extends Matrix {
                             "search-base-component"],function() {
             $(function() {
 
+                // ConsoleList Table组件
+                Vue.component("el-consolelist-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip :content="item.content" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                            <el-button type="text" @click="onAction(item)" :icon="item.icon"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出模板" placement="top" open-delay="500">
+                                            <el-button type="text" icon="el-icon-s-unfold" @click="$root.exportIt">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导入实体" placement="top" open-delay="500">
+                                            <el-button type="text" class="fileinput-button" icon="el-icon-s-fold" @click="$root.entityDataImport">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="新增实体" placement="top" open-delay="500">
+                                            <el-button type="text" icon="el-icon-plus" @click="$root.entityNew"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出" delay-time="500">
+                                            <el-dropdown @command="onExport">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-download el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                                    <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                                    <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                                    <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                                    <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                                    <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowContextmenu"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @row-click="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            ref="table">
+                                            <el-table-column type="selection" align="center"></el-table-column> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                sortable 
+                                                show-overflow-tooltip
+                                                v-for="(item,index) in dt.columns"
+                                                :key="index"
+                                                :prop="item.field"
+                                                :label="item ? item.title : ''"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                                    <template slot-scope="scope">
+                                                        <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                            v-if="typeof item.render === 'function'">
+                                                        </div>
+                                                        <div v-else>
+                                                            #{scope.row[item.field]}#
+                                                        </div>
+                                                    </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.template, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                                    
+                            };
+
+                            if(self.model && $("table",self.$el).is(':visible')){
+                                init();
+                            } else {
+                                setTimeout(init,50);
+                            }
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = val;
+                        },
+                        onAction(evt){
+                            if(_.isEmpty(this.dt.selected)){
+                                this.$message({
+                                    type: "info",
+                                    message: "请选择实体！"
+                                });
+                                return false;
+                            }
+
+                            this.$root.action( {list: this.dt.selected, action:evt});
+                        },
+                        onToggle(){
+                            this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.model.contextMenu.entity
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
                 // 实体录入
                 Vue.component("entity-new",{
                     delimiters: ['#{', '}#'],
@@ -806,8 +1076,100 @@ class Entity extends Matrix {
                 });
                 
                 let main = {
-                    delimiters: ['${', '}'],
-                    template: "#app-template",
+                    delimiters: ['#{', '}#'],
+                    template:   `<el-container>
+                                    <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                        <search-base-component :id="model.id"
+                                                                :options="options"
+                                                                ref="searchRef"
+                                                                class="grid-content"></search-base-component>
+                                    </el-header>			
+                                    <el-main id="entity-view-container" style="padding: 5px 0px 0px 0px;">
+                                        <el-tabs v-model="layout.main.activeIndex" type="border-card" closable @tab-remove="detailRemove">
+                                            <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" style="padding:0px;">
+                                                <div v-if="item.type==='main'">
+                                                    <div class="entity-view-summary-control">
+                                                        <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                            <div>
+                                                                #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                <el-switch
+                                                                v-model="control.ifSmart"
+                                                                active-color="#13ce66"
+                                                                inactive-color="#dddddd"
+                                                                active-value="1"
+                                                                inactive-value="0"
+                                                                @change="toggleSummaryBySmart">
+                                                                </el-switch>
+                                                            </div>
+                                                        </el-tooltip>
+                                                        <el-tooltip :content="control.ifGraph==1?'实体图谱启用中':'实体图谱关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifGraph==1?'实体图谱':'实体图谱'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifGraph"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryByGraph">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                    </div>
+                                                    
+                                                    <el-container id="entity-view-summary">
+                                                        <el-main>
+                                                            <el-tabs v-model="layout.summary.activeIndex" type="border">
+                                                                <el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+                                                                    <div v-if="item.type=='radar'">
+                                                                        <entity-view-radar id="event-radar" :model='model.message'></entity-view-radar>
+                                                                    </div>
+                                                                    <div v-if="item.type=='pie'">
+                                                                        <entity-view-pie id="event-pie" :model='model.message'></entity-view-pie>
+                                                                    </div>
+                                                                </el-tab-pane>
+                                                            </el-tabs>
+                                                        </el-main>
+                                                    </el-container>
+                                                    
+                                                    <el-container id="entity-view-console">
+                                                        <el-aside class="tree-view" id="entity-view-left" style="background-color:#f6f6f6;">
+                                                            <entity-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></entity-tree-component>
+                                                        </el-aside>
+                                                        <el-main class="table-view" id="entity-view-main" style="padding:5px;">
+                                                            <el-consolelist-component :model="model.message"></el-consolelist-component>		
+                                                        </el-main>
+                                                    </el-container>
+                                                    
+                                                </div>
+                                                <div v-if="item.type==='diagnosis'">
+                                                    <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
+                                                        <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
+                                                            <div v-if="it.type==='base'">
+                                                                <entity-diagnosis-base :id="it.name+ '-base'" :model="it.model.detail"></entity-diagnosis-base>
+                                                            </div>
+                                                            <div v-else-if="it.type==='manager'">
+                                                                <entity-diagnosis-manager :id="it.name+ '-manager'" :model="it.model.detail"></entity-diagnosis-manager>
+                                                            </div>
+                                                            <div v-else-if="it.type==='config'">
+                                                                <entity-diagnosis-config :id="it.name+ '-config'" :model="it.model.detail"></entity-diagnosis-config>
+                                                            </div>
+                                                            <div v-else-if="it.type==='compare'">
+                                                                <entity-diagnosis-compare :id="it.name+ '-compare'" :model="it.model"></entity-diagnosis-compare>
+                                                            </div>
+                                                            <div v-else-if="it.type==='topological'">
+                                                                <entity-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></entity-diagnosis-topological>
+                                                            </div>
+                                                        </el-tab-pane>
+                                                    </el-tabs>
+                                                </div>
+                                                <div v-else-if="item.type==='graph'" style="padding-top: 1px;margin: 0px -1px;">
+                                                    <entity-view-graph id="entity-view-graph" :model="model.message"></entity-view-graph>
+                                                </div>
+                                            </tab>
+                                        </el-tabs>
+                                    </el-main>
+                                </el-container>`,
                     data: {
                         // 布局
                         layout:{
@@ -978,6 +1340,11 @@ class Entity extends Matrix {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        'display': 'none'
+                                    }
+                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
@@ -1268,6 +1635,82 @@ class Entity extends Matrix {
                                 }
                             }).$mount("#class-template-import");
                         },
+                        exportIt(){
+                            const me = this;
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-entity-template')){
+                                    jsPanel.activePanels.getPanel('jsPanel-entity-template').close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winEntityTemplate('导出实体模板', `<div id="entity-template-export"></div>`, null, null, null);
+                            }
+
+                            new Vue({
+                                data:{
+                                    classList: fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
+                                    defaultProps: {
+                                        children: 'children',
+                                        label: 'alias'
+                                    },
+                                    model: {
+                                        ifData: false, 
+                                        limit: 0,
+                                        recursive: true,
+                                        filetype: 'xlsx',
+                                        template: true,
+                                        class: '/matrix/entity',
+                                        ignoreClass: ''
+                                    }
+                                },
+                                template: `<el-container style="height:100%;">
+                                                <el-header style="height:35px;line-height:35px;padding: 0px 5px;background: #f6f6f6;">
+                                                    <el-switch v-model="model.ifData" active-text="导出样例数据" active-color="#13ce66"></el-switch>
+                                                </el-header>
+                                                <el-main style="padding:10px;">
+                                                    <el-tree
+                                                        ref="entityTree"
+                                                        :data="classList"
+                                                        show-checkbox
+                                                        node-key="id"
+                                                        :default-expanded-keys="[_.first(classList).id]"
+                                                        :default-checked-keys="[]"
+                                                        :props="defaultProps"
+                                                        style="background-color:transparent;">
+                                                    </el-tree>
+                                                </el-main>
+                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                    <el-button type="default" @click="onCancel">取消</el-button>
+                                                    <el-button type="primary" @click="onExport">导出</el-button>
+                                                </el-footer>
+                                            </el-container>`,
+                                methods:{
+                                    onCancel(){
+                                        wnd.close();
+                                    },
+                                    onExport(){
+                                        let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",this.model.class).message;
+                                        let checkedClass = _.map(this.$refs.entityTree.getCheckedNodes(),'class');
+                                        
+                                        _.extend(this.model, {ignoreClass: _.xor(allNodes,checkedClass) } );
+                                        
+                                        if(this.model.ifData){
+                                            this.model.limit = 5;
+                                            this.model.template = false;
+                                        } else {
+                                            this.model.template = true;
+                                            this.model.limit = 0;
+                                        }
+                                        omdbHandler.classDataExport(this.model);
+                                    }
+                                }
+                            }).$mount("#entity-template-export");
+                            
+                        },
                         entityNew(){
                             const me = this;
                             let wnd = null;
@@ -1344,6 +1787,11 @@ class Entity extends Matrix {
                                             sizes: [20, 80],
                                             minSize: [0, 0],
                                             gutterSize: 5,
+                                            gutterStyle: function(dimension, gutterSize) {
+                                                return {
+                                                    'display': 'none'
+                                                }
+                                            },
                                             cursor: 'col-resize',
                                             direction: 'horizontal',
                                         });

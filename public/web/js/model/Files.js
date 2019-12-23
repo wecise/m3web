@@ -55,7 +55,7 @@ class Files {
                         id: String
                     },
                     delimiters: ['${', '}'],
-                    template: `<fs-view-component :id="id+'file-fs-view'" :root="root" defaultView="grid-view" rootName="我的文件"></fs-view-component>`,
+                    template: `<fs-view-component :id="id+'file-fs-view'" :root="root" defaultView="grid-view" rootName="我的文件" ref="viewConsoleFs"></fs-view-component>`,
                     data(){
                         return {
                             model: [],
@@ -248,7 +248,7 @@ class Files {
                                         <api-view-tree id="api-view-tree"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;" class="split" id="api-view-right">
-                                        <api-view-console id="api-view-console"></api-view-console>
+                                        <api-view-console id="api-view-console" ref="viewConsole"></api-view-console>
                                     </el-main>
                                 </el-container>`,
                     data: {

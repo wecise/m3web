@@ -28,7 +28,63 @@ class Home extends Matrix {
 
                 let main = {
                     delimiters: ['#{', '}#'],
-                    template: '#app-template',
+                    template:   `<el-container style="padding:3em 0;">
+                                    <el-main style="padding:0px;">
+                                        <el-row type="flex" justify="center" style="padding:20px 0px;">
+                                            <el-col :span="18">
+                                                <div class="grid-content">
+                                                    <div class="input-group">
+                                                        <input class="form-control search" type="text" placeholder="搜索" @click="hideSearch" style="border: 1px solid #b6c2ca;">
+                                                        <div class="input-group-btn">
+                                                            <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
+                                                        </div>
+                                                        <div class="input-group-btn">
+                                                            <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="collapse collapseShowresult" id="search-result-panel" v-on:blur="hideSearch">
+                                                        <div id="search-result-content"></div>
+                                                    </div>
+                                                </div>
+                                            </el-col>
+                                        </el-row>
+                                        
+                                        <el-row type="flex" justify="center" style="height: calc(100vh - 215px);">
+                                            <el-col :span="18"> 
+                                                <div class="grid-content" id="grid-content">
+                                                    <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
+                                                        <a :href="item.url" :target="item.target" style="color:#ffffff;">
+                                                            <div class="tile_name">
+                                                                <img style="width:30px" :src="item.icon | pickIcon"></img>
+                                                                <p class="small">#{item.cnname}#</p>
+                                                            </div>
+                                                        </a>
+                                                        <div class="list-context-menu" :data-item="item.id">
+                                                            <i class="fa fa-angle-down"></i>
+                                                        </div>
+                                                    </div>
+                                                    <a class="layer btn btn-primary" href="javascript:void(0);" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;" @click="dialogFormVisible = true">
+                                                        <span class="fa fa-plus" style="font-size: 20px;"></span>
+                                                    </a>
+                                                </div>
+                                            </el-col>
+                                        </el-row>
+                                        
+                                        <el-dialog title="应用" :visible.sync="dialogFormVisible" width="60%">
+                                            <el-button :target="item.target" type="primary" v-for="item in user.appList" @click="triggerInput(item.name)">
+                                                <img :src="item.icon | pickIcon" style="width:28px;"></img>
+                                                <p class="small">
+                                                    #{item.cnname}#
+                                                </p>
+                                                <p>
+                                                    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)">
+                                                </p>
+                                            </el-button>
+                                        </el-dialog>
+                                        
+                                    </el-main>
+                            
+                                </el-container>`,
                     data: {
                         search: {
                             input: {
@@ -227,9 +283,35 @@ class Home extends Matrix {
                             $("#search-result-panel").append(`<div id="search-result-content"></div>`);
 
                             var resultVue = new Vue({
-                                delimiters: ['${', '}'],
+                                delimiters: ['#{', '}#'],
                                 el: "#search-result-content",
-                                template: "#search-result-content-template",
+                                template:   `<div>
+                                                <div class="row search-result-row" 
+                                                    v-for="item in model">
+                                                    <div class="col-lg-4">
+                                                        结果
+                                                        <p>#{item.name}#</p>
+                                                    </div>
+                                                    <div class="col-lg-2">
+                                                        数量
+                                                        <p>#{item.count}#</p>
+                                                    </div>
+                                                    <div class="col-lg-5">
+                                                        时间分布
+                                                        <p>#{item.from}# - #{item.to}#</p>
+                                                    </div>
+                                                    <div>
+                                                        <a href="#" class="btn btn-xs btn-default btn-copy" @click="copyToClipBoard" alt="拷贝到剪切板" title="拷贝到剪切板" style="height: 22px;"><i class="fa fa-clipboard"></i></a>
+                                                    </div>
+                                                    <div class="col-lg-12" style="display:none;">
+                                                        <div class="panel">
+                                                            <div class="panel-body">
+                                                            #{JSON.stringify(item.list)}#
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>`,
                                 data: {
                                     model:[],
                                 },

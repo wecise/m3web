@@ -79,7 +79,8 @@
                                     fullname: data.fullname,
                                     id: data.id,
                                     name: data.name,
-                                    parent: data.parent
+                                    parent: data.parent,
+                                    size: _.find(fsHandler.fsList(data.parent),{name: data.name}).size || 0
                                 };
                     eventHub.$emit("FS-NODE-OPENIT-EVENT", item, data.parent);
                 } else {
@@ -159,7 +160,7 @@
                                                     _type = v.ftype;
                                                 }
 
-                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type, size: v.size});
                                     });
 
                         // append sub nodesGr

@@ -105,6 +105,266 @@ class Omdb{
     init() {
         const odb = this;
 
+        // ClassList Table组件
+        Vue.component("omdb-classlist-component",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model: Object
+            },
+            data(){
+                return {
+                    dt:{
+                        rows:[],
+                        columns: [],
+                        selected: []
+                    },
+                    info: []
+                }
+            },
+            watch: {
+                dt: {
+                    handler(val,oldVal){
+                        this.info = [];
+                        this.info.push(`共 ${this.dt.rows.length} 项`);
+                        this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                        this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                    },
+                    deep:true,
+                    immediate:true
+                }
+            },
+            template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 295px);">
+                            <el-header style="height:30px;line-height:30px;">
+                                <el-tooltip content="导出" delay-time="500">
+                                    <el-dropdown @command="onExport">
+                                        <span class="el-dropdown-link">
+                                            <i class="el-icon-download el-icon--right"></i>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                            <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                            <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                            <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                            <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                            <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </el-tooltip>
+                            </el-header>   
+                            <el-main style="padding:0px;height:100%;">
+                                <el-table
+                                    :data="dt.rows"
+                                    highlight-current-row="true"
+                                    style="width: 100%"
+                                    :row-class-name="rowClassName"
+                                    :header-cell-style="headerRender"
+                                    @row-contextmenu="onRowContextmenu"
+                                    @selection-change="onSelectionChange"
+                                    @expand-change="onExpandChange"
+                                    stripe
+                                    ref="table">
+                                    <el-table-column type="selection" align="center"></el-table-column> 
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                            
+                                            <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                <el-form-item v-for="v,k in _.find(dt.rows,{name:props.row.name})" :label="k">
+                                                    <el-select v-model="v" v-if="k==='class'">
+                                                        <el-option
+                                                            v-for="item in v"
+                                                            :key="item"
+                                                            :label="item"
+                                                            :value="item">
+                                                        </el-option>
+                                                    </el-select>
+                                                    <el-select v-model="v" v-else-if="k==='dispname'">
+                                                        <el-option
+                                                            v-for="(val,key) in v"
+                                                            :key="key"
+                                                            :label="val"
+                                                            :value="val">
+                                                            <span style="float: left">#{ val }#</span>
+                                                            <span style="float: right; color: #8492a6; font-size: 13px">#{ key }#</span>
+                                                        </el-option>
+                                                    </el-select>
+                                                    <el-select v-model="v" v-else-if="k==='tags'">
+                                                        <el-option
+                                                            v-for="(val,key) in v"
+                                                            :key="key"
+                                                            :label="val"
+                                                            :value="val">
+                                                            <el-tag style="float: left">#{ val }#</el-tag>
+                                                            <span style="float: right; color: #8492a6; font-size: 13px">#{ key }#</span>
+                                                        </el-option>
+                                                    </el-select>
+                                                    <el-input type="textarea" autosize v-model="v" v-else-if="k==='note'"></el-input>
+                                                    <el-image :src="'${window.ASSETS_ICON}/tools/png/'+v+'.png?type=open&issys=${window.SignedUser_IsAdmin}'" v-else-if="k==='icon'" style="width:64px;"></el-image>
+                                                    <el-input v-model="v" v-else></el-input>
+                                                </el-form-item>
+                                            </el-form>
+
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        sortable 
+                                        show-overflow-tooltip
+                                        v-for="(item,index) in dt.columns"
+                                        :key="index"
+                                        :prop="item.field"
+                                        :label="item ? item.title : ''"
+                                        :width="item.width"
+                                        v-if="item.visible">
+                                            <template slot-scope="scope">
+                                                <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                    v-if="typeof item.render === 'function'">
+                                                </div>
+                                                <div v-else>
+                                                    #{scope.row[item.field]}#
+                                                </div>
+                                            </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                            <el-footer  style="height:30px;line-height:30px;">
+                                #{ info.join(' &nbsp; | &nbsp;') }#
+                            </el-footer>
+                        </el-container>`,
+            mounted(){
+                this.initData();
+            },
+            methods: {
+                initData(){
+                    _.extend(this.dt,this.model);
+                    _.map(this.dt.columns,(v)=>{
+                        if(_.isUndefined(v.visible)){
+                            _.extend(v, { visible: true });
+                        }
+                        return v;
+                    })
+                },
+                rowClassName({row, rowIndex}){
+                    return `row-${rowIndex}`;
+                },
+                headerRender({ row, column, rowIndex, columnIndex }){
+                    if (rowIndex === 0) {
+                        //return 'text-align:center;';
+                    }
+                },
+                onExpandChange(val){
+                    
+                },
+                onSelectionChange(val) {
+                    this.dt.selected = val;
+                },
+                onAction(evt){
+                    if(_.isEmpty(this.dt.selected)){
+                        this.$message({
+                            type: "info",
+                            message: "请选择事件！"
+                        });
+                        return false;
+                    }
+
+                    this.$root.action( {list: this.dt.selected, action:evt});
+                },
+                onToggle(){
+                    this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
+                },
+                onRowContextmenu(row, column, event){
+                    const self = this;
+
+                    $.contextMenu( 'destroy' ).contextMenu({
+                        selector: `.${column.id}`,
+                        trigger: "right",
+                        autoHide: true,
+                        delay: 5,
+                        hideOnSecondTrigger: true,
+                        className: `animated slideIn ${column.id}`,
+                        build: function($trigger, e) {
+                            
+                            return {
+                                callback: function(key, opt) {
+                                    
+                                    if(_.includes(key,'diagnosis')) {
+                                        self.$root.detailAdd(row);
+                                    } else if(_.includes(key,'action')) {
+                                        // 增加操作类型
+                                        let action = _.last(key.split("_"));
+                                        self.$root.action({list: [row], action:action});
+                                    } else if(_.includes(key,'ticket')){
+                                        alertify.confirm(`确定生成工单<br><br>
+                                                            告警ID：${row.id}<br><br>
+                                                            实体ID：${row.entity}<br><br>
+                                                            模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                            告警摘要：${row.msg}<br><br>
+                                                            告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                            if (e) {
+                                                try{
+                                                    let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                    if(rtn.data.success == 1){
+                                                        self.options.term = row.id;
+                                                        self.$refs.searchRef.search();
+                                                        alertify.success(`创建工单成功! <br><br>
+                                                                    工单单号：${rtn.data.ticket_number}`)
+                                                    }
+                                                }catch(err){
+                                                    alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                    ${rtn}<br><br>
+                                                                    ${err}`)
+                                                }
+                                            } else {
+                                                
+                                            }
+                                        });
+                                    }
+                                },
+                                items: self.model.contextMenu
+                            }
+                        },
+                        events: {
+                            show(opt) {
+        
+                                let $this = this;
+                                _.delay(()=>{
+                                    new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                },50)
+                            }
+                        }
+                    });
+                },
+                onExport(type){
+            
+                    let options = {
+                        csvEnclosure: '',
+                        csvSeparator: ', ',
+                        csvUseBOM: true,
+                        ignoreColumn: [0,1],
+                        fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                        type: type,
+                    };
+
+                    if(type === 'png'){
+                        //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                        $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                    } else if(type === 'pdf'){
+                        _.extend(options, {
+                            jspdf: {orientation: 'l',
+                                    format: 'a3',
+                                    margins: {left:10, right:10, top:20, bottom:20},
+                                    autotable: {styles: {fillColor: 'inherit', 
+                                                            textColor: 'inherit'},
+                                                tableWidth: 'auto'}
+                            }
+                        });
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    } else {
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    }
+                    
+                }
+            }
+        })
+
         // 日志控制台
         Vue.component("omdb-log-console", {
             delimiters: ['#{', '}#'],
@@ -165,7 +425,9 @@ class Omdb{
                     handler:function(val,oldVal){
                         const self = this;
                         // 追加
-                        self.append(_.last(val).level, _.last(val).msg);
+                        if(!_.isEmpty(val)){
+                            self.append(_.last(val).level, _.last(val).msg);
+                        }
                     },
                     deep:true,
                     immediate:true
@@ -523,13 +785,7 @@ class Omdb{
                                 <el-tabs v-model="tabs.activeName" type="card" tab-position="left" @tab-click="onClick" style="border-top:1px solid #dddddd;">
                                     <el-tab-pane name="columns">
                                         <span slot="label"><i class="fas fa-columns"></i> 属性</span>
-                                        <omdb-class-datatables-component :id="id" :bid="id"
-                                                                        :dataset="dtModel.datatable.dataset"
-                                                                        :columns="dtModel.datatable.columns"
-                                                                        :options="dtModel.datatable.options"
-                                                                        contextmenu="null"
-                                                                        :result="dtModel.result">
-                                        </omdb-class-datatables-component>
+                                        <omdb-classlist-component :model="dt"></omdb-classlist-component>
                                     </el-tab-pane>
                                     <el-tab-pane name="keys">
                                         <span slot="label"><i class="fas fa-key"></i> 主键</span>
@@ -583,22 +839,9 @@ class Omdb{
                     tabs:{
                         activeName: 'columns'
                     },
-                    dtModel: {
-                        datatable: {
-                            dataset: [],
-                            columns: [],
-                            options: {
-                                info:true,
-                                pageing:true,
-                                scrollY: 'calc(100vh - 400px)',
-                                searching: false,
-                                rowCallback: function( row, data ) {
-                                    if( data.icon === "parent" ) {
-                                        $('td', row).css('background-color', '#f9f9f9');
-                                    }
-                                }
-                            }
-                        },
+                    dt: {
+                        rows: [],
+                        columns: [],
                         result: {},
                         keys: [],
                     },
@@ -646,109 +889,104 @@ class Omdb{
                 }
             },
             created(){
-                const self = this;
-                
                 // columns
-                self.initColumns();
+                this.initColumns();
 
                 // keys
-                self.initKeys();
+                this.initKeys();
 
                 // form
-                self.initForm();
+                this.initForm();
             },
             mounted() {
-                const self = this;
+                
             },
             methods: {
                 initColumns(){
-                    const self = this;
+                    
+                    if(!_.isEmpty(this.model.node.fieldsObj) && !_.isEmpty(this.model.pnode.fieldsObj)) {
 
-                    if(!_.isEmpty(self.model.node.fieldsObj) && !_.isEmpty(self.model.pnode.fieldsObj)) {
-
-                        let _node = _.cloneDeep(self.model.node.fieldsObj);
-                        let _pnode = _.cloneDeep(self.model.pnode.fieldsObj);
+                        let _node = _.cloneDeep(this.model.node.fieldsObj);
+                        let _pnode = _.cloneDeep(this.model.pnode.fieldsObj);
         
-                        if(self.model.node.fieldsObj == self.model.pnode.fieldsObj) {
-                            self.dtModel.datatable.dataset = _.map(self.model.node.fieldsObj, function (v) {
+                        if(this.model.node.fieldsObj == this.model.pnode.fieldsObj) {
+                            this.dt.rows = _.map(this.model.node.fieldsObj, (v)=>{
                                 return _.merge(v, {icon: 'parent'});
                             });
                         } else {
-                            let _diff =  _.differenceWith(self.model.node.fieldsObj, self.model.pnode.fieldsObj, function(v1,v2){return v1.name === v2.name;});
+                            let _diff =  _.differenceWith(this.model.node.fieldsObj, this.model.pnode.fieldsObj, (v1,v2)=>{return v1.name === v2.name;});
         
                             if(_.isEmpty(_diff)){
-                                self.dtModel.datatable.dataset = _.map(_node, function (v) {
+                                this.dt.rows = _.map(_node, (v)=> {
                                     return _.merge(v, {icon: 'parent'});
                                 });
         
                             } else {
-                                self.dtModel.datatable.dataset = _.concat(_.map(_pnode,function(v){return _.merge(v, {icon: 'parent'});}), _.map(_diff,function(v){return _.merge(v, {icon: 'child'});}));
+                                this.dt.rows = _.concat(_.map(_pnode,(v)=>{return _.merge(v, {icon: 'parent'});}), _.map(_diff,(v)=>{return _.merge(v, {icon: 'child'});}));
                             }
                         }
                     } else{
-                        self.dtModel.datatable.dataset = _.map(self.model.node.fieldsObj, function (v) {
+                        this.dt.rows = _.map(this.model.node.fieldsObj, (v)=> {
                             return _.merge(v, {icon: 'parent'});
                         });
                     }
         
-                    self.dtModel.datatable.dataset = _.map(_.uniqBy(self.dtModel.datatable.dataset,'name'),function(v){
-                        if(_.indexOf(self.model.node.keys,v.name) > -1){
+                    this.dt.rows = _.map(_.uniqBy(this.dt.rows,'name'),(v)=>{
+                        if(_.indexOf(this.model.node.keys,v.name) > -1){
                             _.extend(v,{iskey:1});
                         }
                         return v;
                     });
     
-                    self.dtModel.datatable.columns = [
-                                                {"field": "id", render: function (data, type, row, meta) {
-                                                        return meta.row + meta.settings._iDisplayStart + 1;
-                                                    }
-                                                },
-                                                {"field": "icon", "title": "Inherit", render: function (data, type, row) {
-                                                        return `<img src="${window.ASSETS_ICON}/tools/png/${data}.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:22px;height:22px;">`;
-                                                    }
-                                                },
-                                                {"field": "name", "title": "Name"},
-                                                {"field": "title", "title": "Title"},
-                                                {"field": "colname", "title": "ColName", visible: false},
-                                                {"field": "ftype", "title": "Ftype",render: function (data, type, row) {
-                                                        return data==='smallint'?'enum':data;
-                                                    }
-                                                },
-                                                {"field": "loption", "title": "Loption"},
-                                                {"field": "fparam", "title": "Fparam"},
-                                                {"field": "isindex", "title": "Index",render: function (data, type, row) {
-                                                        return data===1?'是':'否';
-                                                    }
-                                                },
-                                                {"field": "iskey", "title": "Primary Key",render: function (data, type, row) {
-                                                        return data===1?'是':'否';
-                                                    }
-                                                },
-                                                {"field": "note", "title": "Note"},
-                                                {"field": "mtime", "title": "Mtime",render: function (data, type, row) {
-                                                        return moment(data).format("LLL");
-                                                    }
-                                                },
-                                                {"field": "class", "title": "Class", "visible": false},
-                                                {"field": "dispname", "title": "Dispname", "visible": false},
-                                                {"field": "tags", "title": "Tags", "visible": false},
-                                                {"field": "isrel", "title": "Rel", "visible": false},
-                                                {"field": "btype", "title": "Btype", "visible": false}
-                                            ];
+                    this.dt.columns = [
+                                        {"field": "id", title:"序号", width: 80, render: function(row,column,cellValue,index) {
+                                                return index + 1;
+                                            }
+                                        },
+                                        {"field": "icon", "title": "继承", width: 120, render: function(row,column,cellValue,index) {
+                                                return `<img src="${window.ASSETS_ICON}/tools/png/${cellValue}.png?type=open&issys=${window.SignedUser_IsAdmin}" style="width:22px;height:22px;">`;
+                                            }
+                                        },
+                                        {"field": "name", "title": "属性", width: 120},
+                                        {"field": "colname", "title": "列属性", width: 120, visible: false},
+                                        {"field": "title", "title": "标题", width: 120},
+                                        {"field": "ftype", "title": "类型", width: 80, render: function(row,column,cellValue,index) {
+                                                return cellValue==='smallint'?'enum':cellValue;
+                                            }
+                                        },
+                                        {"field": "loption", "title": "Loption", width: 120},
+                                        {"field": "fparam", "title": "Fparam", width: 160},
+                                        {"field": "isindex", "title": "索引", width: 80, render: function (row,column,cellValue,index) {
+                                                return cellValue===1?'是':'否';
+                                            }
+                                        },
+                                        {"field": "iskey", "title": "主键", width: 120, render: function (row,column,cellValue,index) {
+                                                return cellValue===1?'是':'否';
+                                            }
+                                        },
+                                        {"field": "note", "title": "备注", width: 80},
+                                        {"field": "mtime", "title": "时间", width: 160, render: function (row,column,cellValue,index) {
+                                                return moment(cellValue).format("YYYY-MM-DD HH:MM:SS.SSS");
+                                            }
+                                        },
+                                        {"field": "class", "title": "类", width: 80, "visible": false},
+                                        {"field": "dispname", "title": "显示名称", width: 80, "visible": false},
+                                        {"field": "tags", "title": "标签", width: 80, "visible": false},
+                                        {"field": "isrel", "title": "Rel", width: 80, "visible": false},
+                                        {"field": "btype", "title": "Btype", width: 80, "visible": false}
+                                    ];
     
-                    self.dtModel.datatable.columns = _.uniqBy(self.dtModel.datatable.columns, 'field');
-    
-                    self.dtModel.result = self.model.node;
+                    this.dt.columns = _.uniqBy(this.dt.columns, 'field');
+                                    
+                    this.dt.result = this.model.node;
                     
                     _.delay(()=>{
                         eventHub.$emit(`LAYOUT-DATATABLE-RESIZE-EVENT`);
                     },1500)
                 },
                 initKeys: function(){
-                    const self = this;
-
                     let rtn = omdbHandler.classList(-1)[0];
-                    self.dtModel.keys = _.sortBy(_.keys(rtn));
+                    this.dt.keys = _.sortBy(_.keys(rtn));
                 },
                 initForm(){
                     this.formModel = this.model.node;
@@ -775,8 +1013,8 @@ class Omdb{
                             return `${v}`;
                         })).join(endWord);
                     } else if(tab.name == 'options'){
-                        self.dtModel.keys = _.without(self.dtModel.keys,'child','fields');
-                        self.optionsModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Value`,headerWord],_.map(self.dtModel.keys,function(v){
+                        self.dt.keys = _.without(self.dt.keys,'child','fields');
+                        self.optionsModel.newInput = _.concat([`Name${spaceWord(4)}${splitTab}Value`,headerWord],_.map(self.dt.keys,function(v){
                             let value = self.model.node[v];
 
                             if(v === 'mtime'){
@@ -850,31 +1088,113 @@ class Omdb{
                 id: String,
                 model: Object
             },
-            template: `<omdb-output-datatables-component :id="id" :bid="id"
-                                                        :dataset="datatable.dataset"
-                                                        :columns="datatable.columns"
-                                                        :options="datatable.options"
-                                                        contextmenu="null"
-                                                        :result="result"></omdb-output-datatables-component>`,
+            template:   `<el-container style="height:calc(100% - 30px);">
+                            <el-header style="height:30px;line-height:30px;">
+                                <el-tooltip content="删除" delay-time="500">
+                                    <el-button type="text" @click="onDelete" icon="el-icon-delete"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="导出" delay-time="500">
+                                    <el-dropdown @command="onExport">
+                                        <span class="el-dropdown-link">
+                                            <i class="el-icon-download el-icon--right"></i>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                            <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                            <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                            <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </el-tooltip>
+
+                            </el-header>
+                            <el-main style="height:100%;padding:0px;">
+                                <el-table :data="dt.rows" 
+                                    stripe
+                                    style="width: 100%;"
+                                    height="100%"
+                                    :row-class-name="rowClassName"
+                                    :header-cell-style="headerRender"
+                                    @row-dblclick="rowDblclick"
+                                    @selection-change="onSelectionChange"
+                                    fit="true"
+                                    size="mini"
+                                    ref="table">
+                                    
+                                    <el-table-column type="index" label="序号" sortable align="center">
+                                        <template slot-scope="scope">
+                                            <div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column type="selection" align="center">
+                                    </el-table-column>                                                
+                                    <el-table-column type="expand" label="详细" align="center" >
+                                        <template slot-scope="props">
+                                            <el-form style="width: 100%;padding:10px 20px;" label-position="left" class="omdb-table-data-expand">
+                                                <el-form-item v-for="v,k in props.row" :label="k">
+                                                    <el-input :type="k | pickType" v-model="v" :disabled="true" v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
+                                                    <el-input :type="k | pickType" v-model="v" :disabled="false" v-else></el-input>
+                                                </el-form-item>
+                                            </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column :prop="item.field"  
+                                            show-overflow-tooltip="true" 
+                                            sortable
+                                            resizable
+                                            :formatter="item.render"
+                                            v-for="item in dt.columns"
+                                            min-width="180">
+                                        <template slot-scope="scope" slot="header">
+                                            <span> #{item.field}# 
+                                                <el-popover
+                                                    placement="top-start"
+                                                    width="100"
+                                                    trigger="hover"
+                                                    :content="item.type">
+                                                    <code slot="reference" style="color: #333;background-color: #f7f7f7;">#{item.type.substr(0,1)}#</code>
+                                                </el-popover>
+                                            </span>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                            <el-footer  style="height:30px;line-height:30px;">
+                                #{ info.join(' &nbsp; | &nbsp;') }#
+                            </el-footer>
+                        </el-container>`,
             data(){
                 return {
-                    datatable: {
-                        dataset: [],
+                    dt: {
+                        rows: [],
                         columns: [],
-                        options: {
-                            info:true,
-                            pageing: false,
-                            scrollY: '148px',
-                            searching: false,
-                        }
+                        selected: [],
                     },
-                    result: []
+                    info: []
+                }
+            },
+            filters: {
+                pickType(key){
+                    let rtn = 'text';
+                    try{
+                        let type = _.find(this.dt.columns,{field:key}).type;
+                        if(type === 'text'){
+                            rtn = 'textarea';
+                        }
+                    } catch(err){
+                        rtn = 'input';
+                    }
+
+                    return rtn;
                 }
             },
             watch: {
-                model:{
+                dt:{
                     handler: function(val,oldVal){
-                        this.datatable.dataset = val.data;
+                        this.info = [];
+                        this.info.push(`共 ${val.rows.length} 项`);
+                        this.info.push(`已选择 ${val.selected.length} 项`);
+                        this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
                     },
                     deep:true
                 }
@@ -883,36 +1203,124 @@ class Omdb{
                 const self = this;
 
                 if(!_.isEmpty(self.model)) {
-                    self.datatable.dataset = self.model.data;
-                    self.datatable.columns = self.model.columns[_.keys(self.model.columns)[0]];
-                    self.result = self.model;
-                }
+                    self.dt.rows = self.model.data;
+                    self.dt.columns = _.map(self.model.columns[_.keys(self.model.columns)[0]],(v)=>{
+                        //  msg
+                        if(_.includes(['msg'],v.field)){
+                            return _.extend(v,{render: function(row, column, cellValue, index){
+                                        return  _.truncate(cellValue, {'length': 100});
+                                    }});
+                        }
 
+                        //  data & time render
+                        if(_.includes(['day'],v.field)){
+                            return _.extend(v,{render: function(row, column, cellValue, index){
+                                        return moment(cellValue).format("YYYY-MM-DD");
+                                    }});
+                        }
+
+                        if(_.includes(['vtime','mtime','ctime','stime','etime'],v.field)){
+                            return _.extend(v,{render: function(row, column, cellValue, index){
+                                        return moment(cellValue).format("YYYY-MM-DD HH:mm:ss.SSS");
+                                    }});
+                        }
+
+                        if(_.includes(['map','set','list'],v.type) || typeof(data) === 'object'){
+                            return _.extend(v,{render: function(row, column, cellValue, index){
+                                        if(_.isNull(cellValue) || _.isEmpty(cellValue)) {
+                                            return '';
+                                        } else{
+                                            return JSON.stringify(cellValue,null,2);
+                                        }
+                                    }});
+                        }
+
+                        return v;
+                    });
+                }
             },
-            mounted() {
-                const self = this;
-                self.init();
+            mounted(){
+                this.info.push(`共 ${this.dt.rows.length} 项`);
             },
             methods: {
-                init(){
+                rowClassName({row, rowIndex}){
+                    return `row-${rowIndex}`;
+                },
+                headerRender({ row, column, rowIndex, columnIndex }){
+                    if (rowIndex === 0) {
+                        return 'text-align:center;';
+                    }
+                },
+                rowDblclick(row, column, event){
+                    
+                },
+                onSelectionChange(val) {
+                    this.dt.selected = val;
+                },
+                onUpdate(row){
+                    let cx = { columns:_.map(this.dt.columns,(v)=>{ return { [v.field]:v.type }; }), row: row };
+                    //let rtn = fsHandler.callFsJScript("/matrix/omdb/dataUpdate.js",encodeURIComponent)
+                },
+                onDelete(){
                     const self = this;
-
-                    if(!_.isEmpty(self.model)) {
-                        self.datatable.dataset = self.result.data;//[_.keys(self.result.columns)[0]];
-                        self.datatable.columns = self.result.columns[_.keys(self.result.columns)[0]];
-                    } else {
-                        self.datatable.dataset = [];
-                        self.datatable.columns = [];
+                    
+                    if(_.isEmpty(self.dt.selected)) {
+                        self.$message({
+                            message: '请选择删除数据！',
+                            type: 'info'
+                        });
+                        return false;
                     }
 
+                    let ids = _.map(self.dt.selected,"id");
+
+                    alertify.confirm(`确定删除以下数据<br><br>${ids.join("<br><br>")}`, function (e) {
+                        if(e) {
+                            try{
+                                let rtn = fsHandler.callFsJScript("/matrix/omdb/dataDelete.js", encodeURIComponent(JSON.stringify(ids)));
+                                self.dt.rows = _.xor(self.dt.rows, self.dt.selected);
+                                self.dt.selected = [];
+                                self.$message({
+                                    message: '删除成功',
+                                    type: 'success'
+                                });
+                            }catch(err){
+                                
+                            }
+                        } else {
+                            
+                        }
+                    });
                 },
-                setData(event){
-                    const self = this;
+                onExport(type){
+                    
+                    let options = {
+                        csvEnclosure: '',
+                        csvSeparator: ', ',
+                        csvUseBOM: true,
+                        ignoreColumn: [0,1,2],
+                        fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                        type: type,
+                    };
 
-                    self.datatable.dataset = event.data;//[_.keys(event.columns)[0]] || [];
-                    self.datatable.columns = event.columns[_.keys(event.columns)[0]] || [];
-                    self.result = event;
-
+                    if(type === 'png'){
+                        //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                        $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                    } else if(type === 'pdf'){
+                        _.extend(options, {
+                            jspdf: {orientation: 'l',
+                                    format: 'a3',
+                                    margins: {left:10, right:10, top:20, bottom:20},
+                                    autotable: {styles: {fillColor: 'inherit', 
+                                                            textColor: 'inherit'},
+                                                tableWidth: 'auto'}
+                            }
+                        });
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    } else {
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    }
+                    
                 }
             }
         })
@@ -966,14 +1374,6 @@ class Omdb{
                         readOnly: false,
                     },
                     keys: []
-                }
-            },
-            watch: {
-                'main.tabs': {
-                    handler:function(val,oldVal){
-                        //let sizes = (localStorage.getItem(`OMDB-SPLIT-SIZES-${_.upperCase(this.id)}`)).split(",");
-                    },
-                    deep:true
                 }
             },
             created: function(){
@@ -1233,10 +1633,10 @@ class Omdb{
                 odb.app = new Vue({
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="calc(100vh - 140px);">
-                                    <el-aside :id="id+'-aside'" style="overflow:hidden;">
-                                        <el-container>
+                                    <el-aside :id="id+'-aside'" style="overflow:hidden;height:100%;">
+                                        <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
-                                                <h4 style="width:50%;font-size:12px;">
+                                                <h4 style="width:70%;font-size:12px;">
                                                     <i class="fas fa-cubes"></i> 对象管理 [${window.COMPANY_OSPACE}]
                                                 </h4>
                                                 <el-dropdown style="width: 50%;text-align: right;font-size:12px;">
@@ -1249,12 +1649,9 @@ class Omdb{
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </el-header>
-                                            <el-main style="padding:0px;height:80vh;border-top:1px solid #ffffff;">
+                                            <el-main style="padding:0px;height:calc(100vh - 108px);border-top:1px solid #ffffff;">
                                                 <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
                                             </el-main>
-                                            <el-footer style="height:30px;line-height:30px;padding:0 5px;">
-                                            ${window.SignedUser_UserName} | #{moment().format("LLL")}#
-                                            </el-footer>
                                         </el-container>
                                     </el-aside>
                                     <el-main :id="id+'-main'" style="padding:0px;">
@@ -1263,7 +1660,20 @@ class Omdb{
                                                 :key="item.name"
                                                 v-for="(item, index) in main.tabs"
                                                 :name="item.name">
-                                                <span slot="label">#{item.title}#</span>
+                                                <span slot="label">
+                                                    #{item.title}#
+                                                    <el-dropdown trigger="click">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="mainTabsClose(0,item)">关闭</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="mainTabsClose(1,item)">关闭其它标签页</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="mainTabsClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                </span>
+                                                
                                                 <omdb-query-console :id="id+'-query-'+item.name" :model="item.model" v-if="item.type=='omdb-query-console'" :ref="'omdbQueryConsoleRef-'+id+'-query-'+item.name"></omdb-query-console>
                                                 <omdb-trigger-console :id="id+'-trigger-'+item.name" :model="item.model" v-if="item.type=='omdb-trigger-console'"></omdb-trigger-console>
                                                 <omdb-class-console :id="id+'-class-'+item.name" :model="item.model" v-if="item.type=='omdb-class-console'"  :ref="'omdbClassRef-'+id+'-class-'+item.name""></omdb-class-console>
@@ -1300,6 +1710,23 @@ class Omdb{
                         },
                         mainTabsClick(tab, event) {
                             
+                        },
+                        mainTabsClose(key,tab){
+                            const self = this;
+
+                            if(key === 0){
+                                self.mainTabsRemove(tab.name);
+                            } else if( key === 1 ){
+                                let others = _.xor(self.main.tabs,[tab]);
+                                _.forEach(others,(v)=>{
+                                    self.mainTabsRemove(v.name);
+                                })
+                            } else {
+                                let others = self.main.tabs.slice(_.indexOf(self.main.tabs,tab) + 1, self.main.tabs.length);
+                                _.forEach(others,(v)=>{
+                                    self.mainTabsRemove(v.name);
+                                })
+                            }
                         },
                         mainTabsAdd(node){
                             const self = this;
@@ -1429,6 +1856,10 @@ class Omdb{
                                             this.model.limit = 0;
                                         }
                                         let rtn = omdbHandler.classDataExport(this.model);
+                                        this.$message({
+                                            type: "info",
+                                            message: "导出操作将提交至后台，请稍后。。。"
+                                        })
                                         if(rtn == 1){
                                             wnd.close();
                                         }
@@ -1491,6 +1922,10 @@ class Omdb{
                                     },
                                     onImport(){
                                         this.rtnInfo = JSON.parse(omdbHandler.classDataImport(this.fileList[0]));
+                                        this.$message({
+                                            type: "info",
+                                            message: "导入操作将提交至后台，请稍后。。。"
+                                        })
                                     },
                                     clearInfo(){
                                         this.rtnInfo = null;

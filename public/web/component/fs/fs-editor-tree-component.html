@@ -38,7 +38,7 @@
                 <el-input placeholder="搜索" size="mini"></el-input>
             </el-header>
             <el-main style="padding: 5px;height: calc(100vh - 175px);">
-                <ul class="ztree" :id="id"></ul>
+                <ul class="ztree" :id="id" style="overflow:hidden auto;"></ul>
             </el-main>
 		</el-container>
 	</template>
@@ -225,7 +225,7 @@
                                                     _type = v.ftype;
                                                 }
 
-                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+                                                return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type, size: v.size});
                                     });
 
                         // append sub nodesGr

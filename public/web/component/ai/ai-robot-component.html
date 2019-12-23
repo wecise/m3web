@@ -257,13 +257,32 @@
 			height: 60px;
 		}
 
+		.ai-robot-component .el-tabs--left .el-tabs__header.is-left {
+			background: #242c46;
+		}
+
+		.ai-robot-component .el-tabs--left .el-tabs__header.is-left .el-tabs__item.is-left {
+			color: #ffffff;
+		}
+
+		.ai-robot-component .el-tabs--left .el-tabs__header.is-left .el-tabs__item.is-left.is-active {
+			color: #2eb9fd;
+		}
+		.ai-robot-component .el-tabs--left .el-tabs__header.is-left .el-tabs__item.is-left.is-active:hover {
+			color: #f7f7f7;
+		}
+
+		.ai-robot-component .el-tabs--left .el-tabs__nav-wrap::after{
+			background:transparent;
+		}
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="ai-robot-component"  ----------*/
 	<template>		
 		<el-container>
-			<el-tabs :tab-position="tabs.position" v-model="tabs.activeName">
+			<el-tabs :tab-position="tabs.position" v-model="tabs.activeName" @tab-click="onClick">
 				<el-tab-pane name="robot-ai">
 					<span slot="label"><img src="/fs/assets/images/robot/png/robot.png?issys=true&type=download" class="image" style="width: 68px;"></span>
 					<ai-robot></ai-robot>
@@ -271,6 +290,11 @@
 				<el-tab-pane label="消息"  name="robot-message">
 					<ai-message></ai-message>
 				</el-tab-pane>
+
+				<el-tab-pane label="文件"  name="robot-files">
+					<ai-message></ai-message>
+				</el-tab-pane>
+
 				<el-tab-pane label="设置"  name="robot-setup">
 					<ai-setup></ai-setup>
 				</el-tab-pane>
@@ -303,7 +327,11 @@
 			
 		},
         methods: {
-            
+            onClick(tab){
+				if(tab.index == 2){
+					window.open("/janesware/files","_blank");
+				}
+			}
         }
 	
 	}

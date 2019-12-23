@@ -199,7 +199,7 @@
                     autoScrollEditorIntoView: true,
                     enableBasicAutocompletion: true,
                     enableSnippets: true,
-                    enableLiveAutocompletion: false
+                    enableLiveAutocompletion: true
                 });
                 //self.editor.$blockScrolling = Infinity;
                 self.editor.setShowPrintMargin(self.model.printMargin);
@@ -259,9 +259,16 @@
 	                },
                     {
                         name: "save",
-                        bindKey: {mac: "cmd-S", win: "ctrl-S"},
-                        exec: self.saveToFs
+                        bindKey: {
+                            mac: "cmd-S", 
+                            win: "ctrl-S",
+                            sender: 'editor|cli'
+                        },
+                        exec: function(env, args, request) {
+                            self.saveToFs();
+                        }
                     }
+                    
                 );
 
                 // init Theme

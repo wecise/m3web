@@ -107,7 +107,7 @@
     
             #list .bg-silver {
                 background: rgb(255, 255, 255) !important;
-                border: 1px solid rgb(221, 221, 221);
+                border: 1px solid #f6f6f6;
             }
     
             #list .widget-stats.bg-silver .stats-link a{
@@ -314,17 +314,21 @@
         /*----------  最外层element会自动增加组件同名 class="fs-view-component"  ----------*/
         <template>
             <el-container>
-                <el-header style="padding:0 5px;">
+                <el-header style="padding:0 10px;height:50px;line-heigh:50px;margin-bottom:10px;">
                     <el-row>
                         <el-col :span="24">
-                            <ul style="list-style: none;display:  flex;padding:0 8px;">
-                                <li style="padding:5px 0px;">
-                                    <a href="javascript:void(0);" @click="openIt(null,'/')" style="text-decoration:none;color:#333333;"><i class="fa fa-folder-o"></i> ${rootName} </a>
+                            <!-- <el-breadcrumb>
+                                <el-breadcrumb-item @click="openIt(null,'/')">${rootName}</el-breadcrumb-item>
+                                <el-breadcrumb-item @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" v-for="(item,index) in filePath">${item}</el-breadcrumb-item>
+                            </el-breadcrumb> -->
+                            <ul style="list-style: none;display: flex;padding:0px;height:20px;line-height:20px;">
+                                <li>
+                                    <el-button type="text" @click="openIt(null,'/')" icon="el-icon-s-home"> ${rootName} </el-button>
                                 </li>
                                 <li>
                                     <ol class="breadcrumb">
                                         <li v-for="(item,index) in filePath" >
-                                            <a href="javascript:void(0);" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" :title="_.slice(filePath,0,index+1).join('/')">${item}</a>
+                                            <el-button type="text" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))">${item}</el-button>               
                                         </li>
                                     </ol>
                                 </li>
@@ -334,106 +338,109 @@
                 
                     <el-row>
                         <el-col :span="24">
-                            <div class="btn-group" style="padding:0 11px;float:right;">
+                            <div style="padding:0px;text-align:right;height:30px;line-height:30px;width:100%;">
     
+                                <el-button-group style="margin-right:10px;">
+                                    <el-tooltip content="格子视图" placement="top">
+                                        <el-button type="text" @click="currentView='list-view'" icon="el-icon-picture">
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-tooltip content="列表视图" placement="top">
+                                        <el-button type="text" @click="currentView='grid-view'" icon="el-icon-s-grid">
+                                        </el-button>
+                                    </el-tooltip>
+                                    <el-tooltip content="表格视图" placement="top">
+                                        <el-button type="text" @click="currentView='table-view'" icon="el-icon-menu">
+                                        </el-button>
+                                    </el-tooltip>
+                                </el-button-group>
+
                                 <el-tooltip content="刷新" placement="top">
-                                    <a href="#" class="btn btn-link" @click="load();refreshTree();" title="刷新">
-                                        <i class="fas fa-sync-alt"></i>
-                                    </a>
+                                    <el-button type="text" @click="load();refreshTree();" icon="el-icon-refresh">
+                                    </el-button>
                                 </el-tooltip>
-    
+
                                 <el-tooltip content="排序" placement="top">
-                                    <a href="#" class="btn btn-link fs-order" title="排序">
-                                        <i class="fas fa-list-ol"></i>
-                                    </a>
+                                    <el-button type="text" class="fs-order" icon="el-icon-sort">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="新建目录" placement="top">
-                                    <a href="#" class="btn btn-link" @click="newDir" title="新建目录">
-                                        <i class="fas fa-folder-plus"></i>
-                                    </a>
+                                    <el-button type="text" @click="newDir" icon="el-icon-folder-add">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="新建文件" placement="top">
-                                    <a href="#" class="btn btn-link" @click="newFile" title="新建文件">
-                                        <i class="fas fa-file"></i>
-                                    </a>
+                                    <el-button type="text" @click="newFile" icon="el-icon-document-add">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="选择所有" placement="top">
-                                    <a href="#" class="btn btn-link" @click="selectAll" title="选择所有">
-                                        <i class="fas fa-check-square"></i>
-                                    </a>
+                                    <el-button type="text" @click="selectAll" icon="el-icon-document-checked">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="复制到" placement="top">
-                                    <a href="#" class="btn btn-link" @click="copyTo" title="复制到">
-                                        <i class="fas fa-copy"></i>
-                                    </a>
+                                    <el-button type="text" @click="copyTo" icon="el-icon-document-copy">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="移动到" placement="top">
-                                    <a href="#" class="btn btn-link" @click="moveTo" title="移动到">
-                                        <i class="fas fa-people-carry"></i>
-                                    </a>
+                                    <el-button type="text" @click="moveTo" icon="el-icon-shopping-cart-full">
+                                    </el-button>
                                 </el-tooltip>
                                 
                                 <!--el-tooltip content="复制" placement="top">
-                                    <a href="#" class="btn btn-link" @click="copyThem" title="复制">
+                                    <el-button type="text" @click="copyThem">
                                         <i class="fas fa-copy"></i>
-                                    </a>
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="粘贴到" placement="top">
-                                    <a href="#" class="btn btn-link" @click="pasteIt" title="粘贴到">
+                                    <el-button type="text" @click="pasteIt">
                                         <i class="fas fa-paste"></i>
-                                    </a>
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="移动到" placement="top">
-                                    <a href="#" class="btn btn-link" @click="moveIt" title="移动到">
+                                    <el-button type="text" @click="moveIt">
                                         <i class="fas fa-people-carry"></i>
-                                    </a>
+                                    </el-button>
                                 </el-tooltip-->
     
                                 <el-tooltip content="删除" placement="top">
-                                    <a href="#" class="btn btn-link" @click="deleteThem" title="删除">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <el-button type="text" @click="deleteThem" icon="el-icon-delete">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="上传文件" placement="top">
-                                    <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="上传文件" style="color:#16e216;">
-                                        <i class="fas fa-upload"></i>
+                                    <el-button type="text" class="fileinput-button" style="color:#16e216;" icon="el-icon-upload">
                                         <input id="file-upload" type="file" name="uploadfile" multiple>
-                                    </a>
+                                    </el-button>
                                 </el-tooltip>
-                                <!--<a href="#" class="btn btn-link" @click="downloadThem" title="下载文件，可选择多个文件">
+                                <!--<el-button type="text" @click="downloadThem">
                                     <i class="fas fa-download""></i>
-                                </a>-->
-                                <!-- <a href="#" class="btn btn-link" @click="toggleView('grid-view')" title="图标显示" data-tooltip="tooltip">
+                                </el-button>-->
+                                <!-- <el-button type="text" @click="toggleView('grid-view')">
                                     <i class="fas fa-th"></i>
-                                </a>
-                                <a href="#" class="btn btn-link" @click="toggleView('table-view')" title="列表显示" data-tooltip="tooltip">
+                                </el-button>
+                                <el-button type="text" @click="toggleView('table-view')">
                                     <i class="fas fa-bars"></i>
-                                </a> -->
+                                </el-button> -->
                                 <el-tooltip content="导出备份" placement="top">
-                                    <a href="#" class="btn btn-link" @click="exportIt(rootPath)" title="导出备份">
-                                        <i class="fas fa-cloud-download-alt""></i>
-                                    </a>
+                                    <el-button type="text" @click="exportIt(rootPath)" icon="el-icon-download">
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="导入恢复" placement="top">
-                                    <a href="javascript:void(0);" class="btn btn-link fileinput-button" title="导入恢复">
-                                        <i class="fas fa-cloud-upload-alt" style=""></i>
+                                    <el-button type="text" class="fileinput-button" icon="el-icon-upload2">
                                         <input type="file" name="loadfile" multiple @change="importIt">
-                                    </a>
+                                    </el-button>
                                 </el-tooltip>
     
                                 <el-tooltip content="版本同步" placement="top">
-                                    <a href="#" class="btn btn-link" @click="syncIt" title="版本同步">
-                                        <i class="fas fa-retweet""></i>
-                                    </a>
+                                    <el-button type="text" @click="syncIt" icon="el-icon-attract">
+                                    </el-button>
                                 </el-tooltip>
     
                             </div>
@@ -558,9 +565,12 @@
                             handler:function(val,oldVal){
                                 const me = this;
     
-                                let _tagify = $('input[name=tags]').data("tagify");
-    
-                                _tagify.removeAllTags.bind(_tagify);
+                                let tagify = $('input[name=tags]').data("tagify");
+                                
+                                if(tagify){
+                                    tagify.removeAllTags.bind(tagify);
+                                }
+                                
                                 me.init();
     
                             },
@@ -702,9 +712,11 @@
                           handler:function(val,oldVal){
                               const me = this;
     
-                              let _tagify = $('input[name=tags]').data("tagify");
-    
-                              _tagify.removeAllTags.bind(_tagify);
+                              let tagify = $('input[name=tags]').data("tagify");
+
+                              if(tagify){
+                                tagify.removeAllTags.bind(tagify);
+                              }
                               me.init();
     
                           },
@@ -825,18 +837,65 @@
                     props: {
                         model: Array
                     },
-                    template: `<fs-datatable-component id="files-list-datatable"
-                                                 :columns="datatable.columns"
-                                                 :dataset="datatable.dataset"
-                                                 :options="datatable.options"></fs-datatable-component>`,
-                    computed: {
-                        datatable: function(){
-    
-                            let _list = fsHandler.callFsJScript("/matrix/fs/fs_data.js", "").message;
-    
-                            _list.dataset =  this.model;
-    
-                            return _list;
+                    data(){
+                        return {
+                            dt:{
+                                rows: [],
+                                columns: []
+                            }
+                        }
+                    },
+                    template:   `<el-table style="width: 100%"
+                                    :data="model"
+                                    stripe>
+                                    <el-table-column type="selection" align="center"></el-table-column> 
+                                    <el-table-column
+                                        sortable 
+                                        show-overflow-tooltip
+                                        v-for="(item,index) in dt.columns"
+                                        :key="index"
+                                        :prop="item.field"
+                                        :label="item ? item.title : ''"
+                                        :width="item.width"
+                                        v-if="item.visible">
+                                            <template slot-scope="scope">
+                                                <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                    v-if="typeof item.render === 'function'">
+                                                </div>
+                                                <div v-else-if="item.field==='name'">
+                                                    <el-link type="info" :underline="false" @click.native.prevent="forward(scope.row)" >#{scope.row[item.field]}#</el-link>
+                                                </div>
+                                                <div v-else>
+                                                    #{scope.row[item.field]}#
+                                                </div>
+                                                
+                                            </template>
+                                    </el-table-column>
+                                </el-table>`,
+                    created(){
+                        let tmp = fsHandler.callFsJScript("/matrix/fs/fs_data.js", null).message.columns;
+                        _.extend(this.dt, {columns: _.map(tmp, function(v){
+                                    
+                            if(_.isUndefined(v.visible)){
+                                _.extend(v, { visible: true });
+                            }
+
+                            if(!v.render){
+                                return v;
+                            } else {
+                                return _.extend(v, { render: eval(v.render) });
+                            }
+                            
+                        })});
+                        
+                        _.extend(this.dt, { rows:this.model } );
+                    },
+                    methods:{
+                        forward(row){
+                            eventHub.$emit('FS-NODE-OPENIT-EVENT',row, row.parent+'/'+row.name)
+                        },  
+                        onCellClick(row,column,cell,event){
+
                         }
                     }
                 });
@@ -864,7 +923,6 @@
                     methods: {
                         setSrc(event) {
                             this.src = event;
-                            console.log(event)
                         }
                     }
                 })
@@ -894,7 +952,6 @@
                     watch: {
                         output: {
                             handler(val,oldVal){
-                                console.log(77,val)
                                 _.extend(this.model,{newInput: JSON.stringify(this.output, null, 2)});
                                 //eventHub.$on(`FS-EDITOR-RUN-EVENT-${this.id}`, this.setData)
                                 //this.setData(val);
@@ -937,6 +994,95 @@
     
                 })
                 
+                // 日志
+                Vue.component('fs-editor-log-console',{
+                    delimiters: ['${', '}'],
+                    props: {
+                        //规则名称
+                        id: String   
+                    },
+                    template:   `<el-container>
+                                    <el-header style="height:30px;line-height:30px;padding:5px 30px;">
+                                        <el-tooltip content="清空" open-delay="500">
+                                            <el-button type="text" @click="onReset"><i class="fas fa-trash"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="重新加载" open-delay="500">
+                                            <el-button type="text" @click="onLoad"><i class="fas fa-sync"></i></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-table :data="rows" style="width: 100%" max-height="200" stripe :default-sort="{prop: 'vtime', order: 'descending'}" 
+                                                :row-class-name="rowClassName"
+                                                :header-cell-style="headerRender"
+                                                @selection-change="handleSelectionChange">
+                                            <el-table-column type="selection" width="55"></el-table-column>                                                
+                                            <el-table-column :label="item.title" 
+                                                            :prop="item.data" 
+                                                            v-for="(item,index) in columns" 
+                                                            :formatter="item.render" 
+                                                            sortable 
+                                                            :width="item.width"
+                                                            v-if="item.visible">
+                                            </el-table-column>
+                                            <!--el-table-column align="right">
+                                                <template slot="header" slot-scope="scope">
+                                                    <el-input size="mini" placeholder="输入关键字搜索"/>
+                                                </template>
+                                            </el-table-column-->
+                                        </el-table>
+                                    </el-main>
+                                </el-container>`,
+                    data(){
+                        return {
+                            rows: [],
+                            columns: [],
+                            selectedRows: [],
+                            ifDeleteVersionData: false
+                        }
+                    },
+                    created(){
+                        let rtn = fsHandler.callFsJScript("/matrix/fs/log-by-name.js", encodeURIComponent(this.id)).message;
+                        this.rows = rtn.rows;
+                        this.columns = _.map(rtn.columns,function(v){
+                                            if(v.render){
+                                                v.render = eval(v.render);
+                                            }
+                                            return v;
+                                        });
+                        
+                        // 更新DataTable
+                        eventHub.$on("FS-LOG-UPDATE-EVENT",()=>{
+                            let rtn = fsHandler.callFsJScript("/matrix/config/fs-by-name.js", encodeURIComponent(this.id)).message;
+                            this.rows = rtn.rows;
+                        })
+                    },
+                    methods:{
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onReset(){
+                            let item = {class:"/matrix/consolelog/scriptjs", ids: _.map(this.selectedRows,'id').join("', '"), ifDeleteVersionData: self.ifDeleteVersionData}
+                            let act = fsHandler.callFsJScript("/matrix/fs/action-by-delete.js",encodeURIComponent(JSON.stringify(item))).message;
+                            _.delay(()=>{
+                                let rtn = fsHandler.callFsJScript("/matrix/fs/log-by-name.js", encodeURIComponent(this.id)).message;
+                                this.rows = rtn.rows;
+                            })
+                        },
+                        onLoad(){
+                            let rtn = fsHandler.callFsJScript("/matrix/fs/log-by-name.js", encodeURIComponent(this.id)).message;
+                            this.rows = rtn.rows;
+                        },
+                        handleSelectionChange(val) {
+                            this.selectedRows = val;
+                        }
+                    }
+                })
+
                 Vue.component("fs-editor-view",{
                     props:{
                         id: String,
@@ -952,7 +1098,7 @@
                                     <el-footer :id="'fs-editor-view-footer-'+id" style="background-color:#ddd;overflow:hidden;padding:0px;height:200px;">
                                         <el-tabs value="result" type="border-card" style="height:100%;">
                                             <el-tab-pane label="日志" name="log" style="height:100%;">
-                                                
+                                                <fs-editor-log-console :id="item.fullname" v-if="!_.isEmpty(item)"></fs-editor-log-console> 
                                             </el-tab-pane>
                                             <el-tab-pane label="预览" name="result" style="height:100%;overflow:auto;padding-top: 1px;">
                                                 <fs-editor-view-by-html :id="'output-'+id" :output="model.fs.output" v-if="item.ftype=='html'" style="height:100%;"></fs-editor-view-by-html>
@@ -976,7 +1122,6 @@
                     watch: {
                         item: {
                             handler(val,oldVal){
-                                console.log(66,val)
                                 _.extend(this.model,{fs: val, mode: this.mode()});
                             },
                             deep: true,
@@ -1140,7 +1285,6 @@
     
                     // 排他事件
                     $('*[data-edit="true"]').click(function(e) {
-                        console.log(e)
                         //e.preventDefault();
                         e.stopPropagation();
                     });
@@ -1154,7 +1298,7 @@
                 initContextMenu(){
                     const self = this
     
-                    $.contextMenu({
+                    $.contextMenu("destroy").contextMenu({
                         selector: '.list-context-menu',
                         trigger: 'left',
                         build: function($trigger, e) {
@@ -1750,12 +1894,12 @@
                     const self = this
     
                     // 临时解决view刷新问题 & destroy editable
-                    self.currentView = "";
+                    //self.currentView = "";
     
                     _.delay(function(){
     
                         // 临时解决view刷新问题
-                        self.currentView = self.defaultView;
+                        //self.currentView = self.defaultView;
     
                         // 重置选择
                         self.selectedItem = [];
@@ -2187,69 +2331,75 @@
                     let wnd = maxWindow.winDeployApp( `<i class="fab fa-codepen"></i> 应用发布`, `<div id="fs-app-deploy"></div>`, null, 'content');
     
                     let form = {
-                        el: "#fs-app-deploy",
-                        template:`<div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane active" id="fs-deploy-home" style="padding:15px;">
-                                        <form class="form-horizontal">
-                                          <div class="form-group">
-                                            <label class="col-sm-2 control-label">应用名称</label>
-                                            <div class="col-sm-10">
-                                              <input type="text" class="form-control" placeholder="" v-model="app.cnname" required autofocus>
-                                            </div>
-                                          </div>
-                                          <div class="form-group">
-                                            <label class="col-sm-2 control-label">英文名称</label>
-                                            <div class="col-sm-10">
-                                              <input type="text" class="form-control" placeholder="" v-model="app.enname" required>
-                                            </div>
-                                          </div>
-                                          <div class="form-group">
-                                            <label class="col-sm-2 control-label">图标</label>
-                                            <div class="col-sm-10">
-                                                <a href="#fs-deploy-icon-list" aria-controls="fs-deploy-icon-list" role="tab" data-toggle="tab">
-                                                    <img class="media-object" :src="app.icon.value" style="width:48px;height:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);" >
-                                                </a>
-                                            </div>
-                                          </div>
-                                          <div class="form-group">
-                                            <div class="col-sm-offset-2 col-sm-10">
-                                              <a class="btn btn-sm btn-primary" @click="deploy">发布</a>
-                                              <a class="btn btn-sm btn-default" @click="cancel">取消</a>
-                                            </div>
-                                          </div>
-                                        </form>
-                                    </div>
-                                    <div role="tabpanel" class="tab-pane" id="fs-deploy-icon-list" style="padding:10px;">
-                                        <div class="row">
-                                          <div class="col-md-12" style="display: list-item;height: 35vh;overflow: auto;">
-                                            <ul>
-                                                <li v-for="icon in app.icon.list" style="width: 68px;height: 68px;padding: 0px;">
-                                                    <a href="#" class="thumbnail" style="border:none;height:100%;" @click="triggerInput(icon.id)">
-                                                      <img class="media-object" :src="icon | pickIcon" style="max-width: 34px;min-width: 34px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
-                                                      <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value" >
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                          </div>
-                                        </div>
-                                        <div class="row" style="margin-top:15px;">
-                                            <div class="col-md-12" style="text-align:center;">
-                                                <a class="btn btn-sm btn-default" href="#fs-deploy-home" aria-controls="fs-deploy-home" role="tab" data-toggle="tab">返回</a></li>
-                                            </div>
-                                        </div>
-                                    </div>
-    
-                                </div>`,
+                        delimiters: ['#{', '}#'],
+                        template:   `<el-container><el-main><el-tabs v-model="activeName" ref="tabs">
+                                        <el-tab-pane label="应用发布" name="app">
+                                            <el-container style="height:100%;">
+                                                <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                                    <el-form ref="form" :model="app" label-width="80px">
+                                                        <el-form-item label="中文名">
+                                                            <el-input v-model="app.cnname"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item label="英文名称">
+                                                            <el-input v-model="app.enname"></el-input>
+                                                        </el-form-item>
+                                                        <el-form-item label="图标选择">
+                                                            <el-button type="text" @click="activeName='icon'">
+                                                                <el-avatar shape="square" fit="fill" size="64" :src="app.icon.value"></el-avatar>
+                                                            </el-button>
+                                                        </el-form-item>
+                                                        <el-form-item label="Target">
+                                                            <el-radio-group v-model="app.target">
+                                                                <el-radio label="_blank">打开新窗口</el-radio>
+                                                                <el-radio label="_parent">当前窗口打开</el-radio>
+                                                            </el-radio-group>
+                                                        </el-form-item>
+                                                        <el-form-item label="分组">
+                                                            <el-radio-group v-model="app.groups.group">
+                                                                #{app.groups.group}#
+                                                                <el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+                                                            </el-radio-group>
+                                                        </el-form-item>
+                                                    </el-form> 
+                                                </el-main>
+                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                    <el-button type="primary" @click="deploy">发布</el-button>
+                                                    <el-button type="defult" @click="cancel">取消</el-button>
+                                                </el-footer>
+                                            </el-container>
+                                        </el-tab-pane>
+                                        <el-tab-pane label="" name="icon">
+                                            <el-container style="height:100%;">
+                                                <el-main style="height:100%;overflow:auto;padding:10px 0px;">
+                                                    <el-radio-group v-model="app.icon.value">
+                                                        <el-radio :label="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="app.icon.value"  v-for="icon in app.icon.list">
+                                                            <el-avatar shape="square" fit="contain" size="64" :src="icon | pickIcon"></el-avatar>    
+                                                        </el-radio>
+                                                    </el-radio-group>
+                                                </el-main>
+                                                <el-footer style="height:30px;line-height:30px;text-align:center;">
+                                                    <el-button type="text" @click="activeName='app'">返回</el-button>  
+                                                </el-footer>
+                                            </el-container>
+                                        </el-tab-pane>
+                                    </el-tabs></el-main></el-container>`,
                         data: {
+                            activeName: "app",
+                            model: null,
                             app: {
                                 cnname: _.head(item.name.split(".")),
-                                enname: _.head(item.name.split(".")),
+								enname: _.head(item.name.split(".")),
                                 seat: _.random(100, 10000),
+                                url: "",
+								icon: "",
+								target: "_blank",
+								selected: 1,
+                                groups: {"group":"application"},
                                 url: `/fs${[item.parent, item.name].join("/")}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,
                                 icon: {
                                     value: '',
                                     list: []
-                                }
+                                }                                
                             }
                         },
                         filters:{
@@ -2264,19 +2414,23 @@
                                 me.app.icon.value = `${window.ASSETS_ICON}/apps/png/creative.png?type=download&issys=${window.SignedUser_IsAdmin}`;
     
                                 me.init();
+
+                                _.delay(()=>{
+                                    me.hideHeader();
+                                },500)
+                                
                             })
                         },
                         methods: {
                             init: function(){
                                 const me = this;
-    
+                                me.model = fsHandler.callFsJScript("/matrix/apps/appList.js",null).message;
                                 me.app.icon.list = fsHandler.fsList(`${window.ASSETS_ICON}/apps/png`);
     
                             },
-                            triggerInput: function(id){
+                            hideHeader(){
                                 const me = this;
-    
-                                $(me.$refs[id]).click()
+                                me.$refs.tabs.$children[0].$el.style.display = 'none';
                             },
                             deploy: function(){
                                 const me = this;
@@ -2284,43 +2438,73 @@
                                 let check = fsHandler.callFsJScript("/matrix/apps/app_exist_check.js",encodeURIComponent(JSON.stringify(me.app.cnname))).message;;
     
                                 if(check==1){
-                                    alertify.log("应用已经发布，请确认。")
+                                    me.$message({
+                                        message:"应用已经发布，请确认。",
+                                        type: "info"
+                                    });
                                     return false;
                                 }
-    
-                                let app = {
-                                    cnname: me.app.cnname,
-                                    enname: me.app.enname,
-                                    icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,''),
-                                    seat: me.app.seat,
-                                    url: me.app.url
-                                };
-    
-                                let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+
+                                _.extend(me.app,{
+                                                    icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,'')
+                                                });
+
+                                let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(me.app)));
                                 if( _.lowerCase(rtn.status) == "ok"){
-                                    alertify.success("应用发布成功");
+                                    self.$message({
+                                        type: "info",
+                                        message: "应用发布成功"
+                                    });
+                                    
                                     eventHub.$emit("APP-REFRESH-EVENT");
-    
+
                                     $("ul.nav").find("li>a[title='应用']").popover({
                                         container: "body",
                                         title: "",
                                         content: `${me.app.cnname} 应用发布成功！`
                                     }).popover('show');
-    
+
                                     _.delay(function(){
                                         $("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
                                     },8000)
-    
-    
+
                                     wnd.close();
+
                                 }
+    
+                                // let app = {
+                                //     cnname: me.app.cnname,
+                                //     enname: me.app.enname,
+                                //     icon: me.app.icon.value.replace(/\/fs\/assets\/images\/apps\/png\//,'').replace(/\?type=download&issys=true/,''),
+                                //     seat: me.app.seat,
+                                //     url: me.app.url
+                                // };
+    
+                                // let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(app)));
+                                // if( _.lowerCase(rtn.status) == "ok"){
+                                //     alertify.success("应用发布成功");
+                                //     eventHub.$emit("APP-REFRESH-EVENT");
+    
+                                //     $("ul.nav").find("li>a[title='应用']").popover({
+                                //         container: "body",
+                                //         title: "",
+                                //         content: `${me.app.cnname} 应用发布成功！`
+                                //     }).popover('show');
+    
+                                //     _.delay(function(){
+                                //         $("ul.nav").find("li>a[data-original-title='应用']").popover('destroy');
+                                //     },8000)
+    
+    
+                                //     wnd.close();
+                                // }
                             },
                             cancel:function(){
                                 wnd.close();
                             }
                         }
                     };
-                    new Vue(form);
+                    new Vue(form).$mount("#fs-app-deploy");
     
                 },
                 editIt(node){
@@ -2401,7 +2585,7 @@
                                                 </el-header>
                                                 <el-container style="height: 100%;min-height:300px;border-top:1px solid #fff;">
                                                     <el-aside id="fs-editor-left" style="background-color:#f6f6f6;width:200px;overflow:hidden;">
-                                                        <devops-tree-component :root="tree.root" :defaultExpandedKeys="[tabs.activeNode.fullname]"></devops-tree-component>
+                                                        <devops-tree-component :root="tree.root" :defaultExpandedKeys="[tabs.activeNode.fullname]" v-if="!_.isEmpty(tabs.activeNode)"></devops-tree-component>
                                                     </el-aside>
                                                     <el-main style="padding:0px;overflow:hidden;" id="fs-editor-main">
                                                         <el-tabs v-model="tabs.activeIndex" type="border-card" 
@@ -2414,7 +2598,25 @@
                                                                 :label="item.title"
                                                                 :name="item.name"
                                                                 style="height:100%;">
-                                                                <span slot="label"><i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.title}#</span>
+                                                                <span slot="label">
+                                                                    <i class="fas fa-code" style="color:rgb(64, 158, 255);"></i> #{item.title}#
+                                                                    <el-dropdown trigger="click">
+                                                                        <span class="el-dropdown-link">
+                                                                            <i class="el-icon-arrow-down"></i>
+                                                                        </span>
+                                                                        <el-dropdown-menu slot="dropdown">
+                                                                            <el-dropdown-item @click.native="tabClose(0,item)">关闭</el-dropdown-item>
+                                                                            <el-dropdown-item @click.native="tabClose(1,item)">关闭其它标签页</el-dropdown-item>
+                                                                            <el-dropdown-item @click.native="tabClose(2,item)">关闭右侧标签页</el-dropdown-item>
+                                                                            <el-dropdown-item divided>
+                                                                                <p style="margin:0px;">所在目录：#{item.model.parent}#</p>
+                                                                                <p style="margin:0px;">文件类型：#{item.model.ftype}#</p>
+                                                                                <p style="margin:0px;">文件大小：#{mx.bytesToSize(item.model.size)}#</p>
+                                                                                <p style="margin:0px;">创建时间：#{moment(item.model.vtime).format("LLL")}#</p>
+                                                                            </el-dropdown-item>
+                                                                        </el-dropdown-menu>
+                                                                    </el-dropdown>
+                                                                </span>
                                                                 <fs-editor-view :id="item.name" :item="item.model"></fs-editor-view>
                                                             </el-tab-pane>
                                                         </el-tabs>
@@ -2453,7 +2655,25 @@
                                     },50)
                                 },
                                 methods: {
+                                    tabClose(key,tab){
+                                        const self = this;
+
+                                        if(key === 0){
+                                            self.tabRemove(tab.name);
+                                        } else if( key === 1 ){
+                                            let others = _.xor(self.tabs.list,[tab]);
+                                            _.forEach(others,(v)=>{
+                                                self.tabRemove(v.name);
+                                            })
+                                        } else {
+                                            let others = self.tabs.list.slice(_.indexOf(self.tabs.list,tab) + 1, self.tabs.list.length);
+                                            _.forEach(others,(v)=>{
+                                                self.tabRemove(v.name);
+                                            })
+                                        }
+                                    },
                                     tabAdd(item){
+                                        console.log(2,item)
                                         try {
                                             let pID = objectHash.sha1([item.parent,item.name].join("/"));
                                             
@@ -2518,7 +2738,9 @@
                                         let editor = ace.edit('editor-'+this.tabs.activeIndex);
                                         let rtn = fsHandler.fsContent(node.parent,node.name);
 
-                                        editor.setValue(rtn);
+                                        if(editor){
+                                            editor.setValue(rtn);
+                                        }
                                     },
                                     onUndo(){
                                         let editor = ace.edit('editor-'+this.tabs.activeIndex);
@@ -2548,8 +2770,10 @@
                                     },
                                     onRemove(){
                                         let editor = ace.edit('editor-'+this.tabs.activeIndex);
-                                        editor.setValue();
-                                        this.$message("已清空");
+                                        if(editor){
+                                            editor.setValue();
+                                            this.$message("已清空");
+                                        }
                                     },
                                     onSave(){
                                         let me = this;
@@ -2559,8 +2783,6 @@
                                         if(_.isEmpty(editor.getValue())){
                                             return false;
                                         }
-
-                                        console.log(123,this.tabs.activeNode.parent, this.tabs.activeNode.name,sc);
 
                                         // save
                                         let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
@@ -2581,8 +2803,6 @@
                                         if(_.isEmpty(editor.getValue())){
                                             return false;
                                         }
-
-                                        console.log(123,this.tabs.activeNode.parent, this.tabs.activeNode.name,sc);
 
                                         // save
                                         let sRtn = fsHandler.fsNew(this.tabs.activeNode.ftype, this.tabs.activeNode.parent, this.tabs.activeNode.name, sc, _.attempt(JSON.parse.bind(null, this.tabs.activeNode.attr)));
@@ -2611,12 +2831,12 @@
                                                 try {
                                                     let rtn = fsHandler.callFsJScript([this.tabs.activeNode.parent, this.tabs.activeNode.name].join("/").replace(/\/script/g, ""), '');
                                                     _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:rtn});
-                                                    console.log(223,this.tabs.activeNode.fullname,_.find(this.tabs.list,{name:this.tabs.activeIndex}).model)
+                                                    
                                                     //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, rtn);
                                                 } catch(err) {
                                                     //eventHub.$emit(`FS-EDITOR-RUN-EVENT-${this.tabs.activeIndex}`, err);
                                                     _.extend(_.find(this.tabs.list,{name:this.tabs.activeIndex}).model, {output:err});
-                                                    console.log(323,this.tabs.activeNode.fullname,_.find(this.tabs.list,{name:this.tabs.activeIndex}).model)
+                                                    
                                                 }
                                             }
                                         },500)
@@ -2945,6 +3165,10 @@
                     alertify.confirm(`确认要导出 ${path} 目录下的所有文件?`, function (e) {
                         if (e) {
                             fsHandler.fsZip(path);
+                            self.$message({
+                                type: "info",
+                                message: "导出操作将提交至后台，请稍后。。。"
+                            })
                         } else {
                             
                         }
@@ -2962,7 +3186,12 @@
                                         文件大小：${mx.bytesToSize(file.size)}`, function (e) {
                         if (e) {
                             let rtn = fsHandler.fsUnZip(self.rootPath, file);
-    
+
+                            self.$message({
+                                type: "info",
+                                message: "导入操作将提交至后台，请稍后。。。"
+                            })
+
                             if(rtn == 1){
                                 self.load();
                             }

@@ -25,6 +25,259 @@ class Topological {
     init() {
         const inst = this;
 
+        // Table组件 单选
+        Vue.component("el-table-component",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model: Object,
+                expandColumn: Boolean
+            },
+            data(){
+                return {
+                    dt:{
+                        rows:[],
+                        columns: [],
+                        selected: []
+                    },
+                    info: []
+                }
+            },
+            watch: {
+                model: {
+                    handler(val,oldVal){
+                        this.initData();
+                    },
+                    deep:true,
+                    immediate:true
+                },
+                dt: {
+                    handler(val,oldVal){
+                        this.info = [];
+                        this.info.push(`共 ${this.dt.rows.length} 项`);
+                        this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                        this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                    },
+                    deep:true,
+                    immediate:true
+                }
+            },
+            template:   `<el-container style="height:100%;">
+                            <el-header style="height:30px;line-height:30px;">
+                                <el-tooltip content="删除" open-delay="500" placement="top">
+                                    <el-button type="text" icon="el-icon-notebook-2"></el-button>
+                                </el-tooltip>
+                                <el-tooltip content="导出" delay-time="500">
+                                    <el-dropdown @command="onExport">
+                                        <span class="el-dropdown-link">
+                                            <i class="el-icon-download el-icon--right"></i>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                            <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                            <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                            <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                            <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                            <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </el-tooltip>
+                            </el-header>   
+                            <el-main style="padding:0px;">
+                                <el-table
+                                    :data="dt.rows"
+                                    highlight-current-row="true"
+                                    style="width: 100%"
+                                    :row-class-name="rowClassName"
+                                    :header-cell-style="headerRender"
+                                    @row-dblclick="onRowDblclick"
+                                    @row-contextmenu="onRowContextmenu"
+                                    @selection-change="onSelectionChange"
+                                    @current-change="onCurrentChange"
+                                    ref="table">
+                                    <!--el-table-column type="selection" align="center"></el-table-column--> 
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                            <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                <el-form-item v-for="v,k in props.row" :label="k">
+                                                    <el-input v-model="v"></el-input>
+                                                </el-form-item>
+                                            </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        sortable 
+                                        show-overflow-tooltip
+                                        v-for="(item,index) in dt.columns"
+                                        :key="index"
+                                        :prop="item.field"
+                                        :label="item ? item.title : ''"
+                                        :width="item.width"
+                                        v-if="item.visible">
+                                            <template slot-scope="scope">
+                                                <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                    v-if="typeof item.render === 'function'">
+                                                </div>
+                                                <div v-else>
+                                                    #{scope.row[item.field]}#
+                                                </div>
+                                            </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-main>
+                            <el-footer  style="height:30px;line-height:30px;">
+                                #{ info.join(' &nbsp; | &nbsp;') }#
+                            </el-footer>
+                        </el-container>`,
+            mounted(){
+
+            },
+            directives: {
+                'table': function (el, binding) {
+                  if (binding.value) {
+                    el.focus()
+                  }
+                }
+            },
+            methods: {
+                initData(){
+                    const self = this;
+                    
+                    let init = function(){
+                        
+                        _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+                            
+                            if(_.isUndefined(v.visible)){
+                                _.extend(v, { visible: true });
+                            }
+
+                            if(!v.render){
+                                return v;
+                            } else {
+                                return _.extend(v, { render: eval(v.render) });
+                            }
+                            
+                        })});
+
+                        _.extend(self.dt, {rows: self.model.rows});
+                    };
+
+                    _.delay(()=>{
+                        init();
+                    },1000)
+                    
+                },
+                rowClassName({row, rowIndex}){
+                    return `row-${rowIndex}`;
+                },
+                headerRender({ row, column, rowIndex, columnIndex }){
+                    if (rowIndex === 0) {
+                        //return 'text-align:center;';
+                    }
+                },
+                onSelectionChange(val) {
+                    this.dt.selected = [val];
+                },
+                onCurrentChange(val){
+                    this.dt.selected = [val];
+                },
+                onRowContextmenu(row, column, event){
+                    const self = this;
+                    
+                    $.contextMenu( 'destroy' ).contextMenu({
+                        selector: `.${column.id}`,
+                        trigger: "right",
+                        autoHide: true,
+                        delay: 5,
+                        hideOnSecondTrigger: true,
+                        className: `animated slideIn ${column.id}`,
+                        build: function($trigger, e) {
+            
+                            return {
+                                callback: function(key, opt) {
+                                    
+                                    if(_.includes(key,'diagnosis')) {
+                                        self.$root.detailAdd(row);
+                                    } else if(_.includes(key,'action')) {
+                                        // 增加操作类型
+                                        let action = _.last(key.split("_"));
+                                        self.$root.action({list: [row], action:action});
+                                    } else if(_.includes(key,'ticket')){
+                                        alertify.confirm(`确定生成工单<br><br>
+                                                            告警ID：${row.id}<br><br>
+                                                            实体ID：${row.entity}<br><br>
+                                                            模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                            告警摘要：${row.msg}<br><br>
+                                                            告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                            if (e) {
+                                                try{
+                                                    let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                    if(rtn.data.success == 1){
+                                                        self.options.term = row.id;
+                                                        self.$refs.searchRef.search();
+                                                        alertify.success(`创建工单成功! <br><br>
+                                                                    工单单号：${rtn.data.ticket_number}`)
+                                                    }
+                                                }catch(err){
+                                                    alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                    ${rtn}<br><br>
+                                                                    ${err}`)
+                                                }
+                                            } else {
+                                                
+                                            }
+                                        });
+                                    }
+                                },
+                                items: self.$root.model.message.contextMenu.event
+                            }
+                        },
+                        events: {
+                            show(opt) {
+        
+                                let $this = this;
+                                _.delay(()=>{
+                                    new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                },50)
+                            }
+                        }
+                    });
+                },
+                onRowDblclick(row, column, event){
+                    
+                },
+                onExport(type){
+            
+                    let options = {
+                        csvEnclosure: '',
+                        csvSeparator: ', ',
+                        csvUseBOM: true,
+                        ignoreColumn: [0,1],
+                        fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                        type: type,
+                    };
+
+                    if(type === 'png'){
+                        //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                        $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                    } else if(type === 'pdf'){
+                        _.extend(options, {
+                            jspdf: {orientation: 'l',
+                                    format: 'a3',
+                                    margins: {left:10, right:10, top:20, bottom:20},
+                                    autotable: {styles: {fillColor: 'inherit', 
+                                                            textColor: 'inherit'},
+                                                tableWidth: 'auto'}
+                            }
+                        });
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    } else {
+                        $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                    }
+                    
+                }
+            }
+        })
+
         // 拓扑分析输入组件
         Vue.component("topological-analysis-input",{
             delimiters: ['#{', '}#'],
@@ -1163,40 +1416,18 @@ class Topological {
 
         })
 
-
-        VueLoader.onloaded(["ai-robot-component",
-                            "topological-graph-component",
-                            "omdb-path-datatables-component",
-                            "event-datatable-component",
-                            "event-diagnosis-datatable-component",
-                            "event-summary-component",
-                            "search-preset-component",
-                            "search-base-component",
-                            "entity-tree-component"],function() {
-            $(function() {
-
-                
-
-            })
-        })
-    }
-
-    // 图挂载
-    mount(el){
-        const inst = this;
-        
         // 拓扑分析图 局部组件
-        let graphViewContainer = Vue.extend({
+        Vue.component("graph-view-container",{
             delimiters: ['${', '}'],
             props: {
-                id: String
+                
             },
             data(){
                 return {
                     model: null
                 }
             },
-            template: `<topological-graph-component :id="id" :graphData="model" ref="graphViewContainerInst"></topological-graph-component>`,
+            template: `<topological-graph-component :graphData="model" ref="graphViewContainerInst"></topological-graph-component>`,
             mounted() {
                 
             },
@@ -1223,10 +1454,10 @@ class Topological {
         })
 
         // 拓扑分析节点信息 局部组件
-        let graphViewDiagnosis = Vue.extend({
+        Vue.component("graph-view-diagnosis",{
             delimiters: ['#{', '}#'],
             props: {
-                id: String
+                
             },
             template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="diagnosisRemove">
                             <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
@@ -1235,7 +1466,7 @@ class Topological {
                                         
                                         <profile-view :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></profile-view>
                                         
-                                        <event-diagnosis-datatable-component :id="it.name" :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></event-diagnosis-datatable-component>
+                                        <el-table-component :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></el-table-component>
                                         
                                         <diagnosis-base-table :model="it.model[it.type]" v-if=" _.includes(['element'],it.type) "></diagnosis-base-table>
 
@@ -1359,16 +1590,16 @@ class Topological {
         })
 
         // 节点关系维护 局部组件
-        let graphViewEdges = Vue.extend({
+        Vue.component("graph-view-edges",{
             delimiters: ['#{', '}#'],
             props: {
-                id: String,
+                
             },
             template:   `<el-tabs v-model="activeIndex" type="board-card" closable @tab-remove="edgesTabRemove" class="topological-view-edges-tabs">
                             <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
                                 <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
                                     <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
-                                        <edges-maintain :id="id+'-maintain'" :parent="node" :type="it.type" :model="it.model"></edges-maintain>    
+                                        <edges-maintain :parent="node" :type="it.type" :model="it.model"></edges-maintain>    
                                     </el-tab-pane>
                                 </el-tabs>
                             </el-tab-pane>
@@ -1465,21 +1696,41 @@ class Topological {
                 }
             }
         })
+
+        VueLoader.onloaded(["ai-robot-component",
+                            "topological-graph-component",
+                            "omdb-path-datatables-component",
+                            "event-datatable-component",
+                            "event-diagnosis-datatable-component",
+                            "event-summary-component",
+                            "search-preset-component",
+                            "search-base-component",
+                            "entity-tree-component"],function() {
+            $(function() {
+
+            
+            })
+        })
+    }
+
+    // 图挂载
+    mount(el){
+        const inst = this;
         
         let randomId = objectHash.sha1(el + _.now());
 
-        let component =  {
+        let main =  {
             delimiters: ['${', '}'],
             template: `<el-container style="background: transparent;height: 100%;">
                             <el-aside :id="'topological-view-left-'+id" style="background-color:transparent;" class="topological-view-edges">
                                 <!--graph-view-nav :id="'graph-view-nav-'+id"></graph-view-nav-->
-                                <graph-view-edges :id="'graph-view-edges-'+id" ref="graphEdgesRef"></graph-view-edges>
+                                <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :id="'topological-view-main-'+id">
-                                <graph-view-container :id="'graph-view-'+id" ref="graphViewRef"></graph-view-container>
+                                <graph-view-container ref="graphViewRef"></graph-view-container>
                             </el-container>
                             <el-aside :id="'topological-view-right-'+id" style="height:calc(100vh - 30px);overflow:hidden;background-color:transparent;" class="topological-view-diagnosis">
-                                <graph-view-diagnosis :id="'graph-diagnosis-'+id" ref="graphDiagnosisRef"></graph-view-diagnosis>
+                                <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
             data: {
@@ -1490,11 +1741,6 @@ class Topological {
                     ports: [],
                     list: []
                 }
-            },
-            components:{
-                'graph-view-diagnosis': graphViewDiagnosis,
-                'graph-view-container': graphViewContainer,
-                'graph-view-edges': graphViewEdges
             },
             created(){
                 
@@ -1687,7 +1933,7 @@ class Topological {
                             window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).show();
                         }
                     } catch(err){
-                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, `#graph-view-${this.id}-container`, callbackFun);
+                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, $(this.$refs.graphViewRef.$el).find("main"), callbackFun);
                     
                         new Vue({
                             delimiters: ['#{', '}#'],
@@ -1706,9 +1952,9 @@ class Topological {
                 contextMenu(){
                     const self = this;
 
-                    $.contextMenu({
+                    $.contextMenu("destroy").contextMenu({
                         //selector: `#graph-view-${self.id} svg g`,
-                        selector: `#graph-view-${self.id} svg g image,#graph-view-${self.id} svg g path`,
+                        selector: `svg g image,svg g path`,
                         trigger: 'left',
                         autoHide: true,
                         delay: 10,
@@ -1827,7 +2073,7 @@ class Topological {
         
         // mount
         _.delay(() => {
-            this.app = new Vue(component).$mount(el);
+            this.app = new Vue(main).$mount(el);
         },50)
 
     }

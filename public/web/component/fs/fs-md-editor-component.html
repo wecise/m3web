@@ -198,8 +198,14 @@
 
                 self.editor.commands.addCommand({
                     name: "save",
-                    exec: self.saveIt,
-                    bindKey: { win: "ctrl-s", mac: "cmd-s" }
+                    bindKey: {
+                        mac: "cmd-S", 
+                        win: "ctrl-S",
+                        sender: 'editor|cli'
+                    },
+                    exec: function(env, args, request) {
+                        self.saveIt();
+                    }
                 });
 
                 /*ToolBar*/

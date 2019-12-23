@@ -34,6 +34,181 @@ class Performance extends Matrix {
                             "search-base-component"],function() {
             $(function() {
 
+
+                // Table组件
+                Vue.component("el-table-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onToggle"><i class="fas fa-tags"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                            <el-button type="text" @click="onAction(item)"><i :class="mx.global.register.event.status[item][2]"></i></el-button>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main class="animated fadeIn" style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowDblclick"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @selection-change="onSelectionChange">
+                                            <el-table-column type="selection" align="center"></el-table-column> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column :prop="item.field" 
+                                                :label="item.title" 
+                                                sortable 
+                                                show-overflow-tooltip
+                                                :formatter="item.render" 
+                                                v-for="item in dt.columns"
+                                                :width="item.width"
+                                                :align="item.align"
+                                                v-if="item.visible">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+
+                            try{
+                                self.dt.rows = self.model.rows;
+                                self.dt.columns = _.map(self.model.template, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(_.isUndefined(v.align)){
+                                        _.extend(v, { align: "right" });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })
+                                
+                            }catch(err){
+                                
+                            } finally{
+                                
+                            }
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = val;
+                        },
+                        onAction(evt){
+                            this.$root.action( {list: this.dt.selected, action:evt});
+                        },
+                        onToggle(){
+                            this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+                            
+                            $.contextMenu({
+                                selector: "tr",
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } 
+                                        },
+                                        items: self.model.contextMenu.performance
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onRowDblclick(row, column, event){
+                            
+                        }
+                    }
+                })
+
                 Vue.component('performance-history-chart', {
                     template: `<div :id="id" style="width:100%;height:280px;"></div>`,
                     props:{
@@ -513,8 +688,94 @@ class Performance extends Matrix {
                 })
                 
                 let main = {
-                    delimiters: ['${', '}'],
-                    template: "#app-template",
+                    delimiters: ['#{', '}#'],
+                    template:   `<main id="content" class="content">
+                                    <el-container>
+                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                            <search-base-component :id="model.id"
+                                                                :options="options"
+                                                                ref="searchRef"
+                                                                class="grid-content"></search-base-component>
+                                        </el-header>
+                                        <el-main id="performance-view-container" style="padding: 5px 0px 0px 0px;">
+                                            <el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
+                                                <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name"  lazy=true>
+                                                    <div v-if="item.type==='main'">
+                                                        <div class="performance-view-summary-control">
+                                                            <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifRefresh"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryByRefresh">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                    <el-switch
+                                                                        v-model="control.ifSmart"
+                                                                        active-color="#13ce66"
+                                                                        inactive-color="#dddddd"
+                                                                        active-value="1"
+                                                                        inactive-value="0"
+                                                                        @change="toggleSummaryBySmart">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                        </div>
+                            
+                                                        <el-container id="performance-view-summary">
+                                                            <el-main>
+                                                                <el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
+                                                                    <el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+                                                                        <div v-if="item.type=='radar'">
+                                                                            <performance-view-radar id="event-radar" :model='model.message'></performance-view-radar>
+                                                                        </div>
+                                                                        <div v-if="item.type=='gauge'">
+                                                                            <performance-gauge id="performance-view-gauge" :model="model.message"></performance-gauge>
+                                                                        </div>
+                                                                    </el-tab-pane>
+                                                                </el-tabs>
+                                                            </el-main>
+                                                        </el-container>
+                                                        <el-container id="performance-view-console">
+                                                            <el-aside class="tree-view" id="performance-view-left" style="background-color:#f6f6f6;">
+                                                                <entity-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></entity-tree-component>
+                                                            </el-aside>
+                                                            <el-main class="table-view" id="performance-view-main" style="padding:5px;">
+                                                                <el-table-component :model="model.message"></el-table-component>
+                                                            </el-main>
+                                                        </el-container>
+                                                    </div>
+                                                    <div v-if="item.type==='diagnosis'">
+                                                        <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggle" lazy="true">
+                                                            <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name" lazy=true>
+                                                                <div v-if="it.type==='detail'">
+                                                                    <performance-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></performance-diagnosis-detail>
+                                                                </div>
+                                                                <div v-else-if="it.type==='history'">
+                                                                    <performance-diagnosis-history :id="it.name+ '-history'" :model="it.model.history"></performance-diagnosis-history>
+                                                                </div>
+                                                                <div v-else-if="it.type==='journal'">
+                                                                    <performance-diagnosis-journal :id="it.name+ '-journal'" :model="it.model.journal"></performance-diagnosis-journal>
+                                                                </div>
+                                                                <div v-else-if="it.type==='topological'">
+                                                                    <performance-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></performance-diagnosis-topological>
+                                                                </div>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                    </div>
+                                                </tab>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>
+                                </main>`,
                     data: {
                         // 布局
                         layout:{
@@ -555,7 +816,7 @@ class Performance extends Matrix {
                             // 搜索窗口
                             name:"所有", value: "",
                             // 输入
-                            term: "top 500",
+                            term: "top 100",
                             // 指定类
                             class: "#/matrix/devops/performance/:",
                             // 指定api
@@ -642,6 +903,11 @@ class Performance extends Matrix {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        'display': 'none'
+                                    }
+                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',

@@ -27,7 +27,7 @@ class CompanyHandler{
             url: '/companys',
             dataType: 'json',
             type: 'POST',
-            async: false,
+            async: true,
             contentType: 'application/json',
             data: JSON.stringify(event),
             beforeSend: function (xhr) {
@@ -146,7 +146,7 @@ class CompanyHandler{
             url: `/companys/${name}`,
             dataType: 'json',
             type: 'DELETE',
-            async: false,
+            async: true,
             beforeSend: function (xhr) {
                 Pace.restart();
             },
@@ -165,7 +165,6 @@ class CompanyHandler{
             error: function (xhr, textStatus, errorThrown) {
                 rtn = 0;
                 alertify.error("失败" + " " + xhr.responseJSON.error);
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
             }
 
         })

@@ -412,8 +412,6 @@
 <script src="{{AppSubUrl}}/web/js/model/Entity.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
-
-
 <script>
 	$(function() {
 		_.delay(function(){
@@ -421,102 +419,6 @@
 			mxEntity.init();
 		},500)
 	})
-</script>
-
-<script type="text/x-template" id="app-template">
-	<el-container>
-		<el-header style="height: 30px;line-height: 30px;padding: 0px;">
-			<search-base-component :id="model.id"
-									:options="options"
-									ref="searchRef"
-									class="grid-content"></search-base-component>
-		</el-header>			
-		<el-main id="entity-view-container" style="padding: 5px 0px 0px 0px;">
-			<el-tabs v-model="layout.main.activeIndex" type="border-card" closable @tab-remove="detailRemove">
-				<el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" style="padding:0px;">
-					<div v-if="item.type==='main'">
-						<div class="entity-view-summary-control">
-							<el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-								<div>
-									${control.ifSmart==1?'智能分析':'智能分析'}
-									<el-switch
-									v-model="control.ifSmart"
-									active-color="#13ce66"
-									inactive-color="#dddddd"
-									active-value="1"
-									inactive-value="0"
-									@change="toggleSummaryBySmart">
-									</el-switch>
-								</div>
-							</el-tooltip>
-							<el-tooltip :content="control.ifGraph==1?'实体图谱启用中':'实体图谱关闭中'" placement="top" open-delay="500">
-									<div>
-										${control.ifGraph==1?'实体图谱':'实体图谱'}
-										<el-switch
-										v-model="control.ifGraph"
-										active-color="#13ce66"
-										inactive-color="#dddddd"
-										active-value="1"
-										inactive-value="0"
-										@change="toggleSummaryByGraph">
-										</el-switch>
-									</div>
-								</el-tooltip>
-						</div>
-						
-						<el-container id="entity-view-summary">
-							<el-main>
-								<el-tabs v-model="layout.summary.activeIndex" type="border">
-									<el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-										<div v-if="item.type=='radar'">
-											<entity-view-radar id="event-radar" :model='model.message'></entity-view-radar>
-										</div>
-										<div v-if="item.type=='pie'">
-											<entity-view-pie id="event-pie" :model='model.message'></entity-view-pie>
-										</div>
-									</el-tab-pane>
-								</el-tabs>
-							</el-main>
-						</el-container>
-						
-						<el-container id="entity-view-console">
-							<el-aside class="tree-view" id="entity-view-left" style="background-color:#f6f6f6;">
-								<entity-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></entity-tree-component>
-							</el-aside>
-							<el-main class="table-view" id="entity-view-main" style="padding:5px;">
-								<entity-datatable-component id="entity-list" :model="model.message"></entity-datatable-component>		
-							</el-main>
-						</el-container>
-						
-					</div>
-					<div v-if="item.type==='diagnosis'">
-						<el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
-							<el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
-								<div v-if="it.type==='base'">
-									<entity-diagnosis-base :id="it.name+ '-base'" :model="it.model.detail"></entity-diagnosis-base>
-								</div>
-								<div v-else-if="it.type==='manager'">
-									<entity-diagnosis-manager :id="it.name+ '-manager'" :model="it.model.detail"></entity-diagnosis-manager>
-								</div>
-								<div v-else-if="it.type==='config'">
-									<entity-diagnosis-config :id="it.name+ '-config'" :model="it.model.detail"></entity-diagnosis-config>
-								</div>
-								<div v-else-if="it.type==='compare'">
-									<entity-diagnosis-compare :id="it.name+ '-compare'" :model="it.model"></entity-diagnosis-compare>
-								</div>
-								<div v-else-if="it.type==='topological'">
-									<entity-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></entity-diagnosis-topological>
-								</div>
-							</el-tab-pane>
-						</el-tabs>
-					</div>
-					<div v-else-if="item.type==='graph'" style="padding-top: 1px;margin: 0px -1px;">
-						<entity-view-graph id="entity-view-graph" :model="model.message"></entity-view-graph>
-					</div>
-				</tab>
-			</el-tabs>
-		</el-main>
-	</el-container>
 </script>
 
 {{template "base/footer" .}}

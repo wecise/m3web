@@ -33,16 +33,16 @@
 
 	<!-- Bootstrap core CSS -->
 	<link href="{{AppSubUrl}}/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
-	<link href="{{AppSubUrl}}/web/css/dist/css/theme_wecise.css" rel="stylesheet">
+	<!-- <link href="{{AppSubUrl}}/web/css/dist/css/theme_wecise.css" rel="stylesheet"> -->
 	<script src="{{AppSubUrl}}/web/css/dist/js/bootstrap.min.js"></script>
 
 	<!--VUE Core JS-->
-	<script src="{{AppSubUrl}}/web/vendor/vue/2.6.8/dist/vue.min.js"></script>
+	<script src="{{AppSubUrl}}/web/vendor/vue/2.6.10/dist/vue.min.js"></script>
 	<script src="{{AppSubUrl}}/web/vendor/vueloader/vue.loader.min.js"></script>
 
 	<!-- Element -->
-	<script src="{{AppSubUrl}}/web/vendor/element/2.12.0/dist/index.js"></script>
-	<link href="{{AppSubUrl}}/web/vendor/element/2.12.0/dist/theme-chalk/index.css" type="text/css" rel="stylesheet" />
+	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/index.js"></script>
+	<link href="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/theme-chalk/index.css" type="text/css" rel="stylesheet" />
 	
 
 	<!-- Color Theme core CSS -->
@@ -51,12 +51,12 @@
 	<link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">	
 
 	<!-- Bootstrap Select JS & CSS -->
-	<link href="{{AppSubUrl}}/web/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
-	<script src="{{AppSubUrl}}/web/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+	<!-- <link href="{{AppSubUrl}}/web/vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+	<script src="{{AppSubUrl}}/web/vendor/bootstrap-select/dist/js/bootstrap-select.min.js"></script> -->
 	
 	<!-- bootstrap-tagsinput core CSS -->
-	<link rel="stylesheet" href="{{AppSubUrl}}/web/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.css">
-	<script src="{{AppSubUrl}}/web/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.js"></script>
+	<!-- <link rel="stylesheet" href="{{AppSubUrl}}/web/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.css">
+	<script src="{{AppSubUrl}}/web/vendor/bootstrap-tagsinput/dist/bootstrap-tagsinput.js"></script> -->
 
 	<!--lodash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/lodash/dist/lodash.min.js"></script>
@@ -100,9 +100,9 @@
 	<script src="{{AppSubUrl}}/web/vendor/object-hash/dist/object_hash.js"></script>
 
 	<!-- Golden-layout CSS & JS-->
-	<script src="{{AppSubUrl}}/web/vendor/golden-layout/dist/goldenlayout.min.js" type="text/javascript"></script>
+	<!-- <script src="{{AppSubUrl}}/web/vendor/golden-layout/dist/goldenlayout.min.js" type="text/javascript"></script>
 	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-base.css" type="text/css" rel="stylesheet" />
-	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" type="text/css" rel="stylesheet" />
+	<link href="{{AppSubUrl}}/web/vendor/golden-layout/src/css/goldenlayout-light-theme.css" type="text/css" rel="stylesheet" /> -->
 
 	<!--Alertify JS & CSS -->
 	<script src="{{AppSubUrl}}/web/vendor/alertifyjs/lib/alertify.js" type="text/javascript"></script>
@@ -116,7 +116,7 @@
 	<link href="{{AppSubUrl}}/web/vendor/tagify/dist/tagify.css" rel="stylesheet" />
 
 	<!-- D3 JS -->
-	<script src="{{AppSubUrl}}/web/vendor/d3/d3.min.js"></script>
+	<!-- <script src="{{AppSubUrl}}/web/vendor/d3/d3.min.js"></script> -->
 
 	<script>
 		try{
@@ -139,8 +139,6 @@
 	</script>
 
 	<!-- App JS-->
-	<script src="{{AppSubUrl}}/web/js/cfg.js" type="text/javascript"></script>
-	<script src="{{AppSubUrl}}/web/js/app.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/ContextMenu.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/Matrix.js" type="text/javascript"></script>
 	<script src="{{AppSubUrl}}/web/js/model/SideBar.js" type="text/javascript"></script>
@@ -168,19 +166,8 @@
     <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.ui.position.js"></script>
     <script src="{{AppSubUrl}}/web/vendor/jquery-contextmenu/dist/jquery.contextMenu.js"></script>
 
-	<!--Gauge JS-->
-	<script src="{{AppSubUrl}}/web/vendor/gauge/gauge.min.js"></script>
-
 	<!--Clipboard JS-->
 	<script src="{{AppSubUrl}}/web/vendor/clipboard/dist/clipboard.min.js"></script>
-
-	<!-- Vis JS -->
-	<script src="{{AppSubUrl}}/web/vendor/vis/dist/vis.js"></script>
-	<link href="{{AppSubUrl}}/web/vendor/vis/dist/vis.css" rel="stylesheet" type="text/css" />
-
-	<!-- Bootstrap-Wizard JS -->
-	<script src="{{AppSubUrl}}/web/vendor/bootstrap-wizard/js/bwizard.js"></script>
-	<link href="{{AppSubUrl}}/web/vendor/bootstrap-wizard/css/bwizard.min.css" rel="stylesheet" type="text/css" />
 
 	<!-- DataTables JS & CSS -->
 	<link href="{{AppSubUrl}}/web/vendor/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" >
@@ -199,6 +186,15 @@
 
 	<link href="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.css" rel="stylesheet" type="text/css" />
 	<script src="{{AppSubUrl}}/web/vendor/DataTables/dataTables.checkboxes.min.js"></script>
+	<!-- Table Export -->
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/FileSaver/FileSaver.min.js"></script>
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/js-xlsx/xlsx.core.min.js"></script>
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/jsPDF/jspdf.min.js"></script>
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+	<!-- For IE support include es6-promise before html2canvas -->
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/es6-promise/es6-promise.auto.min.js"></script>
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/libs/html2canvas/html2canvas.min.js"></script>
+	<script type="text/javascript" src="{{AppSubUrl}}/web/vendor/tableExport/tableExport.min.js"></script>
 
 	<!--jszip Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/jszip/dist/jszip.min.js"></script>

@@ -56,8 +56,8 @@
                         </el-button>
                     </el-tooltip>
                     <el-switch v-model="selected.disable"
-                            active-color="#13ce66"
-                            inactive-color="#dddddd"
+                            inactive-color="#13ce66"
+                            active-color="#dddddd"
                             active-value="true"
                             inactive-value="false"
                             @change="changeStatus"
@@ -164,8 +164,14 @@
 
                 self.editor.commands.addCommand({
                     name: "save",
-                    exec: self.save,
-                    bindKey: { win: "ctrl-s", mac: "cmd-s" }
+                    bindKey: {
+                        mac: "cmd-S", 
+                        win: "ctrl-S",
+                        sender: 'editor|cli'
+                    },
+                    exec: function(env, args, request) {
+                        self.save();
+                    }
                 });
 
                 // init Theme

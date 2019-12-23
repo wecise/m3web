@@ -36,6 +36,746 @@ class Event {
                             "search-base-component"],function() {
             $(function() {
 
+                // EventList Table组件
+                Vue.component("event-eventlist-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="运行模式切换" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                            <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出" delay-time="500">
+                                            <el-dropdown @command="onExport">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-download el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                                    <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                                    <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                                    <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                                    <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                                    <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowContextmenu"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @row-click="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            ref="table">
+                                            <el-table-column type="selection" align="center"></el-table-column> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column :prop="item.field" 
+                                                :label="item.title" 
+                                                sortable 
+                                                show-overflow-tooltip
+                                                :formatter="item.render" 
+                                                v-for="item in dt.columns"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.template, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                                    
+                            };
+
+                            if(self.model && $("table",self.$el).is(':visible')){
+                                init();
+                            } else {
+                                setTimeout(init,50);
+                            }
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = val;
+                        },
+                        onAction(evt){
+                            if(_.isEmpty(this.dt.selected)){
+                                this.$message({
+                                    type: "info",
+                                    message: "请选择事件！"
+                                });
+                                return false;
+                            }
+
+                            this.$root.action( {list: this.dt.selected, action:evt});
+                        },
+                        onToggle(){
+                            this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.model.contextMenu.event
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
+                // Table组件 单选
+                Vue.component("el-table-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object,
+                        expandColumn: Boolean
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container style="height:100%;">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="删除" open-delay="500" placement="top">
+                                            <el-button type="text" icon="el-icon-notebook-2"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出" delay-time="500">
+                                            <el-dropdown @command="onExport">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-download el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                                    <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                                    <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                                    <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                                    <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                                    <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowDblclick"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            @current-change="onCurrentChange"
+                                            ref="table">
+                                            <!--el-table-column type="selection" align="center"></el-table-column--> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                sortable 
+                                                show-overflow-tooltip
+                                                v-for="(item,index) in dt.columns"
+                                                :key="index"
+                                                :prop="item.field"
+                                                :label="item ? item.title : ''"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                                    <template slot-scope="scope">
+                                                        <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                            v-if="typeof item.render === 'function'">
+                                                        </div>
+                                                        <div v-else>
+                                                            #{scope.row[item.field]}#
+                                                        </div>
+                                                    </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    directives: {
+                        'table': function (el, binding) {
+                          if (binding.value) {
+                            el.focus()
+                          }
+                        }
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                            };
+
+                            _.delay(()=>{
+                                init();
+                            },1000)
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = [val];
+                        },
+                        onCurrentChange(val){
+                            this.dt.selected = [val];
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+                            
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.$root.model.message.contextMenu.event
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onRowDblclick(row, column, event){
+                            
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
+                // Table组件 多选
+                Vue.component("el-table-multiselect-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container style="height:100%;">
+                                    <el-header style="height:30px;line-height:30px;">
+                                        <el-tooltip content="删除" open-delay="500" placement="top">
+                                            <el-button type="text" icon="el-icon-notebook-2"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="导出" delay-time="500">
+                                            <el-dropdown @command="onExport">
+                                                <span class="el-dropdown-link">
+                                                    <i class="el-icon-download el-icon--right"></i>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="csv">CSV</el-dropdown-item>
+                                                    <el-dropdown-item command="json">JSON</el-dropdown-item>
+                                                    <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
+                                                    <el-dropdown-item command="png">PNG</el-dropdown-item>
+                                                    <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
+                                                    <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
+                                    </el-header>   
+                                    <el-main style="padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            ref="table"
+                                            stripe="true">
+                                            <el-table-column type="selection" align="center"></el-table-column> 
+                                            <!--el-table-column type="expand" v-show="expandColumn">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column-->
+                                            <el-table-column
+                                                sortable 
+                                                show-overflow-tooltip
+                                                v-for="(item,index) in dt.columns"
+                                                :key="index"
+                                                :prop="item.field"
+                                                :label="item ? item.title : ''"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                                    <template slot-scope="scope">
+                                                        <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                            v-if="typeof item.render === 'function'">
+                                                        </div>
+                                                        <div v-else>
+                                                            #{scope.row[item.field]}#
+                                                        </div>
+                                                    </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                            };
+
+                            _.delay(()=>{
+                                init();
+                            },1000)
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = val;
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+                            
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.$root.model.message.contextMenu.event
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
                 // 告警轨迹
                 Vue.component("event-diagnosis-journal",{
                     delimiters: ['#{', '}#'],
@@ -43,7 +783,7 @@ class Event {
                         id: String,
                         model: Object
                     },
-                    template:   `<el-container style="height: calc(100vh - 200px);">
+                    template:   `<el-container style="height: calc(100vh - 180px);">
                                     <el-main>
                                         <div class="block">
                                             <el-timeline>
@@ -80,10 +820,9 @@ class Event {
                 })
 
                 // 告警雷达
-                Vue.component("event-view-radar",{
+                Vue.component("event-view-facet",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
                     data(){
@@ -126,7 +865,7 @@ class Event {
                     methods: {
                         initData(){
                             
-                            this.progress = _.map(this.model.summary.radar,function(v,k){
+                            this.progress = _.map(this.model.summary.facet,function(v,k){
                                 let className = k.split("_")[0];
                                 let title = k.split("_")[1];
                                 let sum = _.sum(_.map(v,function(s){return s[1];}));
@@ -277,7 +1016,7 @@ class Event {
                         id: String,
                         model:String
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 180px);">
                                     <el-main>
                                         <form class="form-horizontal">
                                             <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
@@ -407,7 +1146,6 @@ class Event {
                 Vue.component("event-diagnosis-history",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
                     data(){
@@ -415,78 +1153,31 @@ class Event {
                             
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-main style="padding:0px;">
-                                        <event-diagnosis-datatable-component :id="id" :model="model" type="event"></event-diagnosis-datatable-component>
+                                        <el-table-component :model="model" expandColumn="true"></el-table-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
-                        const self = this;
+                        
                     },
                     methods: {
-                        init(){    
-                            const self = this;
-
-                        }
+                        
                     }
                 })
 
-                // 智能分组 grid
+                // 智能分组 grid [deserted]
                 Vue.component("event-view-aigroup-grid",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
-                    data(){
-                        return {
-                            tableData: null,
-                        }
-                    },
-                    watch: {
-                        model(val,oldVal){
-                            this.initData();
-                        }
-                    },
-                    template:`<event-diagnosis-datatable-component :id="id" :model="tableData" type="event"></event-diagnosis-datatable-component>`,
+                    template:`<el-table-component :model="model" expandColumn="true"></el-table-component>`,
                     mounted(){
-                        // 默认维度关联事件
-                        this.tableData = {
-                            rows: this.$root.$data.model.message.rows,
-                            columns: this.$root.$data.model.message.columns[this.$root.$data.model.message.rootclass],
-                            options: this.$root.$data.model.message.options
-                        };
-                        this.initData();
+                        
                     },
                     methods: {
-                        initData(){
-                            const self = this;
-                            let event = this.model;
-
-                            if(event.length < 1) {
-                                self.tableData = null;
-                                return false;
-                            }
-
-                            try{
-                                let temp = _.map(event,function(v){
-                                    // MQL
-                                    //return `${v.title}='${v.data}'`;
-                                    // SEARCH
-                                    return `${v.title}=${v.data}`;
-                                })
-
-                                // 获取相应维度的关联事件  eg: biz='查账系统'
-                                // MQL
-                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
-                                // SEARCH
-                                let where = _.map(event,'ids').join(";");//`biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
-                            } catch(err){
-                                self.tableData = null;
-                            }
-                            
-                        }
+                        
                     }
                 })
 
@@ -494,13 +1185,12 @@ class Event {
                 Vue.component("event-view-aigroup-graph",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object,
                     },
                     data(){
                         return {
+                            id: objectHash.sha1(_.now()),
                             rId: _.now(),
-                            tableData: null,
                             topological: null
                         }
                     },
@@ -510,37 +1200,29 @@ class Event {
                             handler: function(val,oldVal){
                                 this.initData();
                             },
+                            deep:true,
                             immediate:true
                         }
                     },
                     methods: {
                         initData(){
-                            const self = this;
                             
-                            if(this.model.length < 1) {
-                                self.tableData = null;
+                            if(!this.model) {
                                 return false;
                             }
 
                             try {
                                 
-                                // 获取相应维度的关联事件  eg: biz='查账系统'
-                                // MQL
-                                // let where = temp.join(` ${self.aiGroupData.ifOR=='1'?'and':'or'} `);
-                                // SEARCH
-                                let where = _.map(this.model,'ids').join(";");//`biz=matrix`;
-                                self.tableData = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message.event;
-
                                 if(!this.topological){
                                     this.topological = new Topological();
                                     this.topological.init();
                                     this.topological.graphScript = [
-                                        {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`}
+                                        {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`}
                                     ];
-                                    this.topological.mount(`#topological-app-${self.id}-${self.rId}`);
+                                    this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
 
                                 } else {
-                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.tableData.rows,'entity').join('","')}") - [*1] -> ()`} ];
+                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`} ];
                                     this.topological.search(this.topological.graphScript[0].value);
                                 }
 
@@ -549,7 +1231,7 @@ class Event {
                                 },5000)
 
                             } catch(err){
-                                self.tableData = null;
+                                
                             }
                             
                         }
@@ -568,22 +1250,11 @@ class Event {
                     },
                     data(){
                         return {
-                            aiGroupData: {
+                            dt: {
                                 rows: [],
                                 columns: [],
-                                options: {
-                                    searching: false,
-                                    aDataSort: true,
-                                    bSort: true,
-                                    bAutoWidth: true,
-                                    info: false,
-                                    paging:         false,
-                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-                                    select: {
-                                        style: 'single',
-                                    }
-                                },
                                 selected: [],
+                                modelByGroup: null
                             },
                             split:{
                                 inst: null
@@ -593,109 +1264,72 @@ class Event {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 155px);padding:1px;">
+                    template: `<el-container style="height: calc(100vh - 150px);padding:1px;">
                                     <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
+                                                <el-table-component :model="dt" ref="groups" expandColumn="false"></el-table-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
-                                        <el-header style="height:36px;line-height:36px;background: #f6f6f6;display:;">
+                                        <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
                                             <el-tooltip :content="control.ifGraph==0?'列表':'图'" placement="top" open-delay="500">
                                                 <div style="float:right;">
-                                                    #{control.ifGraph==0?'列表':'图'}#
+                                                    
                                                     <el-switch
                                                     v-model="control.ifGraph"
                                                     active-color="#13ce66"
-                                                    inactive-color="#dddddd"
+                                                    inactive-color="#409EFF"
                                                     active-value="0"
                                                     inactive-value="1"
+                                                    active-text="列表"
+                                                    inactive-text="图"
                                                     @change="toggleView">
                                                     </el-switch>
                                                 </div>
                                             </el-tooltip>
                                         </el-header>
-                                        <el-main style="padding:0px;">
-                                            <el-tabs v-model="control.ifGraph">
-                                                <el-tab-pane label="" name="0">
-                                                    <event-view-aigroup-grid :id="id + '-grid'" :model="aiGroupData.selected" ></event-view-aigroup-grid>
+                                        <el-main style="padding:0px;height:100%;">
+                                            <el-tabs v-model="control.ifGraph" style="height:100%;">
+                                                <el-tab-pane label="" name="0" lazy="true" style="height:100%;">
+                                                    <event-view-aigroup-grid :model="dt.modelByGroup" expandColumn="true"></event-view-aigroup-grid>
                                                 </el-tab-pane>
-                                                <el-tab-pane label="" name="1">
-                                                    <event-view-aigroup-graph :id="id + '-graph'" :model="aiGroupData.selected" ></event-view-aigroup-graph>
+                                                <el-tab-pane label="" name="1" lazy="true" style="height:100%;">
+                                                    <event-view-aigroup-graph :model="dt.modelByGroup" ></event-view-aigroup-grap>
                                                 </el-tab-pane>
                                             </el-tabs>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
+                    watch: {
+                        'dt.selected':function(val,oldVal){
+                            this.getEventByGroup();
+                        }  
+                    },
                     created(){
                         const self = this;
 
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        let aiGroup = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
-                        self.aiGroupData.rows = aiGroup.rows;
-                        self.aiGroupData.columns = [
-                                                        {data:'type',title:'',sortable:true, width:'5',render: function(data,type,row){
-                                                                return data==1?'<i class="fas fa-font"></i>':'<i class="fab fa-medium-m"></i>';
-                                                            }
-                                                        },
-                                                        {data:'group',title:'分组名称',sortable:true},
-                                                        {data:'app',title:'影响应用系统'},
-                                                        {data:'severity',title:'告警级别统计', render:function(data,type,row){
-                                                            return `<a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[5][2]}">${data[0]}</a>
-                                                                    <a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[4][2]}">${data[1]}</a>
-                                                                    <a href="javascript:void(0);" class="btn btn-link" style="max-width:30px;min-width:30px;padding: 2px 4px;background:${mx.global.register.event.severity[3][2]}">${data[2]}</a>`;
-                                                        }},
-                                                        {data:'ids',title:'IDS', visible: false}
-                                            ];
+                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
+                        self.dt.rows = rtn.rows;
+                        self.dt.columns = rtn.columns;
                     },
                     mounted(){
-                        const self = this;
-                        
-                        self.init();
+                        this.init();
+                        this.$watch(
+                            "$refs.groups.dt.selected",(val, oldVal) => {
+                                this.dt.selected = val;
+                            }
+                        );
                     },
                     methods: {
                         init(){    
-                            const self = this;
-
-                            //初始化维度选择Table
-                            var table = $(`#${self.id}-table`).DataTable(_.extend(
-                                                                        self.aiGroupData.options,{
-                                                                            data: self.aiGroupData.rows,
-                                                                            columns: self.aiGroupData.columns
-                                                                        }));
-                            
-                            $(`#${self.id}-table tbody`).on( 'click', 'tr', function () {
-                                if ( $(this).hasClass('selected') ) {
-                                    $(this).removeClass('selected');
-                                }
-                                else {
-                                    table.$('tr.selected').removeClass('selected');
-                                    $(this).addClass('selected');
-                                }
-                            } );                                    
-
-                            table.on( 'select', function ( e, dt, type, indexes ) {
-                                self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
-                                //self.handlerFetchData(self.aiGroupData.selected);
-                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
-                                self.aiGroupData.selected = table.rows( '.selected' ).data().toArray();
-                                //self.handlerFetchData(self.aiGroupData.selected);
-                            } );
-
-                            $(self.$el).find('td').css("white-space","normal");
-                            
-                            self.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
-                                sizes: [35, 65],
+                            this.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
+                                sizes: [38, 62],
                                 minSize: [0, 0],
                                 gutterSize: 5,
-                                gutterStyle: function(dimension, gutterSize) {
-                                    return {
-                                        'display': 'none'
-                                    }
-                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
@@ -703,17 +1337,31 @@ class Event {
                             });
 
                             // 默认选择第一行
-                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
-                            self.aiGroupData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
-                            //self.handlerFetchData(self.aiGroupData.selected);
+                            _.delay(()=>{
+                                //this.$refs.groups.$refs.table.toggleRowSelection(this.$refs.groups.dt.rows[0],true);
+                                this.$refs.groups.$refs.table.setCurrentRow(this.$refs.groups.dt.rows[0]);
+                            },1000)
+                            
 
                             // 隐藏tabs header
                             $(".el-tabs > .el-tabs__header",this.$el).css({
                                 "display":"none"
                             });
+                            $(".el-tabs > .el-tabs__content",this.$el).css({
+                                "height":"100%"
+                            });
                         },
                         toggleView(event){
                             this.control.ifGraph = event;
+                        },
+                        getEventByGroup(){
+                            try{
+                                // SEARCH
+                                let where = this.dt.selected[0].ids;//_.map(this.dt.selected,'ids').join(";");
+                                this.dt.modelByGroup = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message;
+                            } catch(err){
+                                this.dt.modelByGroup = null;
+                            }
                         }
                     }
                 })
@@ -722,141 +1370,103 @@ class Event {
                 Vue.component("event-diagnosis-dimension",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
                     data(){
                         return {
-                            dimensionData: {
+                            dt: {
                                 rows: [],
                                 columns: [],
-                                options: {
-                                    searching: false,
-                                    aDataSort: false,
-                                    bSort: false,
-                                    bAutoWidth: true,
-                                    info: false,
-                                    paging:         false,
-                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-                                    stateSave: false,
-                                    keys:  true,
-                                    select: {
-                                        style: 'multi',
-                                    }
-                                },
                                 selected: [],
                                 ifOR: '1'
                             },
-                            tableData: {},
+                            modelByDimension: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" id="left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height: 30px;
-                                                                padding: 5px 10px;
                                                                 float: right;
-                                                                line-height: 20px;">
+                                                                line-height: 30px;">
                                                 当前告警
                                                 <el-switch
-                                                    v-model="dimensionData.ifOR"
+                                                    v-model="dt.ifOR"
                                                     active-text="AND"
                                                     inactive-text="OR"
                                                     style="right:-40%;">
                                                 </el-switch>
                                             </el-header>
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <table :id="id+'-table'" class="display event-table-dimension" width="100%"></table>
+                                                <el-table-multiselect-component :model="dt" ref="dimension"></el-table-multiselect-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
                                     <el-container class="split" id="right-panel">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-dimension-by-value'" :model="tableData" type="event"></event-diagnosis-datatable-component>
+                                            <el-table-component :model="modelByDimension" expandColumn="false"></el-table-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
-                    mounted(){
-                        const self = this;
+                    watch: {
+                        'dt.selected':function(val,oldVal){
+                            this.getEventByDimension();
+                        }  
+                    },
+                    created(){
                         
-                        // 默认维度关联事件
-                        self.tableData = self.model;
+                        this.dt.rows = _.map(_.toPairs(this.model.rows[0]),(v)=>{
+                            return {title:v[0],data:v[1]};
+                        });
 
-                        self.init();
+                        this.dt.columns = [{field:'title',title:'维度'},{field:'data',title:'值'}];
+
+                    },
+                    mounted(){
+                        
+                        this.init();
+                        
+                        this.$watch(
+                            "$refs.dimension.dt.selected",(val, oldVal) => {
+                                this.dt.selected = val;
+                            }
+                        );
 
                     },
                     methods: {
                         init(){    
-                            const self = this;
-
-                            self.dimensionData.rows = _.map(_.toPairs(self.model.rows[0]),function(v){
-                                return {title:v[0],data:v[1]};
+                            
+                            Split(['#left-panel', '#right-panel'], {
+                                sizes: [45, 55],
+                                gutterSize: 5,
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
                             });
 
-                            self.dimensionData.columns = [{data:'title',title:'维度'},{data:'data',title:'值'}];
-
-                            self.menuData = _.groupBy(_.keys(self.model.rows[0]),function(v){
-                                return v.substr(0,1);
-                            })
-
-                            _.delay(function(){
-                                //初始化维度选择Table
-                                let table = $(`#${self.id}-table`).DataTable(_.extend(self.dimensionData.options,{
-                                                                                data: self.dimensionData.rows,
-                                                                                columns: self.dimensionData.columns
-                                                                            }));
-                                
-                                table.on( 'select', function ( e, dt, type, indexes ) {
-                                    self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
-                                    self.handlerFetchData(self.dimensionData.selected);
-                                } ).on( 'deselect', function ( e, dt, type, indexes ) {
-                                    self.dimensionData.selected = table.rows( '.selected' ).data().toArray();
-                                    self.handlerFetchData(self.dimensionData.selected);
-                                } );
-
-                                // table style
-                                $(self.$el).find("thead:eq(0)").css("display","none");
-
-                                Split(['#left-panel', '#right-panel'], {
-                                    sizes: [45, 55],
-                                    gutterSize: 5,
-                                    cursor: 'col-resize',
-                                    direction: 'horizontal',
-                                });
-
+                            _.delay(()=>{
                                 // 默认选择第一行
-                                $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
-                                self.dimensionData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
-                                self.handlerFetchData(self.dimensionData.selected);
+                                this.$refs.dimension.$refs.table.setCurrentRow(this.$refs.dimension.dt.rows[0]);
                             },500)
                             
-                            
                         },
-                        handlerFetchData(event){
-                            const self = this;
-
-                            if(event.length < 1) {
-                                self.tableData = [];
-                                return false;
-                            }
-
+                        getEventByDimension(){
+                            
                             try{
-                                let temp = _.map(event,function(v){
+
+                                let temp = _.map(this.dt.selected,(v)=>{
                                     // MQL
                                     //return `${v.title}='${v.data}'`;
                                     // SEARCH
-                                    return `${v.title}=${v.data}`;
+                                    return `${v.title}=${v.data}`.replace(/%/g,'%25');
                                 })
 
-                                // 获取相应维度的关联事件  eg: biz='查账系统'
-                                // MQL
-                                // let where = temp.join(` ${self.dimensionData.ifOR=='1'?'and':'or'} `);
                                 // SEARCH
-                                let where = temp.join(` ${self.dimensionData.ifOR=='1'?' | ':'; '} `);
-                                self.tableData = fsHandler.callFsJScript("/matrix/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message.event;
+                                let where = temp.join(` ${this.dt.ifOR=='1'?' | ':'; '} `);
+                                this.modelByDimension = fsHandler.callFsJScript("/matrix/event/diagnosis-dimension-by-value.js", encodeURIComponent(where)).message;
                             } catch(err){
-                                self.tableData = [];
+                                this.modelByDimension = null;
                             }
+
                             
                         }
                     }
@@ -874,7 +1484,7 @@ class Event {
                             tableData: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-aside class="split" :id="'probability-left-panel-'+id">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -923,13 +1533,13 @@ class Event {
                 })
 
                 // 资源信息
-                let eventDiagnosisTopological = Vue.extend({
+                Vue.component("event-diagnosis-topological",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+id"></div>
                                     </el-main>
@@ -944,7 +1554,6 @@ class Event {
                             mxTopo.graphScript = _.map(this.model.rows,function(v){
                                 return {value: `match () - [*1] -> ("${v.entity}") - [*1] -> ()`};
                             });
-                            console.log(2,mxTopo.graphScript)
                             mxTopo.mount(`#topological-app-${this.id}`);
                             
                             _.delay(()=>{
@@ -953,33 +1562,21 @@ class Event {
 
                         }
                     }
-                });
+                })
 
                 // Runbook
                 // 获取下发脚本列表，获取脚本下发执行结果
-                let eventDiagnosisScript = Vue.extend({
+                Vue.component("event-diagnosis-script",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
                     data(){
                         return {
-                            tableData: {
+                            id: _.now(),
+                            dt: {
                                 rows: [],
                                 columns: [],
-                                options: {
-                                    searching: false,
-                                    aDataSort: true,
-                                    bSort: true,
-                                    bAutoWidth: true,
-                                    info: false,
-                                    paging:         false,
-                                    aoColumnDefs: [{sDefaultContent:'', aTargets:['_all']}],
-                                    select: {
-                                        style: 'single',
-                                    }
-                                },
                                 selected: [],
                                 result:{
                                     runid: "",
@@ -992,87 +1589,63 @@ class Event {
                             }
                         }
                     },
-                    template:  ` <el-container style="height:calc(100vh - 200px);">
-                                    <el-aside style="width:300px;background: rgb(241, 241, 241);overflow:hidden;" class="split" :id="id+'-left-panel'">
+                    template:  ` <el-container style="height:calc(100vh - 180px);">
+                                    <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" :class="'split left-panel-'+id">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <table :id="id+'-table'" class="hover event-table-dimension" width="100%"></table>
+                                                <el-table-component :model="dt" expandColumn="true" ref="script"></el-table-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container class="split" :id="id+'-right-panel'">
-                                        <el-header style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;padding: 0;">
+                                    <el-container :class="'split right-panel-'+id">
+                                        <el-header style="height:30px;line-height:30px;background: #f7f7f7;display:;padding: 0px 10px;">
                                             <el-tooltip content="下发脚本">
-                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="scriptRun"><i class="fas fa-running"></i></a>
+                                                <el-button type="text" style="float: right;" @click="scriptRun" icon="fas fa-running"></el-button>
                                             </el-tooltip>
                                         </el-header>
                                         <el-main style="padding:0px;background:#333333;">
                                             <div contenteditable="true" style="height:100vh;color:rgb(23, 236, 59);outline-style: none;white-space: pre-line;">
-                                                #{tableData.result.outputs.toString()}#
+                                                #{dt.result.outputs.toString()}#
                                             </div>
                                         </el-main>
-                                        <el-footer style="height:30px;line-height:30px;background: rgb(241, 241, 241);display:;padding: 0;">
-                                            <el-tooltip :content="'查看作业: ' + tableData.result.runid">
-                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="job(tableData.result.runid)"><i class="fas fa-task"></i> #{tableData.result.runid}#</a>
+                                        <el-footer style="height:30px;line-height:30px;background: #f7f7f7;display:;padding: 0px 10px;">
+                                            <el-tooltip :content="'查看作业: ' + dt.result.runid">
+                                                <el-link style="float: right;" @click="job(dt.result.runid)" icon="fas fa-task">#{dt.result.runid}#</el-link>
                                             </el-tooltip>
-                                            <el-tooltip :content="'查看会话: ' + tableData.result.sid">
-                                                <a href="javascript:void(0);" class="btn btn-link" style="float: right;" @click="job(tableData.result.sid)"><i class="fas fa-task"></i> #{tableData.result.sid}#</a>
+                                            <el-tooltip :content="'查看会话: ' + dt.result.sid">
+                                                <el-link style="float: right;" @click="job(dt.result.sid)" icon="fas fa-task">#{dt.result.sid}#</el-link>
                                             </el-tooltip>
                                         </el-footer>
                                     </el-container>
                                 </el-container>`,
-                    created(){
-                        this.tableData = _.extend(this.tableData,{
-                            rows: this.model.rows,
-                            columns: this.model.template
-                        });
-                    },
-                    mounted(){
-                        this.init();
-                    },
                     watch: {
-                        'tableData.selected':{
+                        'dt.selected':{
                             handler(val, oldVal) {
                                 if(val !== oldVal){
-                                    this.tableData.result.outputs = [];
+                                    this.dt.result.outputs = [];
                                 }
                             },
                             immediate: true
                         }
                     },
+                    created(){
+                        this.dt = _.extend(this.dt,{
+                            rows: this.model.rows,
+                            columns: this.model.columns
+                        });
+                    },
+                    mounted(){
+                        this.init();
+                        this.$watch(
+                            "$refs.script.dt.selected",(val, oldVal) => {
+                                this.dt.selected = val;
+                            }
+                        );
+                    },
                     methods: {
                         init(){    
-                            const self = this;
-
-                            //初始化维度选择Table
-                            var table = $(`#${self.id}-table`).DataTable(_.extend(
-                                                                        self.tableData.options,{
-                                                                            data: self.tableData.rows,
-                                                                            columns: self.tableData.columns
-                                                                        }));
-                            
-                            $(`#${self.id}-table tbody`).on( 'click', 'tr', function () {
-                                if ( $(this).hasClass('selected') ) {
-                                    $(this).removeClass('selected');
-                                }
-                                else {
-                                    table.$('tr.selected').removeClass('selected');
-                                    $(this).addClass('selected');
-                                }
-                            } );                                    
-
-                            table.on( 'select', function ( e, dt, type, indexes ) {
-                                self.tableData.selected = table.rows( '.selected' ).data().toArray();
-                                //self.handlerFetchData(self.tableData.selected);
-                            } ).on( 'deselect', function ( e, dt, type, indexes ) {
-                                self.tableData.selected = table.rows( '.selected' ).data().toArray();
-                                //self.handlerFetchData(self.tableData.selected);
-                            } );
-
-                            $(self.$el).find('td').css("white-space","normal");
-                            
-                            self.split.inst = Split([`#${self.id}-left-panel`, `#${self.id}-right-panel`], {
-                                sizes: [35, 65],
+                            this.split.inst = Split([`.left-panel-${this.id}`, `.right-panel-${this.id}`], {
+                                sizes: [33, 67],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 gutterAlign: 'end',
@@ -1082,24 +1655,25 @@ class Event {
                             });
 
                             // 默认选择第一行
-                            $(`#${self.id}-table`).DataTable().row(':eq(0)', { page: 'current' }).select();                            
-                            self.tableData.selected = $(`#${self.id}-table`).DataTable().rows( '.selected' ).data().toArray();
-                            //self.handlerFetchData(self.tableData.selected);
+                            _.delay(()=>{
+                                this.$refs.script.$refs.table.setCurrentRow(this.$refs.script.dt.rows[0]);
+                            },1000)
                         },
                         scriptRun(){
-                            let cmd = this.tableData.selected[0].name;
+                            console.log(2,this.dt.selected)
+                            let cmd = this.dt.selected[0].name;
                             let server = "wecise";
                             let user = "matrix";
                             try {
-                                this.tableData.result.outputs[0] = `${server}:~ ${user}$ ${cmd}\n`;
+                                this.dt.result.outputs[0] = `${server}:~ ${user}$ ${cmd}\n`;
 
                                 let rtn = jobHandler.callJob(cmd,'wecise');
-                                this.tableData.result.runid = rtn.message.runid;
-                                this.tableData.result.sid = rtn.message.sid;
-                                this.tableData.result.outputs.push(rtn.message.outputs[0]);
+                                this.dt.result.runid = rtn.message.runid;
+                                this.dt.result.sid = rtn.message.sid;
+                                this.dt.result.outputs.push(rtn.message.outputs[0]);
 
                             } catch(err){
-                                this.tableData.result.outputs = [];
+                                this.dt.result.outputs = [];
                             }
                         },
                         job(term){
@@ -1113,11 +1687,359 @@ class Event {
                         }
                     }
                 })
+
+                // 视图 Table
+                Vue.component("view-table-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    template:   `<el-table :data="model.rows" 
+                                        @selection-change="onSelectionChange"
+                                        style="width: 100%" height="300" 
+                                        border 
+                                        stripe>
+                                    <el-table-column type="selection" width="55"></el-table-column>
+                                    <el-table-column sortable :prop="item.field" :label="item.title" :width="item.width" v-for="item in model.columns">
+                                        <template slot-scope="scope">
+                                            <el-input v-model="scope.row[item.field]"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>`,
+                    data(){
+                        return {
+                            dt:{
+                                selected: []
+                            }
+                        }
+                    },
+                    methods:{
+                        onSelectionChange(val){
+                            console.log(val)
+                            this.dt.selected = val;
+                        }
+                    }
+
+                })
+                // 视图
+                Vue.component("view-component",{
+                    delimiters: ['#{', '}#'],
+                    template:   `<el-container class="animated fadeInLeft" style="height:100%;">
+                                    <el-aside style="height:100%;background:#f7f7f7;">
+                                        <el-container  style="height:100%;">
+                                            <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
+                                                <el-tooltip content="刷新视图">
+                                                    <el-button type="text" icon="el-icon-refresh" @click="load"></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip content="新建视图">
+                                                    <el-button type="text" icon="el-icon-plus" @click="onAdd"></el-button>
+                                                </el-tooltip>
+                                            </el-header>
+                                        
+                                            <el-main style="height:100%;overflow:auto;">
+                                                <el-radio-group v-model="view.activeName" @change="onChange">
+                                                    <el-radio :label="item.name"  style="padding:10px;" v-for="item in view.list" v-if="view.list">
+                                                        <el-card :body-style="{ padding: '5px' }" style="text-align: center;">
+                                                            <el-image src="/fs/assets/images/robot/png/online-service.png?issys=true&type=open" fit="fill" style="width:200px;height:120px;padding-top:10px;"></el-image>
+                                                            <div style="padding: 0px;">
+                                                            <span>#{item.title}#</span>
+                                                                <el-tooltip content="删除视图">
+                                                                    <el-button type="text"  icon="el-icon-delete" @click.native="onDelete(item)"></el-button>
+                                                                </el-tooltip>
+                                                            </div>
+                                                        </el-card>
+                                                    </el-radio>
+                                                </el-radio-group>
+                                            </el-main>
+
+                                        </el-container>
+                                    </el-aside>
+                                    <el-main style="padding:0px;height: 100%;overflow:auto;">
+                                        <el-container  style="height:100%;">
+                                            <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
+                                                <el-tooltip content="退出视图编辑">
+                                                    <el-button type="text" icon="el-icon-close" @click="$root.view.show=false"></el-button>
+                                                </el-tooltip>
+                                            </el-header>
+                                            <el-main style="height:100%;overflow:auto;">
+                                                <el-form :model="view.activeModel" label-width="120px" v-if="view.activeModel">
+                                                    
+                                                    <el-form-item label="视图标题">
+                                                        <el-input type="textarea" v-model="view.activeModel.title"></el-input>
+                                                    </el-form-item>
+                                                    <el-form-item label="条件">
+                                                        <el-select v-model="view.activeModel.class" 
+                                                            placeholder="请选择类" 
+                                                            default-first-option 
+                                                            @change="onCondsChange">
+                                                            <el-option v-for="item in view.class.list"
+                                                            :key="item.key"
+                                                            :label="item.label"
+                                                            :value="item.key">
+                                                            <span style="float: left">#{ item.label }#</span>
+                                                            <span style="float: right; color: #8492a6; font-size: 12px">#{ item.key }#</span>
+                                                            </el-option>
+                                                        </el-select>
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            title="提示"
+                                                            width="200"
+                                                            trigger="hover"
+                                                            content="按类定义视图，并选择视图中的显示属性">
+                                                            <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
+                                                        </el-popover>
+
+                                                        <view-table-component :model="view.activeModel.template" ref="table"></view-table-component>
+
+                                                        <el-popover
+                                                            placement="top-start"
+                                                            title="提示"
+                                                            width="200"
+                                                            trigger="hover"
+                                                            content="可自定义视图过滤条件，参考一键搜索语法">
+                                                            <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
+                                                        </el-popover>
+                                                        <el-input type="textarea" v-model="view.activeModel.filters" autosize="true"></el-input>
+
+                                                    </el-form-item>
+                                                    <el-form-item label="创建时间">
+                                                        <el-input v-model="moment(view.activeModel.time).format('YYYY-MM-DD HH:MM:SS')"></el-input>
+                                                    </el-form-item>
+                                                </el-form>
+                                            </el-main>
+                                            <el-footer style="height:60px;line-height:60px;text-align:right;">
+                                                <el-button type="primary" icon="el-icon-edit" @click="onSave">提交</el-button>
+                                            </el-footer>
+                                        </el-container>
+                                    </el-main>
+                                </el-container>`,
+                    data(){
+                        return {
+                            // view
+                            view: {
+                                show: false,
+                                // 类
+                                class: {
+                                    value: "/matrix/devops/event",
+                                    list:[]
+                                },
+                                activeName: "all",
+                                // 当前视图model
+                                activeModel: null,
+                                //按条件选择  按类、按属性条件
+                                filter:{
+                                    filters: "",
+                                    class:"",
+                                    template: {
+                                        rows:[],
+                                        columns: [],
+                                        selected: []    
+                                    }
+                                },
+                                list: [],
+                            }
+                        }
+                    },
+                    created(){
+                        this.load();
+                    },
+                    mounted(){
+                        this.$watch(
+                            "$refs.table.dt.selected",(val, oldVal) => {
+                                this.view.filter.template.selected = val;
+                            }
+                        );
+                    },
+                    methods:{
+                        load(){
+                            // 视图列表
+                            let term = JSON.stringify({class: "event", action:"list"});
+                            this.view.list = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;;
+                            
+                            // 默认视图
+                            this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
+                            console.log(this.view.activeModel)
+                            // 当前视图class
+                            this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.class.value)).message;
+                            // 当前视图属性
+                            this.onCondsChange(this.view.activeModel.class);
+                        },
+                        onCondsChange(val){
+                            this.view.activeModel.template = fsHandler.callFsJScript("/matrix/view/props.js",encodeURIComponent(val)).message;
+                        },
+                        onChange(val){
+                            this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
+                        },
+                        onAdd(){
+                            let name = _.now();
+                            let title = `view_${name}`;
+                            let term = JSON.stringify({
+                                                        class: "event", 
+                                                        action:"add",
+                                                        model:{name: name,title: title, filter: { class: "", template: [], filters:""}, time: _.now()}
+                                                    });
+                            let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
+                            if(rtn==1){
+                                this.view.activeName = name;
+                                this.load();
+                            }
+                        },
+                        onSave(){
+                            _.extend(this.view.activeModel,{time: _.now()});
+
+                            let term = JSON.stringify({
+                                                        class: "event", 
+                                                        action:"update", 
+                                                        model: _.extend(this.view.activeModel,{filter:{
+                                                                                                class: this.view.filter.class.value,
+                                                                                                template: this.view.filter.template.selected,
+                                                                                                filters: this.view.filter.filters
+                                                                                            }}) 
+                                        });
+                            let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
+                            if(rtn==1){
+                                this.load();
+                            }
+                        },
+                        onDelete(item){
+                            this.$confirm("确认要删除该视图？", '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                            }).then(() => {
+                                let term = JSON.stringify({class: "event", action:"delete", name:item.name});
+                                let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
+                                
+                                if(rtn==1){
+                                    this.load();
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除成功!'
+                                    });
+                                }else {
+                                    this.$message({
+                                        type: 'info',
+                                        message: rtn.message
+                                    });
+                                }
+                            }).catch(() => {
+                                this.$message({
+                                  type: 'info',
+                                  message: '已取消删除'
+                                });          
+                            });
+                        }
+                    }
+
+                })
                 
                 let main = {
-                    delimiters: ['${', '}'],
-                    template: "#app-template",
+                    delimiters: ['#{', '}#'],
+                    template:   `<main id="content" class="content">
+                                    <el-container>
+                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                            <search-base-component :id="model.id"
+                                                                :options="options"
+                                                                ref="searchRef"
+                                                                class="grid-content"></search-base-component>
+                                        </el-header>
+                                        <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 125px);overflow:hidden;" v-if="view.show">
+                                            <view-component></view-component>
+                                        </el-main>
+                                        <el-main id="event-view-container" style="padding: 5px 0px 0px 0px;" >
+                                            <el-tabs v-model="layout.main.activeIndex" class="eventViewContainer animated fadeInLeft" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
+                                                <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true style="padding:0px;">
+                                                    <div v-if="item.type==='main'">
+                                                        <div class="event-view-summary-control">
+                                                            <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifRefresh"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryByRefresh">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifSmart"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryBySmart">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                            <el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
+                                                                <div>
+                                                                    #{control.ifAiGroup==1?'智能分组':'智能分组'}#
+                                                                    <el-switch
+                                                                    v-model="control.ifAiGroup"
+                                                                    active-color="#13ce66"
+                                                                    inactive-color="#dddddd"
+                                                                    active-value="1"
+                                                                    inactive-value="0"
+                                                                    @change="toggleSummaryByGroup">
+                                                                    </el-switch>
+                                                                </div>
+                                                            </el-tooltip>
+                                                        </div>
+                                                        <el-container id="event-view-console">
+                                                            <el-aside class="tree-view" id="event-view-left" style="background-color:#f6f6f6;">
+                                                                <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
+                                                            </el-aside>
+                                                            <el-main class="table-view" id="event-view-main" style="padding:5px;">
+                                                                <event-view-facet :model="model.message" v-show="control.ifSmart!=0" style="margin-top:30px;"></event-view-facet>
+                                                                <event-eventlist-component :model="model.message"></event-eventlist-component>
+                                                            </el-main>
+                                                        </el-container>
+                                                    </div>
+                                                    <div v-else-if="item.type==='diagnosis'">
+                                                        <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line"> 
+                                                            <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name"  lazy=true>
+                                                                <div v-if="it.type==='detail'">
+                                                                    <event-diagnosis-detail :id="it.name + '-detail'" :model="it.model.event"></event-diagnosis-detail>
+                                                                </div>
+                                                                <div v-else-if="it.type==='journal'">
+                                                                    <event-diagnosis-journal :id="it.name + '-journal'" :model="it.model.journal"></event-diagnosis-journal>
+                                                                </div>
+                                                                <div v-else-if="it.type==='history'">
+                                                                    <event-diagnosis-history :model="it.model.history"></event-diagnosis-history>
+                                                                </div>
+                                                                <div v-else-if="it.type==='dimension'">
+                                                                    <event-diagnosis-dimension :model="it.model.dimension"></event-diagnosis-dimension>
+                                                                </div>
+                                                                <div v-else-if="it.type==='probability'">
+                                                                    <event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
+                                                                </div>
+                                                                <div v-else-if="it.type==='topological'">
+                                                                    <event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
+                                                                </div>
+                                                                <div v-else-if="it.type==='script'">
+                                                                    <event-diagnosis-script :model="it.model.script"></event-diagnosis-script>
+                                                                </div>
+                                                            </el-tab-pane>
+                                                        </el-tabs>
+                                                    </div>
+                                                    <div v-else-if="item.type==='aiGroup'">
+                                                        <event-view-aigroup id="event-view-aigroup" :model="model.message"></event-view-aigroup>
+                                                    </div>
+                                                </tab>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>
+                                </main>`,
                     data: {
+                        view: {
+                            show:false
+                        },
                         // 布局
                         layout:{
                             main:{
@@ -1131,15 +2053,6 @@ class Event {
                                     tabIndex: 1,
                                     activeIndex: '1',
                                 }
-                            },
-                            summary: {
-                                tabIndex: 1,
-                                activeIndex: 'event-view-radar',
-                                tabs:[
-                                    {name: 'event-view-radar', title:'告警雷达', type: 'radar'},
-                                    // {name: 'event-view-pie', title:'告警统计', type: 'pie'},
-                                    // {name: 'event-view-summary', title:'告警统计', type: 'summary'}
-                                ]
                             }
                         },
                         control: {
@@ -1213,10 +2126,6 @@ class Event {
                             }
                         }
                     },
-                    components: {
-                        'event-diagnosis-topological': eventDiagnosisTopological,
-                        'event-diagnosis-script': eventDiagnosisScript
-                    },
                     created(){
                         try {
                             if(mx.urlParams['cfg']){
@@ -1268,7 +2177,7 @@ class Event {
                         // 接收搜索数据
                         eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT",event.resizeEventConsole);
+                        //eventHub.$on("WINDOW-RESIZE-EVENT",event.resizeEventConsole);
                     },
                     mounted(){
 
@@ -1289,6 +2198,11 @@ class Event {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        'display': 'none'
+                                    }
+                                },
                                 gutterAlign: 'end',
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
@@ -1318,18 +2232,18 @@ class Event {
                             window.EVENT_VIEW = event;
                         },
                         toggleSummaryBySmart(evt){
-                            if(evt==1) {
-                                $("#event-view-summary").css("height","200px").css("display","");
-                            } else {
-                                $("#event-view-summary").css("height","0px").css("display","none");
-                            }
+                            // if(evt==1) {
+                            //     $("#event-view-summary").css("height","200px").css("display","");
+                            // } else {
+                            //     $("#event-view-summary").css("height","0px").css("display","none");
+                            // }
                             this.control.ifSmart = evt;
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
                             
-                            event.resizeEventConsole();
+                            //event.resizeEventConsole();
                         },
                         toggleSummaryByGroup(evt){
                             const self = this;
@@ -1356,7 +2270,7 @@ class Event {
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
                             
-                            event.resizeEventConsole();
+                            //event.resizeEventConsole();
                         },
                         toggleSummaryByRefresh(evt){
                             const self = this;
@@ -1375,7 +2289,7 @@ class Event {
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
                             // RESIZE Event Console
                             
-                            event.resizeEventConsole();
+                            //event.resizeEventConsole();
                         },
                         aiGroup(){
                             try {
@@ -1449,7 +2363,7 @@ class Event {
                                     // RESIZE Event Summary
                                     eventHub.$emit("WINDOW-RESIZE-EVENT");
                                     // RESIZE Event Console
-                                    event.resizeEventConsole();
+                                    //event.resizeEventConsole();
                                 },500)
                             } catch(err){
                                 
@@ -1487,7 +2401,7 @@ class Event {
                                 if (e) {
                                     let rtn = fsHandler.callFsJScript("/matrix/event/action-by-id.js", encodeURIComponent(JSON.stringify(event).replace(/%/g,'%25'))).message;
                                     if(rtn == 1){
-                                        self.options.term = _.map(list,'id').join(";");
+                                        //self.options.term = _.map(list,'id').join(";");
                                         self.$refs.searchRef.search();
                                     }
                                 } else {
@@ -1499,7 +2413,7 @@ class Event {
                         contextMenu(tId,inst,items,fun){
                             const self = this;
 
-                            $.contextMenu({
+                            $.contextMenu("destroy").contextMenu({
                                 selector: `#${tId} tr td:not(:nth-child(1))`,
                                 trigger: 'right',
                                 autoHide: true,
@@ -1573,7 +2487,7 @@ class Event {
         
         window.addEventListener('resize', () => { 
             
-            event.resizeEventConsole();
+            //event.resizeEventConsole();
 
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
@@ -1584,52 +2498,52 @@ class Event {
 
     
 
-    resizeEventConsole(){
-        let evwH = $(window).height();
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
+    // /* resizeEventConsole(){
+    //     let evwH = $(window).height();
+    //     let evcH = $("#event-view-container").height();
+    //     let evsH = $("#event-view-summary").height();
         
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=225px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("min-height", evwH + "px")
-                                                        .css("min-height","-=225px")
-                                                        .css("min-height","-=" + evsH + "px");
-    }
+    //     $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
+    //                                                     .css("max-height","-=225px")
+    //                                                     .css("max-height","-=" + evsH + "px")
+    //                                                     .css("min-height", evwH + "px")
+    //                                                     .css("min-height","-=225px")
+    //                                                     .css("min-height","-=" + evsH + "px");
+    // }
 
-    /* resizeEventConsole(){
-        let evcH = $("#event-view-container").height();
-        let evsH = $("#event-view-summary").height();
-        let otherH = 120;
-        console.log(1,evcH)
-        $("#event-view-console .dataTables_scrollBody").css("max-height", evcH + "px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("max-height","-=" + otherH + "px")
-                                                        .css("min-height", evcH + "px")
-                                                        .css("min-height","-=" + evsH + "px")
-                                                        .css("min-height","-=" + otherH + "px");
-    } */
+    // /* resizeEventConsole(){
+    //     let evcH = $("#event-view-container").height();
+    //     let evsH = $("#event-view-summary").height();
+    //     let otherH = 120;
+    //     console.log(1,evcH)
+    //     $("#event-view-console .dataTables_scrollBody").css("max-height", evcH + "px")
+    //                                                     .css("max-height","-=" + evsH + "px")
+    //                                                     .css("max-height","-=" + otherH + "px")
+    //                                                     .css("min-height", evcH + "px")
+    //                                                     .css("min-height","-=" + evsH + "px")
+    //                                                     .css("min-height","-=" + otherH + "px");
+    // } */
 
-    checkContainer(){
-        if($('#event-view-container').is(':visible')) {
-            this.layout();
-            this.resizeContainer();
-        } else {
-            setTimeout(this.checkContainer, 50);
-        }
-    }
+    // checkContainer(){
+    //     if($('#event-view-container').is(':visible')) {
+    //         this.layout();
+    //         this.resizeContainer();
+    //     } else {
+    //         setTimeout(this.checkContainer, 50);
+    //     }
+    // }
 
-    resizeContainer(){
+    // resizeContainer(){
         
-        let evwH = $(window).height();
-        let headerH = $("header#header").height();
-        let footerH = $("footer#footer").height();
-        let otherH = 45;
+    //     let evwH = $(window).height();
+    //     let headerH = $("header#header").height();
+    //     let footerH = $("footer#footer").height();
+    //     let otherH = 45;
 
-        $("#event-view-container").css("min-height",evwH + "px")
-                                    .css("min-height","-=" + headerH + "px")
-                                    .css("min-height","-=" + footerH + "px")
-                                    .css("min-height","-=" + otherH + "px");
+    //     $("#event-view-container").css("min-height",evwH + "px")
+    //                                 .css("min-height","-=" + headerH + "px")
+    //                                 .css("min-height","-=" + footerH + "px")
+    //                                 .css("min-height","-=" + otherH + "px");
         
-    }
+    // } */
 }

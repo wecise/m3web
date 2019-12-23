@@ -80,8 +80,9 @@
             'model.newInput': {
             	handler:function(val,oldVal){
                     const self = this;
-                    
-                    self.editor.setValue(val);
+                    if(self.editor){
+                        self.editor.setValue(val);
+                    }
                 },
                 deep:true,
                 immediate:true
@@ -163,11 +164,19 @@
 
                 self.editor.commands.addCommand({
                     name: "save",
-                    exec: self.saveIt,
-                    bindKey: { win: "ctrl-s", mac: "cmd-s" }
+                    bindKey: {
+                        mac: "cmd-S", 
+                        win: "ctrl-S",
+                        sender: 'editor|cli'
+                    },
+                    exec: function(env, args, request) {
+                        self.saveIt();
+                    }
                 });
 
-                self.editor.setValue(this.model.newInput);
+                _.delay(()=>{
+                    self.editor.setValue(this.model.newInput);
+                },1000)
                 
             },
             updateToolbar () {
@@ -450,16 +459,25 @@
                     sc = self.editor.getSelectedText();
                 }*/
 
-                // save
-                let sRtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+                alertify.confirm(`确认要更新?<br><br>
+                    名称：${self.model.fs.fullname}<br><br>
+                    类型：${self.model.fs.ftype}`, function (e) {
+                    if (e) {
+                        // save
+                        let sRtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
 
-                if(sRtn == 0){
-                    alertify.log("请确认脚本！");
-                    return false;
-                }
+                        if(sRtn == 0){
+                            alertify.log("请确认脚本！");
+                            return false;
+                        }
 
-                self.editor.session.getUndoManager().markClean();
-                self.updateToolbar();
+                        self.editor.session.getUndoManager().markClean();
+                        self.updateToolbar();
+                    } else {
+                        
+                    }
+                });
+                
 
             },
             runIt(){

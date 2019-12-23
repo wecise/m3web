@@ -94,51 +94,45 @@ class SideBar {
                         {name:'资产管理',url:'', cnname:'资产管理', target:'', icon: '', count: 0},
                         {name:'政务应用',url:'', cnname:'政务应用', target:'', icon: '', count: 0},
                         {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
-                    ]
+                    ],
+                checkList: []
             },
             template: ` <el-container style="height:100%;width:100%;">
-                            <el-header style="height:30px;line-height:30px;">
-                                <input type="text" class="form-control-transparent" placeholder="请输入关键词" v-model="term">
+                            <el-header style="height:40px;line-height:40px;border-bottom:1px solid #ddd;" ref="header">
+                                <el-input placeholder="请输入关键词" v-model="term" style="width:80%;border:unset;"></el-input>
+                                <el-button type="text" @click="onClose" style="float:right;font-size:14px;" icon="el-icon-close"></el-button>
                             </el-header>
                             <el-main style="padding:0px;">
-                                <el-container>
-                                    <el-main style="padding:0px;">
-                                        <ul class="top-bar animated fadeInDown nav-menu-level1">
-                                            <!--li>
-                                                <a href="/" title="首页">
-                                                    <img src="${window.ASSETS_ICON}/apps/png/home.png?type=download&issys=${window.SignedUser_IsAdmin}"></img> <p>首页</p>
-                                                </a>
-                                            </li-->
-                                            <li v-for="(item,index) in model" :class="index<=model.length - 1?'slot-li-divider':''" :data-item="item.id" @click="triggerInput($event,item.name)">
-                                                <a href="javascript:void(0);" :target="item.target" :title="item.cnname" :ref="item.id">
-                                                    <img :src="item.icon | pickIcon" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);"></img> 
-                                                    <p>
-                                                        <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toggle(item)"> #{_.truncate(item.cnname, {'length': 6})}#
-                                                    </p>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="/janesware/system?view=app"  title="应用管理">
-                                                    <i class="fas fa-plus fa-3x"></i> <p>应用管理</p>
-                                                </a>
-                                            </li>
-                                        </ul>
+                                <el-container style="height:100%;">
+                                    <el-main style="padding:0px;height:100%;overflow:auto;">
+                                        <el-checkbox-group v-model="checkList" ref="checkbox" style="display:flex;flex-wrap:wrap;" @change="onChange">
+                                            <el-checkbox :label="item" :key="item" v-for="item in _.map(model,'id')" :data-item="item">
+                                                <el-image :src="_.find(model,{id:item}).icon | pickIcon" fit="fill" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
+                                                </el-image> 
+                                                <p>
+                                                    #{_.truncate(_.find(model,{id:item}).cnname,{'length': 6})}#
+                                                </p>
+                                            </el-checkbox>
+                                        </el-checkbox-group>
                                     </el-main>
-                                    <el-aside style="width:200px;border-left: 1px solid rgb(221, 221, 221);padding: 10px;">
+                                    <el-aside style="width:200px;border-left: 1px solid rgb(221, 221, 221);padding: 10px;overflow:hidden;">
                                         <ul class="animated fadeIn" style="list-style: none;">
                                             <li v-for="(item,index) in group" :class="index<group.length - 1?'slot-li-divider':''" style="margin:5px 0px;">
-                                                <a href="javascript:void(0);" :target="item.target" :title="item.cnname">
+                                                <el-link href="javascript:void(0);" :target="item.target" :title="item.cnname">
                                                     #{_.truncate(item.cnname, {'length': 6})}#  
                                                     <span class="badge" style="background-color:transparent;color:#999;">#{item.count}#</span>
-                                                </a>
+                                                </el-link>
                                                 <span :class="item.icon" style="color:#fba729;"></span> 
                                             </li>
                                         </ul>
                                     </el-aside>
                                 </el-container>
                             </el-main>
-                            <el-footer style="height:30px;line-height:30px;">
-                                <a href="http://wecise.com#appstore" target="_blank">唯简企业应用商店</a>
+                            <el-footer style="height:40px;line-height:40px;">
+                                <el-link href="/janesware/system" target="_blank" icon="el-icon-edit">发布新应用</el-link>
+                                <el-link href="http://wecise.com#appstore" target="_blank" type="primary" icon="el-icon-view" style="margin-left:20px;">
+                                    唯简企业应用商店
+                                </el-link>
                             </el-footer>
                         </el-container>`,
             filters:{
@@ -151,7 +145,8 @@ class SideBar {
                 this.init();
             },
             mounted() {
-                this.contextMenu('li.slot-li-divider');
+                this.contextMenu(".el-checkbox-group > label");
+                this.initStyle();
             },
             methods: {
                 init(){
@@ -159,32 +154,60 @@ class SideBar {
                     
                     // appIds
                     this.selectedApps = rtn.appIds;
-                    
-                    this.model = _.map(rtn.appList,function(v){
+                    this.checkList = [];
+                    this.model = _.map(rtn.appList,(v)=>{
                         if(_.includes(rtn.appIds,v.id)){
                             v.selected = 1;
+                            this.checkList.push(v.id);
                         }
                         return v;
                     });
 
                 },
+                initStyle(){
+
+                    if(this.$refs.checkbox.$el.querySelectorAll("label")) {
+
+                        _.forEach(this.$refs.checkbox.$el.querySelectorAll("label:not(.el-checkbox__input)"),(v)=>{
+                            v.style.width = "100px";
+                            v.style.height = "120px";
+                            v.style.display = "flex";
+                            v.style.flexFlow = "column-reverse";
+                            v.style.margin = "5px";
+                            v.style.padding = "10px";
+                            v.style.cursor = "pointer";
+
+                            v.querySelectorAll("label > .el-checkbox__input")[0].style.textAlign = "center";
+
+                            v.querySelectorAll("label > .el-checkbox__label")[0].style.textAlign = "center";
+                            v.querySelectorAll("label > .el-checkbox__label")[0].style.paddingLeft = "0px";
+
+                            v.addEventListener("mouseover",(evt)=>{
+                                evt.target.style.boxShadow = "0 2px 12px 0 rgba(0, 0, 0, 0.1)";
+                            })
+    
+                            v.addEventListener("mouseout",(evt)=>{
+                                evt.target.style.boxShadow = "unset";
+                            })
+                        }) 
+
+                        this.$refs.header.$el.querySelector("input").style.border="unset";
+
+                    } else {
+                        setTimeout(this.initStyle, 50);
+                    }
+                    
+                },
                 refresh: function(){
                     this.model = [];
                     this.init();
                 },
-                toggle: function(item){
-
+                onChange(evt){
+                    
                     let ldap = new Object();
                     ldap.class = "/matrix/ldap";
                     ldap.fullname = window.SignedUser_FullName;
-
-                    if(_.indexOf(this.selectedApps, item.id) > -1){
-                        _.pull(this.selectedApps,item.id);
-                    } else {
-                        this.selectedApps.push(item.id);
-                    }
-
-                    ldap.remark = this.selectedApps.join(",");
+                    ldap.remark = evt.join(",");
 
                     let _rtn = omdbHandler.putDataToClass(ldap);
 
@@ -193,18 +216,17 @@ class SideBar {
                         eventHub.$emit("APP-REFRESH-EVENT");
                     }
                 },
-                triggerInput: function(event,name){
-                    event.stopPropagation();
-                    event.preventDefault();
-                    $(this.$refs[name]).click();
-                },
-                onSearch(){
+                onClose(){
+                    try{
+                        window.jsPanel.activePanels.getPanel("jsPanel-apps").close();
+                    }catch(err){
 
+                    }
                 },
                 contextMenu(el){
                     const self = this;
 
-                    $.contextMenu({
+                    $.contextMenu("destroy").contextMenu({
                         selector: el,
                         trigger: 'right',
                         autoHide: true,
@@ -212,49 +234,55 @@ class SideBar {
                         hideOnSecondTrigger: true,
                         build: function($trigger, e) {
                             
-                            let id = e.target.attributes.getNamedItem('data-item').value;
-                            let item = _.find(self.model,{id:id});
-                            
-                            return {
-                                callback: function(key, opt) {
-                                    if(_.includes(key,"walking")){
-                                        inst.appRunning(item);
-                                    } else if(_.includes(key,"running")){
-                                        inst.appRunningPlus(item);
-                                    } else if(_.includes(key,"uninstall")){
-                                        inst.appUninstall(item);
-                                    } else if(_.includes(key,"home")){
-                                        inst.appAsHome(item);
-                                    } else if(_.includes(key,"share")){
-                                        inst.appShare(item);
-                                    }
-                                },
-                                items: {
-                                    "m10_walking": {
-                                        "name": "当前窗口运行",
-                                        "icon": "fas fa-walking"
+                            let item = null;
+                            try{
+                                let id = e.target.attributes.getNamedItem('data-item').value;
+                                item = _.find(self.model,{id:id});
+
+                                return {
+                                    callback: function(key, opt) {
+                                        if(_.includes(key,"walking")){
+                                            inst.appRunning(item);
+                                        } else if(_.includes(key,"running")){
+                                            inst.appRunningPlus(item);
+                                        } else if(_.includes(key,"uninstall")){
+                                            inst.appUninstall(item);
+                                        } else if(_.includes(key,"home")){
+                                            inst.appAsHome(item);
+                                        } else if(_.includes(key,"share")){
+                                            inst.appShare(item);
+                                        }
                                     },
-                                    "m20_running": {
-                                        "name": "打开新窗口运行",
-                                        "icon": "fas fa-running"
-                                    },
-                                    "m30":"----------",
-                                    "m40_home": {
-                                        "name": '设为首页', 
-                                        "icon": "fas fa-home"
-                                    },
-                                    "m50":"----------",
-                                    "m60_uninstall": {
-                                        "name": "卸载应用",
-                                        "icon": "fas fa-trash"
-                                    },
-                                    "m70":"----------",
-                                    "m80_share": {
-                                        "name": "分享",
-                                        "icon": "fas fa-share"
+                                    items: {
+                                        "m10_walking": {
+                                            "name": "当前窗口运行",
+                                            "icon": "fas fa-walking"
+                                        },
+                                        "m20_running": {
+                                            "name": "打开新窗口运行",
+                                            "icon": "fas fa-running"
+                                        },
+                                        "m30":"----------",
+                                        "m40_home": {
+                                            "name": '设为首页', 
+                                            "icon": "fas fa-home"
+                                        },
+                                        "m50":"----------",
+                                        "m60_uninstall": {
+                                            "name": "卸载应用",
+                                            "icon": "fas fa-trash"
+                                        },
+                                        "m70":"----------",
+                                        "m80_share": {
+                                            "name": "分享",
+                                            "icon": "fas fa-share"
+                                        }
                                     }
                                 }
+                            } catch(err){
+                                return [];
                             }
+                            
                         },
                         events: {
                             show: function(opt) {
@@ -458,7 +486,7 @@ class SideBar {
     }
 
     appRunning(event){
-        const wndID = "jsPanel-robot";
+        const wndID = "jsPanel-apps";
         try{
             if(jsPanel.activePanels.getPanel(wndID)){
                 jsPanel.activePanels.getPanel(wndID).close();
@@ -470,7 +498,7 @@ class SideBar {
     }
 
     appRunningPlus(event){
-        const wndID = "jsPanel-robot";
+        const wndID = "jsPanel-apps";
         
         try{
             if(jsPanel.activePanels.getPanel(wndID)){

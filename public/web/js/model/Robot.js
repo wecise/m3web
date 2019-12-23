@@ -71,19 +71,20 @@ class Robot {
                             </span>
                             <el-aside width="34%" style="height:100%;overflow: auto;background: transparent;">
                                 <el-container>
-                                    <el-header style="height:80px;line-height:80px;display: flex;">
+                                    <el-header style="height:60px;line-height:60px;display: flex;padding:0px 10px;">
                                         <el-input v-model="message.search.term" placeholder="搜索"></el-input>
+                                        
                                         <el-tooltip content="订阅消息">
-                                            <a hrefe="javascript:void(0);" class="btn btn-link" style="padding: 30px 10px;"><i class="fas fa-plus"></i></a>
+                                            <el-button type="text" icon="fas fa-plus" style="margin-left:5px;"></el-button>
                                         </el-tooltip>
+                                        
                                     </el-header>
                                     <el-main style="padding:0px;">
                                         <div class="media" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" v-for="(item,index) in message.subject" style="border-bottom: 1px solid rgb(221, 221, 221);padding: 5px;cursor: pointer;margin: 0px;" @click="clickMe(item)">
                                             <div class="media-left">
                                                 <span class="fas fa-circle" style="position: absolute;left:40px;color: rgb(255, 0, 0);transform: scale(.7);" v-if="item.msgs.length>0"></span>
-                                                <a href="#">
-                                                    <img class="media-object" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'" style="width: 42px;height: 42px;">
-                                                </a>
+                                                <el-avatar shape="square" size="42" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'"></el-avatar>
+                                                
                                             </div>
                                             <div class="media-body" style="text-align: left;">
                                                 <h5 class="media-heading">#{item.title}#</h5>
@@ -94,7 +95,7 @@ class Robot {
                                 </el-container>
                             </el-aside>
                             <el-container>
-                                <el-main style="padding:0px;text-align: center;line-height: 30px;background:rgb(228, 231, 237);overflow:hidden auto;" id="subject-msgs">
+                                <el-main style="padding:0px;text-align: center;line-height: 30px;background:rgb(228, 231, 237);overflow:hidden auto;border:1px solid #ddd;" id="subject-msgs">
                                     <ul class="chats">
                                         <li :class="item.type" v-for="item in message.defaultSubject.msgs">
                                             <span class="date-time">#{moment(item.ctime).format("LLL")}#</span>

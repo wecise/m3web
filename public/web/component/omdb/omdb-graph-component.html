@@ -206,19 +206,78 @@
             initGraph(){
                 const self = this;
 
-                self.model.graph.graph.getModel().beginUpdate();
-
+                let allNodes = [];
+                let allEdges = [];
+                
                 try {
                     self.model.graph.graph.getModel()
 
-                    //let nodes = {};
                     self.model.graph.nodes = {};
-                    let orderNodes = _.orderBy(self.graphData.nodes,['level'],['asc']);
+                    
+                    // 添加节点类型，是否是新增、删除或者正常
+                    allNodes =  _.map(self.graphData.nodes,(v)=>{
+                                        return _.extend(v,{type:'normal'});
+                                });
+                    
+                    //合并新增节点
+                    try{
+                        allNodes = _.map(allNodes,(v)=>{
+                                        if(_.find(self.graphData.diff.add.nodes,{id:v.id})){
+                                            return _.extend(v,{type:"add"});
+                                        } else {
+                                            return v;
+                                        }
+                                    })
+                    }catch(err){
+                        
+                    }
+                    
+                    //合并删除的节点
+                    try{
+                        allNodes =  _.concat(allNodes,_.map(self.graphData.diff.del.nodes,(v)=>{
+                                        return _.extend(v,{type:"del"});
+                                    }))
+                    } catch(err){
+                        
+                    }
 
-                    _.forEach(orderNodes,function(v){
+                    // 添加edge类型，包括正常的、新增的、删除的
+                    allEdges = _.map(self.graphData.edges,(v)=>{
+                        return _.extend(v,{type:"normal"});
+                    });
+
+                    //合并新增edge
+                    try{
+                        allEdges = _.map(allEdges,(v)=> {
+                            if(_.find(self.graphData.diff.add.edges,{id:v.id})){
+                                return _.extend(v,{type:'add'});
+                            } else {
+                                return v;
+                            }
+                        });
+                    }catch(err){
+
+                    }
+                    
+                    // 合并删除edge
+                    try {
+                        allEdges =  _.concat(allEdges,_.map(self.graphData.diff.del.edges,(v)=> {
+                                        return _.extend(v,{type:'del'});
+                                    }));
+                    } catch(err){
+                        
+                    }
+
+                    // 开始绘图
+                    self.model.graph.graph.getModel().beginUpdate();
+                    
+                    console.log("Nodes="+allNodes.length, "Edges="+allEdges.length);
+
+                    // 绘制节点
+                    _.forEach(allNodes,function(v){
 
                         let _type = v._icon || 'matrix';
-                        
+
                         // 关联类图标设定
                         if(_.startsWith(v.class,'/matrix/devops/')){
                             _type = 'matrix';
@@ -226,7 +285,7 @@
 
                         // 可设置默认显示属性
                         let _name =  '';
-                        
+
                         try{
                             _name = v[self.model.graph.default.title];
                         } catch(err){
@@ -236,63 +295,42 @@
                         let node = self.model.graph.graph.insertVertex(self.model.graph.parent, v.id, _name, 50, 50, 120, 50,
                             `shape=image;html=1;image=${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin};verticalLabelPosition=bottom;verticalAlign=top;`);
 
-                        self.model.graph.nodes[v.id] = node;
 
-                        try{
-                            //add
-                            if(_.some(self.graphData.diff.add.nodes,{id: v.id})){
-                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
-                                self.model.graph.graph.addCellOverlay(node, overlay);
-                            }
+                        _.extend(self.model.graph.nodes,{[v.id]:node});
 
-                            //delete
-                            if(_.some(self.graphData.diff.del.nodes,{id: v.id})){
-                                let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
-                                self.model.graph.graph.addCellOverlay(node, overlay);
-                            }
-                        } catch(err){
 
+                        //add
+                        if(v.type && v.type === 'add'){
+                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/add.png?issys=true&type=download`,24,24), "新增", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            self.model.graph.graph.addCellOverlay(node, overlay);
                         }
-                        
+
+                        //delete
+                        if(v.type && v.type === 'del'){
+                            let overlay = new mxCellOverlay(new mxImage(`/fs/assets/images/apps/png/flag/delete.png?issys=true&type=download`,24,24), "删除", mxConstants.ALIGN_RIGHT, mxConstants.ALIGN_TOP, new mxPoint(-10,15));
+                            self.model.graph.graph.addCellOverlay(node, overlay);
+                        }
+
                     })
 
-                    // 合并所有edges，包括正常的、新增的、删除的
-                    let edges = _.map(self.graphData.edges,(v)=> {
-                        // 判断现有edge是否是新增的
-                        try{
-                            if(_.some(self.graphData.diff.add.edges,{id:v.id})){
-                                return _.merge(v,{type:'add'});
-                            } else {
-                                return v;
-                            }
-                        } catch(err){
-                            return v;
-                        } 
-                    });
-                    
-                    let edgesDel = [];
-                    
-                    try {
-                        edgesDel = _.map(self.graphData.diff.del.edges,(v)=> {return _.merge(v,{type:'del'})});
-                    } catch(err){
-                        edgesDel = [];
-                    }
-                    
-                    _.forEach(_.concat(edges,edgesDel),function(k){
+                    // 绘制关系
+                    _.forEach(allEdges,function(k){
                         let source = self.model.graph.nodes[k.source];
                         let target = self.model.graph.nodes[k.target];
-                        
-						let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+
+                        let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
-                        
+
                         if(k.twoway){
                             direction = 'startArrow=block;endArrow=block;endFill=1;';
                         }
-                        
+
                         if(k.type=='add'){
                             direction += 'strokeColor=#47fa28;strokeWidth=2;';
                         } else if(k.type=='del'){
                             direction += 'dashed=1;strokeColor=#ff0000;strokeWidth=2;';
+                        } else {
+                            direction += ''; 
                         }
 
                         let edge = null;

@@ -42,10 +42,18 @@
 	<template>
 		<div style="display:flex;height: 32px;line-height: 32px;width:100%;" class="search-base">
 			<!--搜索范围-->
-			<el-select v-model="options.class" placeholder="请选择" class="search-base--select">
-				<el-option label="" value="1"></el-option>
-				<el-option label="" value="2"></el-option>
-				<el-option label="" value="3"></el-option>
+			<el-select v-model="view.value" placeholder="请选择" class="search-base--select" @change="onChange">
+				<el-option :label="item.title" :key="item.title" :value="item.filter" v-for="item in view.list" style="height:auto;">
+					<el-card :body-style="{ padding: '5px' }" style="text-align: right;">
+						<el-image src="/fs/assets/images/robot/png/online-service.png?issys=true&type=open" fit="fill" style="width:200px;padding-top:10px;"></el-image>
+						<div style="padding: 0px;">
+						  <span>${item.title}</span>
+						  	<el-tooltip content="视图编辑">
+								<el-button type="text"  icon="el-icon-edit-outline" @click="$root.view.show=true"></el-button>
+							</el-tooltip>
+						</div>
+					  </el-card>
+				</el-option>
 			</el-select>
 			<!--搜索框-->
 			<el-autocomplete class="inline-input" placeholder="搜索" 
@@ -89,12 +97,18 @@
 		            // 返回消息
 			        message: null,
 		        },
-		        cacheID: "TERM-CACHE"
+				cacheID: "TERM-CACHE",
+				view: {
+					list: [],
+					value: "",
+					show: false
+				}
 	        }
 	    },
 	    created: function(){
 			// 预设值
-
+			let term = JSON.stringify({class:this.options.api,action:"list"});
+			this.view.list = fsHandler.callFsJScript(`/matrix/view/action.js`, encodeURIComponent(term)).message;
 	    },
 	    mounted: function () {
 	   	    const self = this;
@@ -126,21 +140,25 @@
 			suggestionsSearch(queryString, cb){
 				cb([]);
 			},
+			onChange(evt){
+				console.log(this.options.term, [this.options.term,evt].join(" | "))
+			},
 			search(){
 			    // 预设值
-			    this.result.preset = this.$refs.preSetRef.preset.default;
-                let ifHistory = this.result.preset.others.ifHistory?"":"#";
-                let ifDebug = this.result.preset.others.ifDebug?"debug> ":"";
+				this.result.preset = this.$refs.preSetRef.preset.default;
+				let ifHistory = this.result.preset.others.ifHistory?"":"#";
+				let ifDebug = this.result.preset.others.ifDebug?"debug> ":"";
                 let forTime = this.result.preset.others.forTime;
 
                 this.result.class = this.result.preset.class;
 
-                // 一键搜索结构
-                this.result.term = (ifDebug + ifHistory + _.without([this.options.class, this.options.term, this.result.preset.value],'').join(" | ")).replace(/##/g,"#");
+				// 一键搜索结构
+				let cls = ifHistory=='#'?this.options.class:this.options.class.replace(/#/g,"");
+                this.result.term = (ifDebug + ifHistory + _.without([cls, this.options.term, this.result.preset.value],'').join(" | ")).replace(/##/g,"#");
 
                 // 缓存搜索
                 this.toCache(this.options.term);
-
+				console.log(this.result.preset,ifHistory,this.result.term)
 			    // 搜索
 				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api}/${this.options.api}_list.js`, encodeURIComponent(this.result.term)).message;
 				// 结果

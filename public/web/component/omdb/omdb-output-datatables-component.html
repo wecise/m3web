@@ -199,7 +199,12 @@
                     // Table置空
                     if( _.isEmpty(val)) {
                         //console.log(222)
-                        this.datatable.rows().remove().draw();
+                        try{
+                            this.datatable.rows().remove().draw();
+                        } catch(err){
+
+                        }
+                        
                         return false;
                     }
 
@@ -207,7 +212,12 @@
                     if(this.datatable instanceof $.fn.dataTable.Api) {
                         //console.log(333)
                         this.datatable.clear();
-                        this.datatable.rows.add(val);
+                        try{
+                            this.datatable.rows.add(val);
+                        } catch(err){
+                            
+                        }
+                        
                         this.datatable.draw();
 
                     } else {
