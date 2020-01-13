@@ -136,11 +136,11 @@ class SideBar {
                             </el-footer>
                         </el-container>`,
             filters:{
-                pickIcon:function(icon){
+                pickIcon(icon){
                     return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
                 }
             },
-            created: function(){
+            created(){
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);
                 this.init();
             },
@@ -205,13 +205,14 @@ class SideBar {
                 onChange(evt){
                     
                     let ldap = new Object();
+                    ldap.action = "update";
                     ldap.class = "/matrix/ldap";
-                    ldap.fullname = window.SignedUser_FullName;
+                    ldap.id = window.SignedUser_Id;
                     ldap.remark = evt.join(",");
 
-                    let _rtn = omdbHandler.putDataToClass(ldap);
+                    let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;// omdbHandler.putDataToClass(ldap);
 
-                    if(_rtn == 1){
+                    if(rtn == 1){
                         this.init();
                         eventHub.$emit("APP-REFRESH-EVENT");
                     }
@@ -324,7 +325,7 @@ class SideBar {
                                 text-color="#fff"
                                 active-text-color="#ffd04b"
                                 style="height:100vh;overflow-y:auto;float:left;">
-                            <el-menu-item index="toggle">
+                            <el-menu-item index="toggle" style="display:none;">
                                 <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img>
                                 <span slot="title">切换</span>
                             </el-menu-item>
@@ -350,6 +351,9 @@ class SideBar {
                                         <img :src="subItem.icon | pickIcon" style="width:17px;"></img>
                                         <span slot="title">
                                             #{subItem.cnname}#
+                                            <el-tooltip content="在新窗口中打开">
+                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                            </el-tooltip>
                                         </span>
                                         <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
                                     </el-menu-item>
@@ -367,7 +371,12 @@ class SideBar {
                                     <span slot="title">应用</span>
                                     <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
                                         <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                        <span slot="title">#{item.cnname}#</span>
+                                        <span slot="title">
+                                            #{item.cnname}#
+                                            <el-tooltip content="在新窗口中打开">
+                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                            </el-tooltip>
+                                        </span>
                                     </el-menu-item>
                                 </el-menu-item-group>
                             </el-submenu>
@@ -375,7 +384,12 @@ class SideBar {
                             <!-- 没有模板情况，且菜单项数量没超过阈值-->
                             <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
                                 <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                <span slot="title">#{item.cnname}#</span>
+                                <span slot="title">
+                                    #{item.cnname}#
+                                    <el-tooltip content="在新窗口中打开">
+                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                    </el-tooltip>
+                                </span>
                             </el-menu-item>
 
                         </el-menu>`,
@@ -470,6 +484,9 @@ class SideBar {
                     } else {
                         window.open(index,'_parent');
                     }
+                },
+                onClick(url){
+                    window.open(url,'_blank')
                 },
                 onOpen(key, keyPath) {
                     console.log(key, keyPath);

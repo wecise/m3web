@@ -36,21 +36,6 @@
 		line-height: 30px;
 	}
 	
-	.vue-search-input-component input{
-		height: 34px!important;
-	}
-	.vue-search-input-component .quick{
-		display: none;
-	}
-
-	.panel{
-		border-radius: 5px!important;
-	}
-
-	.panel-body {
-		padding:0px;
-	}
-
 	.well {
 		border: 1px solid rgb(226, 231, 236);
 	    border-radius: 2px;
@@ -66,94 +51,12 @@
 		border-radius: 0px;
 	}
 
-	.vue-search-input-component > .btn-group > .btn.dropdown-toggle {
-		border-bottom: 2px solid rgb(182, 194, 202);
-	}
 
 	code {
         cursor: pointer;
         font-size: 14px;
         font-weight: bold;
     }
-	
-	.btn-primary {
-        color: #fff;
-        background-color: #03a9f4;
-        border-color: #03a9f4;
-    }
-
-    .btn.dropdown-toggle {
-	    padding: 7px 12px;
-	}
-    
-    .btn-primary.focus, .btn-primary:hover {
-        color: #fff;
-        background-color: #03a9f4;
-        border-color: #03a9f4;
-    }
-
-    .btn-primary.focus, .btn-primary:focus {
-        color: #fff;
-        background-color: #03a9f4;
-        border-color: #03a9f4;
-    }
-
-    .btn-primary.focus, .btn-primary:active {
-        color: #fff;
-        background-color: #03a9f4;
-        border-color: #03a9f4;
-    }
-  	
-  	#table-log > .bootstrap-table > .fixed-table-container tbody td {
-        border-left: none;
-    }
-
-    #table-log > .bootstrap-table > .fixed-table-container tbody > tr > td:nth-child(2) {
-        white-space: nowrap!important;
-        text-align: center;
-    }
-
-    /*----------  Event Severity For Cell Color  ----------*/
-	td.severity6 {
-	  background-color: #333333!important; /*Fatal*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity5 {
-	  background-color: #FF0000!important; /*Critical*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity4 {
-	  background-color: #FFA500!important; /*Major*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity3 {
-	  background-color: #FFD700!important; /*Minor*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity2 {
-	  background-color: #0000FF!important; /*Warning*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity1 {
-	  background-color: #800080!important; /*Indeterminate*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity0 {
-	  background-color: #008000!important; /*Clear*/
-	  text-align: center;
-	  color: #ffffff;
-	}
-	td.severity_1 {
-	  background-color: #808080!important; /*Unknown*/
-	  text-align: center;
-	  color: #ffffff;
-	}
 
 	/* For list-view */
 	#list {
@@ -427,8 +330,9 @@
 
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-editor-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-search-input-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-search-preset-component_{{.Lang}}.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 

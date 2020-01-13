@@ -692,8 +692,7 @@ class Performance extends Matrix {
                     template:   `<main id="content" class="content">
                                     <el-container>
                                         <el-header style="height: 30px;line-height: 30px;padding: 0px;">
-                                            <search-base-component :id="model.id"
-                                                                :options="options"
+                                            <search-base-component :options="options"
                                                                 ref="searchRef"
                                                                 class="grid-content"></search-base-component>
                                         </el-header>
@@ -813,16 +812,18 @@ class Performance extends Matrix {
                             message: null,
                         },
                         options: {
+                            // 视图定义
+                            view: {
+                                show: false
+                            },
                             // 搜索窗口
-                            name:"所有", value: "",
+                            window: { name:"所有", value: ""},
                             // 输入
                             term: "top 100",
                             // 指定类
                             class: "#/matrix/devops/performance/:",
                             // 指定api
-                            api: "performance",
-                            // 时间窗口
-                            range: { from: "", to: ""},
+                            api: {parent: "performance",name: "performance_list.js"},
                             // 其它设置
                             others: {
                                 // 是否包含历史数据
@@ -878,13 +879,20 @@ class Performance extends Matrix {
 
                         }
                         
-                        // 接收搜索数据
-                        eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
                         // 接收窗体RESIZE事件
                         eventHub.$on("WINDOW-RESIZE-EVENT",performance.resizeEventConsole);
                     },
                     mounted(){
-                        const self = this;
+                        
+                        // 数据设置
+                        this.setData();
+
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
                         
                         $(this.$el).addClass('view-normal');
                         
@@ -895,7 +903,7 @@ class Performance extends Matrix {
                         this.toggleSummaryBySmart(this.control.ifSmart);
 
                         // 窗口Resize
-                        _.delay(function(){
+                        _.delay(()=>{
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
@@ -916,17 +924,17 @@ class Performance extends Matrix {
                         },2000);
 
                         // Document mouse listener
-                        $(document).click(function(evt) {
+                        $(document).click((evt)=>{
                             if($(evt.target).is(".performance-view-summary-control-refresh .el-switch__core")){
                                 evt.preventDefault();
-                                self.control.ifRefresh = '0';
+                                this.control.ifRefresh = '0';
                             }
                          });
                         
                     },
                     methods: {
-                        setData(event){
-                            this.model = _.extend(this.model, this.$refs.searchRef.result);
+                        setData(){
+                            _.extend(this.model, {message:this.$refs.searchRef.result});
                         },
                         hideTabEventViewConsoleUl(){
                             const self = this;

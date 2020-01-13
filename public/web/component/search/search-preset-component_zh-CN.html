@@ -20,6 +20,10 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
         }
 
+        .search-preset.el-dropdown-menu--small {
+            padding: 0px 0!important;
+        }
+
         .search-preset .el-collapse-item__header.is-active {
             color: #333;
             background-color: #def1fb;
@@ -52,42 +56,44 @@
 
     /*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
     <template>
-        <el-dropdown placement="bottom">
-            <el-button type="default">${preset.default.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+        <el-dropdown placement="bottom" trigger="click">
+            <el-button type="default">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
             <el-dropdown-menu slot="dropdown" class="search-preset">
 
                 <el-collapse value="1" accordion>
                     <el-collapse-item title="预设值" name="1">
                         <el-row :gutter="20">
                             <el-col :span="8">
-                                <dl>
-                                    <dt>最近</dt>
-                                    <dd v-for="item in preset.nearest"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                </dl>
+                                <h5>最近</h5>
+                                <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.nearest,{value:options.window.value}).name">
+                                    <p v-for="item in preset.nearest"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                </el-radio-group>
                             </el-col>
                             <el-col :span="8" style="border-left:1px dashed #ccc;">
-                                <dl>
-                                    <dt>实时</dt>
-                                    <dd v-for="item in preset.realtime"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                </dl>
+                                <h5>实时</h5>
+                                <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.realtime,{value:options.window.value}).name">
+                                    <p v-for="item in preset.realtime"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                </el-radio-group>
                             </el-col>
                             <el-col :span="8" style="border-left:1px dashed #ccc;">
-                                <dl>
-                                    <dt>区间</dt>
-                                    <dd v-for="item in preset.relative"><a @click="setByWindow(item)">${item.name}</a></dd>
-                                </dl>
+                                <h5>区间</h5>
+                                <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.relative,{value:options.window.value}).name">
+                                    <p v-for="item in preset.relative"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                </el-radio-group>
                             </el-col>
                         </div>
                     </el-collapse-item>
                     <el-collapse-item title="时间区间" name="2">
                         <el-container>
                             <el-main>
-                                <div style="display:flex;">
-                                    <input class="range_from" type="text" placeholder="选择时间.."></p>
-                                    <i class="fa fa-cogs" style="padding: 0px 10px;"></i>
-                                    <input class="range_to" type="text" placeholder="选择时间.."></p>
-                                    <a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">应用</a>
-                                </div>
+                                <el-date-picker
+                                    v-model="preset.range"
+                                    type="datetimerange"
+                                    range-separator="至"
+                                    start-placeholder="开始时间"
+                                    end-placeholder="结束时间"
+                                    :default-time="['00:00:00']">
+                                </el-date-picker>
                             </el-main>
                         <el-container>
                     </el-collapse-item>
@@ -97,50 +103,20 @@
                                 <dl>
                                     <dt>搜索时间</dt>
                                     <dd>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" id="input-systime" value=" for vtime " v-model="preset.default.others.forTime" checked> 系统时间(vtime)
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" id="input-usertime" value=" for ctime " v-model="preset.default.others.forTime" checked> User Time(ctime)
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" id="input-biztime" value=" for firstoccurrence " v-model="preset.default.others.forTime" > Firstoccurrence
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" id="input-biztime" value=" for lastoccurrence " v-model="preset.default.others.forTime" > Lastoccurrence
-                                            </label>
-                                        </div>
-                                        <div class="radio">
-                                            <label>
-                                                <input type="radio" id="input-nonetime" value="" v-model="preset.default.others.forTime" checked> 不要时间
-                                            </label>
-                                        </div>
+                                        <el-radio-group v-model="options.others.forTime">
+                                            <p style="padding-top:10px;"><el-radio label=" for vtime ">系统时间(vtime)</el-radio></p>
+                                            <p></p><el-radio label=" for ctime ">User Time(ctime)</el-radio></p>
+                                            <p><el-radio label=" for firstoccurrence ">Firstoccurrence</el-radio></p>
+                                            <p><el-radio label=" for lastoccurrence ">Lastoccurrence</el-radio></p>
+                                        </el-radio-group>
                                     </dd>
                                 </dl>
                             </el-col>
-                            <el-col :span="12" style="border-left:1px dashed #ccc;">
+                            <el-col :span="12" style="border-left:1px dashed #ddd;">
                                 <dl>
                                     <dt>其它条件</dt>
                                     <dd>
-                                        <form>
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" id="input-hisdata" v-model="preset.default.others.ifHistory" checked> 包含历史数据
-                                                </label>
-                                            </div>
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" id="input-debug" v-model="preset.default.others.ifDebug"> 调试
-                                                </label>
-                                            </div>
-                                        </form>
+                                        <p style="padding-top:10px;"><el-checkbox v-model="options.others.ifHistory">包含历史数据</el-checkbox></p>
                                     </dd>
                                 </dl>
                             </el-col>
@@ -154,24 +130,13 @@
     /*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
     <script id="search-preset-component">
         {
-
             delimiters: ['${', '}'],
             props:{
-                id: String,
                 options: Object,
             },
             data(){
                 return {
                     preset: {
-                        default: _.extend({ name:"最近1天",
-                                            value: " nearest 1 day ",
-                                            class: "",
-                                            term: "",
-                                            others: {
-                                                ifHistory: false,
-                                                ifDebug: false,
-                                                forTime:  " for vtime ",
-                                            }},this.options),
                         nearest: [
                             {"name":"最近 30秒", value: " nearest 30 seconds "},
                             {"name":"最近 1分钟", value: " nearest 1 minutes "},
@@ -208,7 +173,7 @@
                             {"name":"今年", value: " year "},
                             {"name":"去年", value: " last year "},
                         ],
-                        range: { from: "", to: ""},
+                        range: "",
                         others: {
                             ifHistory: false,
                             ifDebug: false,
@@ -217,94 +182,44 @@
                     }
                 }
             },
-            watch: {
-                'preset.default': {
-                    handler:function(val,oldVal){
-
-
-                        if (val.name === '所有'){
-                            this.preset.default.others.forTime = "";
+            watch:{
+                'preset.range':{
+                    handler(val,oldVal){
+                        if(val[0] && val[1]){
+                            let value = " window " + moment(val[0]).format(mx.global.register.format) + " to " + moment(val[1]).format(mx.global.register.format);
+                            this.options.window = {name: value, value: value};
                         }
-
                     },
                     deep:true
                 }
             },
-            created:function(){
-                eventHub.$emit('preset-selected-event', this.preset);
-            },
-            mounted: function() {
-                let self = this;
+            mounted() {
 
-                self.$nextTick(function(){
+                this.$nextTick(()=>{
 
                     // 搜索预定义
-
-                    $(self.$el).find("a[data-toggle='collapse']").click(
-                        function(event) {
+                    $(this.$el).find("a[data-toggle='collapse']").click((event)=>{
 
                             var href = event.target.href.split("#")[1];
 
                             event.stopPropagation();
                             event.preventDefault();
-                            $(self.$el).find(".in").removeClass("in");
-                            $(self.$el).find("#"+href).collapse("toggle");
-                            $(self.$el).find("in").collapse("toggle");
+                            $(this.$el).find(".in").removeClass("in");
+                            $(this.$el).find("#"+href).collapse("toggle");
+                            $(this.$el).find("in").collapse("toggle");
 
-                            $(self.$el).find(".panel-heading").removeClass('active');
+                            $(this.$el).find(".panel-heading").removeClass('active');
                             $(this).parent().parent().toggleClass('active');
 
-                            $(self.$el).find("i").removeClass('fa-angle-down');
-                            $(self.$el).find("i").addClass(' fa-angle-right');
+                            $(this.$el).find("i").removeClass('fa-angle-down');
+                            $(this.$el).find("i").addClass(' fa-angle-right');
 
                             $(this).parent().parent().find("i").removeClass(' fa-angle-right');
                             $(this).parent().parent().find("i").addClass(' fa-angle-down');
                         }
                     );
-
-                    self.initRange();
                 })
-            },
-            methods: {
-                initRange: function(){
-                    let self = this;
-
-                    let sDate = $(".range_from").flatpickr({
-                        locale: "zh",
-                        enableTime: true,
-                        time_24hr: true,
-                        onChange: function(selectedDates, dateStr, instance) {
-                            self.preset.range.from = dateStr;
-                        }
-                    });
-                    let eDate = $(".range_to").flatpickr({
-                        locale: "zh",
-                        enableTime: true,
-                        time_24hr: true,
-                        onChange: function(selectedDates, dateStr, instance) {
-                            self.preset.range.to = dateStr;
-                        }
-                    });
-
-                    self.$once('hook:beforeDestroy', function () {
-                        sDate.destroy()
-                        eDate.destroy();
-                    })
-                },
-                setByWindow: function(event){
-                    _.extend(this.preset.default,event);
-                },
-                setByRange: function(){
-                    if(!_.isEmpty(this.preset.range.from) && !_.isEmpty(this.preset.range.to)){
-                        var range = {
-                            name: this.preset.range.from + "-" + this.preset.range.to,
-                            value: " window " + this.preset.range.from + " to " + this.preset.range.to
-                        };
-                        _.extend(this.preset.default,range);
-                    }
-                }
             }
-
         }
     </script>
 

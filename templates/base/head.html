@@ -43,7 +43,9 @@
 	<!-- Element -->
 	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/index.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/theme-chalk/index.css" type="text/css" rel="stylesheet" />
-	
+	<script src="//unpkg.com/vue-i18n/dist/vue-i18n.js"></script>
+	<script src="//unpkg.com/element-ui/lib/umd/locale/zh-CN.js"></script>
+	<script src="//unpkg.com/element-ui/lib/umd/locale/en.js"></script>
 
 	<!-- Color Theme core CSS -->
 	<!--<link href="{{AppSubUrl}}/web/css/color/color_style.min.css" rel="stylesheet">
@@ -115,8 +117,7 @@
 	<script src="{{AppSubUrl}}/web/vendor/tagify/dist/jQuery.tagify.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/tagify/dist/tagify.css" rel="stylesheet" />
 
-	<!-- D3 JS -->
-	<!-- <script src="{{AppSubUrl}}/web/vendor/d3/d3.min.js"></script> -->
+	
 
 	<script>
 		try{
@@ -125,6 +126,7 @@
 			window.SignedUser_Remark = "{{.SignedUser.Remark}}";
 			window.SignedUser_UserName = "{{.SignedUser.UserName}}";
 			window.SignedUser_FullName = "{{.SignedUser.FullName}}";
+			window.SignedUser_Id = "{{.SignedUser.Id}}";
 			window.SignedUser_IsAdmin = true;//"{{.SignedUser.IsAdmin}}" || false;
 			window.COMPANY_NAME = "{{.company}}";
 			window.COMPANY_OSPACE = "{{.ospace}}";

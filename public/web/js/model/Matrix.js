@@ -265,35 +265,52 @@ class Matrix {
     search(){
         let search = {
             data: {
-                term: null,
-                preset: {"default":{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},"nearest":[{"name":"最近 30秒","value":" | nearest 30 seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"最近 1分钟","value":" | nearest 1 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 5","value":" | nearest 5 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 10","value":" | nearest 10 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 15分钟","value":" | nearest 15 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 30分钟","value":" | nearest 30 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 1小时","value":" | nearest 1 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 2小时","value":" | nearest 2 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 8小时","value":" | nearest 8 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"L","filter":"YYYY/MM/DD HH"}}],"realtime":[{"name":"30秒","value":" | within 30seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"1分钟","value":" | within 1minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"5分钟","value":" | within 5minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"10分钟","value":" | within 10minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"15分钟","value":" | within 15minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"30分钟","value":" | within 30minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"1小时","value":" | within 1hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"2小时","value":" | within 2hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"8小时","value":" | within 8hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1天","value":" | within 1day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1月","value":" | within 1month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD HH"}},{"name":"所有","value":"","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM/DD HH"}}],"relative":[{"name":"今天","value":" | today ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"昨天","value":" | yesterday ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"本周","value":" | week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上周","value":" | last week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"本月","value":" | month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上个月","value":" | last month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"今年","value":" | year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}},{"name":"去年","value":" | last year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}}],"range":{"from":"","to":""},"others":{"ifHistory":false,"ifDebug":false,"forTime":" for vtime "}},
+                options:{
+                    // 视图定义
+                    view: {
+                        show: false
+                    },
+                    // 搜索窗口
+                    window: { name:"所有", value: ""},
+                    // 输入
+                    term: "",
+                    // 指定类
+                    class: "#/matrix/devops/:",
+                    // 指定api
+                    api: {parent: "search",name: "searchByTerm.js"},
+                    // 其它设置
+                    others: {
+                        // 是否包含历史数据
+                        ifHistory: false,
+                        // 是否包含Debug信息
+                        ifDebug: false,
+                        // 指定时间戳
+                        forTime:  ' for vtime ',
+                    }
+                }
             },
-            template: `<div class="input-group full-width topbar">
-                            <input type="text" class="form-control-transparent" placeholder="搜索" v-model="term">
-                            <span class="input-group-btn">
-                                <button class="btn btn-transparent" @click="onSearch" @keyup.13="onSearch"><i class="fa fa-search"></i></button>
-                            </span>
+            template: `<div style="padding:10px;">
+                            <el-input v-model="options.term" autofocuse @click="onSearch" @keyup.13="onSearch" placeholder="搜索"></el-input>
                         </div>`,
-            mounted:function(){
-                let me = this;
-
-                me.$nextTick(function() {
-
-                })
+            mounted(){
+                $("input",this.$el).css({
+                    "background":"transparent",
+                    "color":"#ffffff"
+                });
             },
             methods:{
                 onSearch: function() {
 
-                    if(_.isEmpty(this.term)) {
-                        alertify.log("请输入搜索关键字");
-                        $(self.$el).find("input").focus();
+                    if(_.isEmpty(this.options.term)) {
+                        this.$message({
+                            type: "info",
+                            message: "请输入搜索关键字"
+                        });
+                        
                         return false;
                     }
 
-                    let url = `/janesware/search?term=${window.btoa(encodeURIComponent(JSON.stringify({
-                                    cond: this.term,
-                                    preset: this.preset
-                                })))}`;
+                    let url = `/janesware/search?preset=${window.btoa(encodeURIComponent(JSON.stringify(this.options)))}`;
                     
                     window.open(url,"_parent");
                     
@@ -302,7 +319,7 @@ class Matrix {
 
         };
 
-        new Vue(search).$mount("#search-bar");
+        //new Vue(search).$mount("#search-bar");
     }
 
     // Robot

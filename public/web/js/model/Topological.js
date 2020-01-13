@@ -292,7 +292,6 @@ class Topological {
                                                 @select="handleSelect"
                                                 style="width:100%;color:#ffffff;">
                                     <el-button slot="prepend" icon="el-icon-menu" class="handleSort input-el-button" style="#ffffff;"></el-button>
-                                    
                                     <el-button slot="append" icon="el-icon-arrow-down" @click="edge.show = !edge.show" v-if="edge.show"></el-button>
                                     <el-button slot="append" icon="el-icon-arrow-right" @click="edge.show = !edge.show" v-else></el-button>
                                     <el-button slot="append" icon="el-icon-postcard" @click="onDiagnosis(model)"></el-button>
@@ -604,10 +603,13 @@ class Topological {
                                 filterable="true"
                                 allow-create="true"
                                 v-model="term"
-                                :fetch-suggestions="querySearch"
+                                :fetch-suggestions="onFetchSuggestions"
                                 placeholder="图搜索"
-                                @select="handleSelect"
-                                style="width:96%;">
+                                @select="onSelect"
+                                @clear="onClear"
+                                style="width:96%;"
+                                clearable
+                                ref="graphSearch">
                             </el-autocomplete>
                             <el-button slot="append" type="success" icon="fas fa-search"  @click="search" size="default"></el-button>
                         </div>`,
@@ -615,7 +617,7 @@ class Topological {
                 return{
                     value: "",
                     terms: [],
-                    term: "",
+                    term: ""
                 }
             },
             created(){
@@ -662,8 +664,11 @@ class Topological {
                     //加入搜索历史
                     this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.history.push({id:objectHash.sha1(this.term), term:this.term, time: _.now()});
                 },
-                querySearch(queryString, cb) {
-                    var terms = this.terms;
+                loadHistory(){
+                    return fsHandler.callFsJScript("/matrix/graph/loadConfig.js","history").message;
+                },
+                onFetchSuggestions(queryString, cb) {
+                    var terms = this.loadHistory();
                     var results = queryString ? terms.filter(this.createFilter(queryString)) : terms;
                     // 调用 callback 返回建议列表的数据
                     cb(results);
@@ -679,8 +684,13 @@ class Topological {
                             { value: mx.global.register.topological.default.match},
                         ];
                 },
-                handleSelect(item) {
+                onSelect(item) {
                     this.term = item.value;
+                    this.search();
+                },
+                onClear(item) {
+                    this.term = "";
+                    this.search();
                 }
             }
         })

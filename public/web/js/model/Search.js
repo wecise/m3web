@@ -19,8 +19,8 @@ class Search {
     init() {
 
         VueLoader.onloaded(["vue-editor-component",
-                            "vue-search-preset-component",
-                            "vue-search-input-component",
+                            "search-preset-component",
+                            "search-base-component",
                             "ai-robot-component"],function() {
 
             $(function(){
@@ -112,43 +112,57 @@ class Search {
                                             </el-form>
                                         </template>
                                     </el-table-column>
-                                    <el-table-column :prop="item.field" 
-                                        :label="item.title" 
-                                        :formatter="item.render"
+                                    <el-table-column
                                         sortable 
-                                        v-for="item in cols"
+                                        show-overflow-tooltip
+                                        v-for="(item,index) in dt.columns"
+                                        :key="index"
+                                        :prop="item.field"
+                                        :label="item ? item.title : ''"
                                         :width="item.width"
                                         v-if="item.visible">
+                                            <template slot-scope="scope">
+                                                <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                    v-if="typeof item.render === 'function'">
+                                                </div>
+                                                <div v-else>
+                                                    #{scope.row[item.field]}#
+                                                </div>
+                                            </template>
                                     </el-table-column>
                                 </el-table>`,
                     props:{
                         columns: Array,
                         rows: Array,
-                        options: Object,
                         forward: String
                     },
-                    computed: {
-                        cols: function(){
-                            return _.map(this.columns,function(v){
-                                    if(v.render){
-                                        v.render = eval(v.render);
-                                    }
-                                    return v;
-                                });
+                    data(){
+                        return {
+                            dt: {
+                                rows:[],
+                                columns: []
+                            }
                         }
                     },
-                    mounted: function () {
-                        const self = this;
+                    created() {
+                        this.dt.columns =   _.map(this.columns,function(v){
+                                                if(v.render){
+                                                    v.render = eval(v.render);
+                                                }
+                                                return v;
+                                            });
+                    },
+                    mounted() {
                         
-                        self.$nextTick(function () {
+                        this.$nextTick( ()=> {
                             
-                            $(self.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
+                            $(this.$el).on('dbl-click-row.bs.table', function (e, row, $element) {
                                 let term = row.id;
-                                let url = `/janesware/${self.forward}?term=${window.btoa(encodeURIComponent(term))}`;
+                                let url = `/janesware/${this.forward}?term=${window.btoa(encodeURIComponent(term))}`;
                                 window.open(url,'_blank');
                             });
 
-                            $(self.$el).on('click-row.bs.table', function (e, row, $element) {
+                            $(this.$el).on('click-row.bs.table', function (e, row, $element) {
                                 $('.info').removeClass('info');
                                 $($element).addClass('info');
                             });
@@ -173,6 +187,14 @@ class Search {
 
                 Vue.component('search-event', {
                     delimiters: ['#{', '}#'],
+                    props:{
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            showContent: true
+                        }
+                    },
                     template:   `<el-container id="search-event" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-button type="text" icon="fas fa-exclamation-triangle" @click="showContent=!showContent"> 事件</el-button>
@@ -197,7 +219,6 @@ class Search {
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="event-table">
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :rows="model.rows"
                                                                             forward="event"></el-table-component>
                                                 </div>
@@ -236,43 +257,7 @@ class Search {
                                             </div>
                                         </div>
                                     </el-main>
-                                </el-container>`,
-                    props:{
-                        model: Object,
-                        show: false,
-                    },
-                    data: function(){
-                        return {
-                            showContent: true,
-                            search: {
-                                default: ""
-                            }
-                        }
-                    },
-                    created: function(){
-                        const self = this;
-                    },
-                    mounted: function(){
-                        const self = this;
-
-                        self.$nextTick(function () {
-                            $(self.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            const self = this;
-
-                            if(val){
-                                $(self.$el).css("display","");
-                            } else {
-                                $(self.$el).css("display","none");
-                            }
-                        }
-                    },
-                    methods: {	
-                    
-                    }
+                                </el-container>`
                 });
 
                 Vue.component('search-syslog', {
@@ -301,7 +286,6 @@ class Search {
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="syslog-table">
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :data="model.rows"
                                                                             forward="event"></el-table-component>
                                                 </div>
@@ -342,40 +326,12 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
-                    data: function(){
+                    data(){
                         return {
-                            showContent: true,
-                            search: {
-                                default: ""
-                            }
+                            showContent: true
                         }
-                    },
-                    created: function(){
-                        const self = this;
-                    },
-                    mounted: function(){
-                        const self = this;
-
-                        self.$nextTick(function () {
-                            $(self.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            const self = this;
-
-                            if(val){
-                                $(self.$el).css("display","");
-                            } else {
-                                $(self.$el).css("display","none");
-                            }
-                        }
-                    },
-                    methods: {	
-                    
                     }
                 }); 
 
@@ -405,7 +361,6 @@ class Search {
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="journal-table">
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :rows="model.rows"
                                                                             forward="event"></el-table-component>
                                                 </div>
@@ -431,27 +386,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -482,7 +421,6 @@ class Search {
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="log-table">
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :rows="model.rows"
                                                                             forward="log"></el-table-component>
                                                 </div>
@@ -529,27 +467,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -580,7 +502,6 @@ class Search {
                                             <div class="tab-content">
                                                 <div role="tabpanel" class="tab-pane active" id="raw-table">
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :rows="model.rows"
                                                                             forward="log"></el-table-component>
                                                 </div>
@@ -627,27 +548,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -680,7 +585,6 @@ class Search {
                                                 <div role="tabpanel" class="tab-pane active" id="tickets-table">
                                                     
                                                     <el-table-component :columns="model.columns" 
-                                                                            :options="model.options" 
                                                                             :rows="model.rows">
                                                     </el-table-component>
                                                     
@@ -691,27 +595,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -744,7 +632,6 @@ class Search {
                                                 <div role="tabpanel" class="tab-pane active" id="change-table">
                                                     
                                                         <el-table-component :columns="model.columns" 
-                                                                                :options="model.options" 
                                                                                 :rows="model.rows">
                                                         </el-table-component>
                                                     
@@ -755,27 +642,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -788,33 +659,16 @@ class Search {
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-table-component :columns="model.columns" 
-                                            :options="model.options" 
                                             :rows="model.rows"
                                             forward="performance"></el-table-component>
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     }
                 }); 
@@ -856,26 +710,11 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
-                        }
-                    },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
                         }
                     },
                     filters: {
@@ -987,30 +826,15 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
                         }
                     },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
-                        }
-                    },
                     filters: {
-                        pickName: function(item){
+                        pickName(item){
 
                             if (_.isEmpty(item)) return '';
 
@@ -1024,7 +848,7 @@ class Search {
 
                             return _name;
                         },
-                        pickIcon: function(item){
+                        pickIcon(item){
 
                             // extend || ...
                             if( item.fullname === '/extend' ){
@@ -1040,7 +864,7 @@ class Search {
                             }
 
                         },
-                        pickTags: function(item){
+                        pickTags(item){
 
                             if(item.tags){
                                 return item.tags.join(",");
@@ -1048,31 +872,31 @@ class Search {
                                 return "";
                             }
                         },
-                        pickAuthor: function(item){
+                        pickAuthor(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).author;
                             }
                         },
-                        pickRemark: function(item){
+                        pickRemark(item){
                             if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
                                 return _.attempt(JSON.parse.bind(null, item.attr)).remark;
                             }
                         }
                     },
                     methods:{
-                        mouseOver: function(item){
+                        mouseOver(item){
                             const self = this;
 
                             $(self.$el).find('.fs-node-highlight').removeClass('fs-node-highlight');
                             $('#fs_node_'+item.id).find('.widget').addClass('fs-node-highlight');
 
                         },
-                        mouseOut: function(item){
+                        mouseOut(item){
                             const self = this;
 
                             $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
                         },
-                        openIt: function(item, path){
+                        openIt(item, path){
                             const self = this;
 
                             if(!_.isEmpty(item)){
@@ -1155,30 +979,15 @@ class Search {
                                     </el-main>
                                 </el-container>`,
                     props:{
-                        model: Object,
-                        show: false,
+                        model: Object
                     },
                     data(){
                         return {
                             showContent: true
                         }
                     },
-                    mounted: function(){
-                        this.$nextTick(function () {
-                            $(this.$el).css("display","none");
-                        })
-                    },
-                    watch: {
-                        show: function (val) {
-                            if(val){
-                                $(this.$el).css("display","");
-                            } else {
-                                $(this.$el).css("display","none");
-                            }
-                        }
-                    },
                     filters: {
-                        pickIcon: function(item){
+                        pickIcon(item){
                             try{
                                 let ftype = _.last(item.class.split("/"));
                                 return `${window.ASSETS_ICON}/entity/png/${ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
@@ -1205,15 +1014,7 @@ class Search {
                     template:   `<main id="content" class="content">
                                     <el-container style="height: 100%;">
                                         <el-header style="height:30px;line-height:30px;">
-                                            <div class="input-group">
-                                                <vue-search-input-component :model="search.input"></vue-search-input-component>
-                                                <div class="input-group-btn">
-                                                    <vue-search-preset-component id="search-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
-                                                </div>
-                                                <div class="input-group-btn">
-                                                    <button type="button" class="btn btn-primary" id="btn_search" @click="onSearch"><i class="fa fa-search" style="font-size:18px;"></i></button>
-                                                </div>
-                                            </div>
+                                            <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
                                         <el-main style="padding: 10px 0px;overflow: hidden;height: 100%;">
                                             <el-container style="height: 100%;">
@@ -1239,28 +1040,28 @@ class Search {
                                                         <el-tab-pane name="view" key="view">
                                                             
                                                             <template slot="label" style="display:none;"></template>
-
-                                                            <search-event :model="event" :show="ifShowEvent"></search-event>
+                                                            
+                                                            <search-event :model="event" v-if="!_.isEmpty(event.rows)"></search-event>
                                 
-                                                            <search-syslog :model="syslog" :show="ifShowSyslog"></search-syslog>
+                                                            <search-syslog :model="syslog" v-if="!_.isEmpty(syslog.rows)"></search-syslog>
                             
-                                                            <search-journal :model="journal" :show="ifShowJournal"></search-journal>
+                                                            <search-journal :model="journal" v-if="!_.isEmpty(journal.rows)"></search-journal>
                             
-                                                            <search-raw :model="raw" :show="ifShowRaw"></search-raw>
+                                                            <search-raw :model="raw" v-if="!_.isEmpty(raw.rows)"></search-raw>
                                                             
-                                                            <search-log :model="log" :show="ifShowLog"></search-log>
+                                                            <search-log :model="log" v-if="!_.isEmpty(log.rows)"></search-log>
                             
-                                                            <search-tickets :model="tickets" :show="ifShowTickets"></search-tickets>
+                                                            <search-tickets :model="tickets" v-if="!_.isEmpty(tickets.rows)"></search-tickets>
                             
-                                                            <search-change :model="change" :show="ifShowChange"></search-change>
+                                                            <search-change :model="change" v-if="!_.isEmpty(change.rows)"></search-change>
                                                             
-                                                            <search-performance :model="performance" :show="ifShowPerformance"></search-performance>
+                                                            <search-performance :model="performance" v-if="!_.isEmpty(performance.rows)"></search-performance>
                                                             
-                                                            <search-files :model="files" :show="ifShowFiles"></search-files>
+                                                            <search-files :model="files" v-if="!_.isEmpty(files.rows)"></search-files>
                             
-                                                            <search-graph :model="graph" :show="ifShowGraph"></search-graph>
+                                                            <search-graph :model="graph" v-if="!_.isEmpty(graph.rows)"></search-graph>
 
-                                                            <search-entity :model="entity" :show="ifShowEntity"></search-entity>
+                                                            <search-entity :model="entity" v-if="!_.isEmpty(entity.rows)"></search-entity>
                                                         </el-tab-pane>
                                                         <el-tab-pane name="timeline" key="timeline">
                                                             <template slot="label"></template>
@@ -1323,62 +1124,77 @@ class Search {
                             columns: [],
                             rows: []
                         },
-                        hisSearch: [],
-                        search: {
-                            param: "",
-                            result: [],
-                            content: [],
-                            words: [],
-
-                            input: {
-                                type: {type:"search",quick: ""},
-                                term: ""
+                        // 搜索组件结构
+                        model: {
+                            id: "matrix-search",
+                            filter: null,
+                            term: null,
+                            preset: null,
+                            message: null,
+                        },
+                        options: {
+                            // 视图定义
+                            view: {
+                                show: false
                             },
-                            preset: {},
-                            regexp: {
-                                top: /top (\d+(\.\d)*)/gmi,
-                                undefined:  /undefined/g,
-                                doubleGrep: /\|(\s+(\|))/g,
-
+                            // 搜索窗口
+                            window: { name:"所有", value: ""},
+                            // 输入
+                            term: "",
+                            // 指定类
+                            class: "#/matrix/devops/:",
+                            // 指定api
+                            api: {parent: "search",name: "searchByTerm.js"},
+                            // 其它设置
+                            others: {
+                                // 是否包含历史数据
+                                ifHistory: false,
+                                // 是否包含Debug信息
+                                ifDebug: false,
+                                // 指定时间戳
+                                forTime:  ' for vtime ',
                             }
                         },
-                        showResultType: "view"
+                        showResultType: "view",
+                        search:{
+                            result: []
+                        }
                     },
                     created: function(){
-                        const self = this;
                         
-                        // 初始化term
+                        // 初始化preset
                         try{
-                            let temp = decodeURIComponent(window.atob(mx.urlParams['term']));
+                            let preset = decodeURIComponent(window.atob(mx.urlParams['preset']));
                             
-                            let searchObject = _.attempt(JSON.parse.bind(null, temp));
-                            self.search.input.term = searchObject.cond;
-                            self.search.preset = searchObject.preset;
+                            _.extend(this.options,_.attempt(JSON.parse.bind(null, preset)));
+                            console.log(this.options)
+                            
                         } catch(err){
-                            self.search.input.term = "";
-                            self.search.preset = {"default":{"name":"最后 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},"nearest":[{"name":"最近 30秒","value":" | nearest 30 seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"最近 1分钟","value":" | nearest 1 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 5","value":" | nearest 5 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 10","value":" | nearest 10 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 15分钟","value":" | nearest 15 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 30分钟","value":" | nearest 30 minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 1小时","value":" | nearest 1 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"最近 2小时","value":" | nearest 2 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最近 8小时","value":" | nearest 8 hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"最后 1天","value":" | nearest 1 day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"L","filter":"YYYY/MM/DD HH"}}],"realtime":[{"name":"30秒","value":" | within 30seconds ","scale":{"scale":"second","step":7,"title":"Second","pattern":"LTS","filter":"YYYY/MM/DD HH:mm:ss"}},{"name":"1分钟","value":" | within 1minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"5分钟","value":" | within 5minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"10分钟","value":" | within 10minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"15分钟","value":" | within 15minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"30分钟","value":" | within 30minutes ","scale":{"scale":"minute","step":6,"title":"Minute","pattern":"LTS","filter":"YYYY/MM/DD HH:mm"}},{"name":"1小时","value":" | within 1hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH:mm"}},{"name":"2小时","value":" | within 2hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"8小时","value":" | within 8hour ","scale":{"scale":"hour","step":5,"title":"Hour","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1天","value":" | within 1day ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"1月","value":" | within 1month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD HH"}},{"name":"所有","value":"","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM/DD HH"}}],"relative":[{"name":"今天","value":" | today ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"昨天","value":" | yesterday ","scale":{"scale":"day","step":4,"title":"Day","pattern":"LT","filter":"YYYY/MM/DD HH"}},{"name":"本周","value":" | week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上周","value":" | last week ","scale":{"scale":"week","step":3,"title":"Week","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"本月","value":" | month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"上个月","value":" | last month ","scale":{"scale":"month","step":2,"title":"Month","pattern":"L","filter":"YYYY/MM/DD"}},{"name":"今年","value":" | year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}},{"name":"去年","value":" | last year ","scale":{"scale":"year","step":1,"title":"Year","pattern":"L","filter":"YYYY/MM"}}],"range":{"from":"","to":""},"others":{"ifHistory":false,"ifDebug":false,"forTime":" for vtime "}};
+                            
                         }
 
-                        _.delay(function () {
-                            eventHub.$on('preset-selected-event', self.setPresetDefault);
-                        },500);
-
-                        eventHub.$on("input-term-event", self.setSearchTerm);
-                        eventHub.$on("input-reset-event", self.setSearchReset);
                     },
-                    mounted: function(){
-                        const self = this;
+                    mounted(){
+                        
+                        // 数据设置
+                        this.setData();
 
-                        self.$nextTick(function () {
-                            _.delay(function () {
-                                self.onSearch();
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
 
+                        this.$nextTick( ()=> {
+                            _.delay( ()=> {
+                                
                                 $(document).keypress(function(event) {
                                     var keycode = (event.keyCode ? event.keyCode : event.which);
                                     if (keycode == 13) {
                                         $("#btn_search").click();
                                     } else if (keycode == 27) { 
-                                        self.setSearchTerm("");
+                                        this.setSearchTerm("");
                                     }
                                 })
 
@@ -1387,172 +1203,55 @@ class Search {
                         })
 
                     },
-                    computed: {
-                        ifShowEvent: function(){
-                            if(_.isEmpty(this.event.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowSyslog: function(){
-                            if(_.isEmpty(this.syslog.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowJournal: function(){
-                            if(_.isEmpty(this.journal.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowRaw: function(){
-                            if(_.isEmpty(this.raw.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowLog: function(){
-                            if(_.isEmpty(this.log.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowTickets: function(){
-                            if(_.isEmpty(this.tickets.data)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowChange: function(){
-                            if(_.isEmpty(this.change.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowPerformance: function(){
-                            if(_.isEmpty(this.performance.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowFiles: function(){
-                            if(_.isEmpty(this.files.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowGraph: function(){
-                            if(_.isEmpty(this.graph.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                        ifShowEntity: function(){
-                            if(_.isEmpty(this.entity.rows)) {
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        },
-                    },
                     methods: {
-                        setPresetDefault: function(event){
-                            const self = this;
+                        setData(){
+                            _.extend(this.model, {message:this.$refs.searchRef.result});
                             
-                            self.search.preset = event;
-                        },
-                        setSearchTerm: function(param) {
-                            const self = this;
-                            
-                            self.search.input.term = param;
-                        },
-                        setSearchReset: function(){
-                            const self = this;
-                            
-                            self.setSearchTerm("");
-                            self.onSearch();
-                            
-                        },
-                        onSearch: function () {
-                            const self = this;
-                            let _param = "";
-                            let _preset = self.search.preset.default;
-                            let _ifHistory = self.search.preset.others.ifHistory?"":"#";
-                            let _ifDebug = self.search.preset.others.ifDebug?"debug> ":"";
-                            let _forTime = self.search.preset.others.forTime;
-
-                            if(_.isEmpty(_preset) ){
-                                _param = self.search.input.term;
-                            } else {
-                                _param = self.search.input.term + _preset.value;
-                            }
-
-                            _param = _ifDebug + _ifHistory + _param;
-
-                            let term = {param: _param, preset: _preset, tag: {"_all":[]}};
-
-                            let rtn = fsHandler.callFsJScript("/matrix/search/searchByTerm.js",encodeURIComponent(JSON.stringify(term)));
-
-
                             try {
-                                self.search.words = rtn.message.meta.words;
+                                
+                                _.extend(this.event, this.model.message.data.event);
+                                _.extend(this.syslog, this.model.message.data.syslog);
+                                _.extend(this.performance, this.model.message.data.performance);
+                                _.extend(this.log, this.model.message.data.log);
+                                _.extend(this.raw, this.model.message.data.raw);
+                                _.extend(this.journal, this.model.message.data.journal);
+                                _.extend(this.tickets, this.model.message.data.tickets);
+                                _.extend(this.change, this.model.message.data.change);
+                                _.extend(this.files, this.model.message.data.files);
+                                _.extend(this.graph, this.model.message.data.graph);
+                                _.extend(this.entity, this.model.message.data.entity);
 
-                                _.extend(self.event, rtn.message.data.event);
-                                _.extend(self.syslog, rtn.message.data.syslog);
-                                _.extend(self.performance, rtn.message.data.performance);
-                                _.extend(self.log, rtn.message.data.log);
-                                _.extend(self.raw, rtn.message.data.raw);
-                                _.extend(self.journal, rtn.message.data.journal);
-                                _.extend(self.tickets, rtn.message.data.tickets);
-                                _.extend(self.change, rtn.message.data.change);
-                                _.extend(self.files, rtn.message.data.files);
-                                _.extend(self.graph, rtn.message.data.graph);
-                                _.extend(self.entity, rtn.message.data.entity);
-
-                                self.all.list = _.orderBy(rtn.message.data.all,["vtime"],["desc"]);
+                                this.all.list = _.orderBy(this.model.message.data.all,["vtime"],["desc"]);
                             } catch(err){
-                                self.search.words = "";
+                                
+                                this.event.rows = [];
+                                this.syslog.rows = [];
+                                this.performance.rows = [];
+                                this.log.rows = [];
+                                this.raw.rows = [];
+                                this.journal.rows = [];
+                                this.tickets.rows = [];
+                                this.change.rows = [];
+                                this.files.rows = [];
+                                this.graph.rows = [];
+                                this.entity.rows = [];
 
-                                self.event.rows = [];
-                                self.syslog.rows = [];
-                                self.performance.rows = [];
-                                self.log.rows = [];
-                                self.raw.rows = [];
-                                self.journal.rows = [];
-                                self.tickets.rows = [];
-                                self.change.rows = [];
-                                self.files.rows = [];
-                                self.graph.rows = [];
-                                self.entity.rows = [];
-
-                                self.all.list = [];
+                                this.all.list = [];
                             }
                             
-
-                            self.search.result = [];
-                            self.search.result.push({name:'事件', count:self.event.rows.length, href:"#search-event"});
-                            self.search.result.push({name:'Syslog', count:self.syslog.rows.length, href:"#search-syslog"});
-                            self.search.result.push({name:'日志', count:self.log.rows.length, href:"#search-log"});
-                            self.search.result.push({name:'报文', count:self.raw.rows.length, href:"#search-raw"});
-                            self.search.result.push({name:'Journal', count:self.journal.rows.length, href:"#search-journal"});
-                            self.search.result.push({name:'性能', count:self.performance.rows.length, href:"#search-performance"});
-                            self.search.result.push({name:'工单', count:self.tickets.rows.length, href:"#search-tickets"});
-                            self.search.result.push({name:'变更单', count:self.change.rows.length, href:"#search-change"});
-                            self.search.result.push({name:'文件', count:self.files.rows.length, href:"#search-files"});
-                            self.search.result.push({name:'图', count:self.graph.rows.length, href:"#search-graph"});
-                            self.search.result.push({name:'实体', count:self.entity.rows.length, href:"#search-entity"});
-
+                            
+                            this.search.result = [];
+                            this.search.result.push({name:'事件', count:this.event.rows.length, href:"#search-event"});
+                            this.search.result.push({name:'Syslog', count:this.syslog.rows.length, href:"#search-syslog"});
+                            this.search.result.push({name:'日志', count:this.log.rows.length, href:"#search-log"});
+                            this.search.result.push({name:'报文', count:this.raw.rows.length, href:"#search-raw"});
+                            this.search.result.push({name:'Journal', count:this.journal.rows.length, href:"#search-journal"});
+                            this.search.result.push({name:'性能', count:this.performance.rows.length, href:"#search-performance"});
+                            this.search.result.push({name:'工单', count:this.tickets.rows.length, href:"#search-tickets"});
+                            this.search.result.push({name:'变更单', count:this.change.rows.length, href:"#search-change"});
+                            this.search.result.push({name:'文件', count:this.files.rows.length, href:"#search-files"});
+                            this.search.result.push({name:'图', count:this.graph.rows.length, href:"#search-graph"});
+                            this.search.result.push({name:'实体', count:this.entity.rows.length, href:"#search-entity"});
                         },
                         filterByCond: function(data,cond){
                             const self = this;
@@ -1565,15 +1264,10 @@ class Search {
                             return rtn;
                         },
                         toggleView(cmd){
-                            const self = this;
-
-                            self.showResultType = cmd;
+                            this.showResultType = cmd;
                         },
                         forwardInView: function(href){
-                            const self = this;
-
-                            self.showResultType = "view";
-
+                            this.showResultType = "view";
                             document.location.href = href;
                         }
                     }

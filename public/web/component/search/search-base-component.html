@@ -22,7 +22,7 @@
 		}
 
 		.search-base div.el-autocomplete{
-			width: 80%;
+			width: 100%;
 		}
 
 		.search-base-component .el-input--small .el-input__inner{
@@ -35,6 +35,10 @@
 			border: unset;
 		}
 
+		.search-base .el-button--mini, .el-button--small {
+			border-radius: 0px!important;
+		}
+
 	</style>
 
 	
@@ -42,15 +46,21 @@
 	<template>
 		<div style="display:flex;height: 32px;line-height: 32px;width:100%;" class="search-base">
 			<!--搜索范围-->
-			<el-select v-model="view.value" placeholder="请选择" class="search-base--select" @change="onChange">
-				<el-option :label="item.title" :key="item.title" :value="item.filter" v-for="item in view.list" style="height:auto;">
-					<el-card :body-style="{ padding: '5px' }" style="text-align: right;">
-						<el-image src="/fs/assets/images/robot/png/online-service.png?issys=true&type=open" fit="fill" style="width:200px;padding-top:10px;"></el-image>
-						<div style="padding: 0px;">
-						  <span>${item.title}</span>
-						  	<el-tooltip content="视图编辑">
-								<el-button type="text"  icon="el-icon-edit-outline" @click="$root.view.show=true"></el-button>
-							</el-tooltip>
+			<el-select v-model="options.view.value" placeholder="请选择视图" class="search-base--select" @change="onViewChange" v-if="options.view.show">
+				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
+					<el-card :body-style="{ padding: '5px' }" style="text-align: center;padding:10px 0px 10px 40px">
+						<span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
+						<div style="padding: 0px;text-align: right;">
+							<p style="margin: 0px;">#{item.title}#</p>
+							<p style="margin: 0px;">
+								#{moment(item.time).format(mx.global.register.format)}#
+								<el-tooltip content="设置为默认视图">
+									<el-button type="text"  icon="el-icon-s-platform"></el-button>
+								</el-tooltip>
+								<el-tooltip content="视图管理">
+									<el-button type="text"  icon="el-icon-edit-outline" @click="onChangeView(item)"></el-button>
+								</el-tooltip>
+							</p>  
 						</div>
 					  </el-card>
 				</el-option>
@@ -58,147 +68,106 @@
 			<!--搜索框-->
 			<el-autocomplete class="inline-input" placeholder="搜索" 
 							v-model="options.term" 
-							:fetch-suggestions="suggestionsSearch"
+							:fetch-suggestions="onFetchSuggestions"
 							:trigger-on-focus="false"
 							@select="search"
 							@clear="search"
-							clearable></el-autocomplete>
+							clearable
+							autofocus></el-autocomplete>
 			<!--搜索条件预设置-->
-			<search-preset-component :id="id+'-preset'"
-									:options='options'
-									ref="preSetRef">
-			</search-preset-component>
+			<search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component>
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
-			<a href="javascript:void(0);" class="btn btn-sm btn-primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</a>
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
 		</div>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
 	<script id="search-base-component">
 	{
-	   	delimiters: ['${', '}'],
+	   	delimiters: ['#{', '}#'],
 	    props:{
-			id: String,
 			// 搜索设置
 			options: Object
 	    },
-	    data: function(){
+	    data(){
 	        return {
-	            //搜索返回结构
-	            result: {
-	                // 预设值
-	                preset: null,
-                    // 输入
-		            term: null,
-		            // class
-		            class: null,
-		            // 返回消息
-			        message: null,
-		        },
-				cacheID: "TERM-CACHE",
-				view: {
-					list: [],
-					value: "",
-					show: false
-				}
+				result: {},
+	            view: {
+					list: []
+				},
+				suggestions: []
 	        }
 	    },
-	    created: function(){
-			// 预设值
-			let term = JSON.stringify({class:this.options.api,action:"list"});
+	    created(){
+			// 视图列表初始化
+			let term = JSON.stringify({class:this.options.api.parent,action:"list"});
 			this.view.list = fsHandler.callFsJScript(`/matrix/view/action.js`, encodeURIComponent(term)).message;
+
+			// 搜索辅助
+			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
 	    },
-	    mounted: function () {
-	   	    const self = this;
+	    mounted(){
+			   
+			// 预搜索
+			this.search();
 
-	   	    // 搜索Button Enter事件
-            $(document).keypress(function(event) {
-                var keycode = (event.keyCode ? event.keyCode : event.which);
-                if (keycode == 13) {
-                    self.$refs.searchNowRef.click();
-                } else if (keycode == 27) {
+			// 搜索Button Enter事件
+			$(document).keypress((event)=> {
+				var keycode = (event.keyCode ? event.keyCode : event.which);
+				if (keycode == 13) {
+					this.search();
+				}
+			})
 
-                }
-            })
-
-		    // 设置body class
+			// 设置body class
 			$("body").addClass("search-base-component");
 
-			this.$refs.searchNowRef.click();
-
-	    },
-	    watch: {
-	   	    // 搜索结果变化，更新view
-            'result.message': function (val,oldVal) {
-                // 通知页面刷新
-                eventHub.$emit(`SEARCH-RESPONSE-EVENT-${this.id}`);
-            }
 	    },
 	    methods: {
-			suggestionsSearch(queryString, cb){
-				cb([]);
+			onChangeView(item){
+				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
 			},
-			onChange(evt){
-				console.log(this.options.term, [this.options.term,evt].join(" | "))
+			onFetchSuggestions(queryString, cb){
+				var suggestions = this.suggestions;
+				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+				// 调用 callback 返回建议列表的数据
+				cb(results);
+			},
+			createFilter(queryString) {
+				return (v) => {
+					return (v.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+				};
+			},
+			onViewChange(evt){
+				this.search();
 			},
 			search(){
-			    // 预设值
-				this.result.preset = this.$refs.preSetRef.preset.default;
-				let ifHistory = this.result.preset.others.ifHistory?"":"#";
-				let ifDebug = this.result.preset.others.ifDebug?"debug> ":"";
-                let forTime = this.result.preset.others.forTime;
 
-                this.result.class = this.result.preset.class;
-
+				// 预设值
+				let ifHistory = this.options.others.ifHistory?"":"#";
+				let ifDebug = this.options.others.ifDebug?"debug> ":"";
+					
+				let forTime = this.options.others.forTime;
+				
 				// 一键搜索结构
 				let cls = ifHistory=='#'?this.options.class:this.options.class.replace(/#/g,"");
-                this.result.term = (ifDebug + ifHistory + _.without([cls, this.options.term, this.result.preset.value],'').join(" | ")).replace(/##/g,"#");
+                let term = {
+					view: this.options.view.value || "all",
+					term: (ifDebug + ifHistory + _.without([cls, this.options.term, this.options.window.value],'').join(" | ")).replace(/##/g,"#").replace(/%/g,'%25')
+				};
 
-                // 缓存搜索
-                this.toCache(this.options.term);
-				console.log(this.result.preset,ifHistory,this.result.term)
 			    // 搜索
-				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api}/${this.options.api}_list.js`, encodeURIComponent(this.result.term)).message;
+				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).message;
+
 				// 结果
-				this.result.message = rtn;
+				this.result = rtn;
 			},
 			resetTerm(){
-				this.options.term = "";
+				this.preset.term = "";
 				this.search();
-				mx.windowResize();
-			},
-		    toCache(event){
-			    let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
-
-			    localStorage.setItem(this.cacheID, JSON.stringify(_.uniq(_.concat(cacheTerm, [event]))));
-		    },
-		    fromCache(){
-                let cacheTerm = JSON.parse(localStorage.getItem(this.cacheID) || '[]');
-
-                let items = {};
-
-                const self = this;
-
-                // 整理为 jquery contextMenu items结构
-                _.map(cacheTerm,function(v,k){
-                    return _.merge(items, {[v]:{name: `${k+1}. ${v}`}});
-                })
-                // 清除历史
-			    _.merge(items, {"清除历史":{name: "清除历史", icon:"fas fa-trash", callback: function (itemKey, opt, rootMenu, originalEvent) {
-                            self.removeCache();
-                        }}});
-
-			    let setTerm = function(event){
-                      self.options.term = event;
-			    };
-
-                contextMenu.build(this.id, {select:'history', items: items, handle: setTerm});
-		    },
-		    removeCache(){
-                localStorage.setItem(this.cacheID, '[]');
-		    }
+			}
 
 	    }
 	

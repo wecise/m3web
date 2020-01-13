@@ -19,8 +19,9 @@ class Home extends Matrix {
 
     init() {
         VueLoader.onloaded(["vue-editor-component",
-            "vue-search-preset-component",
-            "ai-robot-component"],function() {
+                            "search-preset-component",
+                            "search-base-component",
+                            "ai-robot-component"],function() {
 
             $(function() {
 
@@ -33,18 +34,8 @@ class Home extends Matrix {
                                         <el-row type="flex" justify="center" style="padding:20px 0px;">
                                             <el-col :span="18">
                                                 <div class="grid-content">
-                                                    <div class="input-group">
-                                                        <input class="form-control search" type="text" placeholder="搜索" @click="hideSearch" style="border: 1px solid #b6c2ca;">
-                                                        <div class="input-group-btn">
-                                                            <vue-search-preset-component id="home-vue-search-preset" :preset="search.preset"></vue-search-preset-component>
-                                                        </div>
-                                                        <div class="input-group-btn">
-                                                            <button type="button" class="btn btn-primary" @click="onSearch"><i class="fa fa-search" style="font-size:20px;"></i></button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="collapse collapseShowresult" id="search-result-panel" v-on:blur="hideSearch">
-                                                        <div id="search-result-content"></div>
-                                                    </div>
+                                                    <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                                                    <div id="search-result-content" v-if="model.message"></div>
                                                 </div>
                                             </el-col>
                                         </el-row>
@@ -86,17 +77,35 @@ class Home extends Matrix {
                             
                                 </el-container>`,
                     data: {
-                        search: {
-                            input: {
-                                type: {type:"home",quick: ""},
-                                term: ""
+                        // 搜索组件结构
+                        model: {
+                            id: "matrix-home",
+                            filter: null,
+                            term: null,
+                            preset: null,
+                            message: null,
+                        },
+                        options: {
+                            // 视图定义
+                            view: {
+                                show: false
                             },
-                            preset: {},
-                            regexp: {
-                                top: /top (\d+(\.\d)*)/gmi,
-                                undefined:  /undefined/g,
-                                doubleGrep: /\|(\s+(\|))/g,
-
+                            // 搜索窗口
+                            window: { name:"所有", value: ""},
+                            // 输入
+                            term: "",
+                            // 指定类
+                            class: "#/matrix/devops/:",
+                            // 指定api
+                            api: {parent: "search",name: "searchByTerm.js"},
+                            // 其它设置
+                            others: {
+                                // 是否包含历史数据
+                                ifHistory: false,
+                                // 是否包含Debug信息
+                                ifDebug: false,
+                                // 指定时间戳
+                                forTime:  ' for vtime ',
                             }
                         },
                         user: {
@@ -115,28 +124,31 @@ class Home extends Matrix {
                             return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
                         }
                     },
-                    created: function(){
-                        const self = this;
-
+                    created(){
+                        
                         // 刷新应用列表
                         eventHub.$on("APP-REFRESH-EVENT",()=>{
                             this.loadApps();
                         });
 
-                        eventHub.$on('preset-selected-event', self.setPresetDefault);
-
                         if(!_.isEmpty(window.SignedUser_Remark)){
-                            self.user.appsId = window.SignedUser_Remark.replace(/\"/g,"").split(",");
+                            this.user.appsId = window.SignedUser_Remark.replace(/\"/g,"").split(",");
                         }
 
                     },
-                    mounted: function(){
-                        const self = this;
+                    mounted(){
+                        
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
 
-                        self.$nextTick()
-                            .then(function () {
-                                self.init();
-                                self.initPlugIn();
+                        this.$nextTick()
+                            .then(()=> {
+                                
+                                this.init();
 
                                 let el = document.getElementById("grid-content");
                                 let sortable = Sortable.create(el,{
@@ -150,45 +162,41 @@ class Home extends Matrix {
 
                     },
                     methods: {
-                        init: function() {
-                            const self = this;
+                        setData(){
+                            _.extend(this.model, {message:this.$refs.searchRef.result});  
+                            
+                            if (_.isEmpty(this.options.term)) {
+                                this.$message({
+                                    type: "info",
+                                    message: "请输入搜索关键字"
+                                });
+                                
+                                return false;
+                            }
 
-                            let $search = $(".search");
-                            $search.off("keyup drop").on("keyup drop", function(event) {
+                            let url = `/janesware/search?preset=${window.btoa(encodeURIComponent(JSON.stringify(this.options)))}`;
+                            
+                            window.open(url,"_parent");
 
-                                clearTimeout(timeoutId);
-                                timeoutId = setTimeout(function() {
-                                    let term = _.trim($search.val());
-
-                                    if(!_.isEmpty(term)){
-                                        self.nowSearch(term);
-                                    }
-
-                                }, 500);
-                            })
                         },
-                        initPlugIn: function(){
-                            const self = this;
+                        init(){
+                            
+                            this.loadApps();
 
-                            self.loadApps();
-
-                            self.initContextMenu();
-
-                            //App.init();
+                            this.initContextMenu();
                         },
                         initContextMenu(){
-                            const self = this;
-        
-                            $.contextMenu({
+                            
+                            $.contextMenu("destroy").contextMenu({
                                 selector: '.list-context-menu',
                                 trigger: 'left',
                                 autoHide: true,
                                 delay: 10,
                                 hideOnSecondTrigger: true,
-                                build: function($trigger, e) {
+                                build: ($trigger, e)=> {
                                     
                                     let id = e.target.attributes.getNamedItem('data-item').value;
-                                    let item = _.find(self.user.appList,{id:id});
+                                    let item = _.find(this.user.appList,{id:id});
                                     
                                     return {
                                         callback: function(key, opt) {
@@ -233,174 +241,31 @@ class Home extends Matrix {
                                     }
                                 },
                                 events: {
-                                    show: function(opt) {
+                                    show(opt) {
                                         let $this = this;
                                     },
-                                    hide: function(opt) {
+                                    hide(opt) {
                                         let $this = this;
                                     }
                                 }
                             });
                         },
-                        setPresetDefault: function(event){
-                            const self = this;
-
-                            self.search.preset = event;
-                        },
-                        nowSearch: function(term) {
-                            const self = this;
-                            let _param = "";
-                            let _preset = self.search.preset.default;
-                            let _ifHistory = self.search.preset.others.ifHistory?"":"#";
-                            let _ifDebug = self.search.preset.others.ifDebug?"debug> ":"";
-                            let _forTime = self.search.preset.others.forTime;
-
-                            if(_.isEmpty(_preset)){
-                                _param = term;
-                            } else {
-                                _param = term + _preset.value;
-                            }
-
-                            _param = _ifDebug + _ifHistory + _param;// + _forTime;
-
-                            let _list = omdbHandler.fetchData(_param);
-                            if(_.isEmpty(_list.message)){
-                                $("#search-result-panel").fadeOut(500);
-                                $("#search-result-panel").hide();
-                                return false;
-                            }
-
-                            self.searchResult(_list);
-
-                            $("#search-result-panel").fadeIn(500);
-                            $("#search-result-panel").show();
-
-                        },
-                        searchResult: function(result){
-                            var self = this;
-
-                            $("#search-result-panel").empty();
-                            $("#search-result-panel").append(`<div id="search-result-content"></div>`);
-
-                            var resultVue = new Vue({
-                                delimiters: ['#{', '}#'],
-                                el: "#search-result-content",
-                                template:   `<div>
-                                                <div class="row search-result-row" 
-                                                    v-for="item in model">
-                                                    <div class="col-lg-4">
-                                                        结果
-                                                        <p>#{item.name}#</p>
-                                                    </div>
-                                                    <div class="col-lg-2">
-                                                        数量
-                                                        <p>#{item.count}#</p>
-                                                    </div>
-                                                    <div class="col-lg-5">
-                                                        时间分布
-                                                        <p>#{item.from}# - #{item.to}#</p>
-                                                    </div>
-                                                    <div>
-                                                        <a href="#" class="btn btn-xs btn-default btn-copy" @click="copyToClipBoard" alt="拷贝到剪切板" title="拷贝到剪切板" style="height: 22px;"><i class="fa fa-clipboard"></i></a>
-                                                    </div>
-                                                    <div class="col-lg-12" style="display:none;">
-                                                        <div class="panel">
-                                                            <div class="panel-body">
-                                                            #{JSON.stringify(item.list)}#
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>`,
-                                data: {
-                                    model:[],
-                                },
-                                mounted: function(){
-                                    const self = this;
-
-                                    self.$nextTick(function(){
-                                        self.init();
-                                    })
-                                },
-                                watch: {
-                                    model: {
-                                        handler: function(val,oldVal){
-                                            const self = this;
-
-                                            if(_.isEmpty(val)){
-
-                                            }
-                                        },
-                                        deep:true
-                                    }
-                                },
-                                methods: {
-                                    init: function(){
-                                        const self = this;
-                                        var _groupByClass = _.omit(_.groupBy(result.message,'class'),["undefined",""]);
-
-                                        self.model = _.map(_groupByClass, function(v,k){
-                                            let _minTime = moment(_.minBy(v,'vtime')['vtime']).format('LLL');
-                                            let _maxTime = moment(_.maxBy(v,'vtime')['vtime']).format('LLL');
-                                            return {name: k, count: v.length, from:_minTime, to:_maxTime, list: v};
-                                        });
-                                    },
-                                    copyToClipBoard: function() {
-                                        const self = this;
-                                        var clipboard = new Clipboard('.btn-copy', {
-                                            text: function() {
-                                                return self.model.list;
-                                            }
-                                        });
-
-                                        clipboard.on('success', function(e) {
-                                            alertify.log("已复制 " + e);
-                                        });
-
-                                        clipboard.on('error', function(e) {
-                                            alertify.log(e);
-                                        });
-                                    }
-                                }
-                            });
-                        },
-                        hideSearch: function(){
-                            $("#search-result-panel").hide();
-                        },
-                        onSearch: function() {
-                            const self = this;
-                            let _term = _.trim($(".search").val());
-
-                            if (_term.length < 1) {
-                                alertify.log("请输入搜索关键字");
-                                $(".search").focus();
-                                return false;
-                            }
-
-                            let url = `/janesware/search?term=${window.btoa(encodeURIComponent(JSON.stringify({
-                                            cond:_term,
-                                            preset:self.search.preset
-                                        })))}`;
+                        loadApps() {
                             
-                            window.open(url,"_parent");
-                        },
-                        loadApps: function() {
-                            const self = this;
-
                             let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
 
-                            self.user.appList = _.orderBy(_list.message,["seat"],["asc"]);
-                            self.user.apps = [];
+                            this.user.appList = _.orderBy(_list.message,["seat"],["asc"]);
+                            this.user.apps = [];
 
-                            _.forEach(self.user.appsId,function(v){
-                                self.user.apps.push (_.find(self.user.appList,{id:v}));
+                            _.forEach(this.user.appsId,(v)=>{
+                                this.user.apps.push (_.find(this.user.appList,{id:v}));
                             });
 
-                            self.user.apps = _.remove(self.user.apps,null);
+                            this.user.apps = _.remove(this.user.apps,null);
 
-                            self.user.appList = _.map(self.user.appList,function(v){
+                            this.user.appList = _.map(this.user.appList,(v)=>{
 
-                                let _idx =  _.find(self.user.apps,{id:v.id});
+                                let _idx =  _.find(this.user.apps,{id:v.id});
 
                                 if(!_.isEmpty(_idx)){
                                     v.selected = 1;
@@ -411,31 +276,31 @@ class Home extends Matrix {
                             });
 
                         },
-                        toogle: function(item) {
-                            const self = this;
+                        toogle(item) {
+                            
                             let ldap = new Object();
 
+                            ldap.action = "update";
                             ldap.class = "/matrix/ldap";
-                            ldap.fullname = window.SignedUser_FullName;
+                            ldap.id = window.SignedUser_Id;
 
-                            if(_.indexOf(self.user.appsId, item.id) > -1){
-                                _.pull(self.user.appsId,item.id);
+                            if(_.indexOf(this.user.appsId, item.id) > -1){
+                                _.pull(this.user.appsId,item.id);
                             } else {
-                                self.user.appsId.push(item.id);
+                                this.user.appsId.push(item.id);
                             }
 
-                            ldap.remark = self.user.appsId.join(",");
+                            ldap.remark = this.user.appsId.join(",");
 
-                            let _rtn = omdbHandler.putDataToClass(ldap);
+                            let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;// omdbHandler.putDataToClass(ldap);
 
-                            if(_rtn == 1){
-                                self.loadApps();
+                            if(rtn == 1){
+                                this.loadApps();
                             }
 
                         },
-                        resetForm: function(){
-                            const self = this;
-
+                        resetForm(){
+                            
                             var elements = $("form").find( "input,select,textarea" );
                             for( var i = 0; i < elements.length; ++i ) {
                                 var element = elements[i];
@@ -447,7 +312,7 @@ class Home extends Matrix {
                                 }
                             }
                         },
-                        toJsonString: function(event) {
+                        toJsonString(event) {
                             var obj = {};
                             var elements = $("form."+event).find( "input,select,textarea" );
 
@@ -466,56 +331,8 @@ class Home extends Matrix {
                             }
                             return obj;
                         },
-                        openHelpPanel: function(){
-                            const self = this;
-
-                            var w = $( window ).width();
-                            var h = $( window ).height();
-                            var wW = $( window ).width()*2/3;
-                            var hH = $( window ).height()*1.5/3;
-                            var lrwh = [10, 148, wW, hH];//[(w-wW)/3.1, (h-hH)/3, wW, hH];
-                            var tb = document.createElement('div');
-
-                            $(tb).append(`  <div id="editor-keywords"></div>`
-                            );
-                            self.win = new mxWindow("How to Search", tb, lrwh[0], lrwh[1], lrwh[2], lrwh[3], true, true);
-                            self.win.setMaximizable(true);
-                            self.win.setResizable(true);
-                            self.win.setClosable(true);
-                            self.win.setVisible(true);
-
-                            var helpVue = new Vue({
-                                el: "#editor-keywords",
-                                template: `<vue-editor-component id="help-editor" :model="model"></vue-editor-component>`,
-                                data: {
-                                    model:{
-                                        oldInput: "",
-                                        newInput: "",
-                                        mode: "toml",
-                                        theme: "tomorrow",
-                                        printMargin: false,
-                                        readOnly: true
-                                    }
-                                },
-                                created: function(){
-                                    const self = this;
-
-                                },
-                                mounted: function(){
-                                    const self = this;
-
-                                    self.$nextTick(function () {
-                                        _.delay(function(){
-                                            self.model.newInput = GLOBAL_CONFIG.global.help.join("\n");
-                                        },500)
-                                    })
-                                }
-                            });
-                        },
-                        triggerInput: function(name){
-                            const self = this;
-
-                            $(self.$refs[name]).click();
+                        triggerInput(name){
+                            $(this.$refs[name]).click();
                         }
                     }
                 };

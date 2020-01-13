@@ -53,12 +53,12 @@ class Event {
                         }
                     },
                     watch: {
-                        model: {
+                        'model.rows': {
                             handler(val,oldVal){
                                 this.initData();
                             },
                             deep:true,
-                            immediate:true
+                            //immediate:true
                         },
                         dt: {
                             handler(val,oldVal){
@@ -133,15 +133,25 @@ class Event {
                                     </el-footer>
                                 </el-container>`,
                     mounted(){
-
+                        this.$nextTick(()=>{
+                            let doLayout = ()=>{
+                                if($(".el-table-column--selection",this.$el).is(':visible')){
+                                    _.delay(()=>{
+                                        this.$refs.table.doLayout();
+                                    },1000)
+                                } else {
+                                    setTimeout(doLayout,50);
+                                }
+                            }
+                            doLayout();
+                        })
                     },
                     methods: {
                         initData(){
-                            const self = this;
                             
-                            let init = function(){
+                            let init = ()=>{
                                 
-                                _.extend(self.dt, {columns: _.map(self.model.template, function(v){
+                                _.extend(this.dt, {columns: _.map(this.model.template, function(v){
                                     
                                     if(_.isUndefined(v.visible)){
                                         _.extend(v, { visible: true });
@@ -155,11 +165,16 @@ class Event {
                                     
                                 })});
 
-                                _.extend(self.dt, {rows: self.model.rows});
+                                _.extend(this.dt, { rows: [] });
+                                _.delay(()=>{
+                                    _.extend(this.dt, { rows: this.model.rows });
+                                },500);
+
+                                console.log(this.dt)
                                     
                             };
 
-                            if(self.model && $("table",self.$el).is(':visible')){
+                            if($("table",this.$el).is(':visible')){
                                 init();
                             } else {
                                 setTimeout(init,50);
@@ -290,8 +305,7 @@ class Event {
                 Vue.component("el-table-component",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        model: Object,
-                        expandColumn: Boolean
+                        model: Object
                     },
                     data(){
                         return {
@@ -391,13 +405,6 @@ class Event {
                                 </el-container>`,
                     mounted(){
 
-                    },
-                    directives: {
-                        'table': function (el, binding) {
-                          if (binding.value) {
-                            el.focus()
-                          }
-                        }
                     },
                     methods: {
                         initData(){
@@ -1155,7 +1162,7 @@ class Event {
                     },
                     template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-main style="padding:0px;">
-                                        <el-table-component :model="model" expandColumn="true"></el-table-component>
+                                        <el-table-component :model="model"></el-table-component>
                                     </el-main>
                                 </el-container>`,
                     mounted(){
@@ -1172,7 +1179,7 @@ class Event {
                     props: {
                         model: Object
                     },
-                    template:`<el-table-component :model="model" expandColumn="true"></el-table-component>`,
+                    template:`<el-table-component :model="model"></el-table-component>`,
                     mounted(){
                         
                     },
@@ -1268,32 +1275,24 @@ class Event {
                                     <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <el-table-component :model="dt" ref="groups" expandColumn="false"></el-table-component>
+                                                <el-table-component :model="dt" ref="groups"></el-table-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
                                     <el-container class="split" id="aigroup-right-panel">
                                         <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
-                                            <el-tooltip :content="control.ifGraph==0?'列表':'图'" placement="top" open-delay="500">
-                                                <div style="float:right;">
-                                                    
-                                                    <el-switch
-                                                    v-model="control.ifGraph"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#409EFF"
-                                                    active-value="0"
-                                                    inactive-value="1"
-                                                    active-text="列表"
-                                                    inactive-text="图"
-                                                    @change="toggleView">
-                                                    </el-switch>
-                                                </div>
+                                            <el-tooltip content="列表" placement="top" open-delay="500">
+                                                <el-button type="text" icon="el-icon-s-grid" @click="control.ifGraph='0'"></el-button>
                                             </el-tooltip>
+                                            <el-tooltip content="图" placement="top" open-delay="500">
+                                                <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
+                                            </el-tooltip>
+                                            <el-button type="text" icon="el-icon-full-screen" style="float:right;"></el-button>
                                         </el-header>
                                         <el-main style="padding:0px;height:100%;">
                                             <el-tabs v-model="control.ifGraph" style="height:100%;">
                                                 <el-tab-pane label="" name="0" lazy="true" style="height:100%;">
-                                                    <event-view-aigroup-grid :model="dt.modelByGroup" expandColumn="true"></event-view-aigroup-grid>
+                                                    <event-view-aigroup-grid :model="dt.modelByGroup"></event-view-aigroup-grid>
                                                 </el-tab-pane>
                                                 <el-tab-pane label="" name="1" lazy="true" style="height:100%;">
                                                     <event-view-aigroup-graph :model="dt.modelByGroup" ></event-view-aigroup-grap>
@@ -1302,25 +1301,20 @@ class Event {
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
-                    watch: {
-                        'dt.selected':function(val,oldVal){
-                            this.getEventByGroup();
-                        }  
-                    },
                     created(){
-                        const self = this;
-
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(self.$root.$refs.searchRef.result.term)).message;
-                        self.dt.rows = rtn.rows;
-                        self.dt.columns = rtn.columns;
+                        console.log(ids,this.$root.$refs.searchRef.options.term)
+                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
+                        this.dt.rows = rtn.rows;
+                        this.dt.columns = rtn.columns;
                     },
                     mounted(){
                         this.init();
                         this.$watch(
                             "$refs.groups.dt.selected",(val, oldVal) => {
                                 this.dt.selected = val;
+                                this.getEventByGroup();
                             }
                         );
                     },
@@ -1338,7 +1332,6 @@ class Event {
 
                             // 默认选择第一行
                             _.delay(()=>{
-                                //this.$refs.groups.$refs.table.toggleRowSelection(this.$refs.groups.dt.rows[0],true);
                                 this.$refs.groups.$refs.table.setCurrentRow(this.$refs.groups.dt.rows[0]);
                             },1000)
                             
@@ -1350,9 +1343,6 @@ class Event {
                             $(".el-tabs > .el-tabs__content",this.$el).css({
                                 "height":"100%"
                             });
-                        },
-                        toggleView(event){
-                            this.control.ifGraph = event;
                         },
                         getEventByGroup(){
                             try{
@@ -1404,7 +1394,7 @@ class Event {
                                     </el-aside>
                                     <el-container class="split" id="right-panel">
                                         <el-main style="padding:0px;">
-                                            <el-table-component :model="modelByDimension" expandColumn="false"></el-table-component>
+                                            <el-table-component :model="modelByDimension"></el-table-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -1593,7 +1583,7 @@ class Event {
                                     <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" :class="'split left-panel-'+id">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
-                                                <el-table-component :model="dt" expandColumn="true" ref="script"></el-table-component>
+                                                <el-table-component :model="dt" ref="script"></el-table-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -1688,6 +1678,55 @@ class Event {
                     }
                 })
 
+                // 视图 Editor
+                Vue.component("view-editor-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        render: String,
+                        index: Number
+                    },
+                    data(){
+                        return {
+                            editor: null
+                        }
+                    },
+                    template: `<div style="width:100%;height:200px;"></div>`,
+                    beforeDestroy: function() {
+                        this.editor.destroy();
+                        this.editor.container.remove();
+                    },
+                    mounted(){
+                        this.$nextTick(()=>{
+                            this.init();
+                        })
+                    },
+                    methods:{
+                        init(){
+                            this.editor = ace.edit(this.$el);
+                            this.editor.setOptions({
+                                // maxLines: 1000,
+                                // minLines: 20,
+                                autoScrollEditorIntoView: true,
+                                enableBasicAutocompletion: true,
+                                enableSnippets: true,
+                                enableLiveAutocompletion: false
+                            });
+                            
+                            this.editor.getSession().setMode("ace/mode/javascript");
+                            this.editor.getSession().setUseSoftTabs(true);
+                            this.editor.getSession().setTabSize(2);
+                            this.editor.getSession().setUseWrapMode(true);
+
+                            this.editor.setValue(this.render);
+
+                            this.editor.on("change", _.debounce((v)=>{
+                                this.$emit('update:render', this.editor.getValue());
+                            },500));
+                        }
+                    }
+
+                })
+
                 // 视图 Table
                 Vue.component("view-table-component",{
                     delimiters: ['#{', '}#'],
@@ -1698,11 +1737,17 @@ class Event {
                                         @selection-change="onSelectionChange"
                                         style="width: 100%" height="300" 
                                         border 
-                                        stripe>
+                                        stripe
+                                        ref="table">
                                     <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column sortable :prop="item.field" :label="item.title" :width="item.width" v-for="item in model.columns">
+                                    <el-table-column sortable :prop="item.field" :label="item.title" :width="item.width" v-for="item in model.columns" v-if="item.field!=='render'">
                                         <template slot-scope="scope">
                                             <el-input v-model="scope.row[item.field]"></el-input>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column type="expand" label="渲染">
+                                        <template slot-scope="scope">
+                                            <view-editor-component :render="scope.row.render" :index="scope.$index" @update:render="scope.row.render = $event"></view-editor-component>
                                         </template>
                                     </el-table-column>
                                 </el-table>`,
@@ -1713,19 +1758,49 @@ class Event {
                             }
                         }
                     },
+                    watch:{
+                        'model.selected':{
+                            handler:function(val,oldVal){
+                                _.delay(()=>{
+                                    this.toggleSelection(val);
+                                },1000)
+                            },
+                            deep: true
+                        }
+                    },
+                    mounted(){
+                        this.$nextTick(()=>{
+                            _.delay(()=>{
+                                this.toggleSelection(this.model.selected);
+                            },1000)
+                        })
+                    },
                     methods:{
                         onSelectionChange(val){
-                            console.log(val)
                             this.dt.selected = val;
+                        },
+                        onExpandChange(row){
+                            
+                        },
+                        toggleSelection(rows) {
+                            this.dt.selected = rows;
+                            _.forEach(rows, (v) => {
+                                let index = _.indexOf(this.model.rows,v);
+                                this.$refs.table.toggleRowSelection(this.model.rows[index],true);
+                            });
                         }
                     }
 
                 })
+
                 // 视图
                 Vue.component("view-component",{
                     delimiters: ['#{', '}#'],
+                    props:{
+                        model:Object
+                    },
                     template:   `<el-container class="animated fadeInLeft" style="height:100%;">
-                                    <el-aside style="height:100%;background:#f7f7f7;">
+                                    <el-aside style="width:270px;height:100%;background:#f7f7f7;">
                                         <el-container  style="height:100%;">
                                             <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
                                                 <el-tooltip content="刷新视图">
@@ -1739,13 +1814,16 @@ class Event {
                                             <el-main style="height:100%;overflow:auto;">
                                                 <el-radio-group v-model="view.activeName" @change="onChange">
                                                     <el-radio :label="item.name"  style="padding:10px;" v-for="item in view.list" v-if="view.list">
-                                                        <el-card :body-style="{ padding: '5px' }" style="text-align: center;">
-                                                            <el-image src="/fs/assets/images/robot/png/online-service.png?issys=true&type=open" fit="fill" style="width:200px;height:120px;padding-top:10px;"></el-image>
-                                                            <div style="padding: 0px;">
-                                                            <span>#{item.title}#</span>
-                                                                <el-tooltip content="删除视图">
-                                                                    <el-button type="text"  icon="el-icon-delete" @click.native="onDelete(item)"></el-button>
-                                                                </el-tooltip>
+                                                        <el-card :body-style="{ padding: '5px' }" style="text-align: center;padding:0px;">
+                                                            <span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
+                                                            <div style="padding: 0px;text-align: right;">
+                                                                <p style="margin: 0px;">#{item.title}#</p>
+                                                                <p style="margin: 0px;">
+                                                                    创建时间:#{moment(item.time).format(mx.global.register.format)}#
+                                                                    <el-tooltip content="删除视图">
+                                                                        <el-button type="text"  icon="el-icon-delete" @click.native="onDelete(item)"></el-button>
+                                                                    </el-tooltip>
+                                                                </p>
                                                             </div>
                                                         </el-card>
                                                     </el-radio>
@@ -1758,20 +1836,43 @@ class Event {
                                         <el-container  style="height:100%;">
                                             <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
                                                 <el-tooltip content="退出视图编辑">
-                                                    <el-button type="text" icon="el-icon-close" @click="$root.view.show=false"></el-button>
+                                                    <el-button type="text" icon="el-icon-close" @click="onCloseView"></el-button>
                                                 </el-tooltip>
                                             </el-header>
-                                            <el-main style="height:100%;overflow:auto;">
-                                                <el-form :model="view.activeModel" label-width="120px" v-if="view.activeModel">
+                                            <el-main style="height:100%;overflow:auto;padding:0 20px;">
+                                                <el-form :model="view.activeModel" label-width="120px" label-position="top" v-if="view.activeModel">
                                                     
-                                                    <el-form-item label="视图标题">
+                                                    <el-form-item>
+                                                        <template slot="label">
+                                                            视图标题
+                                                            <el-popover
+                                                                placement="top-start"
+                                                                title="提示"
+                                                                width="200"
+                                                                trigger="hover"
+                                                                content="视图标题，表头显示名称">
+                                                                <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
+                                                            </el-popover>
+                                                        </template>
                                                         <el-input type="textarea" v-model="view.activeModel.title"></el-input>
                                                     </el-form-item>
-                                                    <el-form-item label="条件">
-                                                        <el-select v-model="view.activeModel.class" 
+                                                    <el-form-item>
+                                                        <template slot="label">
+                                                            条件
+                                                            <el-popover
+                                                                placement="top-start"
+                                                                title="提示"
+                                                                width="200"
+                                                                trigger="hover"
+                                                                content="按类定义视图，并选择视图中的显示属性。属性可设置显示名称、宽度、是否排序及属性值的渲染。">
+                                                                <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
+                                                            </el-popover>
+                                                        </template>
+                                                        
+                                                        <el-select v-model="view.activeModel.filter.class" 
                                                             placeholder="请选择类" 
                                                             default-first-option 
-                                                            @change="onCondsChange">
+                                                            @change="onPropsChange">
                                                             <el-option v-for="item in view.class.list"
                                                             :key="item.key"
                                                             :label="item.label"
@@ -1780,30 +1881,23 @@ class Event {
                                                             <span style="float: right; color: #8492a6; font-size: 12px">#{ item.key }#</span>
                                                             </el-option>
                                                         </el-select>
-                                                        <el-popover
-                                                            placement="top-start"
-                                                            title="提示"
-                                                            width="200"
-                                                            trigger="hover"
-                                                            content="按类定义视图，并选择视图中的显示属性">
-                                                            <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
-                                                        </el-popover>
 
-                                                        <view-table-component :model="view.activeModel.template" ref="table"></view-table-component>
-
-                                                        <el-popover
-                                                            placement="top-start"
-                                                            title="提示"
-                                                            width="200"
-                                                            trigger="hover"
-                                                            content="可自定义视图过滤条件，参考一键搜索语法">
-                                                            <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
-                                                        </el-popover>
-                                                        <el-input type="textarea" v-model="view.activeModel.filters" autosize="true"></el-input>
+                                                        <view-table-component :model="view.filter.template" ref="table"></view-table-component>
 
                                                     </el-form-item>
-                                                    <el-form-item label="创建时间">
-                                                        <el-input v-model="moment(view.activeModel.time).format('YYYY-MM-DD HH:MM:SS')"></el-input>
+                                                    <el-form-item>
+                                                        <template slot="label">
+                                                            条件
+                                                            <el-popover
+                                                                placement="top-start"
+                                                                title="提示"
+                                                                width="400"
+                                                                trigger="hover"
+                                                                content="可自定义视图过滤条件，参考一键搜索语法。例如：severity>=3 | status=10 | top 100">
+                                                                <el-button type="text" slot="reference"><i class="el-icon-question"></i></el-button>
+                                                            </el-popover>
+                                                        </template>
+                                                        <el-input type="textarea" v-model="view.activeModel.filter.filters" autosize="true"></el-input>
                                                     </el-form-item>
                                                 </el-form>
                                             </el-main>
@@ -1815,7 +1909,6 @@ class Event {
                                 </el-container>`,
                     data(){
                         return {
-                            // view
                             view: {
                                 show: false,
                                 // 类
@@ -1823,6 +1916,7 @@ class Event {
                                     value: "/matrix/devops/event",
                                     list:[]
                                 },
+                                // 当前视图name
                                 activeName: "all",
                                 // 当前视图model
                                 activeModel: null,
@@ -1836,6 +1930,7 @@ class Event {
                                         selected: []    
                                     }
                                 },
+                                // 视图列表
                                 list: [],
                             }
                         }
@@ -1844,9 +1939,15 @@ class Event {
                         this.load();
                     },
                     mounted(){
+                        this.$nextTick(()=>{
+                            // 默认视图
+                            this.view.activeName = this.model.value;
+                            // 默认视图Model
+                            this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
+                        })
                         this.$watch(
                             "$refs.table.dt.selected",(val, oldVal) => {
-                                this.view.filter.template.selected = val;
+                                //this.view.filter.template.selected = val;
                             }
                         );
                     },
@@ -1855,23 +1956,45 @@ class Event {
                             // 视图列表
                             let term = JSON.stringify({class: "event", action:"list"});
                             this.view.list = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;;
-                            
+                            this.$root.$refs.searchRef.view.list = this.view.list;
+
                             // 默认视图
                             this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
-                            console.log(this.view.activeModel)
+                            
                             // 当前视图class
-                            this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.class.value)).message;
+                            this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.activeModel.filter.class)).message;
                             // 当前视图属性
-                            this.onCondsChange(this.view.activeModel.class);
+                            console.log(11,this.view.activeModel, this.view.activeModel.filter.class)
+                            this.onPropsChange(this.view.activeModel.class);
                         },
-                        onCondsChange(val){
-                            this.view.activeModel.template = fsHandler.callFsJScript("/matrix/view/props.js",encodeURIComponent(val)).message;
+                        // 视图属性配置
+                        onPropsChange(val){
+                            this.view.filter.template = fsHandler.callFsJScript("/matrix/view/props.js",encodeURIComponent(val)).message;
+                            console.log(1,this.view.filter.template)
+                            if(!_.isEmpty(this.view.activeModel.filter.template)){
+                                
+                                _.forEach(this.view.activeModel.filter.template,(v)=>{
+                                    let index = _.findIndex(this.view.filter.template.rows,{field:v.field});
+                                    if(index != -1){
+                                        this.view.filter.template.rows[index] = v;
+                                    } else {
+                                        this.view.filter.template.rows.push(v);
+                                    }
+                                })
+
+                            }
+                            _.extend(this.view.filter.template,{selected:this.view.activeModel.filter.template});
+                            
                         },
+                        // 视图切换
                         onChange(val){
-                            this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
+                            // 当前视图配置
+                            this.view.activeModel = _.find(this.view.list,{name:val});
+                            // 当前视图属性配置
+                            this.onPropsChange(this.view.activeModel.filter.class);
                         },
                         onAdd(){
-                            let name = _.now();
+                            let name = `view_${_.now()}`;
                             let title = `view_${name}`;
                             let term = JSON.stringify({
                                                         class: "event", 
@@ -1885,17 +2008,16 @@ class Event {
                             }
                         },
                         onSave(){
-                            _.extend(this.view.activeModel,{time: _.now()});
-
+                            
+                            this.view.activeModel.time = _.now();
+                            this.view.activeModel.filter.template = this.$refs.table.dt.selected;
+                            
                             let term = JSON.stringify({
                                                         class: "event", 
                                                         action:"update", 
-                                                        model: _.extend(this.view.activeModel,{filter:{
-                                                                                                class: this.view.filter.class.value,
-                                                                                                template: this.view.filter.template.selected,
-                                                                                                filters: this.view.filter.filters
-                                                                                            }}) 
+                                                        model: this.view.activeModel
                                         });
+
                             let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
                             if(rtn==1){
                                 this.load();
@@ -1928,6 +2050,14 @@ class Event {
                                   message: '已取消删除'
                                 });          
                             });
+                        },
+                        onCloseView(){
+                            this.$root.options.view.eidtEnable=false;
+                            _.delay(()=>{
+                                if(this.$root.layout.main.tabs.length === 1){
+                                    $("#tab-event-view-console").hide();
+                                }
+                            },50)
                         }
                     }
 
@@ -1938,15 +2068,12 @@ class Event {
                     template:   `<main id="content" class="content">
                                     <el-container>
                                         <el-header style="height: 30px;line-height: 30px;padding: 0px;">
-                                            <search-base-component :id="model.id"
-                                                                :options="options"
-                                                                ref="searchRef"
-                                                                class="grid-content"></search-base-component>
+                                            <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
-                                        <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 125px);overflow:hidden;" v-if="view.show">
-                                            <view-component></view-component>
+                                        <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 125px);overflow:hidden;" v-if="options.view.eidtEnable">
+                                            <view-component :model="options.view" ref="viewRef"></view-component>
                                         </el-main>
-                                        <el-main id="event-view-container" style="padding: 5px 0px 0px 0px;" >
+                                        <el-main class="event-view-container" style="padding: 5px 0px 0px 0px;" v-else>
                                             <el-tabs v-model="layout.main.activeIndex" class="eventViewContainer animated fadeInLeft" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
                                                 <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true style="padding:0px;">
                                                     <div v-if="item.type==='main'">
@@ -1955,12 +2082,12 @@ class Event {
                                                                 <div>
                                                                     #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
                                                                     <el-switch
-                                                                    v-model="control.ifRefresh"
-                                                                    active-color="#13ce66"
-                                                                    inactive-color="#dddddd"
-                                                                    active-value="1"
-                                                                    inactive-value="0"
-                                                                    @change="toggleSummaryByRefresh">
+                                                                        v-model="control.ifRefresh"
+                                                                        active-color="#13ce66"
+                                                                        inactive-color="#dddddd"
+                                                                        active-value="1"
+                                                                        inactive-value="0"
+                                                                        @change="toggleSummaryByRefresh">
                                                                     </el-switch>
                                                                 </div>
                                                             </el-tooltip>
@@ -1968,12 +2095,12 @@ class Event {
                                                                 <div>
                                                                     #{control.ifSmart==1?'智能分析':'智能分析'}#
                                                                     <el-switch
-                                                                    v-model="control.ifSmart"
-                                                                    active-color="#13ce66"
-                                                                    inactive-color="#dddddd"
-                                                                    active-value="1"
-                                                                    inactive-value="0"
-                                                                    @change="toggleSummaryBySmart">
+                                                                        v-model="control.ifSmart"
+                                                                        active-color="#13ce66"
+                                                                        inactive-color="#dddddd"
+                                                                        active-value="1"
+                                                                        inactive-value="0"
+                                                                        @change="toggleSummaryBySmart">
                                                                     </el-switch>
                                                                 </div>
                                                             </el-tooltip>
@@ -1981,12 +2108,12 @@ class Event {
                                                                 <div>
                                                                     #{control.ifAiGroup==1?'智能分组':'智能分组'}#
                                                                     <el-switch
-                                                                    v-model="control.ifAiGroup"
-                                                                    active-color="#13ce66"
-                                                                    inactive-color="#dddddd"
-                                                                    active-value="1"
-                                                                    inactive-value="0"
-                                                                    @change="toggleSummaryByGroup">
+                                                                        v-model="control.ifAiGroup"
+                                                                        active-color="#13ce66"
+                                                                        inactive-color="#dddddd"
+                                                                        active-value="1"
+                                                                        inactive-value="0"
+                                                                        @change="toggleSummaryByGroup">
                                                                     </el-switch>
                                                                 </div>
                                                             </el-tooltip>
@@ -2037,9 +2164,6 @@ class Event {
                                     </el-container>
                                 </main>`,
                     data: {
-                        view: {
-                            show:false
-                        },
                         // 布局
                         layout:{
                             main:{
@@ -2069,17 +2193,20 @@ class Event {
                             message: null,
                         },
                         options: {
+                            // 视图定义
+                            view: {
+                                eidtEnable: false,
+                                show: true,
+                                value: "all"
+                            },
                             // 搜索窗口
-                            name:"所有", 
-                            value: "",
+                            window: { name:"所有", value: ""},
                             // 输入
                             term: "",
                             // 指定类
                             class: "#/matrix/devops/event/:",
                             // 指定api
-                            api: "event",
-                            // 时间窗口
-                            range: { from: "", to: ""},
+                            api: {parent: "event",name: "event_list.js"},
                             // 其它设置
                             others: {
                                 // 是否包含历史数据
@@ -2101,6 +2228,14 @@ class Event {
                                 }
                             },
                             deep:true
+                        },
+                        'options.view.eidtEnable':{
+                            handler(val,oldVal){
+                                const self = this;
+                                if(!val){
+                                    self.$refs.searchRef.search();
+                                }
+                            }
                         }
                     },
                     filters: {
@@ -2173,14 +2308,9 @@ class Event {
                         } catch(err){
 
                         }
-
-                        // 接收搜索数据
-                        eventHub.$on(`SEARCH-RESPONSE-EVENT-${this.model.id}`, this.setData);
-                        // 接收窗体RESIZE事件
-                        //eventHub.$on("WINDOW-RESIZE-EVENT",event.resizeEventConsole);
                     },
                     mounted(){
-
+                        
                         $(this.$el).addClass('view-normal');
                         
                         // 没有详细页时，默认隐藏告警列表Title
@@ -2209,20 +2339,29 @@ class Event {
                                 expandToMin: true
                             });
                         },2000);
+
+                        // 数据设置
+                        this.setData();
+
+                        // watch数据更新
+                        this.$watch(
+                            "$refs.searchRef.result",(val, oldVal) => {
+                                this.setData();
+                            }
+                        );
                         
                     },
                     methods: {
-                        setData(event){
-                            _.extend(this.model, this.$refs.searchRef.result);
+                        setData(){
+                            _.extend(this.model, {message:this.$refs.searchRef.result});
                         },
                         hideTabEventViewConsoleUl(){
-                            const self = this;
-
+                            
                             if($('#tab-event-view-console').is(':visible')) {
                                 $("#tab-event-view-console").hide();
                             $("#tab-event-view-console > span").hide();
                             } else {
-                                setTimeout(self.hideTabEventViewConsoleUl, 50);
+                                setTimeout(this.hideTabEventViewConsoleUl, 50);
                             }   
                         },
                         // 切换运行模式
@@ -2232,33 +2371,21 @@ class Event {
                             window.EVENT_VIEW = event;
                         },
                         toggleSummaryBySmart(evt){
-                            // if(evt==1) {
-                            //     $("#event-view-summary").css("height","200px").css("display","");
-                            // } else {
-                            //     $("#event-view-summary").css("height","0px").css("display","none");
-                            // }
+                            
                             this.control.ifSmart = evt;
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            
-                            //event.resizeEventConsole();
                         },
                         toggleSummaryByGroup(evt){
-                            const self = this;
-
                             if(evt==1) {
-                                self.aiGroup();
-                                $("#event-view-aigroup").css("height","200px").css("display","");
+                                this.aiGroup();
                             } else {
-                                $("#event-view-aigroup").css("height","0px").css("display","none");
-
                                 //关闭智能分组
                                 try {
-                                    let id = _.find(self.layout.main.tabs,{type:'aiGroup'}).name;
+                                    let id = _.find(this.layout.main.tabs,{type:'aiGroup'}).name;
                                     if(id){
-                                        self.detailRemove(id);
+                                        this.detailRemove(id);
                                     }
                                 } catch(err){
 
@@ -2268,9 +2395,6 @@ class Event {
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            
-                            //event.resizeEventConsole();
                         },
                         toggleSummaryByRefresh(evt){
                             const self = this;
@@ -2287,9 +2411,6 @@ class Event {
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            
-                            //event.resizeEventConsole();
                         },
                         aiGroup(){
                             try {
@@ -2362,8 +2483,6 @@ class Event {
                                 _.delay(function(){
                                     // RESIZE Event Summary
                                     eventHub.$emit("WINDOW-RESIZE-EVENT");
-                                    // RESIZE Event Console
-                                    //event.resizeEventConsole();
                                 },500)
                             } catch(err){
                                 
@@ -2487,8 +2606,6 @@ class Event {
         
         window.addEventListener('resize', () => { 
             
-            //event.resizeEventConsole();
-
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
@@ -2496,54 +2613,4 @@ class Event {
         
     }
 
-    
-
-    // /* resizeEventConsole(){
-    //     let evwH = $(window).height();
-    //     let evcH = $("#event-view-container").height();
-    //     let evsH = $("#event-view-summary").height();
-        
-    //     $("#event-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-    //                                                     .css("max-height","-=225px")
-    //                                                     .css("max-height","-=" + evsH + "px")
-    //                                                     .css("min-height", evwH + "px")
-    //                                                     .css("min-height","-=225px")
-    //                                                     .css("min-height","-=" + evsH + "px");
-    // }
-
-    // /* resizeEventConsole(){
-    //     let evcH = $("#event-view-container").height();
-    //     let evsH = $("#event-view-summary").height();
-    //     let otherH = 120;
-    //     console.log(1,evcH)
-    //     $("#event-view-console .dataTables_scrollBody").css("max-height", evcH + "px")
-    //                                                     .css("max-height","-=" + evsH + "px")
-    //                                                     .css("max-height","-=" + otherH + "px")
-    //                                                     .css("min-height", evcH + "px")
-    //                                                     .css("min-height","-=" + evsH + "px")
-    //                                                     .css("min-height","-=" + otherH + "px");
-    // } */
-
-    // checkContainer(){
-    //     if($('#event-view-container').is(':visible')) {
-    //         this.layout();
-    //         this.resizeContainer();
-    //     } else {
-    //         setTimeout(this.checkContainer, 50);
-    //     }
-    // }
-
-    // resizeContainer(){
-        
-    //     let evwH = $(window).height();
-    //     let headerH = $("header#header").height();
-    //     let footerH = $("footer#footer").height();
-    //     let otherH = 45;
-
-    //     $("#event-view-container").css("min-height",evwH + "px")
-    //                                 .css("min-height","-=" + headerH + "px")
-    //                                 .css("min-height","-=" + footerH + "px")
-    //                                 .css("min-height","-=" + otherH + "px");
-        
-    // } */
 }

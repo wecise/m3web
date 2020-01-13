@@ -3,31 +3,10 @@
 	<style scoped>
 		
 		/* For Search Dropdown Panel */
-        .search-preset-component .dropdown-menu {
-            padding: 0;
-            font-size: 12px;
-            background-color: #fff;
-            border: 0px solid #ccc;
-            border: 0px solid rgba(0,0,0,.15);
-            border-radius: 0px;
-        }
-        .search-preset-component .dropdown-menu > .panel-group {
-            margin-bottom: 0px;
-        }
-
-        .search-preset-component .dropdown-menu > .panel-group .panel {
-            margin-bottom: 0px;
-            background-color: #fff;
-            border: 0px solid transparent;
-            border-radius: 0px;
-        }
-        .search-preset-component .dropdown-menu > .panel-group .panel+.panel {
-            margin-top: 0px;
-        }
-
-        .search-preset-component .panel-default>.panel-heading{
-            padding-top: 5px;
-            padding-bottom: 5px;
+        .search-preset .el-collapse-item__header{
+            height:32px;
+            line-height: 32px;
+            padding:5px;
 
             border: 1px solid #ccc;
             border-bottom: 0px;
@@ -41,7 +20,11 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
         }
 
-        .search-preset-component .panel-default>.panel-heading.active {
+        .search-preset.el-dropdown-menu--small {
+            padding: 0px 0!important;
+        }
+
+        .search-preset .el-collapse-item__header.is-active {
             color: #333;
             background-color: #def1fb;
             border: 1px solid #ccc;
@@ -50,24 +33,23 @@
 
         }
 
-        .search-preset-component .panel-group .panel-heading+.panel-collapse>.list-group,
-        .search-preset-component .panel-group .panel-heading+.panel-collapse>.panel-body {
-            border-top: 0px;
-        }
-
-        .search-preset-component .panel-default>.collapse {
-            border-left: 1px solid #ccc;
-            border-right: 1px solid #ccc;
-        }
-
-        .search-preset-component code {
+        .search-preset dl > dd > a:hover {
             cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
         }
 
-        .search-preset-component dl > dd > a:hover {
-            cursor: pointer;
+        .search-preset.el-dropdown-menu--small{
+            left: unset!important;
+            width: 40vw;
+            top: 82px!important;
+            right: 83px!important;
+        }
+
+        .search-preset .el-collapse-item__content{
+            padding: 10px;
+        }
+
+        .search-preset .el-button--small{
+            border-radius: 0px;
         }
 		
 	</style>
@@ -75,133 +57,75 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
 	<template>
-		<div>
-			<button type="button" class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border-left:none;">${preset.default.name} <span class="caret"></span></button>
-		    <div class="dropdown-menu dropdown-menu-right" style="width: 40vw;">
-		  
-		    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-		      	<div class="panel panel-default">
-			        <div class="panel-heading active" role="tab" id="headingOne">
-			          <span>
-			            <i class="fa fa-angle-down"></i>
-			            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-			              Presets
-			            </a>
-			          </span>
-			        </div>
-			        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-			            <div class="panel-body">
-			                <div class="row">
-			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-			                        <dl>
-			                            <dt>Nearest</dt>
-			                            <dd v-for="item in preset.nearest"><a @click="setByWindow(item)">${item.name}</a></dd>
-			                        </dl>
-			                    </div>
-			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-			                        <dl>
-			                            <dt>Real-time</dt>
-			                            <dd v-for="item in preset.realtime"><a @click="setByWindow(item)">${item.name}</a></dd>
-			                        </dl>
-			                    </div>
-			                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-			                        <dl>
-			                            <dt>Relative</dt>
-			                            <dd v-for="item in preset.relative"><a @click="setByWindow(item)">${item.name}</a></dd>
-			                        </dl>
-			                    </div>
-			                </div>
-			            </div>
-			        </div>
-		      	</div>
-			    <div class="panel panel-default">
-			        <div class="panel-heading" role="tab" id="headingTwo">
-			          <span>
-			            <i class="fa fa-angle-right"></i>
-			            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-			              Date Range
-			            </a>
-			          </span>
-			        </div>
-			        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-			            <div class="panel-body">
-			                <span style="display: -webkit-box;">
-			                    <input class="range_from" type="text" placeholder="Date time.."></p>
-			                    <i class="fa fa-cogs" style="padding: 0px 10px;"></i>
-			                    <input class="range_to" type="text" placeholder="Date time.."></p>
-			                    <a class="btn btn-xs btn-success" @click="setByRange()" style="height: 22px;margin-left: 10px;">Apply</a>
-			                </span>
-			            </div>
-			        </div>
-			    </div>
-		      	<div class="panel panel-default">
-			        <div class="panel-heading" role="tab" id="headingThree">
-			          <span>
-			            <i class="fa fa-angle-right"></i>
-			            <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-			              Advanced
-			            </a>
-			          </span>
-			        </div>
-			        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-			          <div class="panel-body">
-			              <div class="row">
-			                  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-			                      <dl>
-			                          <dt>Search For Time</dt>
-			                          <dd>
-			                              <div class="radio">
-			                                  <label>
-			                                      <input type="radio" id="input-systime" value=" for vtime " v-model="preset.others.forTime" checked> System Time(vtime)
-			                                  </label>
-			                              </div>
-			                              <div class="radio">
-			                                  <label>
-			                                      <input type="radio" id="input-usertime" value=" for ctime " v-model="preset.others.forTime" checked> User Time(ctime)
-			                                  </label>
-			                              </div>
-			                              <div class="radio">
-			                                  <label>
-			                                      <input type="radio" id="input-biztime" value=" for firstoccurrence " v-model="preset.others.forTime" > Firstoccurrence
-			                                  </label>
-			                              </div>
-			                              <div class="radio">
-			                                  <label>
-			                                      <input type="radio" id="input-biztime" value=" for lastoccurrence " v-model="preset.others.forTime" > Lastoccurrence
-			                                  </label>
-			                              </div>
-			                              <div class="radio">
-			                                  <label>
-			                                      <input type="radio" id="input-nonetime" value="" v-model="preset.others.forTime" checked> None Time
-			                                  </label>
-			                              </div>
-			                          </dd>
-			                      </dl>
-			                  </div>
-			                  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px dashed #ccc;">
-			                        <dl>
-			                            <dt>Other</dt>
-			                            <dd>
-			                                <div class="checkbox">
-			                                  <label>
-			                                    <input type="checkbox" id="input-hisdata" v-model="preset.others.ifHistory" checked> Contains history data
-			                                  </label>
-			                                </div>
-											<div class="checkbox">
-												<label>
-													<input type="checkbox" id="input-debug" v-model="preset.others.ifDebug"> Debug
-												</label>
-											</div>
-			                            </dd>
-			                        </dl>
-			                  </div>
-			              </div>
-			          </div>
-			        </div>
-		      	</div>
-		    </div>
-		    </div>
-		</div>
+		<el-dropdown placement="bottom" trigger="click">
+			<el-button type="default">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+			<el-dropdown-menu slot="dropdown" class="search-preset">
+
+				<el-collapse value="1" accordion>
+					<el-collapse-item title="Presets" name="1">
+						<el-row :gutter="20">
+							<el-col :span="8">
+								<h5>Nearest</h5>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.nearest,{value:options.window.value}).name">
+									<p v-for="item in preset.nearest"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+							<el-col :span="8" style="border-left:1px dashed #ccc;">
+								<h5>Real-time</h5>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.realtime,{value:options.window.value}).name">
+									<p v-for="item in preset.realtime"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+							<el-col :span="8" style="border-left:1px dashed #ccc;">
+								<h5>Relative</h5>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.relative,{value:options.window.value}).name">
+									<p v-for="item in preset.relative"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+						</div>
+					</el-collapse-item>
+					<el-collapse-item title="Date Range" name="2">
+						<el-container>
+							<el-main>
+								<el-date-picker
+									v-model="preset.range"
+									type="datetimerange"
+									range-separator="to"
+									start-placeholder="Begining Date"
+									end-placeholder="End Date"
+									:default-time="['00:00:00']">
+								</el-date-picker>
+							</el-main>
+						<el-container>
+					</el-collapse-item>
+					<el-collapse-item title="Advanced" name="3">
+						<el-row :gutter="20">
+							<el-col :span="12">
+								<dl>
+									<dt>Search For Time</dt>
+									<dd>
+										<el-radio-group v-model="options.others.forTime">
+											<p style="padding-top:10px;"><el-radio label=" for vtime ">System Time(vtime)</el-radio></p>
+											<p></p><el-radio label=" for ctime ">User Time(ctime)</el-radio></p>
+											<p><el-radio label=" for firstoccurrence ">Firstoccurrence</el-radio></p>
+											<p><el-radio label=" for lastoccurrence ">Lastoccurrence</el-radio></p>
+										</el-radio-group>
+									</dd>
+								</dl>
+							</el-col>
+							<el-col :span="12" style="border-left:1px dashed #ddd;">
+								<dl>
+									<dt>Other</dt>
+									<dd>
+										<p style="padding-top:10px;"><el-checkbox v-model="options.others.ifHistory">Contains history data</el-checkbox></p>
+									</dd>
+								</dl>
+							</el-col>
+						</el-row>
+					</el-collapse-item>
+				</el-collapse>
+			</el-dropdown-menu>
+		</el-dropdown>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -210,22 +134,11 @@
 	   
 	    delimiters: ['${', '}'],
 		props:{
-	        id: String,
-			options: Object,
+	        options: Object,
 		},
 	    data(){
-	        return {
-	            
+	        return { 
 				preset: {
-							default: _.extend({ name:"Nearest 1 day",
-										value: " nearest 1 day ",
-										class: "",
-										term: "",
-										others: {
-											ifHistory: false,
-											ifDebug: false,
-											forTime:  " for vtime ",
-										}},this.options),
 							nearest: [
 									{"name":"Nearest 30 second", value: " | nearest 30 seconds "},
 									{"name":"Nearest 1 minute", value: " | nearest 1 minutes "},
@@ -269,98 +182,47 @@
 								forTime:  ' for vtime ',
 							}
 						}
-
 	        }
 	    },
-		watch: {
-                'preset.default': {
-                    handler:function(val,oldVal){
-
-
-                        if (val.name === 'All Time'){
-                            this.preset.default.others.forTime = "";
+		watch:{
+                'preset.range':{
+                    handler(val,oldVal){
+                        if(val[0] && val[1]){
+                            let value = " window " + moment(val[0]).format(mx.global.register.format) + " to " + moment(val[1]).format(mx.global.register.format);
+                            this.options.window = {name: value, value: value};
                         }
-
                     },
                     deep:true
                 }
-            },
-            created:function(){
-                eventHub.$emit('preset-selected-event', this.preset);
-            },
-            mounted: function() {
-                let self = this;
+        },
+		mounted() {
 
-                self.$nextTick(function(){
+			this.$nextTick(()=>{
 
-                    // 搜索预定义
+				// 搜索预定义
+				$(this.$el).find("a[data-toggle='collapse']").click((event)=>{
 
-                    $(self.$el).find("a[data-toggle='collapse']").click(
-                        function(event) {
+						var href = event.target.href.split("#")[1];
 
-                            var href = event.target.href.split("#")[1];
+						event.stopPropagation();
+						event.preventDefault();
+						$(this.$el).find(".in").removeClass("in");
+						$(this.$el).find("#"+href).collapse("toggle");
+						$(this.$el).find("in").collapse("toggle");
 
-                            event.stopPropagation();
-                            event.preventDefault();
-                            $(self.$el).find(".in").removeClass("in");
-                            $(self.$el).find("#"+href).collapse("toggle");
-                            $(self.$el).find("in").collapse("toggle");
+						$(this.$el).find(".panel-heading").removeClass('active');
+						$(this).parent().parent().toggleClass('active');
 
-                            $(self.$el).find(".panel-heading").removeClass('active');
-                            $(this).parent().parent().toggleClass('active');
+						$(this.$el).find("i").removeClass('fa-angle-down');
+						$(this.$el).find("i").addClass(' fa-angle-right');
 
-                            $(self.$el).find("i").removeClass('fa-angle-down');
-                            $(self.$el).find("i").addClass(' fa-angle-right');
-
-                            $(this).parent().parent().find("i").removeClass(' fa-angle-right');
-                            $(this).parent().parent().find("i").addClass(' fa-angle-down');
-                        }
-                    );
-
-                    self.initRange();
-                })
-            },
-            methods: {
-                initRange: function(){
-                    let self = this;
-
-                    let sDate = $(".range_from").flatpickr({
-                        locale: "en",
-                        enableTime: true,
-                        time_24hr: true,
-                        onChange: function(selectedDates, dateStr, instance) {
-                            self.preset.range.from = dateStr;
-                        }
-                    });
-                    let eDate = $(".range_to").flatpickr({
-                        locale: "en",
-                        enableTime: true,
-                        time_24hr: true,
-                        onChange: function(selectedDates, dateStr, instance) {
-                            self.preset.range.to = dateStr;
-                        }
-                    });
-
-                    self.$once('hook:beforeDestroy', function () {
-                        sDate.destroy()
-                        eDate.destroy();
-                    })
-                },
-                setByWindow: function(event){
-                    _.extend(this.preset.default,event);
-                },
-                setByRange: function(){
-                    if(!_.isEmpty(this.preset.range.from) && !_.isEmpty(this.preset.range.to)){
-                        var range = {
-                            name: this.preset.range.from + "-" + this.preset.range.to,
-                            value: " window " + this.preset.range.from + " to " + this.preset.range.to
-                        };
-                        _.extend(this.preset.default,range);
-                    }
-                }
-            }
-
-        }
+						$(this).parent().parent().find("i").removeClass(' fa-angle-right');
+						$(this).parent().parent().find("i").addClass(' fa-angle-down');
+					}
+				);
+			})
+		}
+    }
     </script>
 
 </code>
