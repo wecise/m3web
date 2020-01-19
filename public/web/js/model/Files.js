@@ -243,7 +243,7 @@ class Files {
 
                 mxFile.app = new Vue({
                     delimiters: ['${', '}'],
-                    template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
+                    template:   `<el-container style="height:calc(100vh - 85px);background:#ffffff;">
                                     <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" class="split" id="api-view-left">
                                         <api-view-tree id="api-view-tree"></api-view-tree>
                                     </el-aside>

@@ -398,7 +398,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 180px);">
                                     <el-main><el-row :gutter="10">
                                     <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
                                         <div class="grid-content" style="text-align:center;">
@@ -490,7 +490,7 @@ class Performance extends Matrix {
                             trends: []
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 180px);">
                                     <el-header style="height: 30px;
                                                         padding: 0px 10px;
                                                         line-height: 20px;">
@@ -551,7 +551,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 180px);">
                                     <el-main><el-card class="box-card">
                                         <div slot="header" class="clearfix">
                                             <h4>
@@ -650,7 +650,7 @@ class Performance extends Matrix {
                             splitInst: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 180px);">
                                     <el-aside class="split" :id="id+'-topological-view-left'">
                                         
                                     </el-aside>

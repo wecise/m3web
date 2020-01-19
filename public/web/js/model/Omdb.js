@@ -1791,7 +1791,8 @@ class Omdb{
                                     },
                                     model: {
                                         ifData: false, 
-                                        limit: 0,
+                                        ifAllData: false,
+                                        limit: 10,
                                         recursive: true,
                                         filetype: 'mql',
                                         template: true,
@@ -1799,13 +1800,28 @@ class Omdb{
                                         ignoreClass: '/matrix/filesystem'
                                     }
                                 },
+                                watch: {
+                                    'model.ifData':function(val,oldVal){
+                                        if(!val){
+                                            this.model.limit = 0;
+                                        }
+                                    },
+                                    'model.ifAllData':function(val,oldVal){
+                                        if(val){
+                                            this.model.limit = -1;
+                                        }
+                                    }
+                                },
                                 template: `<el-container style="height:100%;">
-                                                <el-header style="height: 35px;line-height: 35px;padding: 0 5px;background: #f6f6f6;">
-                                                    <el-checkbox v-model="model.ifData" style="height: 35px;line-height: 35px;">导出数据</el-checkbox>
-                                                    <el-radio-group v-model="model.filetype" style="height: 35px;line-height: 35px;padding: 3px;">
-                                                        <el-radio label="mql">导出MQL</el-radio>
-                                                        <el-radio label="xlsx">导出Excel</el-radio>
-                                                    </el-radio-group>
+                                                <el-header style="height:auto;line-height:40px;min-height:40px;background: #f6f6f6;">
+                                                    <el-checkbox v-model="model.ifData" label="导出数据"></el-checkbox>
+                                                    <p v-if="model.ifData">
+                                                        <el-radio-group v-model="model.ifAllData">
+                                                            <el-radio :label="true" border>导出所有数据</el-radio>
+                                                            <el-radio :label="false" border>导出部分数据</el-radio>
+                                                        </el-radio-group>
+                                                        <el-input-number v-model="model.limit" v-if="!model.ifAllData && model.ifData != -1" style="width:30%;margin-left:10px;"></el-input-number>  
+                                                    </p>
                                                 </el-header>
                                                 <el-main style="padding:10px;">
                                                     <el-tree
@@ -1823,7 +1839,8 @@ class Omdb{
                                                 </el-main>
                                                 <el-footer style="height:40px;line-height:40px;text-align:right;">
                                                     <el-button type="default" @click="onCancel">取消</el-button>
-                                                    <el-button type="primary" @click="onExport">导出</el-button>
+                                                    <el-button type="primary" @click="onExport('mql')">导出MQL</el-button>
+                                                    <el-button type="primary" @click="onExport('xlsx')">导出Excel</el-button>
                                                 </el-footer>
                                             </el-container>`,
                                 created(){
@@ -1839,7 +1856,10 @@ class Omdb{
                                     onCancel(){
                                         wnd.close();
                                     },
-                                    onExport(){
+                                    onExport(type){
+
+                                        this.model.filetype = type;
+
                                         //获取所有Class
                                         let allNodes = fsHandler.callFsJScript("/matrix/omdb/getClassList.js",encodeURIComponent(this.model.class)).message;
                                         //checked Class
@@ -1849,11 +1869,11 @@ class Omdb{
                                         _.extend(this.model, {ignoreClass: _.concat(this.model.ignoreClass,_.xor(allNodes,checkedClass)) } );
 
                                         if(this.model.ifData){
-                                            this.model.limit = -1;
+                                            //this.model.limit = -1;
                                             this.model.template = false;
                                         } else {
                                             this.model.template = true;
-                                            this.model.limit = 0;
+                                           // this.model.limit = 0;
                                         }
                                         let rtn = omdbHandler.classDataExport(this.model);
                                         this.$message({

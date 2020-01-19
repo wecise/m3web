@@ -459,25 +459,34 @@
                     sc = self.editor.getSelectedText();
                 }*/
 
-                alertify.confirm(`确认要更新?<br><br>
-                    名称：${self.model.fs.fullname}<br><br>
-                    类型：${self.model.fs.ftype}`, function (e) {
-                    if (e) {
-                        // save
-                        let sRtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
+                const h = this.$createElement;
+                this.$msgbox({
+                        title: "确认要更新该文件?",
+                        message: h('span', null, [
+                            h('p', null, `名称：${self.model.fs.fullname}`),
+                            h('p', null, `类型：${self.model.fs.ftype}`)
+                        ]),
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消'
+                }).then(() => {
+                    let rtn = fsHandler.fsNew(self.model.fs.ftype, self.model.fs.parent, self.model.fs.name, sc, _.attempt(JSON.parse.bind(null, self.model.fs.attr)));
 
-                        if(sRtn == 0){
-                            alertify.log("请确认脚本！");
-                            return false;
-                        }
-
-                        self.editor.session.getUndoManager().markClean();
-                        self.updateToolbar();
-                    } else {
-                        
+                    if(rtn == 0){
+                        this.$message({
+                            type: 'success',
+                            message: '请确认脚本！'
+                        });
+                        done();
+                        return false;
                     }
+
+                    self.editor.session.getUndoManager().markClean();
+                    self.updateToolbar();
+                    
+                }).catch(()=>{
+
                 });
-                
 
             },
             runIt(){

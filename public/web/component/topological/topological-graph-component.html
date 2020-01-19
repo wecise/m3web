@@ -14,25 +14,7 @@
             position: unset!important;
         }
 
-        /* .topological-graph-component .container {
-            position: absolute;
-            z-index: 10000;
-            right: 0px;
-            left: 60px;
-            top: 80px;
-            bottom: 28px;
-            cursor: default;
-            overflow: auto;
-        }
-        */
-        
         .topological-graph-component .container > svg {
-            /* width: 100%!important;
-            height: 100%!important;
-            cursor: default;
-            display: block;
-            position: absolute;
-            background-image: none; */
             min-width: 100vw!important;
             min-height: 100vh!important;
         }
@@ -51,7 +33,10 @@
 			border: 1px solid rgb(42, 147, 249);
 		}
 
-		
+		.topological-graph-component .el-input--small .el-input__inner {
+            height: 33px;
+            line-height: 33px;
+        }
 
         .topological-graph-component .form-control-transparent{
             border-bottom: unset;
@@ -69,18 +54,6 @@
 		.topological-graph-component .node-menu{
 			width:20vw;
 		}
-
-		.topological-graph-component .nav{
-			background: #f7f7f7;
-            border-bottom: 1px solid #f7f7f7;
-            position: relative;
-            top: 0;
-            left: 0;
-            height: 32px;
-            line-height: 32px;
-            /* box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
-            display: flex;
-        }
 
         .topological-graph-component .tools-search {
 			width: 100%;
@@ -222,6 +195,12 @@
             border:none;
         }
 
+        .topological-graph-component .el-input-group__append, 
+        .topological-graph-component .el-input-group__prepend,
+        .topological-graph-component .el-input__inner{
+            border-radius: 0px;
+        }
+
         .el-color-dropdown.el-color-picker-dropdown.el-color-picker__panel{
             z-index: 30000!important;
         }
@@ -241,29 +220,10 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;">
-            <el-container :id="id" style="height:100%;">
-                <el-header class="nav" :id="id+'-nav'" style="height:30px;line-height: 30px;padding:0px 0px 0px 10px;">
-                    <div class="tools" :id="id+'-tools'">
-                        <el-tooltip content="图查询" open-delay="500">
-                            <el-button type="text" @click="path" class="el-icon-search" style="font-size:18px;padding:0px 4px 4px 0px;"></el-button>
-                        </el-tooltip>
-                        <el-tooltip content="编辑" open-delay="500">
-                            <a href="javascript:void(0);" @click="editIt">
-                                <img :src="'design' | genFileName" style="width:18px;height:18px;"></el-button>
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="另存为" open-delay="500">
-                            <a href="javascript:void(0);" @click="saveas">
-                                <img :src="'saveas' | genFileName" style="width:18px;height:18px;">
-                            </a>
-                        </el-tooltip>
-                        <el-tooltip content="图节点显示名称选择" open-delay="500">
-                            <div :id="'attributes-select-'+id"></div>
-                        </el-tooltip>
-                    </div>
-                    <graph-view-manager class="tools-manager" :id="id+'-tools-manager'"></graph-view-manager>
-                    <graph-view-search class="tools-search" :id="id+'-tools-search'"></graph-view-search>
-                    <div class="outlineContainer" :id="id+'-outlineContainer'"></div>
+            <el-container id="container" style="height:100%;" ref="container">
+                <el-header class="nav" style="height:35px;line-height: 35px;padding:0px;margin:-1px -1px 0px;position: relative;">
+                    <graph-view-search class="tools-search" ref="toolsBar"></graph-view-search>
+                    <div id="outlineContainer" class="outlineContainer"></div>
                     <div class="vertical-toolbar">
                         <el-tooltip content="放大" open-delay="500" placement="left">
                             <a href="javascript:void(0);" @click="zoomIn">
@@ -304,7 +264,6 @@
                         <el-tooltip content="调整图背景" open-delay="500">
                             <el-color-picker
                                 v-model="model.graph.theme.color"
-                                show-alpha
                                 :predefine="model.graph.theme.predefineColors"
                                 @change="theme"
                                 style="padding:4px 8px;">
@@ -327,11 +286,10 @@
                             
                     </div>
                 </el-header>
-                <el-main :id="id+'-container'" style="height:calc(100vh - 110px);padding:0px;">
-                </el-main>
+                <el-main id="graphContainer" style="height:calc(100vh - 110px);padding:0px;" ref="graphContainer" style="border:1px solid #ddd;border-top:unset;padding:0px;"></el-main>
                 <transition-group tag="el-footer" class="footerbar animated fadeInRight" :style="{display: model.graph.footbar.show?'':'none'}">
                     <el-tooltip :content="item.term" v-for="(item,index) in model.graph.history" effect="light" :key="item.id" class="animated fadeIn">
-                        <a href="javascript:void(0);" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")} <span class="fas fa-copy copy" @click="onCopy(item.term)"></span></a>
+                        <el-link href="javascript:void(0);" :underline="false" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")} <span class="fas fa-copy copy" @click="onCopy(item.term)"></span></el-link>
                     </el-tooltip>
                 </transition-group>
             </el-container>
@@ -383,7 +341,8 @@
 	                    parent: null,
                         outline: null,
                         default: {
-                            title: 'name'
+                            title: 'name',
+                            list: []
                         },
                         theme:{
                             color: "#FFFFFF",
@@ -430,13 +389,12 @@
             this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
 	    },
 	    mounted() {
-	        const self = this;
+	        
+	        this.$nextTick(()=>{
 
-	        self.$nextTick(function(){
-
-                _.delay(function(){
-                    self.init();
-                    self.initPlugIn();
+                _.delay(()=>{
+                    this.init();
+                    this.initPlugIn();
                 },500)
 	            
 	        })
@@ -445,16 +403,14 @@
             init() {
                 const self = this;
 
-                if (!mxClient.isBrowserSupported())
-                {
+                if (!mxClient.isBrowserSupported()){
                     // Displays an error message if the browser is
                     // not supported.
                     mxUtils.error('Browser is not supported!', 200, false);
-                }
-                else
-                {
-
-                    self.model.graph.container = document.getElementById(`${self.id}-container`);
+                } else {
+                    
+                    self.model.graph.container = document.getElementById(this.$refs.graphContainer.$el.id);
+                    
                     // 滚动效果
                     // self.model.graph.container.style.minHeight = "80vh";
                     
@@ -465,7 +421,7 @@
                     self.model.graph.container.style.top = '0px';
                     self.model.graph.container.style.right = '0px';
                     self.model.graph.container.style.bottom = '0px';
-                    document.getElementById(self.id).appendChild(self.model.graph.container);
+                    document.getElementById(this.$refs.container.$el.id).appendChild(self.model.graph.container);
 
                     //mxEvent.disableContextMenu(self.model.graph.container);
 
@@ -552,29 +508,6 @@
                     self.model.graph.layout.hierarchical = new mxHierarchicalLayout(self.model.graph.graph);
                     // self.model.graph.layout.organic = new mxFastOrganicLayout(self.model.graph.graph);
                     self.model.graph.layout.default = self.model.graph.layout.hierarchical;
-/*
-                    let layout = new mxStackLayout(self.model.graph.graph);
-                    layout.border = self.model.graph.graph.border;
-                    var layoutMgr = new mxLayoutManager(self.model.graph.graph);
-                    layoutMgr.getLayout = function(cell){
-                        if (!cell.collapsed){
-                            if (cell.parent != self.model.graph.graph.model.root){
-                                layout.resizeParent = true;
-                                layout.horizontal = false;
-                                layout.spacing = 10;
-                            } else {
-                                layout.resizeParent = true;
-                                layout.horizontal = true;
-                                layout.spacing = 40;
-                            }
-                            
-                            
-                            return layout;
-                        }
-                        
-                        return null;
-                    };
-*/
                     self.model.graph.parent = self.model.graph.graph.getDefaultParent();
 
                     self.initGraph();
@@ -583,33 +516,29 @@
                 }
             },
             deleteCells(includeEdges){
-                const self = this;
                 
                 // Cancels interactive operations
-                self.model.graph.graph.escape();
-                var cells = self.model.graph.graph.getDeletableCells(self.model.graph.graph.getSelectionCells());
+                this.model.graph.graph.escape();
 
-                if (cells != null && cells.length > 0)
-                {
-                    var parents = self.model.graph.graph.model.getParents(cells);
-                    self.model.graph.graph.removeCells(cells, includeEdges);
+                var cells = this.model.graph.graph.getDeletableCells(this.model.graph.graph.getSelectionCells());
+
+                if (cells != null && cells.length > 0){
+                    var parents = this.model.graph.graph.model.getParents(cells);
+                    this.model.graph.graph.removeCells(cells, includeEdges);
                     
                     // Selects parents for easier editing of groups
-                    if (parents != null)
-                    {
+                    if (parents != null) {
                         var select = [];
                         
-                        for (var i = 0; i < parents.length; i++)
-                        {
-                            if (self.model.graph.graph.model.contains(parents[i]) &&
-                                (self.model.graph.graph.model.isVertex(parents[i]) ||
-                                self.model.graph.graph.model.isEdge(parents[i])))
-                            {
+                        for (var i = 0; i < parents.length; i++) {
+                            if (this.model.graph.graph.model.contains(parents[i]) &&
+                                (this.model.graph.graph.model.isVertex(parents[i]) ||
+                                this.model.graph.graph.model.isEdge(parents[i]))){
                                 select.push(parents[i]);
                             }
                         }
                         
-                        self.model.graph.graph.setSelectionCells(select);
+                        this.model.graph.graph.setSelectionCells(select);
                     }
                 }
             },
@@ -686,8 +615,6 @@
                         } catch(err){
                             
                         }
-
-                        console.log("Nodes="+allNodes.length, "Edges="+allEdges.length);
 
                         // 绘制节点
                         _.forEach(allNodes,function(v){
@@ -777,7 +704,10 @@
                 {
                     self.model.graph.graph.getModel().endUpdate();
 
-                    self.toCenter();
+                    // 判断节点数量 是否居中显示图
+                    if(allNodes.length <= 20){
+                        self.toCenter();
+                    }
 
                     setInterval(()=>{
                         this.updateStatus();
@@ -850,16 +780,22 @@
                     //设置主题
                     this.theme(this.model.graph.theme.color);
                     // 初始化ToolBar
-                    this.toolBars();
+                    this.nodeTitle();
                 },500)
             },
             reload(){
                 if(this.model.graph.graph){
-                    $(this.$el).find(`#${this.id}-container`).empty();
-                    $(this.$el).find(`#${this.id}-outlineContainer`).empty();
+                    
+                    $(this.$refs.graphContainer.$el).empty();
+                    $("#outlineContainer",this.$el).empty();
+
                     this.deleteCells();
                     this.init();
+                    
                     this.outline();
+
+                    this.theme(this.model.graph.theme.color);
+
                     // 更新toobar属性选择列表
                     eventHub.$emit(`UPDATE-ATTRIBUTES-EVENT-${this.id}`,this.graphData);
                 }
@@ -914,10 +850,6 @@
                     
                 };
             },
-            tip(event){
-                const self = this;
-                alertify.log(event + ' ' + moment().format("LLL"));
-            },
             expandHorizontalBar(){
                 this.model.graph.footbar.show = !this.model.graph.footbar.show;
             },
@@ -928,12 +860,7 @@
                 this.$root.$refs.graphViewRef.search( encodeURIComponent(item.term));
             },
             outline(){
-                const self = this;
-
-                let outline = document.getElementById(`${self.id}-outlineContainer`);
-
-                self.model.graph.outline = new mxOutline(self.model.graph.graph, outline);
-
+                this.model.graph.outline = new mxOutline(this.model.graph.graph, $("#outlineContainer",this.$el)[0]);
             },
 		    saveas(){
 				const self = this;
@@ -967,85 +894,30 @@
                 $(".alertify-prompt .alertify-message").css('height','5vh');
 
 		    },
-            toolBars() {
-                const self = this;
+            nodeTitle() {
 
-                // 插入属性选择
-                let id = `attributes-select-${self.id}`;
-                new Vue({
-                        data: {
-                            options: [],
-                            value: 'name'
-                        },
-                        watch:{
-                            value: function(val,oldVal){
-                                self.model.graph.default.title = this.value;
-                                self.reload();
-                            }
-                        },
-                        template:   `<el-select v-model="value" placeholder="请选择" style="padding-left:5px;">
-                                        <span class="fas fa-bars" slot="prefix"></span>
-                                        <el-option
-                                        v-for="item in options"
-                                        :key="item.value"
-                                        :label="item.label"
-                                        :value="item.value">
-                                        </el-option>
-                                    </el-select>`,
-                        created(){
-                            const me = this;
+                // 文件图模式
+                if(window.URL_PARAMS_ITEM){
+                    this.model.graph.default.list = [{value: "id", label: "ID"},{value: "value", label: "Value"}];    
+                } else {
+                    this.model.graph.default.list = _.sortBy(_.map(_.keys(this.graphData.nodes[0]),function(v){
+                        let k = v;//.replace(/_/g,"");
+                        return {value: k, label: k};//_.capitalize(k)};
+                    }),['value'])
+                }
 
-                            // 文件图模式
-                            if(window.URL_PARAMS_ITEM){
-                                me.options = [{value: "id", label: "ID"},{value: "value", label: "Value"}];    
-                            } else {
-                                me.options = _.sortBy(_.map(_.keys(self.graphData.nodes[0]),function(v){
-                                    let k = v;//.replace(/_/g,"");
-                                    return {value: k, label: k};//_.capitalize(k)};
-                                }),['value'])
-                            }
-
-                            // 图数据更行后，更新属性选择列表
-                            eventHub.$on(`UPDATE-ATTRIBUTES-EVENT-${self.id}`,function(event){
-                                me.options = _.sortBy(_.map(_.keys(event.nodes[0]),function(v){
-                                    let k = v;//v.replace(/_/g,"");
-                                    return {value: k, label: k};// _.capitalize(k)};
-                                }),['value'])
-                            });
-                        },
-                        mounted(){
-                            _.delay(() => {
-                                $(".el-input--small .el-input__inner",this.$el).css({
-                                    "border":"unset",
-                                    "backgroundColor": "transparent"
-                                });
-                                /* 
-                                $(".el-input--small",this.$el).css({
-                                    "fontSize": "12px"
-                                });
-
-                                $(".el-select--small").css({
-                                    "width": "120px",
-                                    "height": "22px",
-                                    "line-height": "22px",
-                                    "float": "right"
-                                });
-
-                                $(".el-input__suffix",this.$el).css({
-                                    "display": "none"
-                                });
-                                */
-                            },50)
-                        }                                    
-
-                    }).$mount(`#${id}`);
+                // 图数据更行后，更新属性选择列表
+                eventHub.$on(`UPDATE-ATTRIBUTES-EVENT-${self.id}`,function(event){
+                    this.model.graph.default.list = _.sortBy(_.map(_.keys(event.nodes[0]),function(v){
+                        let k = v;//v.replace(/_/g,"");
+                        return {value: k, label: k};// _.capitalize(k)};
+                    }),['value'])
+                });
 
             },
             toCenter(){
 
-                const self = this;
-
-                self.model.graph.graph.center(true,true,0,0);//将画布放到容器中间
+                this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
 
                 /* 
                 //self.model.graph.graph.fit();
@@ -1164,8 +1036,7 @@
             layout(){
                 this.model.graph.graph.getModel().beginUpdate();
 
-                try
-                {
+                try {
                     if(this.model.graph.orientation.value == 0){
                         this.model.graph.orientation.value = 1;
                     } else {
@@ -1176,9 +1047,7 @@
 
                     // Executes the layout
                     this.model.graph.layout.default.execute(this.model.graph.parent);
-                }
-                finally
-                {
+                } finally{
                     this.model.graph.graph.getModel().endUpdate();
                     this.toCenter();
                 }
@@ -1188,12 +1057,43 @@
                 let preview = new mxPrintPreview(this.model.graph.graph, scale);
                 preview.open();
             },
-            theme(event){
-                $(`#${this.id}-container`).css({
-                    "backgroundColor":event
-                })
+            theme(bgColor){
 
-                localStorage.setItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`,event);
+                $(this.$refs.graphContainer.$el).css({
+                    "backgroundColor":bgColor
+                });
+
+                $("svg g div",this.$el).css({
+                    "color": this.themeFont(bgColor)
+                });
+
+                localStorage.setItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`,bgColor);
+            },
+            themeFont(hexcolor){
+
+                // If a leading # is provided, remove it
+                if (hexcolor.slice(0, 1) === '#') {
+                    hexcolor = hexcolor.slice(1);
+                }
+
+                // If a three-character hexcode, make six-character
+                if (hexcolor.length === 3) {
+                    hexcolor = hexcolor.split('').map(function (hex) {
+                        return hex + hex;
+                    }).join('');
+                }
+
+                // Convert to RGB value
+                var r = parseInt(hexcolor.substr(0,2),16);
+                var g = parseInt(hexcolor.substr(2,2),16);
+                var b = parseInt(hexcolor.substr(4,2),16);
+
+                // Get YIQ ratio
+                var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+
+                // Check contrast
+                return (yiq >= 128) ? 'black' : 'white';
+
             },
             zoomIn(){
                 this.model.graph.graph.zoomIn();
@@ -1219,10 +1119,9 @@
                 window.open(url, "_parent");
             },
             onCopy(item){
-                const self = this;
                 new Clipboard("span.copy", {
-                    text: function(trigger) {
-                        self.$message("已复制");
+                    text: (trigger) => {
+                        this.$message("已复制");
                         return item;
                     }
                 });

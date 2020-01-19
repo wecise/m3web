@@ -2263,17 +2263,23 @@
                         return false;
                     }
     
-            
-                    alertify.confirm(`确定要删除 ${self.rootPath} 目录下的选定文件：<br><br> ${_.map(self.selectedItem,'name').join("<br>")}`, function (e) {
-                        if (e) {
-                            _.forEach(self.selectedItem, function(v){
-                                self.deleteIt(v, false);
-                            })
-                        } else {
-                            
-                        }
+                    const h = this.$createElement;
+                    this.$msgbox({
+                            title: `确定要删除选定文件?`,
+                            message: h('span', null, _.concat(h('p', null, `目录：${self.rootPath}`),_.map(self.selectedItem,(v)=>{ return h('p', null, v.name); })) ),
+                            showCancelButton: true,
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning',
+                    }).then(() => {
+                        _.forEach(self.selectedItem, function(v){
+                            self.deleteIt(v, false);
+                        })
+                        
+                    }).catch(()=>{
+
                     });
-    
+
                 },
                 deleteIt(event, prompt) {
                     const self = this
@@ -2591,6 +2597,7 @@
                                                         <el-tabs v-model="tabs.activeIndex" type="border-card" 
                                                                 style="height:100%;" 
                                                                 closable 
+                                                                @tab-click="onTabClick"
                                                                 @tab-remove="tabRemove">
                                                             <el-tab-pane
                                                                 :key="item.name"
@@ -2655,6 +2662,10 @@
                                     },50)
                                 },
                                 methods: {
+                                    onTabClick(tab){
+                                        console.log(1,tab.name, this.tabs.activeNode, this.tabs.activeIndex, this.tabs.list)
+                                        //this.tabs.activeNode = _.find(this.tabs.list,{name:val});
+                                    },
                                     tabClose(key,tab){
                                         const self = this;
 
@@ -2673,7 +2684,7 @@
                                         }
                                     },
                                     tabAdd(item){
-                                        console.log(2,item)
+                                        
                                         try {
                                             let pID = objectHash.sha1([item.parent,item.name].join("/"));
                                             
@@ -2723,6 +2734,7 @@
                                         fileSystem.fileNewTo(this.tree.root,window.fsSelectedItem,self.load);
                                     },
                                     onNewFile(){
+                                        let node = _.find(this.tabs.list,{name:this.tabs.activeIndex}).model;
                                         fileSystem.fileNew(node.parent,self.load);
                                     },
                                     onCloseTab(){
@@ -2735,7 +2747,8 @@
                                         win.close();
                                     },
                                     onReload(){
-                                        let editor = ace.edit('editor-'+this.tabs.activeIndex);
+                                        let node = _.find(this.tabs.list,{name:this.tabs.activeIndex}).model;
+                                        let editor = ace.edit('editor-' + this.tabs.activeIndex);
                                         let rtn = fsHandler.fsContent(node.parent,node.name);
 
                                         if(editor){

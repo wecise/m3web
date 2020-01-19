@@ -48,7 +48,7 @@ class FileSystem {
                 }
             },
             template: `<el-container style="height:100%;">
-                            <el-header style="height:140px;line-height:140px;background-color:#f6f6f6;padding:10px;">
+                            <el-header style="height:180px;line-height:140px;background-color:#f6f6f6;padding:10px;">
                                 <el-form ref="form" :model="form" label-width="80px">
                                     <el-form-item label="项目名称：">
                                         <el-input v-model="form.name"></el-input>

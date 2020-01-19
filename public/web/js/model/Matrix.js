@@ -500,8 +500,9 @@ class Matrix {
 
         let open = function(url){ window.open(url,"_blank");};
         let rtn = fsHandler.callFsJScript('/matrix/footer/api_contextmenu.js', null).message || [];
-        
-        contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
+        _.delay(()=>{
+            contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
+        },500)
     }
 
     // 工具提示
@@ -527,6 +528,43 @@ class Matrix {
     fullScreen() {
         if (!document.fullscreenElement &&    // alternative standard method
             !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+
+    fullScreenByEl(el) {
+        if (el.requestFullscreen) {
+            el.requestFullscreen();
+        } else if (el.mozRequestFullScreen) { /* Firefox */
+            el.mozRequestFullScreen();
+        } else if (el.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+            el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) { /* IE/Edge */
+            el.msRequestFullscreen();
+        }
+    }
+
+    // 全屏控制 扩展
+    fullScreen(mode) {
+        if ( mode ) {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen();
             } else if (document.documentElement.msRequestFullscreen) {

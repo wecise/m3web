@@ -3,14 +3,15 @@
 clear
 
 PS3="Please select a option to upgrade the M³ System："
-options=("Upgrade web" "Upgrade web lib" "Upgrade web server" "Download FileSystem" "Upgrade Mql")
+options=("Upgrade web" "Upgrade web lib" "Upgrade web server" "Download FileSystem" "Export Excel&Data")
 user="matrix"
 host="47.92.151.165"
 auth="wecise.admin:admin"
 header="-H 'Accept: */*' -H 'Accept-Encoding: gzip, deflate' -H 'cache-control: no-cache'"
+excelHeader="-O -J"
 files=("app" "assets" "etc" "home" "opt" "script")
-filesTarget="/opt/matrix/web/templates"
-mql= ""
+#filesTarget="/opt/matrix/web/templates"
+filesTarget="/opt" 
 
 select choice in "${options[@]}" "Exit"; do
 
@@ -47,9 +48,11 @@ select choice in "${options[@]}" "Exit"; do
 			echo "";
 			echo "*************************************************************";;
 
-		5) echo "$choice"
+		5) echo "$choice";
 
-			curl -u "${auth}" "http://$host/mxobject/mql?${mql}";;
+			curl -u "${auth}" -X GET "http://$host/mxobject/export?recursive=true&filetype=xlsx&template=false&class=/matrix/devops/event&ignoreclass=/matrix/filesystem&limit=-1" ${excelHeader};
+			
+			echo "*************************************************************";;
 
 		6) echo "Exit";break;;
 

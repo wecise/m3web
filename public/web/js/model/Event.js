@@ -55,10 +55,14 @@ class Event {
                     watch: {
                         'model.rows': {
                             handler(val,oldVal){
-                                this.initData();
+                                if(val !== oldVal){
+                                    this.dt.rows = [];
+                                    this.initData();
+                                }
+
+                                this.layout();
                             },
-                            deep:true,
-                            //immediate:true
+                            deep:true
                         },
                         dt: {
                             handler(val,oldVal){
@@ -76,11 +80,14 @@ class Event {
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
                                         </el-tooltip>
+                                        <el-tooltip content="刷新" open-delay="500" placement="top">
+                                            <el-button type="text" @click="$root.$refs.searchRef.search" icon="el-icon-refresh"></el-button>
+                                        </el-tooltip>
                                         <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
                                             <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="导出" delay-time="500">
-                                            <el-dropdown @command="onExport">
+                                            <el-dropdown @command="onExport" style="margin-left:5px;">
                                                 <span class="el-dropdown-link">
                                                     <i class="el-icon-download el-icon--right"></i>
                                                 </span>
@@ -94,12 +101,25 @@ class Event {
                                                 </el-dropdown-menu>
                                             </el-dropdown>
                                         </el-tooltip>
+                                        <el-tooltip :content="$root.control.viewType" placement="top" open-delay="500">
+                                            <el-dropdown @command="$root.toggleView" style="margin-left:5px;">
+                                                <span class="el-dropdown-link">
+                                                    <el-button type="text" icon="el-icon-s-platform"></el-button>
+                                                </span>
+                                                <el-dropdown-menu slot="dropdown">
+                                                    <el-dropdown-item command="m">监控模式</el-dropdown-item>
+                                                    <el-dropdown-item command="o">运维模式</el-dropdown-item>
+                                                    <el-dropdown-item command="f">全屏模式</el-dropdown-item>
+                                                    <el-dropdown-item command="e">退出全屏</el-dropdown-item>
+                                                </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </el-tooltip>
                                     </el-header>   
-                                    <el-main style="padding:0px;">
+                                    <el-main style="padding:0px;" @mouseup.native="onMainClick">
                                         <el-table
                                             :data="dt.rows"
                                             highlight-current-row="true"
-                                            style="width: 100%"
+                                            style="width:100%"
                                             :row-class-name="rowClassName"
                                             :header-cell-style="headerRender"
                                             @row-dblclick="onRowContextmenu"
@@ -134,6 +154,11 @@ class Event {
                                 </el-container>`,
                     mounted(){
                         this.$nextTick(()=>{
+                            this.layout();
+                        })
+                    },
+                    methods: {
+                        layout(){
                             let doLayout = ()=>{
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
                                     _.delay(()=>{
@@ -144,9 +169,7 @@ class Event {
                                 }
                             }
                             doLayout();
-                        })
-                    },
-                    methods: {
+                        },
                         initData(){
                             
                             let init = ()=>{
@@ -169,8 +192,6 @@ class Event {
                                 _.delay(()=>{
                                     _.extend(this.dt, { rows: this.model.rows });
                                 },500);
-
-                                console.log(this.dt)
                                     
                             };
 
@@ -188,6 +209,10 @@ class Event {
                             if (rowIndex === 0) {
                                 //return 'text-align:center;';
                             }
+                        },
+                        // 监听鼠标操作 停止自动刷新
+                        onMainClick(){
+                            this.$root.control.ifRefresh=0;
                         },
                         onSelectionChange(val) {
                             this.dt.selected = val;
@@ -336,7 +361,7 @@ class Event {
                             immediate:true
                         }
                     },
-                    template:   `<el-container style="height:100%;">
+                    template:   `<el-container style="width:100%;height:100%;">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="删除" open-delay="500" placement="top">
                                             <el-button type="text" icon="el-icon-notebook-2"></el-button>
@@ -357,7 +382,7 @@ class Event {
                                             </el-dropdown>
                                         </el-tooltip>
                                     </el-header>   
-                                    <el-main style="padding:0px;">
+                                    <el-main style="width:100%;padding:0px;">
                                         <el-table
                                             :data="dt.rows"
                                             highlight-current-row="true"
@@ -783,50 +808,224 @@ class Event {
                     }
                 })
 
-                // 告警轨迹
-                Vue.component("event-diagnosis-journal",{
+                // 智能分组 grid [deserted]
+                Vue.component("event-view-aigroup-grid",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    template:`<el-table-component :model="model"></el-table-component>`,
+                    mounted(){
+                        
+                    },
+                    methods: {
+                        
+                    }
+                })
+
+                // 智能分组 graph
+                Vue.component("event-view-aigroup-graph",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object,
+                    },
+                    data(){
+                        return {
+                            id: objectHash.sha1(_.now()),
+                            rId: _.now(),
+                            topological: null
+                        }
+                    },
+                    template:`<div :id="'topological-app-' + id + '-' + rId"></div>`,
+                    watch: {
+                        model:{
+                            handler: function(val,oldVal){
+                                this.initData();
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    methods: {
+                        initData(){
+                            
+                            if(!this.model) {
+                                return false;
+                            }
+
+                            try {
+                                
+                                if(!this.topological){
+                                    this.topological = new Topological();
+                                    this.topological.init();
+                                    this.topological.graphScript = [
+                                        {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`}
+                                    ];
+                                    this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
+
+                                } else {
+                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`} ];
+                                    this.topological.search(this.topological.graphScript[0].value);
+                                }
+
+                            } catch(err){
+                                
+                            }
+                            
+                        }
+                    },
+                    destroyed() {
+                        this.topological.destroy();
+                    }
+                })
+
+                // 智能分组列表
+                Vue.component("event-view-aigroup-list",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            activeNames: 0
+                        }
+                    },
+                    template:   `<el-collapse v-model="activeNames" @change="onChange">
+                                    <el-collapse-item :name="index" v-for="(item,index) in model.rows">
+                                        <template slot="title">
+                                            #{item.group}#
+                                            <el-button type="text" :style="severity | pickBg" v-for="severity in item.severity">#{severity}#</el-button>
+                                        </template>
+                                        <p>#{item.app}#</p>
+                                        <p>#{item.ids}#</p>
+                                        <p>#{item.list}#</p>
+                                    </el-collapse-item>
+                                </el-collapse>`,
+                    filters: {
+                        pickBg(evt){
+                            return `background:${mx.global.register.event.severity[5][2]};`;
+                        }
+                    },
+                    methods:{
+                        onChange(evt){
+                            
+                        }
+                    }
+                })
+
+                // 智能分组
+                Vue.component("event-view-aigroup",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    template:   `<el-container style="height: calc(100vh - 180px);">
-                                    <el-main>
-                                        <div class="block">
-                                            <el-timeline>
-                                                <el-timeline-item :timestamp="moment(item.vtime).format(mx.global.register.event.time.format)" placement="top" v-for="item in model.rows">
-                                                    <el-card style="box-shadow: 0 0px 3px 0 rgba(0, 0, 0, 0.1);">
-                                                        <p style="font-size:12px;">业务：#{item.biz}#</p>
-                                                        <p style="font-size:12px;">服务器：#{item.host}#</p>
-                                                        <p style="font-size:12px;">级别：#{item.severity | pickSeverity}#</p>
-                                                        <p style="font-size:12px;">状态：#{item.status | pickStatus}#</p>
-                                                        <p style="font-size:12px;">摘要：#{item.msg}#</p>
-                                                    </el-card>
-                                                </el-timeline-item>
-                                            </el-timeline>
-                                        </div>
-                                    </el-main>
+                    data(){
+                        return {
+                            dt: {
+                                rows: [],
+                                columns: [],
+                                selected: [],
+                                modelByGroup: null
+                            },
+                            split:{
+                                inst: null
+                            },
+                            control: {
+                                ifGraph: '0'
+                            }
+                        }
+                    },
+                    template: `<el-container style="height: calc(100vh - 150px);padding:1px;">
+                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
+                                        <el-container style="overflow:hidden;height:100%;">
+                                            <el-main style="padding:0px;overflow:auto;">
+                                                <!--event-view-aigroup-list :model="dt" ref="groups"></event-view-aigroup-list-->
+                                                <el-table-component :model="dt" ref="groups"></el-table-component>
+                                            </el-main>
+                                        </el-container>
+                                    </el-aside>
+                                    <el-container class="split" id="aigroup-right-panel" ref="container">
+                                        <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
+                                            <el-tooltip content="列表" placement="top" open-delay="500">
+                                                <el-button type="text" icon="el-icon-s-grid" @click="control.ifGraph='0'"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip content="图" placement="top" open-delay="500">
+                                                <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
+                                            </el-tooltip>
+                                            <el-button type="text" icon="el-icon-full-screen" style="float:right;" @click="onFullScreen"></el-button>
+                                        </el-header>
+                                        <el-main style="padding:0px;height:100%;">
+                                            <el-tabs v-model="control.ifGraph" style="height:100%;">
+                                                <el-tab-pane label="" name="0" lazy="true" style="height:100%;">
+                                                    <event-view-aigroup-grid :model="dt.modelByGroup"></event-view-aigroup-grid>
+                                                </el-tab-pane>
+                                                <el-tab-pane label="" name="1" lazy="true" style="height:100%;">
+                                                    <event-view-aigroup-graph :model="dt.modelByGroup" ></event-view-aigroup-grap>
+                                                </el-tab-pane>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>
                                 </el-container>`,
-                    filters: {
-                        pickSeverity(item){
-                            try{
-                                return mx.global.register.event.severity[item][1];
-                            } catch(err){
-                                return '';
+                    created(){
+                        // 根据model进行分组
+                        let ids = _.map(this.model.rows,'id').join(";");
+                        console.log(ids,this.$root.$refs.searchRef.options.term)
+                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
+                        this.dt.rows = rtn.rows;
+                        this.dt.columns = rtn.columns;
+                    },
+                    mounted(){
+                        this.init();
+                        this.$watch(
+                            "$refs.groups.dt.selected",(val, oldVal) => {
+                                this.dt.selected = val;
+                                this.getEventByGroup();
                             }
+                        );
+                    },
+                    methods: {
+                        init(){    
+                            this.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
+                                sizes: [38, 62],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                gutterAlign: 'end',
+                                cursor: 'col-resize',
+                                direction: 'horizontal',
+                                expandToMin: true,
+                            });
+
+                            // 默认选择第一行
+                            _.delay(()=>{
+                                this.$refs.groups.$refs.table.setCurrentRow(this.$refs.groups.dt.rows[0]);
+                            },1000)
                             
+
+                            // 隐藏tabs header
+                            $(".el-tabs > .el-tabs__header",this.$el).css({
+                                "display":"none"
+                            });
+                            $(".el-tabs > .el-tabs__content",this.$el).css({
+                                "height":"100%"
+                            });
                         },
-                        pickStatus(item){
-                            try {
-                                return mx.global.register.event.status[item][1];
+                        getEventByGroup(){
+                            try{
+                                // SEARCH
+                                let where = this.dt.selected[0].ids;//_.map(this.dt.selected,'ids').join(";");
+                                this.dt.modelByGroup = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message;
                             } catch(err){
-                                return '';
+                                this.dt.modelByGroup = null;
                             }
+                        },
+                        onFullScreen(){
+                            mx.fullScreenByEl(this.$refs.container.$el);
                         }
                     }
                 })
 
-                // 告警雷达
+                // 告警分片
                 Vue.component("event-view-facet",{
                     delimiters: ['#{', '}#'],
                     props: {
@@ -1016,33 +1215,6 @@ class Event {
                     }
                 });
 
-                // 告警详情
-                Vue.component("event-diagnosis-detail",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model:String
-                    },
-                    template: `<el-container style="height: calc(100vh - 180px);">
-                                    <el-main>
-                                        <form class="form-horizontal">
-                                            <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                                <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-if="_.includes(key,'day')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'occurrence')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'time')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-else>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </el-main>
-                                </el-container>`,
-                    mounted(){
-                        
-                    }
-                });
-
                 // 仪表盘
                 Vue.component("gauge-component",{
                     delimiters: ['#{', '}#'],
@@ -1149,6 +1321,92 @@ class Event {
                     }
                 });
 
+                // 告警详情
+                Vue.component("event-diagnosis-detail",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model:String
+                    },
+                    template: `<el-container :style="$root.control.viewType | heightByMode">
+                                    <el-main>
+                                        <form class="form-horizontal">
+                                            <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
+                                                <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
+                                                <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-if="_.includes(key,'day')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'occurrence')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'time')">
+                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-else>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </el-main>
+                                </el-container>`,
+                    mounted(){
+                        
+                    },
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
+                        }
+                    }
+                });
+
+                // 告警轨迹
+                Vue.component("event-diagnosis-journal",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        id: String,
+                        model: Object
+                    },
+                    template:   `<el-container :style="$root.control.viewType | heightByMode">
+                                    <el-main>
+                                        <div class="block">
+                                            <el-timeline>
+                                                <el-timeline-item :timestamp="moment(item.vtime).format(mx.global.register.event.time.format)" placement="top" v-for="item in model.rows">
+                                                    <el-card style="box-shadow: 0 0px 3px 0 rgba(0, 0, 0, 0.1);">
+                                                        <p style="font-size:12px;">业务：#{item.biz}#</p>
+                                                        <p style="font-size:12px;">服务器：#{item.host}#</p>
+                                                        <p style="font-size:12px;">级别：#{item.severity | pickSeverity}#</p>
+                                                        <p style="font-size:12px;">状态：#{item.status | pickStatus}#</p>
+                                                        <p style="font-size:12px;">摘要：#{item.msg}#</p>
+                                                    </el-card>
+                                                </el-timeline-item>
+                                            </el-timeline>
+                                        </div>
+                                    </el-main>
+                                </el-container>`,
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
+                        },
+                        pickSeverity(item){
+                            try{
+                                return mx.global.register.event.severity[item][1];
+                            } catch(err){
+                                return '';
+                            }
+                            
+                        },
+                        pickStatus(item){
+                            try {
+                                return mx.global.register.event.status[item][1];
+                            } catch(err){
+                                return '';
+                            }
+                        }
+                    }
+                })
+
                 // 历史相关告警
                 Vue.component("event-diagnosis-history",{
                     delimiters: ['#{', '}#'],
@@ -1160,197 +1418,17 @@ class Event {
                             
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
+                    template:  `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-main style="padding:0px;">
                                         <el-table-component :model="model"></el-table-component>
                                     </el-main>
                                 </el-container>`,
-                    mounted(){
-                        
-                    },
-                    methods: {
-                        
-                    }
-                })
-
-                // 智能分组 grid [deserted]
-                Vue.component("event-view-aigroup-grid",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        model: Object
-                    },
-                    template:`<el-table-component :model="model"></el-table-component>`,
-                    mounted(){
-                        
-                    },
-                    methods: {
-                        
-                    }
-                })
-
-                // 智能分组 graph
-                Vue.component("event-view-aigroup-graph",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        model: Object,
-                    },
-                    data(){
-                        return {
-                            id: objectHash.sha1(_.now()),
-                            rId: _.now(),
-                            topological: null
-                        }
-                    },
-                    template:`<div :id="'topological-app-' + id + '-' + rId"></div>`,
-                    watch: {
-                        model:{
-                            handler: function(val,oldVal){
-                                this.initData();
-                            },
-                            deep:true,
-                            immediate:true
-                        }
-                    },
-                    methods: {
-                        initData(){
-                            
-                            if(!this.model) {
-                                return false;
-                            }
-
-                            try {
-                                
-                                if(!this.topological){
-                                    this.topological = new Topological();
-                                    this.topological.init();
-                                    this.topological.graphScript = [
-                                        {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`}
-                                    ];
-                                    this.topological.mount(`#topological-app-${this.id}-${this.rId}`);
-
-                                } else {
-                                    this.topological.graphScript = [ {value: `match () - [*1] -> ("${_.map(this.model.rows,'entity').join('","')}") - [*1] -> ()`} ];
-                                    this.topological.search(this.topological.graphScript[0].value);
-                                }
-
-                                _.delay(() => {
-                                    this.topological.setStyle();
-                                },5000)
-
-                            } catch(err){
-                                
-                            }
-                            
-                        }
-                    },
-                    destroyed() {
-                        this.topological.destroy();
-                    }
-                })
-
-                // 智能分组
-                Vue.component("event-view-aigroup",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            dt: {
-                                rows: [],
-                                columns: [],
-                                selected: [],
-                                modelByGroup: null
-                            },
-                            split:{
-                                inst: null
-                            },
-                            control: {
-                                ifGraph: '0'
-                            }
-                        }
-                    },
-                    template: `<el-container style="height: calc(100vh - 150px);padding:1px;">
-                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
-                                        <el-container style="overflow:hidden;height:100%;">
-                                            <el-main style="padding:0px;overflow:auto;">
-                                                <el-table-component :model="dt" ref="groups"></el-table-component>
-                                            </el-main>
-                                        </el-container>
-                                    </el-aside>
-                                    <el-container class="split" id="aigroup-right-panel">
-                                        <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
-                                            <el-tooltip content="列表" placement="top" open-delay="500">
-                                                <el-button type="text" icon="el-icon-s-grid" @click="control.ifGraph='0'"></el-button>
-                                            </el-tooltip>
-                                            <el-tooltip content="图" placement="top" open-delay="500">
-                                                <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
-                                            </el-tooltip>
-                                            <el-button type="text" icon="el-icon-full-screen" style="float:right;"></el-button>
-                                        </el-header>
-                                        <el-main style="padding:0px;height:100%;">
-                                            <el-tabs v-model="control.ifGraph" style="height:100%;">
-                                                <el-tab-pane label="" name="0" lazy="true" style="height:100%;">
-                                                    <event-view-aigroup-grid :model="dt.modelByGroup"></event-view-aigroup-grid>
-                                                </el-tab-pane>
-                                                <el-tab-pane label="" name="1" lazy="true" style="height:100%;">
-                                                    <event-view-aigroup-graph :model="dt.modelByGroup" ></event-view-aigroup-grap>
-                                                </el-tab-pane>
-                                            </el-tabs>
-                                        </el-main>
-                                    </el-container>
-                                </el-container>`,
-                    created(){
-                        // 根据model进行分组
-                        let ids = _.map(this.model.rows,'id').join(";");
-                        console.log(ids,this.$root.$refs.searchRef.options.term)
-                        let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
-                        this.dt.rows = rtn.rows;
-                        this.dt.columns = rtn.columns;
-                    },
-                    mounted(){
-                        this.init();
-                        this.$watch(
-                            "$refs.groups.dt.selected",(val, oldVal) => {
-                                this.dt.selected = val;
-                                this.getEventByGroup();
-                            }
-                        );
-                    },
-                    methods: {
-                        init(){    
-                            this.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
-                                sizes: [38, 62],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                gutterAlign: 'end',
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                                expandToMin: true,
-                            });
-
-                            // 默认选择第一行
-                            _.delay(()=>{
-                                this.$refs.groups.$refs.table.setCurrentRow(this.$refs.groups.dt.rows[0]);
-                            },1000)
-                            
-
-                            // 隐藏tabs header
-                            $(".el-tabs > .el-tabs__header",this.$el).css({
-                                "display":"none"
-                            });
-                            $(".el-tabs > .el-tabs__content",this.$el).css({
-                                "height":"100%"
-                            });
-                        },
-                        getEventByGroup(){
-                            try{
-                                // SEARCH
-                                let where = this.dt.selected[0].ids;//_.map(this.dt.selected,'ids').join(";");
-                                this.dt.modelByGroup = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message;
-                            } catch(err){
-                                this.dt.modelByGroup = null;
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
                             }
                         }
                     }
@@ -1373,7 +1451,7 @@ class Event {
                             modelByDimension: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
+                    template:  `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" id="left-panel">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height: 30px;
@@ -1402,6 +1480,15 @@ class Event {
                         'dt.selected':function(val,oldVal){
                             this.getEventByDimension();
                         }  
+                    },
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
+                        }
                     },
                     created(){
                         
@@ -1474,7 +1561,7 @@ class Event {
                             tableData: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
+                    template:  `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-aside class="split" :id="'probability-left-panel-'+id">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
@@ -1493,6 +1580,15 @@ class Event {
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
+                        }
+                    },
                     mounted(){
                         this.init();
 
@@ -1529,11 +1625,20 @@ class Event {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
+                    template:  `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+id"></div>
                                     </el-main>
                                 </el-container>`,
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
+                        }
+                    },
                     mounted(){
                         this.init();
                     },
@@ -1579,7 +1684,7 @@ class Event {
                             }
                         }
                     },
-                    template:  ` <el-container style="height:calc(100vh - 180px);">
+                    template:  ` <el-container :style="$root.control.viewType | heightByMode">
                                     <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" :class="'split left-panel-'+id">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
@@ -1616,6 +1721,15 @@ class Event {
                                 }
                             },
                             immediate: true
+                        }
+                    },
+                    filters: {
+                        heightByMode: function(viewType){
+                            if(viewType === 'm'){
+                                return `height: calc(100vh - 130px)`;
+                            } else {
+                                return `height: calc(100vh - 180px)`;
+                            }
                         }
                     },
                     created(){
@@ -2117,6 +2231,7 @@ class Event {
                                                                     </el-switch>
                                                                 </div>
                                                             </el-tooltip>
+
                                                         </div>
                                                         <el-container id="event-view-console">
                                                             <el-aside class="tree-view" id="event-view-left" style="background-color:#f6f6f6;">
@@ -2182,7 +2297,8 @@ class Event {
                         control: {
                             ifSmart: '0',
                             ifAiGroup: '0',
-                            ifRefresh: '0'
+                            ifRefresh: '0',
+                            viewType: "o"
                         },
                         // 搜索组件结构
                         model: {
@@ -2219,6 +2335,26 @@ class Event {
                         }
                     },
                     watch:{
+                        'control.ifRefresh':{
+                            handler(val,oldVal){
+                                if(val==1) {
+                                    window.intervalListener = setInterval(()=>{
+                                        this.$refs.searchRef.search();
+                                    },mx.global.register.event.interval);
+                                    this.$message({
+                                        type: "info",
+                                        message: "自动刷新开启"
+                                    })
+                                } else {
+                                    clearInterval(window.intervalListener);
+                                    this.$message({
+                                        type: "info",
+                                        message: "自动刷新关闭"
+                                    })
+                                }
+                            },
+                            deep:true
+                        },
                         'layout.main.tabs':{
                             handler(val,oldVal){
                                 if(val.length > 1){
@@ -2370,6 +2506,66 @@ class Event {
                             $(this.$el).addClass(event);
                             window.EVENT_VIEW = event;
                         },
+                        toggleView(cmd){
+                            if(cmd === 'm'){
+                                // 监控模式 
+                                // 自动刷新
+                                // 全屏显示
+                                mx.fullScreen(false);
+                                $("#header").removeClass("navbar-fixed-top").hide();
+                                $("#aside").hide();
+                                $("#content.content").css({
+                                    "width": "100vw",
+                                    "position":"absolute",
+                                    "z-index": 1000,
+                                    "top": "0px",
+                                    "left": "0px",
+                                    "margin": "0px",
+                                    "background": "#ffffff"
+                                }).addClass("animate fadeInLeft");
+                                $("#content.content .event-view-summary-contro").css({
+                                    "right": "25%"
+                                });
+                                $("#content.content .event-eventlist-component").css({
+                                    "height":"calc(100vh - 85px)"
+                                });
+                                this.control.ifRefresh = '1';
+                                mx.fullScreen(true);
+                            } else if(cmd === 'o'){
+                                // 运维模式 
+                                mx.fullScreen(false);
+                                $("#header").addClass("navbar-fixed-top").show();
+                                $("#aside").show();
+                                $("#content.content").css({
+                                    "width": "95.3vw",
+                                    "position":"releative",
+                                    "z-index": 10,
+                                    "top": "unset",
+                                    "left": "unset",
+                                    "margin": "0px 0px 0px 60px",
+                                    "padding": "5px 5px 0px 5px!important",
+                                    "background": "transparent"
+                                }).addClass("animate fadeInLeft");
+                                $("#content.content .event-view-summary-contro").css({
+                                    "right": "5px"
+                                });
+                                $("#content.content .event-eventlist-component").css({
+                                    "height":"calc(100vh - 135px)"
+                                });
+                                this.control.ifRefresh = '0';
+                                mx.fullScreen(true);
+                            } else if(cmd === 'f'){
+                                // 全屏模式
+                                // 全屏显示
+                                mx.fullScreen(true);
+                            } else if(cmd === 'e'){
+                                // 全屏模式
+                                // 全屏显示
+                                mx.fullScreen(false);
+                            }
+
+                            this.control.viewType = cmd;
+                        },
                         toggleSummaryBySmart(evt){
                             
                             this.control.ifSmart = evt;
@@ -2398,14 +2594,6 @@ class Event {
                         },
                         toggleSummaryByRefresh(evt){
                             const self = this;
-                            
-                            if(evt==1) {
-                                window.intervalListener = setInterval(function(){
-                                    self.$refs.searchRef.search();
-                                },5000)
-                            } else {
-                                clearInterval(window.intervalListener);
-                            }
 
                             this.control.ifRefresh = evt;
                             
