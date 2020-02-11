@@ -215,7 +215,7 @@
 
 <script type="text/javascript">
     $(function() {
-		_.delay(function(){
+		_.delay(()=>{
 			let mxSystem = new System();
             mxSystem.init();
 		},50)
@@ -461,21 +461,6 @@
         </div>
         <div class="panel-body">
             <bootstrap-table :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
-        </div>
-    </div>
-</script>
-
-<script type="text/x-template" id="grok-manage-template">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            解析规则
-        </div>
-        <div class="panel-body">
-            <vue-base-datatables-component id="grok-list"
-                                           :columns="model.columns"
-                                           :dataset="model.data"
-                                           :options="model.options"
-                                           contextmenu="grok"></vue-base-datatables-component>
         </div>
     </div>
 </script>

@@ -48,16 +48,22 @@ class Performance extends Matrix {
                                 columns: [],
                                 selected: []
                             },
-                            info: []
+                            info: [],
+                            trends: {value:[],baseline:[],config:{type:"",step:""}},
+                            splitInst: null
                         }
                     },
                     watch: {
-                        model: {
+                        'model.rows': {
                             handler(val,oldVal){
-                                this.initData();
+                                if(val !== oldVal){
+                                    this.dt.rows = [];
+                                    this.initData();
+                                }
+
+                                this.layout();
                             },
-                            deep:true,
-                            immediate:true
+                            deep:true
                         },
                         dt: {
                             handler(val,oldVal){
@@ -68,35 +74,51 @@ class Performance extends Matrix {
                             },
                             deep:true,
                             immediate:true
+                        },
+                        'trends.value':{
+                            handler(val,oldVal){
+                                if(!_.isEmpty(val)){
+                                    this.splitInst.setSizes([50,50]);
+                                } else {
+                                    this.splitInst.setSizes([100,0]);
+                                }
+                                
+                            },
+                            deep:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                    template:   `<el-container class="animated fadeIn">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle"><i class="fas fa-tags"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                        <el-tooltip content="趋势分析" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onAction(item)"><i class="elicon el-icon-s-operation"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="!_.isEmpty(model.actions)">
                                             <el-button type="text" @click="onAction(item)"><i :class="mx.global.register.event.status[item][2]"></i></el-button>
                                         </el-tooltip>
                                     </el-header>   
-                                    <el-main class="animated fadeIn" style="padding:0px;">
+                                    <el-main class="animated fadeIn" style="height:calc(100vh - 210px);padding:0px;overflow:hidden;">
                                         <el-table
                                             :data="dt.rows"
                                             highlight-current-row="true"
-                                            style="width: 100%"
+                                            style="width: 100%;"
                                             :row-class-name="rowClassName"
                                             :header-cell-style="headerRender"
                                             @row-dblclick="onRowDblclick"
                                             @row-contextmenu="onRowContextmenu"
-                                            @selection-change="onSelectionChange">
+                                            @selection-change="onSelectionChange"
+                                            ref="table">
                                             <el-table-column type="selection" align="center"></el-table-column> 
                                             <el-table-column type="expand">
                                                 <template slot-scope="props">
-                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                    <performance-trend-analysis :model="props.row"></performance-trend-analysis>
+                                                    <!--el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
                                                         <el-form-item v-for="v,k in props.row" :label="k">
                                                             <el-input v-model="v"></el-input>
                                                         </el-form-item>
-                                                    </el-form>
+                                                    </el-form-->
                                                 </template>
                                             </el-table-column>
                                             <el-table-column :prop="item.field" 
@@ -110,15 +132,55 @@ class Performance extends Matrix {
                                                 v-if="item.visible">
                                             </el-table-column>
                                         </el-table>
+                                        <trends-analysis :model="trends" :config="trends.config" ref="chart"></trends-analysis>
                                     </el-main>
                                     <el-footer  style="height:30px;line-height:30px;">
                                         #{ info.join(' &nbsp; | &nbsp;') }#
                                     </el-footer>
                                 </el-container>`,
+                    filters:{
+                        pickHeightByChart(evt){
+                            if(!_.isEmpty(evt.value)){
+                                return `width: 100%;height:50%;overflow:auto;`
+                            } else {
+                                return `width: 100%;height:100%;overflow:auto;`
+                            }
+                        }
+                    },
                     mounted(){
-
+                        this.$nextTick(()=>{
+                            this.layout();
+                            _.delay(()=>{
+                                this.split();
+                            },1000)
+                        })
                     },
                     methods: {
+                        layout(){
+                            let doLayout = ()=>{
+                                if($(".el-table-column--selection",this.$el).is(':visible')){
+                                    _.delay(()=>{
+                                        this.$refs.table.doLayout();
+                                    },1000)
+                                } else {
+                                    setTimeout(doLayout,50);
+                                }
+                            }
+                            doLayout();
+                        },
+                        split(){
+                            this.splitInst = Split([this.$refs.table.$el, this.$refs.chart.$el], {
+                                sizes: [100, 0],
+                                minSize: [0, 0],
+                                gutterSize: 5,
+                                cursor: 'row-resize',
+                                direction: 'vertical',
+                                expandToMin: true,
+                                onDragEnd:function(sizes) {
+                                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                }
+                            });
+                        },
                         initData(){
                             const self = this;
 
@@ -167,22 +229,25 @@ class Performance extends Matrix {
                             this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
                         },
                         onRowContextmenu(row, column, event){
-                            const self = this;
                             
-                            $.contextMenu({
+                            const self = this;
+
+                            $.contextMenu('destroy').contextMenu({
                                 selector: "tr",
                                 trigger: "right",
                                 autoHide: true,
                                 delay: 5,
                                 hideOnSecondTrigger: true,
                                 className: `animated slideIn ${column.id}`,
-                                build: function($trigger, e) {
+                                build: ($trigger, e)=> {
                     
                                     return {
-                                        callback: function(key, opt) {
+                                        callback: (key, opt)=> {
                                             
                                             if(_.includes(key,'diagnosis')) {
                                                 self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'trends')) {
+                                                self.trendsAdd(row);
                                             } else if(_.includes(key,'action')) {
                                                 // 增加操作类型
                                                 let action = _.last(key.split("_"));
@@ -195,7 +260,8 @@ class Performance extends Matrix {
                                 events: {
                                     show(opt) {
                 
-                                        let $this = this;
+                                        //let $this = this;
+
                                         _.delay(()=>{
                                             new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
                                         },50)
@@ -205,14 +271,18 @@ class Performance extends Matrix {
                         },
                         onRowDblclick(row, column, event){
                             
+                        },
+                        trendsAdd(row){
+                            let trend = fsHandler.callFsJScript("/matrix/performance/trend-analysis-by-id.js", encodeURIComponent(JSON.stringify(row))).message;
+                            _.extend(this.trends, {baseline: trend.rows.day1.baseline, value: trend.rows.day1.value, config:trend.trends[0].config});
                         }
                     }
                 })
 
+                // 历史曲线图表
                 Vue.component('performance-history-chart', {
-                    template: `<div :id="id" style="width:100%;height:280px;"></div>`,
+                    template: `<div style="width:100%;height:280px;" ref="chartContainer"></div>`,
                     props:{
-                        id:String,
                         model:Object,
                         config: Object
                     },
@@ -304,13 +374,172 @@ class Performance extends Matrix {
                             });
                         },
                         checkChart(){
-                            const self = this;
-        
-                            if(self.chart.id){
-                                self.chart.resize();
+                            if(this.$refs.chartContainer){
+                                this.chart.resize();
                             } else {
-                                setTimeout(self.checkChart, 50);
+                                setTimeout(this.checkChart, 50);
                             }
+                        }
+                    }
+                }); 
+
+                // 曲线分析图表
+                Vue.component('trends-analysis-chart', {
+                    template: `<div id="chart" style="width:100%;height:100%;"></div>`,
+                    props:{
+                        model:Object,
+                        config: Object
+                    },
+                    data(){
+                        return {
+                            chart: null,
+                            option: {
+                                title: "",
+                                tooltip: {
+                                    trigger: 'axis'
+                                },
+                                toolbox: {
+                                    show: true,
+                                    feature: {
+                                        dataZoom: {},
+                                        dataView: {readOnly: false},
+                                        magicType: {type: ['line', 'bar']},
+                                        restore: {},
+                                        saveAsImage: {}
+                                    }
+                                },
+                                legend: {
+                                    data:[]
+                                },
+                                xAxis: {
+                                    type: 'category',
+                                    data: []
+                                },
+                                yAxis: {
+                                    type: 'value'
+                                },
+                                series: []
+                            }                            
+                        }
+                    },
+                    watch:{
+                        'model.value':function(val,oldVal){
+                            this.initData(); 
+                            _.delay(()=>{
+                                this.chart.setOption(this.option);
+                                this.chart.resize();
+                            },2000)
+                        }
+                    },
+                    created(){
+                        // 接收窗体RESIZE事件
+                        eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
+
+                        this.initData();
+                    },
+                    mounted() {
+                        this.init();
+                    },
+                    methods: {
+                        init(){
+                            this.chart = echarts.init(this.$el);
+                            this.chart.setOption(this.option);
+                        },
+                        initData(){
+                            let dataValue = _.cloneDeep(this.model.value).reverse();
+                            let dataBaseline = _.cloneDeep(this.model.baseline).reverse();
+                            
+                            _.extend(this.option,{title: {
+                                text: this.model.value[0].host,
+                                subtext: this.model.value[0].inst + ' ' + this.model.value[0].param,
+                                left: 'left'
+                            }});
+                            
+                            this.option.legend.data = [];
+                            this.option.xAxis.data = [];
+                            this.option.series = [];
+
+                            // 取实时数据的time作为xAxis
+                            this.option.xAxis.data = _.map(dataValue,(v)=>{
+                                return moment(v[mx.global.register.performance.chart.time]).format(this.config.step);
+                            });
+                            
+                            this.option.series = _.map(this.config.type,(v)=>{
+                                
+                                this.option.legend.data.push(v);
+
+                                if(v=='value'){
+                                    return {    
+                                        name: v,
+                                        data: _.map(dataValue, v),
+                                        type: 'line',
+                                        smooth: true,
+                                        color: mx.global.register.performance.chart.color[v],
+                                        markLine: {
+                                            data: [{
+                                                type: 'average',
+                                                name: '平均值'
+                                            }]
+                                        }
+                                    }
+                                } else {
+                                    if(!_.isEmpty(this.model.baseline)) {
+                                        return  {
+                                            name: v,
+                                            data: _.map(dataBaseline, v=='avg'?'value':v),
+                                            type: 'line',
+                                            smooth: true,
+                                            color: mx.global.register.performance.chart.color[v]
+                                        }
+                                    }
+                                }
+                                
+                            });
+                        },
+                        checkChart(){
+                            try{
+                                if(this.$el){
+                                    this.chart.resize();
+                                } else {
+                                    setTimeout(this.checkChart, 50);
+                                }
+                            } catch(err){
+
+                            }
+                        }
+                    }
+                }); 
+
+                // 曲线分析图表
+                Vue.component('trends-analysis', {
+                    props:{
+                        model: Object,
+                        config: Object
+                    },
+                    data(){
+                        return {
+                            
+                        }
+                    },
+                    template:   `<el-container>
+                                    <el-header style="height:30px;line-height:30px;text-align:right;">
+                                        <el-tooltip content="关闭" open-delay="500" placement="top">
+                                            <el-button type="text" @click="onClose"><i class="elicon el-icon-close"></i></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main style="padding:0px;" v-if="!_.isEmpty(model.value)">
+                                        <trends-analysis-chart :model="model" :config="config"></trends-analysis-chart>
+                                    </el-main>
+                                </el-container>`,
+                    created(){
+                        
+                    },
+                    mounted() {
+                        
+                    },
+                    methods: {
+                        onClose(){
+                            this.$parent.$parent.$parent.trends = {value:[],baseline:[],config:{type:"",step:""}};
                         }
                     }
                 }); 
@@ -398,7 +627,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 180px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main><el-row :gutter="10">
                                     <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
                                         <div class="grid-content" style="text-align:center;">
@@ -466,6 +695,100 @@ class Performance extends Matrix {
                     }
                 });
 
+                // 趋势分析
+                Vue.component("performance-trend-analysis",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model:Object
+                    },
+                    data(){
+                        return {
+                            baseLine: {
+                                type: {
+                                    value: [],
+                                    list: [{
+                                        value: 'week',
+                                        label: '周基线'
+                                      }, {
+                                        value: 'month',
+                                        label: '月基线'
+                                      }]
+                                }
+                            },
+                            trend: {},
+                            control: {
+                                ifFullScreen: false
+                            }
+                        }
+                    },
+                    filters: {
+                        pickScreenStyle(evt){
+                            if(evt){
+                                return `el-icon-full-screen`;
+                            } else {
+                                return `el-icon-copy-document`;
+                            }
+                        }
+                    },
+                    template: `<el-container style="height: auto;min-height:400px;width:94vw;" ref="container">
+                                    <el-header style="height: 30px;
+                                                        padding: 0px 10px;
+                                                        line-height: 20px;">
+                                        <!--el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
+                                            <el-option
+                                            v-for="item in baseLine.type.list"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                            </el-option>
+                                        </el-select-->
+                                        <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
+                                    </el-header>
+                                    <el-main style="padding:10px 0px;">
+                                        <div class="grid-stack">
+                                            <div class="grid-stack-item"
+                                                data-gs-auto-position="true"
+                                                data-gs-width="6" data-gs-height="4"
+                                                v-for="item,index in trend.trends">
+                                                    <div class="grid-stack-item-content" style="background:#f7f7f7;">
+                                                        <el-card class="box-card" style="width: 100%;height:100%;padding:5px;" >
+                                                            <div slot="header" class="clearfix">
+                                                                <span>历史性能 <small>#{item.title}#</small></span>
+                                                                <el-tooltip :content="item.detail">
+                                                                    <span class="fas fa-question-circle"></span>
+                                                                </el-tooltip>    
+                                                                <el-tooltip content="设置">
+                                                                    <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
+                                                                </el-tooltip>
+                                                            </div>
+                                                            <performance-history-chart  :model="trend.rows[item.value]" 
+                                                                                        :config="item.config"></performance-history-chart>
+                                                        </el-card>
+                                                    </div>
+                                            </div>
+                                        </div>
+                                        
+                                    
+                                    </el-main>
+                                </el-container>`,
+                    created(){
+                        this.trend = fsHandler.callFsJScript("/matrix/performance/trend-analysis-by-id.js", encodeURIComponent(JSON.stringify(this.model))).message;
+                    },
+                    mounted(){
+                        _.delay(()=>{
+                            $('.grid-stack').gridstack();
+                            $('.grid-stack').on('gsresizestop', function(event, elem) {
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            });
+                        },500)
+                    },
+                    methods: {
+                        onFullScreen(){
+                            this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                        }
+                    }
+                });
+
                 // 历史性能
                 Vue.component("performance-diagnosis-history",{
                     delimiters: ['#{', '}#'],
@@ -490,7 +813,7 @@ class Performance extends Matrix {
                             trends: []
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 180px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-header style="height: 30px;
                                                         padding: 0px 10px;
                                                         line-height: 20px;">
@@ -520,8 +843,7 @@ class Performance extends Matrix {
                                                                     <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
                                                                 </el-tooltip>
                                                             </div>
-                                                            <performance-history-chart :id="id + 'performance-history-chart-' + item.value" 
-                                                                                        :model="model.rows[item.value]" 
+                                                            <performance-history-chart  :model="model.rows[item.value]" 
                                                                                         :config="item.config"></performance-history-chart>
                                                         </el-card>
                                                     </div>
@@ -551,7 +873,7 @@ class Performance extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 180px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main><el-card class="box-card">
                                         <div slot="header" class="clearfix">
                                             <h4>
@@ -650,11 +972,11 @@ class Performance extends Matrix {
                             splitInst: null
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
-                                    <el-aside class="split" :id="id+'-topological-view-left'">
+                    template:  `<el-container style="height: calc(100vh - 190px);">
+                                    <el-aside class="split" ref="leftView">
                                         
                                     </el-aside>
-                                    <el-container class="split" :id="id+'-topological-view-right'">
+                                    <el-container class="split" ref="container">
                                         <el-main style="padding:0px;">
                                             <div :id="'topological-app-'+id"></div>
                                         </el-main>
@@ -676,7 +998,7 @@ class Performance extends Matrix {
                                 mxTopological.app.contextMenu();
                             },500)
 
-                            this.splitInst = Split([`#${this.id}-topological-view-left`, `#${this.id}-topological-view-right`], {
+                            this.splitInst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                 sizes: [0, 100],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -691,7 +1013,7 @@ class Performance extends Matrix {
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
                                     <el-container>
-                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                        <el-header style="height: 40px;line-height: 40px;padding: 0px;">
                                             <search-base-component :options="options"
                                                                 ref="searchRef"
                                                                 class="grid-content"></search-base-component>
@@ -699,77 +1021,81 @@ class Performance extends Matrix {
                                         <el-main id="performance-view-container" style="padding: 5px 0px 0px 0px;">
                                             <el-tabs v-model="layout.main.activeIndex" class="grid-content" type="border-card" closable @tab-remove="detailRemove">
                                                 <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name"  lazy=true>
-                                                    <div v-if="item.type==='main'">
-                                                        <div class="performance-view-summary-control">
-                                                            <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
-                                                                <div>
-                                                                    #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
-                                                                    <el-switch
-                                                                    v-model="control.ifRefresh"
-                                                                    active-color="#13ce66"
-                                                                    inactive-color="#dddddd"
-                                                                    active-value="1"
-                                                                    inactive-value="0"
-                                                                    @change="toggleSummaryByRefresh">
-                                                                    </el-switch>
-                                                                </div>
-                                                            </el-tooltip>
-                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-                                                                <div>
-                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
-                                                                    <el-switch
-                                                                        v-model="control.ifSmart"
-                                                                        active-color="#13ce66"
-                                                                        inactive-color="#dddddd"
-                                                                        active-value="1"
-                                                                        inactive-value="0"
-                                                                        @change="toggleSummaryBySmart">
-                                                                    </el-switch>
-                                                                </div>
-                                                            </el-tooltip>
-                                                        </div>
-                            
-                                                        <el-container id="performance-view-summary">
-                                                            <el-main>
-                                                                <el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
-                                                                    <el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
-                                                                        <div v-if="item.type=='radar'">
-                                                                            <performance-view-radar id="event-radar" :model='model.message'></performance-view-radar>
-                                                                        </div>
-                                                                        <div v-if="item.type=='gauge'">
-                                                                            <performance-gauge id="performance-view-gauge" :model="model.message"></performance-gauge>
-                                                                        </div>
-                                                                    </el-tab-pane>
-                                                                </el-tabs>
-                                                            </el-main>
-                                                        </el-container>
-                                                        <el-container id="performance-view-console">
-                                                            <el-aside class="tree-view" id="performance-view-left" style="background-color:#f6f6f6;">
-                                                                <entity-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></entity-tree-component>
-                                                            </el-aside>
-                                                            <el-main class="table-view" id="performance-view-main" style="padding:5px;">
-                                                                <el-table-component :model="model.message"></el-table-component>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </div>
-                                                    <div v-if="item.type==='diagnosis'">
-                                                        <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggle" lazy="true">
-                                                            <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name" lazy=true>
-                                                                <div v-if="it.type==='detail'">
-                                                                    <performance-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></performance-diagnosis-detail>
-                                                                </div>
-                                                                <div v-else-if="it.type==='history'">
-                                                                    <performance-diagnosis-history :id="it.name+ '-history'" :model="it.model.history"></performance-diagnosis-history>
-                                                                </div>
-                                                                <div v-else-if="it.type==='journal'">
-                                                                    <performance-diagnosis-journal :id="it.name+ '-journal'" :model="it.model.journal"></performance-diagnosis-journal>
-                                                                </div>
-                                                                <div v-else-if="it.type==='topological'">
-                                                                    <performance-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></performance-diagnosis-topological>
-                                                                </div>
-                                                            </el-tab-pane>
-                                                        </el-tabs>
-                                                    </div>
+                                                    
+                                                    <!--el-container id="performance-view-summary">
+                                                        <el-main>
+                                                            <el-tabs v-model="layout.summary.activeIndex" type="border" class="el-tabs-bottom-line">
+                                                                <el-tab-pane v-for="(item,index) in layout.summary.tabs" :key="item.name" :label="item.title" :name="item.name">
+                                                                    <div v-if="item.type=='radar'">
+                                                                        <performance-view-radar id="event-radar" :model='model.message'></performance-view-radar>
+                                                                    </div>
+                                                                    <div v-if="item.type=='gauge'">
+                                                                        <performance-gauge id="performance-view-gauge" :model="model.message"></performance-gauge>
+                                                                    </div>
+                                                                </el-tab-pane>
+                                                            </el-tabs>
+                                                        </el-main>
+                                                    </el-container-->
+
+                                                    <el-container id="performance-view-console" v-if="item.type==='main'">
+                                                        <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                            <entity-tree-component id="performance-tree" :model="{parent:'/performance',name:'performance_tree_data.js',domain:'performance'}"></entity-tree-component>
+                                                        </el-aside>
+                                                        <el-main style="padding:5px;height:100%;" ref="mainView">
+                                                            <el-container style="height:100%;">
+                                                                <el-header style="height:100%;">
+                                                                    <div class="performance-view-summary-control">
+                                                                        <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                                            <div>
+                                                                                #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                                <el-switch
+                                                                                v-model="control.ifRefresh"
+                                                                                active-color="#13ce66"
+                                                                                inactive-color="#dddddd"
+                                                                                active-value="1"
+                                                                                inactive-value="0"
+                                                                                @change="toggleSummaryByRefresh">
+                                                                                </el-switch>
+                                                                            </div>
+                                                                        </el-tooltip>
+                                                                        <!--el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                                            <div>
+                                                                                #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                                <el-switch
+                                                                                    v-model="control.ifSmart"
+                                                                                    active-color="#13ce66"
+                                                                                    inactive-color="#dddddd"
+                                                                                    active-value="1"
+                                                                                    inactive-value="0"
+                                                                                    @change="toggleSummaryBySmart">
+                                                                                </el-switch>
+                                                                            </div>
+                                                                        </el-tooltip-->
+                                                                    </div>
+                                                                </el-header>
+                                                                <el-main style="padding:5px;">
+                                                                    <el-table-component :model="model.message" ref="performanceTable"></el-table-component>
+                                                                </el-main>
+                                                            </el-container>
+                                                        </el-main>
+                                                    </el-container>
+                                                    
+                                                    <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggle" lazy="true" v-if="item.type==='diagnosis'">
+                                                        <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name" lazy=true>
+                                                            <div v-if="it.type==='detail'">
+                                                                <performance-diagnosis-detail :id="it.name+ '-detail'" :model="it.model.detail"></performance-diagnosis-detail>
+                                                            </div>
+                                                            <div v-else-if="it.type==='history'">
+                                                                <performance-diagnosis-history :id="it.name+ '-history'" :model="it.model.history"></performance-diagnosis-history>
+                                                            </div>
+                                                            <div v-else-if="it.type==='journal'">
+                                                                <performance-diagnosis-journal :id="it.name+ '-journal'" :model="it.model.journal"></performance-diagnosis-journal>
+                                                            </div>
+                                                            <div v-else-if="it.type==='topological'">
+                                                                <performance-diagnosis-topological :id="it.name + '-topological'" :model="it.model.detail"></performance-diagnosis-topological>
+                                                            </div>
+                                                        </el-tab-pane>
+                                                    </el-tabs>
                                                 </tab>
                                             </el-tabs>
                                         </el-main>
@@ -878,9 +1204,6 @@ class Performance extends Matrix {
                         } catch(err){
 
                         }
-                        
-                        // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT",performance.resizeEventConsole);
                     },
                     mounted(){
                         
@@ -907,7 +1230,7 @@ class Performance extends Matrix {
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                            Split(['#performance-view-left', '#performance-view-main'], {
+                            Split([this.$refs.leftView[0].$el, this.$refs.mainView[0].$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -962,8 +1285,6 @@ class Performance extends Matrix {
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            performance.resizeEventConsole();
                         },
                         toggleSummaryByRefresh(evt){
                             const self = this;
@@ -980,8 +1301,6 @@ class Performance extends Matrix {
                             
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
-                            // RESIZE Event Console
-                            performance.resizeEventConsole();
                         },
                         detailAdd(event){
                             try {
@@ -1032,8 +1351,6 @@ class Performance extends Matrix {
                                 _.delay(function(){
                                     // RESIZE Event Summary
                                     eventHub.$emit("WINDOW-RESIZE-EVENT");
-                                    // RESIZE Event Console
-                                    performance.resizeEventConsole();
                                 },500)
                             } catch(err){
 
@@ -1097,26 +1414,11 @@ class Performance extends Matrix {
         })
 
         window.addEventListener('resize', () => { 
-            performance.resizeEventConsole();
-
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
 
         
-    }
-
-    resizeEventConsole(){
-        let evwH = $(window).height();
-        let evcH = $("#performance-view-container").height();
-        let evsH = $("#performance-view-summary").height();
-        
-        $("#performance-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                        .css("max-height","-=230px")
-                                                        .css("max-height","-=" + evsH + "px")
-                                                        .css("min-height", evwH + "px")
-                                                        .css("min-height","-=230px")
-                                                        .css("min-height","-=" + evsH + "px");
     }
 
 }

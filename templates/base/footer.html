@@ -1,4 +1,9 @@
 <style>
+	/* sidebar */
+	.sidebar-container .el-input__inner{
+		border:unset;
+	}
+	
 	/* el button */
 	.el-button > i{
 		font-size: 14px;
@@ -14,12 +19,23 @@
 		padding: 5px;
 	}
 
+	/* el-table */
 	.el-table__body tr.current-row>td {
 		background-color:rgba(51,136,255,0.1);
 	}
 	.el-table .cell {
 		white-space: pre-line;
 	}
+
+	.el-table {
+		height:100%!important;
+		overflow: hidden!important;
+	}
+	.el-table .el-table__body-wrapper{
+		height: calc(100% - 50px)!important;
+		overflow: auto;
+	}
+
 	/* 拓扑分析全局样式 */
     .topological-analysis{
         padding: 0px;/* 10px 5px 0px 5px; */

@@ -544,11 +544,11 @@ class Config {
                         model: Object
                     },
                     template: ` <el-container style="height:calc(100vh - 174px);">
-                                    <el-main :id="'config-manage-view-main-'+cid">
-                                        <div class="config-value" :id="'editor-'+id" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;height:100%"></div>
+                                    <el-main ref="mainView">
+                                        <div class="config-value" ref="editorContainer" :model="model" style="border:none;border-top:1px solid #f5f5f5;border-bottom:1px solid #f5f5f5;height:100%"></div>
                                         <div class="config-status-footer" :id="'statusBar-'+id" style="line-height: 30px;padding: 0px 15px;background: rgb(246, 246, 246);"></div>
                                     </el-main>
-                                    <el-footer :id="'config-manage-view-footer-'+cid" style="padding:0px;height:200px;">
+                                    <el-footer style="padding:0px;height:200px;" ref="footerView">
                                         <el-tabs v-model="debug.tabs.activeIndex" type="border-card" closable @tab-remove="logClose" @tab-click="handleClick">
                                             <el-tab-pane name="log" style="padding:10px;">
                                                 <span slot="label">日志 <i class="el-icon-date"></i></span>
@@ -612,11 +612,12 @@ class Config {
                         
                     },
                     mounted(){
+                        
                         // 选择节点
                         if(_.has(this.model,'key')){
                             this.initEditer();
 
-                            this.splitInst = Split([`#config-manage-view-main-${this.cid}`, `#config-manage-view-footer-${this.cid}`], {
+                            this.splitInst = Split([this.$refs.mainView.$el, this.$refs.footerView.$el], {
                                 sizes: [100, 0],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -624,13 +625,14 @@ class Config {
                                 direction: 'vertical',
                             });
                         }
+                        
                     },
                     methods: {
                         initEditer(){
                             const self = this;
                             
                             self.langTools = ace.require("ace/ext/language_tools");
-                            self.editor = ace.edit('editor-'+self.id);
+                            self.editor = ace.edit(this.$refs.editorContainer);
                             ace.require('ace/ext/settings_menu').init(self.editor);
                             let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
                             let statusBar = new StatusBar(self.editor, document.getElementById(`statusBar-${self.id}`));
@@ -971,10 +973,10 @@ class Config {
                                     </el-header>
                                     <el-main style="padding:0px;border-top:1px solid #ffffff;background: #ffffff;">
                                         <el-container style="height:100%;">
-                                            <el-aside id="config-tree-view-left" style="background-color:#f6f6f6!important;">
+                                            <el-aside style="background-color:#f6f6f6!important;" ref="leftView">
                                                 <config-tree-component id="config-tree" :zNodes="configTreeNodes" style="height: calc(100vh - 150px);"></config-tree-component>
                                             </el-aside>
-                                            <el-main style="padding:0px;" id="config-tree-view-main">                            
+                                            <el-main style="padding:0px;" ref="mainView">                            
                                                 <el-tabs v-model="configTabs.activeIndex" type="border-card" closable @tab-remove="configClose" @tab-click="configToggle">
                                                     <el-tab-pane :key="item.name" :name="item.name" v-for="item in configTabs.tabs">
                                                         <span slot="label" v-if="item.dir">
@@ -1031,16 +1033,15 @@ class Config {
                         eventHub.$on("CONFIG-TREE-CLICK-EVENT", this.configOpen);
                     },
                     mounted() {
-                        const self = this;
-
-                        self.$nextTick(function(){
+                        
+                        this.$nextTick(()=>{
                             if(window.SignedUser_IsAdmin && window.COMPANY_OSPACE=='matrix'){
                                 this.configTreeNodes = configHandler.configGet("/");
                             } else {
                                 this.configTreeNodes = configHandler.configGet("/"+window.COMPANY_OSPACE);
                             }
 
-                            self.splitInst = Split([`#config-tree-view-left`, `#config-tree-view-main`], {
+                            this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -1105,9 +1106,8 @@ class Config {
                             });
                         },
                         configOpen(treeNode){
-                            const self = this;
                             
-                            self.configTreeSelectedNode = treeNode;
+                            this.configTreeSelectedNode = treeNode;
 
                             try {
                                 let id = treeNode.key;//tId;
@@ -1122,7 +1122,7 @@ class Config {
                                 this.configTabs.activeIndex = id;
                                 this.configTabs.tabs.push({dir: treeNode.dir, title: treeNode.key, name: id, type: 'config', model: treeNode});                                
 
-                                self.initTheme();
+                                this.initTheme();
                             } catch(error){
                                 this.configTabs.tabs = [];
                             }
@@ -1148,15 +1148,14 @@ class Config {
                             //this.configTabs.activeIndex = targetName.index;
                         },
                         initTheme: function(){
-                            const self = this;
-                            let id = objectHash.sha1(self.configTabs.activeIndex);
-            
+                            let id = objectHash.sha1(this.configTabs.activeIndex);
+                            
                             $.contextMenu({
                                 selector: `.editor-select-theme-${id}`,
                                 trigger: 'left',
-                                callback: function (key, options) {
+                                callback: (key, options)=> {
                                     if(key !== 'bright' && key !== 'dark'){
-                                        let editor = ace.edit('editor-' + self.configTabs.activeIndex);
+                                        let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
                                         editor.setTheme("ace/theme/"+key);
                                         localStorage.setItem(`editor-select-theme-${id}`,key);
                                     }
@@ -1298,15 +1297,15 @@ class Config {
                             }).$mount("#config-new-window");
                         },
                         configUpdate(){
-                            const self = this;
-
-                            let item = {};
-                            item.key = _.find(self.configTabs.tabs,{name:self.configTabs.activeIndex}).model.key;
                             
-                            let editor = ace.edit('editor-' + self.configTabs.activeIndex);
+                            let item = {};
+                            item.key = _.find(this.configTabs.tabs,{name:this.configTabs.activeIndex}).model.key;
+                            
+                            let id = objectHash.sha1(this.configTabs.activeIndex);
+                            let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
                             item.value = editor.getValue();
                             
-                            item.ttl = _.find(self.configTabs.tabs,{name:self.configTabs.activeIndex}).model.ttl;
+                            item.ttl = _.find(this.configTabs.tabs,{name:this.configTabs.activeIndex}).model.ttl;
 
                             alertify.confirm(`确认要更新以下配置?<br><br>
                                 位置：${item.key}<br><br>
@@ -1349,13 +1348,11 @@ class Config {
                             });
                         },
                         configCopy(item){
-                            const self = this;
-
                             new Clipboard(`.copy${objectHash.sha1(item)}`, {
-                                text: function(trigger) {
-                                    self.$message("已复制");
-                                    let editor = ace.edit('editor-' + self.configTabs.activeIndex);
-                                    console.log(12,editor.getValue())
+                                text: (trigger)=> {
+                                    this.$message("已复制");
+                                    let id = objectHash.sha1(this.configTabs.activeIndex);
+                                    let editor = ace.edit(this.$refs[`configManageRef${id}`][0].$refs.editorContainer);
                                     return editor.getValue();
                                 }
                             });

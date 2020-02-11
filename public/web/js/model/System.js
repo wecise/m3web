@@ -26,65 +26,6 @@ class System {
 
 			$(function() {
 			
-				Vue.component('bootstrap-table', {
-					template: `<table :id="id" class="table table-striped" data-locale="zh-CN"></table>`,
-					props:{
-						columns: Array,
-						data: Array,
-						options: Object,
-						id: String,
-					},
-					mounted: function () {
-						const self = this;
-
-						self.$nextTick(function () {
-							
-							$(self.$el).on('check.bs.table', function (e, row) {
-								eventHub.$emit('user-table-select', row);
-							})
-
-							window.actionEvents = {
-								'click .like': function (e, value, row, index) {
-									alert('You click like icon, row: ' + JSON.stringify(row));
-									console.log(value, row, index);
-								},
-								'click .edit': function (e, value, row, index) {
-									alert('You click edit icon, row: ' + JSON.stringify(row));
-									console.log(value, row, index);
-								},
-								'click .remove': function (e, value, row, index) {
-									alert('You click remove icon, row: ' + JSON.stringify(row));
-									console.log(value, row, index);
-								}
-							};
-						})
-					},
-					watch: {
-						data: function (val) {
-							const self = this;
-
-							$(self.$el).bootstrapTable('load', val);
-						},
-						columns: function(val) {
-							const self = this;
-
-							$(self.$el).bootstrapTable({                    
-								columns: val,
-								data: self.data
-							});
-						},
-
-						options: function(val) {
-							const self = this;
-
-							$(self.$el).bootstrapTable('refreshOptions', val);
-						}
-					},
-					methods: {
-						
-					}
-				});
-
 				Vue.component('tree-component',{
 					delimiters: ['${', '}'],
 					template: '<ul class="ztree" :id="zId" style="overflow:auto;"></ul>',
@@ -778,7 +719,7 @@ class System {
 					props: {
 						id: String
 					},
-					template: 	`<el-container>
+					template: 	`<el-container style="height:100%;">
 									
 									<el-header style="text-align: right; font-size: 12px;height:30px;line-height:30px;">
 										<span style="float:right;">
@@ -800,7 +741,7 @@ class System {
 										</span>
 									</el-header>
 									
-									<el-main style="padding:10px;">
+									<el-main style="padding:10px;height:100%;">
 										<el-table
 											:data="dt.rows"
 											stripe
@@ -1851,44 +1792,104 @@ class System {
 
 				// Grok变量管理
 				Vue.component('grok-manage',{
-					delimiters: ['${', '}'],
-					template: '#grok-manage-template',
-					data: function(){
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:30px;line-height:30px;">
+										<h4>解析规则</h4>
+									</el-header>
+									<el-main style="height:100%;">
+										<el-table
+											:data="dt.rows"
+											stripe
+											highlight-current-row
+											fit="true"
+											style="width: 100%"
+											:row-class-name="rowClassName"
+											:header-cell-style="headerRender"
+											@current-change="onSelectionChange">
+											<el-table-column type="index" label="序号" sortable align="center">
+												<template slot-scope="scope">
+													<div style="width:100%; text-align: center;"> <b> #{scope.$index + 1}# </b> </div>
+												</template>
+											</el-table-column>
+											<!--el-table-column type="selection" align="center">
+											</el-table-column--> 
+											<el-table-column type="expand">
+												<template slot-scope="props">
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+														<el-form-item v-for="v,k in props.row" :label="k">
+															<el-input v-model="v"></el-input>
+														</el-form-item>
+													</el-form>
+												</template>
+											</el-table-column>
+											<el-table-column :prop="item.field" 
+												show-overflow-tooltip="true" 
+												:label="item.title"
+												sortable
+												resizable
+												v-for="item in dt.columns"
+												min-width="180">
+												<template slot-scope="scope" >
+													<span v-if="_.includes(['logo','icon'],item.field)">
+														<el-avatar shape="circle" size="48" :src="scope.row[item.field]"></el-avatar>
+													</span>
+													<span  v-else>#{scope.row[item.field]}#</el-avatar>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
 						return {
-							model:{
-								data: [],
+							dt:{
+								rows: [],
 								columns: [],
-								options: {
-											info:true
-										}
+								selected: []
 							}
 						}
 					},
-					created: function(){
-						const self = this;
-
-						eventHub.$on("grok-list-refresh-event", self.init);
+					created(){
+						this.initData();
 					},
-					mounted: function(){
-						const self = this;
-
-						self.$nextTick(function(){
-							self.model.columns = [
-													{"field":"eg",title:"举例"},
-													{"field":"name",title:"名称"},
-													{"field":"pattern",title:"规则"}
-												];
-							
-							self.init();
-						})
+					mounted(){
+						
 					},
 					methods: {
-						init: function(){
-							const self = this;
-							
-							let _list = grokHandler.grokList();
-							
-							self.model.data = _list.message;
+						rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+						},
+						onSelectionChange(val) {
+							this.dt.selected = val;
+						},
+						initData(){
+
+							this.dt.columns = [
+								{field:"name",title:"名称", width:120},
+								{field:"pattern",title:"规则"},
+								{field:"eg",title:"举例", width:120}
+							];
+
+							try {
+								// rows
+								_.extend(this.dt, {rows: grokHandler.grokList().message});
+
+								_.map(this.dt.columns,(v)=>{
+									if(!v.render){
+										return v;
+									} else {
+										return _.extend(v,{render: eval(v.render) });;
+									}
+								})
+
+							} catch(err){
+								
+							}
 						}
 					}
 				})
@@ -2254,130 +2255,6 @@ class System {
 					}
 				})
 
-				// 规则管理
-				Vue.component('rules-manage',{
-					delimiters: ['${', '}'],
-					template: '#rules-manage-template',
-					data: function() {
-						return {
-							editor: Object,
-							etcd: {
-								createdIndex: String,
-								modifiedIndex: String,
-								ttl: -1,
-								expiration: Number,
-							},
-							etcdKey: String,
-						}
-					},
-					mounted: function(){
-						this.$nextTick(function(){
-							this.initEditer();
-						})
-					},
-					created: function(){
-						eventHub.$on("editor-value", this.setEditor);
-					},
-					methods: {
-						initEditer: function(){
-							self = this;
-							self.editor = ace.edit("etcd_value");
-							ace.require('ace/ext/settings_menu').init(self.editor);
-							self.editor.setOptions({
-								maxLines: 30,//Infinity,
-								minLines: 10,
-							});
-							self.editor.commands.addCommands([{
-								name: "showSettingsMenu",
-								bindKey: {
-									win: "Ctrl-9",
-									mac: "Command-9"
-								},
-								exec: function(editor) {
-									self.editor.showSettingsMenu();
-								},
-								readOnly: true
-							}]);
-							self.editor.$blockScrolling = Infinity;
-							self.editor.setTheme("ace/theme/xcode");
-							self.editor.getSession().setMode("ace/mode/ini");
-							self.editor.getSession().setTabSize(2);
-							self.editor.getSession().setUseWrapMode(true);
-						},
-						setEditor: function(event) {
-							self = this;
-							self.etcdKey = event.key;
-							self.editor.setValue(event.value);
-							self.editor.setValue(self.editor.getValue(), 1);
-
-							/**
-							 * @todo  当前节点为目录，隐藏键值输入框并显示节点［添加］按钮
-							 */
-							if (event.dir) {
-								$("#etcd_value").hide();
-								$("#etcd_label").hide();
-								$("#config_btn_new_modal").show();
-							} else {
-								/**
-								 * @todo  当前为节点，显示键值输入框并隐藏节点［添加］按钮，调用刷新为正常显示键值（codemirror's bug)
-								 */
-								$("#etcd_value").show();
-								$("#etcd_label").show();
-								$("#config_btn_new_modal").hide();
-
-							}
-							/**
-							 * @todo  设置节点其它值信息
-							 */
-							self.etcd.createdIndex = event.createdIndex;
-							self.etcd.modifiedIndex = event.modifiedIndex;
-							self.etcd.ttl = event.ttl;
-							self.etcd.expiration = event.expiration;
-						},
-						addNode:function() {
-
-						},
-						removeNode: function() {
-
-						},
-						saveNode: function(){
-							self = this;
-							var key = self.etcdKey;
-							var value = self.editor.getValue();
-							var ttl = self.etcd.ttl;
-							
-							jQuery.ajax({
-								url: '/mxconfig/set',
-								type: 'POST',
-								dataType: 'json',
-								data: {
-									key,
-									value,
-									ttl
-								},
-								complete: function(xhr, textStatus) {
-									//called when complete
-								},
-								success: function(data, textStatus, xhr) {
-
-									alertify.success(`${self.etcdKey} 添加成功`);
-									return false;
-									var treeObj = $.fn.zTree.getZTreeObj("tree1");
-									var sNodes = treeObj.getSelectedNodes();
-									if (sNodes.length > 0) {
-										var node = sNodes[0].getParentNode();
-
-										refreshNodeData(node);
-									}
-								},
-								error: function(xhr, textStatus, errorThrown) {
-									//called when there is an error
-								}
-							})
-						}
-					}
-				})
-
 				// 队列管理
 				Vue.component('queue-manage',{
 					delimiters: ['${', '}'],
@@ -2420,7 +2297,7 @@ class System {
 
 				let main = {
 					template: `<el-container style="background-color:#ffffff;height: calc(100vh - 85px);">
-									<el-aside id="system-view-left-panel" style="background-color:#f6f6f6;">
+									<el-aside style="background-color:#f6f6f6;padding:10px;" ref="leftView">
 										<el-collapse value="company-manage" accordion @change="toggleView">
 											
 											<el-collapse-item name="company-manage" v-if="window.COMPANY_NAME=='wecise' && window.SignedUser_IsAdmin==true">
@@ -2490,7 +2367,7 @@ class System {
 										</el-collapse>
 										
 									</el-aside>
-									<el-main style="padding:0px;" id="system-view-main-panel">
+									<el-main style="padding:0px;" ref="mainView">
 										<component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
 									</el-main>
 								</el-container>  `,
@@ -2509,23 +2386,22 @@ class System {
 						eventHub.$on('user-tree-refresh-event', this.initUserTreeNodes);
 					},
 					mounted(){
-						const self = this;
-
-						self.$nextTick(function(){
+						
+						this.$nextTick(()=>{
 							var name = `{{.SignedUser.IsAdmin}}`;
 							var ospace = `{{.SignedUser.Company.OSpace}}`;
 
 							if(name && ospace=='matrix'){
-								self.loadTreeData('/','configTreeNodes');
+								this.loadTreeData('/','configTreeNodes');
 							} else {
-								self.loadTreeData('/'+ospace,'configTreeNodes');
+								this.loadTreeData('/'+ospace,'configTreeNodes');
 							}
-							self.loadTreeData('/matrix/probes', 'rulesTreeNodes');
-							self.initUserTreeNodes();
-							self.initNotifyTreeNodes();
-							self.initMaintainTreeNodes();
+							this.loadTreeData('/matrix/probes', 'rulesTreeNodes');
+							this.initUserTreeNodes();
+							this.initNotifyTreeNodes();
+							this.initMaintainTreeNodes();
 
-							self.split.inst = Split(['#system-view-left-panel', '#system-view-main-panel'], {
+							this.split.inst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [25, 75],
                                 minSize: [0, 0],
                                 gutterSize: 5,

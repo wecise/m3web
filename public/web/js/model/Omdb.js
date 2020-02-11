@@ -789,40 +789,35 @@ class Omdb{
                                     </el-tab-pane>
                                     <el-tab-pane name="keys">
                                         <span slot="label"><i class="fas fa-key"></i> 主键</span>
-                                        <omdb-editor-base-component :id="id+'-keys'" :bid="id+'-keys'"
-                                                                    :model="keysModel"
+                                        <omdb-editor-base-component :model="keysModel"
                                                                     showToolsBar="true"
                                                                     showStatusBar="true">
                                         </omdb-editor-base-component>
                                     </el-tab-pane>
                                     <el-tab-pane name="indexes">
                                         <span slot="label"><i class="fas fa-indent"></i> 索引</span>
-                                        <omdb-editor-base-component :id="id+'-indexes'" :bid="id+'-indexes'"
-                                                                    :model="indexesModel"
+                                        <omdb-editor-base-component :model="indexesModel"
                                                                     showToolsBar="true"
                                                                     showStatusBar="true">
                                         </omdb-editor-base-component>
                                     </el-tab-pane>
                                     <el-tab-pane name="subClass">
                                         <span slot="label"><i class="fas fa-cube"></i> 子类</span>
-                                        <omdb-editor-base-component :id="id+'-subClass'" :bid="id+'-subClass'"
-                                                                    :model="subClassModel"
+                                        <omdb-editor-base-component :model="subClassModel"
                                                                     showToolsBar="true"
                                                                     showStatusBar="true">
                                         </omdb-editor-base-component>
                                     </el-tab-pane>
                                     <el-tab-pane name="options">
                                         <span slot="label"><i class="fas fa-cog"></i> 设置</span>
-                                        <omdb-editor-base-component :id="id+'-options'" :bid="id+'-options'"
-                                                                    :model="optionsModel"
+                                        <omdb-editor-base-component :model="optionsModel"
                                                                     showToolsBar="true"
                                                                     showStatusBar="true">
                                         </omdb-editor-base-component>
                                     </el-tab-pane>
                                     <el-tab-pane name="ddl">
                                         <span slot="label"><i class="fas fa-table"></i> DDL</span>
-                                        <omdb-editor-base-component :id="id+'-ddl'" :bid="id+'-ddl'"
-                                                                    :model="ddlModel"
+                                        <omdb-editor-base-component :model="ddlModel"
                                                                     showToolsBar="true"
                                                                     showStatusBar="true">
                                         </omdb-editor-base-component>
@@ -1334,13 +1329,13 @@ class Omdb{
                 model: Object
             },
             template: `<el-container style="height:calc(100vh - 110px);">
-                            <el-header :id="id+'-header'" style="padding:0px;height:40%;">
+                            <el-header style="padding:0px;height:40%;" ref="topView">
                                 <omdb-editor-component :id="id" :bid="id"
                                                         :model="editorModel"
                                                         showToolsBar="true"
                                                         showStatusBar="true"></omdb-editor-component>
                             </el-header>
-                            <el-main :id="id+'-main'" style="padding:0px;height:60%;overflow:hidden;">
+                            <el-main style="padding:0px;height:60%;overflow:hidden;" ref="mainView">
                                 <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick"  style="height:100%;">
                                     <el-tab-pane
                                         :key="item.name"
@@ -1528,18 +1523,15 @@ class Omdb{
 
                     self.editorModel.newInput = mql;
                 },
-                initKeys: function(){
-                    const self = this;
-
+                initKeys(){
                     let rtn = omdbHandler.classList(-1)[0];
-                    self.keys = _.sortBy(_.keys(rtn));
+                    this.keys = _.sortBy(_.keys(rtn));
                 },
                 layout(){
-                    const self = this;
                     
                     let sizes = [40,60];
                     
-                    self.main.splitInst = Split([`#${self.id+'-header'}`, `#${self.id+'-main'}`], {
+                    this.main.splitInst = Split([this.$refs.topView.$el, this.$refs.mainView.$el], {
                         sizes: sizes,
                         minSize: [0, 0],
                         gutterSize: 5,
@@ -1633,7 +1625,7 @@ class Omdb{
                 odb.app = new Vue({
                     delimiters: ['#{', '}#'],
                     template:   `<el-container style="calc(100vh - 140px);">
-                                    <el-aside :id="id+'-aside'" style="overflow:hidden;height:100%;">
+                                    <el-aside style="overflow:hidden;height:100%;" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
                                                 <h4 style="width:70%;font-size:12px;">
@@ -1654,7 +1646,7 @@ class Omdb{
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-main :id="id+'-main'" style="padding:0px;">
+                                    <el-main style="padding:0px;" ref="mainView">
                                         <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick">
                                             <el-tab-pane
                                                 :key="item.name"
@@ -1700,7 +1692,7 @@ class Omdb{
                     methods: {
                         init(){
 
-                            self.splitInst = Split([`#${this.id}-aside`, `#${this.id}-main`], {
+                            this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,

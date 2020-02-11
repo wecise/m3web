@@ -244,10 +244,10 @@ class Files {
                 mxFile.app = new Vue({
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 85px);background:#ffffff;">
-                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" class="split" id="api-view-left">
+                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" class="split" ref="leftView">
                                         <api-view-tree id="api-view-tree"></api-view-tree>
                                     </el-aside>
-                                    <el-main style="padding:0px;" class="split" id="api-view-right">
+                                    <el-main style="padding:0px;" class="split" ref="mainView">
                                         <api-view-console id="api-view-console" ref="viewConsole"></api-view-console>
                                     </el-main>
                                 </el-container>`,
@@ -258,7 +258,7 @@ class Files {
 
                     },
                     mounted: function() {
-                        Split(['#api-view-left', '#api-view-right'], {
+                        Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                             sizes: [18, 82],
                             gutterSize: 5,
                             cursor: 'col-resize',

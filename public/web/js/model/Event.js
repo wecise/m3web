@@ -59,7 +59,6 @@ class Event {
                                     this.dt.rows = [];
                                     this.initData();
                                 }
-
                                 this.layout();
                             },
                             deep:true
@@ -70,12 +69,21 @@ class Event {
                                 this.info.push(`共 ${this.dt.rows.length} 项`);
                                 this.info.push(`已选择 ${this.dt.selected.length} 项`);
                                 this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+
+                                // 有选择情况下
+                                // 初始化drag&drop
+                                // if(!_.isEmpty(val.selected)){
+                                //     this.dragHandle(true);
+                                //     this.dropHandle();
+                                // } else{
+                                //     this.dragHandle(false);
+                                // }
                             },
                             deep:true,
                             immediate:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 145px);">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
@@ -83,7 +91,7 @@ class Event {
                                         <el-tooltip content="刷新" open-delay="500" placement="top">
                                             <el-button type="text" @click="$root.$refs.searchRef.search" icon="el-icon-refresh"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="model.actions">
+                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="!_.isEmpty(model.actions)">
                                             <el-button type="text" @click="onAction(item)" :icon="mx.global.register.event.status[item][2]"></el-button>
                                         </el-tooltip>
                                         <el-tooltip content="导出" delay-time="500">
@@ -322,6 +330,75 @@ class Event {
                                 $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
                             }
                             
+                        },
+                        dragHandle(flag){
+                            
+                            let elFrom = $("tbody tr",this.$refs.table.$el);
+
+                            if(flag) {
+                                elFrom.attr("draggable","true");
+                                addEvent(elFrom, 'dragstart', (e)=> {
+                                    e.dataTransfer.effectAllowed = 'copy';
+                                    e.dataTransfer.setData("item", JSON.stringify(this.dt.selected));
+                                });
+                            } else {
+                                elFrom.off('dragstart');
+                            }
+                            
+                        },
+                        dropHandle(){
+                            // init drop for tree
+                            let treeName = "event-tree";
+                            let elTo = $('div[role="treeitem"]',this.$root.$refs.tagTree[0].$refs.tree.$el);
+                            console.log(1,elTo)
+                            // addEvent(elTo, 'dragleave', function (e) {
+                            //     let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+            
+                            //     $(`#${tId}`).removeClass("curSelectedNode");
+                            // });
+            
+            
+                            // addEvent(elTo, 'dragover', function (e) {
+                            //     e.preventDefault();
+                            //     let tId = $(e.target).attr("id").replace(/_span/g,"_a");
+            
+                            //     $(`#${tId}`).addClass("curSelectedNode");
+                            // });
+            
+                            addEvent(elTo, 'drop', (e)=> {
+                                e.preventDefault();
+                                // 接收数据
+                                let data = _.attempt(JSON.parse.bind(null, e.dataTransfer.getData("item")));
+                                e.dataTransfer.clearData();
+                                //console.log(1,elTo.target.data("item"),e,e.target.textContent,data,this.$root.$refs.tagTree[0].nodes)
+                                console.log(11,this.$root.$refs.tagTree[0].$refs.tree.getNode(3))
+                                //target
+                                let targetNode = _.filter(this.$root.$refs.tagTree[0].$refs.tree.nodes,{name:e.target.textContent});
+                                console.log(2,targetNode)
+                                // // 获取tree tID
+                                // let tId = $(e.target).attr("id").replace(/_span/g,"");
+                                // let treeObj = $.fn.zTree.getZTreeObj(treeName);
+                                // let node = treeObj.getNodeByTId(tId);
+            
+                                // let input = null;
+                                // // 删除标签
+                                // if(node.cid == 'A3'){
+                                //     input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "-", tag: null, id: _.map(data,'id')};
+                                // } 
+                                // // 打标签
+                                // else {
+                                //     input = {class: `${_.split( data[0].class,"/",4).join("/")}/`, action: "+", tag: _.last(node.name.split("/")), id: _.map(data,'id')};
+                                // }
+                                
+                                // let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+            
+                                // if(rtn.status == 'ok'){
+                                //     self.$root.$refs.searchRef.search();
+                                // }
+            
+                                // $(`#${treeName} .curSelectedNode`).removeClass("curSelectedNode");
+            
+                            });
                         }
                     }
                 })
@@ -346,6 +423,7 @@ class Event {
                         model: {
                             handler(val,oldVal){
                                 this.initData();
+                                this.layout();
                             },
                             deep:true,
                             immediate:true
@@ -432,6 +510,18 @@ class Event {
 
                     },
                     methods: {
+                        layout(){
+                            let doLayout = ()=>{
+                                if($(".el-table-column--selection",this.$el).is(':visible')){
+                                    _.delay(()=>{
+                                        this.$refs.table.doLayout();
+                                    },1000)
+                                } else {
+                                    setTimeout(doLayout,50);
+                                }
+                            }
+                            doLayout();
+                        },
                         initData(){
                             const self = this;
                             
@@ -591,6 +681,7 @@ class Event {
                         model: {
                             handler(val,oldVal){
                                 this.initData();
+                                this.layout();
                             },
                             deep:true,
                             immediate:true
@@ -675,6 +766,18 @@ class Event {
 
                     },
                     methods: {
+                        layout(){
+                            let doLayout = ()=>{
+                                if($(".el-table-column--selection",this.$el).is(':visible')){
+                                    _.delay(()=>{
+                                        this.$refs.table.doLayout();
+                                    },1000)
+                                } else {
+                                    setTimeout(doLayout,50);
+                                }
+                            }
+                            doLayout();
+                        },
                         initData(){
                             const self = this;
                             
@@ -932,12 +1035,13 @@ class Event {
                                 inst: null
                             },
                             control: {
-                                ifGraph: '0'
+                                ifGraph: '0',
+                                ifFullScreen: false
                             }
                         }
                     },
                     template: `<el-container style="height: calc(100vh - 150px);padding:1px;">
-                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" id="aigroup-left-panel">
+                                    <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
                                                 <!--event-view-aigroup-list :model="dt" ref="groups"></event-view-aigroup-list-->
@@ -945,7 +1049,7 @@ class Event {
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container class="split" id="aigroup-right-panel" ref="container">
+                                    <el-container class="split" ref="container">
                                         <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
                                             <el-tooltip content="列表" placement="top" open-delay="500">
                                                 <el-button type="text" icon="el-icon-s-grid" @click="control.ifGraph='0'"></el-button>
@@ -953,7 +1057,7 @@ class Event {
                                             <el-tooltip content="图" placement="top" open-delay="500">
                                                 <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
                                             </el-tooltip>
-                                            <el-button type="text" icon="el-icon-full-screen" style="float:right;" @click="onFullScreen"></el-button>
+                                            <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
                                         </el-header>
                                         <el-main style="padding:0px;height:100%;">
                                             <el-tabs v-model="control.ifGraph" style="height:100%;">
@@ -967,10 +1071,18 @@ class Event {
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
+                    filters: {
+                        pickScreenStyle(evt){
+                            if(evt){
+                                return `el-icon-full-screen`;
+                            } else {
+                                return `el-icon-copy-document`;
+                            }
+                        }
+                    },
                     created(){
                         // 根据model进行分组
                         let ids = _.map(this.model.rows,'id').join(";");
-                        console.log(ids,this.$root.$refs.searchRef.options.term)
                         let rtn = fsHandler.callFsJScript("/matrix/event/aigroup-list-by-ids.js",encodeURIComponent(ids)).message;
                         this.dt.rows = rtn.rows;
                         this.dt.columns = rtn.columns;
@@ -986,7 +1098,7 @@ class Event {
                     },
                     methods: {
                         init(){    
-                            this.split.inst = Split(['#aigroup-left-panel', '#aigroup-right-panel'], {
+                            this.split.inst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                 sizes: [38, 62],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -1013,14 +1125,14 @@ class Event {
                         getEventByGroup(){
                             try{
                                 // SEARCH
-                                let where = this.dt.selected[0].ids;//_.map(this.dt.selected,'ids').join(";");
+                                let where = this.dt.selected[0].ids;
                                 this.dt.modelByGroup = fsHandler.callFsJScript("/matrix/event/aigroup-by-id.js", encodeURIComponent(where)).message;
                             } catch(err){
                                 this.dt.modelByGroup = null;
                             }
                         },
                         onFullScreen(){
-                            mx.fullScreenByEl(this.$refs.container.$el);
+                            this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
                         }
                     }
                 })
@@ -1100,227 +1212,6 @@ class Event {
                     }
                 });
 
-                // 告警统计
-                Vue.component("event-view-pie",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            dataset:[]
-                        }
-                    },
-                    template:   `<div style="width: 35%;height:200px;float: left;display: flex;">
-                                    <max-echart-pie :id="id" :model="item" v-for="item in dataset"></max-echart-pie>
-                                </div>`,
-                    watch:{
-                        model:{
-                            handler(val,oldVal){
-                                this.initData();
-                            },
-                            deep:true
-                        }
-                    },
-                    mounted(){
-                        const self = this;
-                        _.delay(function(){
-                            self.initData();
-                        },1000)
-                    },
-                    methods: {
-                        initData(){
-                            const self = this;
-                            
-                            self.dataset = [];
-                            _.forEach(self.model.summary.pie,function(v,k){
-                                _.forEach(v,function(val){
-                                    self.dataset.push({
-                                            dimension: k,
-                                            id:objectHash.sha1(k+val+_.now()), 
-                                            name: val[0], 
-                                            count: val[1],
-                                            sum: _.sum(_.map(v,function(s){return s[1];})),
-                                            percent: val[1]/180*100,
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
-                                        });
-                                })
-                            });
-                        },
-                        search(event){
-                            this.$root.options.term = event;
-                            this.$root.$refs.searchRef.search();
-                        }
-                    }
-                });
-
-                // 告警统计
-                Vue.component("event-view-summary",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            dataset:[]
-                        }
-                    },
-                    template:   `<div style="width: 100%;height:200px;float:left;display: flex;flex-wrap: wrap;">
-                                    <max-echart-pie-group :id="id+'-'+item.id" :model="item" v-for="item in dataset" @click.native="search(item)"></max-echart-pie-group>
-                                </div>`,
-                    watch:{
-                        model:{
-                            handler(val,oldVal){
-                                this.initData();
-                            },
-                            deep:true
-                        }
-                    },
-                    mounted(){
-                        const self = this;
-                        _.delay(function(){
-                            self.initData();
-                        },500)
-                    },
-                    methods: {
-                        initData(){
-                            const self = this;
-                            
-                            self.dataset = [];
-
-                            _.forEach(self.model.summary.summary,function(v,k){
-                                let sum = _.sum(_.map(v,function(s){return s[1];}));
-                                _.forEach(v,function(val){
-                                    self.dataset.push({
-                                            dimension: k,
-                                            id:objectHash.sha1(k+val+_.now()), 
-                                            name: val[0], 
-                                            count: val[1],
-                                            sum: sum,
-                                            percent: _.round(val[1]/sum*100,1),
-                                            color: _.sample(['#ff0000','#ffd700','#666666','#00ffff','#40e0d0','#ff7373','#d3ffce','#3399ff','#000080','#66cccc','#a0db8e','#794044','#6897bb','#cc0000'])
-                                        });
-                                })
-                            });
-                            
-                            self.dataset = _.orderBy(self.dataset,['percent'],['desc'])
-                        },
-                        search(event){
-                            // 根据相应维度再搜索
-                            this.$root.options.term = `${event.dimension}=${event.name}`;
-                            this.$root.$refs.searchRef.search();
-                        }
-                    }
-                });
-
-                // 仪表盘
-                Vue.component("gauge-component",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data:function(){
-                        return {
-                            gaugePS: null
-                        }
-                    },
-                    template: ` <div style="width:100%;">
-                                    <canvas :id="'gauge-'+id"></canvas>
-                                    <p>#{model.host}#/<small>#{model.param}#</small></p>
-                                </div>`,
-                    mounted:function(){
-                        const self = this;
-                        self.init();
-                    },
-                    methods: {
-                        init: function(){
-                            const self = this;
-                            
-                            self.gaugePS = new RadialGauge({
-                                renderTo: `gauge-${self.id}`,
-                                width: 200,
-                                height: 200,
-                                units: 'PS',
-                                minValue: 0,
-                                maxValue: 100,
-                                majorTicks: [
-                                    '0',
-                                    '10',
-                                    '20',
-                                    '30',
-                                    '40',
-                                    '50',
-                                    '60',
-                                    '70',
-                                    '80',
-                                    '90',
-                                    '100'
-                                ],
-                                minorTicks: 2,
-                                ticksAngle: 270,
-                                startAngle: 45,
-                                strokeTicks: true,
-                                highlights  : [
-                                    { from : 50,  to : 80, color : '#ffff00' },
-                                    { from : 80, to : 100, color : 'rgba(225, 7, 23, 0.75)' }
-                                ],
-                                valueInt: 1,
-                                valueDec: 0,
-                                colorPlate: "#fff",
-                                colorMajorTicks: "#686868",
-                                colorMinorTicks: "#686868",
-                                colorTitle: "#000",
-                                colorUnits: "#000",
-                                colorNumbers: "#686868",
-                                valueBox: true,
-                                colorValueText: "#000",
-                                colorValueBoxRect: "#fff",
-                                colorValueBoxRectEnd: "#fff",
-                                colorValueBoxBackground: "#fff",
-                                colorValueBoxShadow: false,
-                                colorValueTextShadow: false,
-                                colorNeedleShadowUp: true,
-                                colorNeedleShadowDown: false,
-                                colorNeedle: "rgba(200, 50, 50, .75)",
-                                colorNeedleEnd: "rgba(200, 50, 50, .75)",
-                                colorNeedleCircleOuter: "rgba(200, 200, 200, 1)",
-                                colorNeedleCircleOuterEnd: "rgba(200, 200, 200, 1)",
-                                borderShadowWidth: 0,
-                                borders: true,
-                                borderInnerWidth: 0,
-                                borderMiddleWidth: 0,
-                                borderOuterWidth: 5,
-                                colorBorderOuter: "#fafafa",
-                                colorBorderOuterEnd: "#cdcdcd",
-                                needleType: "arrow",
-                                needleWidth: 2,
-                                needleCircleSize: 7,
-                                needleCircleOuter: true,
-                                needleCircleInner: false,
-                                animationDuration: 1500,
-                                animationRule: "dequint",
-                                fontNumbers: "Verdana",
-                                fontTitle: "Verdana",
-                                fontUnits: "Verdana",
-                                fontValue: "Led",
-                                fontValueStyle: 'italic',
-                                fontNumbersSize: 20,
-                                fontNumbersStyle: 'italic',
-                                fontNumbersWeight: 'bold',
-                                fontTitleSize: 24,
-                                fontUnitsSize: 22,
-                                fontValueSize: 50,
-                                animatedValue: true
-                            });
-                            self.gaugePS.draw();
-                            self.gaugePS.value = self.model.value || 0;
-                        }
-                    }
-                });
-
                 // 告警详情
                 Vue.component("event-diagnosis-detail",{
                     delimiters: ['#{', '}#'],
@@ -1349,9 +1240,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     }
@@ -1384,9 +1275,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         },
                         pickSeverity(item){
@@ -1426,9 +1317,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     }
@@ -1452,7 +1343,7 @@ class Event {
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" id="left-panel">
+                                    <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height: 30px;
                                                                 float: right;
@@ -1465,12 +1356,12 @@ class Event {
                                                     style="right:-40%;">
                                                 </el-switch>
                                             </el-header>
-                                            <el-main style="padding:0px;overflow:auto;">
+                                            <el-main style="padding:0px;overflow:hidden;">
                                                 <el-table-multiselect-component :model="dt" ref="dimension"></el-table-multiselect-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container class="split" id="right-panel">
+                                    <el-container class="split" ref="mainView">
                                         <el-main style="padding:0px;">
                                             <el-table-component :model="modelByDimension"></el-table-component>
                                         </el-main>
@@ -1484,9 +1375,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     },
@@ -1513,7 +1404,7 @@ class Event {
                     methods: {
                         init(){    
                             
-                            Split(['#left-panel', '#right-panel'], {
+                            Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [45, 55],
                                 gutterSize: 5,
                                 cursor: 'col-resize',
@@ -1553,16 +1444,19 @@ class Event {
                 Vue.component("event-diagnosis-probability",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model: Object
                     },
                     data(){
                         return {
-                            tableData: null
+                            dt:{
+                                rows: [],
+                                columns: [],
+                                template: []
+                            }
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside class="split" :id="'probability-left-panel-'+id">
+                                    <el-aside class="split" ref="leftView">
                                         <el-container>
                                             <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                                 
@@ -1574,46 +1468,44 @@ class Event {
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container class="split" :id="'probability-right-panel-'+id">
+                                    <el-container class="split" ref="mainView">
                                         <el-main style="padding:0px;">
-                                            <event-diagnosis-datatable-component :id="id + '-table'" :model="tableData" type="event"></event-diagnosis-datatable-component>
+                                            <el-table-component :model="dt"></el-table-component>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     },
                     mounted(){
-                        this.init();
-
-                        // 默认维度关联事件
-                        this.tableData = {  rows: this.model.rows[0].events, 
-                                            options: this.model.options,
-                                            columns: this.model.columns, 
-                                            template: this.model.template
-                                        };
+                        this.$nextTick(()=>{
+                            this.init();
+                        })
                     },
                     methods: {
-                        init(){    
-                            const self = this;
+                        init(){
+
+                            _.extend(this.dt, {rows: _.first(this.model.rows).events, columns: this.model.template, template: this.model.template});
                             
-                            Split([`#probability-left-panel-${self.id}`, `#probability-right-panel-${self.id}`], {
-                                sizes: [30, 70],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                            });
+                            _.delay(()=>{
+                                Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                                    sizes: [30, 70],
+                                    minSize: [0, 0],
+                                    gutterSize: 5,
+                                    cursor: 'col-resize',
+                                    direction: 'horizontal',
+                                });
+                            },2000)
 
                         },
                         toggleEvent(event){
-                            _.extend(this.tableData, { rows: _.find(this.model.rows,{name:event}).events } );
+                            _.extend(this.dt, { rows: _.find(this.model.rows,{name:event}).events } );
                         }
                     }
                 })
@@ -1633,9 +1525,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     },
@@ -1685,14 +1577,14 @@ class Event {
                         }
                     },
                     template:  ` <el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" :class="'split left-panel-'+id">
+                                    <el-aside style="width:300px;background: #f7f7f7;overflow:hidden;" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-main style="padding:0px;overflow:auto;">
                                                 <el-table-component :model="dt" ref="script"></el-table-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container :class="'split right-panel-'+id">
+                                    <el-container ref="container">
                                         <el-header style="height:30px;line-height:30px;background: #f7f7f7;display:;padding: 0px 10px;">
                                             <el-tooltip content="下发脚本">
                                                 <el-button type="text" style="float: right;" @click="scriptRun" icon="fas fa-running"></el-button>
@@ -1726,9 +1618,9 @@ class Event {
                     filters: {
                         heightByMode: function(viewType){
                             if(viewType === 'm'){
-                                return `height: calc(100vh - 130px)`;
+                                return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 180px)`;
+                                return `height: calc(100vh - 190px)`;
                             }
                         }
                     },
@@ -1748,7 +1640,7 @@ class Event {
                     },
                     methods: {
                         init(){    
-                            this.split.inst = Split([`.left-panel-${this.id}`, `.right-panel-${this.id}`], {
+                            this.split.inst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                 sizes: [33, 67],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -1764,7 +1656,7 @@ class Event {
                             },1000)
                         },
                         scriptRun(){
-                            console.log(2,this.dt.selected)
+                            
                             let cmd = this.dt.selected[0].name;
                             let server = "wecise";
                             let user = "matrix";
@@ -1805,7 +1697,7 @@ class Event {
                         }
                     },
                     template: `<div style="width:100%;height:200px;"></div>`,
-                    beforeDestroy: function() {
+                    beforeDestroy() {
                         this.editor.destroy();
                         this.editor.container.remove();
                     },
@@ -1849,9 +1741,11 @@ class Event {
                     },
                     template:   `<el-table :data="model.rows" 
                                         @selection-change="onSelectionChange"
-                                        style="width: 100%" height="300" 
+                                        style="width: 100%" 
+                                        height="300" 
                                         border 
                                         stripe
+                                        row-key="id"
                                         ref="table">
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column sortable :prop="item.field" :label="item.title" :width="item.width" v-for="item in model.columns" v-if="item.field!=='render'">
@@ -1861,7 +1755,7 @@ class Event {
                                     </el-table-column>
                                     <el-table-column type="expand" label="渲染">
                                         <template slot-scope="scope">
-                                            <view-editor-component :render="scope.row.render" :index="scope.$index" @update:render="scope.row.render = $event"></view-editor-component>
+                                            <!--view-editor-component :render="scope.row.render" :index="scope.$index" @update:render="scope.row.render = $event"></view-editor-component-->
                                         </template>
                                     </el-table-column>
                                 </el-table>`,
@@ -1886,6 +1780,15 @@ class Event {
                         this.$nextTick(()=>{
                             _.delay(()=>{
                                 this.toggleSelection(this.model.selected);
+                                // console.log($('tbody',this.$el)[0])
+                                // const el = $('tbody',this.$el)[0];
+                                // const self = this;
+                                // Sortable.create(el, {
+                                //     onEnd({ newIndex, oldIndex }) {
+                                //         const currRow = self.model.rows.splice(oldIndex, 1)[0];
+                                //         self.model.rows.splice(newIndex, 0, currRow)
+                                //     }
+                                // })
                             },1000)
                         })
                     },
@@ -2181,10 +2084,10 @@ class Event {
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
                                     <el-container>
-                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                        <el-header style="height:40px;line-height:40px;padding: 0px;">
                                             <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
-                                        <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 125px);overflow:hidden;" v-if="options.view.eidtEnable">
+                                        <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 135px);overflow:hidden;" v-if="options.view.eidtEnable">
                                             <view-component :model="options.view" ref="viewRef"></view-component>
                                         </el-main>
                                         <el-main class="event-view-container" style="padding: 5px 0px 0px 0px;" v-else>
@@ -2234,10 +2137,10 @@ class Event {
 
                                                         </div>
                                                         <el-container id="event-view-console">
-                                                            <el-aside class="tree-view" id="event-view-left" style="background-color:#f6f6f6;">
-                                                                <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}"></entity-tree-component>
+                                                            <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                                <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" ref="tagTree"></entity-tree-component>
                                                             </el-aside>
-                                                            <el-main class="table-view" id="event-view-main" style="padding:5px;">
+                                                            <el-main class="table-view" style="padding:5px;" ref="mainView">
                                                                 <event-view-facet :model="model.message" v-show="control.ifSmart!=0" style="margin-top:30px;"></event-view-facet>
                                                                 <event-eventlist-component :model="model.message"></event-eventlist-component>
                                                             </el-main>
@@ -2456,11 +2359,11 @@ class Event {
                         this.toggleSummaryBySmart(this.control.ifSmart);
 
                         // 窗口Resize
-                        _.delay(function(){
+                        _.delay(()=>{
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                            Split(['#event-view-left', '#event-view-main'], {
+                            Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -2550,7 +2453,7 @@ class Event {
                                     "right": "5px"
                                 });
                                 $("#content.content .event-eventlist-component").css({
-                                    "height":"calc(100vh - 135px)"
+                                    "height":"calc(100vh - 145px)"
                                 });
                                 this.control.ifRefresh = '0';
                                 mx.fullScreen(true);

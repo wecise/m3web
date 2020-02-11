@@ -1727,7 +1727,7 @@ class AI {
                     },
                     template:   `<el-container style="background-color:#ffffff;height:calc(100vh - 85px);">
                                     
-                                    <el-aside width="20%" style="height:100%;overflow: hidden;background:#f6f6f6" :id="'matrix-ai-setup-left-'+id">
+                                    <el-aside width="20%" style="height:100%;overflow: hidden;background:#f6f6f6" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height: 30px;padding: 0px 0px 0px 5px;line-height: 30px;font-weight: 900;">
                                                 <i class="fas fa-braille"></i> 规则分类
@@ -1762,7 +1762,7 @@ class AI {
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-container style="height:100%;" :id="'matrix-ai-setup-main-'+id">
+                                    <el-container style="height:100%;" ref="container">
                                         <!--el-header style="height: 30px;padding:0 10px;line-height:30px;">
                                             #{[selectedRule.label,selectedRule.name].join("/").replace(/\\//g," / ")}#
                                         </el-header-->
@@ -1807,7 +1807,7 @@ class AI {
                         })
 
                         _.delay(() => {
-                            this.split.inst = Split([`#matrix-ai-setup-left-${this.id}`, `#matrix-ai-setup-main-${this.id}`], {
+                            this.split.inst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                 sizes: [25, 75],
                                 minSize: [0, 0],
                                 gutterSize: 5,

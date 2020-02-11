@@ -36,6 +36,7 @@ setInterval(()=>{
     $(".el-transfer-panel__item").addClass("el-checkbox");
     $("label[role='checkbox']").addClass("el-checkbox");
     $("label[role='radio']").addClass("el-radio");
+    $(".el-tree-node__content>label").addClass("el-checkbox");
     $(".el-dropdown-menu--small").addClass("el-dropdown-menu el-popper");
     $(".el-form-item--small").addClass("el-form-item");
     $(".el-table--fit").addClass("el-table");
@@ -44,5 +45,6 @@ setInterval(()=>{
     $(".has-time").addClass("el-picker-panel el-date-range-picker el-popper");
     $(".el-dialog__wrapper.transition.ElDialog").removeClass("transition ElDialog");
     $(".el-message-box__wrapper").removeClass("transition");
+    $("i[class^='elicon']").css("font-size","14px");
 //    $(".el-tabs__nav.is-left > div:eq(0)").addClass("el-tabs__active-bar");
 },50)

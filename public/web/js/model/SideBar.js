@@ -95,25 +95,44 @@ class SideBar {
                         {name:'政务应用',url:'', cnname:'政务应用', target:'', icon: '', count: 0},
                         {name:'开发者应用',url:'', cnname:'开发者应用', target:'', icon: '', count: 0}
                     ],
-                checkList: []
+                checkList: [],
+                apps: {}
             },
-            template: ` <el-container style="height:100%;width:100%;">
+            template: ` <el-container style="height:100%;width:100%;" class="sidebar-container">
                             <el-header style="height:40px;line-height:40px;border-bottom:1px solid #ddd;" ref="header">
-                                <el-input placeholder="请输入关键词" v-model="term" style="width:80%;border:unset;"></el-input>
+                                <el-input placeholder="请输入关键词" v-model="term" style="width:80%;"></el-input>
                                 <el-button type="text" @click="onClose" style="float:right;font-size:14px;" icon="el-icon-close"></el-button>
                             </el-header>
                             <el-main style="padding:0px;">
                                 <el-container style="height:100%;">
-                                    <el-main style="padding:0px;height:100%;overflow:auto;">
-                                        <el-checkbox-group v-model="checkList" ref="checkbox" style="display:flex;flex-wrap:wrap;" @change="onChange">
-                                            <el-checkbox :label="item" :key="item" v-for="item in _.map(model,'id')" :data-item="item">
-                                                <el-image :src="_.find(model,{id:item}).icon | pickIcon" fit="fill" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
-                                                </el-image> 
-                                                <p>
-                                                    #{_.truncate(_.find(model,{id:item}).cnname,{'length': 6})}#
-                                                </p>
-                                            </el-checkbox>
-                                        </el-checkbox-group>
+                                    <el-main style="padding:10px;height:100%;overflow:auto;display:flex;flex-wrap:wrap;">
+                                        <el-button type="default" :key="item.id" v-for="item in model" style="border: unset;width:100px;height:120px;margin:5px;padding:0px;cursor:pointer;"> 
+                                            <el-image :src="_.find(model,{id:item.id}).icon | pickIcon" fit="fill" style="width:48px;filter:grayscale(100%) brightness(45%) sepia(100%) hue-rotate(-180deg) saturate(700%) contrast(0.8);">
+                                            </el-image> 
+                                            <p style="padding: 5px 0px;">
+                                                #{_.truncate(_.find(model,{id:item.id}).cnname,{'length': 6})}#
+                                                <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
+                                                    <span class="el-dropdown-link">
+                                                        <i class="el-icon-arrow-down el-icon--right" style="color:#333;"></i>
+                                                    </span>
+                                                    <el-dropdown-menu slot="dropdown">
+                                                        <el-dropdown-item disabled>#{item.cnname}#</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'walking',data:item}" divided>当前窗口运行</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'running',data:item}">打开新窗口运行</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'home',data:item}" divided>设为首页</el-dropdown-item>
+                                                        <el-dropdown-item divided disabled>分组</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in _.xor(apps.template,[item])">
+                                                            <template v-if="groupItem.title">
+                                                                移到【#{groupItem.title}#】组
+                                                            </template>
+                                                        </el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:item}">移到桌面</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>卸载应用</el-dropdown-item>
+                                                        <el-dropdown-item :command="{cmd:'share',data:item}" divided>分享</el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </p>
+                                        </el-button>
                                     </el-main>
                                     <el-aside style="width:200px;border-left: 1px solid rgb(221, 221, 221);padding: 10px;overflow:hidden;">
                                         <ul class="animated fadeIn" style="list-style: none;">
@@ -145,12 +164,12 @@ class SideBar {
                 this.init();
             },
             mounted() {
-                this.contextMenu(".el-checkbox-group > label");
-                this.initStyle();
+                
             },
             methods: {
                 init(){
                     let rtn = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
+                    this.apps = rtn;
                     
                     // appIds
                     this.selectedApps = rtn.appIds;
@@ -201,6 +220,28 @@ class SideBar {
                 refresh: function(){
                     this.model = [];
                     this.init();
+                },
+                onAppCommand(item){
+                    if(item.cmd === "walking"){
+                        sideBar.appRunning(item.data);
+                    } else if(item.cmd === "running"){
+                        sideBar.appRunningPlus(item.data);
+                    } else if(item.cmd === "uninstall"){
+                        sideBar.appUninstall(item.data);
+                    } else if(item.cmd === "home"){
+                        sideBar.appAsHome(item.data);
+                    } else if(item.cmd === "share"){
+                        sideBar.appShare(item.data);
+                    } else if(item.cmd === "groupAction"){
+                        _.extend(item.data.groups,{group: item.targetGroup });
+                        this.toggleGroup(item.data);
+                    }
+                },
+                toggleGroup(item){
+                    let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
+                    if( _.lowerCase(rtn.status) == "ok"){
+                        eventHub.$emit("APP-REFRESH-EVENT");
+                    }
                 },
                 onChange(evt){
                     
@@ -320,14 +361,14 @@ class SideBar {
                                 @open="onOpen" 
                                 @close="onClose" 
                                 :collapse="isCollapse"
+                                :collapse-transition="false"
                                 class="el-menu-vertical-sidebar"
                                 background-color="transparent"
                                 text-color="#fff"
                                 active-text-color="#ffd04b"
                                 style="height:100vh;overflow-y:auto;float:left;">
-                            <el-menu-item index="toggle" style="display:none;">
-                                <img :src="preFixIcon+'toggle-left.png'+postFixIcon" style="width:17px;"></img>
-                                <span slot="title">切换</span>
+                            <el-menu-item index="toggle" style="display:">
+                                <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:17px;color:#fff;"></i>
                             </el-menu-item>
                             <el-menu-item index="apps">
                                 <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> 
@@ -392,6 +433,17 @@ class SideBar {
                                 </span>
                             </el-menu-item>
 
+                            <!-- 没有分组的应用-->
+                            <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
+                                <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                <span slot="title" style="width:auto;">
+                                    #{item.cnname}#
+                                    <el-tooltip content="在新窗口中打开">
+                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                    </el-tooltip>
+                                </span>
+                            </el-menu-item>
+
                         </el-menu>`,
             created(){
                 this.init();
@@ -419,7 +471,8 @@ class SideBar {
 
                                 return _.merge(v, {status: ""});
                             }),
-                        template: rtn.template
+                        template: rtn.template,
+                        appListUnGrouped: rtn.appListUnGrouped
                     };
 
                     this.setStatus();
@@ -454,7 +507,9 @@ class SideBar {
                     this.init();
                 },
                 onToggle(){
-                    this.isCollapse=!this.isCollapse;
+                    console.log(1,this.isCollapse)
+                    this.isCollapse = !this.isCollapse;
+                    console.log(2,this.isCollapse)
                     
                     $(".sidebar-toggle-play").removeClass("toggle animated flash");
                     $("#sidebar").css('display','');
@@ -668,6 +723,7 @@ class SideBar {
 
     appUninstall(event){
 
+        
         alertify.confirm(`确定要卸载该应用？<br><br>
                         应用名称：${event.cnname}<br><br>
                         地址：${event.url}<br><br>`, function (e) {

@@ -68,7 +68,7 @@ class Job extends Matrix {
                             immediate:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 145px);">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
@@ -527,7 +527,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>
                                         <el-row :gutter="10">
                                             <el-col :xs="12" :sm="10" :md="6" :lg="6" :xl="10">
@@ -598,7 +598,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
@@ -623,7 +623,7 @@ class Job extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>
                                         <el-card class="box-card">
                                             <div slot="header" class="clearfix">
@@ -644,7 +644,7 @@ class Job extends Matrix {
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
                                     <el-container>
-                                        <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                        <el-header style="height: 40px;line-height: 40px;padding: 0px;">
                                             <search-base-component :options="options"
                                                                 ref="searchRef"
                                                                 class="grid-content"></search-base-component>
@@ -697,10 +697,10 @@ class Job extends Matrix {
                                                             </el-main>
                                                         </el-container>
                                                         <el-container id="job-view-console">
-                                                            <el-aside :class="'tree-view job-view-left-'+id" style="background-color:#f6f6f6;">
+                                                            <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
                                                                 <probe-tree-component id="job-tree" :model="{parent:'/job',name:'job_tree_data.js',domain:'job'}"></probe-tree-component>
                                                             </el-aside>
-                                                            <el-main :class="'table-view job-view-main-'+id" style="padding:5px;">
+                                                            <el-main class="table-view" style="padding:5px;" ref="mainView">
                                                                 <el-joblist-component :model="model.message"></el-joblist-component>
                                                             </el-main>
                                                         </el-container>
@@ -859,11 +859,11 @@ class Job extends Matrix {
                         this.toggleSummaryBySmart(this.control.ifSmart);
 
                         // 窗口Resize
-                        _.delay(function(){
+                        _.delay(()=>{
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                            Split([`.job-view-left-${this.id}`, `.job-view-main-${this.id}`], {
+                            Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,

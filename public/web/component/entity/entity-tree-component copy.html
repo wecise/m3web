@@ -82,33 +82,7 @@
                 <el-input placeholder="搜索" size="mini"></el-input>
             </el-header>
             <el-main style="padding: 5px;height: calc(100vh - 175px);">
-                <el-tree id="tagTree"
-                    node-key="id"
-                    default-expand-all
-                    :data="nodes" :props="defaultProps" 
-                    draggable
-                    :allow-drop="allowDrop"
-                    :allow-drag="allowDrag"
-                    @node-drag-start="onDragStart"
-                    @node-drag-enter="onDragEnter"
-                    @node-drag-leave="onDragLeave"
-                    @node-drag-over="onDragOver"
-                    @node-drag-end="onDragEnd"
-                    @node-drop="onDrop"
-                    @node-click="onNodeClick"
-                    @node-expand="onNodeExpand"
-                    @node-contextmenu="onNodeContextmenu"
-                    style="background: transparent;"
-                    ref="tree">
-                    <span slot-scope="{ node, data }" style="width:100%;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
-                        <span :class="data.iconSkin"></span>
-                        <span>${node.label}</span>
-                        <span v-if="data.name!=''">
-                            <el-link v-show="data.del" type="primary" @click="delTagDir(data,$event)" style="float:right;" icon="el-icon-delete"></el-link>
-                            <el-link v-show="data.del" type="primary" @click="editTagDir(data,$event)" style="margin-right: 10px;float:right;" icon="el-icon-edit"></el-link>
-                        </span>
-                    </span>                  
-                </el-tree>
+                <ul class="ztree" :id="id"></ul>
             </el-main>
 		</el-container>
 	</template>
@@ -123,11 +97,7 @@
         },
         data: function(){
             return {
-                defaultProps: {
-                    children: 'children',
-                    label: 'name'
-                },
-                
+                zTree: Object,
                 zSetting: {
                     view: {
                         dblClickExpand: this.onDblClickExpand,
@@ -157,167 +127,78 @@
                         enable: false
                     }
                 },
-                nodes: [],
+                zNodes: fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message,
                 selectedNode: null,
                 curTarget: null,
                 curTmpTarget: null,
             }
         },
         created(){
-            this.loadNodes();
+            
         },
         mounted() {
-            this.$nextTick(()=> {
-                
+            const self =  this;
+
+            self.$nextTick(function () {
+
+                self.init();
+                _.delay(function(){
+                    self.initPlugIn();
+                },1500);
+
             })
         },
         methods:{
-            loadNodes(){
-                this.nodes = fsHandler.callFsJScript(`${['/matrix'+this.model.parent,this.model.name].join("/")}`).message;
+            init() {
+                const self = this;
+
+                self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
             },
-            onMouseEnter(data){
-                this.$set(data, 'del', true)
-            },
-            onMouseLeave(data){
-                this.$set(data, 'del', false)
-            },
-            recursiveTraverse(node) {
+	        initPlugIn(){
+                const self = this;
 
-                let rtn = null;
+                $(self.$el).contextMenu({
+                    selector: 'span.class.more',
+                    trigger: 'left',
+                    items: {
 
-                rtn = _.map(node, (v,k)=>{
-                    return {cid: v.name, parent:'A2', rtype:'A2', name: v.name, title: v.name, children: this.recursiveTraverse(v.nodes), iconSkin: 'el-icon-price-tag',del:false};
-                });
+                        "classNewByMql": {
+                            name: "新建子类", icon: "fas fa-plus", callback: function (key, opt) {
 
-                return rtn;
-            },
-            onNodeExpand(tNode){
-                console.log(1,tNode)
-                if(tNode.rtype === 'A1') {
-                    this.loadSubNode([{cid: tNode.cid, tNode: tNode}]);
-                    return;
-                }
+                            }
+                        },
+                        "sep1": "---------",
+                        "删除": {
+                            name: "删除类", icon: "fas fa-trash", callback: function (key, opt) {
 
-                if(tNode.rtype === 'A2' && tNode.parent == null){
-
-                    let tagDir = tagHandler.getTagDir(this.model.domain);
-
-                    // 忽略第一层
-                    _.extend(_.find(this.nodes,{cid:tNode.cid}), {children: this.recursiveTraverse(tagDir.nodes)});
-
-                    return;
-                }
-
-                // 删除标签
-                if(tNode.rtype === 'A3'){
-                    return false;
-                }
-            },
-            onNodeClick(tNode) {
-                
-                if(tNode.rtype === 'A1') {
-                    this.loadSubNode([{cid: tNode.cid, tNode: tNode}]);
-                }
-
-                if(tNode.rtype === 'A2' && tNode.parent == null){
-                    let tagDir = tagHandler.getTagDir(this.model.domain);
-                    // 忽略第一层
-                    _.extend(_.find(this.nodes,{cid:tNode.cid}), {children: this.recursiveTraverse(tagDir.nodes)});
-                }
-
-                // 根据节点过滤数据
-                // A1 为class搜索
-                // A2 为tag搜索
-                if(tNode.rtype=='A1'){
-                    // if(treeNode.parent == null){
-                    //     this.$root.options.term = `class=*`;    
-                    // } else {
-                        this.$root.options.class = `#${tNode.class}: | `;
-                    // }
-                    this.$root.$refs.searchRef.search();
-                } else if(tNode.rtype=='A2'){
-                    if(tNode.parent == null){
-                        this.$root.options.term = "";    
-                    } else {
-                        this.$root.options.term = `tags=${tNode.name}`;
-                    }
-                    this.$root.$refs.searchRef.search();
-                }
-            },
-            onNodeContextmenu(event,data,node,el){
-                
-                $.contextMenu("destroy").contextMenu({
-                    selector: '#tagTree [role="treeitem"]',
-                    trigger: 'right',
-                    autoHide: true,
-                    delay: 5,
-                    hideOnSecondTrigger: true,
-                    build: function($trigger, e) {
-        
-                        return {
-                            callback: function(key, opt) {
-                                
-                            },
-                            items: {
-                                    "m10_diagnosis": {
-                                        "name": "性能趋势",
-                                        "icon": "fas fa-diagnoses"
-                                    },
-                                    "m20_d1":"----------",
-                                    "m30_trends": {
-                                        "name": "性能分析",
-                                        "icon": "fas fa-trash"
-                                    },
-                                    "m40_d2":"----------",
-                                    "m50_threshold": {
-                                        "name": "阈值管理",
-                                        "icon": "fas fa-hand-peace"
-                                    },
-                                    "m60_d3":"----------",
-                                    "m70_tags": {
-                                        "name": "标签", 
-                                        "type": "text", 
-                                        "value": "", 
-                                        "icon": "fas fa-tags"
-                                    }
-                                }
-
+                            }
+                        }
+                    },
+                    events: {
+                        show: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // import states from data store
+                            $.contextMenu.setInputValues(opt, $this.data());
+                        },
+                        hide: function(opt) {
+                            // this is the trigger element
+                            var $this = this;
+                            // export states to data store
+                            $.contextMenu.getInputValues(opt, $this.data());
                         }
                     }
                 });
+
+	        },
+            initData(node){
+                const self = this;
+                
+                self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
             },
-            onDragStart(node, ev) {
-                console.log('drag start', node);
-            },
-            onDragEnter(draggingNode, dropNode, ev) {
-                console.log('tree drag enter: ', dropNode.label);
-            },
-            onDragLeave(draggingNode, dropNode, ev) {
-                console.log('tree drag leave: ', dropNode.label);
-            },
-            onDragOver(draggingNode, dropNode, ev) {
-                console.log('tree drag over: ', dropNode.label);
-            },
-            onDragEnd(draggingNode, dropNode, dropType, ev) {
-                console.log('tree drag end: ', dropNode && dropNode.label, dropType);
-            },
-            onDrop(draggingNode, dropNode, dropType, ev) {
-                console.log('tree drop: ', dropNode.label, dropType);
-            },
-            allowDrop(draggingNode, dropNode, type) {
-                console.log('dragging drop: ', draggingNode, dropNode, type);
-                if (dropNode.data.label === '标签') {
-                    return type !== 'inner';
-                } else {
-                    return true;
-                }
-            },
-            allowDrag(draggingNode) {
-                console.log('dragging drag: ', draggingNode);
-                return draggingNode;
-            },
-            loadSubNode(node){
-				
+            initSubNode(node){
+				const self = this;
+
                 _.forEach(node, function(v,k){
 
                     let rtn = omdbHandler.classList(v.cid);
@@ -327,16 +208,28 @@
                     }
 
                     if( v.cid === -1 ) {
+
                         let _arr = _.map(rtn,function(v){ return _.merge(v,{rtype:'A1', open:true})});
-                        _.merge(this.nodes[0],{ children: _arr});
+
+                        _.merge(self.zNodes[0],{ children: _arr});
+
+                        self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
 
                     } else {
-	                    
+
+	                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+
+                        let nodes = zTree.getSelectedNodes();
+
+                        if (nodes && nodes.length>0) {
+                            zTree.removeChildNodes(nodes[0]);
+                        }
+
                         // 按name排序
-                        _.extend(v.tNode, {children:_.orderBy(_.map(rtn,(v)=>{ 
+                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,function(v){ 
                                                                 var _name = v.name.split("/").slice(0,-1).join("/") + "/" + v.alias;
-                                                                return _.merge(v,{rtype:'A1', name:_name,children:[],class: v.name, open:false, iconSkin: "el-icon-coin", del:false});
-                                                            }),['name'],['asc'])});
+                                                                return _.merge(v,{rtype:'A1', name:_name,children:[],class: v.name, open:false, iconSkin: "server"});
+                                                            }),['name'],['asc']));
 
                     }
                 })
@@ -610,31 +503,21 @@
                 }
 
             },
-            editTagDir(tNode,event){
-                event.preventDefault();
-            },
-            delTagDir(tNode,event){
-                event.preventDefault();
+            delTagDir: function(treeNode){
+                const self = this;
 
-                const h = this.$createElement;
+                alertify.confirm(`确认要删除该标签目录？<br><br>
+                                  标签域：${self.model.domain}<br><br>
+                                  名称：${treeNode.name}`, function (e) {
+                    if (e) {
+                        let rtn = tagHandler.delTagDir(self.model.domain, treeNode.name);
 
-                this.$msgbox({
-                        title: "确认要删除该标签?",
-                        message: h('span', null, [
-                            h('p', null, `标签域：${this.model.domain}`),
-                            h('p', null, `标签名称：${tNode.name}`)
-                        ]),
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消'
-                }).then(() => {
-                    let rtn = tagHandler.delTagDir(this.model.domain, tNode.name);
-                    if(rtn === 1) {
-                        this.loadNodes();
+                        if(rtn === 1) {
+                            self.zTree.removeNode(treeNode);
+                        }
+                    } else {
+                        // user clicked "cancel"
                     }
-                    
-                }).catch(()=>{
-
                 });
 
             }

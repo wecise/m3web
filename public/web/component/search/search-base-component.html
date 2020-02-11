@@ -12,8 +12,8 @@
 		}
 
 		.search-base-component .search-base .el-autocomplete .el-input--small>.el-input__inner{
-			height: 30px;
-			line-height: 30px;
+			height: 40px;
+			line-height: 40px;
 			border: unset;
 		}
 
@@ -26,8 +26,8 @@
 		}
 
 		.search-base-component .el-input--small .el-input__inner{
-			height: 30px;
-			line-height: 30px;
+			height: 40px;
+			line-height: 40px;
 		}
 
 		.search-base-component .el-dropdown.search-preset-component>.el-button--small{
@@ -39,14 +39,19 @@
 			border-radius: 0px!important;
 		}
 
+		.search-base-component .search-base--select-popper{
+			padding:20px;
+			left: 0px!important;
+		}
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="search-base-component"  ----------*/
 	<template>
-		<div style="display:flex;height: 32px;line-height: 32px;width:100%;" class="search-base">
+		<div style="display:flex;height: 40px;line-height: 40px;width:100%;" class="search-base">
 			<!--搜索范围-->
-			<el-select v-model="options.view.value" placeholder="请选择视图" class="search-base--select" @change="onViewChange" v-if="options.view.show">
+			<el-select v-model="options.view.value" placeholder="请选择视图"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
 				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
 					<el-card :body-style="{ padding: '5px' }" style="text-align: center;padding:10px 0px 10px 40px">
 						<span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
@@ -62,7 +67,7 @@
 								</el-tooltip>
 							</p>  
 						</div>
-					  </el-card>
+					</el-card>
 				</el-option>
 			</el-select>
 			<!--搜索框-->

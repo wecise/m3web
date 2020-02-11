@@ -777,8 +777,8 @@ class Window {
                             my: "left-top",
                             at: "left-top",
                             of: container,
-                            offsetX: 3,
-                            offsetY: 3
+                            offsetX: 0,
+                            offsetY: 0
                         };
 
         this.lrwh[2] = $(container).width() * 0.3;//"30em";//this.width * 0.2;
@@ -830,6 +830,68 @@ class Window {
             },
             footerToolbar: function (footer) {
                 return `<div style="width:100%;text-align:center;"><a href="javascript:void(0);" class="btn-close el-button el-button--small el-button-default">关闭</a><a href="javascript:void(0);" class="btn-colspan el-button el-button--small el-button-default">收起</a></div>`;
+            }
+        });
+
+        return win;
+    }
+
+    winGraphEdgeAction(title, template, position, container, fun){
+
+        let _position = {
+                            my: "left-top",
+                            at: "left-top",
+                            of: container,
+                            offsetX: 0,
+                            offsetY: 0
+                        };
+
+        this.lrwh[2] = $(container).width() * 0.3;//"30em";//this.width * 0.2;
+        this.lrwh[3] = $(container).height() * 0.8;//this.height * 0.55;
+
+        let win = $.jsPanel({
+            id: 'jsPanel-graphEdgeAction',
+            theme:          maxWindow.theme.dark,
+            headerTitle:   title,
+            contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
+            position: _position,
+            headerControls: { maximize: 'remove' },
+            headerRemove:  true,
+            container: container,
+            content:        template,
+            callback: function(panel){
+
+                $(".jsPanel").css({
+                    "position":"absoulate",
+                    "z-index": "1000"
+                });
+                
+                $(".jsPanel-headerbar",this).css({
+                    "min-height": "28px",
+                    "border-bottom": "none"
+                });
+                $(".jsPanel-content",this).css({
+                    "border-top": "none",
+                    "overflow":"auto"
+                });
+                
+                $(".jsPanel-titlebar",this).css({
+                    "min-height": "28px"
+                });
+                
+                $(".jsPanel-titlebar h3").css({
+                    "font-size": "12px"
+                });
+
+                $(".jsPanel-ftr a.btn-close",this).click(function(){
+                    fun();
+                    win.close();
+                })
+
+                $(".jsPanel-ftr a.btn-colspan",this).click(function(){
+                    win.hide();
+                })
+
             }
         });
 

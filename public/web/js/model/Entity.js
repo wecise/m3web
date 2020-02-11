@@ -33,6 +33,7 @@ class Entity extends Matrix {
         VueLoader.onloaded(["ai-robot-component",
                             "entity-datatable-component",
                             "entity-tree-component",
+                            "form-component",
                             "search-preset-component",
                             "search-base-component"],function() {
             $(function() {
@@ -72,7 +73,7 @@ class Entity extends Matrix {
                             immediate:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 145px);">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
@@ -213,54 +214,26 @@ class Entity extends Matrix {
                             this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
                         },
                         onRowContextmenu(row, column, event){
-                            const self = this;
-
-                            $.contextMenu( 'destroy' ).contextMenu({
+                            
+                            $.contextMenu("destroy").contextMenu({
                                 selector: `.${column.id}`,
                                 trigger: "right",
                                 autoHide: true,
                                 delay: 5,
                                 hideOnSecondTrigger: true,
                                 className: `animated slideIn ${column.id}`,
-                                build: function($trigger, e) {
+                                build: ($trigger, e)=> {
                                     
                                     return {
-                                        callback: function(key, opt) {
+                                        callback: (key, opt)=> {
                                             
                                             if(_.includes(key,'diagnosis')) {
-                                                self.$root.detailAdd(row);
-                                            } else if(_.includes(key,'action')) {
-                                                // 增加操作类型
-                                                let action = _.last(key.split("_"));
-                                                self.$root.action({list: [row], action:action});
-                                            } else if(_.includes(key,'ticket')){
-                                                alertify.confirm(`确定生成工单<br><br>
-                                                                    告警ID：${row.id}<br><br>
-                                                                    实体ID：${row.entity}<br><br>
-                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
-                                                                    告警摘要：${row.msg}<br><br>
-                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
-                                                    if (e) {
-                                                        try{
-                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
-                                                            if(rtn.data.success == 1){
-                                                                self.options.term = row.id;
-                                                                self.$refs.searchRef.search();
-                                                                alertify.success(`创建工单成功! <br><br>
-                                                                            工单单号：${rtn.data.ticket_number}`)
-                                                            }
-                                                        }catch(err){
-                                                            alertify.error(`创建工单失败，请确认！ <br><br>
-                                                                            ${rtn}<br><br>
-                                                                            ${err}`)
-                                                        }
-                                                    } else {
-                                                        
-                                                    }
-                                                });
+                                                this.$root.detailAdd(row);
+                                            } else if(_.includes(key,'update')) {
+                                                this.$root.entityEdit(row);
                                             }
                                         },
-                                        items: self.model.contextMenu.entity
+                                        items: this.model.contextMenu.entity
                                     }
                                 },
                                 events: {
@@ -268,7 +241,7 @@ class Entity extends Matrix {
                 
                                         let $this = this;
                                         _.delay(()=>{
-                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, this.$root.$refs.searchRef.search));
                                         },50)
                                     }
                                 }
@@ -286,7 +259,6 @@ class Entity extends Matrix {
                             };
         
                             if(type === 'png'){
-                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
                                 $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
                             } else if(type === 'pdf'){
                                 _.extend(options, {
@@ -562,7 +534,7 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
@@ -682,7 +654,7 @@ class Entity extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
@@ -750,7 +722,7 @@ class Entity extends Matrix {
                             element: {}
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 200px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
                                         <el-tooltip content="保存">
                                             <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
@@ -950,7 +922,7 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template:   `<el-container style="height: calc(100vh - 200px);"><el-main>
+                    template:   `<el-container style="height: calc(100vh - 190px);"><el-main>
                                     <el-timeline>
                                         <el-timeline-item :timestamp="moment(item.vtime).format('LLL')" placement="top" v-for="item in model.history.rows">
                                             <el-card style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
@@ -1045,7 +1017,7 @@ class Entity extends Matrix {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 200px);">
+                    template:  `<el-container style="height: calc(100vh - 190px);">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+rId"></div>
                                     </el-main>
@@ -1078,7 +1050,7 @@ class Entity extends Matrix {
                 let main = {
                     delimiters: ['#{', '}#'],
                     template:   `<el-container>
-                                    <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                    <el-header style="height: 40px;line-height: 40px;padding: 0px;">
                                         <search-base-component :options="options"
                                                                 ref="searchRef"
                                                                 class="grid-content"></search-base-component>
@@ -1132,16 +1104,19 @@ class Entity extends Matrix {
                                                     </el-container>
                                                     
                                                     <el-container id="entity-view-console">
-                                                        <el-aside class="tree-view" id="entity-view-left" style="background-color:#f6f6f6;">
+                                                        <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
                                                             <entity-tree-component id="entity-tree" :model="{parent:'/entity',name:'tree_data.js',domain:'entity'}"></entity-tree-component>
                                                         </el-aside>
-                                                        <el-main class="table-view" id="entity-view-main" style="padding:5px;">
+                                                        <el-main class="table-view" style="padding:5px;" ref="mainView">
                                                             <el-consolelist-component :model="model.message"></el-consolelist-component>		
                                                         </el-main>
                                                     </el-container>
                                                     
                                                 </div>
-                                                <div v-if="item.type==='diagnosis'">
+                                                <div v-else-if="item.type==='entityEdit'">
+                                                    <form-component :term="item.row.id" cHeight="160"></form-component>
+                                                </div>
+                                                <div v-else-if="item.type==='diagnosis'">
                                                     <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
                                                         <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
                                                             <div v-if="it.type==='base'">
@@ -1212,7 +1187,7 @@ class Entity extends Matrix {
                             // 搜索窗口
                             window: { name:"所有", value: ""},
                             // 输入
-                            term: "",
+                            term: "top 20",
                             // 指定类
                             class: "#/matrix/entity/:",
                             // 指定api
@@ -1342,11 +1317,11 @@ class Entity extends Matrix {
                         this.toggleSummaryBySmart(this.control.ifSmart);
 
                         // 窗口Resize
-                        _.delay(function(){
+                        _.delay(()=>{
                             // RESIZE Event Summary
                             eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                            Split(['#entity-view-left', '#entity-view-main'], {
+                            Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                                 sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -1435,18 +1410,38 @@ class Entity extends Matrix {
                                 this.layout.main.tabs = [];
                             }
                         },
-                        detailAdd(event){
+                        entityEdit(row){
                             try {
-                                let id = event.id;
-                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
+                                let id = row.id;
+                                if(this.layout.main.activeIndex === `entityEdit-${id}`) return false;
                                 
                                 // event
-                                let term = encodeURIComponent(JSON.stringify(event));
+                                let term = encodeURIComponent(JSON.stringify(row));
                                 // 根据event获取关联信息
                                 let model = fsHandler.callFsJScript("/matrix/entity/diagnosis-by-id.js",term).message;
                                 
                                 // 添加tab
-                                let detail = {title:`实体卡片 ${event.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
+                                let tab = {title:`实体编辑 ${row.id}`, name:`entityEdit-${id}`, type: 'entityEdit', child:[], row:row};
+                                
+                                this.layout.main.tabs.push(tab);
+                                this.layout.main.activeIndex = `entityEdit-${id}`;
+                                
+                            } catch(error){
+                                this.layout.main.tabs = [];
+                            }
+                        },
+                        detailAdd(row){
+                            try {
+                                let id = row.id;
+                                if(this.layout.main.activeIndex === `diagnosis-${id}`) return false;
+                                
+                                // event
+                                let term = encodeURIComponent(JSON.stringify(row));
+                                // 根据event获取关联信息
+                                let model = fsHandler.callFsJScript("/matrix/entity/diagnosis-by-id.js",term).message;
+                                
+                                // 添加tab
+                                let detail = {title:`实体卡片 ${row.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
                                                 {title:'基本信息', name:`diagnosis-base-${id}`, type: 'base', model:model},
                                                 {title:'管理信息', name:`diagnosis-manager-${id}`, type: 'manager', model:model},
                                                 {title:'配置信息', name:`diagnosis-cofig-${id}`, type: 'cofig', model:model},
@@ -1495,9 +1490,8 @@ class Entity extends Matrix {
                             this.layout.main.detail.activeIndex = _.first(_.last(this.layout.main.tabs).child).name;
                         },
                         contextMenu(tId,inst,items,fun){
-                            const self = this;
-
-                            $.contextMenu({
+                            
+                            $.contextMenu("destroy").contextMenu({
                                 selector: `#${tId} tr td:not(:nth-child(1))`,
                                 trigger: 'right',
                                 autoHide: true,
@@ -1507,17 +1501,17 @@ class Entity extends Matrix {
                                 build: function($trigger, e) {
                     
                                     return {
-                                        callback: function(key, opt) {
+                                        callback: (key, opt)=> {
                                             
                                             if(_.includes(key,'diagnosis')) {
-                                                self.detailAdd(inst.mouseOverSelectedRows);
+                                                this.detailAdd(inst.mouseOverSelectedRows);
                                             } else if(_.includes(key,'action')) {
                                                 // 增加操作类型
                                                 let action = _.last(key.split("_"));
                                                 if(action == 'update'){
-                                                    self.detailAdd(inst.mouseOverSelectedRows);
+                                                    this.entityEdit(inst.mouseOverSelectedRows);
                                                 } else if(action == 'delete'){
-                                                    self.entityDelete({list: [inst.mouseOverSelectedRows], action:action});
+                                                    this.entityDelete({list: [inst.mouseOverSelectedRows], action:action});
                                                 }
                                                 
                                             }
@@ -1749,7 +1743,7 @@ class Entity extends Matrix {
                                     }
                                 },
                                 template: `<el-container style="height:100%;">
-                                                <el-aside style="background: #f6f6f6;width:200px;" id="entity-view-new-left">
+                                                <el-aside style="background: #f6f6f6;width:200px;" ref="leftView">
                                                     <el-container>
                                                         <el-header style="height:30px;line-height:30px;padding: 0px 10px;">
                                                             选择类
@@ -1767,7 +1761,7 @@ class Entity extends Matrix {
                                                         </el-main>
                                                     </el-container>
                                                 </el-aside>
-                                                <el-container id="entity-view-new-main">
+                                                <el-container ref="container">
                                                     <el-main style="padding:10px;">
                                                         <el-form ref="form" :model="model.node" label-width="100px">
                                                             <el-form-item :label="item.dispname" v-for="item in model.node" style="margin:5px 0px;">
@@ -1793,7 +1787,7 @@ class Entity extends Matrix {
                                 },
                                 mounted(){
                                     _.delay(()=>{
-                                        Split([`#entity-view-new-left`, `#entity-view-new-main`], {
+                                        Split([this.$refs.leftView.$el, this.$refs.container.$el], {
                                             sizes: [20, 80],
                                             minSize: [0, 0],
                                             gutterSize: 5,

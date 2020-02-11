@@ -194,6 +194,21 @@
         white-space: nowrap;
     } 
 
+    /* el-transfer edge-main-panel */
+    .edge-main-panel.el-transfer{
+        height: calc(100% - 44px);
+    }
+    .edge-main-panel.el-transfer > .el-transfer-panel{
+        width:100%;
+        height: 45%;
+    }
+    .edge-main-panel.el-transfer > .el-transfer__buttons{
+        width:100%;
+        height:60px;
+        line-height: 60px;
+        text-align: center;
+    }
+
     /* Split Style */
 	.gutter.gutter-horizontal {
         cursor: ew-resize;
@@ -270,6 +285,7 @@
 <link rel="vc" href="{{AppSubUrl}}/web/component/event/event-summary-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-graph-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/topological/topological-timeline.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
 <link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>

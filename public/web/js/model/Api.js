@@ -243,10 +243,10 @@ class Api {
                 mxApi.app = new Vue({
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
-                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" id="api-view-left">
+                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" ref="leftView">
                                         <api-view-tree id="api-view-tree"></api-view-tree>
                                     </el-aside>
-                                    <el-main style="padding:0px;overflow:hidden;" id="api-view-right">
+                                    <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                                         <api-view-console id="api-view-console"></api-view-console>
                                     </el-main>
                                 </el-container>`,
@@ -257,7 +257,7 @@ class Api {
 
                     },
                     mounted: function() {
-                        Split(['#api-view-left', '#api-view-right'], {
+                        Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                             sizes: [18, 82],
                             minSize: [0, 0],
                             gutterSize: 5,

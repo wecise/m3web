@@ -68,7 +68,7 @@
                     </el-tooltip>
 				</el-button-group>
 			</el-header>
-			<el-main :id="id" style="padding:0px;"></el-main>
+			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
 			<el-footer :id="id+'_statusBar'" style="height:30px;line-height: 30px;"></el-footer>
 		</el-container>
 	</template>
@@ -99,52 +99,45 @@
 	            statusBarInfo: ""
             }
         },
-        mounted: function(){
-            const self = this;
-
-            self.$nextTick(function(){
-                self.init();
-                self.initData();
-                _.delay(function(){
-	                self.initMenu();
-	                self.initToolTip();
+        mounted(){
+            this.$nextTick(()=>{
+                this.init();
+                this.initData();
+                _.delay(()=>{
+	                this.initMenu();
+	                this.initToolTip();
                 },500)
             })
         },
         watch: {
 	        selected:{
 	            handler:function(val,oldVal){
-	                const self = this;
-
-                    self.editor.setValue(val.script);
+	                this.editor.setValue(val.script);
 	            },
 		        deep:true
 	        },
             result: function(val,oldVal){
-                    const self = this;
-
                     if(val != oldVal) {
-                        eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT",self.result);
+                        eventHub.$emit("QUERY-RESULT-TRIGGER-EVENT",this.result);
                     }
             }
 
         },
         computed:{
-            selectedTitle: function(){
-                const self = this;
+            selectedTitle(){
+                _.delay(()=>{
+                    this.initToolTip()
+                },1500);
 
-                _.delay(self.initToolTip,1500);
-
-                return self.selected.disable == 'true' ? '启用中。。。' : '禁用中。。。';
+                return this.selected.disable == 'true' ? '启用中。。。' : '禁用中。。。';
             }
         },
         methods: {
-            init: function() {
-                const self = this;
-
-                self.editor = ace.edit(self.id);
+            init() {
                 
-                self.editor.setOptions({
+                this.editor = ace.edit(this.$refs.editor.$el);
+                
+                this.editor.setOptions({
                     //maxLines: Infinity,
                     // minLines: 20,
                     autoScrollEditorIntoView: true,
@@ -152,39 +145,37 @@
                     enableSnippets: true,
                     enableLiveAutocompletion: false
                 });
-                self.editor.$blockScrolling = Infinity;
-                self.editor.getSession().setUseSoftTabs(true);
+                this.editor.$blockScrolling = Infinity;
+                this.editor.getSession().setUseSoftTabs(true);
 
-                self.setTheme();
-                self.setMode();
+                this.setTheme();
+                this.setMode();
 
-				self.toggleToolsBar();
+				this.toggleToolsBar();
 
-				self.toggleStatusBar();
+				this.toggleStatusBar();
 
-                self.editor.commands.addCommand({
+                this.editor.commands.addCommand({
                     name: "save",
                     bindKey: {
                         mac: "cmd-S", 
                         win: "ctrl-S",
                         sender: 'editor|cli'
                     },
-                    exec: function(env, args, request) {
-                        self.save();
+                    exec: (env, args, request)=> {
+                        this.save();
                     }
                 });
 
                 // init Theme
-                _.delay(function(){
-                    self.initTheme();
+                _.delay(()=>{
+                    this.initTheme();
                 },3000)
 
             },
-            setOptions: function(){
-                const self = this;
-
-                if(!_.isEmpty(self.model.options)){
-                    self.editor.setOptions(self.model.options);
+            setOptions(){
+                if(!_.isEmpty(this.model.options)){
+                    this.editor.setOptions(this.model.options);
                 } 
             },
             setTheme: function(){

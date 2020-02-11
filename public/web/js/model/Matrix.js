@@ -551,15 +551,15 @@ class Matrix {
     }
 
     fullScreenByEl(el) {
-        if (el.requestFullscreen) {
+        
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+            return false;
+        } else {
             el.requestFullscreen();
-        } else if (el.mozRequestFullScreen) { /* Firefox */
-            el.mozRequestFullScreen();
-        } else if (el.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-            el.webkitRequestFullscreen();
-        } else if (el.msRequestFullscreen) { /* IE/Edge */
-            el.msRequestFullscreen();
+            return true;
         }
+
     }
 
     // 全屏控制 扩展

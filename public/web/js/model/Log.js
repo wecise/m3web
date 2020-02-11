@@ -31,7 +31,6 @@ class Log extends Matrix {
                             "log-summary-component",
                             "search-preset-component",
                             "search-base-component",
-                            "probe-tree-component",
                             "vue-timeline-component"],function() {
             $(function() {
 
@@ -70,7 +69,7 @@ class Log extends Matrix {
                             immediate:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 135px);">
+                    template:   `<el-container class="animated fadeIn" style="height:calc(100vh - 145px);">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle" icon="el-icon-notebook-2"></el-button>
@@ -467,7 +466,7 @@ class Log extends Matrix {
                         id: String,
                         model:String
                     },
-                    template: `<el-container style="height: calc(100vh - 180px);">
+                    template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>            
                                         <form class="form-horizontal">
                                             <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
@@ -502,7 +501,7 @@ class Log extends Matrix {
                         id: String,
                         model: Object
                     },
-                    template:   `<el-container style="height: calc(100vh - 180px);">
+                    template:   `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>
                                         <div class="block">
                                             <el-timeline>
@@ -529,7 +528,7 @@ class Log extends Matrix {
                             
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 180px);">
+                    template:  `<el-container style="height: calc(100vh - 190px);">
                                     <el-main style="padding:0px;">
                                         <el-loglist-component :model="model"></el-loglist-component>
                                     </el-main>
@@ -546,8 +545,6 @@ class Log extends Matrix {
         })
 
         window.addEventListener('resize', () => { 
-            this.app.resizeConsole();
-
             // RESIZE Event Summary
             eventHub.$emit("WINDOW-RESIZE-EVENT");
         })
@@ -560,7 +557,7 @@ class Log extends Matrix {
             delimiters: ['#{', '}#'],
             template:   `<main id="content" class="content">
                             <el-container>
-                                <el-header style="height: 30px;line-height: 30px;padding: 0px;">
+                                <el-header style="height: 40px;line-height: 40px;padding: 0px;">
                                     <search-base-component :options="options"
                                                         ref="searchRef"
                                                         class="grid-content"></search-base-component>
@@ -612,10 +609,10 @@ class Log extends Matrix {
                                                     </el-main>
                                                 </el-container>
                                                 <el-container id="log-view-console">
-                                                    <el-aside :class="'tree-view log-view-left-'+id" style="background-color:#f6f6f6;">
-                                                        <probe-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}"></probe-tree-component>
+                                                    <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                        <entity-tree-component id="log-tree" :model="{parent:'/log',name:'log_tree_data.js',domain:'log'}" ref="tagTree"></entity-tree-component>
                                                     </el-aside>
-                                                    <el-main :class="'table-view log-view-main-'+id" style="padding:5px;">
+                                                    <el-main class="table-view" style="padding:5px;" ref="mainView">
                                                         <el-loglist-component :model="model.message"></el-loglist-component>
                                                     </el-main>
                                                 </el-container>
@@ -748,9 +745,6 @@ class Log extends Matrix {
                 } catch(err){
 
                 }
-                
-                // 接收窗体RESIZE事件
-                eventHub.$on("WINDOW-RESIZE-EVENT",self.resizeConsole);
             },
             mounted(){
                 // 数据设置
@@ -773,10 +767,9 @@ class Log extends Matrix {
 
                 // RESIZE Event Summary
                 _.delay(() => {
-                    this.resizeConsole();
                     eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                    Split([`.log-view-left-${this.id}`, `.log-view-main-${this.id}`], {
+                    Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
                         sizes: [20, 80],
                         minSize: [0, 0],
                         gutterSize: 5,
@@ -827,8 +820,6 @@ class Log extends Matrix {
                     
                     // RESIZE Event Summary
                     eventHub.$emit("WINDOW-RESIZE-EVENT");
-                    // RESIZE Event Console
-                    self.resizeConsole();
                 },
                 toggleSummaryBySmart(evt){
                     if(evt==1) {
@@ -840,8 +831,6 @@ class Log extends Matrix {
                     
                     // RESIZE Event Summary
                     eventHub.$emit("WINDOW-RESIZE-EVENT");
-                    // RESIZE Event Console
-                    this.resizeConsole();
                 },
                 detailAdd(event){
                     try {
@@ -928,18 +917,6 @@ class Log extends Matrix {
                             }
                         }
                     });
-                },
-                resizeConsole(){
-                    let evwH = $(window).height();
-                    let evcH = $("#log-view-container").height();
-                    let evsH = $("#log-view-summary").height();
-                    
-                    $("#log-view-console .dataTables_scrollBody").css("max-height", evwH + "px")
-                                                                    .css("max-height","-=230px")
-                                                                    .css("max-height","-=" + evsH + "px")
-                                                                    .css("min-height", evwH + "px")
-                                                                    .css("min-height","-=230px")
-                                                                    .css("min-height","-=" + evsH + "px");
                 }
             }
         };

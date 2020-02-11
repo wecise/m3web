@@ -63,9 +63,6 @@ class Topological {
             },
             template:   `<el-container style="height:100%;">
                             <el-header style="height:30px;line-height:30px;">
-                                <el-tooltip content="删除" open-delay="500" placement="top">
-                                    <el-button type="text" icon="el-icon-notebook-2"></el-button>
-                                </el-tooltip>
                                 <el-tooltip content="导出" delay-time="500">
                                     <el-dropdown @command="onExport">
                                         <span class="el-dropdown-link">
@@ -277,6 +274,7 @@ class Topological {
                 }
             }
         })
+        
 
         // 拓扑分析输入组件
         Vue.component("topological-analysis-input",{
@@ -390,7 +388,7 @@ class Topological {
                     clearTimeout(this.entity.timeout);
                     this.entity.timeout = setTimeout(() => {
                       cb(results);
-                    }, 50 * Math.random());
+                    }, 3000 * Math.random());
                 },
                 createStateFilter(term) {
                     return (state) => {
@@ -474,13 +472,17 @@ class Topological {
             delimiters: ['#{', '}#'],
             template:  `<el-container>
                             <el-header style="height:100%;line-height:100%;padding:10px;background:#2790e2!important;display:flex;flex-direction: column;">
-                                <div id="topologicalAnalysisInputList">    
+                                <div ref="topologicalAnalysisInputList">    
                                     <topological-analysis-input v-for="item in trace.nodes" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
                                 <div style="color:#2b90e1;padding:0px 10px;">
-                                    <el-button type="success" icon="el-icon-position" @click="pathTrace" style="float:right;"></el-button>
-                                    <el-button type="default" icon="el-icon-search" @click="pathTrace" style="float:right;margin-right:10px;"></el-button>
+                                    <el-tooltip content="路劲查询" open-delay="500" placement="top">
+                                        <el-button type="success" icon="el-icon-position" @click="pathTrace" style="float:right;"></el-button>
+                                    </el-tooltip> 
+                                    <el-tooltip content="图查询" open-delay="500" placement="top">
+                                        <el-button type="default" icon="el-icon-search" @click="onSearch" style="float:right;margin-right:10px;"></el-button>
+                                    </el-tooltip> 
                                 </div>
                             </el-header>
                             <el-main style="padding:0px 10px;" class="topological-analysis">
@@ -528,16 +530,14 @@ class Topological {
                 eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
             },
             mounted(){
-                const self = this;
-
+                
                 _.delay(()=>{
-                    let el = document.getElementById("topologicalAnalysisInputList");
-                    let sortable = Sortable.create(el,{
+                    let sortable = Sortable.create(this.$refs.topologicalAnalysisInputList,{
                         handle: ".handleSort",
                         dataIdAttr: 'data-id',
                         onChange(evt) {
-                            let nodes = _.cloneDeep(self.trace.nodes);
-                            self.trace.nodes = _.map(sortable.toArray(),function(v){
+                            let nodes = _.cloneDeep(this.trace.nodes);
+                            this.trace.nodes = _.map(sortable.toArray(),(v)=>{
                                 return _.find(nodes,{id:v});
                             });
                         }
@@ -546,21 +546,32 @@ class Topological {
             },
             methods:{
                 setTrace(node){
-                    const self = this;
-                    self.trace.nodes.push(node);
+                    this.trace.nodes.push(node);
                 },
-                pathTrace(){
-                    const self = this;
-
-                    if(self.trace.nodes.length < 2){
-                        self.$message("请选择节点！");
+                onSearch(){
+                    if(this.trace.nodes.length < 2){
+                        this.$message("请选择节点！");
                         return false;
                     }
-                    let term = _.map(self.trace.nodes,(v)=>{
-                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(self.$refs[v.id][0].edge,["list","show"]) });
+                    let term = _.map(this.trace.nodes,(v)=>{
+                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
                     });
 
-                    console.log(1,term)
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
+                    
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
+                    
+                },
+                pathTrace(){
+                   
+                    if(this.trace.nodes.length < 2){
+                        this.$message("请选择节点！");
+                        return false;
+                    }
+                    let term = _.map(this.trace.nodes,(v)=>{
+                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
+                    });
                     
                     let rtn = null;
                     let rows = [];
@@ -576,16 +587,15 @@ class Topological {
                             cols = _.concat([{data:"num",title:"序号"}],_.map(rtn.pathtags,function(v){ return {data:v,title:v}}));
                         }
 
-                        _.extend(self.trace.paths, {rows: rows,  columns: cols});
+                        _.extend(this.trace.paths, {rows: rows,  columns: cols});
 
                     } catch(err){
-                        _.extend(self.trace.paths, {rows: rows,  columns: cols});
+                        _.extend(this.trace.paths, {rows: rows,  columns: cols});
                     }
                     
                 },
                 onSelectionChange(val){
-                    const self = this;
-                    self.trace.selectedPaths = val;
+                    this.trace.selectedPaths = val;
                     inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
                 }
             }
@@ -594,9 +604,6 @@ class Topological {
         // 拓扑分析搜索框
         Vue.component("graph-view-search",{
             delimiters: ['${', '}'],
-            props: {
-                id: String
-            },
             template: ` <div style="display:flex;">
                             <el-autocomplete
                                 class="inline-input"
@@ -675,7 +682,7 @@ class Topological {
 
                     //加入搜索历史
                     this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.history.push({id:objectHash.sha1(this.term), term:this.term, time: _.now()});
-
+                    
                     _.delay(()=>{
                         _.extend(this.defaultTitle, this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.default);
                     },1500)
@@ -757,8 +764,8 @@ class Topological {
             }
         })
 
-        // 详情
-        Vue.component("profile-view",{
+        // 实体分析-详情
+        Vue.component("entity-diagnosis-profile",{
             delimiters: ['#{', '}#'],
             props: {
                 id: String,
@@ -794,8 +801,218 @@ class Topological {
             }
         });
 
-        // 文件
-        Vue.component("file-view",{
+        // 实体事件
+        Vue.component("entity-diagnosis-event",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model: Object
+            },
+            template:   `<el-container style="height:100%;">
+                            <el-main>
+                                <el-card style="border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;" 
+                                    v-for="item in model.rows" :key="item.id">
+                                    <span class="el-icon-warning" :style="item | pickStyle"></span>
+                                    <p>服务器:#{item.host}#</p>
+                                    <p>IP地址:#{item.ip}#</p>
+                                    <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
+                                    <p>告警内容：#{item.msg}#</p>
+                                    <el-button type="text" @click="onClick(item)">详细</el-button>
+                                </el-card>
+                            </el-main>
+                        </el-container>`,
+            filters: {
+                pickStyle(item) {
+                    return `color:${mx.global.register.event.severity[item.severity][2]};font-size:40px;float:right;`;
+                }
+            },
+            methods: {
+                onClick(item){
+                    let term = item.id;
+                    let url = `/janesware/event?term=${window.btoa(encodeURIComponent(term))}`;
+                    window.open(url,'_blank');
+                }
+            }
+        })
+
+        // 实体分析-性能 历史曲线图表
+        Vue.component('performance-history-chart', {
+            template: `<div style="width:100%;height:200px;" ref="chartContainer"></div>`,
+            props:{
+                model:Object,
+                config: Object
+            },
+            data(){
+                return {
+                    chart: null,
+                    option: {
+                        tooltip: {
+                            trigger: 'axis'
+                        },
+                        toolbox: {
+                            show: false,
+                            feature: {
+                                dataZoom: {},
+                                dataView: {readOnly: false},
+                                magicType: {type: ['line', 'bar']},
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        xAxis: {
+                            type: 'category',
+                            data: []
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: []
+                    }                            
+                }
+            },
+            created(){
+                // 接收窗体RESIZE事件
+                eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
+            },
+            mounted() {
+                this.init();
+            },
+            watch: {
+                model: {
+                    handler: function (val,oldVal) {
+                        
+                    },
+                    deep:true
+                }
+            },
+            methods: {
+                init(){
+                    this.initData();
+                    this.chart = echarts.init(this.$el);
+                    this.chart.setOption(this.option);
+                },
+                initData(){
+                    const self = this;
+                    
+                    // 取实时数据的time作为xAxis
+                    this.option.xAxis.data = _.map(this.model.value.reverse(),function(v){
+                        return moment(v[mx.global.register.performance.chart.time]).format(self.config.step);
+                    });
+                    
+                    this.option.series = _.map(this.config.type,function(v){
+                        
+                        if(v=='value'){
+                            return {    
+                                name: v,
+                                data: _.map(self.model.value.reverse(), v),
+                                type: 'line',
+                                smooth: true,
+                                color: mx.global.register.performance.chart.color[v],
+                                markLine: {
+                                    data: [{
+                                        type: 'average',
+                                        name: '平均值'
+                                    }]
+                                }
+                            }
+                        } else {
+                            if(!_.isEmpty(self.model.baseline)) {
+                                return  {
+                                    name: v,
+                                    data: _.map(self.model.baseline.reverse(), v=='avg'?'value':v),
+                                    type: 'line',
+                                    smooth: true,
+                                    color: mx.global.register.performance.chart.color[v]
+                                }
+                            }
+                        }
+                        
+                    });
+                },
+                checkChart(){
+                    if(this.$refs.chartContainer){
+                        this.chart.resize();
+                    } else {
+                        setTimeout(this.checkChart, 50);
+                    }
+                }
+            }
+        })
+        // 实体分析-性能
+        Vue.component("entity-diagnosis-performance",{
+            delimiters: ['#{', '}#'],
+            props: {
+                model:Object
+            },
+            data(){
+                return {
+                    baseLine: {
+                        type: {
+                            value: [],
+                            list: [{
+                                value: 'week',
+                                label: '周基线'
+                              }, {
+                                value: 'month',
+                                label: '月基线'
+                              }]
+                        }
+                    },
+                    trends: []
+                }
+            },
+            template: `<el-container style="height: calc(100vh - 180px);">
+                            <!--el-header style="height: 30px;padding: 5px;line-height: 20px;">
+                                <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
+                                    <el-option
+                                    v-for="item in baseLine.type.list"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-header-->
+                            <el-main style="padding:10px 0px;">
+                                <div class="grid-stack">
+                                    <div class="grid-stack-item"
+                                        data-gs-auto-position="true"
+                                        data-gs-width="12" data-gs-height="3"
+                                        v-for="item,index in model.trends">
+                                            <div class="grid-stack-item-content" style="border:1px solid #f7f7f7;border-radius:5px;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);">
+                                                <el-card class="box-card" style="width: 100%;height:100%;overflow:hidden;" >
+                                                    <div slot="header" class="clearfix" style="padding:5px;">
+                                                        <span>#{item.param.param}#  历史性能 <small>#{item.title}#</small></span>
+                                                        <el-tooltip :content="item.detail">
+                                                            <span class="fas fa-question-circle"></span>
+                                                        </el-tooltip>    
+                                                        <!--el-tooltip content="设置">
+                                                            <a href="javascript:void(0);" class="btn btn-link" style="float: right; padding: 3px 0"><i class="fas fa-cog"></i></a>
+                                                        </el-tooltip-->
+                                                    </div>
+                                                    <performance-history-chart  :model="model.rows[item.value]" 
+                                                                                :config="item.config"></performance-history-chart>
+                                                </el-card>
+                                            </div>
+                                    </div>
+                                </div>
+                                
+                            
+                            </el-main>
+                        </el-container>`,
+            mounted(){
+                _.delay(()=>{
+                    $('.grid-stack').gridstack();
+                    $('.grid-stack').on('gsresizestop', function(event, elem) {
+                        eventHub.$emit("WINDOW-RESIZE-EVENT");
+                    });
+                },500)
+            },
+            methods: {
+                
+            }
+        });
+
+        // 实体分析-文件
+        Vue.component("entity-diagnosis-file",{
             delimiters: ['#{', '}#'],
             props: {
                 id: String,
@@ -1378,7 +1595,6 @@ class Topological {
         Vue.component("edges-maintain",{
             delimiters: ['#{', '}#'],
             props:{
-                id: String,
                 parent: Object,
                 type: String,
                 model: Object
@@ -1390,23 +1606,27 @@ class Topological {
                     selected: []
                 };
             },
-            template:   `<el-container>
-                            <el-main style="padding:10px;">
-                                <p><el-input v-model="term" clearable placeholder="实体关键字" @change="searchByTerm"></el-input></p>
+            template:   `<el-container style="height:calc(100vh - 148px);">
+                            <el-main style="padding:10px;height:100%;overflow:hidden;">
+                                <el-input v-model="term" clearable placeholder="实体关键字" @blur="searchByTerm" style="margin-bottom:10px;height:32px;">
+                                    <template slot="prepend">搜索实体</template>
+                                    <el-button slot="append" icon="el-icon-search" @click="searchByTerm" @keyup.enter.native="searchByTerm"></el-button>
+                                </el-input>
                                 <el-transfer v-model="selected" 
                                 :titles="['实体列表',type]"
                                 :button-texts="['取消关系', '创建关系']"
                                 :data="list"
-                                @change="updateEdges"></el-transfer>
+                                @change="updateEdges"
+                                class="edge-main-panel"></el-transfer>
                             </el-main>
                         </el-container>`,
             created(){
                 
                 try{
-                    this.list = _.map(this.model.value,function(v){
+                    this.list = _.map(this.model.value,(v)=>{
                         return {key: v, label: v, disabled: 0};
                     })
-
+                    
                     this.selected = _.map(this.list,'key');
                 } catch(err){
                     this.selected = [];
@@ -1419,18 +1639,23 @@ class Topological {
             },
             methods: {
                 searchByTerm(){
-                    let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.term)).message;
+
                     
-                    //如果已有选择
-                    if(this.selected.length){
-                        _.merge(this.list,_.map(rtn,function(v){
-                            return {key: v.id, label: v.id+":"+v.name, class:v.class, disabled: 0};
-                        }))
-                    } else {
-                        this.list = _.map(rtn,function(v){
-                            return {key: v.id, label: v.id+":"+v.name, class:v.class, disabled: 0};
-                        })
-                    } 
+                        let rtn = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.term)).message;
+
+                        
+                        //如果已有选择
+                        if(this.selected.length){
+                            _.merge(this.list,_.map(rtn,(v)=>{
+                                return {key: v.id, label: v.name, class:v.class, disabled: 0};
+                            }))
+                        } else {
+                            this.list = _.map(rtn,(v)=>{
+                                return {key: v.id, label: v.name, class:v.class, disabled: 0};
+                            })
+                        } 
+                    
+                    
                     
                 },
                 updateEdges(value, direction, movedKeys) {
@@ -1439,8 +1664,18 @@ class Topological {
                                     return _.find(this.list,{key:v});
                                 })};
                     
+                    // 更新关系
                     let rtn = fsHandler.callFsJScript("/matrix/graph/edges-action.js",encodeURIComponent(JSON.stringify(edges))).message;
-                    this.$root.$refs.graphViewRef.search();
+
+                    // 更新图
+                    if(direction=='right'){
+                        // 新建Edge
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.addEdge(edges.id, edges.value);
+                    } else {
+                        // 删除Edge
+                        this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEdge(edges.id, edges.value);
+                    }
+                    //this.$root.$refs.graphViewRef.search();
                 }
             }
         })
@@ -1464,34 +1699,29 @@ class Topological {
         // 拓扑分析图 局部组件
         Vue.component("graph-view-container",{
             delimiters: ['${', '}'],
-            props: {
-                
-            },
             data(){
                 return {
                     model: null
                 }
             },
             template: `<topological-graph-component :graphData="model" ref="graphViewContainerInst"></topological-graph-component>`,
-            mounted() {
-                
-            },
             methods:{
                 search(term){
-                    const self = this;
-
                     try {
                         
                         // 根据文件获取图
                         if( !_.isEmpty(inst.URL_PARAMS_ITEM) ){
-                            self.model = fsHandler.fsContent(inst.URL_PARAMS_ITEM.parent, inst.URL_PARAMS_ITEM.name);
+                            this.model = fsHandler.fsContent(inst.URL_PARAMS_ITEM.parent, inst.URL_PARAMS_ITEM.name);
                         } else {
-                            self.model = fsHandler.callFsJScript("/matrix/graph/graph_service.js", term).message[0].graph;
+                            this.model = fsHandler.callFsJScript("/matrix/graph/graph_service.js", term).message[0].graph;
                         }
 
-                    } catch(error) {
-                        alertify.error("图查询失败，请确认语法！"+error);
-                        self.model = {};
+                    } catch(err) {
+                        this.$message({
+                            type: "waring",
+                            message: "图查询失败，请确认语法！" + err
+                        });
+                        this.model = {};
                     }
                     
                 }
@@ -1509,13 +1739,17 @@ class Topological {
                                 <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
                                     <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
                                         
-                                        <profile-view :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></profile-view>
+                                        <entity-diagnosis-profile :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
                                         
-                                        <el-table-component :model="it.model[it.type]" v-if=" _.includes(['event','performance','log','ticket'],it.type) "></el-table-component>
+                                        <el-table-component :model="it.model[it.type]" v-if=" _.includes(['ticket'],it.type) "></el-table-component>
+
+                                        <entity-diagnosis-event :model="it.model[it.type]" v-if=" _.includes(['event','log'],it.type) "></entity-diagnosis-event>
+
+                                        <entity-diagnosis-performance :model="it.model[it.type]" v-if="it.type === 'history'"></entity-diagnosis-performance>
                                         
                                         <diagnosis-base-table :model="it.model[it.type]" v-if=" _.includes(['element'],it.type) "></diagnosis-base-table>
 
-                                        <file-view :id="it.name" :model="it.model[it.type]" :node="item.node" v-if="it.type === 'file'"></file-view>
+                                        <entity-diagnosis-file :id="it.name" :model="it.model[it.type]" :node="item.node" v-if="it.type === 'file'"></entity-diagnosis-file>
                                         
                                     </el-tab-pane>
                                 </el-tabs>
@@ -1641,9 +1875,9 @@ class Topological {
                 
             },
             template:   `<el-tabs v-model="activeIndex" type="board-card" closable @tab-remove="edgesTabRemove" class="topological-view-edges-tabs">
-                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
+                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name">
                                 <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
-                                    <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
+                                    <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name">
                                         <edges-maintain :parent="node" :type="it.type" :model="it.model"></edges-maintain>    
                                     </el-tab-pane>
                                 </el-tabs>
@@ -1674,7 +1908,7 @@ class Topological {
             watch: {
                 tabs:function(val,oldVal){
                     if(val.length > 0){
-                        this.$root.$data.splitInst.setSizes([44,56,0]);
+                        this.$root.$data.splitInst.setSizes([30,70,0]);
                         $(".gutter").show();
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);
@@ -1743,6 +1977,7 @@ class Topological {
         })
 
         VueLoader.onloaded(["ai-robot-component",
+                            "topological-timeline",
                             "topological-graph-component",
                             "omdb-path-datatables-component",
                             "event-datatable-component",
@@ -1769,13 +2004,13 @@ class Topological {
             template:   `<el-row type="flex">
                             <el-col :span="24">
                                 <el-container style="background: transparent;height: 100%;">
-                                    <el-aside id="leftView" style="background-color:transparent;" class="topological-view-edges" ref="left">
+                                    <el-aside style="background-color:transparent;" class="topological-view-edges" ref="left">
                                         <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                                     </el-aside>
-                                    <el-container id="mainView" :style="containerHeight" ref="main">
+                                    <el-container :style="containerHeight" ref="main">
                                         <graph-view-container ref="graphViewRef"></graph-view-container>
                                     </el-container>
-                                    <el-aside id="rightView" style="height:100%;overflow:hidden;background-color:transparent;" class="topological-view-diagnosis" ref="right">
+                                    <el-aside style="height:100%;overflow:hidden;background-color:transparent;" class="topological-view-diagnosis" ref="right">
                                         <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
                                     </el-aside>
                                 </el-container>
@@ -1853,7 +2088,7 @@ class Topological {
             },
             mounted(){
                 _.delay(()=>{
-                    this.splitInst = Split([`#${this.$refs.left.$el.id}`, `#${this.$refs.main.$el.id}`,`#${this.$refs.right.$el.id}`], {
+                    this.splitInst = Split([this.$refs.left.$el, this.$refs.main.$el,this.$refs.right.$el], {
                         sizes: [0, 100, 0],
                         minSize: [0, 0, 0],
                         cursor: 'col-resize',
@@ -1872,7 +2107,7 @@ class Topological {
                 setData(event){
                     this.model = _.extend(this.model, this.$refs.searchRef.result);
                 },
-                path(id, bid, node){
+                /* path(id, bid, node){
 
                     let _dataset = [];
                     let _columns = [];
@@ -1956,7 +2191,7 @@ class Topological {
                             }
                         }
                     };
-                },
+                }, */
                 cellSelect(cell){
                     let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
                     
@@ -2057,12 +2292,17 @@ class Topological {
                                             "icon": "fas fa-angle-down"
                                         },
                                         "m50":"----------",
-                                        "m60_edges_new": {
-                                            "name": "关系维护",
+                                        "m60_edges_node_select": {
+                                            "name": "选定为新建关系点",
                                             "icon": "fas fa-network-wired"
                                         },
                                         "m70":"----------",
-                                        "m80_spath": {
+                                        "m80_edges_new": {
+                                            "name": "关系维护",
+                                            "icon": "fas fa-network-wired"
+                                        },
+                                        "m90":"----------",
+                                        "m100_spath": {
                                             "name": "选定为路径查询点",
                                             "icon": "fas fa-hourglass-start"
                                         }

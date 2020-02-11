@@ -4,8 +4,8 @@
 
         /* For Search Dropdown Panel */
         .search-preset .el-collapse-item__header{
-            height:32px;
-            line-height: 32px;
+            height: 40px;
+            line-height: 40px;
             padding:5px;
 
             border: 1px solid #ccc;
@@ -20,28 +20,15 @@
             filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
         }
 
-        .search-preset.el-dropdown-menu--small {
-            padding: 0px 0!important;
-        }
-
         .search-preset .el-collapse-item__header.is-active {
             color: #333;
-            background-color: #def1fb;
-            border: 1px solid #ccc;
-            border-bottom: 0px;
+            border: 1px solid #fff;
+            border-bottom: 1px;
             background: #def1fb;
-
         }
 
         .search-preset dl > dd > a:hover {
             cursor: pointer;
-        }
-
-        .search-preset.el-dropdown-menu--small{
-            left: unset!important;
-            width: 40vw;
-            top: 82px!important;
-            right: 83px!important;
         }
 
         .search-preset .el-collapse-item__content{
@@ -51,13 +38,30 @@
         .search-preset .el-button--small{
             border-radius: 0px;
         }
+
+
+        .search-preset{
+            width: 40vw;
+            background: #fff;
+            border:unset;
+            padding: 0px 0!important;
+        }
+        .search-preset .el-dropdown-menu__item:focus, 
+        .search-preset .el-dropdown-menu__item:not(.is-disabled):hover {
+            background: #fff;
+        }
+
+        .search-preset .popper__arrow,
+        .search-preset .popper__arrow::after {
+            border-bottom-color: #fff;
+        }
     </style>
 
 
     /*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
     <template>
-        <el-dropdown placement="bottom" trigger="click">
-            <el-button type="default">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+        <el-dropdown placement="bottom" trigger="click" placement="top-end"> 
+            <el-button type="default" style="height:40px;">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
             <el-dropdown-menu slot="dropdown" class="search-preset">
 
                 <el-collapse value="1" accordion>

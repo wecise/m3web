@@ -76,7 +76,7 @@
 					<a href="javascript:void(0);" class="btn btn-sm btn-primary queryAndSave" @click="queryAndSave"  title="执行并保存到文件"><i class="fa fa-forward"></i></a>
 				</div>
 			</div>
-			<div :id="id" ></div>
+			<div :id="id" ref="editor"></div>
 			<div id="statusBar"></div>
 		</div>
 	</template>
@@ -108,9 +108,7 @@
         watch: {
             'model.newInput': {
             	handler:function(val,oldVal){
-                    let self = this;
-                    
-                    self.editor.setValue(val);
+                    this.editor.setValue(val);
                 },
                 deep:true
             },
@@ -126,17 +124,11 @@
             }
 
         },
-        created: function () {
-            let self = this;
-
-        },
         methods: {
-            init: function() {
-                let self = this;
-
-                self.editor = ace.edit(self.id);
+            init() {
+                this.editor = ace.edit(this.$refs.editor);
                 
-                self.editor.setOptions({
+                this.editor.setOptions({
                     // maxLines: 1000,
                     // minLines: 20,
                     autoScrollEditorIntoView: true,
@@ -145,54 +137,42 @@
                     enableLiveAutocompletion: false
                 });
                 //self.editor.$blockScrolling = Infinity;
-                self.editor.setShowPrintMargin(self.model.printMargin);
-                self.editor.setReadOnly(self.model.readOnly);
-                self.editor.getSession().setUseSoftTabs(true);
+                this.editor.setShowPrintMargin(this.model.printMargin);
+                this.editor.setReadOnly(this.model.readOnly);
+                this.editor.getSession().setUseSoftTabs(true);
 
-                self.editor.getSession().setTabSize(2);
-                self.editor.getSession().setUseWrapMode(true);
+                this.editor.getSession().setTabSize(2);
+                this.editor.getSession().setUseWrapMode(true);
 
-                self.setTheme();
-                self.setMode();
-                self.setOptions();
+                this.setTheme();
+                this.setMode();
+                this.setOptions();
 
-				self.toggleToolsBar();
+				this.toggleToolsBar();
 
-				//self.toggleStatusBar();
-
-                
             },
-            setOptions: function(){
-                let self = this;
-
-                if(!_.isEmpty(self.model.options)){
-                    self.editor.setOptions(self.model.options);
+            setOptions(){
+                if(!_.isEmpty(this.model.options)){
+                    this.editor.setOptions(this.model.options);
                 } 
             },
-            setTheme: function(){
-                let self = this;
-
-                if(_.isEmpty(self.model.theme)){
-                	self.editor.setTheme("ace/theme/tomorrow");
+            setTheme(){
+                if(_.isEmpty(this.model.theme)){
+                	this.editor.setTheme("ace/theme/tomorrow");
                 } else {
-                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                	this.editor.setTheme("ace/theme/"+this.model.theme);
                 }
                 
             },
-            setMode: function(){
-                let self = this;
-
-                if(_.isEmpty(self.model.mode)){
-                	self.editor.getSession().setMode("ace/mode/json");
+            setMode(){
+                if(_.isEmpty(this.model.mode)){
+                	this.editor.getSession().setMode("ace/mode/json");
                 } else {
-                	self.editor.getSession().setMode("ace/mode/"+ self.model.mode);
+                	this.editor.getSession().setMode("ace/mode/"+ this.model.mode);
                 }
-                
             },
-            setValue: function(){
-                let self = this;
-
-                self.editor.setValue(self.model.oldInput);
+            setValue(){
+                this.editor.setValue(this.model.oldInput);
             },
             getSelected: function(){
                 let self = this;

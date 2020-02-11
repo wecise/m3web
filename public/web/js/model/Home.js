@@ -29,9 +29,9 @@ class Home extends Matrix {
 
                 let main = {
                     delimiters: ['#{', '}#'],
-                    template:   `<el-container style="padding:3em 0;">
+                    template:   `<el-container style="padding:30px 0;">
                                     <el-main style="padding:0px;">
-                                        <el-row type="flex" justify="center" style="padding:20px 0px;">
+                                        <el-row type="flex" justify="center" style="padding:40px 0px;">
                                             <el-col :span="18">
                                                 <div class="grid-content">
                                                     <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
@@ -40,38 +40,97 @@ class Home extends Matrix {
                                             </el-col>
                                         </el-row>
                                         
-                                        <el-row type="flex" justify="center" style="height: calc(100vh - 215px);">
-                                            <el-col :span="18"> 
-                                                <div class="grid-content" id="grid-content">
-                                                    <div class="layer btn btn-primary animated flipInX" v-for="item in user.apps">
-                                                        <a :href="item.url" :target="item.target" style="color:#ffffff;">
-                                                            <div class="tile_name">
-                                                                <img style="width:30px" :src="item.icon | pickIcon"></img>
-                                                                <p class="small">#{item.cnname}#</p>
-                                                            </div>
-                                                        </a>
-                                                        <div class="list-context-menu" :data-item="item.id">
-                                                            <i class="fa fa-angle-down"></i>
-                                                        </div>
+                                        <el-row type="flex" justify="center">
+                                            <el-col :span="14" style="display:flex;flex-wrap:wrap;align-content: flex-start;" class="drag-content"> 
+                                                <el-dropdown v-for="(item,index) in apps.template" :key="item.name" @command="onCommand" trigger="click" placement="top-end"  :hide-on-click="false">
+                                                    <el-button type="primary"
+                                                        class="animated flipInX" 
+                                                        style="max-width: 120px;width: 120px;max-height:90px;height:90px;margin: 5px;border-radius: 10px!important;background: rgb(36, 44, 70);border:unset;">
+                                                        <p style="display: flex;flex-wrap: wrap;max-height:50px;height: 50px;">
+                                                            <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="folder in item.groups"></el-image>
+                                                        </p>
+                                                        <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.title}#（#{item.groups.length}#） <!--i class="el-icon-menu el-icon--right"></i--></p>
+                                                        <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">
+                                                            <span class="el-dropdown-link">
+                                                                <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
+                                                            </span>
+                                                            <el-dropdown-menu slot="dropdown">
+                                                                <el-dropdown-item :command="{cmd:'remove',data:item}">删除组</el-dropdown-item>
+                                                            </el-dropdown-menu>
+                                                        </el-dropdown>
+                                                    </el-button>
+                                                    <el-dropdown-menu slot="dropdown" :class="'menu-dropdown drag-content-' + index">
+                                                        <el-dropdown-item :command="subItem" v-for="(subItem,index) in item.groups" :key="subItem.id">
+                                                            <template scope="scope">
+                                                                <el-button type="primary" 
+                                                                    @click="onCommand(subItem)"
+                                                                    style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
+                                                                    <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;"></el-image>
+                                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                                        #{subItem.cnname}#
+                                                                        <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
+                                                                            <span class="el-dropdown-link">
+                                                                                <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
+                                                                            </span>
+                                                                            <el-dropdown-menu slot="dropdown">
+                                                                                <el-dropdown-item disabled>#{subItem.cnname}#</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'walking',data:subItem}" divided>当前窗口运行</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'running',data:subItem}">打开新窗口运行</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'home',data:subItem}" divided>设为首页</el-dropdown-item>
+                                                                                <el-dropdown-item divided disabled>分组</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:subItem}" v-for="groupItem in _.xor(apps.template,[item])">移到【#{groupItem.title}#】组</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'groupAction', targetGroup: '', data:subItem}">移到桌面</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'uninstall',data:subItem}" divided>卸载应用</el-dropdown-item>
+                                                                                <el-dropdown-item :command="{cmd:'share',data:subItem}" divided>分享</el-dropdown-item>
+                                                                            </el-dropdown-menu>
+                                                                        </el-dropdown>
+                                                                    </p>
+                                                                </el-button>
+                                                            </template>
+                                                        </el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                                </el-dropdown>
+                                                <el-button type="primary" 
+                                                    class="animated flipInX" 
+                                                    v-for="item in apps.appListUnGrouped" 
+                                                    @click="onCommand(item)"
+                                                    style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
+                                                    <el-image style="width:40px;margin:5px;" :src="item.icon | pickIcon"></el-image>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.cnname}#</p>
+                                                    <el-dropdown @command="onAppCommand" trigger="hover" placement="top-start" style="position: absolute;right: 5px;top: 5px;">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item disabled>#{item.cnname}#</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'walking',data:item}" divided>当前窗口运行</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'running',data:item}">打开新窗口运行</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'home',data:item}" divided>设为首页</el-dropdown-item>
+                                                            <el-dropdown-item divided disabled>分组</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'groupAction', targetGroup: groupItem.name, data:item}" v-for="groupItem in apps.template">移到【#{groupItem.title}#】组</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'uninstall',data:item}" divided>卸载应用</el-dropdown-item>
+                                                            <el-dropdown-item :command="{cmd:'share',data:item}" divided>分享</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                </el-button>
+                                                <el-button type="default"  @click.native="group.dialogVisible = true" style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;">
+                                                    <span class="fas fa-plus" style="font-size: 20px;"></span>
+                                                </el-button>
+                                                
+                                                <el-dialog :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
+                                                    <el-form :model="group.form" style="width:100%;">
+                                                        <el-form-item label="应用组名称" label-width="80">
+                                                            <el-input v-model="group.form.title" autofocus></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                    <div slot="footer" class="dialog-footer">
+                                                        <el-button @click="group.dialogVisible = false">取 消</el-button>
+                                                        <el-button type="primary" @click="groupAdd" @keyup.enter.native.prevent="groupAdd">确 定</el-button>
                                                     </div>
-                                                    <a class="layer btn btn-primary" href="javascript:void(0);" style="background-color:#e9eaf0;padding: 24px 25px;border: none;margin-left: 5px;min-width: 110px;" @click="dialogFormVisible = true">
-                                                        <span class="fa fa-plus" style="font-size: 20px;"></span>
-                                                    </a>
-                                                </div>
+                                                </el-dialog>
+                                                
                                             </el-col>
                                         </el-row>
-                                        
-                                        <el-dialog title="应用" :visible.sync="dialogFormVisible" width="60%">
-                                            <el-button :target="item.target" type="primary" v-for="item in user.appList" @click="triggerInput(item.name)">
-                                                <img :src="item.icon | pickIcon" style="width:28px;"></img>
-                                                <p class="small">
-                                                    #{item.cnname}#
-                                                </p>
-                                                <p>
-                                                    <input type="checkbox" :ref="item.name" v-model='item.selected' @click="toogle(item)">
-                                                </p>
-                                            </el-button>
-                                        </el-dialog>
                                         
                                     </el-main>
                             
@@ -108,20 +167,24 @@ class Home extends Matrix {
                                 forTime:  ' for vtime ',
                             }
                         },
-                        user: {
-                            appsId: [],
-                            apps: [],
-                            appList: []
-                        },
+                        apps: {},
                         path: {
                             view: "event.html",
                             _csrf: "{{.CsrfToken}}"
                         },
-                        dialogFormVisible: false
+                        group: {
+                            dialogVisible: false,
+                            form: {
+                                name: _.now()+"",
+                                title: "new_"+_.now(),
+                                status: "",
+                                icon: "app.png"
+                            }
+                        }
                     },
                     filters:{
                         pickIcon:function(icon){
-                            return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                            return `${window.ASSETS_ICON}/apps/png/${icon}?type=open&issys=${window.SignedUser_IsAdmin}`;
                         }
                     },
                     created(){
@@ -130,10 +193,6 @@ class Home extends Matrix {
                         eventHub.$on("APP-REFRESH-EVENT",()=>{
                             this.loadApps();
                         });
-
-                        if(!_.isEmpty(window.SignedUser_Remark)){
-                            this.user.appsId = window.SignedUser_Remark.replace(/\"/g,"").split(",");
-                        }
 
                     },
                     mounted(){
@@ -145,20 +204,21 @@ class Home extends Matrix {
                             }
                         );
 
-                        this.$nextTick()
-                            .then(()=> {
-                                
-                                this.init();
+                        this.$nextTick().then(()=> {
+                            this.init();
 
-                                let el = document.getElementById("grid-content");
-                                let sortable = Sortable.create(el,{
-                                    
-                                    dataIdAttr: 'data-id',
-                                    onChange(evt) {
-                                        
-                                    }
-                                });
-                            })
+                            let el = $(`.drag-content`,this.$el)[0];
+                            Sortable.create(el,{
+                                group: 'shared', 
+                                animation: 150,
+                                onAdd: function (evt) {
+                                    console.log(3,evt)
+                                },
+                                onChange(evt) {
+                                    console.log(33,evt)  
+                                }
+                            });
+                        })
 
                     },
                     methods: {
@@ -180,160 +240,147 @@ class Home extends Matrix {
 
                         },
                         init(){
-                            
                             this.loadApps();
-
-                            this.initContextMenu();
                         },
-                        initContextMenu(){
-                            
-                            $.contextMenu("destroy").contextMenu({
-                                selector: '.list-context-menu',
-                                trigger: 'left',
-                                autoHide: true,
-                                delay: 10,
-                                hideOnSecondTrigger: true,
-                                build: ($trigger, e)=> {
-                                    
-                                    let id = e.target.attributes.getNamedItem('data-item').value;
-                                    let item = _.find(this.user.appList,{id:id});
-                                    
-                                    return {
-                                        callback: function(key, opt) {
-                                            
-                                            if(_.includes(key,"walking")){
-                                                sideBar.appRunning(item);
-                                            } else if(_.includes(key,"running")){
-                                                sideBar.appRunningPlus(item);
-                                            } else if(_.includes(key,"uninstall")){
-                                                sideBar.appUninstall(item);
-                                            } else if(_.includes(key,"home")){
-                                                sideBar.appAsHome(item);
-                                            } else if(_.includes(key,"share")){
-                                                sideBar.appShare(item);
-                                            }
-                                        },
-                                        items: {
-                                            "m10_walking": {
-                                                "name": "当前窗口运行",
-                                                "icon": "fas fa-walking"
-                                            },
-                                            "m20_running": {
-                                                "name": "打开新窗口运行",
-                                                "icon": "fas fa-running"
-                                            },
-                                            "m30":"----------",
-                                            "m40_home": {
-                                                name: '设为首页', 
-                                                icon: "fas fa-home"
-                                            },
-                                            "m50":"----------",
-                                            "m60_uninstall": {
-                                                "name": "卸载应用",
-                                                "icon": "fas fa-trash"
-                                            },
-                                            "m70":"----------",
-                                            "m80_share": {
-                                                "name": "分享",
-                                                "icon": "fas fa-share"
-                                            }
-                                        }
-                                    }
-                                },
-                                events: {
-                                    show(opt) {
-                                        let $this = this;
-                                    },
-                                    hide(opt) {
-                                        let $this = this;
-                                    }
-                                }
-                            });
+                        onCommand(item){
+                            window.open(item.url,item.target);
+                        },
+                        onAppCommand(item){
+                            if(item.cmd === "walking"){
+                                sideBar.appRunning(item.data);
+                            } else if(item.cmd === "running"){
+                                sideBar.appRunningPlus(item.data);
+                            } else if(item.cmd === "uninstall"){
+                                sideBar.appUninstall(item.data);
+                            } else if(item.cmd === "home"){
+                                sideBar.appAsHome(item.data);
+                            } else if(item.cmd === "share"){
+                                sideBar.appShare(item.data);
+                            } else if(item.cmd === "groupAction"){
+                                _.extend(item.data.groups,{group: item.targetGroup });
+                                this.toggleGroup(item.data);
+                            }
+                        },
+                        onGroupCommand(item){
+                            this.groupRemove(item);
                         },
                         loadApps() {
                             
-                            let _list = omdbHandler.fetchData("#/matrix/portal/tools/: | sort by seat asc");
+                            this.apps = fsHandler.callFsJScript("/matrix/user/user.js",window.SignedUser_UserName).message;
 
-                            this.user.appList = _.orderBy(_list.message,["seat"],["asc"]);
-                            this.user.apps = [];
+                            _.extend(this.apps, {appList:_.orderBy(this.apps.appList,["seat"],["asc"]) });
 
-                            _.forEach(this.user.appsId,(v)=>{
-                                this.user.apps.push (_.find(this.user.appList,{id:v}));
-                            });
+                            this.$nextTick().then(()=> {
+                                //初始化可拖拽
+                                
+                                let name = _.map(this.apps.template,(v,k)=>{
+                                    return `sortable${k}`;
+                                })
 
-                            this.user.apps = _.remove(this.user.apps,null);
+                                _.forEach(this.apps.template,(v,k)=>{
+                                    let el = $(`.drag-content-${k}`,this.$el)[0];
+                                    let elParent = $(el).parent()[0];
+                                    
+                                    Sortable.create(el,{
+                                        group: {
+                                            name: name[k],
+                                            put: _.concat(['drag-content'],_.xor(name,[`sortable${k}`])),
+                                            pull: _.concat(['drag-content'],_.xor(name,[`sortable${k}`]))
+                                        },
+                                        animation: 150,
+                                        onMove: function (evt, originalEvent) {
+                                            console.log(2,evt)
+                                            console.log(22,originalEvent)
+                                        }
+                                    });
 
-                            this.user.appList = _.map(this.user.appList,(v)=>{
-
-                                let _idx =  _.find(this.user.apps,{id:v.id});
-
-                                if(!_.isEmpty(_idx)){
-                                    v.selected = 1;
-                                }else{
-                                    v.selected = 0;
-                                }
-                                return v;
-                            });
-
+                                    Sortable.create(elParent,{
+                                        group: {
+                                            name: 'drag-content',
+                                            put: name,
+                                            pull: name
+                                        },
+                                        animation: 150,
+                                        onMove: function (evt, originalEvent) {
+                                            console.log(1,evt)
+                                            console.log(11,originalEvent)
+                                        }
+                                    });
+                                })
+                            })
+                        
                         },
-                        toogle(item) {
-                            
-                            let ldap = new Object();
-
-                            ldap.action = "update";
-                            ldap.class = "/matrix/ldap";
-                            ldap.id = window.SignedUser_Id;
-
-                            if(_.indexOf(this.user.appsId, item.id) > -1){
-                                _.pull(this.user.appsId,item.id);
-                            } else {
-                                this.user.appsId.push(item.id);
-                            }
-
-                            ldap.remark = this.user.appsId.join(",");
-
-                            let rtn = fsHandler.callFsJScript("/matrix/ldap/action.js", encodeURIComponent(JSON.stringify(ldap))).message;// omdbHandler.putDataToClass(ldap);
-
-                            if(rtn == 1){
+                        toggleGroup(item){
+                            let rtn = fsHandler.callFsJScript("/matrix/apps/app.js",encodeURIComponent(JSON.stringify(item)));
+							if( _.lowerCase(rtn.status) == "ok"){
+								this.loadApps();
+							}
+                        },
+                        groupAdd(){
+                            let data = {
+                                user: window.SignedUser_UserName,
+                                action:"add",
+                                data: this.group.form   
+                            };
+                            let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
+                            if(rtn === 1){
+                                this.group.form.title = "new_"+_.now();
                                 this.loadApps();
+                            } else{
+                                this.$message({
+                                    type: "error",
+                                    message: "新建失败，请确认！"
+                                });
                             }
-
+                            this.group.dialogVisible = false;
                         },
-                        resetForm(){
+                        groupUpdate(){
+                            let data = {
+                                user: window.SignedUser_UserName,
+                                action:"update",
+                                data: this.group.form   
+                            };
+                            let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
+                            if(rtn === 1){
+                                this.loadApps();
+                            } else{
+                                this.$message({
+                                    type: "error",
+                                    message: "新建失败，请确认！"
+                                });
+                            }
+                        },
+                        groupRemove(item){
+                            let data = {
+                                user: window.SignedUser_UserName,
+                                action: item.cmd,
+                                data: item.data
+                            };
                             
-                            var elements = $("form").find( "input,select,textarea" );
-                            for( var i = 0; i < elements.length; ++i ) {
-                                var element = elements[i];
-                                var id = element.id;
-                                var value = element.value;
-
-                                if( id ) {
-                                    $(id).val("");
+                            this.$confirm('确定要删除?', '提示', {
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                type: 'warning'
+                              }).then(() => {
+                                let rtn = fsHandler.callFsJScript("/matrix/apps/group.js",encodeURIComponent(JSON.stringify(data))).message;
+                                if(rtn === 1){
+                                    this.loadApps();
+                                    this.$message({
+                                        type: 'success',
+                                        message: '删除成功!'
+                                    });
+                                } else{
+                                    this.$message({
+                                        type: "error",
+                                        message: "删除失败，请确认！"
+                                    });
                                 }
-                            }
-                        },
-                        toJsonString(event) {
-                            var obj = {};
-                            var elements = $("form."+event).find( "input,select,textarea" );
+                              }).catch(() => {
+                                
+                            });
 
-                            for( var i = 0; i < elements.length; ++i ) {
-                                var element = elements[i];
-                                var id = element.id;
-                                var value = element.value;
-
-                                if( id ) {
-                                    if( id === "groups" ){
-                                        obj[id] = { id:value } ;
-                                    } else {
-                                        obj[id] = value;
-                                    }
-                                }
-                            }
-                            return obj;
-                        },
-                        triggerInput(name){
-                            $(this.$refs[name]).click();
                         }
+
                     }
                 };
                 

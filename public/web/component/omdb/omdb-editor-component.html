@@ -135,7 +135,7 @@
                     </el-tooltip>
 				</el-button-group>
 			</el-header>
-			<el-main :id="id" style="padding:0px;"></el-main>
+			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
 			<el-footer :id="id+'_statusBar'" style="padding:0px 10px;height:30px;line-height: 30px;"></el-footer>
 		</el-container>
 	</template>
@@ -188,12 +188,10 @@
         },
         methods: {
             init() {
-                const self = this;
-
-                self.langTools = ace.require("ace/ext/language_tools");
-                self.editor = ace.edit(self.id);
+                this.langTools = ace.require("ace/ext/language_tools");
+                this.editor = ace.edit(this.$refs.editor.$el);
                 
-                self.editor.setOptions({
+                this.editor.setOptions({
                     // maxLines: 1000,
                     // minLines: 20,
                     autoScrollEditorIntoView: true,
@@ -201,29 +199,29 @@
                     enableSnippets: true,
                     enableLiveAutocompletion: true
                 });
-                //self.editor.$blockScrolling = Infinity;
-                self.editor.setShowPrintMargin(self.model.printMargin);
-                self.editor.setReadOnly(self.model.readOnly);
-                self.editor.getSession().setUseSoftTabs(true);
+                //this.editor.$blockScrolling = Infinity;
+                this.editor.setShowPrintMargin(this.model.printMargin);
+                this.editor.setReadOnly(this.model.readOnly);
+                this.editor.getSession().setUseSoftTabs(true);
 
-                self.editor.getSession().setTabSize(2);
-                self.editor.getSession().setUseWrapMode(true);
+                this.editor.getSession().setTabSize(2);
+                this.editor.getSession().setUseWrapMode(true);
 
-                self.editor.getSession().on('change', function() {
-                    _.debounce(self.editor.resize, 2000);
+                this.editor.getSession().on('change', _.debounce(()=> {
+                    this.editor.resize();
+                }),2000);
+
+                this.editor.on('mousemove', ()=> {
+                    this.editor.resize();
                 });
 
-                self.editor.on('mousemove', function() {
-                    self.editor.resize();
-                });
+                this.setTheme();
+                this.setMode();
+                this.setOptions();
 
-                self.setTheme();
-                self.setMode();
-                self.setOptions();
+				this.toggleToolsBar();
 
-				self.toggleToolsBar();
-
-				self.toggleStatusBar();
+				this.toggleStatusBar();
 
                 // Customer Auto Completer
                 let customerCompleter = {
@@ -248,14 +246,14 @@
                     }
                 };
 
-                self.langTools.addCompleter(customerCompleter);
+                this.langTools.addCompleter(customerCompleter);
 
 
                 // Add commands
-                self.editor.commands.addCommand({
+                this.editor.commands.addCommand({
 	                    name: "query",
                         bindKey: {mac: "cmd-enter", win: "ctrl-enter"},
-	                    exec: self.query
+	                    exec: this.query
 	                },
                     {
                         name: "save",
@@ -264,16 +262,16 @@
                             win: "ctrl-S",
                             sender: 'editor|cli'
                         },
-                        exec: function(env, args, request) {
-                            self.saveToFs();
+                        exec: (env, args, request)=> {
+                            this.saveToFs();
                         }
                     }
                     
                 );
 
                 // init Theme
-                _.delay(function(){
-                    self.initTheme();
+                _.delay(()=>{
+                    this.initTheme();
                 },3000)
 
                 

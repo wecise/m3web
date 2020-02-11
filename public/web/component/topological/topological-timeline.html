@@ -1,0 +1,108 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+        /* .pace{
+            display: none!important;
+        }
+         */
+        .topological-timeline{
+            height: 100%;
+        }
+
+        
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
+	<template>
+        <div ref="timeline" style="width:100%;height:100%;"></div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="topological-timeline">
+	{
+	    delimiters: ['#{', '}#'],
+	    props: {
+	        model: Object
+	    },
+	    data() {
+            return {
+                timeline: null,
+                items:  null,
+                options: {
+                    width: '100%',
+                    height: '100%',
+                    margin: {
+                        item: 20
+                    },
+                    zoomMax: 1 * 24 * 60 * 60 * 1000,
+                    zoomMin: 60 * 60 * 1000,
+                    locale: 'zh_CN'
+                }
+            }
+        },
+        watch: {
+            model: {
+                handler: function(val,oldVal){
+                    this.initItems();
+                },
+                deep:true,
+                immediate:true
+            }
+        },
+        created(){
+            
+	    },
+	    mounted() {
+            this.$nextTick(() => {
+                this.timeline = new vis.Timeline(this.$refs.timeline, this.items, this.options);
+                this.timeline.on('select', this.onSelect);
+                $(this.$refs.timeline).on("click",(event)=> {
+                    var props = this.timeline.getEventProperties(event)
+                    this.onClick(props);
+                    console.log(props);
+                })
+            })
+	        
+	    },
+	    methods: {
+            initItems(){
+                this.items = null;
+                this.items = new vis.DataSet(_.map(this.model,(v)=>{
+                    return {
+                                id: v.id,
+                                content: v.term,
+                                start: moment(v.time).format("LLL")
+                            }
+                }));
+            },
+            add(){
+                this.items.push();
+            },
+            onSelect(properties) {
+                console.log('selected items: ' + properties.items);
+            },
+            onClick(props){
+                let oldTerm = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term.split(" diff ");
+                oldTerm[1] = `'${moment(props.time.toString()).format("YYYY-MM-DD HH:MM")}'`;
+                let term = oldTerm.join(" diff ")
+                
+                this.$message({
+                    type: "info",
+                    message: " 图查询: " + term
+                });
+
+                _.delay(()=>{
+                    this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
+                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = term;
+                },500)
+
+            }
+	    }
+	
+	}
+	</script>
+
+</code>

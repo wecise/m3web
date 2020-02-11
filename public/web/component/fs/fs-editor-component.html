@@ -47,7 +47,7 @@
 	<template>
 		<div class="editor-container">
             <div class="editor-content">
-                <div :id="id"></div>
+                <div :id="id" ref="editor"></div>
             </div>
             <div id="statusBar"></div>
         </div>
@@ -100,12 +100,11 @@
         },
         methods: {
             init() {
-                const self = this;
+                
+                this.langTools = ace.require("ace/ext/language_tools");
+                this.editor = ace.edit(this.$refs.editor);
 
-                self.langTools = ace.require("ace/ext/language_tools");
-                self.editor = ace.edit(self.id);
-
-                self.editor.setOptions({
+                this.editor.setOptions({
                     maxLines: Infinity,
                     minLines: 50,
                     autoScrollEditorIntoView: true,
@@ -113,25 +112,25 @@
                     enableSnippets: true,
                     enableLiveAutocompletion: false
                 });
-                self.editor.$blockScrolling = Infinity;
-                self.editor.setShowPrintMargin(self.model.printMargin);
-                self.editor.setReadOnly(self.model.readOnly);
-                self.editor.getSession().setUseSoftTabs(true);
+                this.editor.$blockScrolling = Infinity;
+                this.editor.setShowPrintMargin(this.model.printMargin);
+                this.editor.setReadOnly(this.model.readOnly);
+                this.editor.getSession().setUseSoftTabs(true);
 
-                self.editor.getSession().setTabSize(4);
-                self.editor.getSession().setUseWrapMode(true);
+                this.editor.getSession().setTabSize(4);
+                this.editor.getSession().setUseWrapMode(true);
 
-                self.editor.on('mousemove', function() {
-                    self.editor.resize();
+                this.editor.on('mousemove', ()=> {
+                    this.editor.resize();
                 });
 
-                self.setTheme();
-                self.setMode();
-                self.setOptions();
+                this.setTheme();
+                this.setMode();
+                this.setOptions();
                 
-				self.toggleToolsBar();
+				this.toggleToolsBar();
 
-				self.toggleStatusBar();
+				this.toggleStatusBar();
 
 
                 // Customer Auto Completer
@@ -157,64 +156,57 @@
                     }
                 };
 
-                self.langTools.addCompleter(customerCompleter);
+                this.langTools.addCompleter(customerCompleter);
 
 
-                //self.editor.on("input", self.updateToolbar);
+                //self.editor.on("input", this.updateToolbar);
 
-                self.editor.commands.addCommand({
+                this.editor.commands.addCommand({
                     name: "save",
                     bindKey: {
                         mac: "cmd-S", 
                         win: "ctrl-S",
                         sender: 'editor|cli'
                     },
-                    exec: function(env, args, request) {
-                        self.saveIt();
+                    exec: (env, args, request)=>{
+                        this.saveIt();
                     }
                 });
 
                 _.delay(()=>{
-                    self.editor.setValue(this.model.newInput);
+                    this.editor.setValue(this.model.newInput);
                 },1000)
                 
             },
             updateToolbar () {
-                const self = this;
-
-                self.refs.saveButton.disabled = self.editor.session.getUndoManager().isClean();
-                self.refs.undoButton.disabled = !self.editor.session.getUndoManager().hasUndo();
-                self.refs.redoButton.disabled = !self.editor.session.getUndoManager().hasRedo();
+                this.refs.saveButton.disabled = this.editor.session.getUndoManager().isClean();
+                this.refs.undoButton.disabled = !this.editor.session.getUndoManager().hasUndo();
+                this.refs.redoButton.disabled = !this.editor.session.getUndoManager().hasRedo();
             },
 	        refresh(){
-                const self = this;
-
-                if(self.editor){
-                    self.editor.resize();
+                if(this.editor){
+                    this.editor.resize();
                 }
 	        },
             setOptions(){
-                const self = this;
-
-                if(!_.isEmpty(self.model.options)){
-                    self.editor.setOptions(self.model.options);
+                if(!_.isEmpty(this.model.options)){
+                    this.editor.setOptions(this.model.options);
                 } 
             },
             setTheme(){
-                const self = this;
-
-                let localTheme = localStorage.getItem(`editor-select-theme-${self.id}`);
+                
+                let localTheme = localStorage.getItem(`editor-select-theme-${this.id}`);
 
                 if(localTheme){
-                    self.editor.setTheme("ace/theme/" + localTheme);
+                    this.editor.setTheme("ace/theme/" + localTheme);
                     return false;
                 }
 
 
-                if(_.isEmpty(self.model.theme)){
-                	self.editor.setTheme("ace/theme/terminal");
+                if(_.isEmpty(this.model.theme)){
+                	this.editor.setTheme("ace/theme/terminal");
                 } else {
-                	self.editor.setTheme("ace/theme/"+self.model.theme);
+                	this.editor.setTheme("ace/theme/"+this.model.theme);
                 }
                 
             },

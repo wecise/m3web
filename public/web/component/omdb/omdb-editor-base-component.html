@@ -106,8 +106,8 @@
                         </el-tooltip>
                     </el-button-group>
                 </el-header>
-                <el-main :id="id" style="padding:0px;"></el-main>
-                <el-footer :id="id+'_statusBar'" style="padding:0px 10px;height:30px;line-height: 30px;"></el-footer>
+                <el-main id="editor" style="padding:0px;" ref="editor"></el-main>
+                <el-footer id="statusBar" style="padding:0px 10px;height:30px;line-height: 30px;" ref="statusBar"></el-footer>
             </el-container>
         </template>
     
@@ -116,8 +116,6 @@
         {
             delimiters: ['${', '}'],
             props: {
-                id: String,
-                bid: String,
                 model: Object,
                 showToolsBar: Boolean,
                 showStatusBar: Boolean
@@ -131,35 +129,25 @@
                 }
             },
             mounted(){
-                var self = this;
-    
-                self.$nextTick(function(){
-                    self.init();
+                this.$nextTick(()=>{
+                    this.init();
                 })
             },
             watch: {
                 'model.newInput': {
                     handler:function(val,oldVal){
-                        const self = this;
-                        
-                        self.editor.setValue(val);
+                        this.editor.setValue(val);
                     },
                     deep:true
                 }
     
             },
-            created () {
-                const self = this;
-    
-            },
             methods: {
                 init() {
-                    const self = this;
-    
-                    self.langTools = ace.require("ace/ext/language_tools");
-                    self.editor = ace.edit(self.id);
+                    this.langTools = ace.require("ace/ext/language_tools");
+                    this.editor = ace.edit(this.$refs.editor.$el);
                     
-                    self.editor.setOptions({
+                    this.editor.setOptions({
                         // maxLines: 1000,
                         // minLines: 20,
                         autoScrollEditorIntoView: true,
@@ -168,27 +156,24 @@
                         enableLiveAutocompletion: false
                     });
                     //self.editor.$blockScrolling = Infinity;
-                    self.editor.setShowPrintMargin(self.model.printMargin);
-                    self.editor.setReadOnly(self.model.readOnly);
-                    self.editor.getSession().setUseSoftTabs(true);
+                    this.editor.setShowPrintMargin(this.model.printMargin);
+                    this.editor.setReadOnly(this.model.readOnly);
+                    this.editor.getSession().setUseSoftTabs(true);
     
-                    self.editor.getSession().setTabSize(2);
-                    self.editor.getSession().setUseWrapMode(true);
+                    this.editor.getSession().setTabSize(2);
+                    this.editor.getSession().setUseWrapMode(true);
 
-                    self.editor.on('mousemove', function() {
-                        self.editor.resize();
+                    this.editor.on('mousemove', ()=> {
+                        this.editor.resize();
                     });
     
-                    self.setTheme();
-                    self.setMode();
-                    self.setOptions();
+                    this.setTheme();
+                    this.setMode();
+                    this.setOptions();
     
-                    self.toggleToolsBar();
+                    this.toggleToolsBar();
     
-                    self.toggleStatusBar();
-    
-                
-    
+                    this.toggleStatusBar();
                     
                 },
                 setOptions(){
@@ -199,19 +184,18 @@
                     } 
                 },
                 setTheme(){
-                    const self = this;
-    
-                    let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(self.id)}`);
+                    
+                    let localTheme = localStorage.getItem(`editor-select-theme-${objectHash.sha1(this.$refs.editor.$el.id)}`);
     
                     if(localTheme){
-                        self.editor.setTheme("ace/theme/" + localTheme);
+                        this.editor.setTheme("ace/theme/" + localTheme);
                         return false;
                     }
     
-                    if(_.isEmpty(self.model.theme)){
-                        self.editor.setTheme("ace/theme/tomorrow");
+                    if(_.isEmpty(this.model.theme)){
+                        this.editor.setTheme("ace/theme/tomorrow");
                     } else {
-                        self.editor.setTheme("ace/theme/"+self.model.theme);
+                        this.editor.setTheme("ace/theme/"+this.model.theme);
                     }
                     
                 },
@@ -250,20 +234,18 @@
                     }
                 },
                 toggleStatusBar(){
-                    const self = this;
-    
-                    if(self.showStatusBar) {
+                    
+                    if(this.showStatusBar) {
                         let StatusBar = ace.require("ace/ext/statusbar").StatusBar;
-                        let statusBar = new StatusBar(self.editor, document.getElementById(`${self.id}_statusBar`));
+                        let statusBar = new StatusBar(this.editor, document.getElementById(this.$refs.statusBar.$el.id));
                     }
                 },
                 onCopy(){
-                    const self = this;
-
+                    
                     new Clipboard("button.copy", {
-                        text: function(trigger) {
-                            self.$message("已复制");
-                            return self.editor.getValue();
+                        text: (trigger)=> {
+                            this.$message("已复制");
+                            return this.editor.getValue();
                         }
                     });
                 }
