@@ -1696,7 +1696,7 @@ class Event {
                             editor: null
                         }
                     },
-                    template: `<div style="width:100%;height:200px;"></div>`,
+                    template: `<div style="width:100%;height:200px;" ref="editor"></div>`,
                     beforeDestroy() {
                         this.editor.destroy();
                         this.editor.container.remove();
@@ -1708,7 +1708,7 @@ class Event {
                     },
                     methods:{
                         init(){
-                            this.editor = ace.edit(this.$el);
+                            this.editor = ace.edit(this.$refs.editor);
                             this.editor.setOptions({
                                 // maxLines: 1000,
                                 // minLines: 20,
@@ -1745,7 +1745,6 @@ class Event {
                                         height="300" 
                                         border 
                                         stripe
-                                        row-key="id"
                                         ref="table">
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column sortable :prop="item.field" :label="item.title" :width="item.width" v-for="item in model.columns" v-if="item.field!=='render'">
@@ -1755,7 +1754,7 @@ class Event {
                                     </el-table-column>
                                     <el-table-column type="expand" label="渲染">
                                         <template slot-scope="scope">
-                                            <!--view-editor-component :render="scope.row.render" :index="scope.$index" @update:render="scope.row.render = $event"></view-editor-component-->
+                                            <view-editor-component :render="scope.row.render" :index="scope.$index" @update:render="scope.row.render = $event"></view-editor-component>
                                         </template>
                                     </el-table-column>
                                 </el-table>`,
@@ -1777,7 +1776,7 @@ class Event {
                         }
                     },
                     mounted(){
-                        this.$nextTick(()=>{
+                        this.$nextTick().then(()=>{
                             _.delay(()=>{
                                 this.toggleSelection(this.model.selected);
                                 // console.log($('tbody',this.$el)[0])
@@ -1974,20 +1973,20 @@ class Event {
                             let term = JSON.stringify({class: "event", action:"list"});
                             this.view.list = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;;
                             this.$root.$refs.searchRef.view.list = this.view.list;
-
+                            console.log(1,this.view.list)
                             // 默认视图
                             this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
-                            
+                            console.log(2,this.view.activeModel)
                             // 当前视图class
                             this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.activeModel.filter.class)).message;
+                            console.log(3,this.view.class.list)
                             // 当前视图属性
-                            console.log(11,this.view.activeModel, this.view.activeModel.filter.class)
-                            this.onPropsChange(this.view.activeModel.class);
+                            console.log(4,this.view.activeModel.filter.class)
+                            this.onPropsChange(this.view.activeModel.filter.class);
                         },
                         // 视图属性配置
                         onPropsChange(val){
                             this.view.filter.template = fsHandler.callFsJScript("/matrix/view/props.js",encodeURIComponent(val)).message;
-                            console.log(1,this.view.filter.template)
                             if(!_.isEmpty(this.view.activeModel.filter.template)){
                                 
                                 _.forEach(this.view.activeModel.filter.template,(v)=>{
@@ -2011,12 +2010,23 @@ class Event {
                             this.onPropsChange(this.view.activeModel.filter.class);
                         },
                         onAdd(){
+                            let defaultClass = _.first(this.view.class.list).key;
+
                             let name = `view_${_.now()}`;
                             let title = `view_${name}`;
                             let term = JSON.stringify({
                                                         class: "event", 
                                                         action:"add",
-                                                        model:{name: name,title: title, filter: { class: "", template: [], filters:""}, time: _.now()}
+                                                        model:{
+                                                            name: name,
+                                                            title: title, 
+                                                            filter: { 
+                                                                class: defaultClass, 
+                                                                template: [], 
+                                                                filters:""
+                                                            }, 
+                                                            time: _.now()
+                                                        }
                                                     });
                             let rtn = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;
                             if(rtn==1){
@@ -2041,7 +2051,7 @@ class Event {
                             }
                         },
                         onDelete(item){
-                            this.$confirm("确认要删除该视图？", '提示', {
+                            this.$confirm(`确认要删除该视图：${item.name}？`, '提示', {
                                 confirmButtonText: '确定',
                                 cancelButtonText: '取消',
                                 type: 'warning'

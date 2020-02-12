@@ -43,6 +43,10 @@
 			padding:20px;
 			left: 0px!important;
 		}
+		.search-base-component .search-base--select-popper li{
+			margin: 10px 0px;
+    		border-radius: 5px;
+		}
 
 	</style>
 
@@ -53,7 +57,7 @@
 			<!--搜索范围-->
 			<el-select v-model="options.view.value" placeholder="请选择视图"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
 				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
-					<el-card :body-style="{ padding: '5px' }" style="text-align: center;padding:10px 0px 10px 40px">
+					<el-card :body-style="{ padding: '5px' }" style="text-align: center;">
 						<span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
 						<div style="padding: 0px;text-align: right;">
 							<p style="margin: 0px;">#{item.title}#</p>
