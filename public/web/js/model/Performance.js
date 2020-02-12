@@ -79,7 +79,7 @@ class Performance extends Matrix {
                             handler(val,oldVal){
                                 
                                 if(!_.isEmpty(val.value)){
-                                    this.splitInst.setSizes([60,40]);
+                                    //this.splitInst.setSizes([60,40]);
                                 }
                                 
                             },
@@ -151,7 +151,6 @@ class Performance extends Matrix {
                     mounted(){
                         this.$nextTick().then(()=>{
                             this.layout();
-                            this.split();
                         })
                     },
                     methods: {
@@ -169,7 +168,7 @@ class Performance extends Matrix {
                         },
                         split(){
                             this.splitInst = Split([this.$refs.tableContainer.$el, this.$refs.chartContainer.$el], {
-                                sizes: [100, 0],
+                                sizes: [60, 40],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 cursor: 'row-resize',
@@ -269,7 +268,17 @@ class Performance extends Matrix {
                         trendsAdd(row){
                             let trend = fsHandler.callFsJScript("/matrix/performance/trend-analysis-by-id.js", encodeURIComponent(JSON.stringify(row))).message;
                             _.extend(this.trends, {baseline: trend.rows.day1.baseline, value: trend.rows.day1.value, config:trend.trends[0].config});
-                            this.$root.$refs.tableRef[0].splitInst.setSizes([60,40]);
+
+                            this.$nextTick().then(()=>{
+                                
+                                if(this.splitInst){
+                                    this.splitInst.destroy();   
+                                }
+                                
+                                this.split();
+
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            })
                         }
                     }
                 })
