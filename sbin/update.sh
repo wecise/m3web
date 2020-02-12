@@ -5,7 +5,7 @@ clear
 PS3="Please select a option to upgrade the M³ System："
 options=("Upgrade web" "Upgrade web lib" "Upgrade web server" "Download FileSystem" "Export Excel&Data")
 user="matrix"
-host="47.92.151.165"
+host="47.92.151.165:8080"
 auth="wecise.admin:admin"
 header="-H 'Accept: */*' -H 'Accept-Encoding: gzip, deflate' -H 'cache-control: no-cache'"
 excelHeader="-O -J"

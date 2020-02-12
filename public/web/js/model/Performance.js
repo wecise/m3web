@@ -75,64 +75,65 @@ class Performance extends Matrix {
                             deep:true,
                             immediate:true
                         },
-                        'trends.value':{
+                        'trends':{
                             handler(val,oldVal){
-                                if(!_.isEmpty(val)){
-                                    this.splitInst.setSizes([50,50]);
-                                } else {
-                                    this.splitInst.setSizes([100,0]);
+                                
+                                if(!_.isEmpty(val.value)){
+                                    this.splitInst.setSizes([60,40]);
                                 }
                                 
                             },
                             deep:true
                         }
                     },
-                    template:   `<el-container class="animated fadeIn">
+                    template:   `<el-container>
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-tooltip content="运行模式切换" open-delay="500" placement="top">
                                             <el-button type="text" @click="onToggle"><i class="fas fa-tags"></i></el-button>
                                         </el-tooltip>
-                                        <el-tooltip content="趋势分析" open-delay="500" placement="top">
+                                        <!--el-tooltip content="趋势分析" open-delay="500" placement="top">
                                             <el-button type="text" @click="onAction(item)"><i class="elicon el-icon-s-operation"></i></el-button>
-                                        </el-tooltip>
-                                        <el-tooltip :content="mx.global.register.event.status[item][1]" open-delay="500" placement="top" v-for="item in model.actions" v-if="!_.isEmpty(model.actions)">
-                                            <el-button type="text" @click="onAction(item)"><i :class="mx.global.register.event.status[item][2]"></i></el-button>
-                                        </el-tooltip>
+                                        </el-tooltip-->
                                     </el-header>   
-                                    <el-main class="animated fadeIn" style="height:calc(100vh - 210px);padding:0px;overflow:hidden;">
-                                        <el-table
-                                            :data="dt.rows"
-                                            highlight-current-row="true"
-                                            style="width: 100%;"
-                                            :row-class-name="rowClassName"
-                                            :header-cell-style="headerRender"
-                                            @row-dblclick="onRowDblclick"
-                                            @row-contextmenu="onRowContextmenu"
-                                            @selection-change="onSelectionChange"
-                                            ref="table">
-                                            <el-table-column type="selection" align="center"></el-table-column> 
-                                            <el-table-column type="expand">
-                                                <template slot-scope="props">
-                                                    <performance-trend-analysis :model="props.row"></performance-trend-analysis>
-                                                    <!--el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
-                                                        <el-form-item v-for="v,k in props.row" :label="k">
-                                                            <el-input v-model="v"></el-input>
-                                                        </el-form-item>
-                                                    </el-form-->
-                                                </template>
-                                            </el-table-column>
-                                            <el-table-column :prop="item.field" 
-                                                :label="item.title" 
-                                                sortable 
-                                                show-overflow-tooltip
-                                                :formatter="item.render" 
-                                                v-for="item in dt.columns"
-                                                :width="item.width"
-                                                :align="item.align"
-                                                v-if="item.visible">
-                                            </el-table-column>
-                                        </el-table>
-                                        <trends-analysis :model="trends" :config="trends.config" ref="chart"></trends-analysis>
+                                    <el-main style="height:calc(100vh - 210px);padding:0px;overflow:hidden;">
+                                        <el-container style="height:100%;">
+                                            <el-main style="height:100%;padding:0px;" ref="tableContainer">
+                                                <el-table
+                                                    :data="dt.rows"
+                                                    highlight-current-row="true"
+                                                    style="width: 100%;"
+                                                    :row-class-name="rowClassName"
+                                                    :header-cell-style="headerRender"
+                                                    @row-dblclick="onRowDblclick"
+                                                    @row-contextmenu="onRowContextmenu"
+                                                    @selection-change="onSelectionChange"
+                                                    ref="table">
+                                                    <el-table-column type="selection" align="center"></el-table-column> 
+                                                    <el-table-column type="expand">
+                                                        <template slot-scope="props">
+                                                            <performance-trend-analysis :model="props.row"></performance-trend-analysis>
+                                                            <!--el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                                <el-form-item v-for="v,k in props.row" :label="k">
+                                                                    <el-input v-model="v"></el-input>
+                                                                </el-form-item>
+                                                            </el-form-->
+                                                        </template>
+                                                    </el-table-column>
+                                                    <el-table-column :prop="item.field" 
+                                                        :label="item.title" 
+                                                        sortable 
+                                                        show-overflow-tooltip
+                                                        :formatter="item.render" 
+                                                        v-for="item in dt.columns"
+                                                        :width="item.width"
+                                                        :align="item.align"
+                                                        v-if="item.visible">
+                                                    </el-table-column>
+                                                </el-table>
+                                            </el-main>
+                                            <el-footer style="padding:0px;height:0px;" ref="chartContainer">
+                                                <trends-analysis :model="trends" :config="trends.config" ref="chart"></trends-analysis>
+                                            </el-footer>
                                     </el-main>
                                     <el-footer  style="height:30px;line-height:30px;">
                                         #{ info.join(' &nbsp; | &nbsp;') }#
@@ -148,11 +149,9 @@ class Performance extends Matrix {
                         }
                     },
                     mounted(){
-                        this.$nextTick(()=>{
+                        this.$nextTick().then(()=>{
                             this.layout();
-                            _.delay(()=>{
-                                this.split();
-                            },1000)
+                            this.split();
                         })
                     },
                     methods: {
@@ -161,7 +160,7 @@ class Performance extends Matrix {
                                 if($(".el-table-column--selection",this.$el).is(':visible')){
                                     _.delay(()=>{
                                         this.$refs.table.doLayout();
-                                    },1000)
+                                    },500)
                                 } else {
                                     setTimeout(doLayout,50);
                                 }
@@ -169,7 +168,7 @@ class Performance extends Matrix {
                             doLayout();
                         },
                         split(){
-                            this.splitInst = Split([this.$refs.table.$el, this.$refs.chart.$el], {
+                            this.splitInst = Split([this.$refs.tableContainer.$el, this.$refs.chartContainer.$el], {
                                 sizes: [100, 0],
                                 minSize: [0, 0],
                                 gutterSize: 5,
@@ -182,11 +181,10 @@ class Performance extends Matrix {
                             });
                         },
                         initData(){
-                            const self = this;
-
+                            
                             try{
-                                self.dt.rows = self.model.rows;
-                                self.dt.columns = _.map(self.model.template, function(v){
+                                this.dt.rows = this.model.rows;
+                                this.dt.columns = _.map(this.model.template, (v)=>{
                                     
                                     if(_.isUndefined(v.visible)){
                                         _.extend(v, { visible: true });
@@ -229,9 +227,7 @@ class Performance extends Matrix {
                             this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
                         },
                         onRowContextmenu(row, column, event){
-                            
                             const self = this;
-
                             $.contextMenu('destroy').contextMenu({
                                 selector: "tr",
                                 trigger: "right",
@@ -245,23 +241,21 @@ class Performance extends Matrix {
                                         callback: (key, opt)=> {
                                             
                                             if(_.includes(key,'diagnosis')) {
-                                                self.$root.detailAdd(row);
+                                                this.$root.detailAdd(row);
                                             } else if(_.includes(key,'trends')) {
-                                                self.trendsAdd(row);
+                                                this.trendsAdd(row);
                                             } else if(_.includes(key,'action')) {
                                                 // 增加操作类型
                                                 let action = _.last(key.split("_"));
-                                                self.$root.action({list: [row], action:action});
+                                                this.$root.action({list: [row], action:action});
                                             } 
                                         },
-                                        items: self.model.contextMenu.performance
+                                        items: this.model.contextMenu.performance
                                     }
                                 },
                                 events: {
                                     show(opt) {
-                
-                                        //let $this = this;
-
+            
                                         _.delay(()=>{
                                             new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
                                         },50)
@@ -275,6 +269,7 @@ class Performance extends Matrix {
                         trendsAdd(row){
                             let trend = fsHandler.callFsJScript("/matrix/performance/trend-analysis-by-id.js", encodeURIComponent(JSON.stringify(row))).message;
                             _.extend(this.trends, {baseline: trend.rows.day1.baseline, value: trend.rows.day1.value, config:trend.trends[0].config});
+                            this.$root.$refs.tableRef[0].splitInst.setSizes([60,40]);
                         }
                     }
                 })
@@ -315,7 +310,7 @@ class Performance extends Matrix {
                         }
                     },
                     created(){
-                        // 接收窗体RESIZE事件
+                        // 接收窗体RESIZE事件                        
                         eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
                     },
                     mounted() {
@@ -374,10 +369,10 @@ class Performance extends Matrix {
                             });
                         },
                         checkChart(){
-                            if(this.$refs.chartContainer){
+                            try{
                                 this.chart.resize();
-                            } else {
-                                setTimeout(this.checkChart, 50);
+                            } catch(err){
+
                             }
                         }
                     }
@@ -385,7 +380,7 @@ class Performance extends Matrix {
 
                 // 曲线分析图表
                 Vue.component('trends-analysis-chart', {
-                    template: `<div id="chart" style="width:100%;height:100%;"></div>`,
+                    template: `<div style="width:100%;height:100%;" ref="chart"></div>`,
                     props:{
                         model:Object,
                         config: Object
@@ -425,27 +420,35 @@ class Performance extends Matrix {
                     watch:{
                         'model.value':function(val,oldVal){
                             this.initData(); 
-                            _.delay(()=>{
-                                this.chart.setOption(this.option);
-                                this.chart.resize();
-                            },2000)
                         }
                     },
                     created(){
                         // 接收窗体RESIZE事件
-                        eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
-
-                        this.initData();
+                        eventHub.$on("WINDOW-RESIZE-EVENT", this.resize);
                     },
                     mounted() {
-                        this.init();
+                        this.$nextTick().then(()=>{
+                            this.init();
+                        })
                     },
                     methods: {
                         init(){
-                            this.chart = echarts.init(this.$el);
-                            this.chart.setOption(this.option);
+                            if(!this.chart){
+                                this.chart = echarts.init(this.$el);
+                                this.chart.setOption(this.option);
+                            } else {
+                                this.initData();
+                            }
                         },
                         initData(){
+                            
+                            if(_.isEmpty(this.model.value)){
+                                this.option.legend.data = [];
+                                this.option.xAxis.data = [];
+                                this.option.series = [];
+                                return false;
+                            } 
+
                             let dataValue = _.cloneDeep(this.model.value).reverse();
                             let dataBaseline = _.cloneDeep(this.model.baseline).reverse();
                             
@@ -495,14 +498,13 @@ class Performance extends Matrix {
                                 }
                                 
                             });
+
+                            this.chart.setOption(this.option);
+                            this.chart.resize();
                         },
-                        checkChart(){
+                        resize(){
                             try{
-                                if(this.$el){
-                                    this.chart.resize();
-                                } else {
-                                    setTimeout(this.checkChart, 50);
-                                }
+                                this.chart.resize();
                             } catch(err){
 
                             }
@@ -521,13 +523,13 @@ class Performance extends Matrix {
                             
                         }
                     },
-                    template:   `<el-container>
+                    template:   `<el-container style="height:100%;">
                                     <el-header style="height:30px;line-height:30px;text-align:right;">
                                         <el-tooltip content="关闭" open-delay="500" placement="top">
                                             <el-button type="text" @click="onClose"><i class="elicon el-icon-close"></i></el-button>
                                         </el-tooltip>
                                     </el-header>
-                                    <el-main style="padding:0px;" v-if="!_.isEmpty(model.value)">
+                                    <el-main style="padding:0px;height:100%;">
                                         <trends-analysis-chart :model="model" :config="config"></trends-analysis-chart>
                                     </el-main>
                                 </el-container>`,
@@ -539,7 +541,7 @@ class Performance extends Matrix {
                     },
                     methods: {
                         onClose(){
-                            this.$parent.$parent.$parent.trends = {value:[],baseline:[],config:{type:"",step:""}};
+                            this.$root.$refs.tableRef[0].splitInst.setSizes([100,0]);
                         }
                     }
                 }); 
@@ -1074,7 +1076,7 @@ class Performance extends Matrix {
                                                                     </div>
                                                                 </el-header>
                                                                 <el-main style="padding:5px;">
-                                                                    <el-table-component :model="model.message" ref="performanceTable"></el-table-component>
+                                                                    <el-table-component :model="model.message" ref="tableRef"></el-table-component>
                                                                 </el-main>
                                                             </el-container>
                                                         </el-main>
@@ -1145,7 +1147,7 @@ class Performance extends Matrix {
                             // 搜索窗口
                             window: { name:"所有", value: ""},
                             // 输入
-                            term: "top 100",
+                            term: "top 50",
                             // 指定类
                             class: "#/matrix/devops/performance/:",
                             // 指定api

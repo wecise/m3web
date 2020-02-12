@@ -617,6 +617,7 @@ class Topological {
                                 style="width:96%;"
                                 clearable
                                 ref="graphSearch">
+                                
                                 <template slot="prepend">
                                     <el-button type="default" icon="el-icon-position" @click="onPath"></el-button>
                                 </template>
