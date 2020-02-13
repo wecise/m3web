@@ -48,14 +48,7 @@
 	
 	/*----------  最外层element会自动增加组件同名 class="fs-tree-component"  ----------*/
 	<template>
-		<div>
-			<form class="navbar-form full-width">
-				<div class="form-group">
-					<input type="text" class="form-control-transparent" placeholder="搜索">
-				</div>
-			</form>
-			<ul class="ztree" :id="id" style="overflow:hidden auto;height:calc(100vh - 140px);"></ul>
-		</div>
+		<ul class="ztree" style="overflow:hidden auto;height:calc(100vh - 140px);"></ul>
 	</template>
 
 	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
@@ -159,15 +152,11 @@
             // 接收刷新事件
             eventHub.$on("FS-TREE-REFRESH-EVENT",this.init);
         },
-		mounted: function () {
-            let self = this;
-
-            self.$nextTick(function () {
-
-				self.init();
-
-                self.initPlugIn();
-
+		mounted () {
+            
+            this.$nextTick(()=> {
+				this.init();
+                this.initPlugIn();
 			})
 		},
 		watch: {
@@ -183,25 +172,25 @@
 			}
 		},
 		methods: {
-			init: function(){
-                let self = this;
-                let _rtn = fsHandler.fsList(self.root);
-
-                if(_.isEmpty(_rtn)){
-                    self.treeNodes = [];
+			init(){
+                
+                let rtn = fsHandler.fsList(this.root);
+                
+                if(_.isEmpty(rtn)){
+                    this.treeNodes = [];
                 } else {
-                    self.treeNodes = _.sortBy(_.map(_rtn,function(v,k){
-			                            let _type = "dir";
+                    this.treeNodes = _.sortBy(_.map(rtn,(v,k)=>{
+			                            let type = "dir";
 
 			                            if(!_.isEmpty(v.ftype)){
-                                            _type = v.ftype;
+                                            type = v.ftype;
 			                            }
 
-			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: _type});
+			                            return _.merge(v, { pId: 1, isParent: v.isdir, title: v.name, type: type});
 			                        }),[v => v.title.toLowerCase()], ['asc']);
                 }
-				self.treeObj = $.fn.zTree.init($(self.$el).find($("#" + self.id)), self.setting, self.treeNodes);
-
+                
+				this.treeObj = $.fn.zTree.init(this.$el, this.setting, this.treeNodes);
 
 			},
 			initPlugIn: function(){

@@ -31,7 +31,7 @@
     }
 
     #content.content{
-        padding: 10px 10px 0px 10px!important;
+        padding: 5px!important;
     }
 
     .company-info,
@@ -140,9 +140,13 @@
         Vue.component('user-update',{
             delimiters: ['${', '}'],
             template: '#user-update-template',
-            data: function(){
+            data(){
                 return {
-
+                    userForm: {
+                        user_name: {{.SignedUser.UserName}},
+                        password: {{.SignedUser.Passwd}},
+                        email: ""
+                    }
                 }
             },
             computed: {
@@ -153,9 +157,41 @@
                     return email.join(",");
                 }
             },
+            mounted(){
+                console.log(this.userForm)
+            },
             methods: {
-                cancel: function(){
+                onCancel(){
                     appVue.currentView = 'user-info';
+                },
+                onSubmit(){
+                    // let fm = new FormData();
+                    // fm.append("user_name", this.userForm.user_name);
+                    // fm.append("password", this.userForm.password);
+                    // fm.append("email", this.userForm.email);
+
+                    jQuery.ajax({
+                        url: "/admin/users/15305020520705546474",
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {
+                            fullname: this.userForm.user_name,
+                            email: this.userForm.email,
+                            password: this.userForm.password
+                        },
+                        async:false,
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader("X-Csrf-Token", window.CsrfToken);
+                        },
+                        complete: function (xhr, textStatus) {
+                        },
+                        success: function (data, textStatus, xhr) {
+                            console.log(data)
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            console.log(errorThrown)
+                        }
+                    })
                 }
             }
         });
@@ -280,27 +316,24 @@
                     return moment(vtime).format("YYYY-MM-DD HH:mm:ss");
                 }
             },
-            mounted: function(){
-                var self = this;
-
-                self.$nextTick(function(){
-                    self.init();
+            mounted(){
+                this.$nextTick(()=>{
+                    this.init();
                 })
             },
             methods: {
-                init: function(){
-                    const self = this;
-
-                    let _logo = `{{.logo}}`;
-
-                    self.logo = _logo.replace(/"/g,"");
+                init(){
+                    
+                    let logo = `{{.logo}}`;
+                    
+                    this.logo = logo.replace(/"/g,"");
 
                     let _license = _.attempt(JSON.parse.bind(null, `{{.license}}`));
 
                     if(_.isEmpty(_license)){
-                        self.license = "未经授权用户";
+                        this.license = "未经授权用户";
                     } else {
-                        self.license = `${_license.expire}`;
+                        this.license = `${_license.expire}`;
                     }
                 },
                 update: function(){
@@ -333,9 +366,8 @@
 
                 },
                 toggleView: function(view){
-                    const self = this;
-
-                    self.currentView = view;
+                    console.log(view)
+                    this.currentView = view;
                 },
                 changeLogo: function(){
                     const self = this;
@@ -445,15 +477,15 @@
 
 <script type="text/x-template" id="app-template">
 
-    <el-container>
+    <el-container style="background:#fff;height: calc(100vh - 85px);">
         
         <el-aside id="nav">
-            <div class="thumbnail">
-                <div class="company-logo-bg upload-btn-wrapper" @click="changeLogo">
-                    <span class="logo-toggle"><i class="fa fa-wrench"></i></span>
-                    <img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;" title="点击更换Logo">
-                </div>
-                <div class="caption">
+            <el-container>
+                <el-header style="height:auto;">
+                    <el-button type="text" icon="el-icon-s-tools" @click="changeLogo" style="float: right;"></el-button>
+                    <p><img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;"></img></p>
+                </el-header>
+                <el-main>
                     <h5>{{.i18n.Tr "company_info"}}</h5>
                     <p>{{.i18n.Tr "company_name"}}：{{.company}}</p>
                     <p>{{.i18n.Tr "company_fullname"}}：{{.company_fullname}}</p>
@@ -462,14 +494,16 @@
                     <p>{{.i18n.Tr "company_title"}}：{{.title}}</p>
                     <p>{{.i18n.Tr "company_license"}}：${license}</p>
                     <p>{{.i18n.Tr "company_product"}}：{{.i18n.Tr "app_desc"}}</p>
-                    <div class="text-right">
-                        <a class="btn btn-xs btn-white" href="http://{{.website}}" target="_blank"><i class="fa fa-thumbs-up"></i> {{.i18n.Tr "company_web"}} </a>
-                        {{if .SignedUser.IsAdmin}}
-                        <a class="btn btn-xs btn-success" href="javascript:void(0);" @click="toggleView('company-update')"><i class="fa fa-edit"></i> {{.i18n.Tr "company_update"}}</a>
-                        {{end}}
-                    </div>
-                </div>
-            </div>
+                    <p>
+                        <el-link type="default" icon="el-icon-location" href="http://{{.website}}" target="_blank" :underline="false">{{.i18n.Tr "company_web"}} </el-link>
+                    </p>
+                    {{if .SignedUser.IsAdmin}}
+                    <p>
+                        <el-button type="success" icon="el-icon-edit"  @click="toggleView('company-update')">{{.i18n.Tr "company_update"}}</el-button>
+                    </p>
+                    {{end}}
+                </el-main>
+            </el-container>
         </el-aside>
         <el-main id="content" style="margin: 0px 0px 0px 10px;height: calc(100vh - 90px);background: rgb(255, 255, 255);">
             <component v-bind:is="currentView"></component>
@@ -481,146 +515,127 @@
 
 
 <script type="text/x-template" id="user-update-template">
-    <div class="animated fadeIn">
-        <h4>{{.i18n.Tr "user_info"}}</h4>
-        <hr>
-        <form action="/admin/users/15305020520705546474" method="post">
+    <div>
+        <h2>{{.i18n.Tr "user_info"}}</h2>
+        <el-divider></el-divider>
+        <el-form action="/admin/users/15305020520705546474" method="post" label-width="80px">
             {{.CsrfTokenHtml}}
-            <div class="form-group {{if .Err_UserName}}error{{end}}">
-                <label for="user_name">{{.i18n.Tr "username"}}</label>
-                <input class="form-control" id="user_name" name="user_name" value="{{.SignedUser.UserName}}" autofocus required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "username"}}">
+                <el-input id="user_name" name="user_name" v-model="userForm.user_name"  autofocus required disabled></el-input>
+            </el-form-item>
 
-            <div class="form-group {{if .Err_Email}}error{{end}}">
-                <label for="email">{{.i18n.Tr "email"}}</label>
-                <input class="form-control" type="email" id="email" name="email" :value="email" required>
-            </div>
+            <el-form-item label="{{.i18n.Tr "email"}}">
+                <el-input id="email" name="email" v-model="userForm.email" required></el-input>
+            </el-form-item>
 
-            <div class="form-group {{if .Err_Password}}error{{end}}">
-                <label for="password">{{.i18n.Tr "password"}}</label>
-                <input class="form-control" type="password" id="password" name="password" value="{{.SignedUser.Passwd}}" required>
-            </div>
+            <el-form-item label="{{.i18n.Tr "password"}}">
+                <el-input type="password" id="password" name="password" v-model="userForm.password" required show-password></el-input>
+            </el-form-item>
 
-            <div class="form-group button-bars">
-                <button class="btn btn-sm btn-success">{{.i18n.Tr "submit"}}</button>
-                <a href="javascript:void(0);" class="btn btn-sm btn-default" @click="cancel">{{.i18n.Tr "cancel"}}</a>
-            </div>
-        </form>
+            <el-form-item>
+                <el-button type="success" native-type="submit">{{.i18n.Tr "submit"}}</el-button>
+                <el-button type="default" @click="onCancel">{{.i18n.Tr "cancel"}}</el-button>
+            </el-form-item>
+        </el-form>
 
     </div>
 </script>
 
 <script type="text/x-template" id="user-info-template">
-    <div class="animated fadeIn">
-        <h4>{{.i18n.Tr "user_info"}}</h4>
-        <hr>
-        <form>
-            <div class="form-group">
-                <label for="user_name">{{.i18n.Tr "username"}}</label>
-                <input id="user_name" class="form-control" value="{{.SignedUser.UserName}}" autofocus required disabled="true">
-            </div>
-            <div class="form-group">
-                <label for="user_firstname">{{.i18n.Tr "firstname"}}</label>
-                <input id="user_firstname" class="form-control" value="{{.SignedUser.FirstName}}" autofocus required disabled="true">
-            </div>
-            <div class="form-group">
-                <label for="user_lastname">{{.i18n.Tr "lastname"}}</label>
-                <input id="user_lastname" class="form-control" value="{{.SignedUser.LastName}}" autofocus required disabled="true">
-            </div>
-            <div class="form-group">
-                <label for="user_group">{{.i18n.Tr "groupname"}}</label>
-                <input id="user_group" class="form-control" value="{{.SignedUser.Parent}}" autofocus required disabled="true">
-            </div>
+    <div>
+        <h2>{{.i18n.Tr "user_info"}}</h2>
+        <el-divider></el-divider>
+        <el-form label-width="80px">
+            <el-form-item label="{{.i18n.Tr "username"}}">
+                <el-input id="user_name" class="form-control" value="{{.SignedUser.UserName}}" autofocus required disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="{{.i18n.Tr "firstname"}}">
+                <el-input id="user_firstname" class="form-control" value="{{.SignedUser.FirstName}}" autofocus required disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="{{.i18n.Tr "lastname"}}">
+                <el-input id="user_lastname" class="form-control" value="{{.SignedUser.LastName}}" autofocus required disabled="true"></el-input>
+            </el-form-item>
+            <el-form-item label="{{.i18n.Tr "groupname"}}">
+                <el-input id="user_group" class="form-control" value="{{.SignedUser.Parent}}" autofocus required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="email">{{.i18n.Tr "email"}}</label>
-                <input id="email" class="form-control" type="email" :value="email" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "email"}}">
+                <el-input id="email" class="form-control" type="email" :value="email" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="mobile">{{.i18n.Tr "mobile"}}</label>
-                <input id="mobile" class="form-control" type="number" value="{{.SignedUser.Mobile}}" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "mobile"}}">
+                <el-input id="mobile" class="form-control" type="number" value="{{.SignedUser.Mobile}}" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="password">{{.i18n.Tr "password"}}</label>
-                <input id="password" class="form-control" type="password" value="{{.SignedUser.Passwd}}" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "password"}}">
+                <el-input id="password" class="form-control" type="password" value="{{.SignedUser.Passwd}}" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="vtime">{{.i18n.Tr "vtime"}}</label>
-                <input id="vtime" class="form-control" :value="vtime" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "vtime"}}">
+                <el-input id="vtime" class="form-control" :value="vtime" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="isactive">{{.i18n.Tr "isactive"}}</label>
-                <input type="checkbox" id="isactive" checked="{{.SignedUser.IsActive}}" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "isactive"}}">
+                <el-input type="checkbox" id="isactive" checked="{{.SignedUser.IsActive}}" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="isadmin">{{.i18n.Tr "isadmin"}}</label>
-                <input type="checkbox" checked="{{.SignedUser.IsAdmin}}" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "isadmin"}}">
+                <el-input type="checkbox" checked="{{.SignedUser.IsAdmin}}" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group button-bars">
-                <a href="javascript:void(0);" class="btn btn-sm btn-success"  @click="update">{{.i18n.Tr "userinfo_update"}}</button>
-            </div>
-        </form>
+            <el-form-item>
+                <el-button type="success"  @click="update">{{.i18n.Tr "userinfo_update"}}</el-button>
+            </el-form-item>
+        </el-form>
 
     </div>
 </script>
 
 <script type="text/x-template" id="company-update-template">
     <div class="animated fadeIn">
-        <h4>{{.i18n.Tr "company_info"}}</h4>
-        <hr>
-        <form>
-            <div class="form-group">
-                <label for="name">{{.i18n.Tr "company_name"}}</label>
-                <input id="name" class="form-control"  v-model="company.name" autofocus required>
-            </div>
-            <div class="form-group">
-                <label for="fullname">{{.i18n.Tr "company_fullname"}}</label>
-                <input id="fullname" class="form-control" v-model="company.fullname" autofocus required>
-            </div>
+        <h2>{{.i18n.Tr "company_info"}}</h2>
+        <el-divider></el-divider>
+        
+        <el-form>
+            <el-form-item label="{{.i18n.Tr "company_name"}}">
+                <el-input  v-model="company.name" autofocus required></el-input>
+            </el-form-item>
+            <el-form-item label="{{.i18n.Tr "company_fullname"}}">
+                <el-input v-model="company.fullname" autofocus required></el-input>
+            </el-form-item>
 
             <!--div class="form-group">
                 <label for="logo">{{.i18n.Tr "company_logo"}}</label>
                 <img id="logo">
             </div-->
 
-            <div class="form-group">
-                <label for="ospace">{{.i18n.Tr "company_ospace"}}</label>
-                <input id="ospace" class="form-control" v-model="company.ospace" required disabled="true">
-            </div>
+            <el-form-item label="{{.i18n.Tr "company_ospace"}}">
+                <el-input v-model="company.ospace" required disabled="true"></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="title">{{.i18n.Tr "company_title"}}</label>
-                <input id="title" class="form-control" v-model="company.title" required>
-            </div>
+            <el-form-item label="{{.i18n.Tr "company_title"}}">
+                <el-input v-model="company.title" required></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="web">{{.i18n.Tr "company_web"}}</label>
-                <input id="web" class="form-control" v-model="company.web" required>
-            </div>
+            <el-form-item label="{{.i18n.Tr "company_web"}}">
+                <el-input v-model="company.web" required></el-input>
+            </el-form-item>
 
-            <div class="form-group">
-                <label for="config">{{.i18n.Tr "company_license"}}</label>
-                <div class="input-group">
-                    <input id="config" class="form-control" :value="license" required disabled/>
-                    <span class="input-group-btn">
-                        <button class="btn btn-default fileinput-button" title="导入License">
-                            <input type="file" name="loadfile" @change="importLicense">
-                        </button>
-                    </span>
-                </div>
-            </div>
+            <el-form-item label="{{.i18n.Tr "company_license"}}">
+                <el-input id="config" class="form-control" :value="license" required disabled>
+                    <el-button type="success" slot="append">
+                        导入
+                        <el-input type="file" name="loadfile" @change="importLicense"></el-input>
+                    </el-button>
+                </el-input>
+            </el-form-item>
 
-            <div class="form-group button-bars">
-                <a href="javascript:void(0);" class="btn btn-sm btn-success" @click="update">{{.i18n.Tr "submit"}}</a>
-                <a href="javascript:void(0);" class="btn btn-sm btn-default" @click="cancel">{{.i18n.Tr "cancel"}}</a>
-            </div>
-        </form>
+            <el-form-item>
+                <el-button type="success" @click="update">{{.i18n.Tr "submit"}}</el-button>
+                <el-button type="default" @click="cancel">{{.i18n.Tr "cancel"}}</el-button>
+            </el-form-item>
+
+        </el-form>
 
     </div>
 </script>

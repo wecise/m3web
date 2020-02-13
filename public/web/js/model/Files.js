@@ -35,16 +35,14 @@ class Files {
                         id: String
                     },
                     delimiters: ['${', '}'],
-                    template: `<fs-tree-component :id="id+'file-fs-tree'" :root="root" :checkEnable="false" :contextMenu="null"></fs-tree-component>`,
+                    template: `<fs-editor-tree-component :id="id+'file-fs-tree'" :root="root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>`,
                     data() {
                         return {
                             root: "/",
                         }
                     },
-                    mounted: function() {
-                        let self = this;
-
-                        self.$nextTick(function() {
+                    mounted() {
+                        this.$nextTick(function() {
 
                         })
                     }
@@ -245,10 +243,10 @@ class Files {
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 85px);background:#ffffff;">
                                     <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" class="split" ref="leftView">
-                                        <api-view-tree id="api-view-tree"></api-view-tree>
+                                        <api-view-tree id="api-view-tree" ref="treeRef"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;" class="split" ref="mainView">
-                                        <api-view-console id="api-view-console" ref="viewConsole"></api-view-console>
+                                        <api-view-console id="api-view-console" ref="viewRef"></api-view-console>
                                     </el-main>
                                 </el-container>`,
                     data: {

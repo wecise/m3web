@@ -190,72 +190,63 @@ class Search {
                     props:{
                         model: Object
                     },
+                    watch: {
+                        'model.rows':{
+                            handler:function(val,oldVal){
+                                if(!_.isEmpty(val)){
+                                    this.showContent = true;
+                                } else {
+                                    this.showContent = false;
+                                }
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
                     data(){
                         return {
                             showContent: true
                         }
+                    },
+                    mounted(){
+                        console.log(1,this.model)
                     },
                     template:   `<el-container id="search-event" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-button type="text" icon="fas fa-exclamation-triangle" @click="showContent=!showContent"> 事件</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#event-table" aria-controls="event-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#event-list" aria-controls="event-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="event-table">
-                                                    <el-table-component :columns="model.columns" 
-                                                                            :rows="model.rows"
-                                                                            forward="event"></el-table-component>
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns"  
+                                                                    :rows="model.rows" forward="event">
+                                                </el-table-component>
+                                            </el-tab-pane>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                    <i class="el-icon-tickets"></i>
+                                                </span>
+                                                <div v-for="item in model.rows" v-if="item">
+                                                    <h6>
+                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                    </h6>
+                                                    <p>
+                                                        <el-button :style="'background:'+mx.global.register.event.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.event.severity[item.severity][1]}#</el-button>
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                    </p>
+                                                    <p>#{item.msg}#</p>
+                                                    <el-divider></el-divider>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="event-list">
-                                                    <span v-for="item in model.rows" v-if="item">
-                                                        <h6><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</a></h6>
-                                                        <span class="text-muted">
-                                                            <span v-if="item.severity == '5'">
-                                                            <kbd style="color:#FFFFFF;background-color:#FF0000;">Critical</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '4' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFA500;">Major</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '3' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFD700;">Minor</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '2' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#0000FF;">Warning</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '1' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#800080;">Indeterminate</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '0' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#008000;">Clear</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else>
-                                                            <kbd style="color:#FFFFFF;background-color:#808080;">Unknown</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#  &nbsp;&nbsp;&nbsp;&nbsp;							
-                                                            <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
-                                                        </span>
-                                                        <p>#{item.msg}#</p>
-                                                        <hr/>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`
                 });
@@ -267,62 +258,37 @@ class Search {
                                         <el-button type="text" icon="fas fa-exclamation-triangle" @click="showContent=!showContent"> Syslog</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#syslog-table" aria-controls="syslog-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#syslog-list" aria-controls="syslog-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="syslog-table">
-                                                    <el-table-component :columns="model.columns" 
-                                                                            :data="model.rows"
-                                                                            forward="event"></el-table-component>
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
+                                                                    :data="model.rows"
+                                                                    forward="event"></el-table-component>
+                                            </el-tab-pane>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                    <i class="el-icon-tickets"></i>
+                                                </span>
+                                                <div v-for="item in model.rows" v-if="item">
+                                                    <h6>
+                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                    </h6>
+                                                    <p>
+                                                        <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                    </p>
+                                                    <p>#{item.msg}#</p>
+                                                    <el-divider></el-divider>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="syslog-list">
-                                                    <span v-for="item in model.rows" v-if="item">
-                                                        <h6><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</a></h6>
-                                                        <span class="text-muted">
-                                                            <span v-if="item.severity == '5'">
-                                                            <kbd style="color:#FFFFFF;background-color:#FF0000;">Critical</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '4' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFA500;">Major</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '3' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFD700;">Minor</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '2' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#0000FF;">Warning</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '1' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#800080;">Indeterminate</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '0' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#008000;">Clear</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else>
-                                                            <kbd style="color:#FFFFFF;background-color:#808080;">Unknown</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#  &nbsp;&nbsp;&nbsp;&nbsp;							
-                                                            <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
-                                                        </span>
-                                                        <p>#{item.msg}#</p>
-                                                        <hr/>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -402,68 +368,37 @@ class Search {
                                         <el-button type="text" icon="fas fa-file-code" @click="showContent=!showContent"> 日志</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#log-table" aria-controls="log-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#log-list" aria-controls="log-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="log-table">
-                                                    <el-table-component :columns="model.columns" 
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
                                                                             :rows="model.rows"
                                                                             forward="log"></el-table-component>
+                                            </el-tab-pane>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                    <i class="el-icon-tickets"></i>
+                                                </span>
+                                                <div v-for="item in model.rows" v-if="item">
+                                                    <h6>
+                                                        <el-link :href="'/janesware/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                    </h6>
+                                                    <p>
+                                                        <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                    </p>
+                                                    <p>#{item.msg}#</p>
+                                                    <el-divider></el-divider>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="log-list">
-                                                    
-                                                    <span v-for="item in model.rows" v-if="item">
-                        
-                                                        <h5><a :href="'/janesware/log?cond='+item.id+'&preset='+item.preset" target="_blank"><ins>#{item.host}#</ins></a></h5>
-                        
-                                                        <span class="text-muted">
-                                                            <span v-if="item.severity == '5'">
-                                                            <kbd style="color:#FFFFFF;background-color:#FF0000;">Critical</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '4' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFA500;">Major</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '3' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFD700;">Minor</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '2' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#0000FF;">Warning</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '1' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#800080;">Indeterminate</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '0' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#008000;">Clear</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else>
-                                                            <kbd style="color:#FFFFFF;background-color:#808080;">Unknown</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <i class="fa fa-time"></i> 时间：#{ new Date(item.vtime).toLocaleString() }#  &nbsp;&nbsp;&nbsp;&nbsp;
-                                                            <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
-                                                        </span>
-                                                        <p>
-                                                            #{item.msg}#
-                                                        </p>
-                        
-                                                        <hr/>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -483,68 +418,37 @@ class Search {
                                         <el-button type="text" icon="fab fa-fa-file-code" @click="showContent=!showContent"> 原始报文</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#raw-table" aria-controls="raw-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#raw-list" aria-controls="raw-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="raw-table">
-                                                    <el-table-component :columns="model.columns" 
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
                                                                             :rows="model.rows"
                                                                             forward="log"></el-table-component>
+                                            </el-tab-pane>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                    <i class="el-icon-tickets"></i>
+                                                </span>
+                                                <div v-for="item in model.rows" v-if="item">
+                                                    <h6>
+                                                        <el-link :href="'/janesware/log?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                    </h6>
+                                                    <p>
+                                                        <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                    </p>
+                                                    <p>
+                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                    </p>
+                                                    <p>#{item.msg}#</p>
+                                                    <el-divider></el-divider>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="raw-list">
-                                                    
-                                                    <span v-for="item in model.rows" v-if="item">
-                        
-                                                        <h5><a :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank"><ins>#{item.host}#</ins></a></h5>
-                        
-                                                        <span class="text-muted">
-                                                            <span v-if="item.severity == '5'">
-                                                            <kbd style="color:#FFFFFF;background-color:#FF0000;">Critical</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '4' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFA500;">Major</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '3' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#FFD700;">Minor</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '2' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#0000FF;">Warning</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '1' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#800080;">Indeterminate</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else-if="item.severity === '0' ">
-                                                            <kbd style="color:#FFFFFF;background-color:#008000;">Clear</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <span v-else>
-                                                            <kbd style="color:#FFFFFF;background-color:#808080;">Unknown</kbd>&nbsp;&nbsp;&nbsp;&nbsp;
-                                                            </span>
-                                                            <i class="fa fa-time"></i> 时间：#{ new Date(item.vtime).toLocaleString() }#  &nbsp;&nbsp;&nbsp;&nbsp;
-                                                            <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
-                                                        </span>
-                                                        <p>
-                                                            #{item.msg}#
-                                                        </p>
-                        
-                                                        <hr/>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -565,33 +469,16 @@ class Search {
                                     </el-header> 
                                         
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#tickets-table" aria-controls="tickets-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#tickets-list" aria-controls="tickets-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="tickets-table">
-                                                    
-                                                    <el-table-component :columns="model.columns" 
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
                                                                             :rows="model.rows">
-                                                    </el-table-component>
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
+                                                </el-table-component>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -611,34 +498,16 @@ class Search {
                                         <el-button type="text" icon="fab fa-book" @click="showContent=!showContent"> 变更单</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                            
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#change-table" aria-controls="change-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#change-list" aria-controls="change-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="change-table">
-                                                    
-                                                        <el-table-component :columns="model.columns" 
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
                                                                                 :rows="model.rows">
-                                                        </el-table-component>
-                                                    
-                                                </div>
-                                            </div>
-                                        </div>
-
+                                                </el-table-component>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -680,33 +549,29 @@ class Search {
                                         <el-button type="text" icon="fas fa-book" @click="showContent=!showContent"> 图</el-button>
                                     </el-header>        
                                     <el-main class="animated fadeIn" style="display:flex;flex-wrap:wrap;" v-if="showContent">
-                                        <div :class="'widget widget-stats animated fadeIn bg-info ' + item.ftype" v-for="(item,index) in model.rows" v-if="model.rows">
-                                            <div @click="forwardCreative('run',item)">
-                                                <div class="stats-title">
-                                                    <i class="fa fa-braille fa-fw"></i>
-                                                    <span class="fs-name" :data-info="JSON.stringify(item)">#{ item | pickName}#</span>
-                                                </div>
-                
-                                                <div class="stats-subtitle">
-                                                    #{item | pickRemark}#
-                                                </div>
-                
-                                                <div class="media">
-                                                    <div class="media-left">
-                                                        <img class="media-object" :src="item | pickIcon">
-                                                    </div>
-                                                    <div class="media-body">
-                                                        <p>项目作者： #{item.username}#</p>
-                                                        <p>更新日期： #{ moment(item.vtime).format("L") }#</p>
-                                                        <p>更新时间： #{ moment(item.vtime).format("LTS") }#</p>
-                                                        <p class="status">
-                                                            项目状态： 就绪
-                                                        </p>
-                                                    </div>
-                                                </div>
-                
+                                        <el-button type="default" 
+                                            style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @click="forwardCreative('run',item)" 
+                                            v-for="item in model.rows" v-if="model.rows">
+                                            <!--div style="position: relative;right: -100px;">    
+                                                <el-dropdown trigger="hover" placement="top-start">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div-->
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
                                             </div>
-                                        </div>
+                                        </el-button>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -797,32 +662,32 @@ class Search {
                                     <el-header style="height:30px;line-height:30px;">
                                         <el-button type="text" icon="fas fa-book" @click="showContent=!showContent"> 文件</el-button>
                                     </el-header>    
-                                    <el-main id="list" v-if="showContent" class="animated fadeIn">
-                                        <ul>
-                                            <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-                                                    :id="'fs_node_'+item.id"
-                                                    @mouseover="mouseOver(item)"
-                                                    @mouseout="mouseOut(item)"
-                                                    style="cursor: pointer;"
-                                                    :title="item.name"
-                                                    v-for="item in model.rows" v-if="model.rows">
-                                                <div class="widget widget-stats bg-silver animated fadeIn" :id="'fs_node_widget_'+item.id">
-                                                    <div class="stats-info" @dblclick="openIt(item, item.parent+'/'+item.name);" >
-                                                        <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=download&issys=${window.SignedUser_IsAdmin}';"></p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
-                                                            <p><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
-                                                            <p><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
-                                                            <p><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
-                                                        </a>
-                                                    </div>
-                                                    <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                        <i class="fa fa-bars"></i>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                    <el-main id="list" v-if="showContent" style="flex-flow: wrap;display: flex;align-content: flex-start;">
+                                        <el-button type="default" 
+                                            style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @mouseover.native="mouseOver(item)"
+                                            @mouseout.native="mouseOut(item)"
+                                            @click="openIt(item)" 
+                                            v-for="item in model.rows" v-if="model.rows">
+                                            <!--div style="position: relative;right: -100px;">    
+                                                <el-dropdown trigger="hover" placement="top-start">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div-->
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                            </div>
+                                        </el-button>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -968,14 +833,28 @@ class Search {
                                         <el-button type="text" icon="el-icon-s-order" @click="showContent=!showContent"> 实体</el-button>
                                     </el-header>
                                     <el-main style="display:flex;flex-flow: wrap;" class="animated fadeIn" v-if="showContent">
-                                        <el-card body-style="{ padding: '5px'}" v-for="item in model.rows">
-                                            <el-image style="width: 80px; height: 80px; marging:10px;" :src="item | pickIcon" fit="contain"></el-image>
-                                            <div class="bottom clearfix">
-                                                <el-button type="text" @click="forward(item)">
-                                                    #{item.name}#
-                                                </el-button>
+                                        <el-button type="default" 
+                                            style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @click="forward(item)"
+                                            v-for="item in model.rows" v-if="model.rows">
+                                            <!--div style="position: relative;right: -100px;">    
+                                                <el-dropdown trigger="hover" placement="top-start">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div-->
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">ID：#{item.id}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建时间：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <!--p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p-->
                                             </div>
-                                            </el-card>
+                                        </el-button>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -1142,7 +1021,7 @@ class Search {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/devops/:",
+                            class: "#/matrix/:",
                             // 指定api
                             api: {parent: "search",name: "searchByTerm.js"},
                             // 其它设置

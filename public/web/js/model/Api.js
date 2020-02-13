@@ -244,10 +244,10 @@ class Api {
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
                                     <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" ref="leftView">
-                                        <api-view-tree id="api-view-tree"></api-view-tree>
+                                        <api-view-tree id="api-view-tree" ref="treeRef"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">
-                                        <api-view-console id="api-view-console"></api-view-console>
+                                        <api-view-console id="api-view-console" ref="viewRef"></api-view-console>
                                     </el-main>
                                 </el-container>`,
                     data: {

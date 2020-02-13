@@ -46,7 +46,7 @@ class Home extends Matrix {
                                                     <el-button type="primary"
                                                         class="animated flipInX" 
                                                         style="max-width: 120px;width: 120px;max-height:90px;height:90px;margin: 5px;border-radius: 10px!important;background: rgb(36, 44, 70);border:unset;">
-                                                        <p style="display: flex;flex-wrap: wrap;max-height:50px;height: 50px;">
+                                                        <p style="display: flex;flex-wrap: wrap;max-height:40px;height: 40px;margin:5px 0px;">
                                                             <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="folder in item.groups"></el-image>
                                                         </p>
                                                         <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.title}#（#{item.groups.length}#） <!--i class="el-icon-menu el-icon--right"></i--></p>
@@ -66,7 +66,7 @@ class Home extends Matrix {
                                                                     @click="onCommand(subItem)"
                                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                                     <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;"></el-image>
-                                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">
                                                                         #{subItem.cnname}#
                                                                         <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
                                                                             <span class="el-dropdown-link">
@@ -96,7 +96,7 @@ class Home extends Matrix {
                                                     @click="onCommand(item)"
                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                     <el-image style="width:40px;margin:5px;" :src="item.icon | pickIcon"></el-image>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.cnname}#</p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">#{item.cnname}#</p>
                                                     <el-dropdown @command="onAppCommand" trigger="hover" placement="top-start" style="position: absolute;right: 5px;top: 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
@@ -154,7 +154,7 @@ class Home extends Matrix {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/devops/:",
+                            class: "#/matrix/:",
                             // 指定api
                             api: {parent: "search",name: "searchByTerm.js"},
                             // 其它设置

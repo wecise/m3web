@@ -374,12 +374,10 @@ class Omdb{
             },
             template:   `<div :class="'log-console '+ theme" style="height:100%;">
                             <div class="logToolBar">
-                                <div class="btn-group" role="group" aria-label="...">
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary toggle" @click="toggleTheme" title="切换主题" data-tooltip="tooltip"><i class="fas fa-sun"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary copy" @click="copyIt" title="复制" data-tooltip="tooltip"><i class="fa fa-copy"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary clear" @click="clearIt" title="清空" data-tooltip="tooltip"><i class="fa fa-trash"></i></a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary debug" @click="debugIt" title="调试" data-tooltip="tooltip"><i class="fa fa-desktop"></i></a>
-                                </div>
+                                <el-button type="text" class="toggle" @click="toggleTheme" title="切换主题" ><i class="fas fa-sun"></i></el-button>
+                                <el-button type="text" class="copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></el-button>
+                                <el-button type="text" class="clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></el-button>
+                                <el-button type="text" class="debug" @click="debugIt" title="调试"><i class="fa fa-desktop"></i></el-button>
                             </div>
                             <div contenteditable="true" :class="'log-console-content '+ theme" v-if="!_.isEmpty(log.msg)">
                                 <p v-for="item in log.msg"> [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>] <span v-if="_.isEmpty(item[2].content)">#{item[2].short}#</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">#{item[2].short}#</a><span class="collapse animated fadeInUp" :id="item[2].id">#{item[2].content}#</span></span>
@@ -1628,7 +1626,7 @@ class Omdb{
                                     <el-aside style="overflow:hidden;height:100%;" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
-                                                <h4 style="width:70%;font-size:12px;">
+                                                <h4 style="width:70%;font-size:12px;margin:0px;">
                                                     <i class="fas fa-cubes"></i> 对象管理 [${window.COMPANY_OSPACE}]
                                                 </h4>
                                                 <el-dropdown style="width: 50%;text-align: right;font-size:12px;">

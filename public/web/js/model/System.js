@@ -724,19 +724,19 @@ class System {
 									<el-header style="text-align: right; font-size: 12px;height:30px;line-height:30px;">
 										<span style="float:right;">
 											<el-tooltip content="刷新列表">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="initData"><i class="fas fa-sync-alt fa-fw"></i> 刷新</a>
+												<el-button type="text" icon="el-icon-refresh" @click="initData">刷新</el-button>
 											</el-tooltip>
 											<el-tooltip content="新增公司信息">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyNew" ><i class="fas fa-plus fa-fw"></i> 新增</a>
+												<el-button type="text" icon="el-icon-plus" @click="companyNew" >新增</el-button>
 											</el-tooltip>
 											<el-tooltip content="更新公司信息">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyUpdate" ><i class="fas fa-plus fa-sync-alt"></i> 编辑</a>
+												<el-button type="text" icon="el-icon-edit" @click="companyUpdate" >编辑</el-button>
 											</el-tooltip>
 											<el-tooltip content="删除公司信息">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="companyDelete" ><i class="fas fa-trash fa-fw"></i> 删除</a>
+												<el-button type="text" icon="el-icon-delete" @click="companyDelete" >删除</el-button>
 											</el-tooltip>
 											<el-tooltip content="更新文件系统">
-												<a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="updateFs"><i class="fas fa-cloud-upload-alt fa-fw"></i> 更新</a>
+												<el-button type="text" icon="el-icon-files" @click="updateFs">更新</el-button>
 											</el-tooltip>
 										</span>
 									</el-header>
@@ -907,7 +907,7 @@ class System {
 														<el-button type="success" icon="fas fa-save fa-fw" @click="companySave">更新</el-button>
 													</el-tooltip>
 													<el-tooltip content="取消">
-														<el-button type="default" icon="fas fa-plus fa-fw" @click="closeMe" >取消</el-button>
+														<el-button type="default" @click="closeMe" >取消</el-button>
 													</el-tooltip>
 												</el-footer>
 											</el-container>`,
@@ -1045,7 +1045,7 @@ class System {
 														<el-button type="success" icon="fas fa-save fa-fw" @click="companySave">创建</el-button>
 													</el-tooltip>
 													<el-tooltip content="取消">
-														<el-button type="default" icon="fas fa-plus fa-fw" @click="closeMe" >取消</el-button>
+														<el-button type="default" @click="closeMe" >取消</el-button>
 													</el-tooltip>
 												</el-footer>
 											</el-container>`,
@@ -1900,58 +1900,54 @@ class System {
 					template: 	`<el-tabs type="border-card">
 									<el-tab-pane>
 										<span slot="label"><i class="el-icon-date"></i> 应用</span>
-										<div class="block__list_words">      
-											<transition-group id="ul-li" type="transition" tag="ul">
-												<li class="col-lg-3" v-for="(item,index) in model.list" :key="index">
-													<div class="widget widget-stats bg-blue">
-														<div class="stats-icon drag-handle"><img :src="item.icon | pickIcon" style="width:48px;"></img></div>
-														<div class="stats-info">
-															<h4>
-																<a href="#" data-toggle="collapse" :href="'#collapse'+item.name" aria-expanded="false" :aria-controls="'collapse'+item.name">
-																#{item.cnname}#
-																</a>
-															</h4>
-														</div>
-														<div class="stats-link">
-															<a href="javascript:void(0)" @click="remove(item.name)" class="btn btn-xs"><i class="fas fa-trash fa-fw" style="color:#efefef;"></i></a>
-														</div>
-													</div>
-													<div class="collapse block__list_collapse" :id="'collapse'+item.name">
-														<el-form ref="form" :model="item" label-width="80px">
-															<el-form-item label="中文名">
-																<el-input v-model="item.cnname"></el-input>
-															</el-form-item>
-															<el-form-item label="英文名称">
-																<el-input v-model="item.enname"></el-input>
-															</el-form-item>
-															<el-form-item label="Url">
-																<el-input v-model="item.url">
-																	
-																</el-input>
-															</el-form-item>
-															<el-form-item label="图标">
-																<el-input v-model="item.icon"></el-input>
-															</el-form-item>
-															<el-form-item label="Target">
-																<el-radio-group v-model="item.target">
-																	<el-radio label="_blank">打开新窗口</el-radio>
-																	<el-radio label="_parent">当前窗口打开</el-radio>
-																</el-radio-group>
-															</el-form-item>
-															<el-form-item label="分组">
-																<el-radio-group v-model="item.groups.group">
-																	#{item.groups.group}#
-																	<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
-																</el-radio-group>
-															</el-form-item>
-															<el-form-item>
-																<el-button type="primary" @click="update(item)">发布</el-button>
-																<el-button type="defult" @click="hide(item.name)">取消</el-button>
-															</el-form-item>
-														</el-form> 
-													</div>
-												</li>
-											</transition-group>
+										<div class="block__list_words">  
+											<el-button type="default" 
+												style="width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(125, 204, 252);"
+												v-for="(item,index) in model.list"
+												:key="index">
+												<el-image style="width:64px;height:64px;margin:5px;" :src="item.icon | pickIcon"></el-image>
+												<p style="color:#fff;">#{item.cnname}#</p>
+												<p class="tools-manage">
+													<el-collapse accordion>
+														<el-collapse-item>
+															<div style="padding:10px;">
+																<el-form ref="form" :model="item" label-width="80px" >
+																	<el-form-item label="中文名">
+																		<el-input v-model="item.cnname"></el-input>
+																	</el-form-item>
+																	<el-form-item label="英文名称">
+																		<el-input v-model="item.enname"></el-input>
+																	</el-form-item>
+																	<el-form-item label="Url">
+																		<el-input v-model="item.url">
+																			
+																		</el-input>
+																	</el-form-item>
+																	<el-form-item label="图标">
+																		<el-input v-model="item.icon"></el-input>
+																	</el-form-item>
+																	<el-form-item label="Target">
+																		<el-radio-group v-model="item.target">
+																			<el-radio label="_blank">打开新窗口</el-radio>
+																			<el-radio label="_parent">当前窗口打开</el-radio>
+																		</el-radio-group>
+																	</el-form-item>
+																	<el-form-item label="分组">
+																		<el-radio-group v-model="item.groups.group">
+																			#{item.groups.group}#
+																			<el-radio :label="item.name" v-for="item in model.groups">#{item.title}#</el-radio>
+																		</el-radio-group>
+																	</el-form-item>
+																	<el-form-item>
+																		<el-button type="primary" @click="update(item)">发布</el-button>
+																		<el-button type="danger" @click="remove(item.name)">删除</el-button>
+																	</el-form-item>
+																</el-form> 
+															</div>
+														</el-collapse-item>
+													</el-collapse>
+												</p>
+											</el-button>  
 										</div>
 									</el-tab-pane>
 									<el-tab-pane label="tools-list">

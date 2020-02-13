@@ -1,5 +1,60 @@
 <style>
+	body{
+		margin:0px;
+		color:#333;
+	}
+
+	/* system app */
+	.tools-manage .el-collapse-item .el-collapse-item__header{
+		background: transparent;
+		border:unset;
+	}
+
+	.tools-manage .el-collapse-item .el-collapse-item__header > .el-collapse-item__arrow.el-icon-arrow-right{
+		color:#fff;
+	}
+
 	/* sidebar */
+	.page-sidebar-minified .sidebar {
+		width: 60px;
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		z-index: 10;
+	}
+	.sidebar {
+		width: 220px;
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		padding-top: 54px;
+		background: #242c46;
+		z-index: 10;
+		-webkit-transform: translateZ(0);
+	}
+
+	.topbar-el-menu.el-menu.el-menu--horizontal {
+		border-bottom: unset;
+		background: #242c46;
+		height:100%;
+	}
+	.topbar-el-menu.el-menu.el-menu--horizontal >.el-menu-item {
+		height: 30px;
+		line-height: 30px;
+	}
+	.topbar-el-menu.el-menu.el-menu--horizontal>.el-submenu {
+		float: right;
+	}
+	.topbar-el-menu.el-menu.el-menu--horizontal >.el-submenu .el-submenu__title {
+		height: 50px;
+		line-height: 50px;
+		border-bottom: unset;
+		color: #ffffff;
+	}
+
+
 	.sidebar-container .el-input__inner{
 		border:unset;
 	}

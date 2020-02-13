@@ -32,8 +32,8 @@
 	<link href="{{AppSubUrl}}/web/vendor/animate/animate.css" rel="stylesheet" >
 
 	<!-- Bootstrap core CSS -->
-	<link href="{{AppSubUrl}}/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
-	<script src="{{AppSubUrl}}/web/css/dist/js/bootstrap.min.js"></script>
+	<!-- <link href="{{AppSubUrl}}/web/css/dist/css/bootstrap_wecise.css" rel="stylesheet">
+	<script src="{{AppSubUrl}}/web/css/dist/js/bootstrap.min.js"></script> -->
 
 	<!--VUE Core JS-->
 	<script src="{{AppSubUrl}}/web/vendor/vue/2.6.10/dist/vue.min.js"></script>
@@ -42,9 +42,6 @@
 	<!-- Element -->
 	<script src="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/index.js"></script>
 	<link href="{{AppSubUrl}}/web/vendor/element/2.13.0/dist/theme-chalk/index.css" type="text/css" rel="stylesheet" />
-
-	<!-- Color Theme core CSS -->
-	<link href="{{AppSubUrl}}/web/css/color/style.min.css" rel="stylesheet">	
 
 	<!--lodash JS-->
 	<script src="{{AppSubUrl}}/web/vendor/lodash/dist/lodash.min.js"></script>
@@ -96,6 +93,7 @@
 	
 	<script>
 		try{
+			window.MATRIX_TITLE = "{{.title}}";
 			window.MATRIX_LANG = "{{.Lang}}";
 			moment.locale(window.MATRIX_LANG);
 			window.SignedUser_Remark = "{{.SignedUser.Remark}}";
@@ -113,6 +111,7 @@
 		} catch(err){
 
 		}
+		console.log(window.MATRIX_TITLE)
 	</script>
 
 	<!-- App JS-->
@@ -200,133 +199,7 @@
 	
 	<div id="page-container" class="fade page-sidebar-minified page-header-fixed in">
 			
-	<header id="header" class="header navbar navbar-default navbar-fixed-top" style="display:none;">
-		
-		<nav class="container-fluid" style="margin:0px;padding:0px 10px 0px 0px;">
-			
-			<div class="navbar-header">
-				<a class="navbar-brand animated bounceIn" href="{{AppSubUrl}}/">
-					<img id="company_logo" src="">
-					<span>{{.title}}</span>
-				</a>
-			</div>
-			<div class="navbar-collapse collapse">
-				<ul class="nav navbar-nav navbar-right">
-
-					<li>
-						<div id="search-bar"></div>
-					</li>
-
-				{{if .IsSigned}}
-
-				<li>
-					<div id="ai-robot"></div>
-				</li>				    
-
-				{{else}}
-					<li>
-						<a class="{{if .PageIsInfo}} active{{end}}" href="{{AppSubUrl}}/"><i class="icon-comment"></i></a>
-					</li>
-				{{end}}
-
-
-				{{if .IsSigned}}
-
-					<li class="dropdown navbar-user">
-
-						<a href="#" class="dropdown-toggle item" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-							<i class="fa fa-user"></i> {{.SignedUser.UserName}}
-						</a>
-
-						<ul class="dropdown-menu animated fadeIn">
-
-							<li>
-								<a href="{{AppSubUrl}}/janesware/user">
-									<i class="fa fa-user"></i> {{.i18n.Tr "your_profile"}}
-								</a>
-							</li>
-
-							<li class="divider"></li>
-
-							{{if .IsAdmin}}
-							
-								<li>
-									<a class="{{if .PageIsAdmin}}active{{end}}" href="/janesware/system">
-										<i class="fa fa-cogs"></i> {{.i18n.Tr "system"}}
-									</a>
-								</li>
-
-							{{end}}
-
-							<li>
-								<a target="_blank" href="/janesware/files">
-									<i class="fa fa-list-alt"></i> {{.i18n.Tr "files"}}
-								</a>
-							</li>
-
-
-							<li>
-								<a target="_parent" href="javascript:sideBar.appAsHome({url:'/home'})">
-									<i class="fa fa-home"></i> {{.i18n.Tr "defaulthome"}}
-								</a>
-							</li>
-
-
-							<li class="divider"></li>
-
-							<!-- <li>
-								<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('bjzdgt')">
-									<i class="fas fa-sun"></i> 亮色
-								</a>
-							</li>
-
-							<li>
-								<a target="_blank" href="javascript:void(0);" onclick="mx.toggleTheme('matrix')">
-									<i class="fas fa-sun" style="color:#000;"></i> 深色
-								</a>
-							</li> -->
-
-
-							<li>
-								<a target="_blank" href="javascript:void(0);" onclick="mx.fullScreen();">
-									<i class="fa fa-arrows-alt" aria-hidden="true"></i> 全屏切换
-								</a>
-							</li>
-
-							<li class="divider"></li>
-
-							<li>
-								<a href="{{AppSubUrl}}/user/logout/{{.company}}">
-									<i class="fa fa-sign-out-alt"></i> {{.i18n.Tr "sign_out"}}
-								</a>
-							</li>
-						</ul>
-					</li>
-
-				{{else}}
-					<li>
-						<a class="item" target="_blank" href="http://golang.org/" rel="noreferrer">{{.i18n.Tr "help"}}</a>
-					</li>
-
-					{{if .ShowRegistrationButton}}
-						<li>
-							<a class="item{{if .PageIsSignUp}} active{{end}}" href="{{AppSubUrl}}/user/sign_up">
-								<i class="icon octicon octicon-person-add"></i> {{.i18n.Tr "register"}}
-							</a>
-						</li>
-					{{end}}
-					<li>
-						<a class="item{{if .PageIsSignIn}} active{{end}}" href="{{AppSubUrl}}/user/login">
-							<i class="icon octicon octicon-sign-in"></i> {{.i18n.Tr "sign_in"}}
-						</a>
-					</li>
-
-				{{end}}
-
-			</ul>
-			</div>
-		</nav>
-	</header>
+	<header id="header" style="display:none;"></header>
 	
 	<aside id="aside">
 		<div id="sidebar" class="sidebar animated fadeInLeft" style="display:none;">

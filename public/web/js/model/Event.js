@@ -2440,7 +2440,7 @@ class Event {
                                     "right": "25%"
                                 });
                                 $("#content.content .event-eventlist-component").css({
-                                    "height":"calc(100vh - 85px)"
+                                    "height":"calc(100vh - 95px)"
                                 });
                                 this.control.ifRefresh = '1';
                                 mx.fullScreen(true);

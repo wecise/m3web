@@ -84,10 +84,9 @@
     
             /* For list-view */
             #list {
-                padding-left:0px;
-                flex-flow: nowrap;
+                flex-flow: wrap;
                 display: flex;
-                flex-direction: column;
+                align-content: flex-start;
             }
     
             #list ul{
@@ -317,22 +316,14 @@
                 <el-header style="padding:0 10px;height:50px;line-heigh:50px;margin-bottom:10px;">
                     <el-row>
                         <el-col :span="24">
-                            <!-- <el-breadcrumb>
-                                <el-breadcrumb-item @click="openIt(null,'/')">${rootName}</el-breadcrumb-item>
-                                <el-breadcrumb-item @click="openIt(item,_.slice(filePath,0,index+1).join('/'))" v-for="(item,index) in filePath">${item}</el-breadcrumb-item>
-                            </el-breadcrumb> -->
-                            <ul style="list-style: none;display: flex;padding:0px;height:20px;line-height:20px;">
-                                <li>
-                                    <el-button type="text" @click="openIt(null,'/')" icon="el-icon-s-home"> ${rootName} </el-button>
-                                </li>
-                                <li>
-                                    <ol class="breadcrumb">
-                                        <li v-for="(item,index) in filePath" >
-                                            <el-button type="text" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))">${item}</el-button>               
-                                        </li>
-                                    </ol>
-                                </li>
-                            </ul>
+                            <el-breadcrumb separator-class="el-icon-arrow-right">
+                                <el-breadcrumb-item>
+                                    <el-button type="text" @click="openIt(null,'/')">${rootName}</el-button>
+                                </el-breadcrumb-item>
+                                <el-breadcrumb-item  v-for="(item,index) in filePath.slice(1)">
+                                    <el-button type="text" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))">${item}</el-button>
+                                </el-breadcrumb-item>
+                            </el-breadcrumb>
                         </el-col>
                     </el-row>
                 
@@ -340,20 +331,18 @@
                         <el-col :span="24">
                             <div style="padding:0px;text-align:right;height:30px;line-height:30px;width:100%;">
     
-                                <el-button-group style="margin-right:10px;">
-                                    <el-tooltip content="格子视图" placement="top">
-                                        <el-button type="text" @click="currentView='list-view'" icon="el-icon-picture">
-                                        </el-button>
-                                    </el-tooltip>
-                                    <el-tooltip content="列表视图" placement="top">
-                                        <el-button type="text" @click="currentView='grid-view'" icon="el-icon-s-grid">
-                                        </el-button>
-                                    </el-tooltip>
-                                    <el-tooltip content="表格视图" placement="top">
-                                        <el-button type="text" @click="currentView='table-view'" icon="el-icon-menu">
-                                        </el-button>
-                                    </el-tooltip>
-                                </el-button-group>
+                                <el-tooltip content="格子视图" placement="top">
+                                    <el-button type="text" @click="currentView='list-view'" icon="el-icon-picture">
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip content="列表视图" placement="top">
+                                    <el-button type="text" @click="currentView='grid-view'" icon="el-icon-s-grid">
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip content="表格视图" placement="top">
+                                    <el-button type="text" @click="currentView='table-view'" icon="el-icon-menu">
+                                    </el-button>
+                                </el-tooltip>
 
                                 <el-tooltip content="刷新" placement="top">
                                     <el-button type="text" @click="load();refreshTree();" icon="el-icon-refresh">
@@ -626,35 +615,34 @@
                     props: {
                         model: Array
                     },
-                    template: `<div id="list">
-                                   <ul>
-                                      <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-                                           :id="'fs_node_'+item.id"
-                                           @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
-                                           @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
-                                           style="cursor: pointer;"
-                                           :title="item.name"
-                                           v-for="item in model">
-                                          <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)">
-                                              <div class="stats-info">
-                                                  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
-                                              </div>
-                                              <div class="stats-link">
-                                                  <a class="fs-name" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 10px;" :title="item.title" :data-info="JSON.stringify(item)">
-                                                    <p style="margin: 0 0 8.5px;"><i class="fas fa-plug"></i>  名称：#{item.name}#</p>
-                                                    <p style="margin: 0 0 8.5px;"><i class="fas fa-user"></i>  作者：#{item|pickAuthor}# </p>
-                                                    <p style="margin: 0 0 8.5px;"><i class="fas fa-clock"></i> 创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}# </p>
-                                                    <!--<p><i class="fas fa-tree"></i>  类型：#{item.ftype=='dir'?'目录':item.ftype}#</p>-->
-                                                    <p style="margin: 0 0 8.5px;"><i class="fas fa-tags"></i>  标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
-                                                    <p style="margin: 0 0 8.5px;"><i class="fab fa-readme"></i>  描述：#{item|pickRemark}#</p>
-                                                  </a>
-                                              </div>
-                                              <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                  <i class="fa fa-bars"></i>
-                                              </div>
-                                          </div>
-                                      </li>
-                                  </ul></div>`,
+                    template:   `<div id="list">
+                                    <el-button type="default" 
+                                            style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @mouseover.native="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
+                                            @mouseout.native="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
+                                            @click.native="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" 
+                                            @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                            v-for="item in model">
+                                            <div style="position: relative;right: -100px;">    
+                                                <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div>
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                            </div>
+                                    </el-button>
+                                </div>`,
                     data:function(){
                         return {}
                     },
@@ -724,7 +712,7 @@
                       }
                     },
                     mounted: function(){
-    
+                        
                         const me = this;
     
                         me.init();
@@ -773,7 +761,7 @@
                         model: Array
                     },
                     template: `<div id="grid">
-                                   <ul>
+                                   <!--ul>
                                       <li  :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
                                            :id="'fs_node_'+item.id"
                                            @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
@@ -795,7 +783,30 @@
                                               </div>
                                           </div>
                                       </li>
-                                  </ul></div>`,
+                                  </ul-->
+                                  <el-button type="default" 
+                                        style="max-width: 10em;width: 10em;height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                        @mouseover.native="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
+                                        @mouseout.native="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
+                                        @click.native="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" 
+                                        @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                        v-for="item in model">
+                                        <div style="position: relative;right: -40px;">    
+                                            <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                    <span class="el-dropdown-link">
+                                                        <i class="el-icon-arrow-down el-icon--right"></i>
+                                                    </span>
+                                                    <el-dropdown-menu slot="dropdown">
+                                                        <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                    </el-dropdown-menu>
+                                            </el-dropdown>
+                                        </div>
+                                        <el-image style="width:34px;margin:5px;" :src="item | pickIcon"></el-image>
+                                        <div>
+                                            <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">#{item.name}#</p>
+                                        </div>
+                                </el-button>
+                                </div>`,
                     filters: {
                         pickName: function(item){
     
@@ -829,6 +840,9 @@
                                 }
                             }
                         }
+                    },
+                    mounted(){
+                        
                     }
                 });
     
@@ -1202,12 +1216,9 @@
                 eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
             },
             mounted() {
-                const self = this
-    
-                self.$nextTick(function () {
-    
-                    self.initPlugIn();
-    
+                
+                this.$nextTick().then(()=> {
+                    this.initPlugIn();
                 })
             },
             watch: {
@@ -1264,7 +1275,6 @@
     
                     self.initFileUpload();
     
-                    self.initContextMenu();
     
                     if(!_.isEmpty(self.defaultView)){
                         self.currentView = self.defaultView;
@@ -1295,243 +1305,115 @@
     
                     self.currentView = view;
                 },
-                initContextMenu(){
-                    const self = this
-    
-                    $.contextMenu("destroy").contextMenu({
-                        selector: '.list-context-menu',
-                        trigger: 'left',
-                        build: function($trigger, e) {
-                            
-                            let _item = null;
-    
-                            if(!_.isEmpty(e.target.attributes.getNamedItem('data-item').value)) {
-                                _item = _.attempt(JSON.parse.bind(null, e.target.attributes.getNamedItem('data-item').value));
-                            }
-    
-                            if(_.includes(['js'], _item.ftype)){
-                                return {
-    
-                                    items: {
-    
-                                        "read": {
-                                            name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                                self.downloadIt(_item,true);
-                                            }
-                                        },
-                                        "run": {
-                                            name: "编辑/运行", icon: "fas fa-play", callback: function (key, opt) {
-                                                self.editIt(_item);
-                                            }
-                                        },
-                                        "sep1": "---------",
-                                        "delete": {
-                                            name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                                self.deleteIt(_item,true);
-                                            }
-                                        },
-                                        "sep3": "---------",
-                                        "share": {
-                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
-                                                self.shareIt(_item);
-                                            }
-                                        },
-                                        "sep4": "---------",
-                                        "info": {
-                                            name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                                self.info(_item);
-                                            }
-                                        }
-                                    }
-    
-                                }
-                            } else if(_.includes(['html','htm'], _item.ftype)){
-                                return {
-    
-                                    items: {
-                                        "deploy": {
-                                            name: "发布应用", icon: "fab fa-codepen", callback: function (key, opt) {
-                                                self.deployIt(_item);
-                                            }
-                                        },
-                                        "read": {
-                                            name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                                self.downloadIt(_item,true);
-                                            }
-                                        },
-                                        "edit": {
-                                            name: "编辑", icon: "fas fa-edit", callback: function (key, opt) {
-                                                self.editIt(_item);
-                                            }
-                                        },
-                                        "run": {
-                                            name: "运行", icon: "fas fa-play", callback: function (key, opt) {
-                                                self.runHtml(_item);
-                                            }
-                                        },
-                                        "runUrl": {
-                                            name: "运行链接", icon: "fas fa-map-marker-alt", callback: function ($element,key, opt) {
-                                                self.copyUrl(_item);
-                                            }
-                                        },
-                                        "sep1": "---------",
-                                        "delete": {
-                                            name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                                self.deleteIt(_item,true);
-                                            }
-                                        },
-                                        "sep3": "---------",
-                                        "share": {
-                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
-                                                self.shareIt(_item);
-                                            }
-                                        },
-                                        "sep4": "---------",
-                                        "info": {
-                                            name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                                self.info(_item);
-                                            }
-                                        }
-                                    }
-    
-                                }
-                            } else if(_.includes(['md','json'], _item.ftype)){
-                                return {
-    
-                                    items: {
-                                        "read": {
-                                            name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                                self.downloadIt(_item,true);
-                                            }
-                                        },
-                                        "edit": {
-                                            name: "编辑", icon: "fas fa-edit", callback: function (key, opt) {
-                                                self.editIt(_item);
-                                            }
-                                        },
-                                        "run": {
-                                            name: "打开", icon: "fas fa-play", callback: function (key, opt) {
-                                                self.openIt(_item,null);
-                                            }
-                                        },
-                                        "runUrl": {
-                                            name: "打开链接", icon: "fas fa-map-marker-alt", callback: function ($element,key, opt) {
-                                                self.copyUrl(_item);
-                                            }
-                                        },
-                                        "sep1": "---------",
-                                        "delete": {
-                                            name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                                self.deleteIt(_item,true);
-                                            }
-                                        },
-                                        "sep3": "---------",
-                                        "share": {
-                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
-                                                self.shareIt(_item);
-                                            }
-                                        },
-                                        "sep4": "---------",
-                                        "info": {
-                                            name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                                self.info(_item);
-                                            }
-                                        }
-                                    }
-    
-                                }
-                            } else if(_.includes(['imap','iflow','ishow'], _item.ftype)){
-                                return {
-    
-                                    items: {
-    
-                                        "read": {
-                                            name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                                self.downloadIt(_item,true);
-                                            }
-                                        },
-                                        "run": {
-                                            name: "编辑", icon: "fas fa-edit", callback: function (key, opt) {
-                                                self.editIt(_item);
-                                            }
-                                        },
-                                        "sep1": "---------",
-                                        "delete": {
-                                            name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                                self.deleteIt(_item,true);
-                                            }
-                                        },
-                                        "sep3": "---------",
-                                        "share": {
-                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
-                                                self.shareIt(_item);
-                                            }
-                                        },
-                                        "sep4": "---------",
-                                        "info": {
-                                            name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                                self.info(_item);
-                                            }
-                                        }
-                                    }
-    
-                                }
-                            } else {
-                                return {
-    
-                                    items: {
-                                        "open": {
-                                            name: "打开", icon: "fas fa-folder-open", callback: function (key, opt) {
-                                                self.openIt(_item);
-                                            }
-                                        },
-                                        "sep1": "---------",
-                                        "download": {
-                                            name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                                if(_item.ftype==='dir'){
-                                                    self.exportIt(_item.fullname);
-                                                } else {
-                                                    self.downloadIt(_item,true);
-                                                }
-                                            }
-                                        },
-                                        "sep2": "---------",
-                                        "copy": {
-                                            name: "复制", icon: "fas fa-copy", callback: function (key, opt) {
-                                                self.copyIt(_item);
-                                            }
-                                        },
-                                        "paste": {
-                                            name: "粘贴", icon: "fas fa-paste", callback: function (key, opt) {
-                                                self.pasteIt();
-    
-                                            }
-                                        },
-                                        "sep3": "---------",
-                                        "delete": {
-                                            name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                                self.deleteIt(_item,true);
-                                            }
-                                        },
-                                        "sep4": "---------",
-                                        "share": {
-                                            name: "共享", icon: "fas fa-share-square", callback: function (key, opt) {
-                                                self.shareIt(_item);
-                                            }
-                                        },
-                                        "sep5": "---------",
-                                        "info": {
-                                            name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                                self.info(_item);
-                                            }
-                                        }
-                                    }
-    
-                                }
-                            }
-    
+                getMenuModel(item){
+                    // 根据文件类型返回右键菜单
+                    let model = {
+                        "js": [
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑/运行", icon: "fas fa-play", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "html": [
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "运行", icon: "fas fa-play", fun: "runHtml" },
+                            { name: "运行链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "htm": [
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "运行", icon: "fas fa-play", fun: "runHtml" },
+                            { name: "运行链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "md":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "打开", icon: "fas fa-play", fun: "openIt", type: null },
+                            { name: "打开链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "json":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "打开", icon: "fas fa-play", fun: "openIt", type: true },
+                            { name: "打开链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "imap":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "ishow":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "iflow":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "dir": [
+                            { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
+                            { name: "复制", icon: "fas fa-copy", fun: "copyIt" },
+                            { name: "粘贴", icon: "fas fa-paste", fun: "pasteIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "normal": [
+                            { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "复制", icon: "fas fa-copy", fun: "copyIt" },
+                            { name: "粘贴", icon: "fas fa-paste", fun: "pasteIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ]
+                    };
+
+                    try{
+                        if(model[item.ftype]){
+                            return model[item.ftype];
+                        } else {
+                            return model["normal"];
                         }
-                    });
+                    } catch(err){
+                        return model["normal"];
+                    } finally{
+                        console.log(item,model[item.ftype])
+                    }
+
+                },
+                onMenuCommand(cmd){
+                    
+                    if(!cmd.type){
+                        this[cmd.fun](cmd.param);
+                    } else {
+                        this[cmd.fun](cmd.param,cmd.type);
+                    }
+                    
                 },
                 initEditName(){
                     const self = this
@@ -1578,7 +1460,7 @@
                 initFileUpload(){
                     const self = this
                     let uploadButton = $('<button/>')
-                        .addClass('btn btn-xs btn-primary')
+                        .css("background","#ddd")
                         .prop('disabled', true)
                         .text('准备中...')
                         .on('click', function () {
@@ -1607,7 +1489,7 @@
                             new Vue({
                                 delimiters: ['#{', '}#'],
                                 el: `#jsPanel-upload-footer-${objectHash.sha1(title)}`,
-                                template: `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> #{stime}# | 上传文件：#{total}# </div>`,
+                                template: `<div style="width: 100%;"><i class="fas fa-clock"></i> #{stime}# | 上传文件：#{total}# </div>`,
                                 data: {
                                     stime: moment().format("LLL"),
                                     utime: '',
@@ -1648,11 +1530,11 @@
                                 }
     
                                 var node = $('<li/>')
-                                    .append($(`<a href="#" class="thumbnail" style="border:none;-webkit-box-shadow: unset;box-shadow: unset;"/>`)
+                                    .append($(`<p style="padding:0px;margin:0px;"><a href="#" style="border:none;-webkit-box-shadow: unset;box-shadow: unset;"/></p>`)
                                         .text(_name))
                                     .attr("title",file.name)
-                                    .append($(`<div id="progress_${objectHash.sha1(file.name)}" class="progress">
-                                                    <div class="progress-bar progress-bar-success"></div>
+                                    .append($(`<div id="progress_${objectHash.sha1(file.name)}">
+                                                    <progress></progress>
                                                </div>`));
                                 if (!index) {
                                     node

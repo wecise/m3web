@@ -13,6 +13,7 @@ class SideBar {
 
     constructor() {
         this.app = null;
+        this.topbar = null;
     }
 
     // 左边栏切换
@@ -340,6 +341,77 @@ class SideBar {
         }
     }
 
+    // 顶边栏
+    topBar(){
+        
+        return{
+            delimiters: ['#{', '}#'],
+            data: {
+                activeIndex: '1',
+                mxTitle: window.MATRIX_TITLE,
+                menu: {
+                    user:'{{.i18n.Tr "your_profile"}}'
+                }
+            },
+            template:   `<el-container style="position:fixed;z-index:20;top:0;left:0;width:100%;background:rgb(37, 45, 71);">
+                            <el-header style="padding:0px 0px 0px 10px;height:50px;line-height:50px;display:flex;">
+                                <div style="width:80%;">
+                                    <el-link href="/" :underline="false">
+                                        <img id="company_logo" src="">
+                                        <span style="color:#ffffff;">#{mxTitle}#</span>
+                                    </el-link>
+                                </div>
+                                <div id="ai-robot" style="width:8%;"></div>
+                                <div style="width:12%;">
+                                    <el-menu :default-active="activeIndex" class="topbar-el-menu" mode="horizontal" @select="onSelect">
+                                        <el-submenu index="2">
+                                            <template slot="title">
+                                                <el-avatar size="small" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"></el-avatar>
+                                                #{window.SignedUser_UserName}#
+                                            </template>
+                                            <el-menu-item index="user">用户</el-menu-item>
+                                            <el-menu-item index="system">系统管理</el-menu-item>
+                                            <el-menu-item index="files">我的文件</el-menu-item>
+                                            <el-menu-item index="home">默认首页</el-menu-item>
+                                            <el-menu-item index="fullscreen">全屏切换</el-menu-item>
+                                            <el-menu-item index="signout">注销</el-menu-item>
+                                        </el-submenu>
+                                    </el-menu>
+                                </div>
+                            </el-header>
+                        </el-container>`,
+            created(){
+                
+            },
+            mounted(){
+                this.defaultActive = window.location.pathname;
+            },
+            filters:{
+                pickIcon:function(icon){
+                    return `${window.ASSETS_ICON}/apps/png/${icon}?type=download&issys=${window.SignedUser_IsAdmin}`;
+                }
+            },
+            methods: {
+                init(){
+                    
+
+                },
+                onSelect(key, keyPath) {
+                    if(key==='home'){
+                        sideBar.appAsHome({url:'/home'});
+                    } else if(key==='signout'){
+                        window.open(`/user/logout/${window.COMPANY_NAME}`);
+                    } else if(key==='fullscreen'){
+                        //mx.fullScreen();
+                    }
+                    else {
+                        window.open('/janesware/'+key,"_blank");
+                    }
+                }
+            }
+        }
+    };
+
     // 左边栏盒子应用
     sideMenu(){
         const inst = this;
@@ -554,6 +626,7 @@ class SideBar {
     };
 
     init(){
+        this.topbar = new Vue(this.topBar()).$mount("#header");
         this.app = new Vue(this.sideMenu()).$mount("#sidebar-menu");
     }
 
