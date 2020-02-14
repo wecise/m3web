@@ -647,46 +647,36 @@ class Performance extends Matrix {
                                         </div>
                                     </el-col>
                                     <el-col :xs="12" :sm="14" :md="18" :lg="18" :xl="14">
-                                        <div class="grid-content">
-                                            <form class="form-horizontal" style="height:50vh;overflow-x: hidden;overflow-y: auto;">
-                                                <!-- 有模板 -->
-                                                <div class="form-group" v-for="item in model.template" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                    <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <div v-if="item.data==='value' && model.rows[item.data] <= 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else>
-                                                            <!--progress :value="model.rows[item.data]" max="100"></progress> <b style="font-size:12px;">#{model.rows[item.data]}#%</b-->
-                                                        </div>
-                                                        <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else>
-                                                        </div>
-                                                        <div v-else>
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
-                                                        </div>
-                                                    </div>
+                                        <el-form style="height:calc(100vh - 250px);overflow-x: hidden;overflow-y: auto;">
+                                            <!-- 有模板 -->
+                                            <el-form-item :label="item.title" v-for="item in model.template" v-if="model.template" label-width="80">
+                                                <div v-if="item.data==='value' && model.rows[item.data] <= 100">
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else></el-input>
                                                 </div>
-                                                <!-- 没有模板 -->
-                                                <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                    <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                    <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                        <div v-if="key==='value' && value <= 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize" v-else>
-                                                            <!--progress :value="value" max="100"></progress> <b style="font-size:12px;">#{value}#%</b-->
-                                                        </div>
-                                                        <div v-else-if="key==='value' && value > 100">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'">
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | mx.bytesToSize" v-else>
-                                                        </div>
-                                                        <div v-else>
-                                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
-                                                        </div>
-                                                    </div>
+                                                <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else></el-input>
                                                 </div>
-                                            </form>
-                                        </div>
+                                                <div v-else>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | handlerFormat"></el-input>
+                                                </div>
+                                            </el-form-item >
+                                            <!-- 没有模板 -->
+                                            <el-form-item  :label="key" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
+                                                <div v-if="key==='value' && value <= 100">
+                                                    <el-input :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize" v-else></el-input>
+                                                </div>
+                                                <div v-else-if="key==='value' && value > 100">
+                                                    <el-input :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize" v-else></el-input>
+                                                </div>
+                                                <div v-else>
+                                                    <el-input :placeholder="key" :value="value | handlerFormat"></el-input>
+                                                </div>
+                                            </el-form-item >
+                                        </el-form>
                                     </el-col>
                                     </el-row>
                                     </el-main>

@@ -2,7 +2,8 @@
 
 	<style scoped>
 		/*----------  style  ----------*/
-		.search-base-component .el-input__inner{
+		.search-base-component .el-input__inner[role="textbox"],
+		.search-base-component .el-input--suffix > .el-input__inner{
 			border-radius: 0px;
 			border: unset;
 		}
@@ -11,7 +12,12 @@
 			font-size:12px;
 		}
 
-		.search-base-component .search-base .el-autocomplete .el-input--small>.el-input__inner{
+		.search-preset .el-collapse-item__header{
+			height: 30px!important;
+			line-height: 30px!important;
+		}
+
+		.search-base-component .search-base > .el-autocomplete .el-input--small>.el-input__inner{
 			height: 40px;
 			line-height: 40px;
 			border: unset;

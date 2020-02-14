@@ -1297,8 +1297,7 @@ class Window {
                 });
                 $(".jsPanel-content",this).css({
                     "border": "1px solid #dddddd",
-                    "overflow": "hidden",
-                    "padding": "15px 15px 20px 15px"
+                    "overflow": "hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"

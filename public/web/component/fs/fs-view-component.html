@@ -286,10 +286,6 @@
                 -webkit-box-shadow:unset;
                 box-shadow:unset;
             }
-            .el-tabs--border-card>.el-tabs__content {
-                padding: 0px;
-                height: 100%;
-            }
 
             .el-tabs--border-card>.el-tabs__header {
                 border-bottom: unset;
@@ -306,6 +302,18 @@
             .el-tree-node:focus>.el-tree-node__content {
                 background-color: #b2dcfa;
             }
+
+            /* fs-view-node */
+            .fs-view-node .el-checkbox__input{
+                float:right;
+            }
+            .fs-view-node .el-checkbox__label{
+                display: none;
+            }
+            .fs-view-node .el-checkbox__input > .el-checkbox__inner{
+                border:unset;
+            }
+            
     
         </style>
     
@@ -320,8 +328,8 @@
                                 <el-breadcrumb-item>
                                     <el-button type="text" @click="openIt(null,'/')">${rootName}</el-button>
                                 </el-breadcrumb-item>
-                                <el-breadcrumb-item  v-for="(item,index) in filePath.slice(1)">
-                                    <el-button type="text" @click="openIt(item,_.slice(filePath,0,index+1).join('/'))">${item}</el-button>
+                                <el-breadcrumb-item  v-for="(item,index) in filePath" v-if="index > 0">
+                                    <el-button type="text" @click="openIt(item, filePath.slice(0,index+1).join('/'))">${item}</el-button>
                                 </el-breadcrumb-item>
                             </el-breadcrumb>
                         </el-col>
@@ -350,12 +358,22 @@
                                 </el-tooltip>
 
                                 <el-tooltip content="排序" placement="top">
-                                    <el-button type="text" class="fs-order" icon="el-icon-sort">
-                                    </el-button>
+                                    <el-dropdown @command="onOrderCommand" style="margin-left: 5px;">
+                                        <span class="el-dropdown-link">
+                                          <el-button type="text" icon="el-icon-sort"></el-button>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                          <el-dropdown-item command='{"prop":"name","type":"asc"}'>按名称升序</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"name","type":"desc"}'>按名称降序</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"vtime","type":"asc"}'>按时间升序</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"vtime","type":"desc"}'>按时间降序</el-dropdown-item>
+                                          <el-dropdown-item command='{"prop":"ftype","type":"asc"}'>按类型排序</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                      </el-dropdown>
                                 </el-tooltip>
     
                                 <el-tooltip content="新建目录" placement="top">
-                                    <el-button type="text" @click="newDir" icon="el-icon-folder-add">
+                                    <el-button type="text" @click="newDir" icon="el-icon-folder-add" style="margin-left: 5px;">
                                     </el-button>
                                 </el-tooltip>
     
@@ -364,8 +382,8 @@
                                     </el-button>
                                 </el-tooltip>
     
-                                <el-tooltip content="选择所有" placement="top">
-                                    <el-button type="text" @click="selectAll" icon="el-icon-document-checked">
+                                <el-tooltip :content="_.isEmpty(selectedItem)?'选择所有':'取消选择'" placement="top">
+                                    <el-button type="text" @click="selectAll" :icon="_.isEmpty(selectedItem)?'el-icon-folder-checked':'el-icon-document-remove'">
                                     </el-button>
                                 </el-tooltip>
     
@@ -378,24 +396,6 @@
                                     <el-button type="text" @click="moveTo" icon="el-icon-shopping-cart-full">
                                     </el-button>
                                 </el-tooltip>
-                                
-                                <!--el-tooltip content="复制" placement="top">
-                                    <el-button type="text" @click="copyThem">
-                                        <i class="fas fa-copy"></i>
-                                    </el-button>
-                                </el-tooltip>
-    
-                                <el-tooltip content="粘贴到" placement="top">
-                                    <el-button type="text" @click="pasteIt">
-                                        <i class="fas fa-paste"></i>
-                                    </el-button>
-                                </el-tooltip>
-    
-                                <el-tooltip content="移动到" placement="top">
-                                    <el-button type="text" @click="moveIt">
-                                        <i class="fas fa-people-carry"></i>
-                                    </el-button>
-                                </el-tooltip-->
     
                                 <el-tooltip content="删除" placement="top">
                                     <el-button type="text" @click="deleteThem" icon="el-icon-delete">
@@ -407,15 +407,6 @@
                                         <input id="file-upload" type="file" name="uploadfile" multiple>
                                     </el-button>
                                 </el-tooltip>
-                                <!--<el-button type="text" @click="downloadThem">
-                                    <i class="fas fa-download""></i>
-                                </el-button>-->
-                                <!-- <el-button type="text" @click="toggleView('grid-view')">
-                                    <i class="fas fa-th"></i>
-                                </el-button>
-                                <el-button type="text" @click="toggleView('table-view')">
-                                    <i class="fas fa-bars"></i>
-                                </el-button> -->
                                 <el-tooltip content="导出备份" placement="top">
                                     <el-button type="text" @click="exportIt(rootPath)" icon="el-icon-download">
                                     </el-button>
@@ -456,7 +447,7 @@
                 rootName: String,
                 defaultView: String
             },
-            data: function () {
+            data() {
     
                 Vue.component('note-view',{
                     delimiters: ['#{', '}#'],
@@ -467,12 +458,13 @@
                                    <ul>
                                       <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
                                            :id="'fs_node_'+item.id"
-                                           @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
-                                           @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
                                            style="cursor: pointer;"
                                            :title="item.name"
                                            v-for="item in model">
-                                          <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)">
+                                          <div class="widget widget-stats bg-silver animated flipInX" 
+                                                :id="'fs_node_widget_'+item.id" 
+                                                @click="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)" 
+                                                @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)">
                                               <div class="stats-info">
                                                   <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
                                               </div>
@@ -616,35 +608,48 @@
                         model: Array
                     },
                     template:   `<div id="list">
-                                    <el-button type="default" 
-                                            style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-                                            @mouseover.native="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
-                                            @mouseout.native="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
-                                            @click.native="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" 
-                                            @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
-                                            v-for="item in model">
-                                            <div style="position: relative;right: -100px;">    
-                                                <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
-                                                        <span class="el-dropdown-link">
-                                                            <i class="el-icon-arrow-down el-icon--right"></i>
-                                                        </span>
-                                                        <el-dropdown-menu slot="dropdown">
-                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
-                                                        </el-dropdown-menu>
-                                                </el-dropdown>
-                                            </div>
-                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
-                                            <div>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p>
-                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
-                                            </div>
-                                    </el-button>
+                                    <el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
+                                        <el-button type="default" 
+                                                style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                                @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                                v-for="item in model">
+                                                <div style="position: relative;right: -100px;">    
+                                                    <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                            <span class="el-dropdown-link">
+                                                                <i class="el-icon-arrow-down el-icon--right"></i>
+                                                            </span>
+                                                            <el-dropdown-menu slot="dropdown">
+                                                                <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                            </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                </div>
+                                                <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                                
+                                                <div>
+                                                    <el-popover
+                                                            placement="top-start"
+                                                            trigger="hover"
+                                                            open-delay="1000"
+                                                            :content="item.name">
+                                                        <p slot="reference" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                            名称：#{item.name}#
+                                                        </p>
+                                                    </el-popover>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                        标签：#{item.tags}#
+                                                    </p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                                </div>
+                                                <el-checkbox :label="item.id"></el-checkbox>
+                                        </el-button>
+                                    </el-checkbox-group>
                                 </div>`,
-                    data:function(){
-                        return {}
+                    data(){
+                        return {
+                            
+                        }
                     },
                     filters: {
                         pickName: function(item){
@@ -711,15 +716,11 @@
                           deep:true
                       }
                     },
-                    mounted: function(){
-                        
-                        const me = this;
-    
-                        me.init();
-    
+                    mounted(){
+                        this.init();
                     },
                     methods: {
-                        init:function(){
+                        init(){
                             const me = this;
     
                             // init Tagify script on the above inputs
@@ -727,7 +728,7 @@
                                       .on('add', me.onAddTag)
                                       .on('remove', me.onRemoveTag);
                         },
-                        onAddTag: function(event,tagName){
+                        onAddTag(event,tagName){
                             const me = this;
     
                             let item = $(event.currentTarget).parent().parent().data("info");
@@ -740,7 +741,7 @@
                             }
     
                         },
-                        onRemoveTag: function(event,tagName){
+                        onRemoveTag(event,tagName){
                             const me = this;
                             let item = $(event.currentTarget).parent().parent().data("info");
                             let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
@@ -760,52 +761,29 @@
                     props: {
                         model: Array
                     },
-                    template: `<div id="grid">
-                                   <!--ul>
-                                      <li  :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-                                           :id="'fs_node_'+item.id"
-                                           @mouseover="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
-                                           @mouseout="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
-                                           style="cursor: pointer;"
-                                           :title="item.name"
-                                           v-for="item in model">
-                                          <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @click="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" @dblclick="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)" >
-                                              <div class="stats-info">
-                                                  <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';"></p>
-                                              </div>
-                                              <div class="stats-link">
-                                                  <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name" :data-info="JSON.stringify(item)">
-                                                      #{item.name}#
-                                                  </a>
-                                              </div>
-                                              <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                  <i class="fa fa-bars"></i>
-                                              </div>
-                                          </div>
-                                      </li>
-                                  </ul-->
-                                  <el-button type="default" 
-                                        style="max-width: 10em;width: 10em;height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-                                        @mouseover.native="eventHub.$emit('FS-NODE-MOUSEOVER-EVENT',item)"
-                                        @mouseout.native="eventHub.$emit('FS-NODE-MOUSEOUT-EVENT',item)"
-                                        @click.native="eventHub.$emit('FS-NODE-SELECTIT-EVENT',item)" 
-                                        @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
-                                        v-for="item in model">
-                                        <div style="position: relative;right: -40px;">    
-                                            <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
-                                                    <span class="el-dropdown-link">
-                                                        <i class="el-icon-arrow-down el-icon--right"></i>
-                                                    </span>
-                                                    <el-dropdown-menu slot="dropdown">
-                                                        <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
-                                                    </el-dropdown-menu>
-                                            </el-dropdown>
-                                        </div>
-                                        <el-image style="width:34px;margin:5px;" :src="item | pickIcon"></el-image>
-                                        <div>
-                                            <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">#{item.name}#</p>
-                                        </div>
-                                </el-button>
+                    template:   `<div id="grid">
+                                    <el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
+                                        <el-button type="default" 
+                                                style="max-width: 12em;width: 12em;height:110px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                                @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                                v-for="item in model">
+                                                <div style="position: relative;right: -40px;">    
+                                                    <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                            <span class="el-dropdown-link">
+                                                                <i class="el-icon-arrow-down el-icon--right"></i>
+                                                            </span>
+                                                            <el-dropdown-menu slot="dropdown">
+                                                                <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                            </el-dropdown-menu>
+                                                    </el-dropdown>
+                                                </div>
+                                                <el-image style="width:34px;margin:5px;" :src="item | pickIcon"></el-image>
+                                                <div>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">#{item.name}#</p>
+                                                </div>
+                                                <el-checkbox :label="item.id"></el-checkbox>
+                                        </el-button>
+                                    </el-checkbox-group>
                                 </div>`,
                     filters: {
                         pickName: function(item){
@@ -861,7 +839,8 @@
                     },
                     template:   `<el-table style="width: 100%"
                                     :data="model"
-                                    stripe>
+                                    stripe
+                                    @selection-change="onSelectionChange">
                                     <el-table-column type="selection" align="center"></el-table-column> 
                                     <el-table-column
                                         sortable 
@@ -910,6 +889,9 @@
                         },  
                         onCellClick(row,column,cell,event){
 
+                        },
+                        onSelectionChange(val){
+                            this.$root.$refs.viewRef.$children[0].selectedItem = _.map(val,'id');
                         }
                     }
                 });
@@ -1202,18 +1184,12 @@
                 }
             },
             created() {
-                const self = this
-    
-                self.init();
                 
-                eventHub.$on("FS-NODE-SELECTIT-EVENT",self.selectIt);
-                eventHub.$on("FS-NODE-OPENIT-EVENT",self.openIt);
-    
-                eventHub.$on("FS-NODE-MOUSEOVER-EVENT",self.mouseOver);
-                eventHub.$on("FS-NODE-MOUSEOUT-EVENT",self.mouseOut);
-    
-                eventHub.$on("FS-FORWARD-EVENT", self.openIt);
-                eventHub.$on("PATH-CHANGE-EVENT", self.setRootPath);
+                this.init();
+
+                eventHub.$on("FS-NODE-OPENIT-EVENT",this.openIt);
+                eventHub.$on("FS-FORWARD-EVENT", this.openIt);
+                eventHub.$on("PATH-CHANGE-EVENT", this.setRootPath);
             },
             mounted() {
                 
@@ -1223,20 +1199,16 @@
             },
             watch: {
                 root: function(val,oldVal){
-                    const self = this
+                    
+                    this.rootPath = val;
     
-                    self.rootPath = val;
-    
-                    self.load();
+                    this.load();
                 },
                 rootPath: function(val,oldVal){
-                    const self = this
-    
+                    
                     let _extName = _.split(val,'.');
     
-                    //if(_extName.length == 1){
-                        self.load();
-                    //}
+                    this.load();
     
                     let _url = val.replace(/\/\//g,'/');
     
@@ -1247,17 +1219,6 @@
     
                     $('#file-upload').fileupload({url: `/fs${_url}`});
     
-                },
-                selectedItem:function(val,oldVal){
-                    const self = this
-    
-                    $(".fs-node-selected").removeClass("fs-node-selected");
-    
-                    _.forEach(val,function(v){
-                        let node = $(`#fs_node_widget_${v.id}`);
-    
-                        $(node).addClass("fs-node-selected");
-                    })
                 }
             },
             computed: {
@@ -1271,39 +1232,16 @@
                     this.signedUserName = window.SignedUser_UserName;
                 },
                 initPlugIn(){
-                    const self = this;
+                    
+                    this.initFileUpload();
     
-                    self.initFileUpload();
-    
-    
-                    if(!_.isEmpty(self.defaultView)){
-                        self.currentView = self.defaultView;
+                    if(!_.isEmpty(this.defaultView)){
+                        this.currentView = this.defaultView;
                     }
-    
-                    self.orderIt();
-    
-                    // 非选择区域事件
-                    // $(document).mouseup(function(e) {
-                    //     let items = $("li.dir.fs-node");
-                    //     let exclude = $("div.btn-group > a");
-                        
-                    //     if (!items.is(e.target) && items.has(e.target).length === 0) {
-                    //         self.selectedItem = [];
-                    //         window.fsSelectedItem = [];
-                    //     }
-                    // });
-    
-                    // 排他事件
-                    $('*[data-edit="true"]').click(function(e) {
-                        //e.preventDefault();
-                        e.stopPropagation();
-                    });
     
                 },
                 toggleView(view){
-                    const self = this
-    
-                    self.currentView = view;
+                    this.currentView = view;
                 },
                 getMenuModel(item){
                     // 根据文件类型返回右键菜单
@@ -1376,8 +1314,6 @@
                         ],
                         "dir": [
                             { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
-                            { name: "复制", icon: "fas fa-copy", fun: "copyIt" },
-                            { name: "粘贴", icon: "fas fa-paste", fun: "pasteIt" },
                             { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
                             { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
                             { name: "属性", icon: "fas fa-info", fun: "info" }
@@ -1385,8 +1321,6 @@
                         "normal": [
                             { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
                             { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
-                            { name: "复制", icon: "fas fa-copy", fun: "copyIt" },
-                            { name: "粘贴", icon: "fas fa-paste", fun: "pasteIt" },
                             { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
                             { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
                             { name: "属性", icon: "fas fa-info", fun: "info" }
@@ -1402,7 +1336,7 @@
                     } catch(err){
                         return model["normal"];
                     } finally{
-                        console.log(item,model[item.ftype])
+                        
                     }
 
                 },
@@ -1416,24 +1350,23 @@
                     
                 },
                 initEditName(){
-                    const self = this
-    
+                    
                     $(".fs-name[data-edit='true']").editable({
                         title: "重命名",
                         type: "text",
                         pk: $(this).data("pk"),
                         container: 'body',
-                        validate: function (value) {
+                        validate: (value)=> {
                             if (!$.trim(value)) {
                                 return '不能为空';
                             }
                         },
-                        display: function(value, sourceData) {
+                        display: (value, sourceData)=> {
                             if(value.length > 10) {
                                 $(this).html(_.split(value,"",9).join("")+"...");
                             }
                         },
-                        success: function (response,newValue) {
+                        success: (response,newValue)=> {
     
                             let _item = $(this).data("info");
     
@@ -1449,7 +1382,7 @@
                             let _rtn = fsHandler.fsRename(_old, _new);
     
                             if(_rtn == 1){
-                                self.load();
+                                this.load();
                             } else {
                                 $(this).innerHTML($(this).editable('getValue', true));
                             }
@@ -1621,42 +1554,11 @@
                         .parent().addClass($.support.fileInput ? undefined : 'disabled');
                 },
                 resetStatus(){
-                    const self = this
-    
-                    self.selectedItem = [];
-                },
-                orderIt(){
-                    const self = this
-    
-                    $.contextMenu({
-                        selector: '.fs-order',
-                        trigger: 'left',
-                        callback: function (key, options) {
-                            if(key == 'byNameAsc'){
-                                self.model = _.orderBy(self.model,['name'],['asc']);
-                            } else if(key == 'byNameDesc'){
-                                self.model = _.orderBy(self.model,['name'],['desc']);
-                            } else if(key == 'byTimeAsc'){
-                                self.model = _.orderBy(self.model,['vtime'],['asc']);
-                            } else if(key == 'byTimeDesc'){
-                                self.model = _.orderBy(self.model,['vtime'],['desc']);
-                            } else {
-                                self.model = _.orderBy(self.model,['ftype'],['asc']);
-                            }
-                        },
-                        items: {
-                            "byNameAsc": { name: "按名称升序",icon: "fas fa-sort-alpha-up" },
-                            "byNameDesc": { name: "按名称降序",icon: "fas fa-sort-alpha-down" },
-                            "byTimeAsc": { name: "按时间升序",icon: "fas fa-sort-alpha-up" },
-                            "byTimeDesc": { name: "按时间降序",icon: "fas fa-sort-alpha-down" },
-                            "byFtype": { name: "按类型排序",icon: "fas fa-sort-alpha-down" },
-                        }
-                    });
-    
+                    this.selectedItem = [];
                 },
                 openIt(item, path){
                     const self = this
-    
+                    console.log(88,item,path)
                     event.preventDefault();
     
                     // 点击【我的文件】返回不同的root
@@ -1731,8 +1633,6 @@
     
                 },
                 runHtml(item){
-                    const self = this
-    
                     let file = [item.parent, item.name].join("/");
                     window.open(`/fs${file}?issys=true&type=open&issys=${window.SignedUser_IsAdmin}`,'_blank');
                 },
@@ -1773,51 +1673,30 @@
                     eventHub.$emit("FS-TREE-REFRESH-EVENT");
                 },
                 load() {
-                    const self = this
-    
-                    // 临时解决view刷新问题 & destroy editable
-                    //self.currentView = "";
-    
-                    _.delay(function(){
-    
-                        // 临时解决view刷新问题
-                        //self.currentView = self.defaultView;
-    
+                    
+                    this.$nextTick().then(()=>{
+                        
                         // 重置选择
-                        self.selectedItem = [];
+                        this.selectedItem = [];
     
-                        let _rtn = fsHandler.fsList(self.rootPath);
-    
-                        self.model = _.orderBy(_.map(_rtn,function(v,k){
-    
-                            return _.merge(v, {"username": `${self.signedUserName}`});
-    
+                        let _rtn = fsHandler.fsList(this.rootPath);
+
+                        this.model = _.orderBy(_.map(_rtn,(v,k)=>{
+
+                            return _.merge(v, {"username": `${this.signedUserName}`});
+
                         }),[v => v.name.toLowerCase(),"vtime"],["asc","desc"]);
-    
-                        _.delay(function(){
+
+                        _.delay(()=>{
                             // 刷新
-                            self.refresh();
-                        },100);
-                    },100)
+                            this.refresh();
+                        },100);  
+                    })
     
                 },
                 refresh() {
-                    const self = this
-    
                     // 重新实例化 editable
-                    self.initEditName();
-                },
-                mouseOver(item){
-                    const self = this
-    
-                    $(self.$el).find('.fs-node-highlight').removeClass('fs-node-highlight');
-                    $('#fs_node_'+item.id).find('.widget').addClass('fs-node-highlight');
-    
-                },
-                mouseOut(item){
-                    const self = this
-    
-                    $('#fs_node_'+item.id).find('.fs-node-highlight').removeClass('fs-node-highlight');
+                    this.initEditName();
                 },
                 newDir() {
                     const self = this;
@@ -1835,106 +1714,111 @@
                 newFile() {
                     fileSystem.fileNew(this.rootPath,this.load);
                 },
+                onOrderCommand(cmd){
+                    let command = JSON.parse(cmd);
+                    this.model = _.orderBy(this.model,[command.prop],[command.type]);
+                },
                 info(node){
                     const self = this
+                    
+                    console.log(13,node)
     
-                    let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
+                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
     
-                    let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": ${window.SignedUser_UserName}, "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
-    
-                    if(_.isEmpty(node.attr)){
-                        node = _.merge(node, _attr);
-                    }
-    
-                    let _infoVue = new Vue({
+                    new Vue({
                         delimiters: ['#{', '}#'],
-                        el: "#fs-info",
-                        template: `<div class="tab-content" style="height:100%;">
-                                                <div role="tabpanel" class="tab-pane active" id="home"  style="height:100%;">
-                                                    <form  style="height:95%;overflow:auto;">
-                                                        <div class="form-group">
-                                                            <label for="name">名称</label>
-                                                            <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName" autofocus @keyup.enter="save">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="remark">备注</label>
-                                                            <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="ctime">更新时间</label>
-                                                            <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="parent">目录</label>
-                                                            <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="type">类型</label>
-                                                            <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="type">大小</label>
-                                                            <input type="text" class="form-control" id="size" placeholder="" value="${mx.bytesToSize(node.size)}" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="author">作者</label>
-                                                            <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="icon">图标</label>
-                                                            <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
-                                                                <img class="media-object" :src="model.icon.value" style="width:15%;">
-                                                            </a>
-                                                        </div>
-    
-                                                   </form>
-                                                    <div class="form-group" style="text-align: center;padding-top:3px;">
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
-                                                    </div>
-                                                </div>
-                                                <div role="tabpanel" class="tab-pane" id="icon-list" style="height:100%;">
-                                                    <div class="row" style="height:95%;">
-                                                      <div class="col-md-12" style="display: list-item;height: 95%;overflow: auto;">
-                                                        <ul>
-                                                            <li v-for="icon in model.icon.list">
-                                                                <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
-                                                                  <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-                                                                  <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="model.icon.value" >
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                      </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-12" style="text-align:center;">
-                                                            <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
-                                                        </div>
-                                                    </div>
-                                                </div>
-    
-                                            </div>`,
+                        template:   `<el-container style="height:100%;">
+                                        <el-main style="height:100%;">
+                                            <el-tabs v-model="activeName" type="border-card">
+                                                <el-tab-pane label="管理" name="config">
+                                                    
+                                                    <el-form label-width="80px">
+                                                        <el-form-item label="名称">
+                                                            <el-input placeholder="" v-model="model.name" autofocus @keyup.enter.native="save"></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="备注">
+                                                            <el-input type="textarea" v-model="model.attr.remark"></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="更新时间">
+                                                            <el-input :value="moment(model.attr.ctime).format('LLL')" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="目录">
+                                                            <el-input :value="model.parent" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="类型">
+                                                            <el-input :value="model.ftype" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="大小">
+                                                            <el-input :value="mx.bytesToSize(model.size)" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="作者">
+                                                            <el-input placeholder="" :value="model.attr.author" disabled></el-input>
+                                                        </el-form-item>
+                                                        
+                                                        <el-form-item label="图标">
+                                                            <el-button @click="activeName='icon'">
+                                                                <el-image :src="icon.value" style="width:64px;"></el-image>
+                                                            </el-button>
+                                                        </el-form-item>
+
+                                                   </el-form>
+                                                </el-tab-pane>
+                                                <el-tab-pane label="图标" name="icon">
+                                                    <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:flex-start;" @change="onIconChange">
+                                                        <el-button type="default" 
+                                                            style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" v-for="icon in icon.list" :key="icon.id">
+                                                            <el-radio :label="icon | pickIcon">
+                                                                <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
+                                                                <span slot="label">#{icon.id}#</span>
+                                                            </el-radio>
+                                                        </el-button>
+                                                    </el-radio-group>
+                                                    </div>    
+                                                </el-tab-pane>
+                                            </el-tabs>    
+                                        </el-main>
+                                        <el-footer>
+                                            <el-button type="success" @click="apply">应用</el-button>
+                                            <el-button type="primary" @click="save">确定</el-button>
+                                            <el-button type="default" @click="close">取消</el-button>
+                                        </el-footer>
+                                    </el-container>`,
                         data: {
-                            model: {
-                                parent: node.parent,
-                                oldName: node.name,
-                                newName: node.name,
-                                type: node.ftype,
-                                attr: {remark:''},
-                                icon: {
+                            model: {},
+                            icon: {
                                     value: null,
                                     list: []
-                                }
-                            }
+                            },
+                            attr:{
+                                remark: "", 
+                                ctime: _.now(),
+                                author: window.SignedUser_UserName,
+                                icon: `${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`
+                            },
+                            activeName: 'config'
                         },
-                        mounted: function() {
-                            const me = this;
-    
-                            me.$nextTick(function() {
-                                me.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
-                                me.model.icon.value = me.model.attr.icon;
-                                me.init();
+                        created(){
+                            // 初始化Model
+                            _.extend(this.model,node);
+                            
+                            // 初始化属性
+                            if(_.isEmpty(this.model.attr)){
+                                _.extend(this.model, {attr:this.attr});
+                            }
+                            
+                            // 初始化图片列表
+                            this.icon.list = fsHandler.fsList('/assets/images/files/png');
+                        },
+                        mounted() {
+                            this.$nextTick().then(()=> {
+                                //this.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
+                                //this.icon.value = this.model.attr.icon;
                             })
                         },
                         filters: {
@@ -1963,34 +1847,25 @@
                             me.model = null;
                         },
                         methods: {
-                            init: function(){
-                                const me = this;
-    
-                                me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
-                            },
-                            triggerInput: function(id){
+                            triggerInput(id){
                                 const self = this
     
                                 $(self.$refs[id]).click()
                             },
-                            apply: function(){
-                                const me = this;
-    
-                                me.saveAttr();
-    
+                            apply(){
+                                this.saveAttr();
                             },
-                            save: function(){
-                                const me = this;
-    
-                                me.saveAttr();
-                                _win.close();
+                            save(){
+                                this.saveAttr();
+                                win.close();
                             },
-                            close: function(){
-                                const me = this;
-    
-                                _win.close();
+                            close(){
+                                win.close();
                             },
-                            saveName: function(){
+                            onIconChange(val){
+                                this.activeName = 'config';
+                            },
+                            saveName(){
                                 const me = this;
     
                                 let _extName = node.ftype=='dir'?'':'.'+node.ftype;
@@ -2010,152 +1885,97 @@
                                     self.load();
                                 }
                             },
-                            saveAttr: function(){
+                            saveAttr(){
                                 const me = this;
-    
-                                me.model.attr = me.model.icon.value?_.extend(me.model.attr, {icon: me.model.icon.value}):me.model.attr;
-    
+                                
+                                _.extend(me.model.attr, {icon: me.icon.value});
+                                console.log(882, node, me.model.attr)
+
                                 let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
-    
+                                console.log(89,node,me.model,me.model.attr)
                                 if(_rtn == 1){
                                     self.load();
-                                    $(".list-context-menu").contextMenu('update');
-    
-                                    if(me.model.oldName != me.model.newName){
+                                    
+                                    if(me.model.name != node.name){
                                         me.saveName();
                                     }
                                 }
                             }
                         }
-                    })
+                    }).$mount("#fs-info");
     
-                },
-                copyIt(item){
-                    const self = this;
-    
-                    self.selectedItem = [];
-                    window.fsSelectedItem = [];
-                    self.selectedItem[0] = item;
-                    window.fsSelectedItem = _.cloneDeep(self.selectedItem)
-                    alertify.log(`已复制 ${window.fsSelectedItem.length} 项`);
-                },
-                copyThem(){
-                    const self = this;
-    
-                    window.fsSelectedItem = _.cloneDeep(self.selectedItem);
-                    alertify.log(`已复制 ${window.fsSelectedItem.length} 项`);
-                },
-                moveIt(){
-                    const self = this;
-                    
-                    
-                    if(_.isEmpty(window.fsSelectedItem)) {
-                        alertify.log("请选择移动内容")
-                        return false;
-                    }
-                    
-                    alertify.confirm(`确认要将下列所选文件移动到 ${self.rootPath} 目录? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
-                        if (e) {
-                            try {
-                                let rtn = true;
-                                _.forEach(window.fsSelectedItem,function(v){
-                                    let _rtn = fsHandler.fsMove([v.parent,v.name].join("/"), self.rootPath);
-                                    if(_rtn===0){
-                                        rtn = false;
-                                    }
-                                })
-                                if(rtn){
-                                    alertify.success("移动成功 " + self.rootPath);
-                                    self.load();
-                                }
-                            }
-                            catch(error){}
-                            finally{
-                                window.fsSelectedItem = [];
-                            }
-                        } else {
-                            
-                        }
-                    });
-                },
-                pasteIt(){
-                    const self = this
-    
-                    if(_.isEmpty(window.fsSelectedItem)) {
-                        alertify.log("请选择复制内容")
-                        return false;
-                    }
-                    
-                    alertify.confirm(`确认要将下列所选文件复制到 ${self.rootPath} 目录? <br><br> ${_.map(window.fsSelectedItem,'name').join("<br>")}`, function (e) {
-                        if (e) {
-                            try {
-                                let rtn = true;
-                                _.forEach(window.fsSelectedItem,function(v){
-                                    let _rtn = fsHandler.fsCopy([v.parent,v.name].join("/"), self.rootPath);
-                                    if(_rtn===0){
-                                        rtn = false;
-                                    }
-                                })
-                                if(rtn){
-                                    alertify.success("复制成功 " + self.rootPath);
-                                    self.load();
-                                }
-                            }
-                            catch(error){}
-                            finally{
-                                window.fsSelectedItem = [];
-                            }
-                        } else {
-                            
-                        }
-                    });
-                },
+                },     
                 moveTo(){
-                    const self = this;
-                    
-                    if(_.isEmpty(window.fsSelectedItem)) {
-                        alertify.log("请选择移动内容")
+                    if(_.isEmpty(this.selectedItem)) {
+                        this.$message({
+                            type: "info",
+                            message: "请选择移动内容"
+                        })
                         return false;
                     }
-                    const app = self.root;
-                    fileSystem.fileMoveTo(app,window.fsSelectedItem,this.load);
+                    const app = this.root;
+                    let items = [];
+                    _.forEach(this.selectedItem,(v)=>{
+                        items.push(_.find(this.model,{id:v}));
+                    })
+                    fileSystem.fileMoveTo(app,items,this.load);
     
                 },
                 copyTo(){
-                    const self = this
-    
-                    if(_.isEmpty(window.fsSelectedItem)) {
-                        alertify.log("请选择复制内容")
+                    
+                    if(_.isEmpty(this.selectedItem)) {
+                        this.$message({
+                            type: "info",
+                            message: "请选择复制内容"
+                        })
                         return false;
                     }
                     
-                    fileSystem.fileCopyTo(null,window.fsSelectedItem,this.load);
+                    let items = [];
+                    _.forEach(this.selectedItem,(v)=>{
+                        items.push(_.find(this.model,{id:v}));
+                    })
+
+                    fileSystem.fileCopyTo(null,items,this.load);
     
                 },
                 deleteThem() {
                     const self = this
+                    let items = [];
+                    _.forEach(this.selectedItem,(v)=>{
+                        items.push(_.find(this.model,{id:v}));
+                    })
+                    
+                    _.forEach(items,(v)=>{
+                        if(_.includes([['app','extend','assets','opt','script']],v.name)){
+                            this.$message({
+                                type: "info",
+                                message: "系统目录，不允许删除!"
+                            })
+                            return false;
+                        }
+                    })
+                    
     
-                    if(_.includes([['app','extend','assets','opt','script']],self.selectedItem[0].name)){
-                        alertify.error("系统目录，不允许删除!");
-                        return false;
-                    }
-    
-                    if(_.isEmpty(self.selectedItem)) {
-                        alertify.log("选择需要删除的对象！");
+                    if(_.isEmpty(this.selectedItem)) {
+                        this.$message({
+                            type: "info",
+                            message: "选择需要删除的对象!"
+                        })
                         return false;
                     }
     
                     const h = this.$createElement;
                     this.$msgbox({
                             title: `确定要删除选定文件?`,
-                            message: h('span', null, _.concat(h('p', null, `目录：${self.rootPath}`),_.map(self.selectedItem,(v)=>{ return h('p', null, v.name); })) ),
+                            message: h('span', null, _.concat(h('p', null, `目录：${this.rootPath}`),_.map(items,(v)=>{ return h('p', null, v.name); })) ),
                             showCancelButton: true,
                             confirmButtonText: '确定',
                             cancelButtonText: '取消',
                             type: 'warning',
                     }).then(() => {
-                        _.forEach(self.selectedItem, function(v){
-                            self.deleteIt(v, false);
+                        _.forEach(items, function(v){
+                            this.deleteIt(v, false);
                         })
                         
                     }).catch(()=>{
@@ -2164,26 +1984,31 @@
 
                 },
                 deleteIt(event, prompt) {
-                    const self = this
-    
+                    
                     if(_.includes(['admin','app','extend','assets','opt','script'],event.name)){
-                        alertify.error("系统目录，不允许删除!");
+                        this.$message({
+                            type: "info",
+                            message: "系统目录，不允许删除!"
+                        })
                         return false;
                     }
     
                     if(_.isEmpty(event)) {
-                        alertify.log("选择需要删除的对象！");
+                        this.$message({
+                            type: "info",
+                            message: "选择需要删除的对象!"
+                        })
                         return false;
                     }
     
                     if(prompt){
                         
-                        alertify.confirm(`确定要删除 ${event.name} 文件?`, function (e) {
+                        alertify.confirm(`确定要删除 ${event.name} 文件?`, (e)=> {
                             if (e) {
                                 let _rtn = fsHandler.fsDelete(event.parent,event.name);
     
                                 if (_rtn == 1){
-                                    self.load();
+                                    this.load();
                                 }
                             } else {
                                 
@@ -2195,7 +2020,7 @@
                         let _rtn = fsHandler.fsDelete(event.parent,event.name);
     
                         if (_rtn == 1){
-                            self.load();
+                            this.load();
                         }
                     }
     
@@ -3110,33 +2935,12 @@
                     }, "url:http://47.92.151.165/matrix/web.git;username:admin;password:admin;interval=24hour;");
                     $(".alertify-prompt .alertify-message").css('height','5vh');
                 },
-                selectIt(item){
-                    const self = this
-                    
-                    if(_.find(self.selectedItem,item)) {
-                        self.selectedItem = _.filter( self.selectedItem,function(v){ return v.id != item.id} );
-                    } else {
-                        self.selectedItem.push(item);
-                    }
-    
-                    window.fsSelectedItem = self.selectedItem;//[];
-                    
-                },
                 selectAll(){
-                    const self = this
-    
-                    let items = $("li.fs-node").find('.fs-name');
-    
-                    self.selectedItem = [];
-            
-                    _.forEach(items,function(v){
-                        let item = $(v).data("info");
-    
-                        self.selectedItem.push(item);
-                    })
-    
-                    //window.fsSelectedItem = self.selectedItem;//[];
-    
+                    if(_.isEmpty(this.selectedItem)){
+                        this.selectedItem = _.map(this.model,'id');
+                    } else {
+                        this.selectedItem = [];
+                    }
                 },
                 setRootPath(item) {
                     const self = this;

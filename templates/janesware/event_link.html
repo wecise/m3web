@@ -135,15 +135,6 @@
 		background: rgb(255, 255, 255);
 	}
 
-	/* section.event-diagnosis{
-		position: fixed;
-		width: 94%;
-		clear: both;
-		top: 160px;
-		left: 66px;
-		background: #ffffff;
-	} */
-
 	section.event-diagnosis > ul {
 		padding:15px 0px;
 		padding-left: 23vw;
@@ -216,11 +207,6 @@
 		font-weight: 600;
 	}
 
-	/* .el-autocomplete .el-input__inner{
-        height: 30px;
-        line-height: 30px;
-        border: unset;
-    } */
 
 	.el-tabs--border-card{
 		border: unset;
@@ -352,7 +338,7 @@
 
 
 	/* 全屏模式 */
-	header#header{
+	section#header{
 		display:none;
 	}
 	aside>#sidebar{
@@ -419,7 +405,7 @@
 		
 		
 		jQuery.ajax({
-			url: 'http://47.92.151.165/user/signin?company=wecise&username=admin&password=admin',
+			url: 'http://47.92.151.165:8080/user/signin?company=wecise&username=admin&password=admin',
 			dataType: 'json',
 			type: 'GET',
 			contentType: false,

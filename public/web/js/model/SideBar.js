@@ -353,7 +353,7 @@ class SideBar {
                     user:'{{.i18n.Tr "your_profile"}}'
                 }
             },
-            template:   `<el-container style="position:fixed;z-index:20;top:0;left:0;width:100%;background:rgb(37, 45, 71);">
+            template:   `<el-container style="position:fixed;z-index:20;top:0;left:0;width:100%;background:rgb(37, 45, 71);" id="header">
                             <el-header style="padding:0px 0px 0px 10px;height:50px;line-height:50px;display:flex;">
                                 <div style="width:80%;">
                                     <el-link href="/" :underline="false">
@@ -373,7 +373,6 @@ class SideBar {
                                             <el-menu-item index="system">系统管理</el-menu-item>
                                             <el-menu-item index="files">我的文件</el-menu-item>
                                             <el-menu-item index="home">默认首页</el-menu-item>
-                                            <el-menu-item index="fullscreen">全屏切换</el-menu-item>
                                             <el-menu-item index="signout">注销</el-menu-item>
                                         </el-submenu>
                                     </el-menu>

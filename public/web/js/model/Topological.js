@@ -774,16 +774,11 @@ class Topological {
             },
             template:   `<el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
                             <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
-                            <div class="bottom clearfix">
-                                <form class="form-horizontal">
-                                    <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                        <label :for="key" class="col-sm-3 control-label" style="text-align:left;">#{key}#</label>
-                                        <div class="col-sm-9" style="border-left: 1px solid rgb(235, 235, 244);">
-                                            <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value">
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                            <el-form label-position="left" label-width="80px">
+                                <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
+                                    <el-input type="text" :placeholder="key" :value="value" disabled></el-input>
+                                </el-form-item>
+                            </el-form>
                         </el-card>`,
             filters: {
                 pickIcon(evt){

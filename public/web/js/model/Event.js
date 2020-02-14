@@ -1221,17 +1221,12 @@ class Event {
                     },
                     template: `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-main>
-                                        <form class="form-horizontal">
-                                            <div class="form-group" v-for="(value,key) in model.rows[0]" style="padding: 0px 10px;margin-bottom: 1px;">
-                                                <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-if="_.includes(key,'day')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'occurrence')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="moment(value).format('LLL')" v-else-if="_.includes(key,'time')">
-                                                    <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value" v-else>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        <el-form label-width="120px"  label-position="left">
+                                            <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin:10px 0;">
+                                                <el-input :value="moment(value).format('LLL')" disabled v-if="_.includes(['time','day'],key)"></el-input>
+                                                <el-input :value="value" disabled v-else></el-input>
+                                            </el-form-item>
+                                        </el-form>
                                     </el-main>
                                 </el-container>`,
                     mounted(){

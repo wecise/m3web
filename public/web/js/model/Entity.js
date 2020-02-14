@@ -214,7 +214,8 @@ class Entity extends Matrix {
                             this.$root.toggleModel(_.without(['view-normal','view-tags'],window.EVENT_VIEW).join(""));
                         },
                         onRowContextmenu(row, column, event){
-                            
+                            const self = this;
+
                             $.contextMenu("destroy").contextMenu({
                                 selector: `.${column.id}`,
                                 trigger: "right",
@@ -241,7 +242,7 @@ class Entity extends Matrix {
                 
                                         let $this = this;
                                         _.delay(()=>{
-                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, this.$root.$refs.searchRef.search));
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
                                         },50)
                                     }
                                 }
@@ -534,10 +535,10 @@ class Entity extends Matrix {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 190px);">
-                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                    template: `<el-container style="height: calc(100vh - 190px);padding:10px;">
+                                    <el-header style="text-align: right;line-height: 40px;height:40px;">
                                         <el-tooltip content="保存">
-                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                            <el-button type="primary" icon="el-icon-edit"></el-button>
                                         </el-tooltip>
                                     </el-header>
                                     <el-main>
@@ -654,33 +655,25 @@ class Entity extends Matrix {
                         id: String,
                         model:Object
                     },
-                    template: `<el-container style="height: calc(100vh - 190px);">
-                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                    template: `<el-container style="height: calc(100vh - 190px);padding:10px;">
+                                    <el-header style="text-align: right;line-height: 40px;height:40px;">
                                         <el-tooltip content="保存">
-                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                            <el-button type="primary" icon="el-icon-edit"></el-button>
                                         </el-tooltip>
                                     </el-header>
                                     <el-main>
                                         <el-row :gutter="10">
                                             <el-col :span="24">
-                                                <div class="grid-content">
-                                                    <form class="form-horizontal">
-                                                        <!-- 有模板 -->
-                                                        <div class="form-group" v-for="item in _.filter(model.template,{region:'manager'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                            <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                                <input type="text" class="form-control-bg-grey" :placeholder="item.data" :value="model.rows[item.data] | handlerFormat">
-                                                            </div>
-                                                        </div>
-                                                        <!-- 没有模板 -->
-                                                        <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                            <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                                <input type="text" class="form-control-bg-grey" :placeholder="key" :value="value | handlerFormat">
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
+                                                <el-form label-width="120px">
+                                                    <!-- 有模板 -->
+                                                    <el-form-item :label="item.title" v-for="item in _.filter(model.template,{region:'manager'})" style="margin-bottom: 10px;" v-if="model.template">
+                                                        <el-input :placeholder="item.data" :value="model.rows[item.data] | handlerFormat"></el-input>
+                                                    </el-form-item>
+                                                    <!-- 没有模板 -->
+                                                    <el-form-item :label="key" v-for="(value,key) in model.rows" style="margin-bottom: 10px;" v-else>
+                                                        <el-input :placeholder="key" :value="value | handlerFormat"></el-input>
+                                                    </el-form-item>
+                                                </el-form>
                                             </el-col>
                                         </el-row>
                                     </el-main>
@@ -712,7 +705,6 @@ class Entity extends Matrix {
                 Vue.component("entity-diagnosis-config",{
                     delimiters: ['#{', '}#'],
                     props: {
-                        id: String,
                         model:Object
                     },
                     data(){
@@ -722,40 +714,27 @@ class Entity extends Matrix {
                             element: {}
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 190px);">
-                                    <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
+                    template: `<el-container style="height: calc(100vh - 190px);padding:10px;">
+                                    <el-header style="text-align: right;line-height: 40px;height:40px;">
                                         <el-tooltip content="保存">
-                                            <a href="javascript:void(0);" class="btn btn-link"><i class="fas fa-save"></i></a>
+                                            <el-button type="primary" icon="el-icon-edit"></el-button>
                                         </el-tooltip>
                                     </el-header>
                                     <el-main>
-                                        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-                                            <el-form-item label="活动名称" prop="name">
-                                                <el-input v-model="ruleForm.name"></el-input>
-                                            </el-form-item>
-                                        </el-form>
-                                        /* <el-row :gutter="10">
+                                        <el-row :gutter="10">
                                             <el-col :span="24">
-                                                <div class="grid-content">
-                                                    <form class="form-horizontal">
-                                                        <!-- 有模板 -->
-                                                        <div class="form-group" v-for="item in _.filter(model.template,{region:'config'})" style="padding: 0px 10px;margin-bottom: 1px;" v-if="model.template">
-                                                            <label :for="item.title" class="col-sm-2 control-label" style="text-align:left;">#{item.title}#</label>
-                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                                <textarea rows="6" class="form-control-bg-grey" :placeholder="item.data">#{model.rows[item.data]}#</textarea>
-                                                            </div>
-                                                        </div>
-                                                        <!-- 没有模板 -->
-                                                        <div class="form-group" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
-                                                            <label :for="key" class="col-sm-2 control-label" style="text-align:left;">#{key}#</label>
-                                                            <div class="col-sm-10" style="border-left: 1px solid rgb(235, 235, 244);">
-                                                                <textarea rows="6" class="form-control-bg-grey" :placeholder="value">#{value}#</textarea>
-                                                            </div>
-                                                        </div>
-                                                    </form>
-                                                </div>
+                                                <el-form label-width="120px">
+                                                    <!-- 有模板 -->
+                                                    <el-form-item :label="item.title" v-for="item in _.filter(model.template,{region:'config'})" style="margin-bottom: 10px;" v-if="model.template">
+                                                        <el-input type="textarea" :rows="6" :placeholder="item.data">#{model.rows[item.data]}#</el-input>
+                                                    </el-form-item>
+                                                    <!-- 没有模板 -->
+                                                    <el-form-item :label="key" v-for="(value,key) in model.rows" style="margin-bottom: 10px;" v-else>
+                                                        <el-input type="textares" :rows="6" :placeholder="value">#{value}#</el-input>
+                                                    </el-form-item>
+                                                </el-form>
                                             </el-col>
-                                        </el-row> */
+                                        </el-row>
                                     </el-main>
                                 </el-container>`,
                     filters:{
@@ -782,113 +761,6 @@ class Entity extends Matrix {
                     },
                     mounted(){
                     }
-                });
-
-                // 仪表盘
-                Vue.component("gauge-component",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        id: String,
-                        model: Object
-                    },
-                    data:function(){
-                        return {
-                            gaugePS: null
-                        }
-                    },
-                    template: ` <div style="width:100%;">
-                                    <canvas :id="'gauge-'+id"></canvas>
-                                    <p>#{model.host}#/<small>#{model.param}#</small></p>
-                                </div>`,
-                    mounted:function(){
-                        const self = this;
-                        self.init();
-                    },
-                    methods: {
-                        init: function(){
-                            let self = this;
-                            
-                            self.gaugePS = new RadialGauge({
-                                renderTo: `gauge-${self.id}`,
-                                width: 200,
-                                height: 200,
-                                units: 'PS',
-                                minValue: 0,
-                                maxValue: 100,
-                                majorTicks: [
-                                    '0',
-                                    '10',
-                                    '20',
-                                    '30',
-                                    '40',
-                                    '50',
-                                    '60',
-                                    '70',
-                                    '80',
-                                    '90',
-                                    '100'
-                                ],
-                                minorTicks: 2,
-                                ticksAngle: 270,
-                                startAngle: 45,
-                                strokeTicks: true,
-                                highlights  : [
-                                    { from : 50,  to : 80, color : '#ffff00' },
-                                    { from : 80, to : 100, color : 'rgba(225, 7, 23, 0.75)' }
-                                ],
-                                valueInt: 1,
-                                valueDec: 0,
-                                colorPlate: "#fff",
-                                colorMajorTicks: "#686868",
-                                colorMinorTicks: "#686868",
-                                colorTitle: "#000",
-                                colorUnits: "#000",
-                                colorNumbers: "#686868",
-                                valueBox: true,
-                                colorValueText: "#000",
-                                colorValueBoxRect: "#fff",
-                                colorValueBoxRectEnd: "#fff",
-                                colorValueBoxBackground: "#fff",
-                                colorValueBoxShadow: false,
-                                colorValueTextShadow: false,
-                                colorNeedleShadowUp: true,
-                                colorNeedleShadowDown: false,
-                                colorNeedle: "rgba(200, 50, 50, .75)",
-                                colorNeedleEnd: "rgba(200, 50, 50, .75)",
-                                colorNeedleCircleOuter: "rgba(200, 200, 200, 1)",
-                                colorNeedleCircleOuterEnd: "rgba(200, 200, 200, 1)",
-                                borderShadowWidth: 0,
-                                borders: true,
-                                borderInnerWidth: 0,
-                                borderMiddleWidth: 0,
-                                borderOuterWidth: 5,
-                                colorBorderOuter: "#fafafa",
-                                colorBorderOuterEnd: "#cdcdcd",
-                                needleType: "arrow",
-                                needleWidth: 2,
-                                needleCircleSize: 7,
-                                needleCircleOuter: true,
-                                needleCircleInner: false,
-                                animationDuration: 1500,
-                                animationRule: "dequint",
-                                fontNumbers: "Verdana",
-                                fontTitle: "Verdana",
-                                fontUnits: "Verdana",
-                                fontValue: "Led",
-                                fontValueStyle: 'italic',
-                                fontNumbersSize: 20,
-                                fontNumbersStyle: 'italic',
-                                fontNumbersWeight: 'bold',
-                                fontTitleSize: 24,
-                                fontUnitsSize: 22,
-                                fontValueSize: 50,
-                                animatedValue: true
-                            });
-                            self.gaugePS.draw();
-                            self.gaugePS.value = self.model.value || 0;
-                        }
-                    }
-                    
                 });
                 
                 // 配置比对
@@ -930,8 +802,7 @@ class Entity extends Matrix {
                                                 <p style="font-size:12px;">#{item.config}#</p>
                                                 <p style="font-size:12px;">#{item.files}#</p>
                                                 <p style="font-size:12px;">#{item.elements}#</p>
-                                                <!--a href="javascript:void(0);" class="btn btn-xs btn-primary" @click="compareAdd(item)">加入比对</a-->
-                                                <a href="javascript:void(0);" class="btn btn-xs btn-primary" @click="compareWithLast(item,$event)">与最新配置比对 <i class="fas fa-angle-right"></i></a>
+                                                <el-button type="primary" @click="compareWithLast(item,$event)">与最新配置比对 <i class="fas fa-angle-right"></i></el-button>
                                                 <p :class="'ace-compare-container ace-compare-container-'+objectHash.sha1(item)" style="display: flex;
                                                             display: -webkit-flex;
                                                             flex-direction: row;
@@ -962,7 +833,7 @@ class Entity extends Matrix {
                         },
                         compareWithLast(item,event){
                             const self = this;
-                            console.log(event,$($(event.target).find("i")).hasClass("fas"))
+                            
                             // 检查是否已存在
                             let node = `.ace-compare-container-${objectHash.sha1(item)}`;
                             
@@ -984,7 +855,7 @@ class Entity extends Matrix {
                                 $($(event.target).find("i")).addClass("fa-angle-down");
 
                                 _.forEach(self.resultDiff.selectedId,function(v,k){
-                                    let tmp = omdbHandler.fetchData("id="+v.id + " | vtime="+v.vtime);
+                                    let tmp = omdbHandler.fetchData("id="+v.id + " | vtime="+moment(v.vtime).format('yyyy-MM-dd HH:mm:ss.SSS'));
                                     
                                     if (k == 0) {
                                         self.resultDiff.setting.left.content = JSON.stringify(tmp.message[0],null, 2);
@@ -1119,6 +990,7 @@ class Entity extends Matrix {
                                                 <div v-else-if="item.type==='diagnosis'">
                                                     <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line" @tab-click="toggleTab">
                                                         <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name">
+                                                        
                                                             <div v-if="it.type==='base'">
                                                                 <entity-diagnosis-base :id="it.name+ '-base'" :model="it.model.detail"></entity-diagnosis-base>
                                                             </div>
@@ -1126,7 +998,8 @@ class Entity extends Matrix {
                                                                 <entity-diagnosis-manager :id="it.name+ '-manager'" :model="it.model.detail"></entity-diagnosis-manager>
                                                             </div>
                                                             <div v-else-if="it.type==='config'">
-                                                                <entity-diagnosis-config :id="it.name+ '-config'" :model="it.model.detail"></entity-diagnosis-config>
+                                                                
+                                                                <entity-diagnosis-config :model="it.model.detail"></entity-diagnosis-config>
                                                             </div>
                                                             <div v-else-if="it.type==='compare'">
                                                                 <entity-diagnosis-compare :id="it.name+ '-compare'" :model="it.model"></entity-diagnosis-compare>
@@ -1444,7 +1317,7 @@ class Entity extends Matrix {
                                 let detail = {title:`实体卡片 ${row.id}`, name:`diagnosis-${id}`, type: 'diagnosis', child:[
                                                 {title:'基本信息', name:`diagnosis-base-${id}`, type: 'base', model:model},
                                                 {title:'管理信息', name:`diagnosis-manager-${id}`, type: 'manager', model:model},
-                                                {title:'配置信息', name:`diagnosis-cofig-${id}`, type: 'cofig', model:model},
+                                                {title:'配置信息', name:`diagnosis-config-${id}`, type: 'config', model:model},
                                                 {title:'配置比对', name:`diagnosis-compare-${id}`, type: 'compare', model:model},
                                                 {title:'资源信息', name:`diagnosis-topological-${id}`, type: 'topological', model:model},
                                                 {title:'实体发现', name:`diagnosis-discover-${id}`, type: 'discover', model:model},
