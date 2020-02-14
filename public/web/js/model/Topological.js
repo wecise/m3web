@@ -1997,21 +1997,17 @@ class Topological {
 
         let main =  {
             delimiters: ['${', '}'],
-            template:   `<el-row type="flex">
-                            <el-col :span="24">
-                                <el-container style="background: transparent;height: 100%;">
-                                    <el-aside style="background-color:transparent;" class="topological-view-edges" ref="left">
-                                        <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
-                                    </el-aside>
-                                    <el-container :style="containerHeight" ref="main">
-                                        <graph-view-container ref="graphViewRef"></graph-view-container>
-                                    </el-container>
-                                    <el-aside style="height:100%;overflow:hidden;background-color:transparent;" class="topological-view-diagnosis" ref="right">
-                                        <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
-                                    </el-aside>
-                                </el-container>
-                            </el-col>
-                        </el-row>`,
+            template:   `<el-container style="background: transparent;height: 100%;">
+                            <el-aside style="background-color:transparent;" class="topological-view-edges" ref="left">
+                                <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
+                            </el-aside>
+                            <el-container :style="containerHeight" ref="main">
+                                <graph-view-container ref="graphViewRef"></graph-view-container>
+                            </el-container>
+                            <el-aside style="height:100%;overflow:hidden;background-color:transparent;" class="topological-view-diagnosis" ref="right">
+                                <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
+                            </el-aside>
+                        </el-container>`,
             data: {
                 id: randomId,
                 splitInst: null,

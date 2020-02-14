@@ -882,13 +882,13 @@ class Entity extends Matrix {
                 });
 
                 // 资源信息
-                let entityDiagnosisTopological = Vue.extend({
+                Vue.component("entity-diagnosis-topological",{
                     delimiters: ['#{', '}#'],
                     props: {
                         id: String,
                         model: Object
                     },
-                    template:  `<el-container style="height: calc(100vh - 190px);">
+                    template:  `<el-container style="height: calc(100vh - 190px);padding:5px;">
                                     <el-main style="padding:0px;">
                                         <div :id="'topological-app-'+rId"></div>
                                     </el-main>
@@ -905,7 +905,7 @@ class Entity extends Matrix {
                         init(){    
                             var mxTopological = new Topological();
                             mxTopological.init();
-                            mxTopological.graphScript = _.map([this.model.rows],function(v){
+                            mxTopological.graphScript = _.map([this.model.rows],(v)=>{
                                 return {value: `match () - [*1] -> ("${v.id}") - [*1] -> ()`};
                             });
                             mxTopological.mount(`#topological-app-${this.rId}`);
@@ -1010,7 +1010,7 @@ class Entity extends Matrix {
                                                         </el-tab-pane>
                                                     </el-tabs>
                                                 </div>
-                                                <div v-else-if="item.type==='graph'" style="padding-top: 1px;margin: 0px -1px;">
+                                                <div v-else-if="item.type==='graph'" style="height: calc(100vh - 170px);padding:5px;">
                                                     <entity-view-graph id="entity-view-graph" :model="model.message"></entity-view-graph>
                                                 </div>
                                             </tab>
@@ -1075,9 +1075,6 @@ class Entity extends Matrix {
                                 forTime:  ' for vtime ',
                             }
                         }
-                    },
-                    components: {
-                        'entity-diagnosis-topological': entityDiagnosisTopological,
                     },
                     watch:{
                         'layout.main.tabs':{

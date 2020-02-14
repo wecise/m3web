@@ -1064,7 +1064,7 @@ class Event {
                                                 <el-tab-pane label="" name="0" lazy="true" style="height:100%;">
                                                     <event-view-aigroup-grid :model="dt.modelByGroup"></event-view-aigroup-grid>
                                                 </el-tab-pane>
-                                                <el-tab-pane label="" name="1" lazy="true" style="height:100%;">
+                                                <el-tab-pane label="" name="1" lazy="true" style="height:100%;padding:5px;">
                                                     <event-view-aigroup-graph :model="dt.modelByGroup" ></event-view-aigroup-grap>
                                                 </el-tab-pane>
                                             </el-tabs>
