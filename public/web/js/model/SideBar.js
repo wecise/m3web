@@ -366,14 +366,18 @@ class SideBar {
                                     <el-menu :default-active="activeIndex" class="topbar-el-menu" mode="horizontal" @select="onSelect">
                                         <el-submenu index="2">
                                             <template slot="title">
-                                                <el-avatar size="small" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"></el-avatar>
                                                 #{window.SignedUser_UserName}#
                                             </template>
-                                            <el-menu-item index="user">用户</el-menu-item>
-                                            <el-menu-item index="system">系统管理</el-menu-item>
+                                            <el-menu-item index="user">
+                                                <template slot="title">
+                                                    <i class="el-icon-user"></i>
+                                                    <span slot="title">用户</span>
+                                                </template>
+                                            </el-menu-item>
+                                            <el-menu-item index="system" divided>系统管理</el-menu-item>
                                             <el-menu-item index="files">我的文件</el-menu-item>
                                             <el-menu-item index="home">默认首页</el-menu-item>
-                                            <el-menu-item index="signout">注销</el-menu-item>
+                                            <el-menu-item index="signout" divided>注销</el-menu-item>
                                         </el-submenu>
                                     </el-menu>
                                 </div>
@@ -437,7 +441,7 @@ class SideBar {
                                 background-color="transparent"
                                 text-color="#fff"
                                 active-text-color="#ffd04b"
-                                style="height:100vh;overflow-y:auto;float:left;">
+                                style="height:100vh;width:100%;overflow-y:auto;float:left;">
                             <el-menu-item index="toggle" style="display:">
                                 <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:17px;color:#fff;"></i>
                             </el-menu-item>
@@ -507,7 +511,7 @@ class SideBar {
                             <!-- 没有分组的应用-->
                             <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
                                 <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                <span slot="title" style="width:auto;">
+                                <span slot="title">
                                     #{item.cnname}#
                                     <el-tooltip content="在新窗口中打开">
                                         <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>

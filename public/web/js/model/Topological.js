@@ -774,7 +774,7 @@ class Topological {
             },
             template:   `<el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
                             <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
-                            <el-form label-position="left" label-width="80px">
+                            <el-form label-position="left" label-width="80px" class="form-no-border">
                                 <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
                                     <el-input type="text" :placeholder="key" :value="value" disabled></el-input>
                                 </el-form-item>
@@ -2216,7 +2216,7 @@ class Topological {
                             window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).show();
                         }
                     } catch(err){
-                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, $(this.$refs.graphViewRef.$el).find("main"), callbackFun);
+                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, $(this.$refs.graphViewRef.$el).find("#graphContainer"), callbackFun);
                     
                         new Vue({
                             delimiters: ['#{', '}#'],

@@ -78,12 +78,11 @@
 	/*----------  最外层element会自动增加组件同名 class="entity-tree-component"  ----------*/
 	<template>
 		<el-container>
-            <el-header style="height:30px;line-height:30px;padding:5px 8px;margin-bottom: 5px;">
-                <el-input placeholder="搜索" size="mini"></el-input>
+            <el-header style="height:30px;line-height:30px;display: none;">
+                <el-input placeholder="搜索"></el-input>
             </el-header>
             <el-main style="padding: 5px;height: calc(100vh - 175px);">
-                <el-tree id="tagTree"
-                    node-key="id"
+                <el-tree node-key="id"
                     default-expand-all
                     :data="nodes" :props="defaultProps" 
                     draggable
@@ -97,15 +96,19 @@
                     @node-drop="onDrop"
                     @node-click="onNodeClick"
                     @node-expand="onNodeExpand"
-                    @node-contextmenu="onNodeContextmenu"
                     style="background: transparent;"
                     ref="tree">
-                    <span slot-scope="{ node, data }" style="width:100%;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+                    <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
                         <span :class="data.iconSkin"></span>
                         <span>${node.label}</span>
-                        <span v-if="data.name!=''">
-                            <el-link v-show="data.del" type="primary" @click="delTagDir(data,$event)" style="float:right;" icon="el-icon-delete"></el-link>
-                            <el-link v-show="data.del" type="primary" @click="editTagDir(data,$event)" style="margin-right: 10px;float:right;" icon="el-icon-edit"></el-link>
+                        <span v-if="data.parent == null && data.rtype=='A2'">
+                            <el-button v-show="data.del" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+                            <el-button v-show="data.del" type="text" @click="loadSubNodeByA2(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
+                        </span>
+                        <span v-else-if="data.rtype=='A2'">
+                            <el-button v-show="data.del" type="text" @click="delTagDir(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+                            <el-button v-show="data.del" type="text" @click="editTagDir(data,$event)" style="float:right;width:14px;margin-left:5px;" icon="el-icon-edit"></el-button>
+                            <el-button v-show="data.del" type="text" @click="addTagDir(data,$event)" style="float:right;width:14px;" icon="el-icon-plus"></el-button>
                         </span>
                     </span>                  
                 </el-tree>
@@ -127,40 +130,7 @@
                     children: 'children',
                     label: 'name'
                 },
-                
-                zSetting: {
-                    view: {
-                        dblClickExpand: this.onDblClickExpand,
-                        addDiyDom: this.addCountDom,
-                        removeHoverDom: this.removeHoverDom,
-                        showTitle: true
-                    },
-                    edit: {
-                        enable: false
-                    },
-                    callback: {
-                        onClick: this.onClick,
-                        onExpand: this.onExpand
-                    },
-                    data: {
-                        simpleData: {
-                            enable: true,
-                            idKey : "id",
-                            pIdKey : "pId"
-                        },
-                        key: {
-                            name: 'name',
-                            title: 'title'
-                        }
-                    },
-                    check: {
-                        enable: false
-                    }
-                },
-                nodes: [],
-                selectedNode: null,
-                curTarget: null,
-                curTmpTarget: null,
+                nodes: []
             }
         },
         created(){
@@ -192,16 +162,14 @@
                 return rtn;
             },
             onNodeExpand(tNode){
-                console.log(1,tNode)
+                
                 if(tNode.rtype === 'A1') {
-                    this.loadSubNode([{cid: tNode.cid, tNode: tNode}]);
+                    this.loadSubNodeByA1([{cid: tNode.cid, tNode: tNode}]);
                     return;
                 }
 
                 if(tNode.rtype === 'A2' && tNode.parent == null){
-
                     let tagDir = tagHandler.getTagDir(this.model.domain);
-
                     // 忽略第一层
                     _.extend(_.find(this.nodes,{cid:tNode.cid}), {children: this.recursiveTraverse(tagDir.nodes)});
 
@@ -213,10 +181,10 @@
                     return false;
                 }
             },
-            onNodeClick(tNode) {
+            onNodeClick(tNode){
                 
                 if(tNode.rtype === 'A1') {
-                    this.loadSubNode([{cid: tNode.cid, tNode: tNode}]);
+                    this.loadSubNodeByA1([{cid: tNode.cid, tNode: tNode}]);
                 }
 
                 if(tNode.rtype === 'A2' && tNode.parent == null){
@@ -243,48 +211,6 @@
                     }
                     this.$root.$refs.searchRef.search();
                 }
-            },
-            onNodeContextmenu(event,data,node,el){
-                
-                $.contextMenu("destroy").contextMenu({
-                    selector: '#tagTree [role="treeitem"]',
-                    trigger: 'right',
-                    autoHide: true,
-                    delay: 5,
-                    hideOnSecondTrigger: true,
-                    build: function($trigger, e) {
-        
-                        return {
-                            callback: function(key, opt) {
-                                
-                            },
-                            items: {
-                                    "m10_diagnosis": {
-                                        "name": "性能趋势",
-                                        "icon": "fas fa-diagnoses"
-                                    },
-                                    "m20_d1":"----------",
-                                    "m30_trends": {
-                                        "name": "性能分析",
-                                        "icon": "fas fa-trash"
-                                    },
-                                    "m40_d2":"----------",
-                                    "m50_threshold": {
-                                        "name": "阈值管理",
-                                        "icon": "fas fa-hand-peace"
-                                    },
-                                    "m60_d3":"----------",
-                                    "m70_tags": {
-                                        "name": "标签", 
-                                        "type": "text", 
-                                        "value": "", 
-                                        "icon": "fas fa-tags"
-                                    }
-                                }
-
-                        }
-                    }
-                });
             },
             onDragStart(node, ev) {
                 console.log('drag start', node);
@@ -316,9 +242,9 @@
                 console.log('dragging drag: ', draggingNode);
                 return draggingNode;
             },
-            loadSubNode(node){
+            loadSubNodeByA1(node){
 				
-                _.forEach(node, function(v,k){
+                _.forEach(node, (v,k)=>{
 
                     let rtn = omdbHandler.classList(v.cid);
 
@@ -327,7 +253,7 @@
                     }
 
                     if( v.cid === -1 ) {
-                        let _arr = _.map(rtn,function(v){ return _.merge(v,{rtype:'A1', open:true})});
+                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:true})});
                         _.merge(this.nodes[0],{ children: _arr});
 
                     } else {
@@ -341,277 +267,68 @@
                     }
                 })
 
+            },
+            loadSubNodeByA2(tNode){
+                let tagDir = tagHandler.getTagDir(this.model.domain);
+                // 忽略第一层
+                _.extend(_.find(this.nodes,{cid:tNode.cid}), {children: this.recursiveTraverse(tagDir.nodes)});
+
 	        },
-            onExpand(event, treeId, treeNode) {
-                const self = this;
-
-                let recursiveTraverse = function (node) {
-
-                    let rtn = null;
-
-                    rtn = _.map(node, function(v,k){
-                        return {cid: v.name, parent:'A2', rtype:'A2', name: v.name, title: v.name, children: recursiveTraverse(v.nodes), iconSkin: 'tag'};
-                    });
-
-                    return rtn;
-                };
-
-	            if(treeNode.rtype === 'A2' && treeNode.parent == null){
-
-	                let tagDir = tagHandler.getTagDir(self.model.domain);
-
-	                // 忽略第一层
-	                let tree = recursiveTraverse(tagDir.nodes);
-
-	                self.zTree.removeChildNodes(treeNode);
-		            self.zTree.addNodes(treeNode, tree);
-
-                }
-            },
-            onClick(event, treeId, treeNode, clickFlisParentag) {
-                const self = this;
-
-                self.selectedNode = treeNode;
-
-                // 删除标签
-                if(treeNode.rtype === 'A3'){
-                    return;
-                }
-
-                if(treeNode.rtype === 'A1') {
-                    self.initSubNode([{cid: treeNode.cid, treeNode: treeNode}]);
-                }
+            addTagDir(tNode,event){
                 
-                // 根据节点过滤数据
-                // A1 为class搜索
-                // A2 为tag搜索
-                if(treeNode.rtype=='A1'){
-                    // if(treeNode.parent == null){
-                    //     self.$root.options.term = `class=*`;    
-                    // } else {
-                        self.$root.options.class = `#${treeNode.class}: | `;
-                    // }
-                    self.$root.$refs.searchRef.search();
-                } else if(treeNode.rtype=='A2'){
-                    if(treeNode.parent == null){
-                        self.$root.options.term = `tags=*`;    
-                    } else {
-                        self.$root.options.term = `tags=${treeNode.name}`;
-                    }
-                    self.$root.$refs.searchRef.search();
-                }
-                // if(treeNode.parent == null){
-                //     self.$root.options.term = `class=${treeNode.name}`;
-                //     self.$root.$refs.searchRef.search();
-                //     // treeNode.name = '';
-                //     // eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
-                // } else {
-                //     self.$root.options.term = treeNode.name;
-                //     self.$root.$refs.searchRef.search();
-                //     //eventHub.$emit(`DATATABLE-FILTER-BY-${self.model.domain}-EVENT`,treeNode);
-                // }
-            
-                if(treeNode.rtype === 'A1') {
+                event.stopPropagation();
 
-                    // 右键菜单
-                    let sObj = $("#" + treeNode.tId + "_span");
-                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
+                this.$prompt('请输入标签名称', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消'
+                    }).then(({ value }) => {
 
-                    if (treeNode.editNameFlag || $("#addBtn_"+treeNode.tId).length>0) return;
-
-                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
-										<span class='button class edit' id='editBtn_${treeNode.tId}' title='编辑' ></span>
-										<span class='button class console' id='consoleBtn_${treeNode.tId}' title='查询' ></span>
-										<span class='button class more' id='moreBtn_${treeNode.tId}' title='更多'></span>
-								    </div>`;
-
-
-                    // if(scObj.length > 0){
-                    //     scObj.after(addStr);
-                    // } else {
-                    //     sObj.after(addStr);
-                    // }
-
-                    return;
-                }
-
-                if(treeNode.cid === 'A2' && treeNode.parent == null){
-                    // 右键菜单
-                    let sObj = $("#" + treeNode.tId + "_span");
-                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
-
-                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
-										<span class='blank'></span>
-										<span class='button add' id='addBtn_${treeNode.tId}' title='新建标签'></span>
-										<span class='button refresh' id='refreshBtn_${treeNode.tId}' title='刷新'></span>
-								</div>`;
-
-                    if(scObj.length > 0){
-                        scObj.after(addStr);
-                    } else {
-                        sObj.after(addStr);
-                    }
-
-                    // refresh
-                    let btnRefresh = $("#refreshBtn_"+treeNode.tId);
-                    if (btnRefresh) btnRefresh.bind("click", function(event){
-
-                        event.stopPropagation();
-
-                        self.refreshTagDir();
-
+                        let name = "";
+                        if(tNode.parent==null){
+                            name = [value].join("/").replace(/\/\//g,"/");
+                        } else {
+                            name = [tNode.name, value].join("/").replace(/\/\//g,"/");
+                        }
+                        console.log(1,tNode,name)
+                        let rtn = tagHandler.updateTagDir(this.model.domain, name);
+                        
+                        if(rtn === 1){
+                            this.loadSubNodeByA2(tNode);
+                        } 
+                    }).catch(() => {
+                         
                     });
-
-                    // add
-                    let btnAdd = $("#addBtn_"+treeNode.tId);
-                    if (btnAdd) btnAdd.bind("click", function(event){
-
-                        event.stopPropagation();
-
-                        alertify.prompt("标签名称", function (e, str) {
-                            // str is the input text
-                            if (e) {
-                                self.addTagDir(str,treeNode);
-                            } else {
-                                // user clicked "cancel"
-                            }
-                        }, "新建标签");
-
-                        $(".alertify-prompt .alertify-message").css('height','5vh');
-
-                    });
-
-                    return;
-                }
-
-                if(treeNode.rtype === 'A2'){
-                    // 右键菜单
-                    let sObj = $("#" + treeNode.tId + "_span");
-                    let scObj = $("#" + treeNode.tId + "_a").find(".count");
-
-                    let addStr = `<div class="well toolbar" id='toolbars_${treeNode.tId}' >
-										<span class='button edit' id='editBtn_${treeNode.tId}' title='编辑标签'></span>
-										<span class='button add' id='addBtn_${treeNode.tId}' title='新建标签'></span>
-										<span class='button remove' id='deleteBtn_${treeNode.tId}' title='删除标签' ></span>
-								</div>`;
-
-
-                    if(scObj.length > 0){
-                        scObj.after(addStr);
-                    } else {
-                        sObj.after(addStr);
-                    }
-
-                    // edit
-                    let btnEdit = $("#editBtn_"+treeNode.tId);
-                    if (btnEdit) btnEdit.bind("click", function(event){
-
-                        event.stopPropagation();
-
-                        $(`#${treeNode.tId}_span`).editable({
-                            container: 'body',
-                            success: function(response, newValue) {
-
-                                let rtn = tagHandler.delTagDir(self.model.domain, treeNode.name);
-
-                                if(rtn === 1){
-                                    tagHandler.updateTagDir(self.model.domain, newValue);
-                                }
-                            }
-                        });
-
-                        $(`#${treeNode.tId}_span`).editable('show');
-
-                        $(`#${treeNode.tId}_span`).on('hidden', function (e, reason) {
-                            $(`#${treeNode.tId}_span`).editable('destroy');
-                        });
-
-                    });
-
-                    // add
-                    let btnAdd = $("#addBtn_"+treeNode.tId);
-                    if (btnAdd) btnAdd.bind("click", function(event){
-
-                        event.stopPropagation();
-
-                        alertify.prompt("标签名称", function (e, str) {
-                            // str is the input text
-                            if (e) {
-                                self.addTagDir(str,treeNode);
-                            } else {
-                                // user clicked "cancel"
-                            }
-                        }, "新建标签");
-
-                        $(".alertify-prompt .alertify-message").css('height','5vh');
-
-                    });
-
-                    // delete
-                    let btnDel = $("#deleteBtn_"+treeNode.tId);
-                    if (btnDel) btnDel.bind("click", function(event){
-
-                        event.stopPropagation();
-
-                        self.delTagDir(treeNode);
-
-                    });
-
-                    return;
-                }
-
-
-            },
-            addCountDom: function (treeId, treeNode) {
-                const self = this;
-                let aObj = $("#" + treeNode.tId + "_a");
-                
-                if(!_.isEmpty(treeNode.children)){
-                    if (treeNode.children.length > 0){
-                        let str = `<span class='${treeNode.name} count' style='color:rgb(160,160,160);'>(${treeNode.children.length})</span>`;
-                        aObj.append(str);
-                    }
-                }
-            },
-            removeHoverDom: function (treeId, treeNode) {
-                $("#toolbars_"+treeNode.tId).unbind().remove();
-            },
-            refresh: function(event) {
-                const self = this;
-
-                let pNode = self.selectedNode;
-
-
-                let _node = self.zTree.getNodesByParam("name", pNode.name, null)[0];
-
-                self.zTree.removeChildNodes(_node.getParentNode());
-                self.initData();
-
-                _.delay(function(){
-                    self.initData();
-                },2000);
-
-                _.delay(function(){
-                    self.zTree.expandNode(_node, false, false, true);
-                },2500);
-
-            },
-	        addTagDir: function(newName,treeNode){
-                const self = this;
-
-				let _uuid = fsHandler.callFsJScript("/utils/uuid.js").message;
-
-				let _name = [treeNode.name, newName].join("/").replace(/\/\//g,"/");
-
-                let rtn = tagHandler.updateTagDir(self.model.domain, _name);
-                
-                if(rtn === 1){
-                    self.zTree.addNodes(treeNode, {cid: `tag_${_uuid}`, pId:treeNode.cid, rtype: treeNode.rtype, name: _name, title: newName, iconSkin: treeNode.iconSkin});
-                }
 
             },
             editTagDir(tNode,event){
-                event.preventDefault();
+
+                event.stopPropagation();
+
+                this.$prompt('请输入标签名称', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputValue: tNode.name
+                    }).then(({ value }) => {
+
+                        // 先删除
+                        let rtn = tagHandler.delTagDir(this.model.domain, tNode.name);
+                        
+                        // 后添加
+                        if(rtn === 1) {
+                            let name = "";
+                            if(tNode.parent==null){
+                                name = [value].join("/").replace(/\/\//g,"/");
+                            } else {
+                                name = [tNode.name, value].join("/").replace(/\/\//g,"/");
+                            }
+                            console.log(1,tNode,name)
+                            tagHandler.updateTagDir(this.model.domain, name);
+                        }
+
+                        
+                    }).catch(() => {
+                         
+                    });
             },
             delTagDir(tNode,event){
                 event.preventDefault();
@@ -630,7 +347,7 @@
                 }).then(() => {
                     let rtn = tagHandler.delTagDir(this.model.domain, tNode.name);
                     if(rtn === 1) {
-                        this.loadNodes();
+                        this.onNodeClick(tNode);
                     }
                     
                 }).catch(()=>{

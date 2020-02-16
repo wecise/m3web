@@ -166,6 +166,46 @@ class TagHandler{
         return rtn;
 
     };
+
+
+    /* Rename tag name */
+    reNameTagDir(system,source,target){
+
+        let rtn = 0;
+        let fm = new FormData();
+        fm.append("system", "false");
+        fm.append("tagpath", source);
+        fm.append("topath", target);
+
+        jQuery.ajax({
+            url: `/tagdir/${system}`,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            mimeType: 'multipart/form-data',
+            type: 'PUT',
+            data: fm,
+            async: false,
+            beforeSend:function(xhr){},
+            complete: function(xhr, textStatus) {},
+            success: function (data, status) {
+
+                userHandler.ifSignIn(data);
+
+                if (data.status == "ok"){
+                    rtn = 1;
+                }
+            },
+            error: function(xhr, textStatus, errorThrown){
+                rtn = 0;
+                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+            }
+        });
+
+        return rtn;
+
+    };
+    
 }
 
 var tagHandler = new TagHandler();

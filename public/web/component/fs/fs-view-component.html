@@ -601,6 +601,158 @@
     
                     }
                 });
+                
+                Vue.component('thumbnail-view',{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Array
+                    },
+                    template:   `<el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
+                                    <el-button type="default" 
+                                            style="max-width: 25em;width: 25em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
+                                            v-for="item in model">
+                                            <div style="position: relative;right: -100px;">    
+                                                <el-dropdown trigger="hover" placement="top-start" @command="$root.$refs.viewRef.$children[0].onMenuCommand">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div>
+                                            <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            
+                                            <div>
+                                                <el-popover
+                                                        placement="top-start"
+                                                        trigger="hover"
+                                                        open-delay="1000"
+                                                        :content="item.name">
+                                                    <p slot="reference" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                        名称：#{item.name}#
+                                                    </p>
+                                                </el-popover>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">作者：#{item|pickAuthor}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                    标签：#{item.tags}#
+                                                </p>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">描述：#{item|pickRemark}#</p>
+                                            </div>
+                                            <el-checkbox :label="item.id"></el-checkbox>
+                                    </el-button>
+                                </el-checkbox-group>`,
+                    data(){
+                        return {
+                            
+                        }
+                    },
+                    filters: {
+                        pickName: function(item){
+    
+                            if (_.isEmpty(item)) return '';
+    
+                            let _name = _.head(item.name.split("."));
+    
+                            if(!_.isEmpty(_name)){
+                                _name = _.truncate(_name, {
+                                    'length': 9
+                                });
+                            }
+    
+                            return _name;
+                        },
+                        pickIcon: function(item){
+                            // extend || ...
+                            if( item.fullname === '/extend' ){
+                                return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            } else {
+    
+                                try {
+                                    return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                }
+                                catch(error){
+                                    return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                                }
+                            }
+    
+                        },
+                        pickTags: function(item){
+    
+                            if(item.tags){
+                                return item.tags.join(",");
+                            } else {
+                                return "";
+                            }
+                        },
+                        pickAuthor: function(item){
+                            if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                                return _.attempt(JSON.parse.bind(null, item.attr)).author;
+                            }
+                        },
+                        pickRemark: function(item){
+                            if (!_.isEmpty(item.attr) || !_.isEqual(item.attr, 'null')) {
+                                return _.attempt(JSON.parse.bind(null, item.attr)).remark;
+                            }
+                        }
+                    },
+                    watch:{
+                      model:{
+                          handler:function(val,oldVal){
+                              const me = this;
+    
+                              let tagify = $('input[name=tags]').data("tagify");
+
+                              if(tagify){
+                                tagify.removeAllTags.bind(tagify);
+                              }
+                              me.init();
+    
+                          },
+                          deep:true
+                      }
+                    },
+                    mounted(){
+                        this.init();
+                    },
+                    methods: {
+                        init(){
+                            const me = this;
+    
+                            // init Tagify script on the above inputs
+                            $('input[name=tags]').tagify()
+                                      .on('add', me.onAddTag)
+                                      .on('remove', me.onRemoveTag);
+                        },
+                        onAddTag(event,tagName){
+                            const me = this;
+    
+                            let item = $(event.currentTarget).parent().parent().data("info");
+    
+                            let input = {class: item.class, action: "+", tag: tagName.value, id: item.id};
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+    
+                            if(rtn.status == 'ok'){
+                                me.$parent.init();
+                            }
+    
+                        },
+                        onRemoveTag(event,tagName){
+                            const me = this;
+                            let item = $(event.currentTarget).parent().parent().data("info");
+                            let input = {class: item.class, action: "-", tag: tagName.value, id: item.id};
+                            let rtn = fsHandler.callFsJScript("/matrix/tags/tag_service.js", encodeURIComponent(JSON.stringify(input)));
+    
+                            if(rtn.status == 'ok'){
+                                me.$parent.init();
+                            }
+    
+                        }
+    
+                    }
+                });
     
                 Vue.component('list-view',{
                     delimiters: ['#{', '}#'],
@@ -624,7 +776,6 @@
                                                     </el-dropdown>
                                                 </div>
                                                 <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
-                                                
                                                 <div>
                                                     <el-popover
                                                             placement="top-start"
@@ -761,6 +912,11 @@
                     props: {
                         model: Array
                     },
+                    data(){
+                        return {
+
+                        }
+                    },
                     template:   `<div id="grid">
                                     <el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
                                         <el-button type="default" 
@@ -773,34 +929,24 @@
                                                                 <i class="el-icon-arrow-down el-icon--right"></i>
                                                             </span>
                                                             <el-dropdown-menu slot="dropdown">
-                                                                <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">#{menuItem.name}#</el-dropdown-item>
+                                                                <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in $root.$refs.viewRef.$children[0].getMenuModel(item)">
+                                                                    #{menuItem.name}#
+                                                                </el-dropdown-item>
                                                             </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </div>
                                                 <el-image style="width:34px;margin:5px;" :src="item | pickIcon"></el-image>
                                                 <div>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">#{item.name}#</p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
+                                                        #{item.name}#
+                                                    </p>
                                                 </div>
                                                 <el-checkbox :label="item.id"></el-checkbox>
                                         </el-button>
                                     </el-checkbox-group>
                                 </div>`,
                     filters: {
-                        pickName: function(item){
-    
-                            if (_.isEmpty(item)) return '';
-    
-                            let _name = _.head(item.name.split("."));
-    
-                            if(!_.isEmpty(_name)){
-                                _name = _.truncate(_name, {
-                                    'length': 9
-                                });
-                            }
-    
-                            return _name;
-                        },
-                        pickIcon: function(item){
+                        pickIcon(item){
     
                             // extend || ...
                             if( item.fullname === '/extend' ){
@@ -818,9 +964,6 @@
                                 }
                             }
                         }
-                    },
-                    mounted(){
-                        
                     }
                 });
     
@@ -1172,15 +1315,14 @@
                             previewMaxWidth: 100,
                             previewMaxHeight: 100,
                             previewCrop: true
-                        },
-                        swal: {}
+                        }
                     },
                     action: {
                         from: null,
                         to: null
                     },
                     signedUserName: '',
-                    currentView: 'grid-view'
+                    currentView: ''
                 }
             },
             created() {
@@ -1191,18 +1333,19 @@
                 eventHub.$on("FS-FORWARD-EVENT", this.openIt);
                 eventHub.$on("PATH-CHANGE-EVENT", this.setRootPath);
             },
-            mounted() {
+            mounted(){
                 
                 this.$nextTick().then(()=> {
                     this.initPlugIn();
                 })
             },
             watch: {
-                root: function(val,oldVal){
-                    
-                    this.rootPath = val;
-    
-                    this.load();
+                root: {
+                    handler:function(val,oldVal){
+                        this.rootPath = val;
+                        this.load();
+                    },
+                    immediate:true
                 },
                 rootPath: function(val,oldVal){
                     
@@ -1232,13 +1375,13 @@
                     this.signedUserName = window.SignedUser_UserName;
                 },
                 initPlugIn(){
-                    
                     this.initFileUpload();
-    
-                    if(!_.isEmpty(this.defaultView)){
-                        this.currentView = this.defaultView;
-                    }
-    
+
+                    _.delay(()=>{
+                        if(!_.isEmpty(this.defaultView)){
+                            this.currentView = this.defaultView;
+                        }
+                    },100)
                 },
                 toggleView(view){
                     this.currentView = view;
@@ -1940,7 +2083,7 @@
     
                 },
                 deleteThem() {
-                    const self = this
+                    
                     let items = [];
                     _.forEach(this.selectedItem,(v)=>{
                         items.push(_.find(this.model,{id:v}));
@@ -1974,7 +2117,7 @@
                             cancelButtonText: '取消',
                             type: 'warning',
                     }).then(() => {
-                        _.forEach(items, function(v){
+                        _.forEach(items, (v)=>{
                             this.deleteIt(v, false);
                         })
                         
@@ -2003,17 +2146,19 @@
     
                     if(prompt){
                         
-                        alertify.confirm(`确定要删除 ${event.name} 文件?`, (e)=> {
-                            if (e) {
-                                let _rtn = fsHandler.fsDelete(event.parent,event.name);
+                        this.$confirm('确定要删除 ${event.name} 文件??', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                            }).then(() => {
+                                let rtn = fsHandler.fsDelete(event.parent,event.name);
     
-                                if (_rtn == 1){
+                                if (rtn == 1){
                                     this.load();
                                 }
-                            } else {
+                            }).catch(() => {
                                 
-                            }
-                        });
+                            });
                         
                     } else {
     

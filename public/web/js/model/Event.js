@@ -1221,7 +1221,7 @@ class Event {
                     },
                     template: `<el-container :style="$root.control.viewType | heightByMode">
                                     <el-main>
-                                        <el-form label-width="120px"  label-position="left">
+                                        <el-form label-width="120px"  label-position="left" class="form-no-border">
                                             <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin:10px 0;">
                                                 <el-input :value="moment(value).format('LLL')" disabled v-if="_.includes(['time','day'],key)"></el-input>
                                                 <el-input :value="value" disabled v-else></el-input>
@@ -2355,44 +2355,47 @@ class Event {
                     },
                     mounted(){
                         
-                        $(this.$el).addClass('view-normal');
-                        
-                        // 没有详细页时，默认隐藏告警列表Title
-                        this.hideTabEventViewConsoleUl();
+                        this.$nextTick().then(()=>{
 
-                        // 维度统计
-                        this.toggleSummaryBySmart(this.control.ifSmart);
+                            $(this.$el).addClass('view-normal');
+                            
+                            // 没有详细页时，默认隐藏告警列表Title
+                            this.hideTabEventViewConsoleUl();
 
-                        // 窗口Resize
-                        _.delay(()=>{
-                            // RESIZE Event Summary
-                            eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            // 维度统计
+                            this.toggleSummaryBySmart(this.control.ifSmart);
 
-                            Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                                sizes: [20, 80],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                gutterStyle: function(dimension, gutterSize) {
-                                    return {
-                                        'display': 'none'
-                                    }
-                                },
-                                gutterAlign: 'end',
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                                expandToMin: true
-                            });
-                        },2000);
+                            // 窗口Resize
+                            _.delay(()=>{
+                                // RESIZE Event Summary
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
 
-                        // 数据设置
-                        this.setData();
+                                Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                                    sizes: [20, 80],
+                                    minSize: [0, 0],
+                                    gutterSize: 5,
+                                    gutterStyle: function(dimension, gutterSize) {
+                                        return {
+                                            'display': 'none'
+                                        }
+                                    },
+                                    gutterAlign: 'end',
+                                    cursor: 'col-resize',
+                                    direction: 'horizontal',
+                                    expandToMin: true
+                                });
+                            },2000);
 
-                        // watch数据更新
-                        this.$watch(
-                            "$refs.searchRef.result",(val, oldVal) => {
-                                this.setData();
-                            }
-                        );
+                            // 数据设置
+                            this.setData();
+
+                            // watch数据更新
+                            this.$watch(
+                                "$refs.searchRef.result",(val, oldVal) => {
+                                    this.setData();
+                                }
+                            );
+                        })
                         
                     },
                     methods: {

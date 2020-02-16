@@ -21,330 +21,86 @@
 
 -->
 {{template "base/head" .}}
+
 <!-- zTree Core CSS -->
-<link href="{{AppSubUrl}}/web/vendor/zTree/css/entityStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+<link href="{{AppSubUrl}}/web/vendor/zTree/css/fsStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
+
+<link href="{{AppSubUrl}}/web/vendor/jquery-file-upload/css/jquery.fileupload.css" rel="stylesheet" >
+
 
 <style>
 
-    #content.content{
-        margin: -15px -10px 0px 50px;
-    }
-
-    #mainview .bg-info.dir {
-        background: rgb(255, 255, 255);
-        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
-        background: -webkit-linear-gradient(top, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
-        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
-    }
-
-    #mainview .bg-info {
-        background: rgb(255, 255, 255);
-        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
-        background: -webkit-linear-gradient(top, rgb(178, 225, 255) 0%,rgb(102, 182, 252) 100%);
-        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(201, 233, 249) 100%);
-    }
-
-    #mainview .card {
-        width: 25%;
-        max-width: 320px;
-        min-width: 290px;
-        flex: 0 1 20%;
-        margin: 0 10px 0 0;
-    }
-
-    #mainview .fa-wrench{
-        color: #999999;
-    }
-
-    .widget-stats .stats-desc, .widget-stats .stats-title {
-        color: rgb(0, 0, 0);
-    }
-
-    @media screen and (max-width: 2560px) {
-
-        #mainview .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 13.5em;
-        }
-    }
-
-    @media screen and (max-width: 1960px) {
-
-        #mainview .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 13.5em;
-        }
-    }
-
-    @media screen and (max-width: 1280px) {
-
-        #mainview .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 12em;
-        }
-    }
-
-    #mainview .stats-subtitle{
-        font-size:12px;
-        color: #999999;
-        line-height: 25px;
+    body {
         overflow: hidden;
-        max-height: 46px;
-        min-height: 46px;
-        cursor: pointer;
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2
     }
 
-    #mainview .media {
-        cursor: pointer;
-        margin-bottom: 0px;
+    #content.content {
+        padding: 5px;
     }
 
-    #mainview .media-body{
-        color: #999999;
+    [id="app"] {
+        width: 100%;
+        height: 100vh;
     }
 
-    #mainview .media-body p{
-        margin: 0px 0px 3px 20px;
+    /* Split Style */
+	.jsPanel .gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: 1px solid #ddd;
+        border-top: unset;
+        border-bottom: unset;
     }
 
-    #mainview .media-object{
-        max-width:75px;
-        min-width:60px;
-    }
-
-    #mainview .stats-desc {
-        display: -webkit-box;
-        margin: 0px -15px -15px -15px;
-        background-color: rgb(247, 247, 247);
-        padding: 5px 10px;
-        border-top: 0.5px solid rgb(240, 243, 244);
-        color: rgb(124, 124, 124)!important;
-    }
-
-    #mainview .stats-desc .fa-wrench {
-        color: rgb(144, 144, 144);
-    }
-
-    #mainview .stats-desc .status {
-        right: -73%;
-        position: relative;
-        color: rgb(124, 124, 124)!important;
-    }
-
-    #icon-list ul{
-        padding-left: 0;
-        list-style: none;
-    }
-
-    #icon-list ul > li{
-        float: left;
-        width: 25%;
-        height: 115px;
-        padding: 10px;
-        font-size: 10px;
-        line-height: 1.4;
-        text-align: center;
-        background-color: rgb(249, 249, 249);
-        border: 1px solid rgb(255, 255, 255);
-    }
-
-    .col-lg-12 .widget-stats{
-        border: 1px solid rgb(229, 229, 229);
-        border-radius: 10px;
-        max-height: 210px;
-        min-height: 205px;
-    }
-
-    .col-lg-10 .widget-stats{
-        border: 1px solid rgb(240, 240, 240);
-        border-radius: 10px;
-        max-height: 210px;
-        min-height: 200px;
-    }
-
-    .rating {
-        unicode-bidi: bidi-override;
-        direction: rtl;
-        text-align: center;
-    }
-
-    .rating > span {
-        display: inline-block;
-        position: relative;
-        width: 1.1em;
-    }
-
-    .rating > span:hover,
-    .rating > span:hover ~ span {
-        color: transparent;
-    }
-
-    .rating > span:hover:before,
-    .rating > span:hover ~ span:before {
-        content: "\2605";
-        position: absolute;
-        left: 0;
-        color: gold;
-    }
-
-    .bootstrap-tagsinput {
-        background-color: transparent;
-        border-style: none;
-        box-shadow: none;
-    }
-
-    .label {
-        font-size: 12px;
-    }
-
-    .input {
-        width: auto;
-    }
-
-    .modal-dialog {
-        position: relative;
-        display: table;
-        overflow-y: auto;
-        overflow-x: auto;
-        width: auto;
-        min-width: 85%;
-    }
-
-    .btn.dropdown-toggle {
-        padding: 7px 12px;
-        border-radius: 0px;
-    }
-
-    .widget-stats.bg-info:hover,.widget-stats.bg-info.active {
-        box-shadow: 2px 2px 20px 2px #999999;
-        background-color: rgb(255, 255, 255)!important;
-        /*background-image: linear-gradient(to bottom, rgb(255, 255, 255) 0%, rgb(239, 239, 239) 100%)!important;*/
-    }
-
-    .widget-stats.bg-grey:hover,.widget-stats.bg-grey.active {
-        box-shadow: 2px 2px 2px 2px #999;
-        background-color: rgb(183, 190, 208)!important;
-        background-image: linear-gradient(to bottom, rgb(182, 194, 202) 0%, rgb(244, 244, 244) 100%)!important;
-    }
-
-    .bootstrap-tagsinput>input {
-        border: none!important;
-    }
-
-    .context-menu-list {
-        box-shadow: 0 2px 8px 0 rgba(0,0,0,0.15);
-        padding:5px;
-        border: none;
-    }
-        
-    .context-menu-list>li>a{
-        padding: 5px 5px;
-        color:rgb(102, 102, 102)!important;
-    }
-
-    .img-thumbnail {
-        background-color: transparent;
-        border: none;
-        max-width: 60%;
-    }
-
-
-    .breadcrumb > li {
-        text-overflow: ellipsis;
-        width: 10em;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    /* For Button group*/
-    .btn-group .btn-link,
-    .btn-group .btn-link:hover{
-        color: #333333;
-        border:none;
-    }
-
-    .btn-group .btn-group > a > i{
-        color: #666666;
-    }
-
-    /* el-tag */
-    .el-tag + .el-tag {
-        margin-left: 10px;
-    }
-    .button-new-tag {
-        margin-left: 10px;
-        height: 32px;
-        line-height: 30px;
-        padding-top: 0;
-        padding-bottom: 0;
-    }
-    .input-new-tag {
-        width: 90px;
-        margin-left: 10px;
-        vertical-align: bottom;
-    }
-    /* el-menu */
-    .el-menu.transition{
-        background: transparent;
-        box-shadow: unset;
+    .jsPanel .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: 1px solid #ddd;
+        border-left: unset;
         border-right: unset;
     }
-    .el-submenu__title{
-        font-size: 12px;
-    }
-    .el-submenu.is-opened{
-        background: #eeeeee;
+
+    /* 首页Split样式 无border */
+    .gutter.gutter-horizontal {
+        cursor: ew-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: unset!important;
     }
 
-    /* el-header */
-    header.el-header{
-        height:30px!important;
-        line-height: 30px!important;
+    .gutter.gutter-vertical {
+        cursor: ns-resize;
+        background-color: rgb(241, 241, 241);
+        background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
+        background-size: 7px;
+        background-position-x: 50%;
+        background-position-y: 50%;
+        background-repeat: no-repeat;
+        z-index: 100;
+        border: unset!important;
     }
 
-    .el-form-item__content{
-        padding-bottom: 20px;
+    .ace_gutter{
+        background: transparent!important;
     }
-    
+
     /* 全屏模式 */
 	section#header{
 		display:initial!important;
@@ -357,95 +113,39 @@
     }
 
 </style>
+
 <main id="content" class="content">
     <div id="app"></div>
 </main>
 
+
 <script src="{{AppSubUrl}}/web/js/model/Creative.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/FileSystem.js"></script>
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
 
-<!-- Bootstrap x-editable JS -->
-<script src="{{AppSubUrl}}/web/vendor/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+<!--zTree Core JS-->
+<script src="{{AppSubUrl}}/web/vendor/zTree/js/jquery.ztree.all-3.5.min.js"></script>
 
-<!--Clipboard JS-->
-<script src="{{AppSubUrl}}/web/vendor/clipboard/dist/clipboard.min.js"></script>
+<!--File Parse JS-->
+<script src="{{AppSubUrl}}/web/vendor/papaparse/papaparse.min.js"></script>
+<!--Jquery File Upload JS-->
+<script src="{{AppSubUrl}}/web/vendor/js-load-image/js/load-image.all.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/canvas-to-blob.min.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/vendor/jquery.ui.widget.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.iframe-transport.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-process.js"></script>
+<script src="{{AppSubUrl}}/web/vendor/jquery-file-upload/js/jquery.fileupload-image.js"></script>
 
-<!--<link rel="vc" href="{{AppSubUrl}}/web/component/vue-fs-tree-component.html"></link>-->
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-view-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-editor-tree-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-output-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/fs/fs-datatable-component.html"></link>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/devops/devops-tree-component.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
-
-
-<script type="text/x-template" id="app-template">
-    <el-container>
-        <el-header style="height:30px;line-height:30px;display:flex;margin: 0px;padding: 0px;">
-            <ul style="width: 70%;font-size:16px; list-style: none;display:flex;padding: 0px;">
-                <li>
-                    <a href="javascript:void(0);" @click="forwardDir('/opt/creative')" style="text-decoration:none;color:#333333;">
-                        <i class="fa fa-folder-o"></i> 所有
-                    </a>
-                </li>
-                <li>
-                    <ol class="breadcrumb">
-                        <li v-for="(item,index) in filePath" :style="index<3 ? 'display:none;':'display:;'">
-                            <a href="javascript:void(0);" @click="forwardDir(_.slice(filePath,0,index+1).join('/'))" :title="item">${item}</a>
-                        </li>
-                    </ol>
-                </li>
-            </ul>
-            <div style="width:30%;height:30px;line-height:30px;text-align:right;">
-                <!--a href="#" class="btn btn-sm btn-default" @click="toggleLeft"><i class="fa fa-caret-right navtoggle"></i> </a-->
-                <a href="#" class="btn btn-sm btn-link" @click="pasteIt" title="粘贴" data-tooltip="tooltip"><i class="fa fa-paste"></i> 粘贴</a>
-                <a href="#" class="btn btn-sm btn-link" @click="newDir" title="{{.i18n.Tr "creative-new-project"}}" data-tooltip="tooltip"><i class="fas fa-folder-plus"></i> {{.i18n.Tr "creative-new-project"}}</a>
-                <a href="#" class="btn btn-sm btn-link" @click="newFile" title="{{.i18n.Tr "creative-new-file"}}" data-tooltip="tooltip"><i class="fas fa-file-medical"></i> {{.i18n.Tr "creative-new-file"}}</a>
-            </div>
-        </el-header>
-
-        <el-main style="padding:0px;display:flex;flex-wrap:wrap;height:calc(100vh - 85px);align-content:flex-start;" id="mainview">
-
-            <div v-for="(item,index) in model.list" class="card">
-                <div :class="'widget widget-stats animated flipInX bg-info ' + item.ftype">
-                    <div class="list-context-menu" :data-item="JSON.stringify(item)" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                        <i class="fa fa-wrench"></i>
-                    </div>
-                    <div @click="forwardCreative('run',item)">
-                        <div class="stats-title">
-                            <i class="fa fa-braille fa-fw"></i>
-                            <span class="fs-name" :data-info="JSON.stringify(item)">${ item | pickName}</span>
-                        </div>
-
-                        <div class="stats-subtitle">
-                            ${item | pickRemark}
-                        </div>
-
-                        <div class="media">
-                            <div class="media-left">
-                                <img class="media-object" :src="item | pickIcon">
-                            </div>
-                            <div class="media-body">
-                                <p>项目作者： ${item.username}</p>
-                                <p>更新日期： ${ moment(item.vtime).format("L") }</p>
-                                <p>更新时间： ${ moment(item.vtime).format("LTS") }</p>
-                                <p class="status" v-if="item.project.status==='1'">
-                                    项目状态： 运行中 <i class='fa fa-spinner fa-spin'></i>
-                                </p>
-                                <p class="status" v-else>
-                                    项目状态： 就绪
-                                </p>
-                            </div>
-                        </div>
-
-                    </div>
-                    {{if not .SignedUser.Company.OSpace}}
-                    <div class="stats-desc">
-                        <input class="tagsLabel" :id="'tagsLabel'+index" :value="item.tags" :data-index="item.id" placeholder='{{.i18n.Tr "mxdashboard_tag_add"}}'>
-                    </div>
-                    {{end}}
-                </div>
-
-            </div>
-
-        </el-main>
-    </el-container>
-</script>
 
 {{template "base/footer" .}}

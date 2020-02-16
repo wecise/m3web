@@ -31,25 +31,25 @@ class AI {
                                         <el-col :span="24">
                                             <div class="grid-content">
                                                 <el-card style="padding: 20px 15em;">
-                                                    <img src='${window.ASSETS_ICON}/robot/png/robot.png?issys=true&type=download' style="width:180px;">
-                                                    <div class="caption">
+                                                    <el-image src='${window.ASSETS_ICON}/robot/png/robot.png?issys=true&type=download' style="width:180px;"></el-image>
+                                                    <p>
                                                         <h2>唯简运维机器人</h2>
                                                         <p>在岗：9个月</p>
                                                         <p>入岗：2017-02-03</p>
                                                         <p>专注于IT运维领域的日常运维</p>
                                                         <p>专业技能：词频分析、关联分析和神经元网络</p>
                                                         <div class="bottom clearfix"">
-                                                            <a class="btn btn-xs btn-white"><i class="fa fa-thumbs-up"></i> 联系 </a>
-                                                            <a class="btn btn-xs btn-success"><i class="fa fa-server"></i> 技能</a>
+                                                            <el-button type="text"><i class="fa fa-thumbs-up"></i> 联系 </el-button>
+                                                            <el-button type="text"><i class="fa fa-server"></i> 技能</el-button>
                                                         </div>
-                                                    </div>
+                                                    </p>
                                                 </el-card>
                                             </div>
                                         </el-col>
                                     </el-row>
                                 </el-container>`
                 });
-        
+                
                 Vue.component("matrix-ai-message", {
                     delimiters: ['#{', '}#'],
                     props: {
@@ -235,6 +235,222 @@ class AI {
                     },
                 });
                 
+                // 基线计算
+                Vue.component('matrix-ai-setup-baseline',{
+                    delimiters: ['#{', '}#'],
+                    props:{
+                        id: String,
+                        model: Object
+                    },
+                    template: `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save" icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main style="height:100%;">
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.rawclass" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in select.rawclass"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="基线类">
+                                                <el-select v-model="content.baselineclass" placeholder="基线类">
+                                                    <el-option
+                                                        v-for="item in select.baselineclass"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="黑名单">
+                                                <el-tag
+                                                    :key="tag"
+                                                    closable
+                                                    type=""
+                                                    @close="nameRemove(tag)"
+                                                    style="margin:0 2px;" v-for="tag in content.blacklist">
+                                                    #{tag}#
+                                                </el-tag>
+                                                <el-input
+                                                    class="input-new-tag"
+                                                    v-if="names.inputVisible"
+                                                    v-model="names.inputValue"
+                                                    ref="saveTagInput"
+                                                    size="small"
+                                                    @keyup.enter.native="nameAdd"
+                                                    @blur="nameAdd">
+                                                </el-input>
+                                                <el-button v-else class="button-new-tag" size="small" @click="nameInputShow">+</el-button>
+                                            </el-form-item>
+                                            <el-form-item label="Interval" prop="interval">
+                                                <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
+                                            </el-form-item>
+                                            <el-form-item label="Limitday" prop="limitday">
+                                                <el-input-number v-model="content.limitday" controls-position="right" :min="1"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="计算属性">
+                                                <el-checkbox-group v-model="content.ctypelist">
+                                                    <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
+                                                    <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
+                                                    <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
+                                                </el-checkbox-group>
+                                            </el-form-item>
+                                            <el-form-item label="Avgtype">
+                                                <el-radio-group v-model="content.avgtype">
+                                                    <el-radio label="avg" class="el-radio">Avg</el-radio>
+                                                    <el-radio label="median" class="el-radio">Median</el-radio>
+                                                </el-radio-group>    
+                                            </el-form-item>
+                                            <el-form-item label="服务器组" prop="group">
+                                                <el-input type="text" v-model="content.job.group"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="定时器" prop="cron">
+                                                <el-input type="text" v-model="content.job.cron"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="作业名称" prop="name">
+                                                <el-input type="text" v-model="content.name"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
+                    data: function(){
+                        return {
+                            select:{
+                                rawclass: [
+                                    {
+                                        value: '/matrix/devops/performance',
+                                        label: '所有性能'
+                                    }
+                                ],
+                                baselineclass: [
+                                    {
+                                        value: '/matrix/devops/performance/baseline',
+                                        label: '/matrix/devops/performance/baseline'
+                                    }
+                                ],
+                                blacklist: []
+                            },
+                            names:{
+                                inputVisible: false,
+                                inputValue: ''
+                            },
+                            content: null
+                        }
+                    },
+                    created(){
+                        this.content = this.model.content;
+                    },
+                    mounted(){
+                        
+                    },
+                    methods: {
+                        save(){
+                            const self = this;
+
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+                        },
+                        // 删除规则
+                        remove: function() {
+                            const self = this;
+        
+                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                                if (e) {
+                                    // 删除文件系统
+                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
+                                    if(rtn==1){
+                                        // 刷新rules
+                                        self.$root.$refs.aiSetup.load();
+                                        self.$root.$refs.aiSetup.close(self.model.id);
+                                    }   
+                                } else {
+                                    
+                                }
+                            })
+                        },
+                        nameRemove(tag) {
+                            const self = this;
+        
+                            self.content.blacklist.splice($.inArray(tag,self.content.blacklist), 1)
+        
+                            // 更新规则，没有关键字时status=0
+                            _.extend(self.content, {blacklist: self.content.blacklist});
+                            
+                        },
+                        nameInputShow() {
+                            const self = this;
+        
+                            self.names.inputVisible = true;
+                            self.$nextTick(_ => {
+                                self.$refs.saveTagInput.$refs.input.focus();
+                            });
+                        },
+                        nameAdd() {
+                            const self = this;
+        
+                            let inputValue = self.names.inputValue;
+                            if (inputValue) {
+                                self.content.blacklist.push(inputValue);
+                            }
+        
+                             // 更新规则，没有关键字时status=0
+                             _.extend(self.content, {blacklist: self.content.blacklist});
+        
+                             self.names.inputVisible = false;
+                             self.names.inputValue = '';
+                        },
+                        statusUpdate(evt){
+                            const self = this;
+                            
+                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
+                            
+                            // 更新到文件系统
+                            let attr = {ctime: _.now()};
+                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
+
+                            // 生成JOB
+                            if(evt == 1){
+                                let rtn = baseLineHandler.baseLineToJob(self.content);
+                            }
+                        },
+                        job(term){
+                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
+                            window.open(url,'_blank');
+                        }
+                    }
+                })
+
                 // 频繁项关联
                 Vue.component('matrix-ai-setup-cafp',{
                     delimiters: ['#{', '}#'],
@@ -242,68 +458,65 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id"  v-if="model.content">
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.class" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in type.list"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="idfield" prop="idfield">
-                                            <el-input type="text" v-model="content.idfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="valuefield" prop="valuefield">
-                                            <el-input type="text" v-model="content.valuefield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="minpts" prop="minpts">
-                                            <el-input type="text" v-model="content.minpts"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="eps" prop="eps">
-                                            <el-input type="text" v-model="content.eps"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="times" prop="times">
-                                            <el-input-number v-model="content.times" controls-position="right" :min="1"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="isversion" prop="isversion">
-                                            <el-switch v-model="content.isversion"></el-switch>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
+                    template:   `<el-container :id="id" style="height:100%;" v-if="model.content">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save" icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main style="height:100%;">
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.class" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in type.list"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="idfield" prop="idfield">
+                                                <el-input type="text" v-model="content.idfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="valuefield" prop="valuefield">
+                                                <el-input type="text" v-model="content.valuefield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="minpts" prop="minpts">
+                                                <el-input type="text" v-model="content.minpts"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="eps" prop="eps">
+                                                <el-input type="text" v-model="content.eps"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="times" prop="times">
+                                                <el-input-number v-model="content.times" controls-position="right" :min="1"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="isversion" prop="isversion">
+                                                <el-switch v-model="content.isversion"></el-switch>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     filters: {
                         pickTag(tag){
                             if(typeof tag == 'object'){
@@ -382,68 +595,65 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.class" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in type.list"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="hostfield" prop="hostfield">
-                                            <el-input type="text" v-model="content.hostfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="osfield" prop="osfield">
-                                            <el-input type="text" v-model="content.osfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="timefield" prop="timefield">
-                                            <el-input type="text" v-model="content.timefield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="nearest" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="interval" prop="interval">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
+                    template:   `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text"  @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.class" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in type.list"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="hostfield" prop="hostfield">
+                                                <el-input type="text" v-model="content.hostfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="osfield" prop="osfield">
+                                                <el-input type="text" v-model="content.osfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="timefield" prop="timefield">
+                                                <el-input type="text" v-model="content.timefield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="nearest" prop="nearest">
+                                                <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="interval" prop="interval">
+                                                <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     filters: {
                         pickTag(tag){
                             if(typeof tag == 'object'){
@@ -522,68 +732,65 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.class" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in type.list"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="hostfield" prop="hostfield">
-                                            <el-input type="text" v-model="content.hostfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="osfield" prop="osfield">
-                                            <el-input type="text" v-model="content.osfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="timefield" prop="timefield">
-                                            <el-input type="text" v-model="content.timefield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="nearest" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="interval" prop="interval">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
+                    template:   `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text"  @click="save"icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text"  @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.class" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in type.list"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="hostfield" prop="hostfield">
+                                                <el-input type="text" v-model="content.hostfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="osfield" prop="osfield">
+                                                <el-input type="text" v-model="content.osfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="timefield" prop="timefield">
+                                                <el-input type="text" v-model="content.timefield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="nearest" prop="nearest">
+                                                <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="interval" prop="interval">
+                                                <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     filters: {
                         pickTag(tag){
                             if(typeof tag == 'object'){
@@ -662,68 +869,65 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.class" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in type.list"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="hostfield" prop="hostfield">
-                                            <el-input type="text" v-model="content.hostfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="osfield" prop="osfield">
-                                            <el-input type="text" v-model="content.osfield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="timefield" prop="timefield">
-                                            <el-input type="text" v-model="content.timefield"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="nearest" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="interval" prop="interval">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
+                    template:   `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.class" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in type.list"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="hostfield" prop="hostfield">
+                                                <el-input type="text" v-model="content.hostfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="osfield" prop="osfield">
+                                                <el-input type="text" v-model="content.osfield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="timefield" prop="timefield">
+                                                <el-input type="text" v-model="content.timefield"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="nearest" prop="nearest">
+                                                <el-input-number v-model="content.nearest" controls-position="right" :min="1"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="interval" prop="interval">
+                                                <el-input-number v-model="content.interval" controls-position="right" :min="10*60"></el-input-number>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     filters: {
                         pickTag(tag){
                             if(typeof tag == 'object'){
@@ -802,81 +1006,78 @@ class AI {
                         id: String,
                         model: Object
                     },
-                    template: `<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="关键词">
-                                            <el-tag
-                                                :key="tag"
-                                                closable
-                                                type=""
-                                                @close="wordsRemove(tag)"
-                                                style="margin:0 2px;" v-for="tag in content.name">
-                                                #{tag | pickTag}#
-                                            </el-tag>
-                                            <el-input
-                                                class="input-new-tag"
-                                                v-if="words.inputVisible"
-                                                v-model="words.inputValue"
-                                                ref="saveTagInput"
-                                                size="small"
-                                                @keyup.enter.native="wordsAdd"
-                                                @blur="wordsAdd">
-                                            </el-input>
-                                            <el-button v-else class="button-new-tag" size="small" @click="wordsInputShow">+</el-button>
-                                        </el-form-item>
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.class" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in type.list"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="阈值" prop="threshold">
-                                            <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
-                                            <small>发生次数，超过阈值，发送消息</small>
-                                        </el-form-item>
-                                        <el-form-item label="最近" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
-                                            <small>统计窗口，默认最近10分钟</small>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
+                    template:   `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"icon="el-icon-edit"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-form :model="content" label-width="80px">
+                                            <el-form-item label="关键词">
+                                                <el-tag
+                                                    :key="tag"
+                                                    closable
+                                                    type=""
+                                                    @close="wordsRemove(tag)"
+                                                    style="margin:0 2px;" v-for="tag in content.name">
+                                                    #{tag | pickTag}#
+                                                </el-tag>
+                                                <el-input
+                                                    class="input-new-tag"
+                                                    v-if="words.inputVisible"
+                                                    v-model="words.inputValue"
+                                                    ref="saveTagInput"
+                                                    size="small"
+                                                    @keyup.enter.native="wordsAdd"
+                                                    @blur="wordsAdd">
+                                                </el-input>
+                                                <el-button v-else class="button-new-tag" size="small" @click="wordsInputShow">+</el-button>
+                                            </el-form-item>
+                                            <el-form-item label="指定类">
+                                                <el-select v-model="content.class" placeholder="请选择类">
+                                                    <el-option
+                                                        v-for="item in type.list"
+                                                        :key="item.value"
+                                                        :label="item.label"
+                                                        :value="item.value">
+                                                    </el-option>
+                                                </el-select>
+                                            </el-form-item>
+                                            <el-form-item label="阈值" prop="threshold">
+                                                <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
+                                                <small>发生次数，超过阈值，发送消息</small>
+                                            </el-form-item>
+                                            <el-form-item label="最近" prop="nearest">
+                                                <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
+                                                <small>统计窗口，默认最近10分钟</small>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="用户" prop="user">
+                                                <small>#{content.user}#</small>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     filters: {
                         pickTag(tag){
                             if(typeof tag == 'object'){
@@ -1006,225 +1207,6 @@ class AI {
                     }
                 })
         
-                // 基线计算
-                Vue.component('matrix-ai-setup-baseline',{
-                    delimiters: ['#{', '}#'],
-                    props:{
-                        id: String,
-                        model: Object
-                    },
-                    template: `<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="content" label-width="80px" size="mini">
-                                        <el-form-item label="指定类">
-                                            <el-select v-model="content.rawclass" placeholder="请选择类">
-                                                <el-option
-                                                    v-for="item in select.rawclass"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="基线类">
-                                            <el-select v-model="content.baselineclass" placeholder="基线类">
-                                                <el-option
-                                                    v-for="item in select.baselineclass"
-                                                    :key="item.value"
-                                                    :label="item.label"
-                                                    :value="item.value">
-                                                </el-option>
-                                            </el-select>
-                                        </el-form-item>
-                                        <el-form-item label="黑名单">
-                                            <el-tag
-                                                :key="tag"
-                                                closable
-                                                type=""
-                                                @close="nameRemove(tag)"
-                                                style="margin:0 2px;" v-for="tag in content.blacklist">
-                                                #{tag}#
-                                            </el-tag>
-                                            <el-input
-                                                class="input-new-tag"
-                                                v-if="names.inputVisible"
-                                                v-model="names.inputValue"
-                                                ref="saveTagInput"
-                                                size="small"
-                                                @keyup.enter.native="nameAdd"
-                                                @blur="nameAdd">
-                                            </el-input>
-                                            <el-button v-else class="button-new-tag" size="small" @click="nameInputShow">+</el-button>
-                                        </el-form-item>
-                                        <el-form-item label="Interval" prop="interval">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 秒
-                                        </el-form-item>
-                                        <el-form-item label="Limitday" prop="limitday">
-                                            <el-input-number v-model="content.limitday" controls-position="right" :min="1"></el-input-number>
-                                        </el-form-item>
-                                        <el-form-item label="计算属性">
-                                            <el-checkbox-group v-model="content.ctypelist">
-                                                <el-checkbox label="max" class="el-checkbox">Max</el-checkbox>
-                                                <el-checkbox label="avg" class="el-checkbox">Avg</el-checkbox>
-                                                <el-checkbox label="min" class="el-checkbox">Min</el-checkbox>
-                                            </el-checkbox-group>
-                                        </el-form-item>
-                                        <el-form-item label="Avgtype">
-                                            <el-radio-group v-model="content.avgtype">
-                                                <el-radio label="avg" class="el-radio">Avg</el-radio>
-                                                <el-radio label="median" class="el-radio">Median</el-radio>
-                                            </el-radio-group>    
-                                        </el-form-item>
-                                        <el-form-item label="服务器组" prop="group">
-                                            <el-input type="text" v-model="content.job.group"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="定时器" prop="cron">
-                                            <el-input type="text" v-model="content.job.cron"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="作业名称" prop="name">
-                                            <el-input type="text" v-model="content.name"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="用户" prop="user">
-                                            <small>#{content.user}#</small>
-                                        </el-form-item>
-                                    </el-form>
-                                </el-car>`,
-                    data: function(){
-                        return {
-                            select:{
-                                rawclass: [
-                                    {
-                                        value: '/matrix/devops/performance',
-                                        label: '所有性能'
-                                    }
-                                ],
-                                baselineclass: [
-                                    {
-                                        value: '/matrix/devops/performance/baseline',
-                                        label: '/matrix/devops/performance/baseline'
-                                    }
-                                ],
-                                blacklist: []
-                            },
-                            names:{
-                                inputVisible: false,
-                                inputValue: ''
-                            },
-                            content: null
-                        }
-                    },
-                    created(){
-                        this.content = this.model.content;
-                    },
-                    mounted(){
-                        
-                    },
-                    methods: {
-                        save(){
-                            const self = this;
-
-                            let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
-                        },
-                        // 删除规则
-                        remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
-                                if (e) {
-                                    // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
-                                        // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
-                                } else {
-                                    
-                                }
-                            })
-                        },
-                        nameRemove(tag) {
-                            const self = this;
-        
-                            self.content.blacklist.splice($.inArray(tag,self.content.blacklist), 1)
-        
-                            // 更新规则，没有关键字时status=0
-                            _.extend(self.content, {blacklist: self.content.blacklist});
-                            
-                        },
-                        nameInputShow() {
-                            const self = this;
-        
-                            self.names.inputVisible = true;
-                            self.$nextTick(_ => {
-                                self.$refs.saveTagInput.$refs.input.focus();
-                            });
-                        },
-                        nameAdd() {
-                            const self = this;
-        
-                            let inputValue = self.names.inputValue;
-                            if (inputValue) {
-                                self.content.blacklist.push(inputValue);
-                            }
-        
-                             // 更新规则，没有关键字时status=0
-                             _.extend(self.content, {blacklist: self.content.blacklist});
-        
-                             self.names.inputVisible = false;
-                             self.names.inputValue = '';
-                        },
-                        statusUpdate(evt){
-                            const self = this;
-                            
-                            _.extend(self.content,{status:evt+'', ospace:window.COMPANY_OSPACE, user: window.SignedUser_UserName,time: _.now()});
-                            
-                            // 更新到文件系统
-                            let attr = {ctime: _.now()};
-                            let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
-
-                            // 生成JOB
-                            if(evt == 1){
-                                let rtn = baseLineHandler.baseLineToJob(self.content);
-                            }
-                        },
-                        job(term){
-                            let url = `/janesware/job?term=${window.btoa(encodeURIComponent(term))}`;
-                            window.open(url,'_blank');
-                        }
-                    }
-                })
-                
                 // 神经元网络
                 Vue.component('matrix-ai-setup-neural',{
                     delimiters: ['#{', '}#'],
@@ -1261,82 +1243,78 @@ class AI {
                             content: null
                         }
                     },
-                    template:`<el-card :id="id" >
-                                    <div slot="header" class="clearfix" style="line-height:30px;">
-                                        <div style="float:right;">
-                                            #{content.status==1?'启用中':'关闭中'}#
-                                            <el-switch v-model="content.status"
-                                                    active-color="#13ce66"
-                                                    inactive-color="#dddddd"
-                                                    active-value=1
-                                                    inactive-value=0
-                                                    @change="statusUpdate">
-                                            </el-switch>
-                                            <el-tooltip content="保存规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="save"><i class="fas fa-save"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="删除规则">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="remove"><i class="fas fa-times"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="设置">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="toggle"><i class="fas fa-cogs"></i></a>
-                                            </el-tooltip>
-                                            <el-tooltip content="查看作业">
-                                                <a href="javascript:void(0);" class="btn btn-link"  @click="job(content.name)">
-                                                    <i class="fas fa-sync fa-spin" style="color:green;" v-if="content.status==1"></i>
-                                                    <i class="fas fa-sync" v-else></i>
-                                                </a>
-                                            </el-tooltip>
-                                        </div>
-                                    </div>
-                                    <el-form :model="model" label-width="80px">
-                                        <el-form-item label="关键词">
-                                            <el-input type="text" v-model="content.name"></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="采集间隔" prop="threshold">
-                                            <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 次
-                                            <small>采集时间间隔</small>
-                                        </el-form-item>
-                                        <el-form-item label="阈值" prop="threshold">
-                                            <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
-                                            <small>发生次数，超过阈值，发送消息</small>
-                                        </el-form-item>
-                                        <el-form-item label="最近" prop="nearest">
-                                            <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
-                                            <small>统计窗口，默认最近10分钟</small>
-                                        </el-form-item>
-                                        <el-form-item label="消息模板" prop="msg">
-                                            <el-input type="textarea" v-model="content.msg"></textarea></el-input>
-                                        </el-form-item>
-                                        <el-form-item label="时间" prop="time">
-                                            <small>#{moment(content.time).format('LLL')}#</small>
-                                        </el-form-item>
-                                        <el-form-item label="输入">
-                                            <el-tag
-                                                :key="tag"
-                                                closable
-                                                type=""
-                                                @close="inputRemove(tag)"
-                                                style="margin:0 2px;" v-for="tag in content.nodes.input">
-                                                #{tag}#
-                                            </el-tag>
-                                            <el-input
-                                                class="input-new-tag"
-                                                v-if="input.inputVisible"
-                                                v-model="input.inputValue"
-                                                ref="saveInputInput"
-                                                size="small"
-                                                @keyup.enter.native="inputAdd"
-                                                @blur="inputAdd">
-                                            </el-input>
-                                            <el-button v-else class="button-new-tag" size="small" @click="inputInputShow">+</el-button>
-                                        </el-form-item>
-                                        <el-form-item>
-                                            <div :id="id"></div>
-                                        </el-form-item>
-                                    </el-form>
-                                    
-                                </el-card>`,
+                    template:   `<el-container :id="id" style="height:100%;">
+                                    <el-header style="line-height:40px;height:40px;text-align:right;">
+                                        <span>#{content.status==1?'启用中':'关闭中'}#</span>
+                                        <el-switch v-model="content.status"
+                                                active-color="#13ce66"
+                                                inactive-color="#dddddd"
+                                                active-value=1
+                                                inactive-value=0
+                                                @change="statusUpdate">
+                                        </el-switch>
+                                        <el-tooltip content="保存规则">
+                                            <el-button type="text" @click="save"><i class="fas fa-save"></i></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="删除规则">
+                                            <el-button type="text" @click="remove" icon="el-icon-delete"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="设置">
+                                            <el-button type="text" @click="toggle" icon="el-icon-setting"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip content="查看作业">
+                                            <el-button type="text" @click="job(content.name)" icon="el-icon-date"></el-button>
+                                        </el-tooltip>
+                                    </el-header>
+                                    <el-main>
+                                        <el-form :model="model" label-width="80px">
+                                            <el-form-item label="关键词">
+                                                <el-input type="text" v-model="content.name"></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="采集间隔" prop="threshold">
+                                                <el-input-number v-model="content.interval" controls-position="right" :min="1"></el-input-number> 次
+                                                <small>采集时间间隔</small>
+                                            </el-form-item>
+                                            <el-form-item label="阈值" prop="threshold">
+                                                <el-input-number v-model="content.threshold" controls-position="right" :min="1"></el-input-number> 次
+                                                <small>发生次数，超过阈值，发送消息</small>
+                                            </el-form-item>
+                                            <el-form-item label="最近" prop="nearest">
+                                                <el-input-number v-model="content.nearest" controls-position="right" :min="10*60"></el-input-number> 秒
+                                                <small>统计窗口，默认最近10分钟</small>
+                                            </el-form-item>
+                                            <el-form-item label="消息模板" prop="msg">
+                                                <el-input type="textarea" v-model="content.msg"></textarea></el-input>
+                                            </el-form-item>
+                                            <el-form-item label="时间" prop="time">
+                                                <small>#{moment(content.time).format('LLL')}#</small>
+                                            </el-form-item>
+                                            <el-form-item label="输入">
+                                                <el-tag
+                                                    :key="tag"
+                                                    closable
+                                                    type=""
+                                                    @close="inputRemove(tag)"
+                                                    style="margin:0 2px;" v-for="tag in content.nodes.input">
+                                                    #{tag}#
+                                                </el-tag>
+                                                <el-input
+                                                    class="input-new-tag"
+                                                    v-if="input.inputVisible"
+                                                    v-model="input.inputValue"
+                                                    ref="saveInputInput"
+                                                    size="small"
+                                                    @keyup.enter.native="inputAdd"
+                                                    @blur="inputAdd">
+                                                </el-input>
+                                                <el-button v-else class="button-new-tag" size="small" @click="inputInputShow">+</el-button>
+                                            </el-form-item>
+                                            <el-form-item>
+                                                <div :id="id"></div>
+                                            </el-form-item>
+                                        </el-form>
+                                    </el-main>
+                                </el-container>`,
                     created(){
                         this.content = this.model.content;
                     },
@@ -1648,7 +1626,7 @@ class AI {
                             });
                         },
                         toggle(){
-                            $(this.$el).find('.el-card__body').toggle("slide", { direction: "up" }, 500);
+                            $(this.$el).find('svg').toggle("slide", { direction: "up" }, 500);
                         },
                         inputRemove(tag) {
                             const self = this;
@@ -1725,15 +1703,15 @@ class AI {
                             }
                         }
                     },
-                    template:   `<el-container style="background-color:#ffffff;height:calc(100vh - 85px);">
+                    template:   `<el-container style="background:#ffffff;height:calc(100vh - 85px);">
                                     
                                     <el-aside width="20%" style="height:100%;overflow: hidden;background:#f6f6f6" ref="leftView">
                                         <el-container style="height:100%;">
-                                            <el-header style="height: 30px;padding: 0px 0px 0px 5px;line-height: 30px;font-weight: 900;">
-                                                <i class="fas fa-braille"></i> 规则分类
+                                            <el-header style="height: 30px;line-height: 30px;padding: 0px 5px;font-weight: 900;">
+                                                <span><i class="el-icon-s-grid"></i> 规则分类</span>
                                                 <div style="float:right;">
                                                     <el-tooltip content="刷新">
-                                                        <a href="javascript:void(0);" class="btn btn-link" @click="load"><i class="fas fa-sync-alt"></i></a>
+                                                        <el-button type="text" @click="load"><i class="fas fa-sync-alt"></i></el-button>
                                                     </el-tooltip>
                                                 </div>
                                             </el-header>
@@ -1741,7 +1719,7 @@ class AI {
                                                 <el-menu @open="open" @close="open">
                                                     <el-submenu :index="item.id" v-for="item in ruleList" @open="select">
                                                         <template slot="title">
-                                                            <img :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 40px;height: 32px;padding-right:8px;"> 
+                                                            <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '?type=download&issys=true'" style="width: 32px;height: 32px;padding-right:8px;"></el-image>
                                                             #{item.label}# <span style="color:#999;">(#{item.child.length}#)</span>
                                                             <div style="position: absolute;
                                                                 top: 25%;
@@ -1767,10 +1745,10 @@ class AI {
                                             #{[selectedRule.label,selectedRule.name].join("/").replace(/\\//g," / ")}#
                                         </el-header-->
                                         <el-main style="padding:0px;overflow:hidden;height:100%;background: #ffffff;">
-                                            <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close">
+                                            <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="close" style="height:100%;">
                                                 <el-tab-pane :label="tab.name" :key="tab.id" :name="tab.id" v-for="tab in main.tabs" style="height:100%;overflow:auto;">
                                                     <span slot="label">
-                                                        <img :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 20px;height: 20px;"> 
+                                                        <el-image :src="'/fs/assets/images/robot/png/'+tab.component + '.png?type=download&issys=true'" style="width: 10px;height: 10px;"></el-image>
                                                         #{tab.name.split(".")[0]}#
                                                     </span>
                                                     <matrix-ai-setup-words :id="tab.component+'-'+tab.id" :model="tab" v-if="tab.component=='words'" transition="fade" transition-mode="out-in"></matrix-ai-setup-words>

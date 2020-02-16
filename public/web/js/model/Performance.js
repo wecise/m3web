@@ -647,33 +647,33 @@ class Performance extends Matrix {
                                         </div>
                                     </el-col>
                                     <el-col :xs="12" :sm="14" :md="18" :lg="18" :xl="14">
-                                        <el-form style="height:calc(100vh - 250px);overflow-x: hidden;overflow-y: auto;">
+                                        <el-form style="height:calc(100vh - 250px);overflow-x: hidden;overflow-y: auto;" label-width="120px" label-position="top" class="form-no-border">
                                             <!-- 有模板 -->
                                             <el-form-item :label="item.title" v-for="item in model.template" v-if="model.template" label-width="80">
                                                 <div v-if="item.data==='value' && model.rows[item.data] <= 100">
-                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
-                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]"  disabled v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize"  disabled v-else></el-input>
                                                 </div>
                                                 <div v-else-if="item.data==='value' && model.rows[item.data] > 100">
-                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
-                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize" v-else></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data]"  disabled v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | mx.bytesToSize"  disabled v-else></el-input>
                                                 </div>
                                                 <div v-else>
-                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | handlerFormat"></el-input>
+                                                    <el-input :placeholder="item.data" :value="model.rows[item.data] | handlerFormat"  disabled></el-input>
                                                 </div>
                                             </el-form-item >
                                             <!-- 没有模板 -->
                                             <el-form-item  :label="key" v-for="(value,key) in model.rows" style="padding: 0px 10px;margin-bottom: 1px;" v-else>
                                                 <div v-if="key==='value' && value <= 100">
-                                                    <el-input :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
-                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize" v-else></el-input>
+                                                    <el-input :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'"  disabled></el-input>
+                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize"  disabled v-else></el-input>
                                                 </div>
                                                 <div v-else-if="key==='value' && value > 100">
-                                                    <el-input :placeholder="key" :value="value" v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
-                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize" v-else></el-input>
+                                                    <el-input :placeholder="key" :value="value"  disabled v-if="window.COMPANY_OSPACE=='sucdt'"></el-input>
+                                                    <el-input :placeholder="key" :value="value | mx.bytesToSize"  disabled v-else></el-input>
                                                 </div>
                                                 <div v-else>
-                                                    <el-input :placeholder="key" :value="value | handlerFormat"></el-input>
+                                                    <el-input :placeholder="key" :value="value | handlerFormat"  disabled></el-input>
                                                 </div>
                                             </el-form-item >
                                         </el-form>
@@ -970,18 +970,13 @@ class Performance extends Matrix {
                     },
                     data(){
                         return {
-                            splitInst: null
+                            
                         }
                     },
-                    template:  `<el-container style="height: calc(100vh - 190px);">
-                                    <el-aside class="split" ref="leftView">
-                                        
-                                    </el-aside>
-                                    <el-container class="split" ref="container">
-                                        <el-main style="padding:0px;">
-                                            <div :id="'topological-app-'+id"></div>
-                                        </el-main>
-                                    </el-container>
+                    template:  `<el-container style="height: calc(100vh - 190px);padding:5px;">
+                                    <el-main style="padding:0px;">
+                                        <div :id="'topological-app-'+id"></div>
+                                    </el-main>
                                 </el-container>`,
                     mounted(){
                         this.init();
@@ -995,17 +990,10 @@ class Performance extends Matrix {
                             });
                             mxTopological.mount(`#topological-app-${this.id}`);
                             
-                            _.delay(()=>{
+                            this.$nextTick().then(()=>{
                                 mxTopological.app.contextMenu();
-                            },500)
+                            })
 
-                            this.splitInst = Split([this.$refs.leftView.$el, this.$refs.container.$el], {
-                                sizes: [0, 100],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                            });
                         }
                     }
                 })

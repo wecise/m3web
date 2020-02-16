@@ -33,10 +33,8 @@ class Home extends Matrix {
                                     <el-main style="padding:0px;">
                                         <el-row type="flex" justify="center" style="padding:40px 0px;">
                                             <el-col :span="18">
-                                                <div class="grid-content">
-                                                    <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
-                                                    <div id="search-result-content" v-if="model.message"></div>
-                                                </div>
+                                                <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
+                                                <div id="search-result-content" v-if="model.message"></div>
                                             </el-col>
                                         </el-row>
                                         

@@ -14,6 +14,11 @@
 		color:#fff;
 	}
 
+	/* el-form input no-border */
+	.form-no-border .el-input.is-disabled .el-input__inner{
+		border:unset!important;
+	}
+
 	/* sidebar */
 	.page-sidebar-minified .sidebar {
 		width: 60px;
@@ -125,6 +130,9 @@
 	.el-tabs__header{
 		margin: 0px;
 	}
+	.el-tabs__content{
+		height:100%;
+	}
 
 	/* Split Style */
 	.gutter.gutter-horizontal {
@@ -163,12 +171,24 @@
 	.el-menu--vertical > .el-menu.el-menu--popup.el-menu--popup-right-start{
         background-color: #262e48!important;
     }
-	.el-submenu > .el-submenu__title:hover{
-		background-color:#57a3f3!important;
+
+	/* topBar Style */
+	.topbar-el-menu > .el-submenu > .el-submenu__title:hover{
+		background-color:#409eff!important;
 	}
-	.el-menu-item:focus, .el-menu-item:hover{
-		background-color:#57a3f3!important;
+	.topbar-el-menu .el-menu-item:focus, 
+	.topbar-el-menu .el-menu-item:hover{
+		background-color:#ecf5ff!important;
 	}
+
+	/* el-menu */
+	.el-submenu__title i {
+		color: #fff;
+	}
+	.el-submenu__title:hover {
+		background-color: #409eff!important;
+	}
+
 	.el-menu--collapse {
 		width: 60px;
 	}

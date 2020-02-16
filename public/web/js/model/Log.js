@@ -468,10 +468,10 @@ class Log extends Matrix {
                     },
                     template: `<el-container style="height: calc(100vh - 190px);">
                                     <el-main>            
-                                        <el-form label-width="120px">
+                                        <el-form label-width="120px" class="form-no-border">
                                             <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
-                                                <el-input :value="value | handlerFormat" v-if="JSON.stringify(value).length<200"></el-input>
-                                                <el-input type="textarea" :rows="6" :value="value | handlerFormat" v-else></el-input>
+                                                <el-input :value="value | handlerFormat" disabled v-if="JSON.stringify(value).length<200"></el-input>
+                                                <el-input type="textarea" :rows="6" :value="value | handlerFormat" disabled v-else></el-input>
                                             </el-form-item>
                                         </el-form>
                                     </el-main>

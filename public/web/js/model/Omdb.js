@@ -1639,7 +1639,7 @@ class Omdb{
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </el-header>
-                                            <el-main style="padding:0px;height:calc(100vh - 108px);border-top:1px solid #ffffff;">
+                                            <el-main style="padding:0px;height:calc(100vh - 108px);overflow:hidden;border-top:1px solid #ffffff;">
                                                 <omdb-class-tree-component :id="id+'-class-tree'"></omdb-class-tree-component>
                                             </el-main>
                                         </el-container>
