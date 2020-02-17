@@ -60,7 +60,6 @@ mxForm.prototype.addButtons = function(okFunct, cancelFunct)
 
 	// Adds the ok button
 	var button = document.createElement('button');
-	button.setAttribute("class","btn-ok");
 	mxUtils.write(button, mxResources.get('ok') || 'OK');
 	td.appendChild(button);
 
@@ -71,7 +70,6 @@ mxForm.prototype.addButtons = function(okFunct, cancelFunct)
 	
 	// Adds the cancel button
 	button = document.createElement('button');
-    button.setAttribute("class","btn-cancel");
 	mxUtils.write(button, mxResources.get('cancel') || 'Cancel');
 	td.appendChild(button);
 	

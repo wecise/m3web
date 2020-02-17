@@ -57,7 +57,7 @@ var mxLog =
 	{
 		if (mxLog.window == null && document.body != null)
 		{
-			var title = mxLog.consoleName; // + ' - mxGraph ' + mxClient.VERSION; // by wangzd
+			var title = mxLog.consoleName + ' - mxGraph ' + mxClient.VERSION;
 
 			// Creates a table that maintains the layout
 			var table = document.createElement('table');
@@ -102,33 +102,32 @@ var mxLog =
 			table.appendChild(tbody);
 
 			// Adds various debugging buttons
-            /*
-            mxLog.addButton('Info', function (evt)
-            {
-                mxLog.info();
-            });
+			mxLog.addButton('Info', function (evt)
+			{
+				mxLog.info();
+			});
+		
+			mxLog.addButton('DOM', function (evt)
+			{
+				var content = mxUtils.getInnerHtml(document.body);
+				mxLog.debug(content);
+			});
+	
+			mxLog.addButton('Trace', function (evt)
+			{
+				mxLog.TRACE = !mxLog.TRACE;
+				
+				if (mxLog.TRACE)
+				{
+					mxLog.debug('Tracing enabled');
+				}
+				else
+				{
+					mxLog.debug('Tracing disabled');
+				}
+			});	
 
-            mxLog.addButton('DOM', function (evt)
-            {
-                var content = mxUtils.getInnerHtml(document.body);
-                mxLog.debug(content);
-            });
-
-            mxLog.addButton('Trace', function (evt)
-            {
-                mxLog.TRACE = !mxLog.TRACE;
-
-                if (mxLog.TRACE)
-                {
-                    mxLog.debug('Tracing enabled');
-                }
-                else
-                {
-                    mxLog.debug('Tracing disabled');
-                }
-            });	*/
-
-			mxLog.addButton('拷贝', function (evt)
+			mxLog.addButton('Copy', function (evt)
 			{
 				try
 				{
@@ -140,7 +139,7 @@ var mxLog =
 				}
 			});			
 
-			mxLog.addButton('显示', function (evt)
+			mxLog.addButton('Show', function (evt)
 			{
 				try
 				{
@@ -152,7 +151,7 @@ var mxLog =
 				}
 			});	
 			
-			mxLog.addButton('清除', function (evt)
+			mxLog.addButton('Clear', function (evt)
 			{
 				mxLog.textarea.value = '';
 			});
@@ -172,7 +171,7 @@ var mxLog =
 				w = document.body.clientWidth;
 			}
 
-			mxLog.window = new mxWindow(title, table, Math.max(0, w - 490), Math.max(0, h - 360), 480, 320);
+			mxLog.window = new mxWindow(title, table, Math.max(0, w - 320), Math.max(0, h - 210), 300, 160);
 			mxLog.window.setMaximizable(true);
 			mxLog.window.setScrollable(false);
 			mxLog.window.setResizable(true);

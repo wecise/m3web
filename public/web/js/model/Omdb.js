@@ -1255,34 +1255,31 @@ class Omdb{
                     //let rtn = fsHandler.callFsJScript("/matrix/omdb/dataUpdate.js",encodeURIComponent)
                 },
                 onDelete(){
-                    const self = this;
                     
-                    if(_.isEmpty(self.dt.selected)) {
-                        self.$message({
+                    if(_.isEmpty(this.dt.selected)) {
+                        this.$message({
                             message: '请选择删除数据！',
                             type: 'info'
                         });
                         return false;
                     }
 
-                    let ids = _.map(self.dt.selected,"id");
+                    let ids = _.map(this.dt.selected,"id");
 
-                    alertify.confirm(`确定删除以下数据<br><br>${ids.join("<br><br>")}`, function (e) {
-                        if(e) {
-                            try{
-                                let rtn = fsHandler.callFsJScript("/matrix/omdb/dataDelete.js", encodeURIComponent(JSON.stringify(ids)));
-                                self.dt.rows = _.xor(self.dt.rows, self.dt.selected);
-                                self.dt.selected = [];
-                                self.$message({
-                                    message: '删除成功',
-                                    type: 'success'
-                                });
-                            }catch(err){
-                                
-                            }
-                        } else {
-                            
-                        }
+                    this.$confirm(`确定删除数据？`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        let rtn = fsHandler.callFsJScript("/matrix/omdb/dataDelete.js", encodeURIComponent(JSON.stringify(ids)));
+                        this.dt.rows = _.xor(this.dt.rows, this.dt.selected);
+                        this.dt.selected = [];
+                        this.$message({
+                            message: '删除成功',
+                            type: 'success'
+                        }); 
+                    }).catch(() => {
+                        
                     });
                 },
                 onExport(type){

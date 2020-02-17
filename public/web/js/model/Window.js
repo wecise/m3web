@@ -956,8 +956,8 @@ class Window {
 
         let _position = { top: 0, right: 0 };
 
-        this.lrwh[2] = $(`.${container}`).width() + 5;
-        this.lrwh[3] = $(`.${container}`).height() + 0;
+        this.lrwh[2] = this.width * 0.6;
+        this.lrwh[3] = this.height * 0.8;
 
         let win = $.jsPanel({
             id: `jsPanel-${container}`,
@@ -971,7 +971,7 @@ class Window {
                 at: "center"
             },
             container: "body",
-            headerControls: { controls: 'closeonly' },
+            headerControls: { },
             headerRemove:  false,
             content:        template,
             draggable: {
@@ -993,7 +993,7 @@ class Window {
                 });
                 $(".jsPanel-content",this).css({
                     "border": "none",
-                    "overflow": "auto"
+                    "overflow": "hidden"
                 });
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"

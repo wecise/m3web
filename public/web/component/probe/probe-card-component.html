@@ -32,9 +32,9 @@
     /*----------  最外层element会自动增加组件同名 class="probe-card-component"  ----------*/
     <template>
         <el-container>
-            <el-main style="overflow: hidden;">
+            <el-main style="overflow: hidden;padding:0px;">
                 <el-button type="primary" v-for="item in model"
-                    style="max-width: 25%;width: 20%;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
+                    style="max-width: 25%;width: 20%;height:auto;min-height:90px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);">
                     <h3>${item.name}</h3>
                     <p>
                         ${item.count}

@@ -226,28 +226,28 @@ mxWindow.prototype.constructor = mxWindow;
  * 
  * URL of the image to be used for the close icon in the titlebar.
  */
-mxWindow.prototype.closeImage = mxClient.imageBasePath + '/close.png';  // by wzd
+mxWindow.prototype.closeImage = mxClient.imageBasePath + '/close.gif';
 
 /**
  * Variable: minimizeImage
  * 
  * URL of the image to be used for the minimize icon in the titlebar.
  */
-mxWindow.prototype.minimizeImage = mxClient.imageBasePath + '/minimize.png';// by wzd
+mxWindow.prototype.minimizeImage = mxClient.imageBasePath + '/minimize.gif';
 	
 /**
  * Variable: normalizeImage
  * 
  * URL of the image to be used for the normalize icon in the titlebar.
  */
-mxWindow.prototype.normalizeImage = mxClient.imageBasePath + '/normalize.png';// by wzd
+mxWindow.prototype.normalizeImage = mxClient.imageBasePath + '/normalize.gif';
 	
 /**
  * Variable: maximizeImage
  * 
  * URL of the image to be used for the maximize icon in the titlebar.
  */
-mxWindow.prototype.maximizeImage = mxClient.imageBasePath + '/maximize.png';// by wzd
+mxWindow.prototype.maximizeImage = mxClient.imageBasePath + '/maximize.gif';
 
 /**
  * Variable: normalizeImage

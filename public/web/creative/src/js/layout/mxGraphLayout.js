@@ -6,7 +6,7 @@
  * Class: mxGraphLayout
  * 
  * Base class for all layout algorithms in mxGraph. Main public functions are
- * <move> for handling a moved cell within a layouted parent, and <execute> for
+ * <moveCell> for handling a moved cell within a layouted parent, and <execute> for
  * running the layout on a given parent cell.
  *
  * Known Subclasses:
@@ -195,7 +195,7 @@ mxGraphLayout.prototype.isAncestor = function(parent, child, traverseAncestors)
 {
 	if (!traverseAncestors)
 	{
-		return (this.graph.model.getParent(cell) == parent);
+		return (this.graph.model.getParent(child) == parent);
 	}	
 	
 	if (child == parent)

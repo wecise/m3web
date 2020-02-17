@@ -67,7 +67,7 @@ class Probe extends Matrix {
             "probe-list-datatables-component",
             "policy-list-datatables-component",
             "log-list-datatables-component",
-            "script-list-datatables-component"], function () {
+            "script-manage"], function () {
 
             // Table组件 单选
             Vue.component("el-table-component",{
@@ -343,7 +343,7 @@ class Probe extends Matrix {
                                 <el-main style="padding:0px;" ref="mainView">
                                     <el-container style="height:100%;">
                                         <el-main style="padding:0px;">
-                                            <el-table-component :model="model.list" id="script-list-table"></el-table-component>
+                                            <script-manage :model="model.list" id="script-list-table"></script-manage>
                                         </el-main>
                                     </el-container>
                                 </el-main>
@@ -368,8 +368,8 @@ class Probe extends Matrix {
                 this.app = new Vue({
                     delimiters: ['${', '}'],
                     template: ` <el-container style="background:#ffffff;">
-                                    <el-main style="padding:0 10px;overflow:hidden;">
-                                        <el-tabs v-model="tabs.activeName" class="el-tabs-bottom-line">
+                                    <el-main style="padding:0px;overflow:hidden;">
+                                        <el-tabs v-model="tabs.activeName" type="border-card">
                                             <el-tab-pane label="探针列表" name="probe">
                                                 <probe-view :model="probe"></probe-view>
                                             </el-tab-pane>
