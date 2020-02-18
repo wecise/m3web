@@ -415,6 +415,95 @@ class SideBar {
         }
     };
 
+    // 底边栏
+    footBar(){
+        
+        return{
+            delimiters: ['#{', '}#'],
+            data: {
+                appVersion: window.APP_VERSION,
+                api: {
+                    value: "",
+                    list: []
+                },
+                lang: {
+                    name: window.LANG_NAME,
+                    list: window.LANG_LIST.slice(1).slice(0,-1).slice(1).slice(0,-1).split('} {'),
+                    lang: window.LANG
+                },
+                company: {
+                    name: window.COMPANY_NAME,
+                    ospace: window.COMPANY_OSPACE,
+                    fullName: window.COMPANY_FULLNAME
+                }
+            },
+            template:   `<footer id="footer"
+                                style="position:fixed;
+                                bottom: 0px;
+                                right: 10px;
+                                height: 30px;
+                                line-height: 30px;
+                                display: none;">
+                            
+                            <el-link style="font-size: 12px;margin-right:5px;">
+                                <i class="fas fa-copyright"></i> 2018 #{appVersion}#
+                            </el-link>
+                            
+                            <el-dropdown @command="onApiCommand" style="font-size: 12px;margin-right:5px;cursor:pointer;">
+                                <span class="el-dropdown-link">
+                                    <i class="el-icon-tickets el-icon--right"></i> API
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item :command="item.url" v-for="item in api.list">#{item.name}#</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+
+                            <el-dropdown @command="onLangCommand" style="font-size: 12px;margin-right:5px;cursor:pointer;">
+                                <span class="el-dropdown-link">
+                                    <i class="el-icon-s-home el-icon--right"></i> #{lang.name}#
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item :command="item.value" v-for="item in language">#{item.name}#</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+
+                            <el-link href="#" :underline="false" style="font-size:12px;margin-right:5px;">
+                                <i class="el-icon-coin el-icon--right"></i> #{company.name}#
+                            </el-link>
+
+                            <el-link href="http://{{.website}}" target="_blank" :underline="false" style="font-size:12px;">
+                                <i class="el-icon-user el-icon--right"></i> #{company.fullName}#
+                            </el-link>
+                            
+                        </footer>`,
+            computed:{
+                language:function(){
+                    try{
+                        return _.map(this.lang.list,(v)=>{
+                            return {name:v.split(" ")[1], value: v.split(" ")[0]};
+                        });
+                    }catch(err){
+                        return [{name: '简体中文', value: 'zh_CN'}];
+                    }
+                }
+            },
+            created(){
+                // API菜单
+                this.api.list = _.map(fsHandler.callFsJScript('/matrix/footer/api_contextmenu.js', null).message,(v,k)=>{
+                    return {name: v.name, url: k, icon: v.icon};
+                });
+            },
+            methods: {
+                onLangCommand(cmd) {
+                    
+                },
+                onApiCommand(cmd){
+                    window.open(cmd,"_blank");
+                }
+            }
+        }
+    };
+
     // 左边栏盒子应用
     sideMenu(){
         const inst = this;
@@ -631,6 +720,7 @@ class SideBar {
     init(){
         this.topbar = new Vue(this.topBar()).$mount("#header");
         this.app = new Vue(this.sideMenu()).$mount("#sidebar-menu");
+        this.footbar = new Vue(this.footBar()).$mount("#footer");
     }
 
     appRunning(event){

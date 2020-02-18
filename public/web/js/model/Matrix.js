@@ -66,8 +66,6 @@ class Matrix {
             mx.search();
             // Robot实例
             mx.robot();
-            // API菜单实例
-            mx.footerApiContextMenu();
             // 工具提示实例
             mx.toolTip()
             // 模式监控
@@ -493,16 +491,6 @@ class Matrix {
         }
 
         return $(table).html();
-    }
-
-    // API菜单
-    footerApiContextMenu(){
-
-        let open = function(url){ window.open(url,"_blank");};
-        let rtn = fsHandler.callFsJScript('/matrix/footer/api_contextmenu.js', null).message || [];
-        _.delay(()=>{
-            contextMenu.build('api-contextmenu', {select:'footer-button-group', items: rtn, handle: open});
-        },500)
     }
 
     // 工具提示
