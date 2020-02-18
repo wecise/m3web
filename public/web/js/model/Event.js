@@ -1968,15 +1968,15 @@ class Event {
                             let term = JSON.stringify({class: "event", action:"list"});
                             this.view.list = fsHandler.callFsJScript("/matrix/view/action.js",encodeURIComponent(term)).message;;
                             this.$root.$refs.searchRef.view.list = this.view.list;
-                            console.log(1,this.view.list)
+                            
                             // 默认视图
                             this.view.activeModel = _.find(this.view.list,{name:this.view.activeName});
-                            console.log(2,this.view.activeModel)
+                            
                             // 当前视图class
                             this.view.class.list = fsHandler.callFsJScript("/matrix/view/class.js",encodeURIComponent(this.view.activeModel.filter.class)).message;
-                            console.log(3,this.view.class.list)
+                            
                             // 当前视图属性
-                            console.log(4,this.view.activeModel.filter.class)
+                            
                             this.onPropsChange(this.view.activeModel.filter.class);
                         },
                         // 视图属性配置
@@ -2351,6 +2351,12 @@ class Event {
                             this.options.term = term;
                         } catch(err){
 
+                        }
+
+                        // 初始化默认视图
+                        let defaultView = localStorage.getItem("EVENT-DEFAULT-VIEW");
+                        if(defaultView){
+                            this.options.view.value = defaultView;
                         }
                     },
                     mounted(){

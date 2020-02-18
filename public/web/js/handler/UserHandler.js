@@ -122,7 +122,6 @@ class UserHandler{
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("用户删除成功" + " " + moment().format("LLL"));
                 }
 
             },

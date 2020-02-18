@@ -68,9 +68,11 @@
 						<div style="padding: 0px;text-align: right;">
 							<p style="margin: 0px;">#{item.title}#</p>
 							<p style="margin: 0px;">
-								#{moment(item.time).format(mx.global.register.format)}#
+								<el-tooltip content="视图创建时间">
+									<span>#{moment(item.time).format(mx.global.register.format)}#</span>
+								</el-tooltip>
 								<el-tooltip content="设置为默认视图">
-									<el-button type="text"  icon="el-icon-s-platform"></el-button>
+									<el-button type="text"  icon="el-icon-s-platform" style="margin-left:10px;" @click="onSetDefaultView(item)"></el-button>
 								</el-tooltip>
 								<el-tooltip content="视图管理">
 									<el-button type="text"  icon="el-icon-edit-outline" @click="onChangeView(item)"></el-button>
@@ -141,6 +143,13 @@
 
 	    },
 	    methods: {
+			onSetDefaultView(item){
+				localStorage.setItem("EVENT-DEFAULT-VIEW",item.name);
+				this.$message({
+					type: "info",
+					message: "设置默认视图为：" + item.title
+				})
+			},
 			onChangeView(item){
 				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
 			},

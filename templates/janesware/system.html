@@ -222,59 +222,6 @@
 	})
 </script>
 
-<script type="text/x-template" id="user-manage-template">
-    <el-container style="background-color:#ffffff;">
-
-        <el-header style="line-height:30px;height:30px;display:flex;">
-            <h5><i class="fas fa-address-card"></i> 用户信息</h5>
-            <span style="position: absolute;right: 20px;">
-                <el-tooltip content="用户信息更新">
-                    <a href="javascript:void(0);" class="btn btn-xs btn-link" type="button" @click="saveUserData"><i class="fa fa-save fa-fw"></i> 保存</a>
-                </el-tooltip>
-            </span>
-        </el-header>
-
-        <el-main style="padding:10px;">
-            <el-row>
-                <el-col :span="24">
-                    <div class="grid-content bg-purple-dark">
-                        <bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
-                    </div>
-                </el-col>
-            </el-row>
-            <h5><i class="fas fa-user-shield"></i> 权限管理</h5>
-            <el-row>
-                <el-col :span="24">
-                    <div class="grid-content bg-purple-dark">
-                        <el-tabs v-model="permission.activeIndex" class="grid-content" type="border-card">
-                            <el-tab-pane label="按对象授权" name="byObject">
-                                <el-container style="height: calc(100vh - 360px);">
-                                    <el-aside>
-                                        <byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
-                                    </el-aside>
-                                    <el-main>
-                                        <bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>    
-                                    </el-main>
-                                </el-container>  
-                            </el-tab-pane>
-                            <el-tab-pane label="按属性授权" name="byProperty">
-                                <el-container>
-                                    <el-aside>
-                                        <byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
-                                    </el-aside>
-                                    <el-main style="padding:0px 0px 0px 10px;">
-                                        <bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
-                                    </el-main>
-                                </el-container>  
-                            </el-tab-pane>
-                        </el-tabs>
-                    </div>
-                </el-col>
-            </el-row>
-        </el-main>
-    </el-container>
-</script>
-
 <script type="text/x-template" id="notify-manage-template">
     <div>
         

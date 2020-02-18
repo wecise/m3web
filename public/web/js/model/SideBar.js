@@ -495,7 +495,7 @@ class SideBar {
             },
             methods: {
                 onLangCommand(cmd) {
-                    
+                    window.location.href=`?lang=${cmd}`;
                 },
                 onApiCommand(cmd){
                     window.open(cmd,"_blank");
@@ -519,96 +519,99 @@ class SideBar {
                 appConfig: [],
                 sideBarStatus: 2
             },
-            template:   `<el-menu :default-active="defaultActive"
-                                mode="vertical"
-                                @select="onSelect"
-                                @open="onOpen" 
-                                @close="onClose" 
-                                :collapse="isCollapse"
-                                :collapse-transition="false"
-                                class="el-menu-vertical-sidebar"
-                                background-color="transparent"
-                                text-color="#fff"
-                                active-text-color="#ffd04b"
-                                style="height:100vh;width:100%;overflow-y:auto;float:left;">
-                            <el-menu-item index="toggle" style="display:">
-                                <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:17px;color:#fff;"></i>
-                            </el-menu-item>
-                            <el-menu-item index="apps">
-                                <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> 
-                                <span slot="title">应用</span>
-                            </el-menu-item>
-                            <el-menu-item index="/">
-                                <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
-                                <span slot="title">首页</span>
-                            </el-menu-item>
-                            
-                            <!-- 有模板情况-->
-                            <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
-                                <template slot="title">
-                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                    <span>#{item.title}#</span>
-                                </template>
-                                
-                                <el-menu-item-group>
-                                    <span slot="title">#{item.title}#</span>
-                                    <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
-                                        <img :src="subItem.icon | pickIcon" style="width:17px;"></img>
-                                        <span slot="title">
-                                            #{subItem.cnname}#
-                                            <el-tooltip content="在新窗口中打开">
-                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                            </el-tooltip>
-                                        </span>
-                                        <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
-                                    </el-menu-item>
-                                <el-menu-item-group>
-                            </el-submenu>
-
-                            <!-- 没有模板情况，且菜单项数量超过阈值-->
-                            <el-submenu index="appList" v-show="sideBarStatus === 1">
-                                <template slot="title">
-                                    <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
-                                    <span>应用</span>
-                                </template>
-
-                                <el-menu-item-group>
+            template:   `<aside id="aside"><div id="sidebar" class="sidebar animated fadeInLeft" style="display:none;">
+                            <el-menu :default-active="defaultActive"
+                                    mode="vertical"
+                                    @select="onSelect"
+                                    @open="onOpen" 
+                                    @close="onClose" 
+                                    :collapse="isCollapse"
+                                    :collapse-transition="false"
+                                    class="el-menu-vertical-sidebar"
+                                    background-color="transparent"
+                                    text-color="#fff"
+                                    active-text-color="#ffd04b"
+                                    style="height:100vh;width:100%;overflow-y:auto;float:left;">
+                                <el-menu-item index="toggle" style="display:">
+                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:17px;color:#fff;"></i>
+                                </el-menu-item>
+                                <el-menu-item index="apps">
+                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> 
                                     <span slot="title">应用</span>
-                                    <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
+                                </el-menu-item>
+                                <el-menu-item index="/">
+                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
+                                    <span slot="title">首页</span>
+                                </el-menu-item>
+                                
+                                <!-- 有模板情况-->
+                                <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
+                                    <template slot="title">
                                         <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                        <span slot="title">
-                                            #{item.cnname}#
-                                            <el-tooltip content="在新窗口中打开">
-                                                <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                            </el-tooltip>
-                                        </span>
-                                    </el-menu-item>
-                                </el-menu-item-group>
-                            </el-submenu>
+                                        <span>#{item.title}#</span>
+                                    </template>
+                                    
+                                    <el-menu-item-group>
+                                        <span slot="title">#{item.title}#</span>
+                                        <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
+                                            <img :src="subItem.icon | pickIcon" style="width:17px;"></img>
+                                            <span slot="title">
+                                                #{subItem.cnname}#
+                                                <el-tooltip content="在新窗口中打开">
+                                                    <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(subItem.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                                </el-tooltip>
+                                            </span>
+                                            <!--object ><a :href="subItem.url" target="_blank"><i class="fas fa-plus" style="color:#f7f7f7;transform: scale(.5);float:right;"></i></a></object-->
+                                        </el-menu-item>
+                                    <el-menu-item-group>
+                                </el-submenu>
 
-                            <!-- 没有模板情况，且菜单项数量没超过阈值-->
-                            <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
-                                <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                <span slot="title">
-                                    #{item.cnname}#
-                                    <el-tooltip content="在新窗口中打开">
-                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                    </el-tooltip>
-                                </span>
-                            </el-menu-item>
+                                <!-- 没有模板情况，且菜单项数量超过阈值-->
+                                <el-submenu index="appList" v-show="sideBarStatus === 1">
+                                    <template slot="title">
+                                        <i class="fas fa-cubes" style="color:#ffffff;font-size:18px;"></i>
+                                        <span>应用</span>
+                                    </template>
 
-                            <!-- 没有分组的应用-->
-                            <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
-                                <img :src="item.icon | pickIcon" style="width:17px;"></img>
-                                <span slot="title">
-                                    #{item.cnname}#
-                                    <el-tooltip content="在新窗口中打开">
-                                        <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
-                                    </el-tooltip>
-                                </span>
-                            </el-menu-item>
+                                    <el-menu-item-group>
+                                        <span slot="title">应用</span>
+                                        <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
+                                            <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                            <span slot="title">
+                                                #{item.cnname}#
+                                                <el-tooltip content="在新窗口中打开">
+                                                    <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                                </el-tooltip>
+                                            </span>
+                                        </el-menu-item>
+                                    </el-menu-item-group>
+                                </el-submenu>
 
-                        </el-menu>`,
+                                <!-- 没有模板情况，且菜单项数量没超过阈值-->
+                                <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <span slot="title">
+                                        #{item.cnname}#
+                                        <el-tooltip content="在新窗口中打开">
+                                            <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                        </el-tooltip>
+                                    </span>
+                                </el-menu-item>
+
+                                <!-- 没有分组的应用-->
+                                <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
+                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <span slot="title">
+                                        #{item.cnname}#
+                                        <el-tooltip content="在新窗口中打开">
+                                            <el-button type="text" icon="el-icon-position" @click.stop.prevent="onClick(item.url)" style="float:right;transform:scale(0.6);color:#ffffff;"></el-button>
+                                        </el-tooltip>
+                                    </span>
+                                </el-menu-item>
+
+                            </el-menu>
+                        </div>
+                        </aside>`,
             created(){
                 this.init();
                 eventHub.$on("APP-REFRESH-EVENT",this.refresh);
@@ -719,7 +722,7 @@ class SideBar {
 
     init(){
         this.topbar = new Vue(this.topBar()).$mount("#header");
-        this.app = new Vue(this.sideMenu()).$mount("#sidebar-menu");
+        this.app = new Vue(this.sideMenu()).$mount("#aside");
         this.footbar = new Vue(this.footBar()).$mount("#footer");
     }
 

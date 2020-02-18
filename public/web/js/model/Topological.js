@@ -1714,7 +1714,7 @@ class Topological {
 
                     } catch(err) {
                         this.$message({
-                            type: "waring",
+                            type: "error",
                             message: "图查询失败，请确认语法！" + err
                         });
                         this.model = {};
