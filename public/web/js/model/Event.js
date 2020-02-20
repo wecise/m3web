@@ -661,6 +661,244 @@ class Event {
                     }
                 })
 
+                // Table组件 单选 智能分组用
+                Vue.component("el-table-aigroup-component",{
+                    delimiters: ['#{', '}#'],
+                    props: {
+                        model: Object
+                    },
+                    data(){
+                        return {
+                            dt:{
+                                rows:[],
+                                columns: [],
+                                selected: []
+                            },
+                            info: []
+                        }
+                    },
+                    watch: {
+                        model: {
+                            handler(val,oldVal){
+                                this.initData();
+                                this.layout();
+                            },
+                            deep:true,
+                            immediate:true
+                        },
+                        dt: {
+                            handler(val,oldVal){
+                                this.info = [];
+                                this.info.push(`共 ${this.dt.rows.length} 项`);
+                                this.info.push(`已选择 ${this.dt.selected.length} 项`);
+                                this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
+                            },
+                            deep:true,
+                            immediate:true
+                        }
+                    },
+                    template:   `<el-container style="width:100%;height:100%;">
+                                    <el-main style="width:100%;padding:0px;">
+                                        <el-table
+                                            :data="dt.rows"
+                                            highlight-current-row="true"
+                                            style="width: 100%"
+                                            :row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
+                                            @row-dblclick="onRowDblclick"
+                                            @row-contextmenu="onRowContextmenu"
+                                            @selection-change="onSelectionChange"
+                                            @current-change="onCurrentChange"
+                                            ref="table">
+                                            <!--el-table-column type="selection" align="center"></el-table-column--> 
+                                            <el-table-column type="expand">
+                                                <template slot-scope="props">
+                                                    <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input v-model="v"></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                sortable 
+                                                show-overflow-tooltip
+                                                v-for="(item,index) in dt.columns"
+                                                :key="index"
+                                                :prop="item.field"
+                                                :label="item ? item.title : ''"
+                                                :width="item.width"
+                                                v-if="item.visible">
+                                                    <template slot-scope="scope">
+                                                        <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
+                                                            v-if="typeof item.render === 'function'">
+                                                        </div>
+                                                        <div v-else>
+                                                            #{scope.row[item.field]}#
+                                                        </div>
+                                                    </template>
+                                            </el-table-column>
+                                        </el-table>
+                                    </el-main>
+                                    <el-footer  style="height:30px;line-height:30px;">
+                                        #{ info.join(' &nbsp; | &nbsp;') }#
+                                    </el-footer>
+                                </el-container>`,
+                    mounted(){
+
+                    },
+                    methods: {
+                        layout(){
+                            let doLayout = ()=>{
+                                if($(".el-table-column--selection",this.$el).is(':visible')){
+                                    _.delay(()=>{
+                                        this.$refs.table.doLayout();
+                                    },1000)
+                                } else {
+                                    setTimeout(doLayout,50);
+                                }
+                            }
+                            doLayout();
+                        },
+                        initData(){
+                            const self = this;
+                            
+                            let init = function(){
+                                
+                                _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+                                    
+                                    if(_.isUndefined(v.visible)){
+                                        _.extend(v, { visible: true });
+                                    }
+
+                                    if(!v.render){
+                                        return v;
+                                    } else {
+                                        return _.extend(v, { render: eval(v.render) });
+                                    }
+                                    
+                                })});
+
+                                _.extend(self.dt, {rows: self.model.rows});
+                            };
+
+                            _.delay(()=>{
+                                init();
+                            },1000)
+                            
+                        },
+                        rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        },
+                        onSelectionChange(val) {
+                            this.dt.selected = [val];
+                        },
+                        onCurrentChange(val){
+                            this.dt.selected = [val];
+                        },
+                        onRowContextmenu(row, column, event){
+                            const self = this;
+                            
+                            $.contextMenu( 'destroy' ).contextMenu({
+                                selector: `.${column.id}`,
+                                trigger: "right",
+                                autoHide: true,
+                                delay: 5,
+                                hideOnSecondTrigger: true,
+                                className: `animated slideIn ${column.id}`,
+                                build: function($trigger, e) {
+                    
+                                    return {
+                                        callback: function(key, opt) {
+                                            
+                                            if(_.includes(key,'diagnosis')) {
+                                                self.$root.detailAdd(row);
+                                            } else if(_.includes(key,'action')) {
+                                                // 增加操作类型
+                                                let action = _.last(key.split("_"));
+                                                self.$root.action({list: [row], action:action});
+                                            } else if(_.includes(key,'ticket')){
+                                                alertify.confirm(`确定生成工单<br><br>
+                                                                    告警ID：${row.id}<br><br>
+                                                                    实体ID：${row.entity}<br><br>
+                                                                    模板ID：b223c78b-3107-11e6-8487-446d577ed81c<br><br>
+                                                                    告警摘要：${row.msg}<br><br>
+                                                                    告警时间：${moment(row.vtime).format("LLL")}<br><br>`, function (e) {
+                                                    if (e) {
+                                                        try{
+                                                            let rtn = fsHandler.callFsJScript("/matrix/readysoft/eventToTicket.js", encodeURIComponent(JSON.stringify(row).replace(/%/g,'%25'))).message.data;
+                                                            if(rtn.data.success == 1){
+                                                                self.options.term = row.id;
+                                                                self.$refs.searchRef.search();
+                                                                alertify.success(`创建工单成功! <br><br>
+                                                                            工单单号：${rtn.data.ticket_number}`)
+                                                            }
+                                                        }catch(err){
+                                                            alertify.error(`创建工单失败，请确认！ <br><br>
+                                                                            ${rtn}<br><br>
+                                                                            ${err}`)
+                                                        }
+                                                    } else {
+                                                        
+                                                    }
+                                                });
+                                            }
+                                        },
+                                        items: self.$root.model.message.contextMenu.event
+                                    }
+                                },
+                                events: {
+                                    show(opt) {
+                
+                                        let $this = this;
+                                        _.delay(()=>{
+                                            new Vue(mx.tagInput(`${column.id}_single_tags`, `.${column.id} input`, row, self.$root.$refs.searchRef.search));
+                                        },50)
+                                    }
+                                }
+                            });
+                        },
+                        onRowDblclick(row, column, event){
+                            
+                        },
+                        onExport(type){
+                    
+                            let options = {
+                                csvEnclosure: '',
+                                csvSeparator: ', ',
+                                csvUseBOM: true,
+                                ignoreColumn: [0,1],
+                                fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
+                                type: type,
+                            };
+        
+                            if(type === 'png'){
+                                //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                                $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
+                            } else if(type === 'pdf'){
+                                _.extend(options, {
+                                    jspdf: {orientation: 'l',
+                                            format: 'a3',
+                                            margins: {left:10, right:10, top:20, bottom:20},
+                                            autotable: {styles: {fillColor: 'inherit', 
+                                                                    textColor: 'inherit'},
+                                                        tableWidth: 'auto'}
+                                    }
+                                });
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            } else {
+                                $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
+                            }
+                            
+                        }
+                    }
+                })
+
                 // Table组件 多选
                 Vue.component("el-table-multiselect-component",{
                     delimiters: ['#{', '}#'],
@@ -982,40 +1220,6 @@ class Event {
                     }
                 })
 
-                // 智能分组列表
-                Vue.component("event-view-aigroup-list",{
-                    delimiters: ['#{', '}#'],
-                    props: {
-                        model: Object
-                    },
-                    data(){
-                        return {
-                            activeNames: 0
-                        }
-                    },
-                    template:   `<el-collapse v-model="activeNames" @change="onChange">
-                                    <el-collapse-item :name="index" v-for="(item,index) in model.rows">
-                                        <template slot="title">
-                                            #{item.group}#
-                                            <el-button type="text" :style="severity | pickBg" v-for="severity in item.severity">#{severity}#</el-button>
-                                        </template>
-                                        <p>#{item.app}#</p>
-                                        <p>#{item.ids}#</p>
-                                        <p>#{item.list}#</p>
-                                    </el-collapse-item>
-                                </el-collapse>`,
-                    filters: {
-                        pickBg(evt){
-                            return `background:${mx.global.register.event.severity[5][2]};`;
-                        }
-                    },
-                    methods:{
-                        onChange(evt){
-                            
-                        }
-                    }
-                })
-
                 // 智能分组
                 Vue.component("event-view-aigroup",{
                     delimiters: ['#{', '}#'],
@@ -1036,16 +1240,26 @@ class Event {
                             },
                             control: {
                                 ifGraph: '0',
-                                ifFullScreen: false
+                                ifGroupFullScreen: false,
+                                ifGraphFullScreen: false
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 150px);padding:1px;">
+                    template: `<el-container style="height: calc(100vh - 160px);padding:1px;">
                                     <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
-                                            <el-main style="padding:0px;overflow:auto;">
-                                                <!--event-view-aigroup-list :model="dt" ref="groups"></event-view-aigroup-list-->
-                                                <el-table-component :model="dt" ref="groups"></el-table-component>
+                                            <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
+                                                <el-tooltip content="刷新" placement="top" open-delay="500">
+                                                    <el-button type="text" icon="el-icon-refresh"></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip content="新建分组" placement="top" open-delay="500">
+                                                    <el-button type="text" icon="el-icon-plus"></el-button>
+                                                </el-tooltip>
+                                                <el-button type="text" :icon="control.ifGroupFullScreen | pickScreenStyle" style="float:right;" @click="onGroupFullScreen"></el-button>
+                                            </el-header>
+                                            <el-main style="padding:10px;overflow:auto;" ref="groupListRef">
+                                                <el-table-aigroup-component :model="dt" ref="groups" style="height:50%;"></el-table-aigroup-component>
+                                                <el-table-aigroup-component :model="dt" ref="groupsByManual" style="height:50%;"></el-table-aigroup-component>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -1057,7 +1271,7 @@ class Event {
                                             <el-tooltip content="图" placement="top" open-delay="500">
                                                 <el-button type="text" icon="el-icon-data-line" @click="control.ifGraph='1'"></el-button>
                                             </el-tooltip>
-                                            <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
+                                            <el-button type="text" :icon="control.ifGraphFullScreen | pickScreenStyle" style="float:right;" @click="onGraphFullScreen"></el-button>
                                         </el-header>
                                         <el-main style="padding:0px;height:100%;">
                                             <el-tabs v-model="control.ifGraph" style="height:100%;">
@@ -1131,8 +1345,11 @@ class Event {
                                 this.dt.modelByGroup = null;
                             }
                         },
-                        onFullScreen(){
-                            this.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                        onGroupFullScreen(){
+                            this.control.ifGroupFullScreen = mx.fullScreenByEl(this.$refs.groupListRef.$el);
+                        },
+                        onGraphFullScreen(){
+                            this.control.ifGraphFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
                         }
                     }
                 })
@@ -1237,7 +1454,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
                     }
@@ -1272,7 +1489,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         },
                         pickSeverity(item){
@@ -1314,7 +1531,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
                     }
@@ -1338,17 +1555,13 @@ class Event {
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside style="background: rgb(241, 241, 241);overflow:hidden;" class="split" ref="leftView">
+                                    <el-aside style="background: #f7f7f7;overflow:hidden;padding:0px 10px;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
-                                            <el-header style="height: 30px;
-                                                                float: right;
-                                                                line-height: 30px;">
-                                                当前告警
+                                            <el-header style="height: 30px;line-height: 30px;text-align: right;padding:0px;">
                                                 <el-switch
                                                     v-model="dt.ifOR"
                                                     active-text="AND"
-                                                    inactive-text="OR"
-                                                    style="right:-40%;">
+                                                    inactive-text="OR">
                                                 </el-switch>
                                             </el-header>
                                             <el-main style="padding:0px;overflow:hidden;">
@@ -1372,7 +1585,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
                     },
@@ -1447,19 +1660,36 @@ class Event {
                                 rows: [],
                                 columns: [],
                                 template: []
-                            }
+                            },
+                            activeName: ""
                         }
                     },
                     template:  `<el-container :style="$root.control.viewType | heightByMode">
-                                    <el-aside class="split" ref="leftView">
-                                        <el-container>
-                                            <el-header style="text-align: right; font-size: 12px;line-height: 24px;height:24px;">
-                                                
+                                    <el-aside  style="background: #f7f7f7;overflow:hidden;padding:10px;" ref="leftView">
+                                        <el-container style="overflow:hidden;height:100%;">
+                                            <el-header style="text-align: right;line-height: 30px;height:30px;">
+                                                <el-tooltip content="刷新" open-delay="500">
+                                                    <el-button type="text" icon="el-icon-refresh"></el-button>
+                                                </el-tooltip>
                                             </el-header>
-                                            <el-main style="display: flex;flex-wrap: wrap;align-content: space-around;justify-content: space-between;padding: 0px 10px 0px 10px;" v-if="model.rows">
-                                                <el-button type="success" style="flex: 0 1 18%;padding: 30px;border-radius: 30px;margin: 5px;" v-for="item in model.rows" :data-item="item.name" @click="toggleEvent(item.name)">
-                                                    #{item.names.length}#
-                                                </el-button>
+                                            <el-main style="background:#ffffff;display: flex;flex-wrap: wrap;align-content: flex-start;justify-content: space-between;" v-if="model.rows">
+                                                <el-radio-group v-model="activeName">
+                                                    <el-radio :label="item.name" v-for="item in model.rows" :key="item.name">
+                                                        <el-button type="default" style="max-width:100%;width:100%;height:auto;margin: 5px;border-radius: 10px!important;"  @click="toggleEvent(item.name)">
+                                                            <div style="text-align:left;">
+                                                            <p>相关业务：
+                                                                <p v-for="biz in _.map(item.events,'biz')" :key="biz" style="text-indent:25px;">#{biz}#</p>
+                                                            </p>
+                                                            <p>相关服务器：
+                                                                <p v-for="host in _.map(item.events,'host')" :key="host" style="text-indent:25px;">#{host}#</p>
+                                                            </p>
+                                                            <p>级别：
+                                                                <el-button type="danger">#{_.filter(item.events,(v)=>{ return v.severity>=5 }).length}#</el-button>
+                                                                <el-button type="warning">#{_.filter(item.events,(v)=>{ return v.severity>=4 && v.severity <5 }).length}#</el-button>
+                                                            </p>
+                                                        </el-button>
+                                                    </el-radio>
+                                                </el-radio-group>
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -1474,9 +1704,12 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
+                    },
+                    created(){
+                        this.activeName = _.first(this.model.rows).name;
                     },
                     mounted(){
                         this.$nextTick(()=>{
@@ -1500,6 +1733,7 @@ class Event {
 
                         },
                         toggleEvent(event){
+                            this.activeName = event;
                             _.extend(this.dt, { rows: _.find(this.model.rows,{name:event}).events } );
                         }
                     }
@@ -1522,7 +1756,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
                     },
@@ -1615,7 +1849,7 @@ class Event {
                             if(viewType === 'm'){
                                 return `height: calc(100vh - 140px)`;
                             } else {
-                                return `height: calc(100vh - 190px)`;
+                                return `height: calc(100vh - 205px)`;
                             }
                         }
                     },
@@ -1810,7 +2044,7 @@ class Event {
                     props:{
                         model:Object
                     },
-                    template:   `<el-container class="animated fadeInLeft" style="height:100%;">
+                    template:   `<el-container class="view-manage animated fadeInLeft" style="height:100%;">
                                     <el-aside style="width:270px;height:100%;background:#f7f7f7;">
                                         <el-container  style="height:100%;">
                                             <el-header style="height:30px;line-height:30px;width:100%;text-align:right;">
@@ -2098,89 +2332,115 @@ class Event {
                                         <el-main class="event-view-container" style="padding: 5px 0px 0px 0px;" v-else>
                                             <el-tabs v-model="layout.main.activeIndex" class="eventViewContainer animated fadeInLeft" type="border-card" closable @tab-remove="detailRemove" @tab-click="handleClick">
                                                 <el-tab-pane v-for="(item,index) in layout.main.tabs" :key="item.name" :label="item.title" :name="item.name" lazy=true style="padding:0px;">
-                                                    <div v-if="item.type==='main'">
-                                                        <div class="event-view-summary-control">
-                                                            <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
-                                                                <div>
-                                                                    #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
-                                                                    <el-switch
-                                                                        v-model="control.ifRefresh"
-                                                                        active-color="#13ce66"
-                                                                        inactive-color="#dddddd"
-                                                                        active-value="1"
-                                                                        inactive-value="0"
-                                                                        @change="toggleSummaryByRefresh">
-                                                                    </el-switch>
-                                                                </div>
-                                                            </el-tooltip>
-                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
-                                                                <div>
-                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
-                                                                    <el-switch
-                                                                        v-model="control.ifSmart"
-                                                                        active-color="#13ce66"
-                                                                        inactive-color="#dddddd"
-                                                                        active-value="1"
-                                                                        inactive-value="0"
-                                                                        @change="toggleSummaryBySmart">
-                                                                    </el-switch>
-                                                                </div>
-                                                            </el-tooltip>
-                                                            <el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
-                                                                <div>
-                                                                    #{control.ifAiGroup==1?'智能分组':'智能分组'}#
-                                                                    <el-switch
-                                                                        v-model="control.ifAiGroup"
-                                                                        active-color="#13ce66"
-                                                                        inactive-color="#dddddd"
-                                                                        active-value="1"
-                                                                        inactive-value="0"
-                                                                        @change="toggleSummaryByGroup">
-                                                                    </el-switch>
-                                                                </div>
-                                                            </el-tooltip>
+                                                    <el-container v-if="item.type==='main'">
+                                                        <el-main style="padding:0px;">
+                                                            <div class="event-view-summary-control">
+                                                                <el-dropdown style="padding-right:10px;">
+                                                                    <span class="el-dropdown-link">
+                                                                        <i class="el-icon-menu el-icon--right"></i>
+                                                                    </span>
+                                                                    <el-dropdown-menu slot="dropdown">
+                                                                        <el-dropdown-item>
+                                                                            <el-tooltip :content="control.ifSmart==1?'智能分析启用中':'智能分析关闭中'" placement="top" open-delay="500">
+                                                                                <div>
+                                                                                    #{control.ifSmart==1?'智能分析':'智能分析'}#
+                                                                                    <el-switch
+                                                                                        v-model="control.ifSmart"
+                                                                                        active-color="#13ce66"
+                                                                                        inactive-color="#dddddd"
+                                                                                        active-value="1"
+                                                                                        inactive-value="0"
+                                                                                        @change="toggleSummaryBySmart">
+                                                                                    </el-switch>
+                                                                                </div>
+                                                                            </el-tooltip>
+                                                                        </el-dropdown-item>
+                                                                        <el-dropdown-item>
+                                                                            <el-tooltip :content="control.ifAiGroup==1?'智能分组启用中':'智能分组关闭中'" placement="top" open-delay="500">
+                                                                                <div>
+                                                                                    #{control.ifAiGroup==1?'智能分组':'智能分组'}#
+                                                                                    <el-switch
+                                                                                        v-model="control.ifAiGroup"
+                                                                                        active-color="#13ce66"
+                                                                                        inactive-color="#dddddd"
+                                                                                        active-value="1"
+                                                                                        inactive-value="0"
+                                                                                        @change="toggleSummaryByGroup">
+                                                                                    </el-switch>
+                                                                                </div>
+                                                                            </el-tooltip>
+                                                                        </el-dropdown-item>
+                                                                    </el-dropdown-menu>
+                                                                </el-dropdown>
 
-                                                        </div>
-                                                        <el-container id="event-view-console">
-                                                            <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
-                                                                <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" ref="tagTree"></entity-tree-component>
-                                                            </el-aside>
-                                                            <el-main class="table-view" style="padding:5px;" ref="mainView">
-                                                                <event-view-facet :model="model.message" v-show="control.ifSmart!=0" style="margin-top:30px;"></event-view-facet>
-                                                                <event-eventlist-component :model="model.message"></event-eventlist-component>
-                                                            </el-main>
-                                                        </el-container>
-                                                    </div>
-                                                    <div v-else-if="item.type==='diagnosis'">
-                                                        <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="el-tabs-bottom-line"> 
-                                                            <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name"  lazy=true>
-                                                                <div v-if="it.type==='detail'">
-                                                                    <event-diagnosis-detail :id="it.name + '-detail'" :model="it.model.event"></event-diagnosis-detail>
-                                                                </div>
-                                                                <div v-else-if="it.type==='journal'">
-                                                                    <event-diagnosis-journal :id="it.name + '-journal'" :model="it.model.journal"></event-diagnosis-journal>
-                                                                </div>
-                                                                <div v-else-if="it.type==='history'">
-                                                                    <event-diagnosis-history :model="it.model.history"></event-diagnosis-history>
-                                                                </div>
-                                                                <div v-else-if="it.type==='dimension'">
-                                                                    <event-diagnosis-dimension :model="it.model.dimension"></event-diagnosis-dimension>
-                                                                </div>
-                                                                <div v-else-if="it.type==='probability'">
-                                                                    <event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
-                                                                </div>
-                                                                <div v-else-if="it.type==='topological'">
-                                                                    <event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
-                                                                </div>
-                                                                <div v-else-if="it.type==='script'">
-                                                                    <event-diagnosis-script :model="it.model.script"></event-diagnosis-script>
-                                                                </div>
-                                                            </el-tab-pane>
-                                                        </el-tabs>
-                                                    </div>
-                                                    <div v-else-if="item.type==='aiGroup'">
-                                                        <event-view-aigroup id="event-view-aigroup" :model="model.message"></event-view-aigroup>
-                                                    </div>
+                                                                <el-tooltip :content="control.ifRefresh==1?'自动刷新启用中':'自动刷新关闭中'" placement="top" open-delay="500">
+                                                                    <el-dropdown>
+                                                                        <span class="el-dropdown-link">
+                                                                            <div>
+                                                                                #{control.ifRefresh==1?'自动刷新':'自动刷新'}#
+                                                                                <el-switch
+                                                                                    v-model="control.ifRefresh"
+                                                                                    active-color="#13ce66"
+                                                                                    inactive-color="#dddddd"
+                                                                                    active-value="1"
+                                                                                    inactive-value="0"
+                                                                                    @change="toggleSummaryByRefresh">
+                                                                                </el-switch>
+                                                                            </div>
+                                                                        </span>
+                                                                        <el-dropdown-menu slot="dropdown">
+                                                                            <el-dropdown-item>15s</el-dropdown-item>
+                                                                            <el-dropdown-item>30s</el-dropdown-item>
+                                                                            <el-dropdown-item>60s</el-dropdown-item>
+                                                                        </el-dropdown-menu>
+                                                                    </el-dropdown>
+                                                                </el-tooltip>
+                                                            </div>
+                                                            <el-container id="event-view-console">
+                                                                <el-aside class="tree-view" style="background-color:#f6f6f6;" ref="leftView">
+                                                                    <entity-tree-component id="event-tree" :model="{parent:'/event',name:'event_tree_data.js',domain:'event'}" ref="tagTree"></entity-tree-component>
+                                                                </el-aside>
+                                                                <el-main class="table-view" style="padding:5px;" ref="mainView">
+                                                                    <event-view-facet :model="model.message" v-show="control.ifSmart!=0" style="margin-top:30px;"></event-view-facet>
+                                                                    <event-eventlist-component :model="model.message"></event-eventlist-component>
+                                                                </el-main>
+                                                            </el-container>
+                                                        </el-main>
+                                                    </el-container>
+                                                    <el-container v-else-if="item.type==='diagnosis'">
+                                                        <el-main style="padding:10px 20px;">
+                                                            <el-tabs v-model="layout.main.detail.activeIndex" style="background:#ffffff;" class="event-diagnosis-tabs"> 
+                                                                <el-tab-pane v-for="it in item.child" :key="it.name" :label="it.title" :name="it.name"  lazy=true>
+                                                                    <div v-if="it.type==='detail'">
+                                                                        <event-diagnosis-detail :id="it.name + '-detail'" :model="it.model.event"></event-diagnosis-detail>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='journal'">
+                                                                        <event-diagnosis-journal :id="it.name + '-journal'" :model="it.model.journal"></event-diagnosis-journal>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='history'">
+                                                                        <event-diagnosis-history :model="it.model.history"></event-diagnosis-history>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='dimension'">
+                                                                        <event-diagnosis-dimension :model="it.model.dimension"></event-diagnosis-dimension>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='probability'">
+                                                                        <event-diagnosis-probability :id="it.name + '-probability'" :model="it.model.probability"></event-diagnosis-probability>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='topological'">
+                                                                        <event-diagnosis-topological :id="it.name + '-topological'" :model="it.model.event"></event-diagnosis-topological>
+                                                                    </div>
+                                                                    <div v-else-if="it.type==='script'">
+                                                                        <event-diagnosis-script :model="it.model.script"></event-diagnosis-script>
+                                                                    </div>
+                                                                </el-tab-pane>
+                                                            </el-tabs>
+                                                        </el-main>
+                                                    </el-container>
+                                                    <el-container v-else-if="item.type==='aiGroup'">
+                                                        <el-main style="padding:0px;">
+                                                            <event-view-aigroup id="event-view-aigroup" :model="model.message"></event-view-aigroup>
+                                                        </el-main>
+                                                    </el-container>
                                                 </tab>
                                             </el-tabs>
                                         </el-main>

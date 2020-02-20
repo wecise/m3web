@@ -1602,8 +1602,8 @@ class Topological {
                     selected: []
                 };
             },
-            template:   `<el-container style="height:calc(100vh - 148px);">
-                            <el-main style="padding:10px;height:100%;overflow:hidden;">
+            template:   `<el-container style="height:calc(100vh - 150px);">
+                            <el-main style="height:100%;overflow:hidden;">
                                 <el-input v-model="term" clearable placeholder="实体关键字" @blur="searchByTerm" style="margin-bottom:10px;height:32px;">
                                     <template slot="prepend">搜索实体</template>
                                     <el-button slot="append" icon="el-icon-search" @click="searchByTerm" @keyup.enter.native="searchByTerm"></el-button>
@@ -1730,11 +1730,15 @@ class Topological {
             props: {
                 
             },
-            template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="diagnosisRemove">
-                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true>
-                                <el-tabs v-if="item.child" v-model="subIndex" class="el-tabs-bottom-line">
-                                    <el-tab-pane :label="it | pickTitle" v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
-                                        
+            template:   `<el-tabs v-model="activeIndex" type="border-card" closable @tab-remove="diagnosisRemove" style="height:100%;">
+                            <el-tab-pane :label="item.title" v-for="item in tabs" :key="item.name" :name="item.name" lazy=true style="height:100%;">
+                                <el-tabs v-if="item.child" v-model="subIndex" class="entity-diagnosis-tabs" tab-position="left">
+                                    <el-tab-pane v-for="it in item.child" :key="it.name" :name="it.name" lazy=true>
+                                        <span slot="label">
+                                            <el-tooltip :content="it | pickTitle" open-delay="500" placement="left-start">
+                                                <el-image :src="it | pickImage" style="width:16px;height:16px;filter: brightness(0.5);"></el-image><!--i class="el-icon-menu"></i-->
+                                            </el-tooltip>
+                                        </span>
                                         <entity-diagnosis-profile :id="item.name" :model="model[it.type]" v-if="it.type === 'profile'"></entity-diagnosis-profile>
                                         
                                         <el-table-component :model="it.model[it.type]" v-if=" _.includes(['ticket'],it.type) "></el-table-component>
@@ -1770,6 +1774,13 @@ class Topological {
                         return `${event.title} ${count}`;
                     } catch(err){
                         return `${event.title} 0`;
+                    }
+                },
+                pickImage(item){
+                    try{
+                        return `/fs/assets/images/apps/png/${item.icon}.png?type=open&issys=true`;
+                    } catch(err){
+                        return `/fs/assets/images/apps/png/app.png?type=open&issys=true`;
                     }
                 }
             },
@@ -1818,7 +1829,7 @@ class Topological {
 
                         let tab = {
                             title: node.value || node.id, name: `diagnosis-${id}`, type: 'diagnosis', node: node, child:_.map(self.model.template,function(v){
-                                return {title: v.title, name:`diagnosis-${v.name}-${id}`, type: v.type, model: self.model};
+                                return _.extend(v, {name:`diagnosis-${v.name}-${id}`, model: self.model});
                             })};
 
                         self.activeIndex = tab.name;
@@ -1998,13 +2009,13 @@ class Topological {
         let main =  {
             delimiters: ['${', '}'],
             template:   `<el-container style="background: transparent;height: 100%;">
-                            <el-aside style="background-color:transparent;" class="topological-view-edges" ref="left">
+                            <el-aside style="background-color:transparent;border:1px solid #ddd;border-right:unset;" class="topological-view-edges" ref="left">
                                 <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :style="containerHeight" ref="main">
                                 <graph-view-container ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside style="height:100%;overflow:hidden;background-color:transparent;" class="topological-view-diagnosis" ref="right">
+                            <el-aside style="height:calc(100vh - 85px);overflow:hidden;background:transparent;border:1px solid #ddd;border-left:unset;" class="topological-view-diagnosis" ref="right">
                                 <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
@@ -2099,91 +2110,6 @@ class Topological {
                 setData(event){
                     this.model = _.extend(this.model, this.$refs.searchRef.result);
                 },
-                /* path(id, bid, node){
-
-                    let _dataset = [];
-                    let _columns = [];
-                    let _node = {};
-            
-                    if(!_.isEmpty(node)) {
-                        _dataset = node.data[_.keys(node.columns)[0]];
-                        _columns = node.columns[_.keys(node.columns)[0]];
-                        _node = node;
-                    }
-            
-                    _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        }
-                    });
-            
-                    return {
-            
-                        delimiters: ['${', '}'],
-                        el: '#' + id,
-                        template: `<omdb-path-datatables-component :id="id" :bid="bid"
-                                                                    :dataset="model.dataset"
-                                                                    :columns="model.columns"
-                                                                    :options="model.options"
-                                                                    contextmenu="null"
-                                                                    :result="result"></omdb-path-datatables-component>`,
-                        data: {
-                            id: id,
-                            bid: bid,
-                            model: {
-                                dataset: _dataset,
-                                columns: _columns,
-                                options: {
-                                    info:false,
-                                    scrollY: '25vh',
-                                    searching: false,
-                                }
-                            },
-                            result: _node
-                        },
-                        created: function(){
-                            let self = this;
-            
-                            eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
-            
-                            eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                            eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                        },
-                        mounted: function() {
-                            let self = this;
-            
-                            self.$nextTick(function() {
-                                self.init();
-                            })
-                        },
-                        methods: {
-                            init: function(){
-                                let self = this;
-            
-                                if(!_.isEmpty(node)) {
-                                    self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
-                                    self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
-                                } else {
-                                    self.model.dataset = [];
-                                    self.model.columns = [];
-                                }
-            
-                            },
-                            setData: function(event){
-                                let self = this;
-            
-                                self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
-                                self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
-                                self.result = event;
-            
-                            },
-                            setScrollY: function(event){
-                                let self = this;
-            
-                                self.model.options.scrollY = event.scrollY;
-                            }
-                        }
-                    };
-                }, */
                 cellSelect(cell){
                     let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
                     

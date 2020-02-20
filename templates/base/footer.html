@@ -134,6 +134,11 @@
 	.el-tabs--border-card{
 		height:100%;
 	}
+
+	.el-tabs__nav-wrap::after {
+		height: 1px;
+		background: transparent;
+	}
 	
 
 	/* Split Style */
@@ -147,9 +152,9 @@
         background-repeat: no-repeat;
         z-index: 100;
 		width: 5px;
-		border: 1px solid #ddd;
-		border-top: none;
-        border-bottom: none;
+		border: unset;
+		border-top: 1px solid #ddd!important;
+        border-bottom: 1px solid #ddd!important;
     }
 
     .gutter.gutter-vertical {
@@ -255,17 +260,8 @@
 		font-size: 12px;
 	}
 
-	.el-dropdown-menu{
-		z-index: 11000!important;
-	}
-
 	.el-form-item__label{
 		font-weight: normal;
-	}
-
-	header>.el-switch {
-    	font-size: 12px;
-    	padding: 15px 5px;
 	}
 
 	footer ul {

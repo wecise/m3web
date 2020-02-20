@@ -94,6 +94,7 @@ class Search {
                                     </el-timeline-item>
                                 </el-timeline>`
                 })
+                
                 Vue.component('el-table-component', {
                     delimiters: ['#{', '}#'],
                     template:   `<el-table
@@ -190,30 +191,44 @@ class Search {
                     props:{
                         model: Object
                     },
-                    watch: {
-                        'model.rows':{
-                            handler:function(val,oldVal){
-                                if(!_.isEmpty(val)){
-                                    this.showContent = true;
-                                } else {
-                                    this.showContent = false;
-                                }
-                            },
-                            deep:true,
-                            immediate:true
-                        }
-                    },
                     data(){
                         return {
                             showContent: true
                         }
                     },
-                    mounted(){
-                        console.log(1,this.model)
+                    filters:{
+                        pickUrl(item){
+                            try{
+                                return '/janesware/event?cond='+item.id+'&preset='+item.preset;
+                            } catch(err){
+                                return '';
+                            }
+                        },
+                        pickStyle(item){
+                            try{
+                                return 'background:'+mx.global.register.event.severity[item.severity][2]+';color:#FFFFFF;';
+                            } catch(err){
+                                return '';
+                            }
+                        },
+                        pickSeverity(item){
+                            try{
+                                return mx.global.register.event.severity[item.severity][1];
+                            } catch(err){
+                                return item.severity;
+                            }
+                        },
+                        pickLocaleTime(item){
+                            try{
+                                return moment(item.vtime).format("LLL");
+                            } catch(err){
+                                return '';
+                            }
+                        }
                     },
-                    template:   `<el-container id="search-event" class="animated fadeIn" style="background:#ffffff;margin-top:10px;">
+                    template:   `<el-container id="search-event" style="background:#ffffff;margin-top:10px;">
                                     <el-header style="height:30px;line-height:30px;">
-                                        <el-button type="text" icon="fas fa-exclamation-triangle" @click="showContent=!showContent"> 事件</el-button>
+                                        <el-button type="text" icon="el-icon-warning" @click="showContent=!showContent"> 事件</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
                                         <el-tabs>
@@ -229,18 +244,18 @@ class Search {
                                                 <span slot="label">
                                                     <i class="el-icon-tickets"></i>
                                                 </span>
-                                                <div v-for="item in model.rows" v-if="item">
-                                                    <h6>
-                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
-                                                    </h6>
+                                                <div v-for="item in model.rows">
+                                                    <h5>
+                                                        <el-link :href="item | pickUrl" target="_blank">#{item.host}#</el-link>
+                                                    </h5>
                                                     <p>
-                                                        <el-button :style="'background:'+mx.global.register.event.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.event.severity[item.severity][1]}#</el-button>
+                                                        <el-button :style="item | pickStyle">#{item.severity}#</el-button>
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                        <i class="el-icon-timer"></i> 时间： #{ item | pickLocaleTime }#
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                        <el-tag v-for="(k,v) in item.tag">#{ v }#</el-tag>
                                                     </p>
                                                     <p>#{item.msg}#</p>
                                                     <el-divider></el-divider>
@@ -279,10 +294,10 @@ class Search {
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                        <i class="el-icon-timer"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                        <i class="el-icon-price-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
                                                     </p>
                                                     <p>#{item.msg}#</p>
                                                     <el-divider></el-divider>
@@ -308,47 +323,34 @@ class Search {
                                         <el-button type="text" icon="fas fa-film" @click="showContent=!showContent"> 告警轨迹</el-button>
                                     </el-header>   
                                     <el-main v-if="showContent" class="animated fadeIn">
-                                        <div role="tabpanel">
-                                            <!-- Nav tabs -->
-                                            <ul class="nav nav-tabs" role="tablist" style="border:none;float:right;position: relative;top: 0px;background-color:transparent;">
-                                                <li role="presentation" class="active">
-                                                    <a href="#journal-table" aria-controls="journal-table" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-table"></i>
-                                                    </a>
-                                                </li>
-                                                <li role="presentation">
-                                                    <a href="#journal-list" aria-controls="journal-list" role="tab" data-toggle="tab" style="border:none;">
-                                                        <i class="fas fa-list-ul"></i>
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        
-                                            <!-- Tab panes -->
-                                            <div class="tab-content">
-                                                <div role="tabpanel" class="tab-pane active" id="journal-table">
-                                                    <el-table-component :columns="model.columns" 
-                                                                            :rows="model.rows"
-                                                                            forward="event"></el-table-component>
+                                        <el-tabs>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                     <i class="el-icon-s-grid"></i>
+                                                </span>
+                                                <el-table-component :columns="model.columns" 
+                                                                    :data="model.rows"
+                                                                    forward="event"></el-table-component>
+                                            </el-tab-pane>
+                                            <el-tab-pane>
+                                                <span slot="label">
+                                                    <i class="el-icon-tickets"></i>
+                                                </span>
+                                                <div v-for="item in model.rows" v-if="item">
+                                                    <h6>
+                                                        <el-link :href="'/janesware/event?cond='+item.id+'&preset='+item.preset" target="_blank">#{item.host}#</el-link>
+                                                    </h6>
+                                                    <p>
+                                                        <i class="el-icon-timer"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                    </p>
+                                                    <p>
+                                                        <i class="el-icon-price-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                    </p>
+                                                    <p>#{item.msg}#</p>
+                                                    <el-divider></el-divider>
                                                 </div>
-                                                <div role="tabpanel" class="tab-pane" id="journal-list">
-                                                    
-                                                    <span v-for="item in model.rows" v-if="item">
-                        
-                                                        <h5><a href="#" target="_blank"><ins>#{item.host}#</ins></a></h5>
-                        
-                                                        <span class="text-muted">
-                                                            <i class="fa fa-time"></i> 时间：#{ new Date(item.vtime).toLocaleString() }#  &nbsp;&nbsp;&nbsp;&nbsp;
-                                                            <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
-                                                        </span>
-                                                        <p>
-                                                            #{item.msg}#
-                                                        </p>
-                        
-                                                        <hr/>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            </el-tab-pane>
+                                        </el-tabs>
                                     </el-main>
                                 </el-container>`,
                     props:{
@@ -389,10 +391,10 @@ class Search {
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                        <i class="el-icon-timer"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                        <i class="el-icon-price-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
                                                     </p>
                                                     <p>#{item.msg}#</p>
                                                     <el-divider></el-divider>
@@ -439,10 +441,10 @@ class Search {
                                                         <el-button :style="'background:'+mx.global.register.log.severity[item.severity][2]+';color:#FFFFFF;'">#{mx.global.register.log.severity[item.severity][1]}#</el-button>
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-time"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
+                                                        <i class="el-icon-timer"></i> 时间： #{ new Date(item.vtime).toLocaleString() }#
                                                     </p>
                                                     <p>
-                                                        <i class="fa fa-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
+                                                        <i class="el-icon-price-tag" v-for="(k,v) in item.tag"> <a href="#"> #{ v }# </a> &nbsp; </i> 
                                                     </p>
                                                     <p>#{item.msg}#</p>
                                                     <el-divider></el-divider>
@@ -941,6 +943,7 @@ class Search {
                                                             <search-graph :model="graph" v-if="!_.isEmpty(graph.rows)"></search-graph>
 
                                                             <search-entity :model="entity" v-if="!_.isEmpty(entity.rows)"></search-entity>
+                                                            
                                                         </el-tab-pane>
                                                         <el-tab-pane name="timeline" key="timeline">
                                                             <template slot="label"></template>

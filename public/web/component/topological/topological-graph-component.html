@@ -47,13 +47,17 @@
             float: right;
             height: 100%;
             line-height: 30px;
-            border: 1px solid rgb(255, 255, 255);
+            border: unset;
             background: #ffffff;
         }
         
         .topological-graph-component .tools-search .el-input__inner {
 			background: transparent;
-            border: 1px solid #ddd!important;
+            border: unset;
+        }
+        .topological-graph-component .tools-search .el-input-group__append, 
+        .topological-graph-component .tools-search .el-input-group__prepend{
+            border:unset;
         }
 
         /* ToolBar */
@@ -99,7 +103,7 @@
             width: 29px;
             height: auto;
             background: #ffffff;
-            z-index: 10000;
+            z-index: 1000;
             right: 25px;
             bottom: calc( -100vh + 230px);
             -webkit-transform: translateZ(0);
@@ -122,7 +126,7 @@
             height: 30px;
             line-height: 30px;
             background: #ffffff;
-            z-index: 10000;
+            z-index: 1000;
             right: 25px;
             bottom: calc( -100vh + 195px);
             -webkit-transform: translateZ(0);
@@ -226,8 +230,8 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="height:100%;" ref="container" direction="vertical">
-                <el-header class="nav" style="height:35px;line-height: 35px;padding:0px 0px 0px 1px;position: relative;">
+            <el-container id="container" style="height:100%;border:1px solid #dddddd;" ref="container" direction="vertical">
+                <el-header class="nav" style="height:35px;line-height: 35px;padding:0px;position: relative;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                     <div id="outlineContainer" class="outlineContainer"></div>
                     <div class="vertical-toolbar">
@@ -292,7 +296,7 @@
                             </el-button>
                     </div>
                 </el-header>
-                <el-main id="graphContainer" ref="graphContainer" style="position:releative;overflow:auto;width:calc(100% - 1px);height:calc(100% - 110px);border:1px solid #ddd;padding:0px;"></el-main>
+                <el-main id="graphContainer" ref="graphContainer" style="position:releative;overflow:auto;width:calc(100% - 1px);height:calc(100% - 110px);border-top:1px solid #ddd;padding:0px;"></el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
                     <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>    
                     <!--el-tooltip :content="item.term" v-for="(item,index) in model.graph.history" effect="light" :key="item.id" class="animated fadeIn">

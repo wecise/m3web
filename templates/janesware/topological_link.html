@@ -61,11 +61,6 @@
 		box-shadow: unset;
 	}
 
-    .topological-view-edges .el-tabs--border-card>.el-tabs__content,
-    .topological-view-diagnosis .el-tabs--border-card>.el-tabs__content {
-        padding: 0px 0px 0px 5px;
-    }
-
     .el-tabs--border-card{
 		background: rgb(255, 255, 255);
 		border: unset;
@@ -226,8 +221,34 @@
         height:60px;
         line-height: 60px;
         text-align: center;
+        padding:0px;
     }
 
+    .topological-view-edges .el-tabs--border-card>.el-tabs__content,
+    .topological-view-diagnosis .el-tabs--border-card>.el-tabs__content {
+        padding: 0px;
+    }
+
+    /* entity-diagnosis-tabs */
+    .entity-diagnosis-tabs{
+        height:100%;
+    }
+    .entity-diagnosis-tabs > .el-tabs__header.is-left{
+        background: #f7f7f7;
+    }
+    .entity-diagnosis-tabs > .el-tabs__header.is-left > .el-tabs__nav-wrap::after{
+        background: transparent;
+    }
+    .entity-diagnosis-tabs .el-tabs__nav.is-left > .is-left:nth-child(1){
+        height:0px;
+        display: none;
+    }
+    .entity-diagnosis-tabs .el-tabs__nav.is-left .el-tabs__item.is-left{
+        padding: 5px 10px;
+    }
+    .entity-diagnosis-tabs .el-tabs__nav.is-left .el-tabs__item.is-left.is-active{
+        background: #fff;
+    }
 
     /* 全屏模式 */
 	section#header{

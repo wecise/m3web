@@ -6,7 +6,7 @@
         .search-preset .el-collapse-item__header{
             height: 40px;
             line-height: 40px;
-            padding:5px;
+            padding:0px 5px;
 
             border: 1px solid #ccc;
             border-bottom: 0px;
@@ -68,21 +68,21 @@
                     <el-collapse-item title="预设值" name="1">
                         <el-row :gutter="20">
                             <el-col :span="8">
-                                <h5>最近</h5>
+                                <h5 style="margin:5px 0px;">最近</h5 style="margin:5px 0px;>
                                 <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.nearest,{value:options.window.value}).name">
-                                    <p v-for="item in preset.nearest"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                    <p v-for="item in preset.nearest" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
                                 </el-radio-group>
                             </el-col>
                             <el-col :span="8" style="border-left:1px dashed #ccc;">
-                                <h5>实时</h5>
+                                <h5 style="margin:5px 0px;">实时</h5 style="margin:5px 0px;>
                                 <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.realtime,{value:options.window.value}).name">
-                                    <p v-for="item in preset.realtime"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                    <p v-for="item in preset.realtime" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
                                 </el-radio-group>
                             </el-col>
                             <el-col :span="8" style="border-left:1px dashed #ccc;">
-                                <h5>区间</h5>
+                                <h5 style="margin:5px 0px;">区间</h5 style="margin:5px 0px;>
                                 <el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.relative,{value:options.window.value}).name">
-                                    <p v-for="item in preset.relative"><el-radio :label="item.value">${item.name}</el-radio></p>
+                                    <p v-for="item in preset.relative" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
                                 </el-radio-group>
                             </el-col>
                         </div>
@@ -104,25 +104,17 @@
                     <el-collapse-item title="高级" name="3">
                         <el-row :gutter="20">
                             <el-col :span="12">
-                                <dl>
-                                    <dt>搜索时间</dt>
-                                    <dd>
-                                        <el-radio-group v-model="options.others.forTime">
-                                            <p style="padding-top:10px;"><el-radio label=" for vtime ">系统时间(vtime)</el-radio></p>
-                                            <p></p><el-radio label=" for ctime ">User Time(ctime)</el-radio></p>
-                                            <p><el-radio label=" for firstoccurrence ">Firstoccurrence</el-radio></p>
-                                            <p><el-radio label=" for lastoccurrence ">Lastoccurrence</el-radio></p>
-                                        </el-radio-group>
-                                    </dd>
-                                </dl>
+                                <h5 style="margin:5px 0px;">搜索时间</h5>
+                                <el-radio-group v-model="options.others.forTime">
+                                    <p style="padding-top:10px;"><el-radio label=" for vtime ">系统时间(vtime)</el-radio></p>
+                                    <p style="margin:5px 0px;"><el-radio label=" for ctime ">User Time(ctime)</el-radio></p>
+                                    <p style="margin:5px 0px;"><el-radio label=" for firstoccurrence ">Firstoccurrence</el-radio></p>
+                                    <p style="margin:5px 0px;"><el-radio label=" for lastoccurrence ">Lastoccurrence</el-radio></p>
+                                </el-radio-group>
                             </el-col>
                             <el-col :span="12" style="border-left:1px dashed #ddd;">
-                                <dl>
-                                    <dt>其它条件</dt>
-                                    <dd>
-                                        <p style="padding-top:10px;"><el-checkbox v-model="options.others.ifHistory">包含历史数据</el-checkbox></p>
-                                    </dd>
-                                </dl>
+                                <h5 style="margin:5px 0px;">其它条件</h5>
+                                <p style="margin:5px 0px;"><el-checkbox v-model="options.others.ifHistory">包含历史数据</el-checkbox></p>
                             </el-col>
                         </el-row>
                     </el-collapse-item>

@@ -1641,7 +1641,7 @@ class Omdb{
                                             </el-main>
                                         </el-container>
                                     </el-aside>
-                                    <el-main style="padding:0px;" ref="mainView">
+                                    <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                                         <el-tabs v-model="main.activeIndex" type="border-card" closable @tab-remove="mainTabsRemove" @tab-click="mainTabsClick">
                                             <el-tab-pane
                                                 :key="item.name"

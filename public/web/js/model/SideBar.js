@@ -403,7 +403,7 @@ class SideBar {
                     if(key==='home'){
                         sideBar.appAsHome({url:'/home'});
                     } else if(key==='signout'){
-                        window.open(`/user/logout/${window.COMPANY_NAME}`);
+                        window.open(`/user/logout/${window.COMPANY_NAME}`,'_parent');
                     } else if(key==='fullscreen'){
                         //mx.fullScreen();
                     }
@@ -434,7 +434,8 @@ class SideBar {
                 company: {
                     name: window.COMPANY_NAME,
                     ospace: window.COMPANY_OSPACE,
-                    fullName: window.COMPANY_FULLNAME
+                    fullName: window.COMPANY_FULLNAME,
+                    website: window.COMPANY_WEBSITE
                 }
             },
             template:   `<footer id="footer"
@@ -471,7 +472,7 @@ class SideBar {
                                 <i class="el-icon-coin el-icon--right"></i> #{company.name}#
                             </el-link>
 
-                            <el-link href="http://{{.website}}" target="_blank" :underline="false" style="font-size:12px;">
+                            <el-link :href="'http://'+company.website" target="_blank" :underline="false" style="font-size:12px;">
                                 <i class="el-icon-user el-icon--right"></i> #{company.fullName}#
                             </el-link>
                             

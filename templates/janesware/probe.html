@@ -24,51 +24,6 @@
 <!-- zTree Core CSS -->
 <link href="{{AppSubUrl}}/web/vendor/zTree/css/systemStyle/zTreeStyle.css" type="text/css" rel="stylesheet">
 
-<style type="text/css">
-
-    /* For Body */
-    body{
-        overflow:hidden;
-    }
-
-    /* content */
-	#content.content {
-		padding: 5px!important;
-	}
-
-    #content.content-expand{
-        margin-top: -40px;
-        margin-left: 0px;
-    }
-
-    /* Split Style */
-	.gutter.gutter-horizontal{
-		background-color: rgb(241, 241, 241);
-		background-image: url(/fs/assets/images/others/png/vSplit.png?type=open&issys=true);
-		background-size: 7px;
-		background-position-x: 50%;
-		background-position-y: 50%;
-		background-repeat: no-repeat;
-		border:unset!important;
-	}
-
-    .el-tabs__content {
-        padding: 10px!important;
-    }
-
-    /* 全屏模式 */
-	section#header{
-		display:initial!important;
-	}
-	aside>#sidebar{
-		display:initial!important;
-	}
-    footer#footer{
-        display:flex!important;
-    }
-
-</style>
-
 <main id="content" class="content">
     <div id="app"></div>
 </main>
@@ -104,3 +59,44 @@
 <script src="{{AppSubUrl}}/web/vendor/jquery/jquery-migrate-1.1.0.min.js"></script>
 
 {{template "base/footer" .}}
+
+<style type="text/css">
+
+    /* For Body */
+    body{
+        overflow:hidden;
+    }
+
+    /* content */
+	#content.content {
+		padding: 5px!important;
+	}
+
+    #content.content-expand{
+        margin-top: -40px;
+        margin-left: 0px;
+    }
+
+    /* Split Style */
+	.gutter.gutter-horizontal {
+        border: unset!important;
+        border-top: unset!important;
+        border-bottom: unset!important;
+    }
+
+    .el-tabs__content {
+        padding: 10px!important;
+    }
+
+    /* 全屏模式 */
+	section#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+    footer#footer{
+        display:flex!important;
+    }
+
+</style>

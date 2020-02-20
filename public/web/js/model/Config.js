@@ -973,7 +973,7 @@ class Config {
                                     </el-header>
                                     <el-main style="padding:0px;border-top:1px solid #ffffff;background: #ffffff;">
                                         <el-container style="height:100%;">
-                                            <el-aside style="background-color:#f6f6f6!important;" ref="leftView">
+                                            <el-aside style="background-color:#f6f6f6!important;overflow:hidden;" ref="leftView">
                                                 <config-tree-component id="config-tree" :zNodes="configTreeNodes" style="height: calc(100vh - 150px);"></config-tree-component>
                                             </el-aside>
                                             <el-main style="padding:0px;" ref="mainView">                            
