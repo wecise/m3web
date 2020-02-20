@@ -365,35 +365,33 @@
                     });
 
                 },
-                toggleView: function(view){
-                    console.log(view)
+                toggleView(view){
                     this.currentView = view;
                 },
-                changeLogo: function(){
+                changeLogo(){
                     const self = this;
 
-                    let _win = maxWindow.winInfo("更改Logo",'<div id="fs-info"></div>',null,$('#content'));
+                    let wnd = maxWindow.winInfo("更改Logo",'<div id="fs-info"></div>',null,$('#content'));
 
                     let _infoVue = new Vue({
                         delimiters: ['#{', '}#'],
                         el: "#fs-info",
-                        template: `<div class="row" id="icon-list">
-                                      <div class="col-md-12" style="display: list-item;height: 40em;overflow: auto;">
-                                        <ul>
-                                            <li v-for="icon in model.icon.list">
-                                                <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
-                                                  <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-                                                  <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=true'" v-model="model.icon.value" >
-                                                </a>
-                                            </li>
-                                        </ul>
-                                      </div>
-                                    </div>
-                                    <div class="row" style="margin-top:15px;">
-                                        <div class="col-md-12" style="text-align:center;">
-                                            <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
-                                        </div>
-                                    </div>`,
+                        template: `<el-container style="height:100%;">
+                                      <el-main style="display:flex;flex-wrap:wrap;align-content: flex-start;padding:10px;">
+                                        <el-button type="text" style="width:10em;max-width: 10em;height: 105px;padding: 10px;line-height: 1;margin: 5px;text-align: center;border:1px solid rgba(0,0,0,.2);"
+                                            v-for="icon in model.icon.list"
+                                            :key="icon.id"
+                                            @click="triggerInput(icon.id)">
+                                            <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
+                                            <p>
+                                                <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=true'" v-model="model.icon.value" >
+                                            </p>
+                                        </el-button>
+                                      </el-main>
+                                    <el-footer style="line-height:60px;text-align:right;">
+                                        <el-button type="default" @click="onClose">取消</el-button>
+                                    </el-footer>
+                                </el-container>`,
                         data: {
                             model: {
                                 icon: {
@@ -464,6 +462,9 @@
                                 xhr.open('GET', url);
                                 xhr.responseType = 'blob';
                                 xhr.send();
+                            },
+                            onClose(){
+                                wnd.close();
                             }
                         }
                     })
@@ -499,7 +500,8 @@
                     </p>
                     {{if .SignedUser.IsAdmin}}
                     <p>
-                        <el-button type="success" icon="el-icon-edit"  @click="toggleView('company-update')">{{.i18n.Tr "company_update"}}</el-button>
+                        <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')">{{.i18n.Tr "company_update"}}</el-button>
+                        <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')">{{.i18n.Tr "userinfo_update"}}</el-button>
                     </p>
                     {{end}}
                 </el-main>
@@ -533,7 +535,7 @@
             </el-form-item>
 
             <el-form-item>
-                <el-button type="success" native-type="submit">{{.i18n.Tr "submit"}}</el-button>
+                <el-button type="primary" native-type="submit">{{.i18n.Tr "submit"}}</el-button>
                 <el-button type="default" @click="onCancel">{{.i18n.Tr "cancel"}}</el-button>
             </el-form-item>
         </el-form>
@@ -583,9 +585,6 @@
                 <el-input type="checkbox" checked="{{.SignedUser.IsAdmin}}" required disabled="true"></el-input>
             </el-form-item>
 
-            <el-form-item>
-                <el-button type="success"  @click="update">{{.i18n.Tr "userinfo_update"}}</el-button>
-            </el-form-item>
         </el-form>
 
     </div>
@@ -631,7 +630,7 @@
             </el-form-item>
 
             <el-form-item>
-                <el-button type="success" @click="update">{{.i18n.Tr "submit"}}</el-button>
+                <el-button type="primary" @click="update">{{.i18n.Tr "submit"}}</el-button>
                 <el-button type="default" @click="cancel">{{.i18n.Tr "cancel"}}</el-button>
             </el-form-item>
 

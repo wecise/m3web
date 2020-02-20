@@ -815,9 +815,7 @@ class Performance extends Matrix {
                         }
                     },
                     template: `<el-container style="height: calc(100vh - 190px);">
-                                    <el-header style="height: 30px;
-                                                        padding: 0px 10px;
-                                                        line-height: 20px;">
+                                    <el-header style="height: 30px;line-height: 30px;">
                                         <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
                                             <el-option
                                             v-for="item in baseLine.type.list"
@@ -827,7 +825,7 @@ class Performance extends Matrix {
                                             </el-option>
                                         </el-select>
                                     </el-header>
-                                    <el-main style="padding:10px 0px;">
+                                    <el-main>
                                         <div class="grid-stack">
                                             <div class="grid-stack-item"
                                                 data-gs-auto-position="true"
