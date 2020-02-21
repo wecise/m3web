@@ -79,14 +79,30 @@
 	.logToolBar {
 		height: 30px;
 		line-height: 30px;
+		padding: 0px 10px;
 		width: 100%;
-		background-color: rgb(33, 149, 243);
+		background: rgb(33, 149, 243);
 	}
 
 
 	.log-console,
 	.el-tabs__content{
 		height: 100%;
+	}
+
+	.log-console-content .el-collapse{
+		border:unset;
+	}
+	.log-console-content .el-collapse-item__header{
+		height:30px;
+		line-height: 30px;
+	}
+	.log-console-content .el-collapse-item__content{
+		padding: 0px 10px 10px 10px;
+		line-height: unset;
+	}
+	.log-console-content .transition{
+		box-shadow: unset;
 	}
 
 	.log-console-content {
@@ -129,7 +145,9 @@
 		background-color: #000000;
 		cursor: pointer;
 	}
-
+	.log-severity{
+		font-weight: 600;
+	}
 	.log-severity.PANIC {
 		color: #B12727;
 	}

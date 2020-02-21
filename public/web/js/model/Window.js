@@ -777,8 +777,8 @@ class Window {
                             my: "left-top",
                             at: "left-top",
                             of: container,
-                            offsetX: 0,
-                            offsetY: 0
+                            offsetX: -1,
+                            offsetY: 35
                         };
 
         this.lrwh[2] = $(container).width() * 0.3;//"30em";//this.width * 0.2;

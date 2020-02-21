@@ -105,7 +105,7 @@
             background: #ffffff;
             z-index: 1000;
             right: 25px;
-            bottom: calc( -100vh + 230px);
+            bottom: 100px;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
             box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
@@ -128,7 +128,7 @@
             background: #ffffff;
             z-index: 1000;
             right: 25px;
-            bottom: calc( -100vh + 195px);
+            bottom: 60px;
             -webkit-transform: translateZ(0);
             box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
             border-radius: 8px;
@@ -230,80 +230,78 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="height:100%;border:1px solid #dddddd;" ref="container" direction="vertical">
-                <el-header class="nav" style="height:35px;line-height: 35px;padding:0px;position: relative;">
+            <el-container id="container" style="height:100%;border:1px solid #dddddd;position: relative;" ref="container" direction="vertical">
+                <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                     <div id="outlineContainer" class="outlineContainer"></div>
-                    <div class="vertical-toolbar">
-                        <el-tooltip content="放大" open-delay="500" placement="left">
-                            <el-button type="text"  @click="zoomIn">
-                                <img :src="'zoom_out' | genFileName" style="width:18px;height:18px;">
-                            </el-button>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="缩小" open-delay="500" placement="left">
-                            <el-button type="text"  @click="zoomOut">
-                                <img :src="'zoom_in' | genFileName" style="width:18px;height:18px;">
-                            </el-button>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="刷新" open-delay="500" placement="left">
-                            <el-button type="text"  @click="reload">
-                                <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
-                            </el-button>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="全屏显示" open-delay="500" placement="left">
-                            <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:18px;">
-                            </el-button>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="调整布局" open-delay="500" placement="left">
-                            <el-dropdown  @command="onLayout">
-                                <span class="el-dropdown-link">
-                                    <img :src="'direction' | genFileName" style="width:18px;height:18px;">
-                                </span>
-                                <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item command="hierarchical">随机</el-dropdown-item>
-                                    <el-dropdown-item command="tree">树形</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </el-dropdown>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="打印" open-delay="500" placement="left">
-                            <el-button type="text"  @click="print">
-                                <img :src="'print' | genFileName" style="width:18px;height:18px;">
-                            </el-button>
-                        </el-tooltip>
-                        <el-divider></el-divider>
-                        <el-tooltip content="调整图背景" open-delay="500" placement="left">
-                            <el-color-picker
-                                v-model="model.graph.theme.color"
-                                :predefine="model.graph.theme.predefineColors"
-                                @change="theme"
-                                style="padding:4px 8px;">
-                            </el-color-picker>
-                        </el-tooltip>
-                    </div>
-                    <div class="horizontal-toolbar">
-                            <el-tooltip content="展开" open-delay="500" placement="left">
-                                <el-button type="text">
-                                    <i :class="['animated fadeIn fas', model.graph.footbar.show ? 'fa-angle-double-down' : 'fa-angle-double-up']" style="width: 20px;text-align: center;">
-                                </el-button>
-                            </el-tooltip>
-                            <el-button type="text"  @click="expandHorizontalTimeLineBar">
-                                时间轴
-                            </el-button>
-                    </div>
                 </el-header>
-                <el-main id="graphContainer" ref="graphContainer" style="position:releative;overflow:auto;width:calc(100% - 1px);height:calc(100% - 110px);border-top:1px solid #ddd;padding:0px;"></el-main>
+                <el-main id="graphContainer" ref="graphContainer" style="position:releative;overflow:auto;width:calc(100% - 1px);height:calc(100% - 110px);border-top:1px solid #ddd;padding:0px;">
+                </el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
-                    <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>    
-                    <!--el-tooltip :content="item.term" v-for="(item,index) in model.graph.history" effect="light" :key="item.id" class="animated fadeIn">
-                        <el-link href="javascript:void(0);" :underline="false" @click="forward(item)"><span>${index+1}</span> ${moment(item.time).format("YYYY-MM-DD HH:mm:ss")} <span class="fas fa-copy copy" @click="onCopy(item.term)"></span></el-link>
-                    </el-tooltip-->
+                    <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>
                 </el-footer>
-                
+                <div class="vertical-toolbar">
+                    <el-tooltip content="放大" open-delay="500" placement="left">
+                       <el-button type="text"  @click="zoomIn">
+                           <img :src="'zoom_out' | genFileName" style="width:18px;height:18px;">
+                       </el-button>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="缩小" open-delay="500" placement="left">
+                       <el-button type="text"  @click="zoomOut">
+                           <img :src="'zoom_in' | genFileName" style="width:18px;height:18px;">
+                       </el-button>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="刷新" open-delay="500" placement="left">
+                       <el-button type="text"  @click="reload">
+                           <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
+                       </el-button>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="全屏显示" open-delay="500" placement="left">
+                       <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:18px;">
+                       </el-button>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="调整布局" open-delay="500" placement="left">
+                       <el-dropdown  @command="onLayout">
+                           <span class="el-dropdown-link">
+                               <img :src="'direction' | genFileName" style="width:18px;height:18px;">
+                           </span>
+                           <el-dropdown-menu slot="dropdown">
+                               <el-dropdown-item command="hierarchical">分层</el-dropdown-item>
+                               <el-dropdown-item command="tree">树形</el-dropdown-item>
+                               <el-dropdown-item command="organic">随机</el-dropdown-item>
+                           </el-dropdown-menu>
+                       </el-dropdown>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="打印" open-delay="500" placement="left">
+                       <el-button type="text"  @click="print">
+                           <img :src="'print' | genFileName" style="width:18px;height:18px;">
+                       </el-button>
+                   </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="调整图背景" open-delay="500" placement="left">
+                       <el-color-picker
+                           v-model="model.graph.theme.color"
+                           :predefine="model.graph.theme.predefineColors"
+                           @change="theme"
+                           style="padding:4px 8px;">
+                       </el-color-picker>
+                   </el-tooltip>
+               </div>
+               <div class="horizontal-toolbar">
+                       <el-tooltip content="展开" open-delay="500" placement="left">
+                           <el-button type="text">
+                               <i :class="['animated fadeIn fas', model.graph.footbar.show ? 'fa-angle-double-down' : 'fa-angle-double-up']" style="width: 20px;text-align: center;">
+                           </el-button>
+                       </el-tooltip>
+                       <el-button type="text"  @click="expandHorizontalTimeLineBar">
+                           时间轴
+                       </el-button>
+               </div>
             </el-container>
 		</el-main>
 	</template>
@@ -431,7 +429,77 @@
                 },500)
 	            
 	        })
-	    },
+        },
+        created(){
+            // Overridden to define per-shape connection points
+            mxGraph.prototype.getAllConnectionConstraints = function(terminal, source)
+            {
+                if (terminal != null)
+                {
+                    var constraints = mxUtils.getValue(terminal.style, 'points', null);
+                    
+                    if (constraints != null)
+                    {
+                        // Requires an array of arrays with x, y (0..1) and an optional
+                        // perimeter (0 or 1), eg. points=[[0,0,1],[0,1,0],[1,1]]
+                        var result = [];
+                        
+                        try
+                        {
+                            var c = JSON.parse(constraints);
+                            
+                            for (var i = 0; i < c.length; i++)
+                            {
+                                var tmp = c[i];
+                                result.push(new mxConnectionConstraint(new mxPoint(tmp[0], tmp[1]), (tmp.length > 2) ? tmp[2] != '0' : true));
+                            }
+                        }
+                        catch (e)
+                        {
+                            // ignore
+                        }
+                        
+                        return result;
+                    }
+                    else
+                    {
+                        if (terminal.shape != null)
+                        {
+                            if (terminal.shape.stencil != null)
+                            {
+                                if (terminal.shape.stencil != null)
+                                {
+                                    return terminal.shape.stencil.constraints;
+                                }
+                            }
+                            else if (terminal.shape.constraints != null)
+                            {
+                                return terminal.shape.constraints;
+                            }
+                        }
+                    }
+                }
+            
+                return null;
+            };
+        
+            // // Defines the default constraints for all shapes
+            mxShape.prototype.constraints = [new mxConnectionConstraint(new mxPoint(0.25, 0), true),
+                                            new mxConnectionConstraint(new mxPoint(0.5, 0), true),
+                                            new mxConnectionConstraint(new mxPoint(0.75, 0), true),
+                                            new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+                                            new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+                                            new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+                                            new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+                                            new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+                                            new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+                                            new mxConnectionConstraint(new mxPoint(0.25, 1), true),
+                                            new mxConnectionConstraint(new mxPoint(0.5, 1), true),
+                                            new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
+            
+            // // Edges have no connection points
+            //mxPolyline.prototype.constraints = null;
+        },
 	    methods: {
             init() {
                 
@@ -440,42 +508,27 @@
                 } else {
                     
                     this.model.graph.container = document.getElementById(this.$refs.graphContainer.$el.id);
+                    
+                    // Disables the built-in context menu
+                    mxEvent.disableContextMenu(this.model.graph.container);
+
+                    // 初始化Graph
                     this.model.graph.graph = new mxGraph(this.model.graph.container);
                     this.model.graph.parent = this.model.graph.graph.getDefaultParent();
 
-                    /* ————————————————————— 可连接定义 ————————————————————————— */
-                    mxGraph.prototype.getAllConnectionConstraints = function(terminal,source) {
-                        if (terminal != null && terminal.shape != null) {
-                            if (terminal.shape.stencil != null) {
-                                if (terminal.shape.stencil != null) {
-                                    return terminal.shape.stencil.constraints;
-                                }
-                            } else if (terminal.shape.constraints != null) {
-                                return terminal.shape.constraints;
-                            }
-                        }
-
-                        return null;
-                    };
-                    
-                    mxShape.prototype.constraints = 
-                        [new mxConnectionConstraint(new mxPoint(0.25, 0), true),
-                        new mxConnectionConstraint(new mxPoint(0.5, 0), true),
-                        new mxConnectionConstraint(new mxPoint(0.75, 0), true),
-                        new mxConnectionConstraint(new mxPoint(0, 0.25), true),
-                        new mxConnectionConstraint(new mxPoint(0, 0.5), true),
-                        new mxConnectionConstraint(new mxPoint(0, 0.75), true),
-                        new mxConnectionConstraint(new mxPoint(1, 0.25), true),
-                        new mxConnectionConstraint(new mxPoint(1, 0.5), true),
-                        new mxConnectionConstraint(new mxPoint(1, 0.75), true),
-                        new mxConnectionConstraint(new mxPoint(0.25, 1), true),
-                        new mxConnectionConstraint(new mxPoint(0.5, 1), true),
-                        new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
-                    /* ————————————————————— 可连接定义 ————————————————————————— */
-                    
-                    this.model.graph.graph.panningHandler.useLeftButtonForPanning = false;
+                    this.model.graph.graph.setEnabled(true);
                     // 设定可连接
                     this.model.graph.graph.setConnectable(true);
+                    this.model.graph.graph.setConnectableEdges(true);
+                    this.model.graph.graph.setDropEnabled(true);
+                    
+                    // 鼠标拖拉，手机浏览器拖拉
+                    this.model.graph.graph.setPanning(true);
+                    mxPanningHandler.prototype.isPanningTrigger = function(me) {
+                        var evt = me.getEvent();
+                        return true;
+                    };
+
                     // 禁止改变节点大小
                     this.model.graph.graph.setCellsResizable(false);
                     // 节点是否可以移动 
@@ -515,9 +568,7 @@
                     style[mxConstants.STYLE_FOLDABLE] = false;
                     style = this.model.graph.graph.getStylesheet().putCellStyle('column', style);
                     
-                    // 鼠标停留到元素上边缘高亮显示
-                    new mxCellTracker(this.model.graph.graph);
-
+                    
                     // 预览时鼠标悬浮到节点时，改变鼠标样式
                     this.model.graph.graph.getCursorForCell = function(cell){
                         if (cell != null && cell.value != null && cell.vertex ==1 ){
@@ -525,16 +576,18 @@
                         }
                     }
                     
+                    new mxCellTracker(this.model.graph.graph);
+                    
                     // 布局定义
                     if(this.model.graph.layout.default === 'hierarchical'){
                         // Layout hierarchical
-                        // Creates a layout algorithm to be used with the graph
                         this.model.graph.layout.inst = new mxHierarchicalLayout(this.model.graph.graph);
+                    } else if(this.model.graph.layout.default === 'organic'){
+                        // Layout Organic
+                        this.model.graph.layout.inst = new mxFastOrganicLayout(this.model.graph.graph);
+                        this.model.graph.layout.inst.forceConstant = 140;
                     } else if(this.model.graph.layout.default === 'tree'){
                         /* Layout tree */
-                        // Enables automatic layout on the graph and installs
-                        // a tree layout for all groups who's children are
-                        // being changed, added or removed.
                         var layout = new mxCompactTreeLayout(this.model.graph.graph, false);
                         layout.useBoundingBox = false;
                         layout.edgeRouting = false;
@@ -557,7 +610,7 @@
                     }
 
                     this.initGraph();
-                    this.cellsEvent();
+                    this.cellAddEvent();
 
                 }
             },
@@ -688,9 +741,9 @@
                             let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
                             
                             if(this.checkImgExists(`${_type}.png`)){
-                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 60, 60,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
+                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
                             } else {
-                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 60, 60,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
+                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
                             }
 
                             // node directory
@@ -759,9 +812,10 @@
                         })
 
                         // Executes the layout
-                        if(this.model.graph.layout.default === 'hierarchical'){
+                        if(this.model.graph.layout.default === 'hierarchical' || this.model.graph.layout.default === 'organic'){
                             this.model.graph.layout.inst.execute(this.model.graph.parent);
                         }
+
                     }
                     
                 }
@@ -917,12 +971,12 @@
                     }),['value'])
                 }
             },
-            cellsEvent(){
+            cellAddEvent(){
 
                 this.model.graph.graph.addListener(mxEvent.DOUBLE_CLICK, (sender, evt)=> {
                     let cell = evt.getProperty('cell');
 
-                    if(_.isEmpty(cell)) return;
+                    if(!cell) return;
 
                     let id = cell.getId();
                     let value = cell.getValue();
@@ -935,7 +989,7 @@
 
                     let cell = evt.getProperty('cell');
 
-                    if(_.isEmpty(cell)) return;
+                    if(!cell) return;
 
                     let id = cell.getId();
                     let value = cell.getValue();
@@ -943,15 +997,16 @@
                     this.model.graph.selectedCell = cell;
 
                     // copy to copyboard
-                    let clipboard2 = new Clipboard('g image',{
-                        text: function(trigger) {
-                            return id;
-                        }
-                    });
+                    // let clipboard2 = new Clipboard('g image',{
+                    //     text: function(trigger) {
+                    //         return id;
+                    //     }
+                    // });
 
                 });
 
 
+                // 鼠标停留到元素上边缘高亮显示
                 let track = new mxCellTracker(this.model.graph.graph);
                 track.mouseMove = _.debounce((sender, me)=> {
                     
@@ -1024,11 +1079,12 @@
 
             },
             toCenter(){
-
+                let cX = this.$refs.graphContainer.$el.scrollWidth / 2 + 'px';
                 $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
-                    "transform": `translate(200px,20px)`
+                    "transform": `translate(${cX},20px)`
                 });
-
+                $(".topological-graph-component #graphContainer > svg").scrollLeft(cX);
+                
                 //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
 
                 /* 

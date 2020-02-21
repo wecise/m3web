@@ -133,6 +133,7 @@
                     <el-tooltip content="主题" placement="bottom" open-delay="500">
                         <el-button type="text" :class="'pull-right editor-select-theme-'+objectHash.sha1(id)"><i class="fas fa-tshirt"></i></el-button>
                     </el-tooltip>
+                    <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" style="float:right;" @click="onFullScreen"></el-button>
 				</el-button-group>
 			</el-header>
 			<el-main :id="id" style="padding:0px;" ref="editor"></el-main>
@@ -156,7 +157,19 @@
                 langTools:null,
                 editor: null,
                 inputText: "",
-	            result: null
+                result: null,
+                control: {
+                    ifFullScreen: false
+                }
+            }
+        },
+        filters: {
+            pickScreenStyle(evt){
+                if(evt){
+                    return `el-icon-full-screen`;
+                } else {
+                    return `el-icon-copy-document`;
+                }
             }
         },
         mounted(){
@@ -943,6 +956,9 @@
                         }
                     }
                 });
+            },
+            onFullScreen(){
+                this.control.ifFullScreen = mx.fullScreenByEl(this.$root.$refs.mainView.$el);
             }
         }
     

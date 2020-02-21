@@ -1678,10 +1678,10 @@ class Event {
                                                         <el-button type="default" style="max-width:100%;width:100%;height:auto;margin: 5px;border-radius: 10px!important;"  @click="toggleEvent(item.name)">
                                                             <div style="text-align:left;">
                                                             <p>相关业务：
-                                                                <p v-for="biz in _.map(item.events,'biz')" :key="biz" style="text-indent:25px;">#{biz}#</p>
+                                                                <p v-for="biz in _.uniq(_.map(item.events,'biz'))" :key="biz" style="text-indent:25px;">#{biz}#</p>
                                                             </p>
                                                             <p>相关服务器：
-                                                                <p v-for="host in _.map(item.events,'host')" :key="host" style="text-indent:25px;">#{host}#</p>
+                                                                <p v-for="host in _.uniq(_.map(item.events,'host'))" :key="host" style="text-indent:25px;">#{host}#</p>
                                                             </p>
                                                             <p>级别：
                                                                 <el-button type="danger">#{_.filter(item.events,(v)=>{ return v.severity>=5 }).length}#</el-button>

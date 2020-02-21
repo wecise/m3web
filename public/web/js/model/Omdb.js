@@ -372,18 +372,32 @@ class Omdb{
                 id: String,
                 model: Object
             },
-            template:   `<div :class="'log-console '+ theme" style="height:100%;">
-                            <div class="logToolBar">
-                                <el-button type="text" class="toggle" @click="toggleTheme" title="切换主题" ><i class="fas fa-sun"></i></el-button>
+            template:   `<el-container :class="'log-console '+ theme" style="height:100%;">
+                            <el-header class="logToolBar" style="height: 30px;line-height: 30px;padding: 0px 10px;width: 100%;">
                                 <el-button type="text" class="copy" @click="copyIt" title="复制"><i class="fa fa-copy"></i></el-button>
                                 <el-button type="text" class="clear" @click="clearIt" title="清空"><i class="fa fa-trash"></i></el-button>
-                                <el-button type="text" class="debug" @click="debugIt" title="调试"><i class="fa fa-desktop"></i></el-button>
-                            </div>
-                            <div contenteditable="true" :class="'log-console-content '+ theme" v-if="!_.isEmpty(log.msg)">
-                                <p v-for="item in log.msg"> [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>] <span v-if="_.isEmpty(item[2].content)">#{item[2].short}#</span><span v-else><a data-toggle="collapse" :href="'#'+item[2].id" aria-expanded="false" :aria-controls="item[2].id">#{item[2].short}#</a><span class="collapse animated fadeInUp" :id="item[2].id">#{item[2].content}#</span></span>
-                                </p>
-                            </div>
-                        </div>`,
+                            </el-header>
+                            <el-main :class="'log-console-content '+ theme" v-if="!_.isEmpty(log.msg)">
+                                <el-collapse value="['1']" accordion>
+                                    <el-collapse-item :name="item[2].id" v-for="item in log.msg" :key="item[2].id">
+                                        <template slot="title">
+                                            <div style="height: 30px;line-height: 30px;width: 100%;font-size: 10px;font-weight: normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">
+                                                [#{item[0]}#] [<span :class="'log-severity '+item[1]">#{item[1]}#</span>]  #{item[2].short}# 
+                                            </div>
+                                        </template>
+                                        <div>
+                                            <el-button :class="item[2].id" 
+                                                type="text" 
+                                                icon="el-icon-copy-document" 
+                                                style="position: absolute;right: 10px;"
+                                                @click="copyMe(item)">
+                                            </el-button>
+                                            <pre>#{item[2].content}#</pre>
+                                        </div>
+                                    </el-collapse-item>
+                                </el-collapse>
+                            </el-main>
+                        </el-container>`,
             data(){
                 return {
                     log: {
@@ -562,25 +576,41 @@ class Omdb{
                     }
 
                     let _short = _.truncate(_content, {
-                        'length': 130,
+                        'length': 100,
                         'separator': ' ',
                         'omission': ''
                     });
 
-                    let _id = objectHash.sha1(level + _content + _.now());
+                    let _id = 'id' + objectHash.sha1(level + _content + _.now());
 
-                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: _content.replace(_short,'')}];
+                    return [moment().format("YYYY-MM-DD HH:mm:ss:SSS"), _.upperCase(level), {id:_id, short: _short, content: JSON.stringify(JSON.parse(_content),null,2) }];
                 },
                 copyIt(event){
-                    const self = this;
-
+                    
                     new Clipboard(".copy", {
-                        text: function(trigger) {
-                            alertify.log("已复制");
-                            let _rtn = _.map(self.log.msg,function(v){
+                        text: (trigger)=> {
+                            this.$message({
+                                type: "info",
+                                message: "已复制"
+                            });
+
+                            let rtn = _.map(this.log.msg,function(v){
                                 return [v[0],v[1],v[2].short + v[2].content];
                             });
-                            return _rtn.join("\n");
+                            return rtn.join("\n");
+                        }
+                    });
+
+                },
+                copyMe(item){
+                    
+                    new Clipboard(`.${item[2].id}`, {
+                        text: (trigger)=> {
+                            this.$message({
+                                type: "info",
+                                message: "已复制"
+                            });
+                            return item[2].content;
                         }
                     });
 
@@ -1623,10 +1653,10 @@ class Omdb{
                                     <el-aside style="overflow:hidden;height:100%;" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
-                                                <h4 style="width:70%;font-size:12px;margin:0px;">
-                                                    <i class="fas fa-cubes"></i> 对象管理 [${window.COMPANY_OSPACE}]
-                                                </h4>
-                                                <el-dropdown style="width: 50%;text-align: right;font-size:12px;">
+                                                <span style="width:70%;margin:0px;">
+                                                    <i class="el-icon-coin"></i> 对象管理 [${window.COMPANY_OSPACE}]
+                                                </span>
+                                                <el-dropdown style="width: 50%;text-align: right;">
                                                     <span class="el-dropdown-link">
                                                         <i class="fas fa-angle-down"></i>
                                                     </span>

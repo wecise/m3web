@@ -144,7 +144,7 @@
                         </div>
                      </el-header>
                      <el-main>
-                        <el-form  action="{{.Link}}" method="post" ref="form">
+                        <el-form ref="form">
                            {{template "base/alert" .}}
                            <el-form-item label="{{.i18n.Tr "home.company_name_holder"}}" style="display:none;">
                               <el-input name="company" v-model="company" required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>

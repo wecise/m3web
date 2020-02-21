@@ -2142,7 +2142,8 @@ class Topological {
                             window.jsPanel.activePanels.getPanel(`jsPanel-graphAction`).show();
                         }
                     } catch(err){
-                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, $(this.$refs.graphViewRef.$el).find("#graphContainer"), callbackFun);
+                        
+                        window.topologicalAnalysisWnd = maxWindow.winGraphAction("", `<div id="topological-analysis-container" style="width:100%;height:100%;"></div>`, null, this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.container.$el, callbackFun);
                     
                         new Vue({
                             delimiters: ['#{', '}#'],
