@@ -97,32 +97,18 @@
                template: "#app-template",
                data: {
                   logo: "",
-                  company: "",
-                  username: "",
-                  password: "",
-                  remember: false
+                  loginForm: {
+                     company: "",
+                     username: "",
+                     password: "",
+                     remember: false
+                  }
                },
                created(){
                   this.logo = '{{.logo}}'.replace(/"/g,"");
-                  this.company = '{{.company}}'.replace(/"/g,"");
-                  this.username = '{{.user_name}}'.replace(/"/g,"");
-                  this.password = '{{.password}}'.replace(/"/g,"");
-               },
-               mounted(){
-                  if(this.company=='nxgd'){
-                     $(".el-header",this.$el).css({
-                        "background-color":"#007a77",
-                        "color":"#ffffff"
-                     });
-                     $("h4",this.$el).css({
-                        "color":"#ffffff"
-                     });
-                     $("button",this.$el).css({
-                        "background-color":"#007a77"
-                     });
-                  }
-
-                  $("button",this.$el).attr("type","submit");
+                  this.loginForm.company = '{{.company}}'.replace(/"/g,"");
+                  this.loginForm.username = '{{.user_name}}'.replace(/"/g,"");
+                  this.loginForm.password = '{{.password}}'.replace(/"/g,"");
                }
             }).$mount("#app");
          });
@@ -144,22 +130,22 @@
                         </div>
                      </el-header>
                      <el-main>
-                        <el-form ref="form">
+                        <el-form action="{{.Link}}" method="POST" ref="loginForm">
                            {{template "base/alert" .}}
                            <el-form-item label="{{.i18n.Tr "home.company_name_holder"}}" style="display:none;">
-                              <el-input name="company" v-model="company" required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>
+                              <el-input name="company" v-model="loginForm.company" required placeholder="{{.i18n.Tr "home.company_name_holder"}}"></el-input>
                            </el-form-item>
                            <el-form-item label="{{.i18n.Tr "home.uname_holder"}}" class="form-group {{if .Err_UserName}}error{{end}}">
-                              <el-input name="user_name" v-model="username" autofocus required placeholder="{{.i18n.Tr "home.uname_holder"}}"></el-input>
+                              <el-input name="user_name" v-model="loginForm.username" autofocus required placeholder="{{.i18n.Tr "home.uname_holder"}}"></el-input>
                            </el-form-item>
                            <el-form-item label="{{.i18n.Tr "password"}}" class="form-group {{if .Err_Password}}error{{end}}">
-                              <el-input name="password" type="password" v-model="password" required></el-input>
+                              <el-input name="password" type="password" v-model="loginForm.password" required show-password></el-input>
                            </el-form-item>
                            <el-form-item label="{{.i18n.Tr "auth.remember_me"}}">
-                              <el-checkbox v-model="remember"></el-checkbox>
+                              <el-checkbox name="remember" v-model="loginForm.remember"></el-checkbox>
                            </el-form-item>
                            <el-form-item>
-                              <el-button type="primary" style="float:right;">{{.i18n.Tr "sign_in"}}</el-button>
+                              <el-button type="primary" style="float:right;" native-type="submit">{{.i18n.Tr "sign_in"}}</el-button>
                            </el-form-item>
                         </el-form>
                      </el-main>

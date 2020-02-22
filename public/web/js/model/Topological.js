@@ -2202,18 +2202,18 @@ class Topological {
                                             "icon": "fas fa-diagnoses"
                                         },
                                         "m20":"----------",
-                                        "m30_search_out": {
+                                        "m30_entity_delete": {
+                                            "name": "实体删除",
+                                            "icon": "fas fa-trash"
+                                        },
+                                        "m40":"----------",
+                                        "m50_search_out": {
                                             "name": "起点图查询",
                                             "icon": "fas fa-angle-up"
                                         },
-                                        "m40_search_in": {
+                                        "m60_search_in": {
                                             "name": "终点图查询",
                                             "icon": "fas fa-angle-down"
-                                        },
-                                        "m50":"----------",
-                                        "m60_edges_node_select": {
-                                            "name": "选定为新建关系点",
-                                            "icon": "fas fa-network-wired"
                                         },
                                         "m70":"----------",
                                         "m80_edges_new": {
@@ -2243,6 +2243,11 @@ class Topological {
                                         "m10_diagnosis": {
                                             "name": "实体分析",
                                             "icon": "fas fa-diagnoses"
+                                        },
+                                        "m20":"----------",
+                                        "m30_entity_delete": {
+                                            "name": "实体删除",
+                                            "icon": "fas fa-trash"
                                         }
                                     }
                                 }

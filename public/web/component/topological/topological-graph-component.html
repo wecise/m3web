@@ -11,8 +11,15 @@
         }
 
         .topological-graph-component #graphContainer > svg{
-            width: calc( 100% * 2)!important;
-            height: calc( 100% * 2)!important;
+            left: 0px!important;
+            top: 0px!important;
+            width: 100%!important;
+            height: 100%!important;
+            display: block!important;
+            min-width: 2618px!important;
+            min-height: 3316px!important;
+            position: absolute!important;
+            background-image: none!important;
         }
 
         .topological-graph-component #graphContainer > svg > g:nth-child(1){
@@ -230,12 +237,13 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="height:100%;border:1px solid #dddddd;position: relative;" ref="container" direction="vertical">
+            <el-container id="container" style="width:100%;height:100%;border:1px solid #dddddd;position: relative;" ref="container" direction="vertical">
                 <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                     <div id="outlineContainer" class="outlineContainer"></div>
                 </el-header>
-                <el-main id="graphContainer" ref="graphContainer" style="position:releative;overflow:auto;width:calc(100% - 1px);height:calc(100% - 110px);border-top:1px solid #ddd;padding:0px;">
+                <el-main id="graphContainer" ref="graphContainer" 
+                        style="position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;border-top:1px solid #ddd;">
                 </el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
                     <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>
@@ -260,14 +268,14 @@
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="全屏显示" open-delay="500" placement="left">
-                       <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:18px;">
+                       <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:auto;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="调整布局" open-delay="500" placement="left">
                        <el-dropdown  @command="onLayout">
                            <span class="el-dropdown-link">
-                               <img :src="'direction' | genFileName" style="width:18px;height:18px;">
+                               <img :src="'direction' | genFileName" style="width:18px;height:auto;">
                            </span>
                            <el-dropdown-menu slot="dropdown">
                                <el-dropdown-item command="hierarchical">分层</el-dropdown-item>
@@ -431,74 +439,60 @@
 	        })
         },
         created(){
-            // Overridden to define per-shape connection points
-            mxGraph.prototype.getAllConnectionConstraints = function(terminal, source)
-            {
-                if (terminal != null)
-                {
-                    var constraints = mxUtils.getValue(terminal.style, 'points', null);
+            
+            // 三次贝塞尔曲线
+            // 替代默认边绘制，两种形式，默认是通过贝塞尔曲线绘制成带圆角的折线，另一种是直角折线
+            // mxShape.prototype.addPoints = function(c, pts, rounded, arcSize, close, exclude, initialMove){
+            //     if (pts != null && pts.length > 0){
+            //         initialMove = (initialMove != null) ? initialMove : true;
+            //         var pe = pts[pts.length - 1];
                     
-                    if (constraints != null)
-                    {
-                        // Requires an array of arrays with x, y (0..1) and an optional
-                        // perimeter (0 or 1), eg. points=[[0,0,1],[0,1,0],[1,1]]
-                        var result = [];
-                        
-                        try
-                        {
-                            var c = JSON.parse(constraints);
-                            
-                            for (var i = 0; i < c.length; i++)
-                            {
-                                var tmp = c[i];
-                                result.push(new mxConnectionConstraint(new mxPoint(tmp[0], tmp[1]), (tmp.length > 2) ? tmp[2] != '0' : true));
-                            }
-                        }
-                        catch (e)
-                        {
-                            // ignore
-                        }
-                        
-                        return result;
-                    }
-                    else
-                    {
-                        if (terminal.shape != null)
-                        {
-                            if (terminal.shape.stencil != null)
-                            {
-                                if (terminal.shape.stencil != null)
-                                {
-                                    return terminal.shape.stencil.constraints;
-                                }
-                            }
-                            else if (terminal.shape.constraints != null)
-                            {
-                                return terminal.shape.constraints;
-                            }
-                        }
-                    }
-                }
-            
-                return null;
+            //         // Adds virtual waypoint in the center between start and end point
+            //         if (close && rounded){
+            //             pts = pts.slice();
+            //             var p0 = pts[0];
+            //             var wp = new mxPoint(pe.x + (p0.x - pe.x) / 2, pe.y + (p0.y - pe.y) / 2);
+            //             pts.splice(0, 0, wp);
+            //         }
+                
+            //         var pt = pts[0];
+            //         var i = 1;
+                
+            //         // Draws the line segments
+            //         if (initialMove)
+            //         {
+            //             c.moveTo(pt.x, pt.y);
+            //         }
+            //         else
+            //         {
+            //             c.lineTo(pt.x, pt.y);
+            //         }
+            //         const midX = pt.x / 2 + pe.x / 2
+            //         // 调用内置函数绘制三次贝塞尔曲线
+            //         c.curveTo(midX, pt.y, midX, pe.y, pe.x, pe.y)
+            //         // 忽略后面绘制折线的代码
+            //         return;
+            //     }
+            // }
+
+            // 节点是否可以移动 
+            mxGraphHandler.prototype.setMoveEnabled(true);
+            //显示节点位置标尺  
+            mxGraphHandler.prototype.guidesEnabled = true;
+
+            // Alt disables guides
+            mxGuide.prototype.isEnabledForEvent = function(evt)
+            {
+                return !mxEvent.isAltDown(evt);
             };
-        
-            // // Defines the default constraints for all shapes
-            mxShape.prototype.constraints = [new mxConnectionConstraint(new mxPoint(0.25, 0), true),
-                                            new mxConnectionConstraint(new mxPoint(0.5, 0), true),
-                                            new mxConnectionConstraint(new mxPoint(0.75, 0), true),
-                                            new mxConnectionConstraint(new mxPoint(0, 0.25), true),
-                                            new mxConnectionConstraint(new mxPoint(0, 0.5), true),
-                                            new mxConnectionConstraint(new mxPoint(0, 0.75), true),
-                                            new mxConnectionConstraint(new mxPoint(1, 0.25), true),
-                                            new mxConnectionConstraint(new mxPoint(1, 0.5), true),
-                                            new mxConnectionConstraint(new mxPoint(1, 0.75), true),
-                                            new mxConnectionConstraint(new mxPoint(0.25, 1), true),
-                                            new mxConnectionConstraint(new mxPoint(0.5, 1), true),
-                                            new mxConnectionConstraint(new mxPoint(0.75, 1), true)];
+
+            // Enables snapping waypoints to terminals
+            mxEdgeHandler.prototype.snapToTerminals = true;
+
+            // Defines an icon for creating new connections in the connection handler.
+            // This will automatically disable the highlighting of the source vertex.
+            mxConnectionHandler.prototype.connectImage = new mxImage('/fs/assets/images/tools/down.gif?type=open&issys=true', 16, 16);
             
-            // // Edges have no connection points
-            //mxPolyline.prototype.constraints = null;
         },
 	    methods: {
             init() {
@@ -509,18 +503,27 @@
                     
                     this.model.graph.container = document.getElementById(this.$refs.graphContainer.$el.id);
                     
-                    // Disables the built-in context menu
-                    mxEvent.disableContextMenu(this.model.graph.container);
-
                     // 初始化Graph
                     this.model.graph.graph = new mxGraph(this.model.graph.container);
+
+                    console.log(1,this.model.graph.graph)
+                    
+
                     this.model.graph.parent = this.model.graph.graph.getDefaultParent();
 
                     this.model.graph.graph.setEnabled(true);
                     // 设定可连接
                     this.model.graph.graph.setConnectable(true);
+
+                    // Clones the source if new connection has no target
+                    this.model.graph.graph.connectionHandler.setCreateTarget(true);
+                    
                     this.model.graph.graph.setConnectableEdges(true);
                     this.model.graph.graph.setDropEnabled(true);
+
+                    // 是否允许平移。true：表示按住Shift+左键拖动时，整个graph移动；
+                    // false：按住Shift+左键拖动时，选中的图形水平方向或者垂直方向平移。
+                    this.model.graph.graph.setPanning(true);
                     
                     // 鼠标拖拉，手机浏览器拖拉
                     this.model.graph.graph.setPanning(true);
@@ -531,10 +534,6 @@
 
                     // 禁止改变节点大小
                     this.model.graph.graph.setCellsResizable(false);
-                    // 节点是否可以移动 
-                    mxGraphHandler.prototype.setMoveEnabled(false);
-                    //显示节点位置标尺  
-                    mxGraphHandler.prototype.guidesEnabled = true;
                     
                     // 允许连线的目标和源是同一元素 
                     this.model.graph.graph.setAllowLoops(true); 
@@ -1079,12 +1078,17 @@
 
             },
             toCenter(){
-                let cX = this.$refs.graphContainer.$el.scrollWidth / 2 + 'px';
-                $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
-                    "transform": `translate(${cX},20px)`
-                });
-                $(".topological-graph-component #graphContainer > svg").scrollLeft(cX);
                 
+                // let cX = $("svg",this.$refs.container.$el).width() / 2 + 'px';
+                
+                // $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
+                //     "transform": `translate(${cX},20px)`
+                // });
+
+                // $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
+                //     "transform": `translate(200px,20px)`
+                // });
+
                 //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
 
                 /* 
@@ -1201,6 +1205,7 @@
             onLayout(cmd){
                 this.model.graph.layout.default = cmd;
                 this.reload();
+                this.toCenter();
             },
             print(){
                 let scale = mxUtils.getScaleForPageCount(1, this.model.graph.graph);
