@@ -237,7 +237,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="width:100%;height:100%;border:1px solid #dddddd;position: relative;" ref="container" direction="vertical">
+            <el-container id="container" style="width:100%;height:100%;border:1px solid #ddd;border-left:unset;border-right:unset;position: relative;" ref="container" direction="vertical">
                 <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                     <div id="outlineContainer" class="outlineContainer"></div>
@@ -250,22 +250,27 @@
                 </el-footer>
                 <div class="vertical-toolbar">
                     <el-tooltip content="放大" open-delay="500" placement="left">
-                       <el-button type="text"  @click="zoomIn">
-                           <img :src="'zoom_out' | genFileName" style="width:18px;height:18px;">
+                       <el-button type="text"  @click="onZoomIn">
+                            <i class="el-icon-zoom-in" style="font-size:18px;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="缩小" open-delay="500" placement="left">
-                       <el-button type="text"  @click="zoomOut">
-                           <img :src="'zoom_in' | genFileName" style="width:18px;height:18px;">
+                       <el-button type="text"  @click="onZoomOut">
+                            <i class="el-icon-zoom-out" style="font-size:18px;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="刷新" open-delay="500" placement="left">
-                       <el-button type="text"  @click="reload">
-                           <img :src="'refresh' | genFileName" style="width:18px;height:18px;">
+                       <el-button type="text"  @click="onReload">
+                            <i class="el-icon-refresh" style="font-size:18px;">
                        </el-button>
                    </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="图标渲染模式" open-delay="500" placement="left">
+                        <el-button type="text" :icon="model.control.ifIcon | pickIconStyle" @click="onToggleIcon" style="width:18px;height:auto;">
+                        </el-button>
+                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="全屏显示" open-delay="500" placement="left">
                        <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:auto;">
@@ -275,7 +280,7 @@
                    <el-tooltip content="调整布局" open-delay="500" placement="left">
                        <el-dropdown  @command="onLayout">
                            <span class="el-dropdown-link">
-                               <img :src="'direction' | genFileName" style="width:18px;height:auto;">
+                                <i class="el-icon-view" style="font-size:18px;">
                            </span>
                            <el-dropdown-menu slot="dropdown">
                                <el-dropdown-item command="hierarchical">分层</el-dropdown-item>
@@ -286,8 +291,8 @@
                    </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="打印" open-delay="500" placement="left">
-                       <el-button type="text"  @click="print">
-                           <img :src="'print' | genFileName" style="width:18px;height:18px;">
+                       <el-button type="text"  @click="onPrint">
+                           <i class="el-icon-printer" style="font-size:18px;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
@@ -306,7 +311,7 @@
                                <i :class="['animated fadeIn fas', model.graph.footbar.show ? 'fa-angle-double-down' : 'fa-angle-double-up']" style="width: 20px;text-align: center;">
                            </el-button>
                        </el-tooltip>
-                       <el-button type="text"  @click="expandHorizontalTimeLineBar">
+                       <el-button type="text"  @click="onTimeLine">
                            时间轴
                        </el-button>
                </div>
@@ -387,7 +392,8 @@
                         }
                     },
                     control: {
-                        ifFullScreen: false
+                        ifFullScreen: false,
+                        ifIcon: true
                     }
                 }
 	        }
@@ -402,6 +408,13 @@
                 } else {
                     return `el-icon-copy-document`;
                 }
+            },
+            pickIconStyle(evt){
+                if(evt){
+                    return `el-icon-picture-outline`;
+                } else {
+                    return `el-icon-s-help`;
+                }
             }
         },
 	    watch:{
@@ -410,7 +423,7 @@
                     if(val === oldVal){
                         return false;
                     } else {
-                        this.reload();
+                        this.onReload();
                     }
                 },
                 deep:true
@@ -736,14 +749,24 @@
                             }
 
                             // normal
+                            // 选择节点渲染模式：icon/shape
                             let node = null;
                             let imageUrl = `${window.ASSETS_ICON}/entity/png/${_type}.png?type=download&issys=${window.SignedUser_IsAdmin}`;
                             
-                            if(this.checkImgExists(`${_type}.png`)){
-                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
-                            } else {
+                            // icon渲染
+                            if(this.model.control.ifIcon){
+                                if(this.checkImgExists(`${_type}.png`)){
+                                    node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
+                                } else {
+                                    node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
+                                }    
+                            } 
+                            // shape渲染
+                            else {
                                 node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
                             }
+
+                            
 
                             // node directory
                             _.extend(this.model.graph.nodes,{[v.id]:node});
@@ -950,7 +973,7 @@
                     this.nodeTitle();
                 },500)
             },
-            reload(){
+            onReload(){
                 if(this.model.graph.graph){
                     
                     $(this.$refs.graphContainer.$el).empty();
@@ -972,17 +995,17 @@
             },
             cellAddEvent(){
 
-                this.model.graph.graph.addListener(mxEvent.DOUBLE_CLICK, (sender, evt)=> {
-                    let cell = evt.getProperty('cell');
+                // this.model.graph.graph.addListener(mxEvent.DOUBLE_CLICK, (sender, evt)=> {
+                //     let cell = evt.getProperty('cell');
 
-                    if(!cell) return;
+                //     if(!cell) return;
 
-                    let id = cell.getId();
-                    let value = cell.getValue();
+                //     let id = cell.getId();
+                //     let value = cell.getValue();
 
-                    // 点击获取关联信息
-                    this.$root.$refs.graphDiagnosisRef.diagnosisAdd( {id:id, value:value, type:'event', cell: cell} );
-                })
+                //     // 点击获取关联信息
+                //     this.$root.$refs.graphDiagnosisRef.diagnosisAdd( {id:id, value:value, type:'event', cell: cell} );
+                // })
 
                 this.model.graph.graph.addListener(mxEvent.CLICK, (sender, evt)=> {
 
@@ -1020,7 +1043,7 @@
                     
                 },2000);
             },
-            expandHorizontalTimeLineBar(){
+            onTimeLine(){
                 this.model.graph.footbar.show = !this.model.graph.footbar.show;
             },
             forward(item){
@@ -1204,10 +1227,10 @@
             },
             onLayout(cmd){
                 this.model.graph.layout.default = cmd;
-                this.reload();
+                this.onReload();
                 this.toCenter();
             },
-            print(){
+            onPrint(){
                 let scale = mxUtils.getScaleForPageCount(1, this.model.graph.graph);
                 let preview = new mxPrintPreview(this.model.graph.graph, scale);
                 preview.open();
@@ -1250,14 +1273,11 @@
                 return (yiq >= 128) ? 'black' : 'white';
 
             },
-            zoomIn(){
+            onZoomIn(){
                 this.model.graph.graph.zoomIn();
             },
-            zoomOut(){
+            onZoomOut(){
                 this.model.graph.graph.zoomOut();
-            },
-            fit(){
-                this.model.graph.graph.fit();
             },
             editIt(){
                 let item = { 
@@ -1272,14 +1292,6 @@
                 let url = fsHandler.genFsUrl(item,null,null);
 
                 window.open(url, "_parent");
-            },
-            onCopy(item){
-                new Clipboard("span.copy", {
-                    text: (trigger) => {
-                        this.$message("已复制");
-                        return item;
-                    }
-                });
             },
             addCell(tNode){
                 
@@ -1378,6 +1390,11 @@
             },
             onFullScreen(){
                 this.model.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+            },
+            onToggleIcon(){
+                this.model.control.ifIcon = !this.model.control.ifIcon;
+                this.onReload();
+                //this.toCenter();
             },
             initTimeLine(){
 

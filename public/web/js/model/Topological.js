@@ -2164,7 +2164,7 @@ class Topological {
 
                     $.contextMenu("destroy").contextMenu({
                         //selector: `#graph-view-${self.id} svg g`,
-                        selector: `svg g image,svg g path`,
+                        selector: `svg g image,svg g path,svg g`,
                         trigger: 'left',
                         autoHide: true,
                         delay: 10,

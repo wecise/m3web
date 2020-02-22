@@ -1271,7 +1271,7 @@ class Window {
         }
 
         this.lrwh[2] = this.width * 0.34;
-        this.lrwh[3] = this.height * 0.6;
+        this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
             theme:         maxWindow.theme.dark,

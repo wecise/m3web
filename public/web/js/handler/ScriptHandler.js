@@ -23,7 +23,7 @@ class ScriptHandler {
     * */
     depotAdd(event) {
 
-        let rtn = 0;
+        let rtn = null;
 
         var fm = new FormData();
         fm.append("name", event.name);
@@ -52,14 +52,11 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("脚本添加成功" + " " + data.message);
                 }
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("脚本添加失败" + " " + xhr.responseJSON.message);
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.message);
+                rtn = xhr.responseJSON;
             }
         });
         return rtn;
@@ -74,7 +71,7 @@ class ScriptHandler {
     * */
     depotDelete(name) {
 
-        let rtn = 0;
+        let rtn = null;
 
         jQuery.ajax({
             url: `/monitoring/depot/${name}`,
@@ -92,14 +89,11 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("成功" + " " + data.message);
                 }
 
             },
             error: function (xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("删除失败" + " " + xhr.responseJSON.message);
-                console.log("[" + moment().format("LLL") + "] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseJSON;
             }
         });
         return rtn;
@@ -231,11 +225,11 @@ class ScriptHandler {
     *
     * */
     depotDeploy(event) {
-        let rtn = 0;
+        let rtn = null;
 
         var form = new FormData();
 
-        _.forEach(event.hosts,function(v){
+        _.forEach(event.hosts,(v)=>{
             form.append("hosts", v);
         })
 
@@ -259,14 +253,11 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("脚本部署成功" + " " + data.message);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = 0;
-                alertify.error("脚本部署失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseJSON;
             }
         });
 

@@ -67,10 +67,11 @@ class Probe extends Matrix {
             "probe-list-datatables-component",
             "policy-list-datatables-component",
             "log-list-datatables-component",
-            "script-manage"], function () {
+            "script-manage",
+            "script-datatable"], function () {
 
             // Table组件 单选
-            Vue.component("el-table-component",{
+            Vue.component("probe-manage",{
                 delimiters: ['#{', '}#'],
                 props: {
                     model: Object
@@ -107,8 +108,8 @@ class Probe extends Matrix {
                 },
                 template:   `<el-container style="width:100%;height:100%;">
                                 <el-header style="height:30px;line-height:30px;">
-                                    <el-tooltip content="删除" open-delay="500" placement="top">
-                                        <el-button type="text" icon="el-icon-notebook-2"></el-button>
+                                    <el-tooltip content="刷新" open-delay="500" placement="top">
+                                        <el-button type="text" icon="el-icon-refresh" @click="eventHub.$emit('PROBE-REFRESH-EVENT', ['script'])"></el-button>
                                     </el-tooltip>
                                     <el-tooltip content="导出" delay-time="500">
                                         <el-dropdown @command="onExport">
@@ -282,7 +283,7 @@ class Probe extends Matrix {
                                             <probe-card-component :model="model.summary"></probe-card-component>
                                         </el-header>
                                         <el-main style="padding:0px;">
-                                            <el-table-component :model="model.list" id="probe-list-table"></el-table-component>
+                                            <probe-manage :model="model.list"></probe-manage>
                                         </el-main>
                                     </el-container>
                                 </el-main>
@@ -336,14 +337,14 @@ class Probe extends Matrix {
                 props: {
                     model: Object
                 },
-                template: `<el-container style="height:calc(100vh - 145px);">
+                template: `<el-container style="height:calc(100vh - 145px);width:100%;">
                                 <el-aside ref="leftView" style="background:#f7f7f7;">
                                     <entity-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}" ref="tagTree"></entity-tree-component>
                                 </el-aside>
-                                <el-main style="padding:0px;" ref="mainView">
+                                <el-main style="padding:0px;width:100%;" ref="mainView">
                                     <el-container style="height:100%;">
-                                        <el-main style="padding:0px;">
-                                            <script-manage :model="model.list" id="script-list-table"></script-manage>
+                                        <el-main style="padding:0px;width:100%;">
+                                            <script-manage :model="model.list" ref="scriptManageRef"></script-manage>
                                         </el-main>
                                     </el-container>
                                 </el-main>

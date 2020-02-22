@@ -427,7 +427,7 @@
                         </el-col>
                     </el-row>
                 </el-header>
-                <el-main style="padding:0 5px;overflow:hidden;">
+                <el-main style="padding:0 5px;overflow:hidden;" ref="contentRef">
                     <component v-bind:is="currentView" :model.sync="model" @dblclick.native="resetStatus"></component>
                 </el-main>
                 <el-footer style="padding:0 10px;height:30px;line-height:30px;">
@@ -1864,9 +1864,7 @@
                 info(node){
                     const self = this
                     
-                    console.log(13,node)
-    
-                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
+                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, self.$refs.contentRef.$el);
     
                     new Vue({
                         delimiters: ['#{', '}#'],
@@ -1874,8 +1872,7 @@
                                         <el-main style="height:100%;">
                                             <el-tabs v-model="activeName" type="border-card">
                                                 <el-tab-pane label="管理" name="config">
-                                                    
-                                                    <el-form label-width="80px">
+                                                    <el-form label-width="80px" style="height:100%;">
                                                         <el-form-item label="名称">
                                                             <el-input placeholder="" v-model="model.name" autofocus @keyup.enter.native="save"></el-input>
                                                         </el-form-item>
@@ -1910,7 +1907,8 @@
                                                             </el-button>
                                                         </el-form-item>
 
-                                                   </el-form>
+                                                    </el-form>
+                                                    
                                                 </el-tab-pane>
                                                 <el-tab-pane label="图标" name="icon">
                                                     <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:flex-start;" @change="onIconChange">
@@ -1926,7 +1924,7 @@
                                                 </el-tab-pane>
                                             </el-tabs>    
                                         </el-main>
-                                        <el-footer>
+                                        <el-footer style="height:40px;line-height:40px;text-align:right;">
                                             <el-button type="success" @click="apply">应用</el-button>
                                             <el-button type="primary" @click="save">确定</el-button>
                                             <el-button type="default" @click="close">取消</el-button>
