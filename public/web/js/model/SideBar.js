@@ -468,9 +468,15 @@ class SideBar {
                                 </el-dropdown-menu>
                             </el-dropdown>
 
-                            <el-link href="#" :underline="false" style="font-size:12px;margin-right:5px;">
-                                <i class="el-icon-coin el-icon--right"></i> #{company.name}#
-                            </el-link>
+                            <el-dropdown style="font-size: 12px;margin-right:5px;cursor:pointer;">
+                                <span class="el-dropdown-link">
+                                    <i class="el-icon-coin el-icon--right"></i> #{company.name}#
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item>名称：#{company.name}#</el-dropdown-item>
+                                    <el-dropdown-item>应用：#{company.ospace}#</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
 
                             <el-link :href="'http://'+company.website" target="_blank" :underline="false" style="font-size:12px;">
                                 <i class="el-icon-user el-icon--right"></i> #{company.fullName}#

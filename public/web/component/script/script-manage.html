@@ -13,8 +13,8 @@
 	<template>
 		<el-container style="width:100%;height:100%;">
             <el-header style="height:30px;line-height:30px;">
-                <el-tooltip content="标签" open-delay="500" placement="top">
-                    <el-button type="text" icon="el-icon-notebook-2"></el-button>
+                <el-tooltip content="切换视图" open-delay="500" placement="top">
+                    <el-button type="text" icon="el-icon-s-fold" @click="onToggle"></el-button>
                 </el-tooltip>
                 <el-tooltip content="上传脚本" delay-time="500">
                     <el-button type="text" icon="el-icon-upload2" @click="scriptUpload"></el-button>
@@ -23,7 +23,7 @@
                     <el-button type="text" icon="el-icon-download" @click="scriptDeploy"></el-button>
                 </el-tooltip>
                 <el-tooltip content="编辑脚本" delay-time="500">
-                    <el-button type="text" icon="el-icon-edit-outline" @click="script.update(dt.row( { selected: true } ).data())"></el-button>
+                    <el-button type="text" icon="el-icon-edit-outline" @click="scriptUpdate"></el-button>
                 </el-tooltip>
                 <el-tooltip content="删除未下发脚本" delay-time="500">
                     <el-button type="text" icon="el-icon-delete" @click="scriptDelete"></el-button>
@@ -60,7 +60,6 @@
                     @current-change="onCurrentChange"
                     ref="table">
                     <el-table-column type="selection" align="center"></el-table-column> 
-           
                     <el-table-column
                         sortable 
                         show-overflow-tooltip
@@ -79,6 +78,9 @@
                                 </div>
                             </template>
                     </el-table-column>
+                    <el-table-column  width="180" v-show="dt.rows">
+                        <template slot-scope="scope">#{ scope.row.name }#</template>
+                    </el-table-column> 
                 </el-table>
             </el-main>
             <el-footer  style="height:30px;line-height:30px;">
@@ -218,6 +220,9 @@
                     }
                     
                 },
+                onToggle(){
+                    this.$root.$refs.scriptView.onToggle();
+                },
                 scriptDelete(){
                     
                     if(!this.dt.selected){
@@ -315,7 +320,7 @@
                                                 </el-tab-pane>
                                                 <el-tab-pane name="second">
                                                     <div slot="label">
-                                                        <i class="header-icon el-icon-s-platform"></i> 选择部署目标，开始部署
+                                                        <i class="header-icon el-icon-s-platform"></i> 选择下发目标，开始下发
                                                     </div>
                                                     <el-container>
                                                         <el-header style="height:40px;line-height:40px;text-align:right;">
@@ -485,7 +490,7 @@
                                                 </el-tab-pane>
                                                 <el-tab-pane name="second">
                                                     <div slot="label">
-                                                        <i class="header-icon el-icon-s-platform"></i> 如果需要部署，选择部署目标，开始部署
+                                                        <i class="header-icon el-icon-s-platform"></i> 如果需要下发，选择下发目标，开始下发
                                                     </div>
                                                     <el-container>
                                                         <el-header style="height:40px;line-height:40px;text-align:right;">
@@ -531,7 +536,7 @@
                                         message: "上传成功！"
                                     })
 
-                                    this.$confirm('是否需要部署该脚本?', '提示', {
+                                    this.$confirm('是否需要下发该脚本?', '提示', {
                                         confirmButtonText: '需要',
                                         cancelButtonText: '取消',
                                         type: 'warning'
@@ -599,6 +604,216 @@
                     };
 
                     new Vue(wizard).$mount("#script-add-container");
+                },
+                scriptUpdate(){
+
+                    const self = this;
+
+                    let wnd = maxWindow.winProbe( `<i class="fas fa-plus-circle"></i> 编辑`, `<div id="script-update-container"></div>`, null, 'script-container');
+
+                    let conf = fsHandler.callFsJScript("/matrix/probe/probe_summary_script_conf.js", mx.urlParams['userid']).message;
+                    
+                    let wizard = {
+                        delimiters: ['#{', '}#'],
+                        data: {
+                            model: {
+                                item: {
+                                    name: null,
+                                    version: null,
+                                    remark: null,
+                                    uploadfile: null,
+                                    tags: ['SCRIPT'],
+                                    servers: conf.servers,
+                                    command: null,
+                                    wnd: wnd
+                                },
+                                handler: {
+                                    tagify: null
+                                }
+                            },
+                            fileList: [],
+                            activeName: 'first'
+                        },
+                        template:   `<el-container style="height:100%;">
+                                        <el-main style="height:100%;overflow:hidden;">
+                                            <el-tabs v-model="activeName" type="border-card">
+                                                <el-tab-pane name="first" style="height:100%;">
+                                                    <div slot="label">
+                                                        <i class="header-icon el-icon-upload"></i> 选择脚本，上传到脚本库
+                                                    </div>
+                                                    <el-container style="height:calc(100% - 80px);">
+                                                        <el-header style="height:40px;line-height:40px;text-align:right;">
+                                                            <el-button type="primary" @click="save">上传</el-button>    
+                                                        </el-header>
+                                                        <el-main style="height:100%;">
+                                                            <el-form label-position="left" label-width="120px">
+                                                                <el-form-item>
+                                                                    <el-upload
+                                                                        :on-preview="handlePreview"
+                                                                        :on-remove="handleRemove"
+                                                                        :on-change="onFileChange"
+                                                                        :before-remove="beforeRemove"
+                                                                        :file-list="fileList"
+                                                                        :limit="1"
+                                                                        multiple="false"
+                                                                        :auto-upload="false">
+                                                                        <el-button size="mini" type="success">点击上传脚本</el-button>
+                                                                        <div slot="tip" class="el-upload__tip">只能上传脚本文件</div>
+                                                                        </el-upload>
+                                                                </el-form-item>
+                                                                <el-form-item label="脚本名称">
+                                                                    <el-input v-model="model.item.name" required="required" disabled></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="脚本版本">
+                                                                    <el-input type="number" v-model="model.item.version" required="required" step="0.1"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="执行命令">
+                                                                    <el-input v-model="model.item.command"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="脚本说明">
+                                                                    <el-input type="textarea" :row="6" v-model="model.item.remark"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="添加标签">
+                                                                    <el-tag
+                                                                        v-for="tag in model.item.tags"
+                                                                        :key="tag"
+                                                                        closable>
+                                                                        #{tag}#
+                                                                    </el-tag>
+                                                                </el-form-item>
+                                                            </el-form>
+                                                        </el-main>
+                                                    </el-container>
+                                                </el-tab-pane>
+                                                <el-tab-pane name="second" style="display:none;">
+                                                    <div slot="label">
+                                                        <i class="header-icon el-icon-s-platform"></i> 如果需要下发，选择下发目标，开始下发
+                                                    </div>
+                                                    <el-container>
+                                                        <el-header style="height:40px;line-height:40px;text-align:right;">
+                                                            <el-button type="primary" @click="onDeploy">下发并退出</el-button>    
+                                                        </el-header>
+                                                        <el-main>
+                                                            <script-datatable :model="model.item.servers" ref="scriptUpdateServerRef"></script-datatable>
+                                                        </el-main>
+                                                    </el-container>
+                                                </el-tab-pane>
+                                            </el-tabs>
+                                        </el-main>
+                                    </el-container>`,
+                        created(){
+                            _.extend(this.model, {item: self.dt.selected[0]});
+                            _.extend(this.model.item, {servers:conf.servers});
+                            this.fileList.push({
+                                    status: "ready",
+                                    name: this.model.item.name,
+                                    size: 0,
+                                    percentage: 0,
+                                    uid: _.now(),
+                                    raw: null
+                                }
+                            );
+                        },
+                        mounted(){
+                            this.$nextTick(()=> {
+                                this.tagInput();
+                                $(this.$el).find("li").on("click",()=>{
+                                    eventHub.$emit("COMPONENT-REDRAW-EVENT");
+                                })
+                            })
+                        },
+                        methods: {
+                            tagInput: function(className,container, tags){
+                                const me = this
+
+                                me.model.handler.tagify = $(me.$el).find(".tags").tagify()
+                                    .on("add",function(event, tagName){
+                                        me.model.item.tags = tagName.value;
+                                    })
+                                    .on("remove",function(event,tagName){
+                                        me.model.item.tags = tagName.value;
+                                    });
+
+                            },
+                            save(){
+                                
+                                let result = scriptHandler.depotUpdate(this.model.item);
+
+                                if(result == 1){
+                                    
+                                    this.$message({
+                                        type: "success",
+                                        message: "更新成功！"
+                                    })
+
+                                    this.$confirm('是否需要下发该脚本?', '提示', {
+                                        confirmButtonText: '需要',
+                                        cancelButtonText: '取消',
+                                        type: 'warning'
+                                        }).then(() => {
+                                            this.activeName = 'second';    
+                                        }).catch(() => {
+                                            wnd.close();
+                                        });
+
+                                    eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                } else{
+                                    this.$message({
+                                        type: "error",
+                                        message: "更新失败：" + result.message
+                                    })
+                                }
+                                
+                            },
+                            onFileChange(file, fileList) {
+                                
+                                this.model.item.name = _.head(file.raw.name.split("."));
+                                
+                                this.model.item.uploadfile = file.raw;
+
+                            },
+                            onDeploy(){
+                              
+                                this.$confirm('确定下发该脚本?', '提示', {
+                                    confirmButtonText: '需要',
+                                    cancelButtonText: '取消',
+                                    type: 'warning'
+                                    }).then(() => {
+
+                                        let depot = _.extend({},{depots: this.model.item.name, versions: this.model.item.version, hosts: _.map(this.$refs.scriptUpdateServerRef.dt.selected,'host') });
+
+                                        let result = scriptHandler.depotDeploy(depot);
+
+                                        if(result == null){
+                                            this.$message({
+                                                type: "success",
+                                                message: "下发成功！"
+                                            })
+                                            eventHub.$emit("PROBE-REFRESH-EVENT", ['script']);
+                                        } else{
+                                            this.$message({
+                                                type: "error",
+                                                message: "下发失败：" + result.message
+                                            })
+                                        }
+                                        
+                                    }).catch(() => {
+                                        wnd.close();
+                                    })
+                            },
+                            handleRemove(file, fileList) {
+                                console.log(file, fileList);
+                            },
+                            handlePreview(file) {
+                                console.log(file);
+                            },
+                            beforeRemove(file, fileList) {
+                                return this.$confirm(`确定移除 ${ file.name }？`);
+                            }
+                        }
+                    };
+
+                    new Vue(wizard).$mount("#script-update-container");
                 }
             }
         

@@ -67,217 +67,24 @@ class Probe extends Matrix {
             "probe-list-datatables-component",
             "policy-list-datatables-component",
             "log-list-datatables-component",
+            "probe-manage",
             "script-manage",
             "script-datatable"], function () {
-
-            // Table组件 单选
-            Vue.component("probe-manage",{
-                delimiters: ['#{', '}#'],
-                props: {
-                    model: Object
-                },
-                data(){
-                    return {
-                        dt:{
-                            rows:[],
-                            columns: [],
-                            selected: []
-                        },
-                        info: []
-                    }
-                },
-                watch: {
-                    model: {
-                        handler(val,oldVal){
-                            this.initData();
-                            this.layout();
-                        },
-                        deep:true,
-                        immediate:true
-                    },
-                    dt: {
-                        handler(val,oldVal){
-                            this.info = [];
-                            this.info.push(`共 ${this.dt.rows.length} 项`);
-                            this.info.push(`已选择 ${this.dt.selected.length} 项`);
-                            this.info.push(moment().format("YYYY-MM-DD HH:MM:SS.SSS"));
-                        },
-                        deep:true,
-                        immediate:true
-                    }
-                },
-                template:   `<el-container style="width:100%;height:100%;">
-                                <el-header style="height:30px;line-height:30px;">
-                                    <el-tooltip content="刷新" open-delay="500" placement="top">
-                                        <el-button type="text" icon="el-icon-refresh" @click="eventHub.$emit('PROBE-REFRESH-EVENT', ['script'])"></el-button>
-                                    </el-tooltip>
-                                    <el-tooltip content="导出" delay-time="500">
-                                        <el-dropdown @command="onExport">
-                                            <span class="el-dropdown-link">
-                                                <i class="el-icon-download el-icon--right"></i>
-                                            </span>
-                                            <el-dropdown-menu slot="dropdown">
-                                                <el-dropdown-item command="csv">CSV</el-dropdown-item>
-                                                <el-dropdown-item command="json">JSON</el-dropdown-item>
-                                                <!--el-dropdown-item command="pdf">PDF</el-dropdown-item-->
-                                                <el-dropdown-item command="png">PNG</el-dropdown-item>
-                                                <!--el-dropdown-item command="sql">SQL</el-dropdown-item-->
-                                                <el-dropdown-item command="xls">XLS (Excel 2000 HTML format)</el-dropdown-item>
-                                            </el-dropdown-menu>
-                                        </el-dropdown>
-                                    </el-tooltip>
-                                </el-header>   
-                                <el-main style="width:100%;padding:0px;">
-                                    <el-table
-                                        :data="dt.rows"
-                                        highlight-current-row="true"
-                                        style="width: 100%"
-                                        :row-class-name="rowClassName"
-                                        :header-cell-style="headerRender"
-                                        @row-dblclick="onRowDblclick"
-                                        @row-contextmenu="onRowContextmenu"
-                                        @selection-change="onSelectionChange"
-                                        @current-change="onCurrentChange"
-                                        ref="table">
-                                        <!--el-table-column type="selection" align="center"></el-table-column--> 
-                                        <el-table-column type="expand">
-                                            <template slot-scope="props">
-                                                <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
-                                                    <el-form-item v-for="v,k in props.row" :label="k">
-                                                        <el-input v-model="v"></el-input>
-                                                    </el-form-item>
-                                                </el-form>
-                                            </template>
-                                        </el-table-column>
-                                        <el-table-column
-                                            sortable 
-                                            show-overflow-tooltip
-                                            v-for="(item,index) in dt.columns"
-                                            :key="index"
-                                            :prop="item.field"
-                                            :label="item ? item.title : ''"
-                                            :width="item.width"
-                                            v-if="item.visible">
-                                                <template slot-scope="scope">
-                                                    <div v-html='item.render(scope.row, scope.column, scope.row[item.field], scope.$index)' 
-                                                        v-if="typeof item.render === 'function'">
-                                                    </div>
-                                                    <div v-else>
-                                                        #{scope.row[item.field]}#
-                                                    </div>
-                                                </template>
-                                        </el-table-column>
-                                    </el-table>
-                                </el-main>
-                                <el-footer  style="height:30px;line-height:30px;">
-                                    #{ info.join(' &nbsp; | &nbsp;') }#
-                                </el-footer>
-                            </el-container>`,
-                mounted(){
-
-                },
-                methods: {
-                    layout(){
-                        let doLayout = ()=>{
-                            if($(".el-table-column--selection",this.$el).is(':visible')){
-                                _.delay(()=>{
-                                    this.$refs.table.doLayout();
-                                },1000)
-                            } else {
-                                setTimeout(doLayout,50);
-                            }
-                        }
-                        doLayout();
-                    },
-                    initData(){
-                        const self = this;
-                        
-                        let init = function(){
-                            
-                            _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
-                                
-                                if(_.isUndefined(v.visible)){
-                                    _.extend(v, { visible: true });
-                                }
-
-                                if(!v.render){
-                                    return v;
-                                } else {
-                                    return _.extend(v, { render: eval(v.render) });
-                                }
-                                
-                            })});
-
-                            _.extend(self.dt, {rows: self.model.rows});
-                        };
-
-                        _.delay(()=>{
-                            init();
-                        },1000)
-                        
-                    },
-                    rowClassName({row, rowIndex}){
-                        return `row-${rowIndex}`;
-                    },
-                    headerRender({ row, column, rowIndex, columnIndex }){
-                        if (rowIndex === 0) {
-                            //return 'text-align:center;';
-                        }
-                    },
-                    onSelectionChange(val) {
-                        this.dt.selected = [val];
-                    },
-                    onCurrentChange(val){
-                        this.dt.selected = [val];
-                    },
-                    onRowContextmenu(row, column, event){
-                        
-                    },
-                    onRowDblclick(row, column, event){
-                        
-                    },
-                    onExport(type){
-                
-                        let options = {
-                            csvEnclosure: '',
-                            csvSeparator: ', ',
-                            csvUseBOM: true,
-                            ignoreColumn: [0,1],
-                            fileName: `tableExport_${moment().format("YYYY-MM-DD HH:MM:SS")}`,
-                            type: type,
-                        };
-    
-                        if(type === 'png'){
-                            //$(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-                            $(this.$refs.table.$el.querySelector("table.el-table__body")).tableExport(options);
-                        } else if(type === 'pdf'){
-                            _.extend(options, {
-                                jspdf: {orientation: 'l',
-                                        format: 'a3',
-                                        margins: {left:10, right:10, top:20, bottom:20},
-                                        autotable: {styles: {fillColor: 'inherit', 
-                                                                textColor: 'inherit'},
-                                                    tableWidth: 'auto'}
-                                }
-                            });
-                            $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-                        } else {
-                            $(this.$refs.table.$el.querySelectorAll("table")).tableExport(options);
-                        }
-                        
-                    }
-                }
-            })
 
             Vue.component("probe-view", {
                 props: {
                     model: Object
                 },
+                data(){
+                    return {
+                        splitInst: null
+                    }
+                },
                 template: `<el-container style="height:calc(100vh - 145px);">
-                                <el-aside ref="leftView" style="background:#f7f7f7;">
+                                <el-aside style="background:#f7f7f7;width:20%;" ref="leftView">
                                     <entity-tree-component id="probe-tree" :model="{parent:'/probe',name:'probe_tree_data.js',domain:'probe'}" ref="tagTree"></entity-tree-component>
                                 </el-aside>
-                                <el-main style="padding:0px;" ref="mainView">
+                                <el-main style="padding:0px;width:80%;" ref="mainView">
                                     <el-container style="height:100%;">
                                         <el-header style="height:120px;padding:0px;">
                                             <probe-card-component :model="model.summary"></probe-card-component>
@@ -290,8 +97,8 @@ class Probe extends Matrix {
                             </el-container>`,
                 mounted(){
                     this.$nextTick().then(()=>{
-                        Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                            sizes: [20, 80],
+                        this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                            sizes: [0, 100],
                             minSize: [0, 0],
                             gutterSize: 5,
                             gutterAlign: 'end',
@@ -300,6 +107,15 @@ class Probe extends Matrix {
                             expandToMin: true
                         });
                     })   
+                },
+                methods: {
+                    onToggle(){
+                        if(this.splitInst.getSizes()[0] == 0){
+                            this.splitInst.setSizes([20,80]);
+                        } else {
+                            this.splitInst.setSizes([0,100]);
+                        }
+                    }
                 }
             });
 
@@ -337,6 +153,11 @@ class Probe extends Matrix {
                 props: {
                     model: Object
                 },
+                data(){
+                    return {
+                        splitInst: null
+                    }
+                },
                 template: `<el-container style="height:calc(100vh - 145px);width:100%;">
                                 <el-aside ref="leftView" style="background:#f7f7f7;">
                                     <entity-tree-component id="script-tree" :model="{parent:'/probe',name:'script_tree_data.js',domain:'script'}" ref="tagTree"></entity-tree-component>
@@ -351,8 +172,8 @@ class Probe extends Matrix {
                             </el-container>`,
                 mounted(){
                     this.$nextTick().then(()=>{
-                        Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                            sizes: [20, 80],
+                        this.splitInst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                            sizes: [0, 100],
                             minSize: [0, 0],
                             gutterSize: 5,
                             gutterAlign: 'end',
@@ -361,6 +182,15 @@ class Probe extends Matrix {
                             expandToMin: true
                         });
                     })   
+                },
+                methods: {
+                    onToggle(){
+                        if(this.splitInst.getSizes()[0] == 0){
+                            this.splitInst.setSizes([20,80]);
+                        } else {
+                            this.splitInst.setSizes([0,100]);
+                        }
+                    }
                 }
             });
 
@@ -372,7 +202,7 @@ class Probe extends Matrix {
                                     <el-main style="padding:0px;overflow:hidden;">
                                         <el-tabs v-model="tabs.activeName" type="border-card">
                                             <el-tab-pane label="探针列表" name="probe">
-                                                <probe-view :model="probe"></probe-view>
+                                                <probe-view :model="probe" ref="probeView"></probe-view>
                                             </el-tab-pane>
                                             <!--el-tab-pane label="策略管理" name="policy">
                                                 <policy-view :model="policy"></policy-view>
@@ -381,7 +211,7 @@ class Probe extends Matrix {
                                                 <log-view :model="log"></log-view>
                                             </el-tab-pane-->
                                             <el-tab-pane label="脚本管理" name="script">
-                                                <script-view :model="script"></script-view>
+                                                <script-view :model="script" ref="scriptView"></script-view>
                                             </el-tab-pane>
                                         </el-tabs>
                                     </el-main>

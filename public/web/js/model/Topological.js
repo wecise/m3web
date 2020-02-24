@@ -1671,7 +1671,7 @@ class Topological {
                         // 删除Edge
                         this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEdge(edges.id, edges.value);
                     }
-                    //this.$root.$refs.graphViewRef.search();
+                    
                 }
             }
         })
@@ -2194,6 +2194,8 @@ class Topological {
                                         } else if(_.includes(key,'spath')){
                                             self.cellSelect( cell );
                                             eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                                        } else if(_.includes(key,'entity_delete')){
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeCell();
                                         }
                                     },
                                     items: {
@@ -2237,6 +2239,8 @@ class Topological {
                                     callback: function(key, opt) {
                                         if(_.includes(key,'diagnosis')){
                                             self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                                        } else if(_.includes(key,'entity_delete')){
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeCell();
                                         }
                                     },
                                     items: {

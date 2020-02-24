@@ -108,7 +108,7 @@ class ScriptHandler {
     *
     */
     depotUpdate(event) {
-        let rtn = 1;
+        let rtn = null;
 
         let fm = new FormData();
         _.map(event,function(v,k){
@@ -134,14 +134,11 @@ class ScriptHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("更新成功" + " " + data.message);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = 0;
-                alertify.error("更新失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseJSON;
             }
         });
         return rtn;
