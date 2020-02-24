@@ -772,11 +772,25 @@ class Topological {
                 id: String,
                 model:Object
             },
+            data(){
+                return {
+                    edges: {
+                        value: "",
+                        list: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message
+                    }
+                }
+            },
             template:   `<el-card :body-style="{ padding: '10px' }" v-show="model.rows.length">
                             <el-image style="width: 100px; height: 100px" :src="model | pickIcon" fit="scale-down" @error="onErrorPickIcon"></el-image>
                             <el-form label-position="left" label-width="80px" class="form-no-border">
                                 <el-form-item :label="key" v-for="(value,key) in model.rows[0]" style="margin-bottom: 10px;">
-                                    <el-input type="text" :placeholder="key" :value="value" disabled></el-input>
+                                    <el-select v-model="edges.value" placeholder="选择关系类型" v-if="key==='type'">
+                                        <el-option v-for="item in edges.list" 
+                                        :key="item.name"
+                                        :value="item.name"
+                                        :label="item.remedy"></el-option>
+                                    </el-select>
+                                    <el-input type="text" :placeholder="key" :value="value" disabled v-else></el-input>
                                 </el-form-item>
                             </el-form>
                         </el-card>`,
@@ -789,6 +803,9 @@ class Topological {
                     }
                     
                 }
+            },
+            created(){
+                this.edges.value = this.model.rows[0].type;
             },
             methods:{
                 onErrorPickIcon(e){
@@ -2195,7 +2212,7 @@ class Topological {
                                             self.cellSelect( cell );
                                             eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
                                         } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeCell();
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity();
                                         }
                                     },
                                     items: {
@@ -2240,7 +2257,7 @@ class Topological {
                                         if(_.includes(key,'diagnosis')){
                                             self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
                                         } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeCell();
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity();
                                         }
                                     },
                                     items: {
@@ -2250,7 +2267,7 @@ class Topological {
                                         },
                                         "m20":"----------",
                                         "m30_entity_delete": {
-                                            "name": "实体删除",
+                                            "name": "实体关系删除",
                                             "icon": "fas fa-trash"
                                         }
                                     }

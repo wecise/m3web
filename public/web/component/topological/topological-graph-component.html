@@ -363,7 +363,7 @@
                       </el-row>
                     <span slot="footer" class="dialog-footer">
                         <el-button @click="entity.dialogVisible = false">取消</el-button>
-                        <el-button type="primary" @click="updateEdge">提交</el-button>
+                        <el-button type="primary" @click="updateEntityEdge">提交</el-button>
                     </span>
                 </el-dialog>
             </el-container>
@@ -513,7 +513,9 @@
 	        })
         },
         created(){
-            
+            // 节点渲染方式
+            this.model.control.ifIcon = (localStorage.getItem("TOPOLOGICAL-RENDER-TYPE"))=='true'?true:false;
+
             // 三次贝塞尔曲线
             // 替代默认边绘制，两种形式，默认是通过贝塞尔曲线绘制成带圆角的折线，另一种是直角折线
             // mxShape.prototype.addPoints = function(c, pts, rounded, arcSize, close, exclude, initialMove){
@@ -1055,6 +1057,24 @@
 
                 try{
 
+                    // Changes the zoom on mouseWheel events
+                    mxEvent.addMouseWheelListener(function (evt, up)
+                    {
+                        if (!mxEvent.isConsumed(evt))
+                        {
+                            if (up)
+                            {
+                                editor.execute('zoomIn');
+                            }
+                            else
+                            {
+                                editor.execute('zoomOut');
+                            }
+                            
+                            mxEvent.consume(evt);
+                        }
+                    });
+                    
                     // 首先禁用浏览器右键菜单
                     mxEvent.disableContextMenu(this.$el);
                     // 右键菜单
@@ -1070,10 +1090,12 @@
                         
                         menu.addItem('图标', null, ()=>{
                             this.model.control.ifIcon = true;
+                            localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
                             this.onReload();
                         }, submenuIcon);
                         menu.addItem('图形', null, ()=>{
                             this.model.control.ifIcon = false;
+                            localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
                             this.onReload();
                         }, submenuIcon);
 
@@ -1517,8 +1539,8 @@
             },
             onToggleIcon(){
                 this.model.control.ifIcon = !this.model.control.ifIcon;
+                localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
                 this.onReload();
-                //this.toCenter();
             },
             initTimeLine(){
 
@@ -1559,15 +1581,19 @@
             saveEntityAndEdge(){
 
             },
-            removeCell(){
+            removeEntity(){
                 this.$confirm(`确定删除节点？`, '提示', {
                         confirmButtonText: '确定',
                         cancelButtonText: '取消',
                         type: 'warning'
                     }).then(() => {
+                        // entity action
+
+                        // graph action
                         let cell = this.model.graph.graph.getSelectionCell();
                         cell.removeFromParent();
                         this.model.graph.graph.refresh(cell);
+                        
                         this.$message({
                             message: '删除成功',
                             type: 'success'
@@ -1576,7 +1602,7 @@
                         
                     });
             },
-            updateEdge(){
+            updateEntityEdge(){
                 
                 if(!this.entity.edges.value){
                     this.$message({
