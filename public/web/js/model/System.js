@@ -2128,14 +2128,19 @@ class System {
 							}
 						},
 						remove(event) {
-							const self = this;
-
-							alertify.confirm(`确定要删除？<br><br> ${event}`, function (e) {
+							
+							alertify.confirm(`确定要删除？<br><br> ${event}`, (e)=> {
 								if (e) {
 									let _mql = `delete from /matrix/portal/tools where name='${event}'`;
-									let _rtn = omdbHandler.fetchDataByMql(_mql);
-
-									self.init();
+									let rtn = omdbHandler.fetchDataByMql(_mql);
+									if(rtn.status === 'ok'){
+										this.init();
+									} else {
+										this.$message({
+											type: "error",
+											message: rtn.message
+										})
+									}
 								} else {
 									
 								}

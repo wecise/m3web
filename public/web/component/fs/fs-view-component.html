@@ -1869,12 +1869,12 @@
                     new Vue({
                         delimiters: ['#{', '}#'],
                         template:   `<el-container style="height:100%;">
-                                        <el-main style="height:100%;">
+                                        <el-main style="height:100%;display:grid;">
                                             <el-tabs v-model="activeName" type="border-card">
                                                 <el-tab-pane label="管理" name="config">
                                                     <el-form label-width="80px" style="height:100%;">
                                                         <el-form-item label="名称">
-                                                            <el-input placeholder="" v-model="model.name" autofocus @keyup.enter.native="save"></el-input>
+                                                            <el-input v-model="model.name"></el-input>
                                                         </el-form-item>
 
                                                         <el-form-item label="备注">
@@ -1882,15 +1882,15 @@
                                                         </el-form-item>
 
                                                         <el-form-item label="更新时间">
-                                                            <el-input :value="moment(model.attr.ctime).format('LLL')" disabled></el-input>
+                                                            <el-input :value="model.attr.ctime | toLocalTime" disabled></el-input>
                                                         </el-form-item>
 
                                                         <el-form-item label="目录">
-                                                            <el-input :value="model.parent" disabled></el-input>
+                                                            <el-input v-model="model.parent" disabled></el-input>
                                                         </el-form-item>
 
                                                         <el-form-item label="类型">
-                                                            <el-input :value="model.ftype" disabled></el-input>
+                                                            <el-input v-model="model.ftype" disabled></el-input>
                                                         </el-form-item>
 
                                                         <el-form-item label="大小">
@@ -1898,12 +1898,12 @@
                                                         </el-form-item>
 
                                                         <el-form-item label="作者">
-                                                            <el-input placeholder="" :value="model.attr.author" disabled></el-input>
+                                                            <el-input v-model="model.attr.author" disabled></el-input>
                                                         </el-form-item>
                                                         
                                                         <el-form-item label="图标">
                                                             <el-button @click="activeName='icon'">
-                                                                <el-image :src="icon.value" style="width:64px;"></el-image>
+                                                                <el-image :src="icon.value" style="width:64px;" ></el-image>
                                                             </el-button>
                                                         </el-form-item>
 
@@ -1924,75 +1924,65 @@
                                                 </el-tab-pane>
                                             </el-tabs>    
                                         </el-main>
-                                        <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                        <el-footer style="line-height:60px;text-align:center;">
                                             <el-button type="success" @click="apply">应用</el-button>
                                             <el-button type="primary" @click="save">确定</el-button>
                                             <el-button type="default" @click="close">取消</el-button>
                                         </el-footer>
                                     </el-container>`,
                         data: {
-                            model: {},
+                            model: {
+                                name: "",
+                                attr: {
+                                    remark: ""
+                                }
+                            },
                             icon: {
-                                    value: null,
+                                    value: `${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`,
                                     list: []
                             },
                             attr:{
                                 remark: "", 
                                 ctime: _.now(),
                                 author: window.SignedUser_UserName,
-                                icon: `${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`
+                                icon: ""
                             },
                             activeName: 'config'
                         },
                         created(){
-                            // 初始化Model
-                            _.extend(this.model,node);
                             
-                            // 初始化属性
-                            if(_.isEmpty(this.model.attr)){
-                                _.extend(this.model, {attr:this.attr});
+                            try{
+                                // 初始化model
+                                _.extend(this.model,node);
+
+                                // 初始化attr
+                                if(_.isEmpty(this.model.attr)){
+                                    _.extend(this.model, {attr:this.attr});   
+                                } else {
+                                    _.extend(this.model, {attr: JSON.parse(this.model.attr)});   
+                                }
+
+                                // 如果属性没有icon定义，默认根据ftype文件类型显示
+                                let icon = JSON.parse(this.model.attr).icon;
+                                if(!_.isEmpty(icon)){
+                                    this.icon.value = icon;
+                                }
+                            } catch(err){
+
                             }
                             
                             // 初始化图片列表
                             this.icon.list = fsHandler.fsList('/assets/images/files/png');
                         },
-                        mounted() {
-                            this.$nextTick().then(()=> {
-                                //this.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
-                                //this.icon.value = this.model.attr.icon;
-                            })
-                        },
                         filters: {
-                            pickName: function (value) {
-                                const me = this;
-    
-                                if (!value) return '';
-    
-                                let _attr = _.attempt(JSON.parse.bind(null, value));
-    
-                                return _attr.name;
+                            pickIcon(item) {
+                                return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
                             },
-                            pickIcon: function(item) {
-                                return `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
-                            },
-                            readMore: function (text, length, suffix) {
-                                return text.substring(0, length) + suffix;
-                            },
-                            toLocalTime: function (value) {
-                                return moment(value).format("LLL");
+                            toLocalTime(value) {
+                                return moment(value).format("YYYY-MM-DD HH:MM:SS");
                             }
                         },
-                        destroyed: function(){
-                            const me = this;
-    
-                            me.model = null;
-                        },
                         methods: {
-                            triggerInput(id){
-                                const self = this
-    
-                                $(self.$refs[id]).click()
-                            },
                             apply(){
                                 this.saveAttr();
                             },
@@ -2009,37 +1999,62 @@
                             saveName(){
                                 const me = this;
     
-                                let _extName = node.ftype=='dir'?'':'.'+node.ftype;
-                                let _old = node.parent + "/" + node.name;// + _extName;
-                                let _new = node.parent + "/" + me.model.newName;// + _extName;
+                                let _old = node.parent + "/" + node.name;
+                                let _new = node.parent + "/" + me.model.name;
     
     
-                                let _check = fsHandler.fsCheck( node.parent, me.model.newName);
+                                let _check = fsHandler.fsCheck( node.parent, me.model.name);
                                 if(_check) {
-                                    alertify.error("文件已存在，请确认！")
+                                    this.$message({
+                                        type: "info",
+                                        message: "文件已存在，请确认！"
+                                    });
+                                    return false;
+                                }
+                                
+                                if(_check.status == 'error') {
+                                    this.$message({
+                                        type: "error",
+                                        message: _check.message
+                                    });
                                     return false;
                                 }
     
                                 let _rtn = fsHandler.fsRename(_old, _new);
     
                                 if(_rtn == 1){
+                                    
                                     self.load();
+
+                                    this.$message({
+                                        type: "success",
+                                        message: "重命名成功！"
+                                    })
+                                }else {
+                                    this.$message({
+                                        type: "error",
+                                        message: _rtn.message
+                                    })
                                 }
                             },
                             saveAttr(){
                                 const me = this;
                                 
                                 _.extend(me.model.attr, {icon: me.icon.value});
-                                console.log(882, node, me.model.attr)
 
                                 let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
-                                console.log(89,node,me.model,me.model.attr)
+                                
                                 if(_rtn == 1){
                                     self.load();
                                     
                                     if(me.model.name != node.name){
                                         me.saveName();
                                     }
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: _rtn.message
+                                    })
                                 }
                             }
                         }

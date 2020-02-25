@@ -467,13 +467,11 @@ class OmdbHandler {
                 // MQL for CRUD
                 if(_.lowerCase(data.status) == "ok"){
                     rtn = data;
-                    alertify.success("成功" + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown){
-                rtn = xhr.responseText;
-                alertify.error("失败" + " " + moment().format("LLL") + " " +  xhr.responseText);
+                rtn = xhr.responseJSON;
             }
         });
 

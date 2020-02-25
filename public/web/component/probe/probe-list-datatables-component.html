@@ -717,6 +717,12 @@
 
                                     if(_rtn.status === 'ok') {
                                         self.datatable.rows( { selected: true } ).remove().draw(false);
+                                    } else{
+                                        this.$message({
+                                            type: "error",
+                                            message: _rtn.message,
+                                            effect:"light"
+                                        })
                                     }
                                 }
                             })

@@ -484,6 +484,11 @@
 
                 if(!_.isEmpty(_list)){
                     _rtn = _list;
+                } else{
+                    this.$message({
+                        type: "error",
+                        message: _list.message
+                    })
                 }
 
                 return _rtn;

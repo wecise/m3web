@@ -484,7 +484,7 @@
             <el-container>
                 <el-header style="height:auto;">
                     <el-button type="text" icon="el-icon-s-tools" @click="changeLogo" style="float: right;"></el-button>
-                    <p><img :src="logo" style="max-width:250px;padding: 20px 0 30px 0px;"></img></p>
+                    <p><img :src="logo" style="width:200px;max-width:200px;"></img></p>
                 </el-header>
                 <el-main>
                     <h5>{{.i18n.Tr "company_info"}}</h5>
@@ -499,7 +499,7 @@
                         <el-link type="default" icon="el-icon-location" href="http://{{.website}}" target="_blank" :underline="false">{{.i18n.Tr "company_web"}} </el-link>
                     </p>
                     {{if .SignedUser.IsAdmin}}
-                    <p>
+                    <p style="display:flex;">
                         <el-button type="success" icon="el-icon-edit" @click="toggleView('company-update')">{{.i18n.Tr "company_update"}}</el-button>
                         <el-button type="success" icon="el-icon-user" @click="toggleView('user-update')">{{.i18n.Tr "userinfo_update"}}</el-button>
                     </p>

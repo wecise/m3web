@@ -392,7 +392,7 @@ class Omdb{
                                                 style="position: absolute;right: 10px;"
                                                 @click="copyMe(item)">
                                             </el-button>
-                                            <pre>#{item[2].content}#</pre>
+                                            <pre style="white-space: pre-wrap;">#{item[2].content}#</pre>
                                         </div>
                                     </el-collapse-item>
                                 </el-collapse>

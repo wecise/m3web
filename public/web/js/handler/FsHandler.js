@@ -25,7 +25,7 @@ class FsHandler {
     *
     */
     fsCheck(path, name){
-        let rtn = false;
+        let rtn = null;
 
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=check`;
@@ -54,7 +54,7 @@ class FsHandler {
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn=xhr.responseJSON;
             }
         })
 
@@ -72,7 +72,7 @@ class FsHandler {
     *
     */
     fsNew(ftype, path, name, content, attr){
-        let rtn = 0;
+        let rtn = null;
 
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
@@ -107,14 +107,11 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("创建成功 " + name + " " + moment().format("LLL"));
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("创建失败 " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseJSON;
             }
         })
 
@@ -284,7 +281,7 @@ class FsHandler {
     *
     */
     fsRename(srcpath,dstpath){
-        let rtn = 0;
+        let rtn = null;
 
         let _issys = false;
 
@@ -324,14 +321,11 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("编辑成功" + " " + srcpath);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("编辑失败" + " " + xhr.responseJSON.message);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseJSON.error);
+                rtn = xhr.responseJSON;
             }
         })
 
@@ -459,7 +453,7 @@ class FsHandler {
     *
     */
     fsUpdateAttr(path, name, attr) {
-        let rtn = 0;
+        let rtn = null;
 
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}?type=attr`;
@@ -487,14 +481,11 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("编辑成功" + " " + parent + "/" + name);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("编辑失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseJSON;
             }
         })
 

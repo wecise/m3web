@@ -409,49 +409,74 @@
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('info',_list);
 
                 } else {
+                    this.$message({
+                        type: "error",
+                        message: _list.message
+                    })
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
 	                return false;
                 }
 
                 if(_.isEmpty(_list)) {
-                    alertify.log("查询结果为空");
+                    this.$message({
+                        type: "info",
+                        message: "查询结果为空"
+                    });
                     return false;
                 }
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
-                    alertify.success("创建成功");
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
-                    alertify.success("删除成功");
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
-                    alertify.success("创建成功");
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
-                    alertify.success("删除成功");
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
-                    alertify.success("修改成功");
+                    this.$message({
+                        type: "success",
+                        message: "修改成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
-                    alertify.success("插入成功");
+                    this.$message({
+                        type: "success",
+                        message: "插入成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                     return false;
                 }
@@ -511,29 +536,34 @@
 
                 // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
                 if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
-                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
-                                    点击【确认】以文本形式输出`, function (e) {
-                        if (e) {
+                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
+                                    点击【确定】以文本形式输出`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        center: true
+                        }).then(() => {
                             self.queryByJson();
-                        } else {
-                            
-                        }
-                    });
+                        }).catch(() => {
+                        
+                        });
                     return false;
                 } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
-                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
-                                    点击【确认】以文本形式输出`, function (e) {
-                        if (e) {
+                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 
+                                    点击【确定】以文本形式输出`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        center: true
+                        }).then(() => {
                             self.queryByJson();
-                        } else {
-                            
-                        }
-                    });
+                        }).catch(() => {
+                        
+                        });
                     return false;
                 }
                 // 正常Table显示 
                 else {
-                    //self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns, rootclass: _list.meta.rootclass};
                     self.result = { id:self.id, bid: self.bid, type: 'table-update', data: _data, columns: _columns, rootclass: _list.meta.rootclass};
                 }
 
@@ -570,47 +600,74 @@
 
                     // 输出日志
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
-	                return false;
+                    
+                    this.$message({
+                        type: "error",
+                        message: _list.message
+                    })
+
+                    return false;
                 }
 
                 if(_.isEmpty(_list)) {
-                    alertify.log("查询结果为空");
+                    this.$message({
+                        type: "info",
+                        message: "查询结果为空"
+                    });
                     return false;
                 }
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
-                    alertify.success("创建成功");
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
-                    alertify.success("删除成功");
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
-                    alertify.success("创建成功");
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
-                    alertify.success("删除成功");
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
-                    alertify.success("修改成功");
+                    this.$message({
+                        type: "success",
+                        message: "修改成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
-                    alertify.success("插入成功");
+                    this.$message({
+                        type: "success",
+                        message: "插入成功"
+                    });
                     eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
                     return false;
                 }
@@ -660,24 +717,30 @@
 
                 // 结果数据太大,超过阈值【max_record_threshold】，以html形式显示
                 if( _list.meta.type == 'select' &&  _list.message.length > mx.global.register.omdb.max_record_threshold){
-                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
-                                    点击【确认】以文本形式输出`, function (e) {
-                        if (e) {
+                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
+                                    点击【确定】以文本形式输出`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        center: true
+                        }).then(() => {
                             self.queryByJson();
-                        } else {
-                            
-                        }
-                    });
+                        }).catch(() => {
+                        
+                        });
                     return false;
                 } else if( _list.meta.type == 'graph' && _list.message[0].graph.nodes.length > mx.global.register.omdb.max_record_threshold){
-                    alertify.confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】 <br><br> 
-                                    点击【确认】以文本形式输出`, function (e) {
-                        if (e) {
+                    this.$confirm(`返回结果集超过阈值【${mx.global.register.omdb.max_record_threshold}】  
+                                    点击【确定】以文本形式输出`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        center: true
+                        }).then(() => {
                             self.queryByJson();
-                        } else {
-                            
-                        }
-                    });
+                        }).catch(() => {
+                        
+                        });
                     return false;
                 }
                 // 正常Table显示 
@@ -738,7 +801,13 @@
 
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
-	                return false;
+                    
+                    this.$message({
+                        type: "error",
+                        message: _list.message
+                    })
+
+                    return false;
                 }   
             },
             queryPlus(){
@@ -760,50 +829,74 @@
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'info', _list)
                 } else {
                     eventHub.$emit("LOG-CONSOLE-APPEND-EVENT", 'error', _list)
+                    
+                    this.$message({
+                        type: "error",
+                        message: _list.message
+                    })
+                    
                 }
 
 
                 if(_.isEmpty(_list)) {
 
-                    alertify.log("查询结果为空");
+                    this.$message({
+                        type: "info",
+                        message: "查询结果为空"
+                    })
 
                     return false;
                 }
 
                 // MQL for  CRUD
                 if(_.includes(['create'],_list.meta.type)){
-                    alertify.success("创建成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-class', node: null});
+                    
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
+                    
                     return false;
                 }
 
                 if(_.includes(['drop'],_list.meta.type)){
-                    alertify.success("删除成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-class', node: null});
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
+                    
                     return false;
                 }
 
                 if(_.includes(['create edge'],_list.meta.type)){
-                    alertify.success("创建成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'create-edge-type', node: null});
+                    this.$message({
+                        type: "success",
+                        message: "创建成功"
+                    });
                     return false;
                 }
 
                 if(_.includes(['drop edge'],_list.meta.type)){
-                    alertify.success("删除成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'drop-edge-type', node: null});
+                    this.$message({
+                        type: "success",
+                        message: "删除成功"
+                    });
                     return false;
                 }
 
                 if(_list.meta.type === 'alter'){
-                    alertify.success("修改成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'alter-class', node: null});
+                    this.$message({
+                        type: "success",
+                        message: "修改成功"
+                    });
                     return false;
                 }
 
                 if(_list.meta.type === 'insert'){
-                    alertify.success("插入成功");
-                    //eventHub.$emit("OMDB-CLASS-REFRESH-EVENT", {type:'console', pattern: 'insert-class', node: null});
+                    this.$message({
+                        type: "success",
+                        message: "插入成功"
+                    });
                     return false;
                 }
 
@@ -843,10 +936,11 @@
                 _mql = _mql.replace(/\n/g,' ').replace(/\t/g,' ').replace(/\\/g,' ');
 
                 let _list = omdbHandler.fetchDataByMql(_mql);
+
                 let _content = JSON.stringify({mql: _mql, result: {message: _list.message, meta: _list.meta}},null,4).replace(/   /g, ' ');
                 let _ftype = "html";
                 let _attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: _ftype};
-				let _name = '查询_' + moment().format("LLL");
+				let _name = '查询_' + moment().format("YYYY-MM-DD HH:MM:SS");
 				let _html = `<!DOCTYPE html>
 							<html>
 								<head>
@@ -863,18 +957,22 @@
                 let _url = fsHandler.fsTemp(_ftype, _name + "." + _ftype, _html, _attr);
                 
                 // 保存失败
-                if(!_url)  return false;
-
-                alertify.confirm(`运行结果已保存到以下目录 <br><br> 
-                                  目录：${_url} <br><br>
-                                  MQL: ${_mql} <br><br>
-                                  返回记录: ${_list.message.length} <br><br>
-                                  点击【确认】查看详细`, function (e) {
-                    if (e) {
-                        window.open(`/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}`,"_blank");
-                    } else {
-                        
-                    }
+                if(!_url){
+                    this.$message({
+                        type: "error",
+                        message: "文件保存失败，请确认！"
+                    });
+                    return false;
+                }
+                
+                this.$notify({
+                    title: '运行结果已保存',
+                    dangerouslyUseHTMLString: true,
+                    duration: 10*1000,
+                    message: `<p>目录：${_url} </p>
+                                <p>返回记录: ${_list.message.length} </p>
+                                <p>点击 <a href="/fs${_url}?type=open&issys=${window.SignedUser_IsAdmin}" class="el-button el-button--success el-button--mini" style="text-decoration: none;" target="_blank">确认</a> 查看详细</p>`,
+                    position: 'bottom-right'
                 });
             },
             saveToFs(){
