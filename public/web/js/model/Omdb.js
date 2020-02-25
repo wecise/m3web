@@ -1708,10 +1708,8 @@ class Omdb{
                         }
                     },
                     mounted() {
-                        const self = this;
-    
-                        self.$nextTick(function() {
-                            self.init();
+                        this.$nextTick(()=> {
+                            this.init();
                         })
                     },
                     methods: {
@@ -1746,20 +1744,17 @@ class Omdb{
                             }
                         },
                         mainTabsAdd(node){
-                            const self = this;
-                            
                             // 已经打开
-                            if(_.find(self.main.tabs,{name:node.name})){
-                                self.main.activeIndex = node.name;
+                            if(_.find(this.main.tabs,{name:node.name})){
+                                this.main.activeIndex = node.name;
                                 return false;
                             }
 
-                            self.main.tabs.push(_.extend(node,{ name: [node.name,node.model.pattern].join("-"), title: [node.title,node.model.pattern].join("-") }));
-                            self.main.activeIndex = node.name;
+                            this.main.tabs.push(_.extend(node,{ name: [node.name,node.model.pattern,_.now()].join("-"), title: [node.title,node.model.pattern].join("-") }));
+                            this.main.activeIndex = node.name;
                         },
                         mainTabsRemove(targetName){
-                            const self = this;
-
+                            
                             try{
                                 let tabs = this.main.tabs;
                                 let activeIndex = this.main.activeIndex;

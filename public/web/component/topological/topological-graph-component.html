@@ -652,14 +652,11 @@
                         var layout = new mxCompactTreeLayout(this.model.graph.graph, false);
                         layout.useBoundingBox = false;
                         layout.edgeRouting = false;
-                        layout.levelDistance = 60;
-                        layout.nodeDistance = 60;
-                        // Allows the layout to move cells even though cells
-                        // aren't movable in the graph
+                        layout.levelDistance = 40;
+                        layout.nodeDistance = 30;
                         layout.isVertexMovable = function(cell){
                             return true;
                         };
-
                         var layoutMgr = new mxLayoutManager(this.model.graph.graph);
 
                         layoutMgr.getLayout = function(cell){
@@ -1064,17 +1061,17 @@
                                 });
 
                                 menu.addItem('实体删除', null, ()=>{
-                                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
+                                    this.removeEntity(cell);
                                 });
                                 
                                 menu.addSeparator();
 
                                 menu.addItem('起点图查询', null, ()=>{
-                                    this.$root.$refs.graphDiagnosisRef.edgesSearch({direction:"out",node:node});
+                                    this.$root.edgesSearch({direction:"out",node:node});
                                 });
 
                                 menu.addItem('终点图查询', null, ()=>{
-                                    this.$root.$refs.graphDiagnosisRef.edgesSearch({direction:"in",node:node});
+                                    this.$root.edgesSearch({direction:"in",node:node});
                                 });
 
                                 menu.addSeparator();
