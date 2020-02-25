@@ -1153,12 +1153,17 @@ class Omdb{
                                     </el-table-column>                                                
                                     <el-table-column type="expand" label="详细" align="center" >
                                         <template slot-scope="props">
-                                            <el-form style="width: 100%;padding:10px 20px;" label-position="left" class="omdb-table-data-expand">
-                                                <el-form-item v-for="v,k in props.row" :label="k">
-                                                    <el-input :type="k | pickType" v-model="v" :disabled="true" v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
-                                                    <el-input :type="k | pickType" v-model="v" :disabled="false" v-else></el-input>
-                                                </el-form-item>
-                                            </el-form>
+                                            <el-container style="width:50vw;">
+                                                <el-main>
+                                                    <el-form label-position="right" label-width="120px">
+                                                        <el-form-item v-for="v,k in props.row" :label="k" :key="k">
+                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-if="_.includes(['class','ctime', 'day','id','name', 'vtime'],k)"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :rows="6" :value="JSON.stringify(v,null,2)"  v-else-if="typeof v =='object'"></el-input>
+                                                            <el-input :type="k,dt.columns | pickType" :value="v"  v-else></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </el-main>
+                                            </el-container>
                                         </template>
                                     </el-table-column>
                                     <el-table-column :prop="item.field"  
@@ -1197,11 +1202,11 @@ class Omdb{
                 }
             },
             filters: {
-                pickType(key){
+                pickType(key,columns){
                     let rtn = 'text';
                     try{
-                        let type = _.find(this.dt.columns,{field:key}).type;
-                        if(type === 'text'){
+                        let type = _.find(columns,{field:key}).type;
+                        if(_.includes(['map','list','set'],type)){
                             rtn = 'textarea';
                         }
                     } catch(err){
