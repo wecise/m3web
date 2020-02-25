@@ -377,18 +377,23 @@ class Topological {
                 },
                 querySearchAsync(term, cb) {
                     
-                    if(_.isEmpty(term)){
-                        return false;
-                    }
+                    try{
+                        if(_.isEmpty(term)){
+                            return false;
+                        }
+    
+                        let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(term)).message;
+                        
+                        let results = term ? entitys.filter(this.createStateFilter(term)) : entitys;
+                
+                        clearTimeout(this.entity.timeout);
+                        this.entity.timeout = setTimeout(() => {
+                          cb(results);
+                        }, 3000 * Math.random()); 
+                    } catch(err){
 
-                    let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(term)).message;
+                    }
                     
-                    let results = term ? entitys.filter(this.createStateFilter(term)) : entitys;
-            
-                    clearTimeout(this.entity.timeout);
-                    this.entity.timeout = setTimeout(() => {
-                      cb(results);
-                    }, 3000 * Math.random());
                 },
                 createStateFilter(term) {
                     return (state) => {
@@ -2175,115 +2180,6 @@ class Topological {
                     }
                     
                     
-                },
-                contextMenu(){
-                    const self = this;
-
-                    $.contextMenu("destroy").contextMenu({
-                        //selector: `#graph-view-${self.id} svg g`,
-                        selector: `svg g image,svg g path,svg g`,
-                        trigger: 'left',
-                        autoHide: true,
-                        delay: 10,
-                        hideOnSecondTrigger: true,
-                        build: function($trigger, e) {
-                            let graph = self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph;
-                            let cell = graph.selectedCell;
-                            
-                            if(!cell) return false;
-
-                            if(!cell.edge){
-                                // node
-                                let id = cell.getId();
-                                let value = cell.getValue();
-                                let node = {id: id, value: value, type:'event', cell: cell};
-                                
-                                return {
-                                    callback: function(key, opt) {
-                                        if(_.includes(key,'diagnosis')){
-                                            self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
-                                        } else if(_.includes(key,'search_out')){
-                                            self.edgesSearch({direction:"out",node:node});
-                                        } else if(_.includes(key,'search_in')){
-                                            self.edgesSearch({direction:"in",node:node});
-                                        } else if(_.includes(key,'edges_new')){
-                                            self.$root.$refs.graphEdgesRef.edgesTabAdd( node );
-                                        } else if(_.includes(key,'spath')){
-                                            self.cellSelect( cell );
-                                            eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
-                                        } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
-                                        }
-                                    },
-                                    items: {
-                                        "m10_diagnosis": {
-                                            "name": "实体分析",
-                                            "icon": "fas fa-diagnoses"
-                                        },
-                                        "m20":"----------",
-                                        "m30_entity_delete": {
-                                            "name": "实体删除",
-                                            "icon": "fas fa-trash"
-                                        },
-                                        "m40":"----------",
-                                        "m50_search_out": {
-                                            "name": "起点图查询",
-                                            "icon": "fas fa-angle-up"
-                                        },
-                                        "m60_search_in": {
-                                            "name": "终点图查询",
-                                            "icon": "fas fa-angle-down"
-                                        },
-                                        "m70":"----------",
-                                        "m80_edges_new": {
-                                            "name": "关系维护",
-                                            "icon": "fas fa-network-wired"
-                                        },
-                                        "m90":"----------",
-                                        "m100_spath": {
-                                            "name": "选定为路径查询点",
-                                            "icon": "fas fa-hourglass-start"
-                                        }
-                                    }
-                                }
-                            } else {
-
-                                let id = cell.getId();
-                                let value = cell.getValue();
-                                let node = _.extend(_.find(self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.graphData.edges,{id:id}), {type:'event', cell: cell});
-                                
-                                return {
-                                    callback: function(key, opt) {
-                                        if(_.includes(key,'diagnosis')){
-                                            self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
-                                        } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
-                                        }
-                                    },
-                                    items: {
-                                        "m10_diagnosis": {
-                                            "name": "实体分析",
-                                            "icon": "fas fa-diagnoses"
-                                        },
-                                        "m20":"----------",
-                                        "m30_entity_delete": {
-                                            "name": "实体关系删除",
-                                            "icon": "fas fa-trash"
-                                        }
-                                    }
-                                }
-                            }
-                            
-                        },
-                        events: {
-                            show: function(opt) {
-                                let $this = this;
-                            },
-                            hide: function(opt) {
-                                let $this = this;
-                            }
-                        }
-                    });
                 },
                 edgesSearch(node){
                     let term = "";
