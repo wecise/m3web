@@ -325,9 +325,10 @@
                </div>
                <el-dialog
                     title="实体/关系编辑"
-                    :visible.sync="entity.dialogVisible"
+                    :visible.sync="entity.dialog.show"
                     width="60%"
-                    modal="false">
+                    modal="false"
+                    @closed="onEntityDialogClosed">
                     <el-row :gutter="24">
                         <el-col :span="8">
                             <h4>起始点</h4>
@@ -362,7 +363,7 @@
                         </el-col>
                       </el-row>
                     <span slot="footer" class="dialog-footer">
-                        <el-button @click="entity.dialogVisible = false">取消</el-button>
+                        <el-button @click="entity.dialog.ifClose = true;entity.dialog.show = false;">取消</el-button>
                         <el-button type="primary" @click="updateEntityEdge">提交</el-button>
                     </span>
                 </el-dialog>
@@ -449,7 +450,10 @@
                     }
                 },
                 entity: {
-                    dialogVisible: false,
+                    dialog: {
+                        show: false,
+                        ifClose: false,
+                    },
                     source: {},
                     target: {},
                     edges: {
@@ -1125,7 +1129,7 @@
                             _.extend(this.entity, {source: {id: sCell.getId(), value: sCell.getValue()}});
                             _.extend(this.entity, {target: {id: tCell.getId(), value: tCell.getValue()}});
                             
-                            this.entity.dialogVisible = true;
+                            this.entity.dialog.show = true;
                         }
                     })
 
@@ -1581,26 +1585,88 @@
             saveEntityAndEdge(){
 
             },
-            removeEntity(){
-                this.$confirm(`确定删除节点？`, '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        // entity action
+            onEntityDialogClosed(){
+                this.entity.soure = {};
+                this.entity.target = {};
+                if(this.entity.dialog.ifClose == true){
+                    this.model.graph.undoMng.undo();
+                }
+            },
+            removeEntity(cell){
+                
+                if(!cell){
+                    this.$message({
+                        type: "info",
+                        message: "请确认所选实体！"
+                    })
+                    return false;
+                }
 
-                        // graph action
-                        let cell = this.model.graph.graph.getSelectionCell();
-                        cell.removeFromParent();
-                        this.model.graph.graph.refresh(cell);
-                        
-                        this.$message({
-                            message: '删除成功',
-                            type: 'success'
-                        }); 
-                    }).catch(() => {
-                        
-                    });
+                // 删除节点
+                if(!cell.edge){
+                    this.$confirm(`确定删除该实体？`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            // entity action
+
+                            // graph action
+                            cell.removeFromParent();
+                            this.model.graph.graph.refresh(cell);
+                            
+                            this.$message({
+                                message: '删除实体成功',
+                                type: 'success'
+                            }); 
+                        }).catch(() => {
+                            
+                        });
+                }
+                // 删除关系
+                else{
+                    this.$confirm(`确定删除该实体关系？`, '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            
+                            // entity action
+                            let sourceId = cell.getId().split("-")[0];
+                            let targetId = cell.getId().split("-")[1];
+                            let type = cell.getValue();
+                            let edges = {
+                                id: sourceId, 
+                                type: type, 
+                                action:"-", 
+                                value: _.map([targetId],(v)=>{
+                                    return {key: v, label: v};
+                                })
+                            };
+                    
+                            // 更新关系
+                            let rtn = fsHandler.callFsJScript("/matrix/graph/edges-action.js",encodeURIComponent(JSON.stringify(edges)));
+                            
+                            if(rtn.status == 'ok'){
+                                this.$message({
+                                    type: "success",
+                                    message: "删除关系成功！"
+                                })
+                                // graph action
+                                cell.removeFromParent();
+                                this.model.graph.graph.refresh(cell);
+
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: "删除关系失败！"
+                                })
+                            }
+
+                        }).catch(() => {
+                            
+                        });
+                }
             },
             updateEntityEdge(){
                 
@@ -1655,7 +1721,10 @@
                         type: "success",
                         message: "创建关系成功！"
                     })
-                    this.entity.dialogVisible = false;
+                    
+                    this.entity.dialog.ifClose = false;
+                    this.entity.dialog.show = false;
+
                 } else {
                     this.$message({
                         type: "error",

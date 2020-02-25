@@ -2212,7 +2212,7 @@ class Topological {
                                             self.cellSelect( cell );
                                             eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
                                         } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity();
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
                                         }
                                     },
                                     items: {
@@ -2257,7 +2257,7 @@ class Topological {
                                         if(_.includes(key,'diagnosis')){
                                             self.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
                                         } else if(_.includes(key,'entity_delete')){
-                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity();
+                                            self.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
                                         }
                                     },
                                     items: {

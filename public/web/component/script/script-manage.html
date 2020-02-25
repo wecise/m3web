@@ -107,13 +107,15 @@
                 }
             },
             watch: {
-                model: {
+                'model.rows': {
                     handler(val,oldVal){
-                        this.initData();
+                        if(val !== oldVal){
+                            this.dt.rows = [];
+                            this.initData();
+                        }
                         this.layout();
                     },
-                    deep:true,
-                    immediate:true
+                    deep:true
                 },
                 dt: {
                     handler(val,oldVal){
@@ -127,7 +129,9 @@
                 }
             },
             mounted(){
-
+                this.$nextTick(()=>{
+                    this.layout();
+                })
             },
             methods: {
                 layout(){
@@ -147,7 +151,7 @@
                     
                     let init = function(){
                         
-                        _.extend(self.dt, {columns: _.map(self.model.columns, function(v){
+                        _.extend(self.dt, {columns: _.map(self.model.columns, (v)=>{
                             
                             if(_.isUndefined(v.visible)){
                                 _.extend(v, { visible: true });
