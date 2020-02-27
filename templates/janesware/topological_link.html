@@ -71,12 +71,12 @@
 		background-color: rgb(247, 247, 247);
 		border-bottom: 1px solid rgb(228, 231, 237);
 		margin: 0;
-		height: 32px;
-		line-height: 32px;
+		height: 35px;
+		line-height: 35px;
 	}
 	.el-tabs__item {
-		height:32px;
-		line-height:32px;
+		height:35px;
+		line-height:35px;
 	}
 
     .el-tabs__nav-next, .el-tabs__nav-prev{
@@ -233,8 +233,12 @@
     .entity-diagnosis-tabs{
         height:100%;
     }
+    .entity-diagnosis-tabs .is-always-shadow + .is-always-shadow{
+        margin-top:10px;
+    }
     .entity-diagnosis-tabs > .el-tabs__header.is-left{
         background: #f7f7f7;
+        margin-right:0px;
     }
     .entity-diagnosis-tabs > .el-tabs__header.is-left > .el-tabs__nav-wrap::after{
         background: transparent;
@@ -248,6 +252,22 @@
     }
     .entity-diagnosis-tabs .el-tabs__nav.is-left .el-tabs__item.is-left.is-active{
         background: #fff;
+    }
+
+     /* Graph Diagnosis Tabs Header */
+     .graph-view-diagnosis.el-tabs.el-tabs--top.el-tabs--border-card{
+        border-left:1px solid #ddd;
+    }
+
+    /* fs-view-node */
+    .fs-view-node .el-checkbox__input{
+        float:right;
+    }
+    .fs-view-node .el-checkbox__label{
+        display: none;
+    }
+    .fs-view-node .el-checkbox__input > .el-checkbox__inner{
+        border:unset;
     }
 
     /* 全屏模式 */

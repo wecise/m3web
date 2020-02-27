@@ -116,7 +116,7 @@ class AI {
                     created: function(){
                         const self = this;
         
-                        eventHub.$on("win-close-event",self.wsClose);
+                        eventHub.$on("WIN-CLOSE-EVENT",self.wsClose);
         
                         // 初始化主题
                         self.message.subject = fsHandler.callFsJScript("/matrix/ai/subscribe.js", null).message;

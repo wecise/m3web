@@ -804,12 +804,12 @@
                                 if(this.checkImgExists(`${_type}.png`)){
                                     node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=image;html=1;image=${imageUrl};verticalLabelPosition=bottom;verticalAlign=top;`);
                                 } else {
-                                    node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
+                                    node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
                                 }    
                             } 
                             // shape渲染
                             else {
-                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;verticalLabelPosition=bottom;verticalAlign=top;`);
+                                node = this.model.graph.graph.insertVertex(this.model.graph.parent, v.id, _name, 50, 50, 70, 70,`shape=ellipse;perimeter=ellipsePerimeter;html=1;labelPosition=center;verticalLabelPosition=bottom;align=center;verticalAlign=middle;`);
                             }
 
                             

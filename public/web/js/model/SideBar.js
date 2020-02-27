@@ -727,10 +727,70 @@ class SideBar {
         }
     };
 
+     // Robot
+     robot(){
+
+        try{
+            if(!mx.global.register.robot.enable) return false;
+        } catch(err){
+            return false;
+        }
+        
+
+        $.get(`${window.ASSETS_ICON}/robot/svg/robot.svg?type=download&issys=${window.SignedUser_IsAdmin}`,function(svg){
+
+            $("#ai-robot").empty();
+
+            $("#ai-robot").append(`<div style="cursor: pointer;" class="animated fadeIn">
+                                ${svg}
+                             </div>`).find('svg').click(function(){
+
+                if($("#jsPanel-robot")){
+                    $("#jsPanel-robot").remove();
+                }
+
+                let win = maxWindow.winRobot('∵', '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
+
+                let robotVue = {
+                    template: '<ai-robot-component id="THIS-IS-ROBOT"></ai-robot-component>',
+                    mounted: function () {
+
+                        this.$nextTick(function () {
+
+
+                        })
+                    }
+                };
+
+                new Vue(robotVue).$mount("#robot-active-win");
+            });
+
+            let getStatus = function(){
+                try{
+                    let count = fsHandler.callFsJScript("/matrix/ai/status.js",'aiStatusGet').message.count;
+                    if(count < 1){
+                        $("#ai-robot span").remove();
+                    } else {
+                        $("#ai-robot span").remove();
+                        $("#ai-robot div").first().append(`<span class="animated fadeIn" style="margin:10px -10px;background:#ff0000;border-radius:15px;width:10px;height:10px;"></span>`);
+                    }
+                } catch(err){
+
+                }
+            }
+            getStatus();
+            if(_.includes(['matrix'],window.COMPANY_OSPACE)){
+                setInterval(getStatus, mx.global.register.robot.interval);
+            }
+
+        },'text');
+    }
+
     init(){
         this.topbar = new Vue(this.topBar()).$mount("#header");
         this.app = new Vue(this.sideMenu()).$mount("#aside");
         this.footbar = new Vue(this.footBar()).$mount("#footer");
+        this.robot();
     }
 
     appRunning(event){

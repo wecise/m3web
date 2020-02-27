@@ -825,9 +825,9 @@ class Topological {
             props: {
                 model: Object
             },
-            template:   `<el-container style="height:100%;">
-                            <el-main>
-                                <el-card style="border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;" 
+            template:   `<el-container style="height: calc(100vh - 120px);">
+                            <el-main style="padding:10px;">
+                                <el-card :style="item | pickBgStyle" 
                                     v-for="item in model.rows" :key="item.id">
                                     <span class="el-icon-warning" :style="item | pickStyle"></span>
                                     <p>服务器:#{item.host}#</p>
@@ -839,6 +839,19 @@ class Topological {
                             </el-main>
                         </el-container>`,
             filters: {
+                pickBgStyle(item){
+                    let hexToRgba = function(hex, opacity) {
+                        var RGBA = "rgba(" + parseInt("0x" + hex.slice(1, 3)) + "," + parseInt("0x" + hex.slice(3, 5)) + "," + parseInt( "0x" + hex.slice(5, 7)) + "," + opacity + ")";
+                        return {
+                            red: parseInt("0x" + hex.slice(1, 3)),
+                            green: parseInt("0x" + hex.slice(3, 5)),
+                            blue: parseInt("0x" + hex.slice(5, 7)),
+                            rgba: RGBA
+                        }
+                    };
+                    let rgbaColor = hexToRgba(mx.global.register.event.severity[item.severity][2],0.1).rgba;
+                    return `background:linear-gradient(to top, ${rgbaColor}, rgb(255,255,255));border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;`;
+                },
                 pickStyle(item) {
                     return `color:${mx.global.register.event.severity[item.severity][2]};font-size:40px;float:right;`;
                 }
@@ -978,7 +991,7 @@ class Topological {
                     trends: []
                 }
             },
-            template: `<el-container style="height: calc(100vh - 180px);">
+            template: `<el-container style="height: calc(100vh - 120px);">
                             <!--el-header style="height: 30px;padding: 5px;line-height: 20px;">
                                 <el-select v-model="baseLine.type.value" placeholder="选择基线" class="el-select">
                                     <el-option
@@ -1039,87 +1052,75 @@ class Topological {
             },
             data(){
                 return {
-                    
+                    selectedItem:[]
                 }
             },
-            template:   `<el-container :id="id">
-                            <el-header style="height:30px;line-height:30px;padding:0px 10px;">
-                                <el-button-group>
-                                    <el-tooltip content="排序">
-                                        <el-button type="text" class="fs-order">
-                                            <i class="fas fa-list-ol"></i>
-                                        </el-button>
-                                    </el-tooltip>    
-                                    <el-button type="text" style="width: 10px;">
+            template:   `<el-container :id="id" style="height: calc(100vh - 120px);">
+                            <el-header style="height:30px;line-height:30px;padding:0px 10px;text-align:right;">
+                                
+                                <el-tooltip content="排序" placement="top">
+                                    <el-dropdown @command="onOrderCommand">
+                                        <span class="el-dropdown-link">
+                                        <el-button type="text" icon="el-icon-sort"></el-button>
+                                        </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item command='{"prop":"name","type":"asc"}'>按名称升序</el-dropdown-item>
+                                        <el-dropdown-item command='{"prop":"name","type":"desc"}'>按名称降序</el-dropdown-item>
+                                        <el-dropdown-item command='{"prop":"vtime","type":"asc"}'>按时间升序</el-dropdown-item>
+                                        <el-dropdown-item command='{"prop":"vtime","type":"desc"}'>按时间降序</el-dropdown-item>
+                                        <el-dropdown-item command='{"prop":"ftype","type":"asc"}'>按类型排序</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </el-tooltip>
+                                <el-tooltip content="上传文件">
+                                    <el-button type="text" class="fileinput-button" icon="el-icon-upload" @click="fileUpload">
                                     </el-button>
-                                    <el-tooltip content="上传文件">
-                                        <el-button type="text" class="fileinput-button" @click="fileUpload">
-                                            <i class="fas fa-upload"></i>
-                                        </el-button>
-                                    </el-tooltip>    
-                                </el-button-group>
+                                </el-tooltip>    
                             </el-header>
-                            <el-main style="padding:10px;height:calc(100vh - 205px);">
-                                <el-row v-if="model && model.rows">
-                                    <el-col :span="24" id="grid">
-                                        <ul>
-                                            <li :class="item.ftype=='dir'?'dir fs-node context-menu-file':'fs-node context-menu-file'"
-                                                :id="'fs_node_'+item.id"
-                                                style="cursor: pointer;"
-                                                :title="item.name"
-                                                v-for="item in model.rows">
-                                                <div class="widget widget-stats bg-silver animated flipInX" :id="'fs_node_widget_'+item.id" @dblclick="openIt(item, item.parent+'/'+item.name);" >
-                                                    <div class="stats-info">
-                                                        <p><img class="media-object" :src="item | pickIcon" onerror="this.src='${window.ASSETS_ICON}/files/png/dir.png?type=open&issys=${window.SignedUser_IsAdmin}';" style="width:32px;"></p>
-                                                    </div>
-                                                    <div class="stats-link">
-                                                        <a class="fs-name" data-edit="true" :data-pk="item.id" href="javascript:void(0);" style="text-align: left;margin:15px -15px -15px -15px;padding: 5px;" :title="item.name">
-                                                            #{item.name}#
-                                                        </a>
-                                                    </div>
-                                                    <div class="list-context-menu" :data-id="item.id" style="position: absolute;right: 10px;top: 5px;cursor:pointer;">
-                                                        <i class="fa fa-bars"></i>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </el-col>
-                                </el-row>
+                            <el-main style="padding:10px;height:100%;">
+                                <el-checkbox-group v-model="selectedItem" v-if="model && model.rows" class="fs-view-node">
+                                    <el-button type="default" 
+                                            style="max-width: 12em;width: 12em;height:110px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                            @dblclick.native="openIt(item, item.parent+'/'+item.name)"
+                                            v-for="item in model.rows">
+                                            <div style="position: relative;right: -40px;">    
+                                                <el-dropdown trigger="hover" placement="top-start" @command="onMenuCommand">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-arrow-down el-icon--right"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item :command="{fun:menuItem.fun,param:item,type:menuItem.type?menuItem.type:false}" v-for="menuItem in getMenuModel(item)">
+                                                                #{menuItem.name}#
+                                                            </el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                </el-dropdown>
+                                            </div>
+                                            <el-image style="width:34px;height:34px;margin:5px;" :src="item | pickIcon"></el-image>
+                                            <div>
+                                                <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
+                                                    #{item.name}#
+                                                </p>
+                                            </div>
+                                            <el-checkbox :label="item.id"></el-checkbox>
+                                    </el-button>
+                                </el-checkbox-group>
                             </el-main>
                         </el-container>`,
-            created(){
-                
-            },
-            mounted(){
-                this.initContextMenu();
-                this.orderIt();
-            },
             filters: {
-                pickName: function(item){
-
-                    if (_.isEmpty(item)) return '';
-
-                    let _name = _.head(item.name.split("."));
-
-                    if(!_.isEmpty(_name)){
-                        _name = _.truncate(_name, {
-                            'length': 9
-                        });
-                    }
-
-                    return _name;
-                },
-                pickIcon: function(item){
+                pickIcon(item){
 
                     // extend || ...
                     if( item.fullname === '/extend' ){
                         return `${window.ASSETS_ICON}/files/png/dir-lock.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                     } else {
-
-                        try {
-                            return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                        try{
+                            if(_.includes(['png','jpeg'],item.ftype)){
+                                return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;    
+                            } else {
+                                return _.attempt(JSON.parse.bind(null, item.attr)).icon || `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
+                            }
                         }
-                        catch(error) {
+                        catch(error){
                             return `${window.ASSETS_ICON}/files/png/${item.ftype}.png?type=open&issys=${window.SignedUser_IsAdmin}`;
                         }
                     }
@@ -1129,47 +1130,113 @@ class Topological {
                 reloadData(event){
                     this.model = event['file'];
                 },
-                initContextMenu(){
-                    const self = this;
-
-                    $.contextMenu({
-                        selector: `#${self.id} .list-context-menu`,
-                        trigger: 'left',
-                        build: function($trigger, e) {
-                            let item = null;
-    
-                            if(!_.isEmpty(e.target.attributes.getNamedItem('data-id').value)) {
-                                let id = e.target.attributes.getNamedItem('data-id').value;
-                                item = _.find(self.model.rows,{id:id});
-                            }
-                            
-                            return {
-                                items: {
-    
-                                    "read": {
-                                        name: "下载", icon: "fas fa-download", callback: function (key, opt) {
-                                            self.downloadIt(item,true);
-                                        }
-                                    },                                               
-                                    "sep1": "---------",
-                                    "delete": {
-                                        name: "删除", icon: "fas fa-trash", callback: function (key, opt) {
-                                            self.deleteIt(item,true);
-                                        }
-                                    },
-                                    "sep2": "---------",
-                                    "info": {
-                                        name: "属性", icon: "fas fa-info", callback: function (key, opt) {
-                                            self.info(item);
-                                        }
-                                    }
-                                }
-                            }
-    
-                        }
-                    });
+                onMenuCommand(cmd){
+                    
+                    if(!cmd.type){
+                        this[cmd.fun](cmd.param);
+                    } else {
+                        this[cmd.fun](cmd.param,cmd.type);
+                    }
+                    
                 },
-                deleteIt: function(event, prompt) {
+                getMenuModel(item){
+                    // 根据文件类型返回右键菜单
+                    let model = {
+                        "js": [
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑/运行", icon: "fas fa-play", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "html": [
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "运行", icon: "fas fa-play", fun: "runHtml" },
+                            { name: "运行链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "htm": [
+                            { name: "发布应用", icon: "fab fa-codepen", fun: "deployIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "运行", icon: "fas fa-play", fun: "runHtml" },
+                            { name: "运行链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "md":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "打开", icon: "fas fa-play", fun: "openIt", type: null },
+                            { name: "打开链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "json":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "打开", icon: "fas fa-play", fun: "openIt", type: true },
+                            { name: "打开链接", icon: "fas fa-map-marker-alt", fun: "copyUrl" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "imap":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "ishow":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "iflow":[
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "编辑", icon: "fas fa-edit", fun: "editIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "dir": [
+                            { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ],
+                        "normal": [
+                            { name: "打开", icon: "fas fa-folder-open", fun: "openIt" },
+                            { name: "下载", icon: "fas fa-download", fun: "downloadIt", type: true },
+                            { name: "删除", icon: "fas fa-trash", fun: "deleteIt", type: true },
+                            { name: "共享", icon: "fas fa-share-square", fun: "shareIt" },
+                            { name: "属性", icon: "fas fa-info", fun: "info" }
+                        ]
+                    };
+
+                    try{
+                        if(model[item.ftype]){
+                            return model[item.ftype];
+                        } else {
+                            return model["normal"];
+                        }
+                    } catch(err){
+                        return model["normal"];
+                    } finally{
+                        
+                    }
+
+                },
+                deleteIt(event, prompt) {
                     const self = this;
     
                     if(_.includes(['app','extend','assets','opt','script'],event.name)){
@@ -1203,7 +1270,7 @@ class Topological {
                         }
                     }
                 },                     
-                downloadIt: function(item, prompt) {
+                downloadIt(item, prompt) {
                     let self = this;
     
                     if(item.ftype == 'dir'){
@@ -1214,36 +1281,11 @@ class Topological {
                         window.open(_url, _target);
                     }
                 },
-                orderIt: function(){
-                    const self = this;
-    
-                    $.contextMenu({
-                        selector: `#${self.id} .fs-order`,
-                        trigger: 'left',
-                        callback: function (key, options) {
-                            if(key == 'byNameAsc'){
-                                self.model.rows = _.orderBy(self.model.rows,['name'],['asc']);
-                            } else if(key == 'byNameDesc'){
-                                self.model.rows = _.orderBy(self.model.rows,['name'],['desc']);
-                            } else if(key == 'byTimeAsc'){
-                                self.model.rows = _.orderBy(self.model.rows,['vtime'],['asc']);
-                            } else if(key == 'byTimeDesc'){
-                                self.model.rows = _.orderBy(self.model.rows,['vtime'],['desc']);
-                            } else {
-                                self.model.rows = _.orderBy(self.model.rows,['ftype'],['asc']);
-                            }
-                        },
-                        items: {
-                            "byNameAsc": { name: "按名称升序",icon: "fas fa-sort-alpha-up" },
-                            "byNameDesc": { name: "按名称降序",icon: "fas fa-sort-alpha-down" },
-                            "byTimeAsc": { name: "按时间升序",icon: "fas fa-sort-alpha-up" },
-                            "byTimeDesc": { name: "按时间降序",icon: "fas fa-sort-alpha-down" },
-                            "byFtype": { name: "按类型排序",icon: "fas fa-sort-alpha-down" },
-                        }
-                    });
-    
+                onOrderCommand(cmd){
+                    let command = JSON.parse(cmd);
+                    this.model = _.orderBy(this.model,[command.prop],[command.type]);
                 },
-                fileUpload: function(){
+                fileUpload(){
                     const self = this;
 
                     let wnd = null;
@@ -1311,7 +1353,7 @@ class Topological {
                     let rtn = fsHandler.callFsJScript("/matrix/graph/update-files-by-id.js", encodeURIComponent(JSON.stringify(fs))).message;
                     _.delay(()=>{ this.reload() },1000);
                 },                     
-                openIt: function(item, path){
+                openIt(item, path){
                     const self = this;
     
                     if(typeof(item) === 'string' || item.ftype === 'dir'){
@@ -1376,201 +1418,206 @@ class Topological {
                     }
     
                 },
-                info: function(node){
+                info(node){
                     const self = this
+                    
+                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, self.$root.$el);
     
-                    let _win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null,$('#content'));
-    
-                    let _attr = {"attr": `{"remark": "", "ctime": ${_.now()}, "author": ${window.SignedUser_UserName}, "type": "${node.ftype}", "icon": "${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}"}`};
-    
-                    if(_.isEmpty(node.attr)){
-                        node = _.merge(node, _attr);
-                    }
-    
-                    let _infoVue = new Vue({
+                    new Vue({
                         delimiters: ['#{', '}#'],
-                        el: "#fs-info",
-                        template: `<div class="tab-content" style="height:100%;">
-                                                <div role="tabpanel" class="tab-pane active" id="home"  style="height:100%;">
-                                                    <form  style="height:95%;overflow:auto;">
-                                                        <div class="form-group">
-                                                            <label for="name">名称</label>
-                                                            <input type="text" class="form-control" id="name" placeholder="" v-model="model.newName" autofocus @keyup.enter="save">
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="remark">备注</label>
-                                                            <textarea type="text" class="form-control" rows="2" id="remark" placeholder="" v-model="model.attr.remark"></textarea>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="ctime">更新时间</label>
-                                                            <input type="text" class="form-control" id="ctime" placeholder="" :value="model.attr.ctime | toLocalTime" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="parent">目录</label>
-                                                            <input type="text" class="form-control" id="parent" placeholder="" v-model="model.parent" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="type">类型</label>
-                                                            <input type="text" class="form-control" id="type" placeholder="" v-model="model.type" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="type">大小</label>
-                                                            <input type="text" class="form-control" id="size" placeholder="" value="${mx.bytesToSize(node.size)}" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="author">作者</label>
-                                                            <input type="text" class="form-control" id="author" placeholder="" v-model="model.attr.author" disabled>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="icon">图标</label>
-                                                            <a href="#icon-list" aria-controls="icon-list" role="tab" data-toggle="tab">
-                                                                <img class="media-object" :src="model.icon.value" style="width:15%;">
-                                                            </a>
-                                                        </div>
-    
-                                                   </form>
-                                                    <div class="form-group" style="text-align: center;padding-top:3px;">
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-warning" @click="apply">应用</a>
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-success" @click="save">确定</a>
-                                                        <a href="javascript:void(0)" class="btn btn-sm btn-default" @click="close">取消</a>
-                                                    </div>
-                                                </div>
-                                                <div role="tabpanel" class="tab-pane" id="icon-list" style="height:100%;">
-                                                    <div class="row" style="height:95%;">
-                                                      <div class="col-md-12" style="display: list-item;height: 95%;overflow: auto;">
-                                                        <ul>
-                                                            <li v-for="icon in model.icon.list">
-                                                                <a href="#" class="thumbnail" style="border:none;" @click="triggerInput(icon.id)">
-                                                                  <img class="media-object" :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;;">
-                                                                  <input type="radio" :ref="icon.id" :id="icon.id"  :value="'/fs'+icon.parent+'/'+icon.name+'?type=download&issys=${window.SignedUser_IsAdmin}'" v-model="model.icon.value" >
-                                                                </a>
-                                                            </li>
-                                                        </ul>
-                                                      </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-md-12" style="text-align:center;">
-                                                            <a class="btn btn-sm btn-default" href="#home" aria-controls="home" role="tab" data-toggle="tab">返回</a></li>
-                                                        </div>
-                                                    </div>
-                                                </div>
-    
-                                            </div>`,
+                        template:   `<el-container style="height:100%;">
+                                        <el-main style="height:100%;display:grid;">
+                                            <el-tabs v-model="activeName" type="border-card">
+                                                <el-tab-pane label="管理" name="config">
+                                                    <el-form label-width="80px" style="height:100%;">
+                                                        <el-form-item label="名称">
+                                                            <el-input v-model="model.name"></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="备注">
+                                                            <el-input type="textarea" v-model="model.attr.remark"></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="更新时间">
+                                                            <el-input :value="model.attr.ctime | toLocalTime" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="目录">
+                                                            <el-input v-model="model.parent" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="类型">
+                                                            <el-input v-model="model.ftype" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="大小">
+                                                            <el-input :value="mx.bytesToSize(model.size)" disabled></el-input>
+                                                        </el-form-item>
+
+                                                        <el-form-item label="作者">
+                                                            <el-input v-model="model.attr.author" disabled></el-input>
+                                                        </el-form-item>
+                                                        
+                                                        <el-form-item label="图标">
+                                                            <el-button @click="activeName='icon'">
+                                                                <el-image :src="icon.value" style="width:64px;" ></el-image>
+                                                            </el-button>
+                                                        </el-form-item>
+
+                                                    </el-form>
+                                                    
+                                                </el-tab-pane>
+                                                <el-tab-pane label="图标" name="icon">
+                                                    <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:flex-start;" @change="onIconChange">
+                                                        <el-button type="default" 
+                                                            style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" v-for="icon in icon.list" :key="icon.id">
+                                                            <el-radio :label="icon | pickIcon">
+                                                                <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
+                                                                <span slot="label">#{icon.id}#</span>
+                                                            </el-radio>
+                                                        </el-button>
+                                                    </el-radio-group>
+                                                    </div>    
+                                                </el-tab-pane>
+                                            </el-tabs>    
+                                        </el-main>
+                                        <el-footer style="line-height:60px;text-align:center;">
+                                            <el-button type="success" @click="apply">应用</el-button>
+                                            <el-button type="primary" @click="save">确定</el-button>
+                                            <el-button type="default" @click="close">取消</el-button>
+                                        </el-footer>
+                                    </el-container>`,
                         data: {
                             model: {
-                                parent: node.parent,
-                                oldName: node.name,
-                                newName: node.name,
-                                type: node.ftype,
-                                attr: {remark:''},
-                                icon: {
-                                    value: null,
-                                    list: []
+                                name: "",
+                                attr: {
+                                    remark: ""
                                 }
-                            }
+                            },
+                            icon: {
+                                    value: `${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`,
+                                    list: []
+                            },
+                            attr:{
+                                remark: "", 
+                                ctime: _.now(),
+                                author: window.SignedUser_UserName,
+                                icon: ""
+                            },
+                            activeName: 'config'
                         },
-                        mounted: function() {
-                            let me = this;
-    
-                            me.$nextTick(function() {
-                                me.model.attr = _.attempt(JSON.parse.bind(null, node.attr));
-                                me.model.icon.value = me.model.attr.icon;
-                                me.init();
-                            })
+                        created(){
+                            
+                            try{
+                                // 初始化model
+                                _.extend(this.model,node);
+
+                                // 初始化attr
+                                if(_.isEmpty(this.model.attr)){
+                                    _.extend(this.model, {attr:this.attr});   
+                                } else {
+                                    _.extend(this.model, {attr: JSON.parse(this.model.attr)});   
+                                }
+
+                                // 如果属性没有icon定义，默认根据ftype文件类型显示
+                                let icon = JSON.parse(this.model.attr).icon;
+                                if(!_.isEmpty(icon)){
+                                    this.icon.value = icon;
+                                }
+                            } catch(err){
+
+                            }
+                            
+                            // 初始化图片列表
+                            this.icon.list = fsHandler.fsList('/assets/images/files/png');
                         },
                         filters: {
-                            pickName: function (value) {
-                                let me = this;
-    
-                                if (!value) return '';
-    
-                                let _attr = _.attempt(JSON.parse.bind(null, value));
-    
-                                return _attr.name;
+                            pickIcon(item) {
+                                return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
                             },
-                            pickIcon: function(item) {
-                                return `/fs${item.parent}/${item.name}?type=download&issys=${window.SignedUser_IsAdmin}`;
-                            },
-                            readMore: function (text, length, suffix) {
-                                return text.substring(0, length) + suffix;
-                            },
-                            toLocalTime: function (value) {
-                                return moment(value).format("LLL");
+                            toLocalTime(value) {
+                                return moment(value).format("YYYY-MM-DD HH:MM:SS");
                             }
                         },
-                        destroyed: function(){
-                            let me = this;
-    
-                            me.model = null;
-                        },
                         methods: {
-                            init: function(){
-                                let me = this;
-    
-                                me.model.icon.list = fsHandler.fsList('/assets/images/files/png');
+                            apply(){
+                                this.saveAttr();
                             },
-                            triggerInput: function(id){
-                                const self = this
-    
-                                $(self.$refs[id]).click()
+                            save(){
+                                this.saveAttr();
+                                win.close();
                             },
-                            apply: function(){
-                                let me = this;
-    
-                                me.saveAttr();
-    
+                            close(){
+                                win.close();
                             },
-                            save: function(){
-                                let me = this;
-    
-                                me.saveAttr();
-                                _win.close();
+                            onIconChange(val){
+                                this.activeName = 'config';
                             },
-                            close: function(){
-                                let me = this;
+                            saveName(){
+                                const me = this;
     
-                                _win.close();
-                            },
-                            saveName: function(){
-                                let me = this;
-    
-                                let _extName = node.ftype=='dir'?'':'.'+node.ftype;
-                                let _old = node.parent + "/" + node.name;// + _extName;
-                                let _new = node.parent + "/" + me.model.newName;// + _extName;
+                                let _old = node.parent + "/" + node.name;
+                                let _new = node.parent + "/" + me.model.name;
     
     
-                                let _check = fsHandler.fsCheck( node.parent, me.model.newName);
+                                let _check = fsHandler.fsCheck( node.parent, me.model.name);
                                 if(_check) {
-                                    alertify.error("文件已存在，请确认！")
+                                    this.$message({
+                                        type: "info",
+                                        message: "文件已存在，请确认！"
+                                    });
+                                    return false;
+                                }
+                                
+                                if(_check.status == 'error') {
+                                    this.$message({
+                                        type: "error",
+                                        message: _check.message
+                                    });
                                     return false;
                                 }
     
                                 let _rtn = fsHandler.fsRename(_old, _new);
     
                                 if(_rtn == 1){
+                                    
                                     self.load();
+
+                                    this.$message({
+                                        type: "success",
+                                        message: "重命名成功！"
+                                    })
+                                }else {
+                                    this.$message({
+                                        type: "error",
+                                        message: _rtn.message
+                                    })
                                 }
                             },
-                            saveAttr: function(){
-                                let me = this;
-    
-                                me.model.attr = me.model.icon.value?_.extend(me.model.attr, {icon: me.model.icon.value}):me.model.attr;
-    
+                            saveAttr(){
+                                const me = this;
+                                
+                                _.extend(me.model.attr, {icon: me.icon.value});
+
                                 let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
-    
+                                
                                 if(_rtn == 1){
                                     self.load();
-                                    $(".list-context-menu").contextMenu('update');
-    
-                                    if(me.model.oldName != me.model.newName){
+                                    
+                                    if(me.model.name != node.name){
                                         me.saveName();
                                     }
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: _rtn.message
+                                    })
                                 }
                             }
                         }
-                    })
+                    }).$mount("#fs-info");
     
-                },
+                },  
                 reload(){
                     const self = this;
                     
@@ -1809,7 +1856,7 @@ class Topological {
             watch: {
                 tabs:function(val,oldVal){
                     if(val.length > 0){
-                        this.$root.$data.splitInst.setSizes([0,60,40]);
+                        this.$root.$data.splitInst.setSizes([0,70,30]);
                         $(".gutter").show();
                     } else {
                         this.$root.$data.splitInst.setSizes([0,100,0]);

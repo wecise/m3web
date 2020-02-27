@@ -28,8 +28,13 @@ class Window {
     }
 
     init(){
-        $(document).on('jspanelstatuschange', function (event, id) {
+        $(document).on('jspanelstatuschange',(event, id)=>{
+            let status = $('#' + id).data('status');
+            if(status == 'closed'){
+                eventHub.$emit("WIN-CLOSE-EVENT",null);
+            }
             eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT",null);
+
         });
     }
 
@@ -480,7 +485,7 @@ class Window {
             position: _position,
             maximizedMargin: [100, 100, 100, 100],
             container: 'body',
-            headerControls: { minimize: 'remove' },
+            headerControls: {  },
             headerRemove:  false,
             content:        template,
             draggable: {
@@ -493,10 +498,7 @@ class Window {
                 }
             },
             callback: function(){
-                // $(".jsPanel").css({
-                //     "position":"absoulate",
-                //     "z-index": "10000"
-                // });
+                $("#jsPanel-robot-min").parent().addClass("jsPanel-btn jsPanel-btn-maximize");
                 
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",

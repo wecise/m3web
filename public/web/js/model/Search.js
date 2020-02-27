@@ -893,13 +893,13 @@ class Search {
                 let main = {
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
-                                    <el-container style="height: 100%;">
-                                        <el-header style="height:30px;line-height:30px;">
+                                    <el-container style="height: calc(100vh - 90px);">
+                                        <el-header style="height:40px;line-height:40px;padding:0px;">
                                             <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
-                                        <el-main style="padding: 10px 0px;overflow: hidden;height: 100%;">
+                                        <el-main style="overflow: hidden;height: 100%;padding:0px;">
                                             <el-container style="height: 100%;">
-                                                <el-header style="height:30px;line-height:30px;">
+                                                <el-header style="height:40px;line-height:40px;padding:10px 0px;">
                                                     <span style="font-size:14px;">结果：</span>
                                                     <span>
                                                         <el-button type="text" @click="forwardInView(v.href)" v-for="(v,k) in search.result">
@@ -916,7 +916,7 @@ class Search {
                                                         </el-dropdown>
                                                     </span>
                                                 </el-header>
-                                                <el-main id="div_result_view" style="padding:0 20px;height:100%;overflow:auto;">
+                                                <el-main id="div_result_view" style="padding:0px;height:100%;overflow:auto;">
                                                     <el-tabs v-model="showResultType">
                                                         <el-tab-pane name="view" key="view">
                                                             

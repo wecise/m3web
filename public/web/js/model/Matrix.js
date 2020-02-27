@@ -62,8 +62,6 @@ class Matrix {
         mx.setTheme();
         
         document.addEventListener('DOMContentLoaded', function(){
-            // Robot实例
-            mx.robot();
             // 模式监控
             mx.viewListen();
             // Alert设置
@@ -229,65 +227,6 @@ class Matrix {
         };
 
         return tag;
-    }
-
-    // Robot
-    robot(){
-
-        try{
-            if(!mx.global.register.robot.enable) return false;
-        } catch(err){
-            return false;
-        }
-        
-
-        $.get(`${window.ASSETS_ICON}/robot/svg/robot.svg?type=download&issys=${window.SignedUser_IsAdmin}`,function(svg){
-
-            $("#ai-robot").empty();
-
-            $("#ai-robot").append(`<div style="cursor: pointer;" class="animated fadeIn">
-                                ${svg}
-                             </div>`).find('svg').click(function(){
-
-                if($("#jsPanel-robot")){
-                    $("#jsPanel-robot").remove();
-                }
-
-                let win = maxWindow.winRobot('∵', '<div class="animated slideInDown" id="robot-active-win"></div>', null,null);
-
-                let robotVue = {
-                    template: '<ai-robot-component id="THIS-IS-ROBOT"></ai-robot-component>',
-                    mounted: function () {
-
-                        this.$nextTick(function () {
-
-
-                        })
-                    }
-                };
-
-                new Vue(robotVue).$mount("#robot-active-win");
-            });
-
-            let getStatus = function(){
-                try{
-                    let count = fsHandler.callFsJScript("/matrix/ai/status.js",'aiStatusGet').message.count;
-                    if(count < 1){
-                        $("#ai-robot span").remove();
-                    } else {
-                        $("#ai-robot span").remove();
-                        $("#ai-robot div").first().append(`<span class="animated fadeIn" style="margin:15px 0;background:#ff0000;border-radius:15px;padding:3px 8px;color:#ffffff;">${count}</span>`);
-                    }
-                } catch(err){
-
-                }
-            }
-
-            if(_.includes(['matrix'],window.COMPANY_OSPACE)){
-                setInterval(getStatus, mx.global.register.robot.interval);
-            }
-
-        },'text');
     }
 
     // 获取当前页
