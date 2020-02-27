@@ -23,7 +23,7 @@ class OmdbHandler {
     classList(event){
         let rtn = null;
         
-        Pace.restart();
+        // Pace.restart();
 
         jQuery.ajax({
             url: "/mxobject/schema/class/list",
@@ -34,7 +34,7 @@ class OmdbHandler {
             },
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -63,7 +63,7 @@ class OmdbHandler {
     classListField(event){
         let rtn = null;
         
-        Pace.restart();
+        // Pace.restart();
 
         jQuery.ajax({
             url: "/mxobject/schema/class/fields?id="+event,
@@ -71,7 +71,7 @@ class OmdbHandler {
             type: 'GET',
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -109,7 +109,7 @@ class OmdbHandler {
             },
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -171,7 +171,7 @@ class OmdbHandler {
                 classinfo: JSON.stringify(event)
             },
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             success: function (data, status) {
 
@@ -208,7 +208,7 @@ class OmdbHandler {
             type: 'DELETE',
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -254,7 +254,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -293,7 +293,7 @@ class OmdbHandler {
                 class: param
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -332,7 +332,7 @@ class OmdbHandler {
                 ctype: "insert"
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -373,7 +373,7 @@ class OmdbHandler {
                 mql: _mql
             },
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -416,7 +416,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -456,7 +456,7 @@ class OmdbHandler {
                 meta: true
             },
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -494,7 +494,7 @@ class OmdbHandler {
         type: 'GET',
         async: false,
         beforeSend:function(xhr){
-            Pace.restart();
+            // Pace.restart();
         },
         complete: function(xhr, textStatus) {
         },
@@ -526,7 +526,7 @@ class OmdbHandler {
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_${_.last(event.class.split("/"))}_${moment().format("YYYY-MM-DD HH:mm:SS")}.${event.filetype}`;
 
-        Pace.restart();
+        // Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -568,7 +568,7 @@ class OmdbHandler {
             processData:false,
             contentType: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -600,7 +600,7 @@ class OmdbHandler {
 
         let fileName = `${window.location.host}_${window.COMPANY_OSPACE}_实体模板_${moment().format("YYYY-MM-DD HH:mm:SS")}.xlsx`;
 
-        Pace.restart();
+        // Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();

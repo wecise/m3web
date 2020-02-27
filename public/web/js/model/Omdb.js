@@ -1658,16 +1658,17 @@ class Omdb{
                                     <el-aside style="overflow:hidden;height:100%;" ref="leftView">
                                         <el-container style="height:100%;">
                                             <el-header style="height:29px;line-height:29px;padding:0 5px;border-bottom:1px solid #dddddd;display:flex;">
-                                                <span style="width:70%;margin:0px;">
+                                                <span style="width:90%;margin:0px;">
                                                     <i class="el-icon-coin"></i> 对象管理 [${window.COMPANY_OSPACE}]
                                                 </span>
-                                                <el-dropdown style="width: 50%;text-align: right;">
+                                                <el-dropdown style="width: 10%;text-align: right;cursor:pointer;" placement="top-end">
                                                     <span class="el-dropdown-link">
                                                         <i class="fas fa-angle-down"></i>
                                                     </span>
                                                     <el-dropdown-menu slot="dropdown">
                                                         <el-dropdown-item @click.native="classDataExport('/matrix')"><i class="fas fa-file-export"></i> 导出</el-dropdown-item>
                                                         <el-dropdown-item @click.native="classDataImport"><i class="fas fa-file-import"></i> 导入</el-dropdown-item>
+                                                        <el-dropdown-item @click.native="classPropsDirectory"><i class="el-icon-notebook-2"></i> 字典</el-dropdown-item>
                                                     </el-dropdown-menu>
                                                 </el-dropdown>
                                             </el-header>
@@ -1854,7 +1855,7 @@ class Omdb{
                                                         style="background-color:transparent;">
                                                     </el-tree>
                                                 </el-main>
-                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                <el-footer style="line-height:60px;text-align:center;">
                                                     <el-button type="default" @click="onCancel">取消</el-button>
                                                     <el-button type="primary" @click="onExport('mql')">导出MQL</el-button>
                                                     <el-button type="primary" @click="onExport('xlsx')">导出Excel</el-button>
@@ -1945,7 +1946,7 @@ class Omdb{
                                                         <div class="el-upload__tip" slot="tip">只能上传Mql/Excel文件</div>
                                                     </el-upload>
                                                 </el-main>
-                                                <el-footer style="height:40px;line-height:40px;text-align:right;">
+                                                <el-footer style="line-height:60px;text-align:center;">
                                                     <el-button type="default" @click="onCancel">取消</el-button>
                                                     <el-button type="primary" @click="onImport">导入</el-button>
                                                 </el-footer>
@@ -1966,6 +1967,182 @@ class Omdb{
                                     },
                                     clearInfo(){
                                         this.rtnInfo = null;
+                                    }
+                                }
+                            }).$mount("#class-template-import");
+                        },
+                        classPropsDirectory(){
+                            
+                            let wnd = null;
+
+                            try{
+                                if(jsPanel.activePanels.getPanel('jsPanel-class-template')){
+                                    jsPanel.activePanels.getPanel('jsPanel-class-template').close();
+                                }
+                            } catch(error){
+
+                            }
+                            finally{
+                                wnd = maxWindow.winClassTemplate('属性字典', `<div id="class-template-import"></div>`, null, null, null);
+                            }
+
+                            new Vue({
+                                delimiters: ['#{', '}#'],
+                                data:{
+                                    tree: {
+                                        data: [],
+                                        defaultProps: {
+                                            children: 'children',
+                                            label: 'label'
+                                        }
+                                    },
+                                    classObj:{
+                                        // Class list
+                                        list: [],
+                                        // 当前选定prop对象
+                                        prop: null,
+                                        // 当前prop所在Clas分布
+                                        propAtClass:{
+                                            rows:[],
+                                            columns:[]
+                                        }
+                                        
+                                    }
+                                },
+                                template: `<el-container style="height:100%;">
+                                                <el-header style="height:40px;line-height:40px;background:#f7f7f7;">
+                                                    <el-button type="text" icon="el-icon-refresh" @click="onRefreshDirectory"></el-button>
+                                                </el-header>
+                                                <el-container style="height:calc(100% - 40px);">
+                                                    <el-aside width="200px" style="height:100%;">
+                                                        <el-tree :data="tree.data" 
+                                                                :props="tree.defaultProps" 
+                                                                @node-click="onNodeClick"  
+                                                                default-expand-all
+                                                                style="background: transparent;">
+                                                            <span slot-scope="{ node, data }">
+                                                                <i class="el-icon-folder" style="color:#f2cb34;" v-if="data.isParent"></i>
+                                                                <i class="el-icon-bank-card" style="color:#409eff;" v-else></i>
+                                                                <span v-if="data.children.length>0">#{ node.label }# (#{data.children.length}#)</span>
+                                                                <span v-else>#{ node.label }#</span>
+                                                            </span>
+                                                        </el-tree>
+                                                    </el-aside>
+                                                    <el-container>
+                                                        <el-main style="padding:10px;">
+                                                            <h3 v-if="classObj.prop">#{classObj.prop.name}#</h3>
+                                                            <el-divider></el-divider>
+                                                            <el-form label-width="80px" label-position="top" v-if="classObj.prop">
+                                                                <el-form-item label="名称">
+                                                                    <el-input :value="classObj.prop.name"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="存储名称">
+                                                                    <el-input :value="classObj.prop.colname"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="类型">
+                                                                    <el-input :value="classObj.prop.ftype"></el-input>
+                                                                </el-form-item>
+                                                                <el-form-item label="所在类">
+
+                                                                    <el-table :data="classObj.propAtClass.rows" 
+                                                                            stripe 
+                                                                            border
+                                                                            show-overflow-tooltip 
+                                                                            tooltip-effect="light" 
+                                                                            style="width: 100%"
+                                                                            height="100%">
+                                                                        <el-table-column
+                                                                            type="index"
+                                                                            width="50">
+                                                                        </el-table-column>
+                                                                        <el-table-column type="expand">
+                                                                            <template slot-scope="props">
+                                                                                <el-container><el-main>
+                                                                                    <el-form label-position="top" label-width="100px">
+                                                                                        <el-form-item :label="k" :key="k" v-for="(v,k) in props.row">
+                                                                                            <el-input type="textarea" :rows="6" v-if="typeof v == 'object'" :value="JSON.stringify(v,null,2)"></el-input>
+                                                                                            <el-input :value="v" v-else>#{props.row[k]}#</el-input>
+                                                                                        </el-form-item>
+                                                                                    </el-form>
+                                                                                </el-main></el-container>
+                                                                            </template>
+                                                                        </el-table-column>
+                                                                        <el-table-column
+                                                                            prop="Cid"
+                                                                            label="cid"
+                                                                            width="80">
+                                                                        </el-table-column>
+                                                                        <el-table-column
+                                                                            prop="Name"
+                                                                            label="类名称">
+                                                                        </el-table-column>
+                                                                        <el-table-column
+                                                                            prop="Alias"
+                                                                            label="类别名"
+                                                                            width="160">
+                                                                        </el-table-column>
+                                                                        <el-table-column
+                                                                            prop="colName"
+                                                                            label="属性名称"
+                                                                            width="160">
+                                                                        </el-table-column>
+                                                                    </el-table>
+                                                                </el-form-item>
+                                                            </el-form>  
+                                                        </el-main>
+                                                    </el-container>
+                                                </el-container>
+                                            </el-container>`,
+                                created(){
+                                    this.initTreeData();
+                                },
+                                methods:{
+                                    onRefreshDirectory(){
+                                        this.classObj.list = fsHandler.callFsJScript("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('refresh-cache')).message;
+                                    },
+                                    initTreeData(){
+                                        this.tree.data = fsHandler.callFsJScript("/matrix/omdb/propsDirectory.js",null).message;
+                                        this.classObj.list = fsHandler.callFsJScript("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('no-refresh')).message;
+                                        console.log(this.classObj.list)
+                                    },
+                                    onNodeClick(tNode){
+                                        this.classObj.propAtClass.rows = [];
+
+                                        if(tNode.isParent){
+                                            tNode.children = [];
+                                            tNode.children = fsHandler.callFsJScript("/matrix/omdb/getPropsByName.js",encodeURIComponent(tNode.label)).message;
+                                            _.extend(this.tree.data,tNode);
+                                        } else {
+                                            // 当前prop所在Class分布
+                                            let propObj = _.filter(this.classObj.list,(v)=>{
+                                                if(_.indexOf(v.Fields,tNode.label) != -1){
+
+                                                    let colObj = _.find(v.Columns,(val)=>{ return val.name==tNode.label; });
+                                                    this.classObj.propAtClass.rows.push(_.extend(v,{colName:colObj.name}));
+                                                    
+                                                    return v;
+                                                }
+                                            });
+                                            console.log(1,JSON.stringify(propObj))
+                                            // 当前prop所有定义
+                                            let colObj = []; 
+                                            _.forEach(propObj,(v)=>{
+                                                let col = _.find(v.Columns,(val)=>{ return val.name==tNode.label; });
+                                                colObj.push(col);
+                                            });
+                                            console.log(2,JSON.stringify(this.classObj.propAtClass.rows))
+                                            this.classObj.prop =   {
+                                                                        name: tNode.label, 
+                                                                        colname: colObj[0].colname,
+                                                                        ftype:  colObj[0].ftype,
+                                                                        prop: propObj  
+                                                                    };
+
+                                            //console.log(JSON.stringify(this.classObj.prop))
+                                        }
+                                    },
+                                    onCancel(){
+                                        wnd.close();
                                     }
                                 }
                             }).$mount("#class-template-import");

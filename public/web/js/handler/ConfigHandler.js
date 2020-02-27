@@ -30,7 +30,7 @@ class ConfigHandler {
                 key: event
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -69,7 +69,7 @@ class ConfigHandler {
                 value: event.value
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -108,7 +108,7 @@ class ConfigHandler {
                 key: event.key
             },
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -140,7 +140,7 @@ class ConfigHandler {
 
         let fileName = `ETCD${key}_${moment().format("YYYY-MM-DD_HH:mm:SS")}.json`;
 
-        Pace.restart();
+        // Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -185,7 +185,7 @@ class ConfigHandler {
             contentType: false,
             mimeType: "multipart/form-data",
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },

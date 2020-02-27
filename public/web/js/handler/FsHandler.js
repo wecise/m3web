@@ -97,7 +97,7 @@ class FsHandler {
             data: fm,
             async:false,
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -150,7 +150,7 @@ class FsHandler {
             },
             async:false,
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -197,7 +197,7 @@ class FsHandler {
             contentType: "application/text; charset=utf-8",
             async: false,
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -251,7 +251,7 @@ class FsHandler {
                 type: 'file'
             },
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -311,7 +311,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -366,7 +366,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -421,7 +421,7 @@ class FsHandler {
                 dstpath: dstpath
             },
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -471,7 +471,7 @@ class FsHandler {
             },
             async:false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -532,7 +532,7 @@ class FsHandler {
             _issys = true;
         }
 
-        Pace.restart();
+        // Pace.restart();
 
         try {
             var xhr = new XMLHttpRequest();
@@ -589,7 +589,7 @@ class FsHandler {
             data: form,
             async: true,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -642,7 +642,7 @@ class FsHandler {
             },
             async: true,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -711,7 +711,7 @@ class FsHandler {
             beforeSend: function(xhr) {
                 // 忽略
                 if(!_.includes(term,'aiStatusGet')){
-                    Pace.restart();
+                    // Pace.restart();
                 }
             },
             complete: function(xhr, textStatus) {
@@ -754,7 +754,7 @@ class FsHandler {
             beforeSend: function(xhr) {
                 // 忽略
                 if(!_.includes(term,'aiStatusGet')){
-                    Pace.restart();
+                    // Pace.restart();
                 }
             },
             complete: function(xhr, textStatus) {
@@ -788,7 +788,7 @@ class FsHandler {
             url: url,
             async:false,
             beforeSend: function(xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },

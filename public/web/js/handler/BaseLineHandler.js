@@ -27,7 +27,7 @@ class BaseLineHandler {
             type: 'GET',
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -61,7 +61,7 @@ class BaseLineHandler {
             async: false,
             data: JSON.stringify(event),
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },
@@ -97,7 +97,7 @@ class BaseLineHandler {
             type: 'DELETE',
             async: false,
             beforeSend:function(xhr){
-                Pace.restart();
+                // // Pace.restart();
             },
             complete: function(xhr, textStatus) {
             },

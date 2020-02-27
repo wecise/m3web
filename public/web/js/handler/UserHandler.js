@@ -37,7 +37,7 @@ class UserHandler{
                 fullname: event || "/"
             },
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -75,7 +75,7 @@ class UserHandler{
             data: JSON.stringify(event),
             beforeSend: function (xhr) {
                 xhr.setRequestHeader("X-Csrf-Token", token);
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -112,7 +112,7 @@ class UserHandler{
             type: 'DELETE',
             async: false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },

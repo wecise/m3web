@@ -79,7 +79,7 @@ class PolicyHandler {
             data: JSON.stringify(event),
             async: false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -158,7 +158,7 @@ class PolicyHandler {
             data: fm,
             async: false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },

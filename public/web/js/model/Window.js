@@ -220,7 +220,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -290,7 +290,7 @@ class Window {
                 window.editorApp = null;
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -391,7 +391,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -452,7 +452,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;">创建：${window.SignedUser_UserName}  | ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -516,7 +516,7 @@ class Window {
 
             },
             // footerToolbar: function (footer) {
-            //     return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+            //     return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             // }
         });
 
@@ -626,7 +626,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -672,7 +672,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -718,7 +718,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -727,7 +727,7 @@ class Window {
 
     winClassTemplate(title, template, position, container){
 
-        this.lrwh[2] = this.width * 0.4;
+        this.lrwh[2] = this.width * 0.6;
         this.lrwh[3] = this.height * 0.6;
 
         let win = $.jsPanel({
@@ -737,7 +737,7 @@ class Window {
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: "center 0 0",
             container: 'body',
-            headerControls: { maximize: 'remove' },
+            headerControls: {  },
             headerRemove:  false,
             content:        template,
             callback: function(){
@@ -764,7 +764,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -945,7 +945,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1101,7 +1101,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1150,7 +1150,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1204,7 +1204,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1253,7 +1253,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1308,7 +1308,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1353,7 +1353,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1401,7 +1401,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1451,7 +1451,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                //return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                //return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1500,7 +1500,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1553,7 +1553,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1606,7 +1606,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -1652,7 +1652,7 @@ class Window {
 
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format("LLL")}</div>`;
+                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 

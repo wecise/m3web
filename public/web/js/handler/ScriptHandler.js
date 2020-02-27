@@ -42,7 +42,7 @@ class ScriptHandler {
             data: fm,
             async: false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
@@ -79,7 +79,7 @@ class ScriptHandler {
             type: 'DELETE',
             async: false,
             beforeSend: function (xhr) {
-                Pace.restart();
+                // Pace.restart();
             },
             complete: function (xhr, textStatus) {
             },
