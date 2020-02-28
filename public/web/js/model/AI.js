@@ -382,18 +382,27 @@ class AI {
                             let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
                         },
                         // 删除规则
-                        remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                        remove() {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     
                                 }
@@ -552,17 +561,27 @@ class AI {
                         },
                         // 删除规则
                         remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`, (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     
                                 }
@@ -689,17 +708,27 @@ class AI {
                         },
                         // 删除规则
                         remove: function() {
-                            const self = this;
         
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     
                                 }
@@ -826,17 +855,27 @@ class AI {
                         },
                         // 删除规则
                         remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     
                                 }
@@ -962,18 +1001,28 @@ class AI {
                             let rtn = fsHandler.fsNew('json', self.model.parent, self.model.name, JSON.stringify(self.content,null,2), attr);
                         },
                         // 删除规则
-                        remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                        remove() {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    }
                                 } else {
                                     
                                 }
@@ -1134,17 +1183,27 @@ class AI {
                         },
                         // 删除规则
                         remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
-                                    }   
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
+                                    } 
                                 } else {
                                     
                                 }
@@ -1609,16 +1668,26 @@ class AI {
                         },
                         // 删除规则
                         remove: function() {
-                            const self = this;
-        
-                            alertify.confirm(`确认要删除该规则? <br><br> ${self.model.name}`, function (e) {
+                            
+                            alertify.confirm(`确认要删除该规则? <br><br> ${this.model.name}`,  (e)=> {
                                 if (e) {
                                     // 删除文件系统
-                                    let rtn = fsHandler.fsDelete(self.model.parent, self.model.name);
-                                    if(rtn==1){
+                                    let rtn = fsHandler.fsDelete(this.model.parent, this.model.name);
+                                    
+                                    if (rtn == 1){
                                         // 刷新rules
-                                        self.$root.$refs.aiSetup.load();
-                                        self.$root.$refs.aiSetup.close(self.model.id);
+                                        this.$root.$refs.aiSetup.load();
+                                        this.$root.$refs.aiSetup.close(this.model.id);
+
+                                        this.$message({
+                                            type: "success",
+                                            message: "删除成功！"
+                                        })
+                                    } else {
+                                        this.$message({
+                                            type: "error",
+                                            message: "删除失败 " + rtn.message
+                                        })
                                     }   
                                 } else {
                                     
@@ -1818,8 +1887,8 @@ class AI {
                                                     <el-input type="textarea" v-model="remark"></el-input>
                                                 </el-form-item>
                                                 <el-form-item>
-                                                    <a href="javascript:void(0);" class="btn btn-small btn-primary" @click="save">保存</a>
-                                                    <a href="javascript:void(0);" class="btn btn-small btn-default" @click="cancel">取消</a>
+                                                    <el-button type="primary" @click="save">保存</el-button>
+                                                    <el-button type="default" @click="cancel">取消</el-button>
                                                 </el-form-item>
                                             </el-form>`,
                                 data: {
@@ -1831,7 +1900,10 @@ class AI {
                                     save(){
                                         
                                         if(!this.name){
-                                            alertify.error("规则名称不能为空!");
+                                            this.$message({
+                                                type: "info",
+                                                message: "规则名称不能为空!"
+                                            });
                                             return false;
                                         }
                                         

@@ -182,7 +182,7 @@ class FsHandler {
     *
     */
     fsDelete(path,name){
-        let rtn = 0;
+        let rtn = null;
         let parent = path.replace(/\/\//g,'/');
         let _url = `/fs${parent}/${name}`;
 
@@ -207,14 +207,11 @@ class FsHandler {
 
                 if( _.lowerCase(data.status) == "ok"){
                     rtn = 1;
-                    alertify.success("删除成功" + " " + name);
                 }
 
             },
             error: function(xhr, textStatus, errorThrown) {
-                rtn = 0;
-                alertify.error("删除失败" + " " + xhr.responseText);
-                console.log("["+ moment().format("LLL")+"] [" + xhr.status + "] " + xhr.responseText);
+                rtn = xhr.responseJSON;
             }
         })
 

@@ -80,7 +80,8 @@
 	}
 
 	/* el-table */
-	tr.el-table__row.expanded{
+	tr.el-table__row.expanded,
+	tr.el-table__row.el-table__row--striped.expanded{
 		background:#ddd;
 	}
 	.el-table__body tr.current-row>td {
@@ -142,6 +143,19 @@
 		height: 1px;
 		background: transparent;
 	}
+
+	/* jsPanel-editor Common FS Editor Style */
+	#jsPanel-editor .gutter.gutter-horizontal{
+		border-top:unset!important;
+		border-bottom:unset!important;
+		background-color: transparent!important;
+	}
+	#jsPanel-editor .gutter.gutter-horizontal:hover{
+		background-color: #ddd!important;
+	}
+	#jsPanel-editor .el-tabs--border-card>.el-tabs__content {
+		padding: 0px;
+	}
 	
 
 	/* Split Style */
@@ -190,6 +204,8 @@
 	.topbar-el-menu .el-menu-item:hover{
 		background-color:#ecf5ff!important;
 	}
+	
+	.el-dropdown,
 	.el-menu-item{
 		font-size: 12px;
 	}

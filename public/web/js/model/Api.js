@@ -34,7 +34,7 @@ class Api {
                         id: String
                     },
                     delimiters: ['${', '}'],
-                    template: `<fs-editor-tree-component :id="id+'file-fs-tree'" :root="root" :checkEnable="false" :contextMenu="null"></fs-editor-tree-component>`,
+                    template: `<mx-fs-tree :root="root"></mx-fs-tree>`,
                     data() {
                         return {
                             root: "/script",
@@ -58,7 +58,7 @@ class Api {
                 mxApi.app = new Vue({
                     delimiters: ['${', '}'],
                     template:   `<el-container style="height:calc(100vh - 80px);background:#ffffff;">
-                                    <el-aside style="width:230px;padding:0px 10px;overflow:hidden;background:#f6f6f6;" ref="leftView">
+                                    <el-aside style="width:240px;overflow:hidden;background:#f7f7f7;" ref="leftView">
                                         <api-view-tree id="api-view-tree" ref="treeRef"></api-view-tree>
                                     </el-aside>
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">
@@ -68,11 +68,17 @@ class Api {
                     mounted() {
                         this.$nextTick().then(()=>{
                             Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                                sizes: [18, 82],
+                                sizes: [20, 80],
                                 minSize: [0, 0],
                                 gutterSize: 5,
                                 cursor: 'col-resize',
                                 direction: 'horizontal',
+                                expandToMin: true,
+                                gutterStyle: function(dimension, gutterSize) {
+                                    return {
+                                        
+                                    }
+                                }
                             });
                         })
                     }

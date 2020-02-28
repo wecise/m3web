@@ -1276,6 +1276,7 @@ class Window {
         this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
+            id: "jsPanel-fsInfo",
             theme:         maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},

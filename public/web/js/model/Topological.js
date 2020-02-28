@@ -1251,23 +1251,42 @@ class Topological {
     
                     if(prompt){
 
-                        alertify.confirm(`确定要删除 ${event.name} 文件?`, function (e) {
+                        alertify.confirm(`确定要删除 ${event.name} 文件?`,  (e)=> {
                             if (e) {
-                                let _rtn = fsHandler.fsDelete(event.parent,event.name);
-                                if (_rtn == 1){
+                                let rtn = fsHandler.fsDelete(event.parent,event.name);
+                                
+                                if (rtn == 1){
                                     let fs = {class: event.class, id:event.id, name: event.name, file: `${event.parent}/${event.name}`};
-                                    self.updateEntity(fs,"-");
-                                }
+                                    this.updateEntity(fs,"-");
+
+                                    this.$message({
+                                        type: "success",
+                                        message: "删除成功！"
+                                    })
+                                } else {
+                                    this.$message({
+                                        type: "error",
+                                        message: "删除失败 " + rtn.message
+                                    })
+                                }  
                             } else {
                                 
                             }
                         });
                     } else {
-                        let _rtn = fsHandler.fsDelete(event.parent,event.name);
+                        let rtn = fsHandler.fsDelete(event.parent,event.name);
     
-                        if (_rtn == 1){
-                            
-                        }
+                        if (rtn == 1){
+                            this.$message({
+                                type: "success",
+                                message: "删除成功！"
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: "删除失败 " + rtn.message
+                            })
+                        }  
                     }
                 },                     
                 downloadIt(item, prompt) {
