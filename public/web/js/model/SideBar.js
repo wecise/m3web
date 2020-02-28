@@ -374,10 +374,30 @@ class SideBar {
                                                     <span slot="title">用户</span>
                                                 </template>
                                             </el-menu-item>
-                                            <el-menu-item index="system" divided>系统管理</el-menu-item>
-                                            <el-menu-item index="files">我的文件</el-menu-item>
-                                            <el-menu-item index="home">默认首页</el-menu-item>
-                                            <el-menu-item index="signout" divided>注销</el-menu-item>
+                                            <el-menu-item index="system" divided>
+                                                <template slot="title">
+                                                    <i class="el-icon-setting"></i>
+                                                    <span slot="title">系统管理</span>
+                                                </template>
+                                            </el-menu-item>
+                                            <el-menu-item index="files">
+                                                <template slot="title">
+                                                    <i class="el-icon-folder-opened"></i>
+                                                    <span slot="title">我的文件</span>
+                                                </template>
+                                            </el-menu-item>
+                                            <el-menu-item index="home">
+                                                <template slot="title">
+                                                    <i class="el-icon-s-home"></i>
+                                                    <span slot="title">默认首页</span>
+                                                </template>
+                                            </el-menu-item>
+                                            <el-menu-item index="signout" divided>
+                                                <template slot="title">
+                                                    <i class="el-icon-switch-button"></i>
+                                                    <span slot="title">注销</span>
+                                                </template>
+                                            </el-menu-item>
                                         </el-submenu>
                                     </el-menu>
                                 </div>

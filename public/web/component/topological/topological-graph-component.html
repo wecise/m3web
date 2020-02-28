@@ -294,6 +294,7 @@
                                <el-dropdown-item command="hierarchical">分层</el-dropdown-item>
                                <el-dropdown-item command="tree">树形</el-dropdown-item>
                                <el-dropdown-item command="organic">随机</el-dropdown-item>
+                               <el-dropdown-item command="circle">圆形</el-dropdown-item>
                            </el-dropdown-menu>
                        </el-dropdown>
                    </el-tooltip>
@@ -496,8 +497,19 @@
 	        this.$nextTick(()=>{
 
                 _.delay(()=>{
+                    // 初始化
                     this.init();
-                    this.initPlugIn();
+                    // 鹰眼
+                    this.outline();
+                    _.delay(()=>{
+                        // 设置主题
+                        this.setTheme(this.model.graph.theme.color);
+                        // 初始化ToolBar
+                        this.nodeTitle();
+                    },500)
+                    setInterval(()=>{
+                        this.updateStatus();
+                    },mx.global.register.topological.status_interval);
                 },500)
 	            
 	        })
@@ -647,24 +659,48 @@
                         // Layout Organic
                         this.model.graph.layout.inst = new mxFastOrganicLayout(this.model.graph.graph);
                         this.model.graph.layout.inst.forceConstant = 140;
-                    } else if(this.model.graph.layout.default === 'tree'){
-                        /* Layout tree */
-                        var layout = new mxCompactTreeLayout(this.model.graph.graph, false);
-                        layout.useBoundingBox = false;
+                    } else if(this.model.graph.layout.default === 'tree_vertical'){
+                        /* Layout tree vertical */
+                        var layout = new mxCompactTreeLayout(this.model.graph.graph, false, false);
+                        layout.useBoundingBox = true;
                         layout.edgeRouting = false;
                         layout.levelDistance = 40;
-                        layout.nodeDistance = 30;
+                        layout.nodeDistance = 60;
                         layout.isVertexMovable = function(cell){
                             return true;
                         };
                         var layoutMgr = new mxLayoutManager(this.model.graph.graph);
 
                         layoutMgr.getLayout = function(cell){
-                            if (cell.getChildCount() > 0)
-                            {
+                            if (cell.getChildCount() > 0){
                                 return layout;
                             }
                         };
+                    } else if(this.model.graph.layout.default === 'tree_horizontal'){
+                        /* Layout tree horizontal */
+                        var layout = new mxCompactTreeLayout(this.model.graph.graph, true, false);
+                        layout.useBoundingBox = true;
+                        layout.edgeRouting = false;
+                        layout.levelDistance = 40;
+                        layout.nodeDistance = 60;
+                        layout.isVertexMovable = function(cell){
+                            return true;
+                        };
+                        var layoutMgr = new mxLayoutManager(this.model.graph.graph);
+
+                        layoutMgr.getLayout = function(cell){
+                            if (cell.getChildCount() > 0){
+                                return layout;
+                            }
+                        };
+                    } else if(this.model.graph.layout.default === 'composite'){
+                        /* Layout partition */
+                        let first = new mxHierarchicalLayout(this.model.graph.graph);
+                        let second = new mxCircleLayout(this.model.graph.graph);
+                        this.model.graph.layout.inst = new mxCompositeLayout(this.model.graph.graph, [first, second], first);
+                    } else {
+                        /* Layout Circle */
+                        this.model.graph.layout.inst = new mxCircleLayout(this.model.graph.graph);
                     }
 
                     this.initGraph();
@@ -879,28 +915,30 @@
                             
                         })
 
-                        // Executes the layout
-                        if(this.model.graph.layout.default === 'hierarchical' || this.model.graph.layout.default === 'organic'){
-                            this.model.graph.layout.inst.execute(this.model.graph.parent);
-                        }
+                        // Executes the layout handler
+                        this.executeLayout();
 
                     }
                     
                 }
                 finally {
-                    
+
                     $(this.$refs.graphContainer.$el).after(this.$refs.footer.$el);
 
                     this.toCenter();
 
                     this.model.graph.graph.getModel().endUpdate();
 
-                    setInterval(()=>{
-                        this.updateStatus();
-                    },mx.global.register.topological.status_interval);
-                    
                     this.updateStatus();
 
+                }
+            },
+            executeLayout(){
+                if(this.model.graph.layout.default === 'hierarchical' 
+                    || this.model.graph.layout.default === 'organic'
+                    || this.model.graph.layout.default === 'circle'
+                    || this.model.graph.layout.default === 'composite'){
+                    this.model.graph.layout.inst.execute(this.model.graph.parent);
                 }
             },
             addChild(graph, cell){
@@ -1006,16 +1044,6 @@
                     self.model.graph.graph.getModel().endUpdate();
                 }
             },
-            initPlugIn(){
-                this.outline();
-                
-                _.delay(()=>{
-                    //设置主题
-                    this.setTheme(this.model.graph.theme.color);
-                    // 初始化ToolBar
-                    this.nodeTitle();
-                },500)
-            },
             onReload(){
                 if(this.model.graph.graph){
                     
@@ -1104,10 +1132,25 @@
                             menu.addItem('撤销', null, ()=>{
                                 this.model.graph.undoMng.undo();
                             });
+
+                            menu.addItem('刷新', null, ()=>{
+                                this.$refs.graphViewSearch.search();
+                            });
                             
                             menu.addSeparator();
 
-                            var submenuIcon = menu.addItem('节点渲染', null, null);
+                            var submenuEntity = menu.addItem('实体', null, null);
+                            menu.addItem('引入', null, ()=>{
+                                
+                            }, submenuEntity);
+                            menu.addItem('新建', null, ()=>{
+                                
+                            }, submenuEntity);
+                            
+
+                            menu.addSeparator();
+
+                            var submenuIcon = menu.addItem('显示', null, null);
                             
                             menu.addItem('图标', null, ()=>{
                                 this.model.control.ifIcon = true;
@@ -1127,12 +1170,25 @@
                             menu.addItem('分层布局', null, ()=>{
                                 this.onLayout('hierarchical');
                             }, submenuLayout);
-                            menu.addItem('树形布局', null, ()=>{
-                                this.onLayout('tree');
-                            }, submenuLayout);
+                            
+                            var submenuLayoutTree = menu.addItem('树形布局', null, null,submenuLayout);
+
+                            menu.addItem('上下', null, ()=>{
+                                this.onLayout('tree_vertical');
+                            }, submenuLayoutTree);
+                            menu.addItem('左右', null, ()=>{
+                                this.onLayout('tree_horizontal');
+                            }, submenuLayoutTree);
+
                             menu.addItem('随机布局', null, ()=>{
                                 this.onLayout('organic');
                             }, submenuLayout);
+                            menu.addItem('圆形布局', null, ()=>{
+                                this.onLayout('circle');
+                            }, submenuLayout);
+                            // menu.addItem('复合布局', null, ()=>{
+                            //     this.onLayout('composite');
+                            // }, submenuLayout);
                         }
                         
                     };
@@ -1276,7 +1332,7 @@
                 //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
 
                 /* 
-                //self.model.graph.graph.fit();
+                // self.model.graph.graph.fit();
                 //self.model.graph.graph.center(true,false,0.5,0.5);
                 var margin = 2;
                 var max = 3;
@@ -1365,10 +1421,8 @@
                     
                     this.entity.dialog.show = false;
 
-                    // 布局
-                    if(this.model.graph.layout.default === 'hierarchical' || this.model.graph.layout.default === 'organic'){
-                        this.model.graph.layout.inst.execute(this.model.graph.parent);
-                    }
+                    // Executes the layout handler
+                    this.executeLayout();
 
                 } catch(err){
 
@@ -1518,8 +1572,8 @@
                         _.extend(this.model.graph.edges, {[id]:edge});
                     })
                     
-                    // Executes the layout
-                    this.model.graph.layout.hierarchical.execute(this.model.graph.parent);
+                    // Executes the layout handler
+                    this.executeLayout();
                     
                 }
                 finally
@@ -1547,8 +1601,8 @@
                         this.model.graph.graph.removeCells(cells, true);
                     }
                     
-                    // Executes the layout
-                    this.model.graph.layout.hierarchical.execute(this.model.graph.parent);
+                    // Executes the layout handler
+                    this.executeLayout();
                     
                 }
                 finally
