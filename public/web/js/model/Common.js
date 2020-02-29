@@ -656,10 +656,10 @@ Vue.component("mx-fs-tree",{
                                 style="background:transparent;">
                             <span slot-scope="{ node, data }" style="width:100%;">
                                 <span v-if="data.ftype!=='dir'">
-                                    <i class="el-icon-c-scale-to-original" style="color:burlywood;"></i> #{ node.label }#
+                                    <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
                                 </span>
                                 <span v-else>
-                                    <i class="el-icon-folder" style="color:burlywood;"></i> #{ node.label }#
+                                    <i class="el-icon-folder" style="color:#ffa500;"></i> #{ node.label }#
                                 </span>
                             </span>
                         </el-tree>

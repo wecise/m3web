@@ -30,8 +30,12 @@
                         @node-click="handleNodeClick"
                         @node-contextmenu="handleNodeContextMenu">
                     <span slot-scope="{ node, data }" style="width:100%;">
-                        <span v-if="data.ftype!=='dir'"><i class="el-icon-c-scale-to-original" style="color:burlywood;"></i> #{ node.label }#</span>
-                        <span v-else>#{ node.label }#</span>
+                        <span v-if="data.ftype!=='dir'">
+                            <i class="el-icon-c-scale-to-original" style="color:#0088cc;"></i> #{ node.label }#
+                        </span>
+                        <span v-else>
+                            <i class="el-icon-folder" style="color:#ffa500;"></i> #{ node.label }#
+                        </span>
                     </span>
                 </el-tree>
             </el-main>

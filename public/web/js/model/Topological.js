@@ -1438,204 +1438,18 @@ class Topological {
     
                 },
                 info(node){
-                    const self = this
                     
-                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, self.$root.$el);
+                    let win = maxWindow.winInfo("属性",'<div id="fs-info"></div>',null, this.$root.$el);
     
                     new Vue({
                         delimiters: ['#{', '}#'],
-                        template:   `<el-container style="height:100%;">
-                                        <el-main style="height:100%;display:grid;">
-                                            <el-tabs v-model="activeName" type="border-card">
-                                                <el-tab-pane label="管理" name="config">
-                                                    <el-form label-width="80px" style="height:100%;">
-                                                        <el-form-item label="名称">
-                                                            <el-input v-model="model.name"></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="备注">
-                                                            <el-input type="textarea" v-model="model.attr.remark"></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="更新时间">
-                                                            <el-input :value="model.attr.ctime | toLocalTime" disabled></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="目录">
-                                                            <el-input v-model="model.parent" disabled></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="类型">
-                                                            <el-input v-model="model.ftype" disabled></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="大小">
-                                                            <el-input :value="mx.bytesToSize(model.size)" disabled></el-input>
-                                                        </el-form-item>
-
-                                                        <el-form-item label="作者">
-                                                            <el-input v-model="model.attr.author" disabled></el-input>
-                                                        </el-form-item>
-                                                        
-                                                        <el-form-item label="图标">
-                                                            <el-button @click="activeName='icon'">
-                                                                <el-image :src="icon.value" style="width:64px;" ></el-image>
-                                                            </el-button>
-                                                        </el-form-item>
-
-                                                    </el-form>
-                                                    
-                                                </el-tab-pane>
-                                                <el-tab-pane label="图标" name="icon">
-                                                    <el-radio-group v-model="icon.value" style="display:flex;flex-wrap:wrap;align-content:flex-start;" @change="onIconChange">
-                                                        <el-button type="default" 
-                                                            style="width:8em;max-width:8em;height:90px;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);" v-for="icon in icon.list" :key="icon.id">
-                                                            <el-radio :label="icon | pickIcon">
-                                                                <el-image :src="icon | pickIcon" style="max-width: 55px;min-width: 55px;"></el-image>
-                                                                <span slot="label">#{icon.id}#</span>
-                                                            </el-radio>
-                                                        </el-button>
-                                                    </el-radio-group>
-                                                    </div>    
-                                                </el-tab-pane>
-                                            </el-tabs>    
-                                        </el-main>
-                                        <el-footer style="line-height:60px;text-align:center;">
-                                            <el-button type="success" @click="apply">应用</el-button>
-                                            <el-button type="primary" @click="save">确定</el-button>
-                                            <el-button type="default" @click="close">取消</el-button>
-                                        </el-footer>
-                                    </el-container>`,
-                        data: {
-                            model: {
-                                name: "",
-                                attr: {
-                                    remark: ""
-                                }
-                            },
-                            icon: {
-                                    value: `${window.ASSETS_ICON}/files/png/${node.ftype}.png?type=download&issys=${window.SignedUser_IsAdmin}`,
-                                    list: []
-                            },
-                            attr:{
-                                remark: "", 
-                                ctime: _.now(),
-                                author: window.SignedUser_UserName,
-                                icon: ""
-                            },
-                            activeName: 'config'
+                        data:{
+                            model:node,
+                            win: win
                         },
-                        created(){
-                            
-                            try{
-                                // 初始化model
-                                _.extend(this.model,node);
-
-                                // 初始化attr
-                                if(_.isEmpty(this.model.attr)){
-                                    _.extend(this.model, {attr:this.attr});   
-                                } else {
-                                    _.extend(this.model, {attr: JSON.parse(this.model.attr)});   
-                                }
-
-                                // 如果属性没有icon定义，默认根据ftype文件类型显示
-                                let icon = JSON.parse(this.model.attr).icon;
-                                if(!_.isEmpty(icon)){
-                                    this.icon.value = icon;
-                                }
-                            } catch(err){
-
-                            }
-                            
-                            // 初始化图片列表
-                            this.icon.list = fsHandler.fsList('/assets/images/files/png');
-                        },
-                        filters: {
-                            pickIcon(item) {
-                                return `/fs${item.parent}/${item.name}?type=open&issys=${window.SignedUser_IsAdmin}`;
-                            },
-                            toLocalTime(value) {
-                                return moment(value).format("YYYY-MM-DD HH:MM:SS");
-                            }
-                        },
-                        methods: {
-                            apply(){
-                                this.saveAttr();
-                            },
-                            save(){
-                                this.saveAttr();
-                                win.close();
-                            },
-                            close(){
-                                win.close();
-                            },
-                            onIconChange(val){
-                                this.activeName = 'config';
-                            },
-                            saveName(){
-                                const me = this;
-    
-                                let _old = node.parent + "/" + node.name;
-                                let _new = node.parent + "/" + me.model.name;
-    
-    
-                                let _check = fsHandler.fsCheck( node.parent, me.model.name);
-                                if(_check) {
-                                    this.$message({
-                                        type: "info",
-                                        message: "文件已存在，请确认！"
-                                    });
-                                    return false;
-                                }
-                                
-                                if(_check.status == 'error') {
-                                    this.$message({
-                                        type: "error",
-                                        message: _check.message
-                                    });
-                                    return false;
-                                }
-    
-                                let _rtn = fsHandler.fsRename(_old, _new);
-    
-                                if(_rtn == 1){
-                                    
-                                    self.load();
-
-                                    this.$message({
-                                        type: "success",
-                                        message: "重命名成功！"
-                                    })
-                                }else {
-                                    this.$message({
-                                        type: "error",
-                                        message: _rtn.message
-                                    })
-                                }
-                            },
-                            saveAttr(){
-                                const me = this;
-                                
-                                _.extend(me.model.attr, {icon: me.icon.value});
-
-                                let _rtn = fsHandler.fsUpdateAttr(node.parent, node.name, me.model.attr);
-                                
-                                if(_rtn == 1){
-                                    self.load();
-                                    
-                                    if(me.model.name != node.name){
-                                        me.saveName();
-                                    }
-                                } else {
-                                    this.$message({
-                                        type: "error",
-                                        message: _rtn.message
-                                    })
-                                }
-                            }
-                        }
+                        template:   `<mx-fs-info :node="model" :winContainer="win"></mx-fs-info>`,
                     }).$mount("#fs-info");
-    
+                    
                 },  
                 reload(){
                     const self = this;
@@ -2247,26 +2061,20 @@ class Topological {
                     
                     
                 },
-                edgesSearch(node){
+                edgesSearch(node,step){
                     let term = "";
                     if(node.direction=="out"){
-                        term = `match ('${node.node.id}') - [*] -> ()`;
+                        term = `match ('${node.node.id}') - [*${node.step}] -> ()`;
                     } else{
-                        term = `match ('${node.node.id}') <- [*] - ()`;
+                        term = `match ('${node.node.id}') <- [*${node.step}] - ()`;
                     }
                     
                     //this.$root.$refs.graphViewRef.term.push(term);
+                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = term;
                     this.$root.$refs.graphViewRef.search( encodeURIComponent(term) );
                     //加入搜索历史
                     this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.history.push({id:objectHash.sha1(term),term:term, time: _.now()});
 
-                    _.delay(()=>{
-                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
-                        let graphModel = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph.getModel();
-                        let geo = graph.getCellGeometry(node.cell);
-                        graphModel.setGeometry(node.cell, geo);
-                        graph.refresh();
-                    },1000)
                 }
             },
             destroyed: function () {

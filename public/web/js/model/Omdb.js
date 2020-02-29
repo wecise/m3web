@@ -2103,7 +2103,6 @@ class Omdb{
                                     initTreeData(){
                                         this.tree.data = fsHandler.callFsJScript("/matrix/omdb/propsDirectory.js",null).message;
                                         this.classObj.list = fsHandler.callFsJScript("/matrix/omdb/getClassListFromCache.js", encodeURIComponent('no-refresh')).message;
-                                        console.log(this.classObj.list)
                                     },
                                     onNodeClick(tNode){
                                         this.classObj.propAtClass.rows = [];
@@ -2123,14 +2122,14 @@ class Omdb{
                                                     return v;
                                                 }
                                             });
-                                            console.log(1,JSON.stringify(propObj))
+                                            
                                             // 当前prop所有定义
                                             let colObj = []; 
                                             _.forEach(propObj,(v)=>{
                                                 let col = _.find(v.Columns,(val)=>{ return val.name==tNode.label; });
                                                 colObj.push(col);
                                             });
-                                            console.log(2,JSON.stringify(this.classObj.propAtClass.rows))
+                                            
                                             this.classObj.prop =   {
                                                                         name: tNode.label, 
                                                                         colname: colObj[0].colname,
@@ -2138,7 +2137,6 @@ class Omdb{
                                                                         prop: propObj  
                                                                     };
 
-                                            //console.log(JSON.stringify(this.classObj.prop))
                                         }
                                     },
                                     onCancel(){

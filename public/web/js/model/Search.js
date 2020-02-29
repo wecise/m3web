@@ -900,13 +900,12 @@ class Search {
                                         <el-main style="overflow: hidden;height: 100%;padding:0px;">
                                             <el-container style="height: 100%;">
                                                 <el-header style="height:40px;line-height:40px;padding:10px 0px;">
-                                                    <span style="font-size:14px;">结果：</span>
-                                                    <span>
+                                                    <span style="width:95%;">
                                                         <el-button type="text" @click="forwardInView(v.href)" v-for="(v,k) in search.result">
-                                                            <u>#{v.name}#: #{v.count}#</u>
+                                                            #{v.name}#: #{v.count}#
                                                         </el-button>
                                                     </span>
-                                                    <span style="float:right;">
+                                                    <span style="width:5%;float:right;text-align:right;">
                                                         <el-dropdown @command="toggleView">
                                                             <i class="el-icon-menu" style="margin-right: 15px;font-size:14px;"></i>
                                                             <el-dropdown-menu slot="dropdown">

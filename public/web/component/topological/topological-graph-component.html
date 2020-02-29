@@ -21,9 +21,9 @@
             position: absolute!important;
             background-image: none!important;
         }
-
+        
         .topological-graph-component #graphContainer > svg > g:nth-child(1){
-            transform: translate(200px,20px);
+            transform: translate(50vw,20px);
         }
         
 
@@ -251,7 +251,7 @@
                     <div id="outlineContainer" class="outlineContainer"></div>
                 </el-header>
                 <el-main id="graphContainer" ref="graphContainer" 
-                        style="position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;border-top:1px solid #ddd;">
+                        style="width:100vw;height:100vh;position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;border-top:1px solid #ddd;">
                 </el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
                     <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>
@@ -357,7 +357,7 @@
                                 <el-form-item label="id">
                                     <el-input v-model="entity.target.id" placeholder="ID"></el-input>
                                 </el-form-item>
-                                <el-form-item label="value">
+                                <el-form-item label="name" v-if="!entity.target.type">
                                     <el-input v-model="entity.target.value" placeholder="Value"></el-input>
                                 </el-form-item>
                             </el-form>
@@ -365,7 +365,8 @@
                       </el-row>
                     <span slot="footer" class="dialog-footer">
                         <el-button @click="entity.dialog.ifClose = true;entity.dialog.show = false;">取消</el-button>
-                        <el-button type="primary" @click="updateEntityEdge">提交</el-button>
+                        <el-button type="primary" @click="addEntity(null)" v-if="entity.target.type=='new'">创建实体和关系</el-button>
+                        <el-button type="primary" @click="updateEntityEdge" v-else>创建关系</el-button>
                     </span>
                 </el-dialog>
             </el-container>
@@ -440,6 +441,11 @@
                     dialog: {
                         show: false,
                         ifClose: false,
+                        classList: fsHandler.callFsJScript("/matrix/omdb/getClassListForTree.js",encodeURIComponent("/matrix/entity")).message,
+                        defaultProps: {
+                            children: 'children',
+                            label: 'class'
+                        }
                     },
                     source: {},
                     target: {},
@@ -592,7 +598,7 @@
                     // Clones the source if new connection has no target
                     this.model.graph.graph.connectionHandler.setCreateTarget(true);
                     
-                    this.model.graph.graph.setConnectableEdges(true);
+                    this.model.graph.graph.setConnectableEdges(false);
                     this.model.graph.graph.setDropEnabled(true);
 
                     // 是否允许平移。true：表示按住Shift+左键拖动时，整个graph移动；
@@ -1094,13 +1100,45 @@
                                 
                                 menu.addSeparator();
 
-                                menu.addItem('起点图查询', null, ()=>{
-                                    this.$root.edgesSearch({direction:"out",node:node});
-                                });
+                                var submenuBsearch= menu.addItem('起点图查询', null, null);
+                                menu.addItem('1跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:1});
+                                },submenuBsearch);
+                                menu.addItem('2跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:2});
+                                },submenuBsearch);
+                                menu.addItem('3跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:3});
+                                },submenuBsearch);
+                                menu.addItem('4跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:4});
+                                },submenuBsearch);
+                                menu.addItem('5跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:5});
+                                },submenuBsearch);
+                                menu.addItem('6跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"out",node:node,step:6});
+                                },submenuBsearch);
 
-                                menu.addItem('终点图查询', null, ()=>{
-                                    this.$root.edgesSearch({direction:"in",node:node});
-                                });
+                                var submenuEsearch= menu.addItem('终点图查询', null, null);
+                                menu.addItem('1跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:1});
+                                },submenuEsearch);
+                                menu.addItem('2跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:2});
+                                },submenuEsearch);
+                                menu.addItem('3跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:3});
+                                },submenuEsearch);
+                                menu.addItem('4跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:4});
+                                },submenuEsearch);
+                                menu.addItem('5跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:5});
+                                },submenuEsearch);
+                                menu.addItem('6跳', null, ()=>{
+                                    this.$root.edgesSearch({direction:"in",node:node,step:6});
+                                },submenuEsearch);
 
                                 menu.addSeparator();
 
@@ -1186,9 +1224,31 @@
                             menu.addItem('圆形布局', null, ()=>{
                                 this.onLayout('circle');
                             }, submenuLayout);
-                            // menu.addItem('复合布局', null, ()=>{
-                            //     this.onLayout('composite');
-                            // }, submenuLayout);
+
+                            // menu.addSeparator();
+                            
+                            // var submenuCell = menu.addItem('图形', null, null);
+                            
+                            // menu.addItem('节点', null, ()=>{
+                                
+                            // }, submenuCell);
+                            
+                            // var submenuCellEdge = menu.addItem('线段', null, null,submenuCell);
+
+                            // menu.addItem('实线', null, ()=>{
+                                
+                            // }, submenuCellEdge);
+                            // menu.addItem('虚线', null, ()=>{
+                            //     this.model.graph.graph.getModel().beginUpdate();
+                            //     try{
+                            //         this.model.graph.graph.setCellStyles(mxConstants.STYLE_ROUNDED, '0');
+                            //         this.model.graph.graph.setCellStyles(mxConstants.STYLE_CURVED, '1');
+                            //         this.model.graph.graph.fireEvent(new mxEventObject('styleChanged', 'keys', [mxConstants.STYLE_ROUNDED, mxConstants.STYLE_CURVED],
+                            //                 'values', ['0', '1'], 'cells', this.model.graph.graph.selectEdges()));
+                            //     }finally {
+                            //         this.model.graph.graph.getModel().endUpdate();
+                            //     }
+                            // }, submenuCellEdge);
                         }
                         
                     };
@@ -1199,10 +1259,25 @@
                         let edge = evt.getProperty('edge');
                         let sCell = edge.source;
                         let tCell = edge.target;
-                        
+
                         if(sCell && tCell){
                             _.extend(this.entity, {source: {id: sCell.getId(), value: sCell.getValue()}});
-                            _.extend(this.entity, {target: {id: tCell.getId(), value: tCell.getValue()}});
+
+                            // 如果tCell为空，则为复制源实体
+                            let id = tCell.getId();
+                            let value = tCell.getValue();
+                            let type = "";
+
+                            console.log(3,id,value,_.includes(id,":"))
+                            if(!_.includes(id,":")){
+                                tId = sCell.getId() + `_copy_${moment().format("SSS")}`;
+                                tValue = sCell.getValue() + `_copy_${moment().format("SSS")}`;
+                                type = "new";
+                            } else {
+                                tId = sCell.getId();
+                                tValue = sCell.getValue();
+                            }
+                            _.extend(this.entity, {target: {id: tId, value: tValue, type: type}});
                             
                             this.entity.dialog.show = true;
                         }
@@ -1236,17 +1311,17 @@
                     // });
 
                     // 鼠标停留到元素上边缘高亮显示
-                    let track = new mxCellTracker(this.model.graph.graph);
-                    track.mouseMove = _.debounce((sender, me)=> {
+                    // let track = new mxCellTracker(this.model.graph.graph);
+                    // track.mouseMove = _.debounce((sender, me)=> {
                         
-                        try{
-                            // 刷新状态
-                            this.updateStatus();
-                        } catch(err){
+                    //     try{
+                    //         // 刷新状态
+                    //         this.updateStatus();
+                    //     } catch(err){
 
-                        }
+                    //     }
                         
-                    },2000);
+                    // },2000);
 
                     // UNDO监听
                     this.model.graph.undoMng = new mxUndoManager();   
@@ -1318,36 +1393,7 @@
 
             },
             toCenter(){
-                
-                // let cX = $("svg",this.$refs.container.$el).width() / 2 + 'px';
-                
-                // $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
-                //     "transform": `translate(${cX},20px)`
-                // });
-
-                // $(".topological-graph-component #graphContainer > svg > g:nth-child(1)").css({
-                //     "transform": `translate(200px,20px)`
-                // });
-
                 //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
-
-                /* 
-                // self.model.graph.graph.fit();
-                //self.model.graph.graph.center(true,false,0.5,0.5);
-                var margin = 2;
-                var max = 3;
-
-                var bounds = self.model.graph.graph.getGraphBounds();
-                var cw = self.model.graph.graph.container.clientWidth - margin;
-                var ch = self.model.graph.graph.container.clientHeight - margin;
-                var w = bounds.width / self.model.graph.graph.view.scale;
-                var h = bounds.height / self.model.graph.graph.view.scale;
-                var s = Math.min(max, Math.min(cw / w, ch / h));
-
-                self.model.graph.graph.view.scaleAndTranslate(s,
-                (margin + cw - w * s) / (2 * s) - bounds.x / self.model.graph.graph.view.scale,
-                (margin + ch - h * s) / (2 * s) - bounds.y / self.model.graph.graph.view.scale); */
-
             },
             path(){
                 
@@ -1683,6 +1729,8 @@
                             type: 'warning'
                         }).then(() => {
                             // entity action
+                            let entity = {id:cell.getId(),type:'delete'};
+                            fsHandler.callFsJScript("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(entity)));
 
                             // graph action
                             cell.removeFromParent();
@@ -1740,6 +1788,29 @@
                             
                         });
                 }
+            },
+            addEntity(entity){
+                let rtn = null;
+
+                if(!this.entity.edges.value){
+                    this.$message({
+                        type: "info",
+                        message: "请选择关系类型！"
+                    });
+                    return false;
+                }
+
+                if(!entity){
+                    
+                    rtn = fsHandler.callFsJScript("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(this.entity.target))).message;
+                }
+
+                this.$message({
+                    type: "success",
+                    message: "实体插入成功！"
+                })
+
+                this.updateEntityEdge();
             },
             updateEntityEdge(){
                 

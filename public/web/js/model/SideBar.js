@@ -560,28 +560,28 @@ class SideBar {
                                     active-text-color="#ffd04b"
                                     style="height:100vh;width:100%;overflow-y:auto;float:left;">
                                 <el-menu-item index="toggle" style="display:">
-                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:17px;color:#fff;"></i>
+                                    <i :class="isCollapse?'el-icon-s-unfold':'el-icon-s-fold'" style="width:18px;color:#fff;"></i>
                                 </el-menu-item>
                                 <el-menu-item index="apps">
-                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:17px;"></img> 
+                                    <img :src="preFixIcon+'app.png'+postFixIcon" style="width:20px;"></img> 
                                     <span slot="title">应用</span>
                                 </el-menu-item>
                                 <el-menu-item index="/">
-                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:17px;"></img>
+                                    <img :src="preFixIcon+'home.png'+postFixIcon" style="width:18px;"></img>
                                     <span slot="title">首页</span>
                                 </el-menu-item>
                                 
                                 <!-- 有模板情况-->
                                 <el-submenu :index="item.name" v-for="item in model.template" v-show="sideBarStatus === 0">
                                     <template slot="title">
-                                        <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                        <img :src="item.icon | pickIcon" style="width:18px;"></img>
                                         <span>#{item.title}#</span>
                                     </template>
                                     
                                     <el-menu-item-group>
                                         <span slot="title">#{item.title}#</span>
                                         <el-menu-item :class="subItem.status" :index="subItem.url" v-for="subItem in item.groups">
-                                            <img :src="subItem.icon | pickIcon" style="width:17px;"></img>
+                                            <img :src="subItem.icon | pickIcon" style="width:18px;"></img>
                                             <span slot="title">
                                                 #{subItem.cnname}#
                                                 <el-tooltip content="在新窗口中打开">
@@ -603,7 +603,7 @@ class SideBar {
                                     <el-menu-item-group>
                                         <span slot="title">应用</span>
                                         <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list">
-                                            <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                            <img :src="item.icon | pickIcon" style="width:18px;"></img>
                                             <span slot="title">
                                                 #{item.cnname}#
                                                 <el-tooltip content="在新窗口中打开">
@@ -616,7 +616,7 @@ class SideBar {
 
                                 <!-- 没有模板情况，且菜单项数量没超过阈值-->
                                 <el-menu-item :class="item.status" :index="item.url" v-for="item in model.list" v-show="sideBarStatus === 2">
-                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <img :src="item.icon | pickIcon" style="width:18px;"></img>
                                     <span slot="title">
                                         #{item.cnname}#
                                         <el-tooltip content="在新窗口中打开">
@@ -627,7 +627,7 @@ class SideBar {
 
                                 <!-- 没有分组的应用-->
                                 <el-menu-item :class="item.status" :index="item.url" v-for="item in model.appListUnGrouped">
-                                    <img :src="item.icon | pickIcon" style="width:17px;"></img>
+                                    <img :src="item.icon | pickIcon" style="width:18px;"></img>
                                     <span slot="title">
                                         #{item.cnname}#
                                         <el-tooltip content="在新窗口中打开">
