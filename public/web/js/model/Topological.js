@@ -288,16 +288,17 @@ class Topological {
                                                 v-model="model.id" 
                                                 :fetch-suggestions="querySearchAsync"
                                                 @select="handleSelect"
-                                                style="width:100%;color:#ffffff;">
-                                    <el-button slot="prepend" icon="el-icon-menu" class="handleSort input-el-button" style="#ffffff;"></el-button>
-                                    <el-button slot="append" icon="el-icon-arrow-down" @click="edge.show = !edge.show" v-if="edge.show"></el-button>
+                                                style="width:100%;"
+                                                class="topological-analysis-input">
+                                    <el-button slot="prepend" icon="el-icon-menu" class="handleSort input-el-button"></el-button>
+                                    <el-button slot="append" icon="el-icon-arrow-down"  @click="edge.show = !edge.show" v-if="edge.show"></el-button>
                                     <el-button slot="append" icon="el-icon-arrow-right" @click="edge.show = !edge.show" v-else></el-button>
                                     <el-button slot="append" icon="el-icon-postcard" @click="onDiagnosis(model)"></el-button>
                                     <el-button slot="append" icon="el-icon-close" @click="onRemove(model.id)"></el-button>
                                 </el-autocomplete>
                             </el-header>
-                            <el-main v-if="edge.show" style="padding:10px 5px 0px 5px;background:#ffffff;">
-                                <el-form label-width="50px">
+                            <el-main v-if="edge.show" style="padding:10px;background:#f6f6f6;">
+                                <el-form label-width="50px" label-position="top" class="topological-analysis-form">
                                     <el-form-item label="关系" style="font-weight:noomal;">
                                         <el-select v-model="edge.edgeType" placeholder="请选择关系类型">
                                             <el-option
@@ -328,7 +329,7 @@ class Topological {
                                         </el-popover>
                                     </el-form-item>
                                     <el-form-item label="自定义" style="font-weight:normal;">
-                                        <el-input v-model="edge.edgeCustom" style="border: 1px solid #ddd!important;width:60%;" @blur="onBlur" clearable></el-input>
+                                        <el-input type="textarea" :rows=3 v-model="edge.edgeCustom" @blur="onBlur" clearable></el-input>
                                         <el-popover
                                             placement="top-start"
                                             width="200"
@@ -412,11 +413,13 @@ class Topological {
             template:  `<el-autocomplete placeholder="请输入实体" 
                                         v-model="newModel.id" 
                                         autofocus
-                                        class="input-with-select"
+                                        class="input-with-select topological-analysis-input"
                                         :fetch-suggestions="querySearchAsync"
                                         @select="handleSelect"
                                         @keyup.enter.native="onNew">
-                            <template slot="prepend"><i class="el-icon-place"></i></template>
+                            <template slot="prepend">
+                                <i class="el-icon-place"></i>
+                            </template>
                             <el-button slot="append" icon="el-icon-plus" @click="onNew"></el-button>
                         </el-input>`,
             data(){
@@ -472,21 +475,21 @@ class Topological {
             }
         })
 
-        // 拓扑分析
-        Vue.component("topological-analysis",{
+        // 路径搜索面板
+        Vue.component("topological-path",{
             delimiters: ['#{', '}#'],
+            props: {
+                pathType: String
+            },
             template:  `<el-container>
-                            <el-header style="height:100%;line-height:100%;padding:10px;background:#2790e2!important;display:flex;flex-direction: column;">
+                            <el-header style="height:100%;line-height:100%;padding:10px;display:flex;flex-direction: column;">
                                 <div ref="topologicalAnalysisInputList">    
-                                    <topological-analysis-input v-for="item in trace.nodes" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
+                                    <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
-                                <div style="color:#2b90e1;padding:0px 10px;">
+                                <div style="padding:0px 10px;">
                                     <el-tooltip content="路劲查询" open-delay="500" placement="top">
-                                        <el-button type="success" icon="el-icon-position" @click="pathTrace" style="float:right;"></el-button>
-                                    </el-tooltip> 
-                                    <el-tooltip content="图查询" open-delay="500" placement="top">
-                                        <el-button type="default" icon="el-icon-search" @click="onSearch" style="float:right;margin-right:10px;"></el-button>
+                                        <el-button type="success" icon="el-icon-position" @click="onSearch" style="float:right;"></el-button>
                                     </el-tooltip> 
                                 </div>
                             </el-header>
@@ -554,29 +557,17 @@ class Topological {
                     this.trace.nodes.push(node);
                 },
                 onSearch(){
-                    if(this.trace.nodes.length < 2){
-                        this.$message("请选择节点！");
-                        return false;
-                    }
-                    let term = _.map(this.trace.nodes,(v)=>{
-                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
-                    });
-
-                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
-                    
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
-                    
-                },
-                pathTrace(){
                    
                     if(this.trace.nodes.length < 2){
                         this.$message("请选择节点！");
                         return false;
                     }
-                    let term = _.map(this.trace.nodes,(v)=>{
-                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
-                    });
+                    let term = {
+                                pathType: this.pathType,
+                                nodes: _.map(this.trace.nodes,(v)=>{
+                                    return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
+                                })
+                            };
                     
                     let rtn = null;
                     let rows = [];
@@ -605,46 +596,292 @@ class Topological {
                 }
             }
         })
+        // 图搜索面板
+        Vue.component("topological-graph",{
+            delimiters: ['#{', '}#'],
+            template:  `<el-container>
+                            <el-header style="height:100%;line-height:100%;padding:10px;display:flex;flex-direction: column;">
+                                <div ref="topologicalAnalysisInputList">    
+                                    <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
+                                </div>
+                                <topological-analysis-new-input></topological-analysis-new-input>
+                            </el-header>
+                            <el-main style="padding:0px 10px;" class="topological-analysis">
+                                <el-table :data="trace.paths.rows" 
+                                        ref="multipleTable"
+                                        tooltip-effect="dark"
+                                        @selection-change="onSelectionChange"
+                                        style="width: 100%"
+                                        v-if="trace.paths.rows.length > 0">
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                          <el-form>
+                                            <el-form-item v-for="v,k in _.omit(props.row,['num','class'])">
+                                                <template slot="label">
+                                                    <i class="el-icon-place" style="color: #67c239;"></i>
+                                                </template>
+                                                <span>#{ v }#</span>
+                                            </el-form-item>
+                                          </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column type="selection" width="55"></el-table-column>
+                                    <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
+                                </el-table>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+                    trace: {
+                        newItem: {
+                            id: "",
+                            type: "",
+                            value: ""
+                        },
+                        nodes: [],
+                        paths: {
+                            rows: [], 
+                            columns: []
+                        },
+                        selectedPaths: []
+                    }
+                }
+            },
+            created(){
+                eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
+            },
+            mounted(){
+                
+                _.delay(()=>{
+                    let sortable = Sortable.create(this.$refs.topologicalAnalysisInputList,{
+                        handle: ".handleSort",
+                        dataIdAttr: 'data-id',
+                        onChange(evt) {
+                            let nodes = _.cloneDeep(this.trace.nodes);
+                            this.trace.nodes = _.map(sortable.toArray(),(v)=>{
+                                return _.find(nodes,{id:v});
+                            });
+                        }
+                    });
+                },1000)
+            },
+            methods:{
+                setTrace(node){
+                    this.trace.nodes.push(node);
+                },
+                onSearch(){
+                    if(this.trace.nodes.length < 1){
+                        this.$message("请选择节点！");
+                        return false;
+                    }
+                    let term = _.map(this.trace.nodes,(v)=>{
+                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
+                    });
 
-        // 拓扑分析搜索框
-        Vue.component("graph-view-search",{
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
+                    
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
+                    
+                },
+                onSelectionChange(val){
+                    this.trace.selectedPaths = val;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
+                }
+            }
+        })
+        // 图搜索高级面板
+        Vue.component("topological-graphAdv",{
+            delimiters: ['#{', '}#'],
+            template:  `<el-container>
+                            <el-header style="height:100%;line-height:100%;padding:10px;display:flex;flex-direction: column;">
+                                <div ref="topologicalAnalysisInputList">    
+                                    <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
+                                </div>
+                                <topological-analysis-new-input></topological-analysis-new-input>
+                            </el-header>
+                            <el-main style="padding:0px 10px;" class="topological-analysis">
+                                <el-table :data="trace.paths.rows" 
+                                        ref="multipleTable"
+                                        tooltip-effect="dark"
+                                        @selection-change="onSelectionChange"
+                                        style="width: 100%"
+                                        v-if="trace.paths.rows.length > 0">
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                          <el-form>
+                                            <el-form-item v-for="v,k in _.omit(props.row,['num','class'])">
+                                                <template slot="label">
+                                                    <i class="el-icon-place" style="color: #67c239;"></i>
+                                                </template>
+                                                <span>#{ v }#</span>
+                                            </el-form-item>
+                                          </el-form>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column type="selection" width="55"></el-table-column>
+                                    <el-table-column :prop="col.data" :label="col.title" v-for="col in trace.paths.columns"></el-table-column>
+                                </el-table>
+                            </el-main>
+                        </el-container>`,
+            data(){
+                return {
+                    trace: {
+                        newItem: {
+                            id: "",
+                            type: "",
+                            value: ""
+                        },
+                        nodes: [],
+                        paths: {
+                            rows: [], 
+                            columns: []
+                        },
+                        selectedPaths: []
+                    }
+                }
+            },
+            created(){
+                eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
+            },
+            mounted(){
+                
+                _.delay(()=>{
+                    let sortable = Sortable.create(this.$refs.topologicalAnalysisInputList,{
+                        handle: ".handleSort",
+                        dataIdAttr: 'data-id',
+                        onChange(evt) {
+                            let nodes = _.cloneDeep(this.trace.nodes);
+                            this.trace.nodes = _.map(sortable.toArray(),(v)=>{
+                                return _.find(nodes,{id:v});
+                            });
+                        }
+                    });
+                },1000)
+            },
+            methods:{
+                setTrace(node){
+                    this.trace.nodes.push(node);
+                },
+                onSearch(){
+                    if(this.trace.nodes.length < 1){
+                        this.$message("请选择节点！");
+                        return false;
+                    }
+                    let term = _.map(this.trace.nodes,(v)=>{
+                        return _.extend(_.omit(v,["cell"]),{ edgeProperty: _.omit(this.$refs[v.id][0].edge,["list","show"]) });
+                    });
+
+                    let rtn = fsHandler.callFsJScript("/matrix/graph/graph-by-id.js",encodeURIComponent(JSON.stringify(term))).message;
+                    
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.graphData = rtn.result.data[0].graph;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = rtn.mql;
+                    
+                },
+                onSelectionChange(val){
+                    this.trace.selectedPaths = val;
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.addPath(val);
+                }
+            }
+        })
+        
+        Vue.component("topological-search-toolbar-path",{
             delimiters: ['${', '}'],
-            template: ` <div style="display:flex;">
-                            <el-autocomplete
-                                class="inline-input"
-                                filterable="true"
-                                allow-create="true"
-                                v-model="term"
-                                :fetch-suggestions="onFetchSuggestions"
-                                placeholder="图搜索"
-                                @select="onSelect"
-                                @clear="onClear"
-                                style="width:96%;"
-                                clearable
-                                ref="graphSearch">
-                                
-                                <template slot="prepend">
-                                    <el-button type="default" icon="el-icon-position" @click="onPath"></el-button>
-                                </template>
-                            </el-autocomplete>
-                            
-                            <el-button type="primary" icon="el-icon-search"  @click="search" @keyup.enter.native="search" style="margin-left:-1px;"></el-button>
-                            
-                            <div v-if="defaultTitle.list" style="padding-left:1px;">
-                                <el-select v-model="defaultTitle.title" slot="append" placeholder="显示名称" @change="onNodeTitleChange">
-                                    <el-option v-for="item in defaultTitle.list"
-                                        :key="item.value"
-                                        :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </div>
+            data(){
+                return {
+                    type: 'all'
+                }
+            },
+            template:   `<div>
+                            <el-header style="display:flex;height:35px;line-height:35px;padding:0px;">
+                                <el-radio-group v-model="type">
+                                    <el-radio-button label="all">全路径</el-radio-button>
+                                    <el-radio-button label="short">最短路径</el-radio-button>
+                                    <el-radio-button label="long">最长路径</el-radio-button>
+                                    <el-radio-button label="">关键路径</el-radio-button>
+                                    <el-button type="default" icon="el-icon-close"  @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>     
+                                </el-radio-group>
+                            </el-header>
+                            <el-main ref="mainView" style="padding:0px;">
+                                <topological-path class="graphAction" :model="$parent.$parent.mainView.path.model" :pathType="type" ref="pathRef"></topological-path>
+                            </el-main>
+                        </div>`
+        })
 
-                            <el-select placeholder="请选择" @change="onActionChange" style="padding-left:1px;">
-                                <el-option label="新建实体" value="entity"></el-option>
-                                <el-option label="编辑" value="edit"></el-option>
-                                <el-option label="另存为" value="saveas"></el-option>
-                            </el-select>
+        Vue.component("topological-search-toolbar-graph",{
+            delimiters: ['${', '}'],
+            template:   `<div>
+                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                                <el-input placeholder="选择实体" style="width:100%;" disabled></el-input>
+                                <el-button type="default" icon="el-icon-position"  @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>
+                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">高级</el-button>
+                                <el-button type="primary" icon="el-icon-search"  @click="onSearch" @keyup.enter.native="onSearch" style="margin-left:-1px;"></el-button>
+                            </el-header>
+                            <el-main ref="mainView" style="padding:0px;border-top:1px solid #f7f7f7;">
+                                <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
+                            </el-main>
                         </div>`,
+            methods: {
+                onSearch(){
+                    this.$refs.searchRef.onSearch();
+                }
+            }
+        })
+
+        Vue.component("topological-search-toolbar-graphAdv",{
+            delimiters: ['#{', '}#'],
+            data(){
+                return {
+                    history: fsHandler.callFsJScript("/matrix/graph/loadConfig.js","history").message
+                }
+            },
+            template:   `<div style="height:100%;">
+                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                                <el-input placeholder="图查询语句" style="width:100%;" disabled></el-input>
+                                <el-button type="default" icon="el-icon-position"  @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>
+                                <el-button type="default" icon="el-icon-search"  @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" style="margin-left:-1px;"></el-button>
+                                <el-button type="primary" @click="onSearch('')" @keyup.enter.native="onSearch('')" style="margin-left:-1px;">高级</el-button>
+                            </el-header>
+                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;width:100%;height:calc(100vh - 190px);">
+                                <el-input
+                                    type="textarea" :rows="4"
+                                    v-model="$parent.$parent.term"
+                                    placeholder="图搜索"
+                                    @clear="$parent.$parent.onClear"
+                                    style="width:100%;"
+                                    clearable
+                                    ref="graphSearch">
+                                </el-input>
+                                <el-divider content-position="left">历史</el-divider>
+                                <p style="text-align:left;width:100%;" v-for="item in history">
+                                    <el-button
+                                        type="text"
+                                        style="width:200px;text-align:left;"
+                                        @click="onSearch(item.value)">
+                                        #{item.value}#
+                                    </el-button>
+                                </p>
+                                <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
+                            </el-main>
+                        </div>`,
+            methods: {
+                onSearch(term){
+                    if(_.isEmpty(term)){
+                        this.$parent.$parent.search();
+                    } else {
+                        this.$parent.$parent.term = term;
+                        this.$parent.$parent.search();
+                    }
+                }
+            }
+        })
+
+        // 拓扑分析搜索框 newest!
+        Vue.component("topological-search-toolbar",{
+            delimiters: ['${', '}'],
+            template:   `<el-container style="100%;">
+                            <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
+                        </el-container>`,
             data(){
                 return{
                     value: "",
@@ -653,6 +890,23 @@ class Topological {
                     defaultTitle: {
                         title: "name",
                         list: null
+                    },
+                    mainView: {
+                        path: {
+                            model: {}
+                        },
+                        search: {
+                            model: {}
+                        }
+                    },
+                    currentView: "topological-search-toolbar-graph",
+                    control: {
+                        path:{
+                            show:false
+                        },
+                        graph:{
+                            show:false
+                        }
                     }
                 }
             },
@@ -683,6 +937,9 @@ class Topological {
                 this.search();
             },
             methods:{
+                onToggleView(view){
+                    this.currentView = view;
+                },
                 search(){
                     this.$root.$refs.graphViewRef.search( encodeURIComponent(this.term) );
 
@@ -714,7 +971,7 @@ class Topological {
                         ];
                 },
                 onPath(){
-                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.path();
+                    this.control.path.show = !this.control.path.show;
                 },
                 onActionChange(val){
                     if(val == 'path'){
@@ -2049,7 +2306,7 @@ class Topological {
                     
                         new Vue({
                             delimiters: ['#{', '}#'],
-                            template: `<topological-analysis class="graphAction" :model="model"></topological-analysis>`,
+                            template: `<topological-path class="graphAction" :model="model"></topological-path>`,
                             data: {
                                 model: {}
                             },

@@ -157,11 +157,6 @@
                     trigger: 'left',
                     items: {
 
-                        /*"classNew": {
-                            name: "创建类", icon: "fa-sitemap", callback: function (key, opt) {
-
-                            }
-                        },*/
                         "classNewByMql": {
                             name: "新建子类", icon: "fas fa-plus", callback: function (key, opt) {
 
@@ -237,70 +232,25 @@
                                                         });
                             }
                         },
+                        "删除数据": {
+                            name: "删除数据", icon: "fas fa-trash", callback: function (key, opt) {
+                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                            name: self.selectedNode.name.replace(/\//g,"_"),
+                                                            title: self.selectedNode.name,
+                                                            model: { pattern: 'delete-data', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+                                                        });
+                            }
+                        },
+                        "删除数据(带版本)": {
+                            name: "删除数据(带版本)", icon: "fas fa-trash", callback: function (key, opt) {
+                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                            name: self.selectedNode.name.replace(/\//g,"_"),
+                                                            title: self.selectedNode.name,
+                                                            model: { pattern: 'delete-data-withversion', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+                                                        });
+                            }
+                        },
                         "sep2": "---------",
-                        /* "查看数据": {
-                            name: "查看数据", icon: "fas fa-table", callback: function (key, opt) {
-
-                                alertify.prompt("查看数据行数", function (e, str) {
-                                    // str is the input text
-                                    if (e) {
-                                        let count = Number(str) || 200;
-                                        let _mql = `SELECT * FROM ${self.selectedNode.name} limit ${count}`;
-                                        let _list = omdbHandler.fetchDataByMql(_mql);
-
-                                        if(_.isEmpty(_list)) {
-
-                                            alertify.log("查询结果为空");
-
-                                            return false;
-                                        }
-
-                                        _data = _list.message;
-
-                                        _columns = mx.columnsParse(_list.meta);
-
-                                        let result = { id:self.id, bid: self.id, type: 'table-update', data: _.groupBy(_data,'class'), columns: _columns };
-
-
-                                        self.$root.mainTabsAdd({ type: 'omdb-query-console',
-                                                            name: self.selectedNode.name.replace(/\//g,"_"),
-                                                            title: self.selectedNode.name,
-                                                            model: { pattern: 'select', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
-                                                        });
-
-                                        self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].mainTabsAdd({
-                                                                        type: 'omdb-query-output-console',
-                                                                        name: self.id+'-output-table',
-                                                                        title: `结果_TABLE_${moment().format("LT")}`,
-                                                                        model: result
-                                                                    });
-                                        
-                                        console.log(11,self.$root,`omdbQueryConsoleRef-${self.id}`)
-                                        if(_list.status === 'ok'){
-                                            self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('info',_list);
-                                        } else {
-                                            self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
-                                        }
-
-                                    } else {
-                                        // user clicked "cancel"
-                                    }
-                                }, '200');
-                                $(".alertify-prompt .alertify-message").css('height','5vh');
-                            }
-                        },
-                        "sep3": "---------", */
-                        "触发器": {
-                            name: "触发器", icon: "fas fa-toggle-on", callback: function (key, opt) {
-                                // 触发器组件 node=类名称
-                                self.$root.mainTabsAdd({ type: 'omdb-trigger-console',
-                                                            name: self.selectedNode.name.replace(/\//g,"_"),
-                                                            title: self.selectedNode.name,
-                                                            model: { pattern: 'trigger', node: self.selectedNode }
-                                                        });
-                            }
-                        },
-                        "sep4": "---------",
                         "SELECT": {
                             name: "SELECT", icon: "fas fa-database", callback: function (key, opt) {
                                 self.$root.mainTabsAdd({ type: 'omdb-query-console',
@@ -338,27 +288,13 @@
                             }
                         },
                         "sep5": "---------",
-                        /* "ddl": {
-                            name: "DDL&属性", icon: "fas fa-info-circle", callback: function (key, opt) {
-                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
-                                                                    name: self.selectedNode.name.replace(/\//g,"_"),
-                                                                    title: self.selectedNode.name,
-                                                                    model: { pattern: 'ddl', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
-                                                                });
-                            }
-                        }, */
                         "导出数据结构": {
                             name: "导出数据结构", icon: `fas fa-file-export`, callback: function (key, opt) {
                                 
                                 omdb.app.classDataExport(self.selectedNode.name);
                                 
                             }
-                        }//,
-                        // "导入数据结构": {
-                        //     name: "导入数据结构", icon: 'fas fa-file-import', callback: function (key, opt) {
-                        //         omdb.app.classDataImport();
-                        //     }
-                        // }
+                        }
                     },
                     events: {
                         show: function(opt) {

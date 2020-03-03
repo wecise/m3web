@@ -20,7 +20,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
         <el-container>
-            <el-aside style="display: none;">
+            <el-aside style="display: ;">
                 <el-tree :data="tree.data" :props="tree.defaultProps" @node-click="onNodeClick"></el-tree>
             </el-aside>
             <el-main style="padding:0px;">
@@ -89,7 +89,7 @@
                 this.timeline.items = null;
                 this.timeline.items = new vis.DataSet(_.map(this.model,(v)=>{
                     return {
-                                id: v.id,
+                                id: v.id+_.now(),
                                 content: v.term,
                                 start: moment(v.time).format("LLL")
                             }

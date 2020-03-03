@@ -87,6 +87,7 @@
                 flex-flow: wrap;
                 display: flex;
                 align-content: flex-start;
+                overflow-x: hidden;
             }
     
             #list ul{
@@ -762,7 +763,7 @@
                     template:   `<div id="list">
                                     <el-checkbox-group v-model="$root.$refs.viewRef.$children[0].selectedItem" class="fs-view-node">
                                         <el-button type="default" 
-                                                style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                                style="max-width: 18.5em;width: 18.5em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
                                                 @dblclick.native="eventHub.$emit('FS-NODE-OPENIT-EVENT',item, item.parent+'/'+item.name)"
                                                 v-for="item in model">
                                                 <div style="position: relative;right: -100px;">    

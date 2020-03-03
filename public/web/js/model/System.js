@@ -716,377 +716,134 @@ class System {
 					}
 				})
 
-				Vue.component('config-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="configTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Object,
-
-					},
-					data: function(){
+				// 通知管理
+				Vue.component('notify-manage',{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container>
+									<el-main style="padding:0px;">
+										<el-tabs v-model="activeName" @tab-click="onTabClick" type="border-card">
+										<el-tab-pane label="规则管理" name="rule">
+											<el-container>
+												<el-header>
+													<el-tooltip content="新建规则">
+														<el-button type="text" icon="el-icon-plus"></el-button>
+													</el-tooltip>
+													<el-tooltip content="删除规则">
+														<el-button type="text" icon="el-icon-delete"></el-button>
+													</el-tooltip>
+													<el-tooltip content="导出规则">
+														<el-button type="text" icon="el-icon-upload2"></el-button>
+													</el-tooltip>
+													<el-tooltip content="导入规则">
+														<el-button type="text" icon="el-icon-download"></el-button>
+													</el-tooltip>
+												</el-header>
+												<el-main>
+													<el-table
+														:data="rule.dt.rows"
+														style="width: 100%">
+														<el-table-column type="index"></el-table-column>
+														<el-table-column type="expand">
+														<template slot-scope="props">
+															<el-form label-position="left" inline class="demo-table-expand">
+																
+															</el-form>
+														</template>
+														</el-table-column>
+														<el-table-column 
+															:label="item.title" 
+															:prop="item.field" 
+															v-for="item in rule.dt.columns"
+															v-if="item.visible"></el-table-column>
+													</el-table>
+												</el-main>
+											</el-container>
+										</el-tab-pane>
+										<el-tab-pane label="分类管理" name="type">分类管理</el-tab-pane>
+										<el-tab-pane label="人员管理" name="person">人员管理</el-tab-pane>
+										<el-tab-pane label="级别管理" name="severity">级别管理</el-tab-pane>
+										<el-tab-pane label="模板管理" name="template">模板管理</el-tab-pane>
+										<el-tab-pane label="发送日志" name="log">发送日志</el-tab-pane>
+									</el-tabs>
+									</el-main>
+								</el-container>`,
+					data(){
 						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-
-								},
-								data: {
-									simpleData: {
-										enable: true
+							activeName:"rule",
+							rule: {
+								dt: {
+									rows:[{
+										id: '1',
+										class: "/matrix/system/notify",
+										name: '运维开放',
+										status: '1',
+										phones: '13923234366',
+										emails: 'wz@13.com',
+										template: '开放'
 									},
-									key: {
-										name: "key",
-										children: "nodes"
-									}
-								},
-								view: {
-									showTitle: true,
+									{
+										id: '2',
+										class: "/matrix/system/notify",
+										name: '运维主机',
+										status: '1',
+										phones: '13923234366',
+										emails: 'wz@13.com',
+										template: '开放'
+									}],
+									columns: [
+										{
+											field: "status",
+											title: "状态",
+											width: 50,
+											visible: true
+										},
+										{
+											field: "id",
+											title: "ID",
+											width: 120,
+											visible:false
+										},
+										{
+											field: "class",
+											title: "CLASS",
+											width: 120,
+											visible:false
+										},
+										{
+											field: "name",
+											title: "规则名称",
+											width: 160,
+											visible: true
+										},
+										{
+											field: "phones",
+											title: "接收人员电话",
+											width: 160,
+											visible: true
+										},
+										{
+											field: "emails",
+											title: "接收人员邮件",
+											width: 160,
+											visible: true
+										},
+										{
+											field: "template",
+											title: "引用模板",
+											width: 160,
+											visible: true
+										}],
+									selected: []
 								}
-							},
-							selectedNodeName: ""
-						}
-					},
-					created: function(){
-						const self = this;
-
-						eventHub.$on("config-refresh-event",self.refresh);
-					},
-					mounted: function() {
-						const self = this;
-
-						self.$nextTick(function(){
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onExpand = self.zTreeOnExpand;
-							self.setting.view.addDiyDom = self.addDiyDom;
-						})
-					},
-					watch: {
-						setting: function(val){
-							const self = this;
-
-							self.zTree = $.fn.zTree.init($(self.$el), val, self.zNodes);
-						},
-						zNodes: function(val){
-							const self = this;
-
-							$.fn.zTree.init($(self.$el), self.setting, val);
-							self.zTree = $.fn.zTree.getZTreeObj("configTree");
-							var nodes = self.zTree.getNodes();
-							if (nodes.length > 0) {
-								self.zTree.expandNode(nodes[0], true, false, true);
 							}
 						}
 					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							const self = this;
-							var node = self.zTree.getSelectedNodes();
-							
-							$("[title='" + self.selectedNodeName + "']").removeClass('curSelectedNode');
-							self.selectedNodeName = treeNode.key;
-							
-							jQuery.ajax({
-								url: '/config/get',
-								type: 'GET',
-								dataType: 'json',
-								data: {
-									key: treeNode.key
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									
-									if(!_.isEmpty(data.message)){
-										self.zTree.removeChildNodes(node[0]);
-										let _tmp = JSON.stringify(data.message).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true');
-										let rtn = _.attempt(JSON.parse.bind(null, _tmp));
-										self.zTree.addNodes(treeNode, eval(rtn.nodes));
-
-									}
-									/**
-									 * @todo  赋键值
-									 */
-									eventHub.$emit('editor-value', treeNode);
-
-
-								},
-								error: function(xhr, textStatus, errorThrown) {
-								}
-							});
-						},
-						refresh: function () {
-							const self = this;
-
-							var treeObj = $.fn.zTree.getZTreeObj("configTree");
-							var sNodes = treeObj.getSelectedNodes();
-
-							if (sNodes.length > 0) {
-								var pNode = sNodes[0].getParentNode() || sNodes[0];
-								
-								jQuery.ajax({
-									url: '/config/get',
-									type: 'GET',
-									dataType: 'json',
-									data: {
-										key: pNode.key
-									},
-									beforeSend: function(xhr) {
-									},
-									complete: function(xhr, textStatus) {
-									},
-									success: function(data, textStatus, xhr) {
-										/**
-										 * @todo  刷新当前节点结构
-										 */
-										self.zTree.removeChildNodes(pNode);
-										var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
-										self.zTree.addNodes(pNode, eval(rtn.message.nodes));
-										/**
-										 * @todo  选中当前节点
-										 */
-										$("[title='" + self.selectedNodeName + "']").addClass('curSelectedNode');
-									},
-									error: function(xhr, textStatus, errorThrown) {
-									}
-								})
-							} 
-						},
-						addDiyDom: function (treeId, treeNode) {
-							const self = this;
-							let aObj = $("#" + treeNode.tId + "_a");
-							
-							if (treeNode.isParent){
-								let str = "<span>["+treeNode.nodes.length+"]</span>";
-								aObj.append(str);
-							} 
-						}
-					}
-				})
-
-				Vue.component('rules-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="rulesTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Object,
-
+					mounted() {
+						
 					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
+					methods:{
+						onTabClick(){
 
-								},
-								data: {
-									simpleData: {
-										enable: true
-									},
-									key: {
-										name: "key",
-										children: "nodes"
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						const self = this;
-
-						self.$nextTick(function(){
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onExpand = self.zTreeOnExpand;
-						})
-					},
-					watch: {
-						setting: function(val){
-							this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
-						},
-						zNodes: function(val){
-
-							$.fn.zTree.init($(this.$el), this.setting, val);
-							this.zTree = $.fn.zTree.getZTreeObj("rulesTree");
-							var nodes = this.zTree.getNodes();
-							if (nodes.length > 0) {
-								this.zTree.expandNode(nodes[0], true, false, true);
-							}
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							self = this;
-							var node = self.zTree.getSelectedNodes();
-
-							jQuery.ajax({
-								url: '/config/get',
-								type: 'GET',
-								dataType: 'json',
-								data: {
-									key: treeNode.key
-								},
-								beforeSend: function(xhr) {
-								},
-								complete: function(xhr, textStatus) {
-								},
-								success: function(data, textStatus, xhr) {
-									/**
-									 * @todo  刷新当前节点结构
-									 */
-									self.zTree.removeChildNodes(node[0]);
-									var rtn = JSON.parse(JSON.stringify(data).replace(new RegExp('"dir":true', 'gm'), '"isParent":true,"dir":true'));
-									self.zTree.addNodes(treeNode, eval(rtn.message.node.nodes));
-
-									/**
-									 * @todo  赋键值
-									 */
-									eventHub.$emit('editor-value', treeNode);
-
-
-								},
-								error: function(xhr, textStatus, errorThrown) {
-								}
-							});
-						}
-					}
-				})
-
-				Vue.component('notify-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="notifyTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Object,
-
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-
-								},
-								data: {
-									simpleData: {
-										enable: true
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						this.$nextTick(function(){
-							const self = this;
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onExpand = self.zTreeOnExpand;
-						})
-					},
-					watch: {
-						setting: function(val){
-							this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
-						},
-						zNodes: function(val){
-
-							$.fn.zTree.init($(this.$el), this.setting, val);
-							this.zTree = $.fn.zTree.getZTreeObj("notifyTree");
-							var nodes = this.zTree.getNodes();
-							if (nodes.length > 0) {
-								this.zTree.expandNode(nodes[0], true, false, true);
-							}
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							self = this;
-						}
-					}
-				})
-
-				Vue.component('maintain-tree-component',{
-					delimiters: ['${', '}'],
-					template: '<ul class="ztree" id="maintainTree" style="overflow:auto;"></ul>',
-					props: {
-						zNodes: Object,
-
-					},
-					data: function(){
-						return {
-							zTree: Object,
-							setting: {
-								edit: {
-									enable: false
-								},
-								callback: {
-
-								},
-								data: {
-									simpleData: {
-										enable: true
-									}
-								}
-							},
-						}
-					},
-					mounted: function() {
-						this.$nextTick(function(){
-							const self = this;
-							self.setting.callback.onClick = self.zTreeOnClick;
-							self.setting.callback.onExpand = self.zTreeOnExpand;
-						})
-					},
-					watch: {
-						setting: function(val){
-							this.zTree = $.fn.zTree.init($(this.$el), val, this.zNodes);
-						},
-						zNodes: function(val){
-
-							$.fn.zTree.init($(this.$el), this.setting, val);
-							this.zTree = $.fn.zTree.getZTreeObj("maintainTree");
-							var nodes = this.zTree.getNodes();
-							if (nodes.length > 0) {
-								this.zTree.expandNode(nodes[0], true, false, true);
-							}
-						}
-					},
-					methods: {
-						zTreeOnExpand: function (event, treeId, treeNode) {
-							if (treeNode.dir) {
-								treeNode.isParent = true;
-							} else {
-								treeNode.isParent = false;
-							}
-						},
-						zTreeOnClick: function (event, treeId, treeNode, clickFlisParentag) {
-							self = this;
 						}
 					}
 				})
@@ -1418,7 +1175,7 @@ class System {
 														</el-form-item>
 													</el-form>
 												</el-main>
-												<el-footer style="text-align:right;">
+												<el-footer style="text-align:right;line-height: 60px;">
 													<el-tooltip content="创建">
 														<el-button type="success" icon="fas fa-save fa-fw" @click="companySave">创建</el-button>
 													</el-tooltip>
@@ -1524,52 +1281,58 @@ class System {
 				// 用户、权限管理
 				Vue.component('user-manage',{
 					delimiters: ['${', '}'],
-					template: 	`<el-container style="background:#ffffff;">
-
-									<el-header style="line-height:40px;height:40px;">
-										<span style="font-size:16px;">用户信息</span>
-										<span style="float: right; font-size: 12px">
-											<el-tooltip content="用户信息更新">
-												<el-button type="text" @click="saveUserData" icon="el-icon-edit">保存</el-button>
-											</el-tooltip>
-										</span>
-									</el-header>
-							
-									<el-main style="padding:10px;">
-										<el-row>
-											<el-col :span="24">
-												<bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
-											</el-col>
-										</el-row>
-										<el-divider></el-divider>
-										<span style="font-size:16px;">权限管理</span>
-										<el-row>
-											<el-col :span="24">
-												<el-tabs v-model="permission.activeIndex" class="grid-content" type="border-card">
-													<el-tab-pane label="按对象授权" name="byObject">
-														<el-container style="height: calc(100vh - 360px);">
-															<el-aside>
-																<byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
-															</el-aside>
-															<el-main>
-																<bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>    
-															</el-main>
-														</el-container>  
-													</el-tab-pane>
-													<el-tab-pane label="按属性授权" name="byProperty">
-														<el-container>
-															<el-aside>
-																<byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
-															</el-aside>
-															<el-main style="padding:0px 0px 0px 10px;">
-																<bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
-															</el-main>
-														</el-container>  
-													</el-tab-pane>
-												</el-tabs>
-											</el-col>
-										</el-row>
-									</el-main>
+					template: 	`<el-container style="height:100%;background:#f9f9f9;">
+									<el-aside style="width:260px;height:100%;" ref="leftView">
+										<user-tree-component></user-tree-component>
+									</el-aside>
+									<el-container style="height:100%;background:#ffffff;" ref="mainView">
+										<el-main>
+											<el-header style="line-height:40px;height:40px;">
+												<span style="font-size:16px;">用户信息</span>
+												<span style="float: right; font-size: 12px">
+													<el-tooltip content="用户信息更新">
+														<el-button type="text" @click="saveUserData" icon="el-icon-edit">保存</el-button>
+													</el-tooltip>
+												</span>
+											</el-header>
+									
+											<el-main style="padding:10px;">
+												<el-row>
+													<el-col :span="24">
+														<bootstrap-table id="userTable" :columns="model.columns" :options="model.options" :data="model.data"></bootstrap-table>
+													</el-col>
+												</el-row>
+												<el-divider></el-divider>
+												<span style="font-size:16px;">权限管理</span>
+												<el-row>
+													<el-col :span="24">
+														<el-tabs v-model="permission.activeIndex" class="grid-content" type="border-card">
+															<el-tab-pane label="按对象授权" name="byObject">
+																<el-container style="height: calc(100vh - 360px);">
+																	<el-aside>
+																		<byobject-tree-component :zNodes="byObjectTreeNodes"></byobject-tree-component>      
+																	</el-aside>
+																	<el-main>
+																		<bootstrap-table id="byObjectTable" :columns="byObjectTreeModel.columns" :options="byObjectTreeModel.options" :data="byObjectTreeModel.data"></bootstrap-table>    
+																	</el-main>
+																</el-container>  
+															</el-tab-pane>
+															<el-tab-pane label="按属性授权" name="byProperty">
+																<el-container>
+																	<el-aside>
+																		<byProperty-tree-component :zNodes="byPropertyTreeNodes"></byProperty-tree-component>
+																	</el-aside>
+																	<el-main style="padding:0px 0px 0px 10px;">
+																		<bootstrap-table id="byPropertyTable" :columns="byPropertyTreeModel.columns" :options="byPropertyTreeModel.options" :data="byPropertyTreeModel.data"></bootstrap-table>
+																	</el-main>
+																</el-container>  
+															</el-tab-pane>
+														</el-tabs>
+													</el-col>
+												</el-row>
+											</el-main>
+										</el-main>
+									</el-container>
 								</el-container>`,
 					data(){
 						return {
@@ -1597,21 +1360,19 @@ class System {
 							selectedNode: null
 						}
 					},
-					created: function(){
-						const self = this;
-
-						eventHub.$on('user-table-select',self.loadByClassTreeNodes);
-						eventHub.$on("user-tree-click-event", self.loadUserData);
-						eventHub.$on("user-remove", self.removeUserData);
-						eventHub.$on("byObjectTree-select", self.setByObjectTreeModel)
-						eventHub.$on("byPropertyTree-select", self.setByPropertyTreeModel)
+					created(){
+						
+						eventHub.$on('user-table-select',this.loadByClassTreeNodes);
+						eventHub.$on("user-tree-click-event", this.loadUserData);
+						eventHub.$on("user-remove", this.removeUserData);
+						eventHub.$on("byObjectTree-select", this.setByObjectTreeModel)
+						eventHub.$on("byPropertyTree-select", this.setByPropertyTreeModel)
 					},
-					mounted: function(){
-						const self = this;
+					mounted(){
+						
+						this.$nextTick( ()=> {
 
-						self.$nextTick(function () {
-
-							self.model.columns = [
+							this.model.columns = [
 													{
 														field: 'state',
 														radio: true,
@@ -1631,7 +1392,7 @@ class System {
 														return `<a href="javascript:eventHub.$emit('user-remove', {id: '${r.id}',fullname: '${r.fullname}'});"><i class="fas fa-trash"></i></a>`;
 													}},
 												];
-							self.model.options = {
+							this.model.options = {
 								toggle: "table",
 								classes: "table table-striped",
 								pagination: true,
@@ -1641,7 +1402,7 @@ class System {
 								treeShowField: 'name'
 							};
 
-							self.byObjectTreeModel.columns = self.byPropertyTreeModel.columns = [
+							this.byObjectTreeModel.columns = this.byPropertyTreeModel.columns = [
 															{"field":"name",title:"动作"},
 															{"field":"add",title:"添加", align: 'center',
 																formatter:function(v){
@@ -1664,17 +1425,27 @@ class System {
 																}
 															},
 														];
-							self.byObjectTreeModel.options =  self.byPropertyTreeModel.options = {
+							this.byObjectTreeModel.options =  this.byPropertyTreeModel.options = {
 															toggle: "table",
 															classes: "table table-striped",
 															pagination: true,
 															pageSize: "15",
 															pageList: "[15,30,45,60]",
 														};
+
+							this.split.inst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+								sizes: [25, 75],
+								minSize: [0, 0],
+								gutterSize: 5,
+								gutterAlign: 'end',
+								cursor: 'col-resize',
+								direction: 'horizontal',
+								expandToMin: true,
+							});
 						})
 					},
 					methods: {
-						loadUserData: function(event) {
+						loadUserData(event) {
 							const self = this;
 							let param = "";
 
@@ -1686,7 +1457,7 @@ class System {
 							self.byObjectTreeNodes = [];
 							self.byPropertyTreeNodes = [];
 						},
-						saveUserData: function(){
+						saveUserData(){
 							const self = this;
 							var action = ["add","delete","update","view"];
 							var auth = {
@@ -1941,13 +1712,13 @@ class System {
 										<span slot="label"><i class="el-icon-date"></i> 应用</span>
 										<div class="block__list_words">  
 											<el-button type="default" 
-												style="width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(125, 204, 252);"
+												style="width: auto;height:auto;padding: 10px 30px;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);background:rgb(81, 123, 160);"
 												v-for="(item,index) in model.list"
 												:key="index">
 												<el-image style="width:64px;height:64px;margin:5px;" :src="item.icon | pickIcon"></el-image>
 												<p style="color:#fff;">#{item.cnname}#</p>
 												<p class="tools-manage">
-													<el-collapse accordion>
+													<el-collapse accordion="true">
 														<el-collapse-item>
 															<div style="padding:10px;">
 																<el-form ref="form" :model="item" label-width="80px" >
@@ -2297,44 +2068,38 @@ class System {
 
 				let main = {
 					template: `<el-container style="background-color:#ffffff;height: calc(100vh - 85px);">
-									<el-aside style="background-color:#f6f6f6;padding:10px;" ref="leftView">
-										<el-collapse value="company-manage" accordion @change="toggleView">
-											
-											<el-collapse-item name="company-manage" v-if="window.COMPANY_NAME=='wecise' && window.SignedUser_IsAdmin==true">
-												<template slot="title">
-													<i class="el-icon-office-building"></i> &nbsp;公司管理
-												</template>
-											</el-collapse-item>
-
-											<el-collapse-item name="user-manage">
-												<template slot="title">
-													<i class="el-icon-user"></i> &nbsp;用户和权限
-												</template>
-												<el-container>
-													<user-tree-component @click.native="toggleView('user-manage')"></user-tree-component>
-												</el-container>
-											</el-collapse-item>
-							
-											<el-collapse-item name="grok-manage">
-												<template slot="title">
-													<i class="fas fa-random"></i> &nbsp;解析规则
-												</template>
-											</el-collapse-item>
-											
-											<el-collapse-item name="calendar-manage">
-												<template slot="title">
-													<i class="fas fa-calendar"></i> &nbsp;日历管理
-												</template>
-											</el-collapse-item>
-							
-											<el-collapse-item name="tools-manage">
-												<template slot="title">
-													<i class="fas fa-tasks"></i> &nbsp;应用管理
-												</template>
-											</el-collapse-item>
-																	
-										</el-collapse>
-										
+									<el-aside style="width:unset;" ref="leftView">
+										<el-menu
+											default-active="company-manage"
+											@select="toggleView"
+											:collapse="ifCollapse"
+											style="height:100%;"
+											class="system-manage-menu">
+											<el-menu-item index="company-manage" v-if="window.COMPANY_NAME=='wecise' && window.SignedUser_IsAdmin==true">
+												<i class="el-icon-office-building"></i>
+												<span slot="title">公司管理</span>
+											</el-menu-item>
+											<el-menu-item index="user-manage">
+												<i class="el-icon-user"></i>
+												<span slot="title">用户和权限</span>
+											</el-menu-item>
+											<el-menu-item index="notify-manage">
+												<i class="el-icon-bell"></i>
+												<span slot="title">通知管理</span>
+											</el-menu-item>
+											<el-menu-item index="grok-manage">
+												<i class="el-icon-finished"></i>
+												<span slot="title">解析规则</span>
+											</el-menu-item>
+											<el-menu-item index="calendar-manage">
+												<i class="el-icon-alarm-clock"></i>
+												<span slot="title">日历管理</span>
+											</el-menu-item>
+											<el-menu-item index="tools-manage">
+												<i class="el-icon-menu"></i>
+												<span slot="title">应用管理</span>
+											</el-menu-item>
+										</el-menu>
 									</el-aside>
 									<el-main style="padding:0px;" ref="mainView">
 										<component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
@@ -2348,7 +2113,8 @@ class System {
 						maintainTreeNodes: {},
 						split: {
 							inst: null
-						}
+						},
+						ifCollapse:true
 					},
 					mounted(){
 						
@@ -2366,20 +2132,24 @@ class System {
 							this.initNotifyTreeNodes();
 							this.initMaintainTreeNodes();
 
-							this.split.inst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
-                                sizes: [25, 75],
-                                minSize: [0, 0],
-                                gutterSize: 5,
-                                gutterAlign: 'end',
-                                cursor: 'col-resize',
-                                direction: 'horizontal',
-                                expandToMin: true,
-                            });
+							// this.split.inst = Split([this.$refs.leftView.$el, this.$refs.mainView.$el], {
+                            //     sizes: [15, 85],
+                            //     minSize: [0, 0],
+                            //     gutterSize: 5,
+                            //     gutterAlign: 'end',
+                            //     cursor: 'col-resize',
+                            //     direction: 'horizontal',
+                            //     expandToMin: true,
+                            // });
 						})
 					},
 					methods: {
-						toggleView(event) {
-							this.currentView=event;
+						toggleView(key,keyPath) {
+							if(key == 'toggle'){
+								this.ifCollapse = !this.ifCollapse;
+							}else {
+								this.currentView = key;
+							}
 						},
 						loadTreeData(event, param){
 							const self = this;

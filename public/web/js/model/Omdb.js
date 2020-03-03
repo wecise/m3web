@@ -1166,7 +1166,7 @@ class Omdb{
                                             </el-container>
                                         </template>
                                     </el-table-column>
-                                    <el-table-column :prop="item.field"  
+                                    <el-table-column :prop="item['field']"  
                                             show-overflow-tooltip="true" 
                                             sortable
                                             resizable
@@ -1174,7 +1174,7 @@ class Omdb{
                                             v-for="item in dt.columns"
                                             min-width="180">
                                         <template slot-scope="scope" slot="header">
-                                            <span> #{item.field}# 
+                                            <span> #{item['field']}# 
                                                 <el-popover
                                                     placement="top-start"
                                                     width="100"
@@ -1183,6 +1183,9 @@ class Omdb{
                                                     <code slot="reference" style="color: #333;background-color: #f7f7f7;">#{item.type.substr(0,1)}#</code>
                                                 </el-popover>
                                             </span>
+                                        </template>
+                                        <template slot-scope="scope">
+                                            #{scope.row[item['field']]}#
                                         </template>
                                     </el-table-column>
                                 </el-table>
@@ -1233,21 +1236,22 @@ class Omdb{
                 if(!_.isEmpty(self.model)) {
                     self.dt.rows = self.model.data;
                     self.dt.columns = _.map(self.model.columns[_.keys(self.model.columns)[0]],(v)=>{
+                        console.log(_.now(),v.field,v['field'])
                         //  msg
-                        if(_.includes(['msg'],v.field)){
+                        if(_.includes(['msg'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         return  _.truncate(cellValue, {'length': 100});
                                     }});
                         }
 
                         //  data & time render
-                        if(_.includes(['day'],v.field)){
+                        if(_.includes(['day'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         return moment(cellValue).format("YYYY-MM-DD");
                                     }});
                         }
 
-                        if(_.includes(['vtime','mtime','ctime','stime','etime'],v.field)){
+                        if(_.includes(['vtime','mtime','ctime','stime','etime'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
                                         return moment(cellValue).format("YYYY-MM-DD HH:mm:ss.SSS");
                                     }});
@@ -1459,6 +1463,10 @@ class Omdb{
                         mql = "UPDATE " + self.model.node.name + "\nSET " + _.map(self.model.node.fields,function(v){return v+"=''";}).join(",") + "\nWHERE ";
                     } else if(self.model.pattern === 'delete') {
                         mql = "DELETE FROM\n\t " + self.model.node.name;
+                    }  else if(self.model.pattern === 'delete-data') {
+                        mql = "DELETE FROM\n\t " + self.model.node.name + " limit -1";
+                    }  else if(self.model.pattern === 'delete-data-withversion') {
+                        mql = "DELETE FROM\n\t " + self.model.node.name + " limit -1 with version";
                     } else if(self.model.pattern === 'ddl') {
 
                         mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.model.node.name + " (\n\t" + _.map(self.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.model.node.keys.join(",") + ")\n);";

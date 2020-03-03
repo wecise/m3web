@@ -411,7 +411,8 @@
                 } else {
                     this.$message({
                         type: "error",
-                        message: _list.message
+                        message: _list.message,
+                        showClose: true
                     })
                     // 输出日志
                     self.$root.$refs[`omdbQueryConsoleRef-${self.id}`][0].logAppend('error',_list);
@@ -603,7 +604,8 @@
                     
                     this.$message({
                         type: "error",
-                        message: _list.message
+                        message: _list.message,
+                        showClose: true
                     })
 
                     return false;
@@ -804,7 +806,8 @@
                     
                     this.$message({
                         type: "error",
-                        message: _list.message
+                        message: _list.message,
+                        showClose: true
                     })
 
                     return false;
@@ -832,7 +835,8 @@
                     
                     this.$message({
                         type: "error",
-                        message: _list.message
+                        message: _list.message,
+                        showClose: true
                     })
                     
                 }
@@ -960,7 +964,8 @@
                 if(!_url){
                     this.$message({
                         type: "error",
-                        message: "文件保存失败，请确认！"
+                        message: "文件保存失败，请确认！",
+                        showClose: true
                     });
                     return false;
                 }

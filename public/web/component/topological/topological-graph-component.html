@@ -11,15 +11,8 @@
         }
 
         .topological-graph-component #graphContainer > svg{
-            left: 0px!important;
-            top: 0px!important;
-            width: 100%!important;
-            height: 100%!important;
-            display: block!important;
             min-width: 2618px!important;
             min-height: 3316px!important;
-            position: absolute!important;
-            background-image: none!important;
         }
         
         .topological-graph-component #graphContainer > svg > g:nth-child(1){
@@ -104,6 +97,22 @@
 			border: unset;
             border-radius: 5px;
 		}
+
+        .topological-graph-component .search-toolbar{        
+            position: absolute;
+            width: auto;
+            max-width: 40vw;
+            height: auto;
+            z-index: 1000;
+            top:5px;
+            left:5px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+        }
+        .topological-graph-component .search-toolbar .el-input__inner,
+        .topological-graph-component .search-toolbar .el-button{
+            border:unset;
+        } 
 
         .topological-graph-component .vertical-toolbar{
             position: absolute;
@@ -226,9 +235,20 @@
         .graphAction .input-with-select.el-input.el-input--small{
             border-bottom: 1px solid #ddd!important;
         }
-        .graphAction .el-input-group__append, .graphAction .el-input-group__prepend, .graphAction .el-input__inner {
+        .graphAction .topological-analysis-input .el-input-group__append, .graphAction .el-input-group__prepend, .graphAction .el-input__inner {
             background-color: transparent!important;
             border: unset!important;
+        }
+        .graphAction .topological-analysis-form .el-input__inner{
+            background-color: #FFF!important;
+            border:1px solid #DCDFE6!important;
+            height: 32px!important;
+            line-height: 32px!important;
+        }
+
+        /* graphAdv  */
+        .topological-search-toolbar-graphAdv .el-textarea__inner{
+            border:unset;
         }
 
         /* mxPopuMenu */
@@ -238,6 +258,17 @@
             box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
             border: unset!important;
         }
+        
+        /* mxToolTip */
+        div.mxTooltip {
+            background: #fff;
+            border: unset!important;
+            font-family: inherit;
+            font-size: 12px;
+            padding: 10px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+    }
 
 	</style>
 
@@ -246,16 +277,19 @@
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
             <el-container id="container" style="width:100%;height:100%;border:1px solid #ddd;border-left:unset;border-right:unset;position: relative;" ref="container" direction="vertical">
-                <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;">
+                <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;display:none;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
-                    <div id="outlineContainer" class="outlineContainer"></div>
                 </el-header>
                 <el-main id="graphContainer" ref="graphContainer" 
-                        style="width:100vw;height:100vh;position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;border-top:1px solid #ddd;">
+                        style="width:100vw;height:100vh;position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;">
                 </el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
                     <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>
                 </el-footer>
+                <div id="search-toolbar" class="search-toolbar">
+                    <topological-search-toolbar ref="searchToolbar"></topological-search-toolbar>
+                </div>
+                <div id="outlineContainer" class="outlineContainer"></div>
                 <div class="vertical-toolbar">
                     <el-tooltip content="放大" open-delay="500" placement="left">
                        <el-button type="text"  @click="onZoomIn">
@@ -453,6 +487,9 @@
                         value: "",
                         list: fsHandler.callFsJScript("/matrix/graph/edges.js",null).message
                     }
+                },
+                layout: {
+                    splitInst: null
                 }
 	        }
         },
@@ -495,8 +532,6 @@
             //初始化theme
             this.model.graph.theme.color = localStorage.getItem(`GRAPH-VIEW-THEME-${window.SignedUser_UserName}`);
 
-            // 初始化timeline
-            this.initTimeLine();
 	    },
 	    mounted() {
 	        
@@ -516,6 +551,9 @@
                     setInterval(()=>{
                         this.updateStatus();
                     },mx.global.register.topological.status_interval);
+
+                    // 初始化timeline
+                    this.initTimeLine();
                 },500)
 	            
 	        })
@@ -751,7 +789,7 @@
                 let allEdges = [];
 
                 this.model.graph.graph.getModel().beginUpdate();
-
+                
                 try{
 
                     if(!_.isEmpty(window.URL_PARAMS_ITEM)) {
@@ -1074,6 +1112,18 @@
 
                 try{
 
+                    // 自定义ToolTip
+                    this.model.graph.graph.getTooltipForCell = function(cell){
+                        if(!cell.edge){
+                            return `<h5>ID：${cell.getId()}</h5>`;
+                        } else {
+                            return `ID：${cell.getId()}<br>
+                                    起点：${cell.source.getId()}<br>
+                                    终点：${cell.target.getId()}`;
+                        }
+                        
+                    }
+
                     // 首先禁用浏览器右键菜单
                     mxEvent.disableContextMenu(this.$el);
                     // 右键菜单
@@ -1149,8 +1199,12 @@
                                 menu.addSeparator();
 
                                 menu.addItem('选定为路径查询点', null, ()=>{
-                                    this.$root.cellSelect( cell );
-                                    eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                                    if(this.$refs.searchToolbar.currentView==='topological-search-toolbar-graphAdv'){
+                                        this.$refs.searchToolbar.currentView = "topological-search-toolbar-path";
+                                    }
+                                    _.delay(()=>{
+                                        eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                                    },500)
                                 });
 
                             } 
@@ -1200,6 +1254,13 @@
                                 localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
                                 this.onReload();
                             }, submenuIcon);
+                            var submenuLabel = menu.addItem("标签",null,null);
+                            _.forEach(this.model.graph.default.list,(v)=>{
+                                menu.addItem(v.label, null, ()=>{
+                                    this.model.graph.default.title = v.label;
+                                    this.onReload();
+                                }, submenuLabel);
+                            })
 
                             menu.addSeparator();
                             
@@ -1268,7 +1329,6 @@
                             let value = tCell.getValue();
                             let type = "";
 
-                            console.log(3,id,value,_.includes(id,":"))
                             if(!_.includes(id,":")){
                                 tId = sCell.getId() + `_copy_${moment().format("SSS")}`;
                                 tValue = sCell.getValue() + `_copy_${moment().format("SSS")}`;
@@ -1297,18 +1357,26 @@
                     // })
 
                     // 监听单击事件
-                    // this.model.graph.graph.addListener(mxEvent.CLICK, (sender, evt)=> {
+                    this.model.graph.graph.addListener(mxEvent.CLICK, (sender, evt)=> {
 
-                    //     let cell = evt.getProperty('cell');
+                        let cell = evt.getProperty('cell');
 
-                    //     if(!cell) return;
+                        if(!cell) return;
 
-                    //     let id = cell.getId();
-                    //     let value = cell.getValue();
+                        let id = cell.getId();
+                        let value = cell.getValue();
+                        let node = {id: id, value: value, type:'event', cell: cell};
+                        
+                        if(!cell.edge){
+                            if(this.$refs.searchToolbar.currentView==='topological-search-toolbar-graphAdv'){
+                                this.$refs.searchToolbar.currentView = "topological-search-toolbar-graph";
+                            }
+                            _.delay(()=>{
+                                eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                            },500)   
+                        }
 
-                    //     this.model.graph.selectedCell = cell;
-
-                    // });
+                    });
 
                     // 鼠标停留到元素上边缘高亮显示
                     // let track = new mxCellTracker(this.model.graph.graph);
@@ -1337,6 +1405,17 @@
             },
             onTimeLine(){
                 this.model.graph.footbar.show = !this.model.graph.footbar.show;
+                if(this.model.graph.footbar.show){
+                    this.layout.splitInst = Split([this.$refs.graphContainer.$el, this.$refs.footer.$el], {
+                        sizes: [60,40],
+                        minSize: [0, 0],
+                        gutterSize: 5,
+                        cursor: 'col-resize',
+                        direction: 'vertical'
+                    });
+                } else {
+                    this.layout.splitInst.destroy();
+                }
             },
             forward(item){
                 if(this.model.graph.history.length > 1){
@@ -1394,38 +1473,6 @@
             },
             toCenter(){
                 //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
-            },
-            path(){
-                
-                this.$root.cellSelect(null);
-
-                return false;
-                
-                try{
-                    if(jsPanel.activePanels.getPanel('jsPanel-路径')){
-                        jsPanel.activePanels.getPanel('jsPanel-路径').close();
-                    }
-                }catch(error){
-
-                }
-                finally{
-                    maxWindow.winGraphPath('路径', `<div id="${this.id}-graph-path"></div>`, null, `#${this.id}`, this.pathHandle);
-                }
-            },
-            pathHandle(){
-                const self = this;
-
-                let dataset = [];
-                let cols = {
-                                "path":_.concat([{field:"num",title:"序号"}],_.map(self.graphData.pathtags,function(v){ return {field:v,title:v}}))
-                            };
-                
-                _.forEach(self.graphData.paths,function(v,index){
-                    dataset.push( _.merge({num:`路径${++index}`,class:"path"},v));
-                })
-                let node = { data: _.groupBy(dataset,'class'), columns: cols};
-                let path = self.$root.path(`${self.id}-graph-path`,`${self.id}-graph-path`, node);
-                new Vue(path);
             },
             // 绘制路径
             addPath(paths){
