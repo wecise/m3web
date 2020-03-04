@@ -247,7 +247,8 @@
         }
 
         /* graphAdv  */
-        .topological-search-toolbar-graphAdv .el-textarea__inner{
+        .topological-search-toolbar-graphAdv .el-textarea__inner,
+        .topological-search-toolbar-path .el-radio-button__inner{
             border:unset;
         }
 
@@ -1316,7 +1317,7 @@
 
                     // 关系编辑
                     this.model.graph.graph.addListener(mxEvent.CELL_CONNECTED, (sender, evt)=>{
-                        console.log(evt)
+                        
                         let edge = evt.getProperty('edge');
                         let sCell = edge.source;
                         let tCell = edge.target;
@@ -1362,7 +1363,8 @@
                         let cell = evt.getProperty('cell');
 
                         if(!cell){
-                            this.$refs.searchToolbar.currentView = "topological-search-toolbar-graph";
+                            // 点击画板切换到图查询搜索栏
+                            //this.$refs.searchToolbar.currentView = "topological-search-toolbar-graph";
                             return;
                         }
 

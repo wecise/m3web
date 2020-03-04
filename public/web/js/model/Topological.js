@@ -794,15 +794,19 @@ class Topological {
             },
             template:   `<div>
                             <el-header style="display:flex;height:35px;line-height:35px;padding:0px;">
-                                <el-radio-group v-model="type">
+                                <el-radio-group v-model="type" style="height:35px;">
                                     <el-radio-button label="all">全路径</el-radio-button>
                                     <el-radio-button label="short">最短路径</el-radio-button>
                                     <el-radio-button label="long">最长路径</el-radio-button>
                                     <el-radio-button label="">关键路径</el-radio-button>
-                                    <el-button type="default" icon="el-icon-close"  @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>     
+                                    <el-button type="default" icon="el-icon-close"  
+                                        @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
+                                        @keyup.enter.native="$parent.$parent.search"
+                                        style="height:35px;">
+                                    </el-button>
                                 </el-radio-group>
                             </el-header>
-                            <el-main ref="mainView" style="padding:0px;">
+                            <el-main ref="mainView" style="padding:0px;width:30vw;">
                                 <topological-path class="graphAction" :model="$parent.$parent.mainView.path.model" :pathType="type" ref="pathRef"></topological-path>
                             </el-main>
                         </div>`
@@ -817,7 +821,7 @@ class Topological {
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">高级</el-button>
                                 <el-button type="primary" icon="el-icon-search"  @click="onSearch" @keyup.enter.native="onSearch" style="margin-left:-1px;"></el-button>
                             </el-header>
-                            <el-main ref="mainView" style="padding:0px;border-top:1px solid #f7f7f7;">
+                            <el-main ref="mainView" style="width:30vw;padding:0px;border-top:1px solid #f7f7f7;">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-main>
                         </div>`,
@@ -832,7 +836,7 @@ class Topological {
             delimiters: ['#{', '}#'],
             data(){
                 return {
-                    history: fsHandler.callFsJScript("/matrix/graph/loadConfig.js","history").message
+                    history: null
                 }
             },
             template:   `<div style="height:100%;">
@@ -864,7 +868,7 @@ class Topological {
                                             width="200"
                                             trigger="hover"
                                             :content="item.value"
-                                            open-delay="2000"
+                                            open-delay="1000"
                                             style="width:85%;">
                                             <el-button slot="reference" @click="onSearch(item.value)" style="margin-top:5px;color:#777;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width:100%;text-align:left;">
                                                 #{item.value}#
@@ -873,20 +877,43 @@ class Topological {
                                         <el-button
                                             type="text"
                                             icon="el-icon-close"
-                                            style="width:15%;text-align:right;">
+                                            style="width:15%;text-align:right;color:#999;"
+                                            @click="onDeleteHistory(item)">
                                         </el-button>
                                     </el-col>
                                 </el-row>
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
                             </el-main>
+                            <el-footer style="height:30px;line-height:30px;background:#f7f7f7;">
+                            </el-footer>
                         </div>`,
+            created(){
+                this.loadHistory();
+            },
             methods: {
+                loadHistory(){
+                    try{
+                        this.history = fsHandler.callFsJScript("/matrix/graph/loadConfig.js","history").message;
+                    } catch(err){
+
+                    }
+                },
                 onSearch(term){
                     if(_.isEmpty(term)){
                         this.$parent.$parent.search();
                     } else {
                         this.$parent.$parent.term = term;
                         this.$parent.$parent.search();
+                    }
+                },
+                onDeleteHistory(item){
+                    try{
+                        let term = _.extend(item, {action:"delete"});
+                        fsHandler.callFsJScript("/matrix/graph/history-action.js",encodeURIComponent(JSON.stringify(term))).message;
+                    }catch(err){
+
+                    } finally{
+                        this.loadHistory();
                     }
                 }
             }
