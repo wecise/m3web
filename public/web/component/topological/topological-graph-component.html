@@ -1358,10 +1358,13 @@
 
                     // 监听单击事件
                     this.model.graph.graph.addListener(mxEvent.CLICK, (sender, evt)=> {
-
+                        
                         let cell = evt.getProperty('cell');
 
-                        if(!cell) return;
+                        if(!cell){
+                            this.$refs.searchToolbar.currentView = "topological-search-toolbar-graph";
+                            return;
+                        }
 
                         let id = cell.getId();
                         let value = cell.getValue();

@@ -842,25 +842,41 @@ class Topological {
                                 <el-button type="default" icon="el-icon-search"  @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" style="margin-left:-1px;"></el-button>
                                 <el-button type="primary" @click="onSearch('')" @keyup.enter.native="onSearch('')" style="margin-left:-1px;">高级</el-button>
                             </el-header>
-                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;width:100%;height:calc(100vh - 190px);">
-                                <el-input
-                                    type="textarea" :rows="4"
-                                    v-model="$parent.$parent.term"
-                                    placeholder="图搜索"
-                                    @clear="$parent.$parent.onClear"
-                                    style="width:100%;"
-                                    clearable
-                                    ref="graphSearch">
-                                </el-input>
+                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;width:30vw;height:calc(100vh - 190px);">
+                                <el-row style="padding-bottom:5px;">
+                                    <el-col :span="24">
+                                        <el-input
+                                            type="textarea" :rows="4"
+                                            v-model="$parent.$parent.term"
+                                            placeholder="图搜索"
+                                            @clear="$parent.$parent.onClear"
+                                            style="width:100%;"
+                                            clearable
+                                            ref="graphSearch">
+                                        </el-input>
+                                    </el-col>
+                                </el-row>
                                 <el-divider content-position="left">历史</el-divider>
-                                <p style="text-align:left;width:100%;" v-for="item in history">
-                                    <el-button
-                                        type="text"
-                                        style="width:200px;text-align:left;"
-                                        @click="onSearch(item.value)">
-                                        #{item.value}#
-                                    </el-button>
-                                </p>
+                                <el-row style="padding-top:5px;">
+                                    <el-col :span="24" v-for="item in history" style="display:flex;flex-wrap:nowrap;">
+                                        <el-popover
+                                            placement="top-start"
+                                            width="200"
+                                            trigger="hover"
+                                            :content="item.value"
+                                            open-delay="2000"
+                                            style="width:85%;">
+                                            <el-button slot="reference" @click="onSearch(item.value)" style="margin-top:5px;color:#777;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;width:100%;text-align:left;">
+                                                #{item.value}#
+                                            </el-button>
+                                        </el-popover>
+                                        <el-button
+                                            type="text"
+                                            icon="el-icon-close"
+                                            style="width:15%;text-align:right;">
+                                        </el-button>
+                                    </el-col>
+                                </el-row>
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
                             </el-main>
                         </div>`,

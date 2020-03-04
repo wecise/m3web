@@ -498,6 +498,11 @@ class Window {
                 }
             },
             callback: function(){
+                
+                $(".jsPanel").css({
+                    "z-index": "1000"
+                });
+                
                 $("#jsPanel-robot-min").parent().addClass("jsPanel-btn jsPanel-btn-maximize");
                 
                 $(".jsPanel-headerbar",this).css({
