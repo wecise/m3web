@@ -226,6 +226,9 @@
         .topological-graph-component .el-input__inner{
             border-radius: 0px;
         }
+        .topological-graph-component .el-input.is-disabled .el-input__inner {
+            background-color: #ffffff;
+        }
 
         .el-color-dropdown.el-color-picker-dropdown.el-color-picker__panel{
             z-index: 30000!important;
@@ -316,7 +319,8 @@
                     </el-tooltip>
                    <el-divider></el-divider>
                    <el-tooltip content="全屏显示" open-delay="500" placement="left">
-                       <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" @click="onFullScreen" style="width:18px;height:auto;">
+                       <el-button type="text" :icon="model.control.ifFullScreen | pickScreenStyle" 
+                                @click="onFullScreen" style="width:18px;height:auto;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
@@ -1710,7 +1714,24 @@
                 }
             },
             onFullScreen(){
-                this.model.control.ifFullScreen = mx.fullScreenByEl(this.$refs.container.$el);
+                if (screenfull.isEnabled) {
+                    if(this.model.control.ifFullScreen){
+                        screenfull.exit(this.$el);
+                        this.model.control.ifFullScreen = false;   
+                    
+                        $("#header").show();
+                        $("#aside").show();
+                        $("#content").css("margin-left","60px");
+                    } else {
+                        screenfull.request();
+                        this.model.control.ifFullScreen = true;
+
+                        $("#header").hide();
+                        $("#aside").hide();
+                        $("#content").css("margin-left","0px");
+                    }   
+                }
+                //this.model.control.ifFullScreen = mx.fullScreenByEl(this.$el);
             },
             onToggleIcon(){
                 this.model.control.ifIcon = !this.model.control.ifIcon;

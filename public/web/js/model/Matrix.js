@@ -375,7 +375,7 @@ class Matrix {
             document.exitFullscreen();
             return false;
         } else {
-            el.requestFullscreen();
+            el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
             return true;
         }
 

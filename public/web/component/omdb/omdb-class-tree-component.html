@@ -250,6 +250,15 @@
                                                         });
                             }
                         },
+                        "删除列数据": {
+                            name: "删除列数据", icon: "fas fa-trash", callback: function (key, opt) {
+                                self.$root.mainTabsAdd({ type: 'omdb-query-console',
+                                                            name: self.selectedNode.name.replace(/\//g,"_"),
+                                                            title: self.selectedNode.name,
+                                                            model: { pattern: 'delete-column-data', node: self.selectedNode, pnode: self.selectedNode.getParentNode() }
+                                                        });
+                            }
+                        },
                         "sep2": "---------",
                         "SELECT": {
                             name: "SELECT", icon: "fas fa-database", callback: function (key, opt) {

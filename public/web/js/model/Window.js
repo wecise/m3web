@@ -479,7 +479,8 @@ class Window {
 
         let win = $.jsPanel({
             id: 'jsPanel-robot',
-            theme:          maxWindow.theme.dark,
+            //theme:          maxWindow.theme.dark,
+            theme: "none",
             headerTitle:   'AI 运维',//title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
             position: _position,
@@ -518,7 +519,13 @@ class Window {
                     "min-height": "28px"
                 });
                 $(".jsPanel-titlebar h3").css({
-                    "font-size": "12px"
+                    "font-size": "12px",
+                    "width": "70px",
+                    "margin": "0px",
+                    "background": "#242c46",
+                    "height": "32px",
+                    "padding": "10px 0px 0px 10px",
+                    "color": "#fff!important"
                 });
 
             },

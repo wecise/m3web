@@ -257,7 +257,8 @@ class System {
 										</el-tooltip>
 									</el-header-->
 									<el-main style="padding:0px;">
-										<el-tree node-key="fullname"
+										<el-tree 
+											node-key="fullname"
 											default-expand-all
 											:data="nodes" :props="defaultProps" 
 											@node-click="onNodeClick"
@@ -716,126 +717,1059 @@ class System {
 					}
 				})
 
+				// 通知管理-rule
+				Vue.component("notify-manage-rule",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container>
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="新建规则">
+											<el-button type="text" icon="el-icon-plus"></el-button>
+										</el-tooltip>
+										<el-tooltip content="删除规则">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出规则">
+											<el-button type="text" icon="el-icon-upload2"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导入规则">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="padding:0px;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											<el-table-column type="expand">
+											<template slot-scope="props">
+												<el-form label-position="left">
+													
+												</el-form>
+											</template>
+											</el-table-column>
+											<el-table-column 
+												node-key="id"
+												:label="item.title" 
+												:prop="item.field" 
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<span v-if="item.field=='status'">
+														<el-button type="danger" v-if="scope.row.status==0">停止</el-button>
+														<el-button type="success" v-else>启动</el-button>
+													</span>
+													<span v-else>
+														#{scope.row[item.field]}#
+													</span>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									name: '运维开放',
+									status: '1',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									template: '开放'
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									name: '运维主机',
+									status: '1',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									template: '开放'
+								}],
+								columns: [
+									{
+										field: "status",
+										title: "状态",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "规则名称",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "phones",
+										title: "接收人员电话",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "emails",
+										title: "接收人员邮件",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "template",
+										title: "引用模板",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						
+					}
+				})
+				// 通知管理-type
+				Vue.component("notify-manage-type",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="width:240px;background:#fff;height:100%;">
+										<el-tree 
+											node-key="id"
+											:data="tree.data" 
+											:props="tree.defaultProps" 
+											@node-click="onNodeClick"
+											style="background:transparent;"
+											ref="tree">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+												<span>#{node.label}#</span>
+												<el-button v-show="data.show" type="text" @click="delNode(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+												<el-button v-show="data.show" type="text" @click="newNode(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+												<el-button v-show="data.show" type="text" @click="newGroup(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
+												<el-button v-show="data.show" type="text" @click="refresh(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
+											</span>   
+										</el-tree>
+									</el-aside>
+									<el-container style="height:100%;">
+										<el-header style="height:40px;line-height:40px;">
+											<el-tooltip content="删除选择的分类">
+												<el-button type="text" icon="el-icon-delete"></el-button>
+											</el-tooltip>
+											<el-tooltip content="导出">
+												<el-button type="text" icon="el-icon-download"></el-button>
+											</el-tooltip>
+											<el-tooltip content="导入">
+												<el-button type="text" icon="el-icon-upload2"></el-button>
+											</el-tooltip>
+										</el-header>
+										<el-main  style="padding:0px;height:100%;">
+											<el-table
+												:data="dt.rows"
+												style="width: 100%">
+												<el-table-column type="index"></el-table-column>
+												<el-table-column type="expand">
+												<template slot-scope="props">
+													<el-form label-position="left">
+														
+													</el-form>
+												</template>
+												</el-table-column>
+												<el-table-column 
+													:label="item.title" 
+													:prop="item.field" 
+													v-for="item in dt.columns"
+													v-if="item.visible"></el-table-column>
+											</el-table>
+										</el-main>
+									</el-container>
+								</el-container>`,
+					data(){
+						return {
+							tree: {
+								data: [
+									{
+										id: "1",
+										label: '主机事件',
+										show: false,
+										children: [
+											{
+												id: "11",
+												label: '主机硬件',
+												show: false,
+												param: `alerttype="1"`,
+												children: []
+											},
+											{
+												id: "12",
+												label: '主机系统',
+												show: false,
+												param: `alerttype="2"`,
+												children: []
+											},
+											{
+												id: "13",
+												label: '主机DB2',
+												show: false,
+												param: `alerttype="3"`,
+												children: []
+											}
+										]
+									}, 
+									{
+										id: "2",
+										label: '开放事件',
+										children: [
+											{
+												id: "21",
+												label: '开放硬件',
+												show: false,
+												param: `alerttype="1"`,
+												children: []
+											},
+											{
+												id: "22",
+												label: '开放系统',
+												show: false,
+												param: `alerttype="2"`,
+												children: []
+											},
+											{
+												id: "3",
+												label: '开放DB2',
+												show: false,
+												param: `alerttype="3"`,
+												children: []
+											}
+										]
+									}
+								],
+								defaultProps:{
+									children: 'children',
+          							label: 'label'
+								}
+							},
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									name: '运维开放',
+									status: '1',
+									param: `alerttype='1'`,
+									config: ''
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									name: '运维主机',
+									status: '1',
+									param: `alerttype='1'`,
+									config: ''
+								}],
+								columns: [
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "规则名称",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "param",
+										title: "规则定义",
+										visible: true
+									},
+									{
+										field: "config",
+										title: "其它",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						onNodeClick(tNode){
+
+						},
+						newNode(){
+
+						},
+						delNode(){
+							
+						},
+						newGroup(){
+							
+						},
+						refresh(){
+
+						},
+						onMouseEnter(data){
+							this.$set(data, 'show', true)
+						},
+						onMouseLeave(data){
+							this.$set(data, 'show', false)
+						}
+					}
+				})
+				// 通知管理-person
+				Vue.component("notify-manage-person",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-aside style="width:240px;background:#fff;height:100%;">
+										<el-tree 
+											node-key="id"
+											:data="tree.data" 
+											:props="tree.defaultProps" 
+											@node-click="onNodeClick"
+											style="background:transparent;"
+											ref="tree">
+											<span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;"  @mouseenter="onMouseEnter(data)" @mouseleave="onMouseLeave(data)">
+												<span>#{node.label}#</span>
+												<el-button v-show="data.show" type="text" @click="delNode(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-delete"></el-button>
+												<el-button v-show="data.show" type="text" @click="newNode(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-plus"></el-button>
+												<el-button v-show="data.show" type="text" @click="newGroup(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-folder-add"></el-button>
+												<el-button v-show="data.show" type="text" @click="refresh(data,$event)" style="float:right;width:14px;margin:0 5px;" icon="el-icon-refresh"></el-button>
+											</span>   
+										</el-tree>
+									</el-aside>
+									<el-container style="height:100%;">
+										<el-header style="height:40px;line-height:40px;">
+											<el-tooltip content="删除选择的人员">
+												<el-button type="text" icon="el-icon-delete"></el-button>
+											</el-tooltip>
+											<el-tooltip content="导出">
+												<el-button type="text" icon="el-icon-download"></el-button>
+											</el-tooltip>
+											<el-tooltip content="导入">
+												<el-button type="text" icon="el-icon-upload2"></el-button>
+											</el-tooltip>
+										</el-header>
+										<el-main  style="padding:0px;height:100%;">
+											<el-table
+												:data="dt.rows"
+												style="width: 100%">
+												<el-table-column type="index"></el-table-column>
+												<el-table-column type="expand">
+												<template slot-scope="props">
+													<el-form label-position="left">
+														
+													</el-form>
+												</template>
+												</el-table-column>
+												<el-table-column 
+													node-key="id"
+													:label="item.title" 
+													:prop="item.field" 
+													v-for="item in dt.columns"
+													v-if="item.visible">
+													<template slot-scope="scope">
+														<span v-if="item.field=='status'">
+															<el-button type="danger" v-if="scope.row.status==0">禁用</el-button>
+															<el-button type="success" v-else>启用</el-button>
+														</span>
+														<span v-else>
+															#{scope.row[item.field]}#
+														</span>
+													</template>	
+												</el-table-column>
+											</el-table>
+										</el-main>
+									</el-container>
+								</el-container>`,
+					data(){
+						return {
+							tree: {
+								data: [
+									{	
+										id: "1",
+										label: '系统一组',
+										show: false,
+										children: [
+											{
+												id: "11",
+												label: '李勇',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											},
+											{
+												id: "12",
+												label: '李勇',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											},
+											{
+												id: "13",
+												label: '李勇',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											}
+										]
+									}, 
+									{
+										id: "2",
+										label: '系统二组',
+										children: [
+											{
+												id: "21",
+												label: '李勇1',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											},
+											{
+												id: "22",
+												label: '李勇2',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											},
+											{
+												id: "23",
+												label: '李勇3',
+												show: false,
+												phone: "13900000000",
+												email: "139@139.com",
+												children: []
+											}
+										]
+									}
+								],
+								defaultProps: {
+									children: 'children',
+          							label: 'label'
+								}
+							},
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									name: '李勇',
+									status: '1',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									company: "ibm",
+									department: "运维部门",
+									group: "系统一组",
+									config: "",
+									template: '开放'
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									name: '运维主机',
+									status: '1',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									company: "ibm",
+									department: "运维部门",
+									group: "系统一组",
+									config: "",
+									template: '开放'
+								}],
+								columns: [
+									{
+										field: "status",
+										title: "状态",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "人员",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "phones",
+										title: "接收人员电话",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "emails",
+										title: "接收人员邮件",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "company",
+										title: "公司",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "department",
+										title: "部门",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "group",
+										title: "所属组",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "config",
+										title: "其它",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "template",
+										title: "引用模板",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						onNodeClick(tNode){
+
+						},
+						newNode(){
+
+						},
+						delNode(){
+							
+						},
+						newGroup(){
+							
+						},
+						refresh(){
+
+						},
+						onMouseEnter(data){
+							this.$set(data, 'show', true)
+						},
+						onMouseLeave(data){
+							this.$set(data, 'show', false)
+						}
+					}
+				})
+				// 通知管理-severity
+				Vue.component("notify-manage-severity",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="新建级别">
+											<el-button type="text" icon="el-icon-plus"></el-button>
+										</el-tooltip>
+										<el-tooltip content="删除选择的级别">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="padding:0px;height:100%;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											</el-table-column>
+											<el-table-column 
+												:label="item.title" 
+												:prop="item.field" 
+												sortable
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<el-color-picker
+														:value="scope.row.color"
+														show-alpha
+														v-if="item.field=='color'">
+													</el-color-picker>
+													<span style="font-weight:900;" v-else>#{scope.row[item['field']]}#</span>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							dt: {
+								rows:[],
+								columns: [
+									{
+										field: "name",
+										title: "级别",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "title_en",
+										title: "名称",
+										width: 120,
+										visible:true
+									},
+									{
+										field: "title_cn",
+										title: "中文名称",
+										width: 120,
+										visible:true
+									},
+									{
+										field: "color",
+										title: "颜色",
+										visible:true
+									}],
+								selected: []
+							}
+						}
+					},
+					created(){
+						this.initData();
+					},
+					mounted() {
+						
+					},
+					methods:{
+						initData(){
+							let term = {action:"list", user:window.SignedUser_UserName};
+							this.dt.rows = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+						}
+					}
+				})
+				// 通知管理-template
+				Vue.component("notify-manage-template",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="新建模板">
+											<el-button type="text" icon="el-icon-plus"></el-button>
+										</el-tooltip>
+										<el-tooltip content="删除模板">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出模板">
+											<el-button type="text" icon="el-icon-upload2"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导入模板">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main style="height:100%;padding:0px;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											<el-table-column type="expand">
+											<template slot-scope="props">
+												<el-form label-position="left">
+													
+												</el-form>
+											</template>
+											</el-table-column>
+											<el-table-column 
+												node-key="id"
+												:label="item.title" 
+												:prop="item.field" 
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<span v-if="item.field=='status'">
+														<el-button type="danger" v-if="scope.row.status==0">禁用</el-button>
+														<el-button type="success" v-else>启用</el-button>
+													</span>
+													<span v-else>
+														#{scope.row[item.field]}#
+													</span>
+												</template>		
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									name: '运维开放',
+									status: '1',
+									template: '@serverial @severity @msg @vtime',
+									config: ''
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									name: '运维主机',
+									status: '1',
+									template: '@serverial @severity @msg @vtime',
+									config: ''
+								}],
+								columns: [
+									{
+										field: "status",
+										title: "状态",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "模板名称",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "template",
+										title: "模板定义",
+										visible: true
+									},
+									{
+										field: "config",
+										title: "其它",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						
+					}
+				})
+				// 通知管理-voice
+				Vue.component("notify-manage-voice",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container>
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="上传新媒介">
+											<el-button type="text" icon="el-icon-upload"></el-button>
+										</el-tooltip>
+										<el-tooltip content="删除选择的媒介">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出媒介">
+											<el-button type="text" icon="el-icon-upload2"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导入媒介">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="padding:0px;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											<el-table-column type="expand">
+											<template slot-scope="props">
+												<el-form label-position="left">
+													
+												</el-form>
+											</template>
+											</el-table-column>
+											<el-table-column 
+												:label="item.title" 
+												:prop="item.field" 
+												v-for="item in dt.columns"
+												v-if="item.visible">
+											</el-table-column>
+											<el-table-column>
+												<template slot-scope="scope">
+													<el-button type="success">播放</el-button>
+													<el-button type="danger">删除</el-button>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									name: 'voice1',
+									remark: ""
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									name: 'voice2',
+									remark: ""
+								}],
+								columns: [
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "声音名称",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "remark",
+										title: "备注",
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						
+					}
+				})
+				// 通知管理-log
+				Vue.component("notify-manage-log",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="删除选择的日志">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出日志">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="padding:0px;height:100%;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											<el-table-column type="expand">
+											<template slot-scope="props">
+												<el-form label-position="left">
+													
+												</el-form>
+											</template>
+											</el-table-column>
+											<el-table-column 
+												node-key="id"
+												sortable
+												:label="item.title" 
+												:prop="item.field" 
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<span v-if="item.field=='status'">
+														<el-button type="danger" v-if="scope.row.status==0">失败</el-button>
+														<el-button type="success" v-else>成功</el-button>
+													</span>
+													<span v-else>
+														#{scope.row[item.field]}#
+													</span>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el=container>`,
+					data(){
+						return {
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									status: '1',
+									serial: '2234234',
+									name: '规则名称',
+									vtime: _.now(),
+									person: '李勇',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									template: '开放'
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									status: '0',
+									serial: '2234234',
+									name: '规则名称',
+									vtime: _.now(),
+									person: '李勇',
+									phones: '13923234366',
+									emails: 'wz@13.com',
+									template: '开放'
+								}],
+								columns: [
+									{
+										field: "status",
+										title: "状态",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "serial",
+										title: "事件ID",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "name",
+										title: "规则名称",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "vtime",
+										title: "发送时间",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "person",
+										title: "接收人",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "phones",
+										title: "接收人电话",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "emails",
+										title: "接收人邮件",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "template",
+										title: "引用模板",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						
+					}
+				})
+				
 				// 通知管理
 				Vue.component('notify-manage',{
 					delimiters: ['#{', '}#'],
-					template: 	`<el-container>
-									<el-main style="padding:0px;">
+					template: 	`<el-container  style="height:100%;">
+									<el-main style="padding:0px;height:100%;overflow:hidden;">
 										<el-tabs v-model="activeName" @tab-click="onTabClick" type="border-card">
 										<el-tab-pane label="规则管理" name="rule">
-											<el-container>
-												<el-header>
-													<el-tooltip content="新建规则">
-														<el-button type="text" icon="el-icon-plus"></el-button>
-													</el-tooltip>
-													<el-tooltip content="删除规则">
-														<el-button type="text" icon="el-icon-delete"></el-button>
-													</el-tooltip>
-													<el-tooltip content="导出规则">
-														<el-button type="text" icon="el-icon-upload2"></el-button>
-													</el-tooltip>
-													<el-tooltip content="导入规则">
-														<el-button type="text" icon="el-icon-download"></el-button>
-													</el-tooltip>
-												</el-header>
-												<el-main>
-													<el-table
-														:data="rule.dt.rows"
-														style="width: 100%">
-														<el-table-column type="index"></el-table-column>
-														<el-table-column type="expand">
-														<template slot-scope="props">
-															<el-form label-position="left" inline class="demo-table-expand">
-																
-															</el-form>
-														</template>
-														</el-table-column>
-														<el-table-column 
-															:label="item.title" 
-															:prop="item.field" 
-															v-for="item in rule.dt.columns"
-															v-if="item.visible"></el-table-column>
-													</el-table>
-												</el-main>
-											</el-container>
+											<notify-manage-rule></notify-manage-rule>
 										</el-tab-pane>
-										<el-tab-pane label="分类管理" name="type">分类管理</el-tab-pane>
-										<el-tab-pane label="人员管理" name="person">人员管理</el-tab-pane>
-										<el-tab-pane label="级别管理" name="severity">级别管理</el-tab-pane>
-										<el-tab-pane label="模板管理" name="template">模板管理</el-tab-pane>
-										<el-tab-pane label="发送日志" name="log">发送日志</el-tab-pane>
+										<el-tab-pane label="分类管理" name="type">
+											<notify-manage-type></notify-manage-type>
+										</el-tab-pane>
+										<el-tab-pane label="人员管理" name="person">
+											<notify-manage-person></notify-manage-person>
+										</el-tab-pane>
+										<el-tab-pane label="级别管理" name="severity">
+											<notify-manage-severity></notify-manage-severity>
+										</el-tab-pane>
+										<el-tab-pane label="模板管理" name="template">
+											<notify-manage-template></notify-manage-template>
+										</el-tab-pane>
+										<el-tab-pane label="声音媒介" name="voice">
+											<notify-manage-voice></notify-manage-voice>
+										</el-tab-pane>
+										<el-tab-pane label="发送日志" name="log">
+											<notify-manage-log></notify-manage-log>
+										</el-tab-pane>
 									</el-tabs>
 									</el-main>
 								</el-container>`,
 					data(){
 						return {
-							activeName:"rule",
-							rule: {
-								dt: {
-									rows:[{
-										id: '1',
-										class: "/matrix/system/notify",
-										name: '运维开放',
-										status: '1',
-										phones: '13923234366',
-										emails: 'wz@13.com',
-										template: '开放'
-									},
-									{
-										id: '2',
-										class: "/matrix/system/notify",
-										name: '运维主机',
-										status: '1',
-										phones: '13923234366',
-										emails: 'wz@13.com',
-										template: '开放'
-									}],
-									columns: [
-										{
-											field: "status",
-											title: "状态",
-											width: 50,
-											visible: true
-										},
-										{
-											field: "id",
-											title: "ID",
-											width: 120,
-											visible:false
-										},
-										{
-											field: "class",
-											title: "CLASS",
-											width: 120,
-											visible:false
-										},
-										{
-											field: "name",
-											title: "规则名称",
-											width: 160,
-											visible: true
-										},
-										{
-											field: "phones",
-											title: "接收人员电话",
-											width: 160,
-											visible: true
-										},
-										{
-											field: "emails",
-											title: "接收人员邮件",
-											width: 160,
-											visible: true
-										},
-										{
-											field: "template",
-											title: "引用模板",
-											width: 160,
-											visible: true
-										}],
-									selected: []
-								}
-							}
+							activeName:"rule"
 						}
 					},
 					mounted() {

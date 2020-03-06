@@ -1466,8 +1466,10 @@ class Omdb{
                     }  else if(self.model.pattern === 'delete-data') {
                         mql = "DELETE FROM\n\t " + self.model.node.name + " limit -1";
                     }  else if(self.model.pattern === 'delete-data-withversion') {
-                        mql = "DELETE FROM\n\t " + self.model.node.name + " limit -1 with version";
-                    } else if(self.model.pattern === 'ddl') {
+                        mql = "DELETE FROM\n\t " + self.model.node.name + " with version";
+                    }  else if(self.model.pattern === 'delete-column-data') {
+                        mql = "DELETE column_name FROM " + self.model.node.name;
+                    }  else if(self.model.pattern === 'ddl') {
 
                         mql = "#DDL\nCREATE CLASS IF NOT EXISTS " + self.model.node.name + " (\n\t" + _.map(self.model.node.fieldsObj, function(v){ return `${v.name}  ${v.ftype}  '${v.title}'`;}).join(",\n\t") + "\n\tindexes(" + _.map(_.filter(self.model.node.fieldsObj,function(v){return v.isindex == 1;}),'name').join(",") + ")\n\tkeys(" + self.model.node.keys.join(",") + ")\n);";
 

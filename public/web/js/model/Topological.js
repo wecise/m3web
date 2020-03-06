@@ -489,7 +489,9 @@ class Topological {
                                 <topological-analysis-new-input></topological-analysis-new-input>
                                 <div style="padding:0px 10px;">
                                     <el-tooltip content="路劲查询" open-delay="500" placement="top">
-                                        <el-button type="success" icon="el-icon-position" @click="onSearch" style="float:right;"></el-button>
+                                        <el-button type="primary" @click="onSearch" style="float:right;">
+                                            <el-image src="/fs/assets/images/tools/png/path-white.png?type=open&issys=true" style="width:16px;"></el-image>
+                                        </el-button>
                                     </el-tooltip> 
                                 </div>
                             </el-header>
@@ -786,29 +788,38 @@ class Topological {
         })
         
         Vue.component("topological-search-toolbar-path",{
-            delimiters: ['${', '}'],
+            delimiters: ['#{', '}#'],
             data(){
                 return {
                     type: 'all'
                 }
             },
             template:   `<div>
-                            <el-header style="display:flex;height:35px;line-height:35px;padding:0px;">
-                                <el-radio-group v-model="type" style="height:35px;">
-                                    <el-radio-button label="all">全路径</el-radio-button>
-                                    <el-radio-button label="short">最短路径</el-radio-button>
-                                    <el-radio-button label="long">最长路径</el-radio-button>
-                                    <el-radio-button label="">关键路径</el-radio-button>
-                                    <el-button type="default" icon="el-icon-close"  
-                                        @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
-                                        @keyup.enter.native="$parent.$parent.search"
-                                        style="height:35px;">
-                                    </el-button>
-                                </el-radio-group>
+                            <el-header style="height:32px;line-height:32px;padding:0px;display:flex;">
+                                <div style="margin-top:-1px;width:88%;">
+                                    <el-radio-group v-model="type">
+                                        <el-radio-button label="all">全路径</el-radio-button>
+                                        <el-radio-button label="short">最短路径</el-radio-button>
+                                        <el-radio-button label="long">最长路径</el-radio-button>
+                                        <el-radio-button label="">关键路径</el-radio-button>
+                                    </el-radio-group>
+                                </div>
+                                <div>
+                                    <el-divider direction="vertical"></el-divider>
+                                </div>
+                                <el-button type="default"
+                                    @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
+                                    @keyup.enter.native="$parent.$parent.search"
+                                    style="width:15%;">
+                                    <i class="el-icon-close" style="font-size:14px;font-weight: 900;"></i>
+                                </el-button>
                             </el-header>
-                            <el-main ref="mainView" style="padding:0px;width:30vw;">
+                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;padding:0px;width:30vw;">
                                 <topological-path class="graphAction" :model="$parent.$parent.mainView.path.model" :pathType="type" ref="pathRef"></topological-path>
                             </el-main>
+                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
+                                
+                            </el-footer>
                         </div>`
         })
 
@@ -817,13 +828,24 @@ class Topological {
             template:   `<div>
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
                                 <el-input placeholder="选择实体" style="width:100%;" disabled></el-input>
-                                <el-button type="default" icon="el-icon-position"  @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>
-                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">高级</el-button>
-                                <el-button type="primary" icon="el-icon-search"  @click="onSearch" @keyup.enter.native="onSearch" style="margin-left:-1px;"></el-button>
+                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
+                                    <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
+                                </el-button>
+                                <el-button type="default" 
+                                    @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">
+                                    高级
+                                </el-button>
+                                <el-button type="primary" @click="onSearch" 
+                                    @keyup.enter.native="onSearch" style="margin-left:-1px;">
+                                    <i class="el-icon-search" style="font-weight: 900;font-size:14px;"></i>
+                                </el-button>
                             </el-header>
                             <el-main ref="mainView" style="width:30vw;padding:0px;border-top:1px solid #f7f7f7;">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-main>
+                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
+                                
+                            </el-footer>
                         </div>`,
             methods: {
                 onSearch(){
@@ -842,9 +864,18 @@ class Topological {
             template:   `<div style="height:100%;">
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
                                 <el-input placeholder="图查询语句" style="width:100%;" disabled></el-input>
-                                <el-button type="default" icon="el-icon-position"  @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;"></el-button>
-                                <el-button type="default" icon="el-icon-search"  @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" style="margin-left:-1px;"></el-button>
-                                <el-button type="primary" @click="onSearch('')" @keyup.enter.native="onSearch('')" style="margin-left:-1px;">高级</el-button>
+                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
+                                    <el-image src="/fs/assets/images/tools/png/path.png?type=open&issys=true" style="width:16px;"></el-image>
+                                </el-button>
+                                <el-button type="default"
+                                    @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
+                                    style="margin-left:-1px;">
+                                    <i class="el-icon-search" style="font-weight: 900;"></i>
+                                </el-button>
+                                <el-button type="primary" @click="onSearch('')" 
+                                    @keyup.enter.native="onSearch('')" style="margin-left:-1px;">
+                                    高级
+                                </el-button>
                             </el-header>
                             <el-main ref="mainView" style="border-top:1px solid #f7f7f7;width:30vw;height:calc(100vh - 190px);">
                                 <el-row style="padding-bottom:5px;">
@@ -884,7 +915,8 @@ class Topological {
                                 </el-row>
                                 <!--topological-graphAdv class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graphAdv-->
                             </el-main>
-                            <el-footer style="height:30px;line-height:30px;background:#f7f7f7;">
+                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
+                                
                             </el-footer>
                         </div>`,
             created(){

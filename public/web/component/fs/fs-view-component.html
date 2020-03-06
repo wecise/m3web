@@ -1844,16 +1844,24 @@
                     this.initEditName();
                 },
                 newDir() {
-                    const self = this;
-    
+                    
                     let _name = '新文件夹_' + _.now();
                     let _type = 'dir';
-                    let _attr = {remark: '', ctime: _.now(), author: self.signedUserName};
+                    let _attr = {remark: '', ctime: _.now(), author: this.signedUserName};
     
-                    let _rtn = fsHandler.fsNew(_type, self.rootPath, _name, null, _attr);
-    
-                    if(_rtn == 1){
-                        self.load();
+                    let rtn = fsHandler.fsNew(_type, this.rootPath, _name, null, _attr);
+                    
+                    if(rtn == 1){
+                        this.load();
+                        this.$message({
+                            type: "success",
+                            message: "新建目录成功！"
+                        })
+                    } else {
+                        this.$message({
+                            type: "error",
+                            message: "新建目录失败，" + rtn.message
+                        })
                     }
                 },
                 newFile() {
