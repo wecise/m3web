@@ -6,13 +6,26 @@
             display: none!important;
         }
          */
-        .topological-timeline{
+        .topological-timeline {
             height: 100%;
             border: 1px solid #ddd;
             border-top:unset;
         }
 
-        
+        .topological-timeline .vis-timeline {
+            border: unset;
+            border-top: 1px solid #ddd;
+            border-left: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .topological-timeline .el-color-picker--mini > .el-color-picker__trigger {
+            height: 12px;
+            width: 12px;
+            margin: 0px 0px -1px 5px;
+            padding:unset;
+            border:unset;
+        }
 
 	</style>
 
@@ -20,12 +33,28 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
         <el-container>
-            <el-aside style="display: ;">
-                <el-tree :data="tree.data" :props="tree.defaultProps" @node-click="onNodeClick"></el-tree>
+            <el-aside width="200px">
+                <el-tree 
+                    show-checkbox
+                    @check-change="onNodeCheckChange"
+                    default-expand-all 
+                    :data="tree.data" :props="tree.defaultProps"
+                    @node-click="onNodeClick"
+                    style="background: transparent;">
+                    <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;">
+                        <span>#{node.label}#</span>
+                        <el-color-picker v-model="data.color" size="mini" v-if="data.children.length==0"></el-color-picker>
+                    </span>  
+                </el-tree>
             </el-aside>
-            <el-main style="padding:0px;">
-                <div ref="timeline" style="width:100%;height:100%;"></div>
-            </el-main>
+            <el-container>
+                <el-header style="height:30px;line-height: 30px;">
+                    <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
+                </el-header>
+                <el-main style="padding:0px;">
+                    <div ref="timeline" style="width:100%;height:100%;"></div>
+                </el-main>
+            </el-container>
         </el-container>
 	</template>
 
@@ -39,6 +68,7 @@
 	    data() {
             return {
                 timeline:{
+                    showDiff:false,
                     inst: null,
                     items:  null,
                     options: {
@@ -53,7 +83,22 @@
                     }
                 },
                 tree: {
-                    data: [],
+                    data: [{
+                        id: 1,
+                        label:'实体关联数据',
+                        children: [{
+                            id: 11,
+                            label: '事件',
+                            children: [],
+                            color:"#ff0000"
+                        },
+                        {
+                            id: 12,
+                            label: '工单',
+                            children: [],
+                            color:"#ffff00"
+                        }]
+                    }],
                     defaultProps: {
                         children: 'children',
                         label: 'label'
@@ -85,6 +130,9 @@
 	        
 	    },
 	    methods: {
+            onNodeCheckChange(data, checked, indeterminate){
+                console.log(data, checked, indeterminate )
+            },
             initItems(){
                 this.timeline.items = null;
                 this.timeline.items = new vis.DataSet(_.map(this.model,(v)=>{

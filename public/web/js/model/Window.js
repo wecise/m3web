@@ -236,34 +236,21 @@ class Window {
 
         let id = `jsPanel-editor`;
 
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-FSEDIT-POSITION")));
-
-        let _position = "center 0 0";
-
-        if(!_.isEmpty(_tmp)){
-            _position = _tmp;
-        }
-
         this.lrwh[2] = this.width * 0.85;
         this.lrwh[3] = this.height * 0.7;
 
         let win = $.jsPanel({
             id: id,
-            theme:          maxWindow.theme.grey,
+            theme:          maxWindow.theme.dark,
             headerTitle:   `<img src="${window.ASSETS_ICON}/apps/png/matrix.png?type=download&issys=${window.SignedUser_IsAdmin}" style="width:12px;"></img> ${title}`,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
-            position: _position,
+            position: "center 0 0",
             container: 'body',
             headerControls: { controls: '' },
             headerRemove:  false,
             content:        template,
             onresized: function(){
                 eventHub.$emit("WINDOW-STATUS-CHANGE-EVENT");
-            },
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-FSEDIT-POSITION",JSON.stringify(position));
-                }
             },
             callback:       function(){
                 $(".jsPanel").css({
@@ -282,10 +269,10 @@ class Window {
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
-                $(".jsPanel-titlebar h3").css({
+                $(".jsPanel-titlebar h3",this).css({
                     "font-size": "12px"
                 });
-                $(".jsPanel .jsPanel-ftr").css({
+                $(".jsPanel .jsPanel-ftr",this).css({
                     "border-top": "unset"
                 });
                 
@@ -295,7 +282,7 @@ class Window {
                 window.editorApp = null;
             },
             footerToolbar: function (footer) {
-                return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
+                return `<div style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
             }
         });
 
@@ -347,8 +334,6 @@ class Window {
 
     winNewFile(title, template, position, container){
 
-        let _position = "center 0 0";
-
         this.lrwh[2] = this.width * 0.35;
         this.lrwh[3] = this.height * 0.47;
 
@@ -357,21 +342,12 @@ class Window {
             theme:          maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
-            position: _position,
+            position: "center 0 0",
             maximizedMargin: [100, 100, 100, 100],
             container: 'body',
             headerControls: { maximize: 'remove',minimize: 'remove' },
             headerRemove:  false,
             content:        template,
-            draggable: {
-                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
-                opacity: 0.8
-            },
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
-                }
-            },
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -421,15 +397,6 @@ class Window {
             headerControls: { maximize: 'remove',minimize: 'remove' },
             headerRemove:  false,
             content:        template,
-            draggable: {
-                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
-                opacity: 0.8
-            },
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
-                }
-            },
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -466,14 +433,6 @@ class Window {
 
     winRobot(title, template, position, container){
 
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-ROBOT-POSITION")));
-
-        let _position = "center 0 0";
-
-        if(!_.isEmpty(_tmp)){
-            _position = _tmp;
-        }
-
         this.lrwh[2] = this.width * 0.6;
         this.lrwh[3] = this.height * 0.7;
 
@@ -481,30 +440,24 @@ class Window {
             id: 'jsPanel-robot',
             //theme:          maxWindow.theme.dark,
             theme: "none",
-            headerTitle:   'AI 运维',//title,
+            headerTitle:   'AI 运维',
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
-            position: _position,
-            maximizedMargin: [100, 100, 100, 100],
+            position: "center 0 0",
             container: 'body',
             headerControls: {  },
-            headerRemove:  false,
+            headerRemove:  true,
             content:        template,
             draggable: {
-                handle:  "div.jsPanel-hdr, div.jsPanel-ftr",
+                handle:  "div.jsPanel-hdr, div.jsPanel-ftr,header.jsPanel-control,div.el-tabs__header.is-left",
                 opacity: 0.8
-            },
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-ROBOT-POSITION",JSON.stringify(position));
-                }
             },
             callback: function(){
                 
-                $(".jsPanel").css({
+                $(".jsPanel",this).css({
                     "z-index": "1000"
                 });
                 
-                $("#jsPanel-robot-min").parent().addClass("jsPanel-btn jsPanel-btn-maximize");
+                $("#jsPanel-robot-min",this).parent().addClass("jsPanel-btn jsPanel-btn-maximize");
                 
                 $(".jsPanel-headerbar",this).css({
                     "min-height": "28px",
@@ -518,7 +471,12 @@ class Window {
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
-                $(".jsPanel-titlebar h3").css({
+
+                $(".jsPanel-controlbar .jsPanel-btn",this).css({
+                    "color": "#333333"
+                });
+
+                $(".jsPanel-titlebar h3",this).css({
                     "font-size": "12px",
                     "width": "70px",
                     "margin": "0px",
@@ -528,10 +486,7 @@ class Window {
                     "color": "#fff!important"
                 });
 
-            },
-            // footerToolbar: function (footer) {
-            //     return `<div class="pull-left" style="width: 100%;"><i class="fas fa-clock"></i> ${moment().format(mx.global.register.format)}</div>`;
-            // }
+            }
         });
 
         return win;
@@ -611,11 +566,6 @@ class Window {
             headerControls: { maximize: 'remove' },
             headerRemove:  false,
             content:        template,
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW_ENTITY_POSITION",JSON.stringify(position));
-                }
-            },
             callback: function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -1276,14 +1226,6 @@ class Window {
 
     winInfo(title, template, position, container){
 
-        let _tmp = _.attempt(JSON.parse.bind(null, localStorage.getItem("WINDOW-INFO-POSITION")));
-
-        let _position = { top: 60, left: 80 };
-
-        if(!_.isEmpty(_tmp)){
-            _position = _tmp;
-        }
-
         this.lrwh[2] = this.width * 0.34;
         this.lrwh[3] = this.height * 0.7;
 
@@ -1292,16 +1234,11 @@ class Window {
             theme:         maxWindow.theme.dark,
             headerTitle:   title,
             contentSize:    {width: this.lrwh[2], height: this.lrwh[3]},
-            position: _position,
+            position: { top: 60, left: 80 },
             container: container,
             headerControls: { controls: 'closeonly' },
             headerRemove:  false,
             content:        template,
-            dragit: {
-                drag: function (panel, position) {
-                    localStorage.setItem("WINDOW-INFO-POSITION",JSON.stringify(position));
-                }
-            },
             callback:       function(){
                 $(".jsPanel").css({
                     "position":"absoulate",
@@ -1317,8 +1254,12 @@ class Window {
                 $(".jsPanel-titlebar",this).css({
                     "min-height": "28px"
                 });
-                $(".jsPanel-titlebar h3").css({
+                $(".jsPanel-titlebar h3",this).css({
                     "font-size": "12px"
+                });
+
+                $(".jsPanel-hdr",this).css({
+                    "background-color": "rgb(37, 45, 71)!important"
                 });
 
             },

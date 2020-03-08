@@ -73,7 +73,7 @@ class Robot {
                             </span>
                             <el-aside width="220px" style="height:100%;overflow: auto;background: transparent;">
                                 <el-container>
-                                    <el-header style="height:40px;line-height:40px;">
+                                    <el-header style="line-height:60px;border-bottom:1px solid #f9f9f9;border-right:1px solid #f9f9f9;">
                                         <el-input v-model="message.search.term" placeholder="搜索">
                                             <el-button slot="append" type="text" icon="el-icon-plus"></el-button>
                                         </el-input>
@@ -81,11 +81,11 @@ class Robot {
                                     <el-main style="padding:0px;overflow-x:hidden;">
                                         <el-button type="text" :class="[index==0?'selected':'']" :id="objectHash.sha1(item)" 
                                             v-for="(item,index) in message.subject" 
-                                            style="border-bottom: 1px solid rgb(221, 221, 221);padding: 0px;cursor: pointer;width:100%;" @click="clickMe(item)">
+                                            style="padding: 0px;cursor: pointer;width:100%;" @click="clickMe(item)">
                                             <div style="display:flex;flex-wrap: nowrap;">
                                                 <div style="padding: 8px;">
                                                     <span class="fas fa-circle" style="position: absolute;left:40px;color: rgb(255, 0, 0);transform: scale(.7);" v-if="item.msgs.length>0"></span>
-                                                    <el-avatar shape="square" size="42" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'"></el-avatar>
+                                                    <el-image style="width:38px" :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=download&issys=true'"></el-image>
                                                 </div>
                                                 <div style="text-align: left;">
                                                     <h5 style="margin: 10px 0px;">#{item.title}#</h5>
@@ -97,21 +97,27 @@ class Robot {
                                 </el-container>
                             </el-aside>
                             <el-container>
-                                <el-main style="text-align: center;line-height: 30px;background:rgb(228, 231, 237);overflow:hidden auto;border:1px solid #ddd;" id="subject-msgs">
+                                <el-header class="jsPanel-control" style="display:flex;line-height:60px;border-bottom:1px solid #f9f9f9;">
+                                    <div style="font-size:15px;font-weight:400;width:60%;text-align:left;">#{message.defaultSubject.title}#</div>
+                                    <div style="width:40%;text-align:right;">
+                                        <el-button type="text" icon="el-icon-close" @click="onClose"></el-button>
+                                    </div>
+                                </el-header>
+                                <el-main style="text-align: center;line-height: 30px;background:#f7f7f7;overflow:hidden auto;" id="subject-msgs">
                                     <ul class="chats">
                                         <li :class="item.type" v-for="item in message.defaultSubject.msgs">
                                             <span class="date-time">#{moment(item.ctime).format("LLL")}#</span>
                                             <el-link :underline="false" class="name">#{item.icon}#</el-link>
                                             <el-link :underline="false" class="image">
-                                                <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=open&issys=true'" style="width: 42px;height: 42px;" ></el-image>
+                                                <el-image :src="'/fs/assets/images/robot/png/'+item.icon + '.png?type=open&issys=true'" style="width: 38px;height: 38px;" ></el-image>
                                             </el-link>
-                                            <div class="message animated pulse" contenteditable="false" style="outline:none;">
+                                            <div class="message animated pulse" contenteditable="false" style="outline:none;height:auto;">
                                                 #{item.msg}#
                                             </div>
                                         </li>
                                     </ul>
                                 </el-main>
-                                <el-footer style="padding:10px;">
+                                <el-footer style="background:#f7f7f7;height:80px;line-height: 80px;">
                                     <el-input placeholder="消息输入" v-model="message.term" @keyup.13="sendMsg">
                                         <el-button slot="append" type="primary" icon="el-icon-position" @click="sendMsg"></el-button>
                                     </el-input>
@@ -208,6 +214,8 @@ class Robot {
                 // 切换主题，获取相应消息
                 clickMe(item){
                     
+                    this.message.defaultSubject = item;
+
                     // 选择主题效果
                     $(this.$el).find(".selected").removeClass("selected");
                     $(`#${objectHash.sha1(item)}`).addClass("selected");
@@ -235,6 +243,12 @@ class Robot {
                     $('#' + id).animate({
                         scrollTop: div.scrollHeight// - div.clientHeight
                     }, 500);
+                },
+                onClose(){
+                    window.jsPanel.activePanels.getPanel("jsPanel-robot").close();
+                },
+                onMinimize(){
+                    window.jsPanel.activePanels.getPanel("jsPanel-robot").minimize();
                 }
             },
         });

@@ -106,11 +106,16 @@ class Search {
                                     @row-dblclick="rowDblclick">
                                     <el-table-column type="expand">
                                         <template slot-scope="props">
-                                            <el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
-                                                <el-form-item v-for="v,k in props.row" :label="k">
-                                                    <el-input v-model="v"></el-input>
-                                                </el-form-item>
-                                            </el-form>
+                                            <el-container style="width:80%;height:100%;">
+                                                <el-main>
+                                                    <el-form label-width="120px">
+                                                        <el-form-item v-for="v,k in props.row" :label="k">
+                                                            <el-input type="textarea" :rows="3" :value="v|pickString" v-if="typeof v ==='object'"></el-input>
+                                                            <el-input :value="v" v-else></el-input>
+                                                        </el-form-item>
+                                                    </el-form>
+                                                </el-main>
+                                            </el-container>
                                         </template>
                                     </el-table-column>
                                     <el-table-column
@@ -142,6 +147,15 @@ class Search {
                             dt: {
                                 rows:[],
                                 columns: []
+                            }
+                        }
+                    },
+                    filters:{
+                        pickString(item){
+                            try{
+                                return JSON.stringify(item,null,2);
+                            } catch(err){
+                                return item;
                             }
                         }
                     },
@@ -224,6 +238,19 @@ class Search {
                             } catch(err){
                                 return '';
                             }
+                        },
+                        pickBgStyle(item){
+                            let hexToRgba = function(hex, opacity) {
+                                var RGBA = "rgba(" + parseInt("0x" + hex.slice(1, 3)) + "," + parseInt("0x" + hex.slice(3, 5)) + "," + parseInt( "0x" + hex.slice(5, 7)) + "," + opacity + ")";
+                                return {
+                                    red: parseInt("0x" + hex.slice(1, 3)),
+                                    green: parseInt("0x" + hex.slice(3, 5)),
+                                    blue: parseInt("0x" + hex.slice(5, 7)),
+                                    rgba: RGBA
+                                }
+                            };
+                            let rgbaColor = hexToRgba(mx.global.register.event.severity[item.severity][2],0.1).rgba;
+                            return `background:linear-gradient(to top, ${rgbaColor}, rgb(255,255,255));border: 1px solid rgb(247, 247, 247);border-radius: 5px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;line-height:1.5;`;
                         }
                     },
                     template:   `<el-container id="search-event" style="background:#ffffff;margin-top:10px;">

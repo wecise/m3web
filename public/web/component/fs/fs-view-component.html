@@ -1703,7 +1703,7 @@
                 },
                 openIt(item, path){
                     const self = this
-                    console.log(88,item,path)
+                    
                     event.preventDefault();
     
                     // 点击【我的文件】返回不同的root
@@ -1725,22 +1725,25 @@
                             let contents = `<img src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" class="preview-img-responsive center-block" alt="Image">`;
                             let _wnd = maxWindow.winApp(item.name, contents, null,null);
     
-                        } else if(_.includes(['mov','mp4','avi'], item.ftype)) {
+                        } else if(_.includes(['mov','mp4','avi','mp3','wav'], item.ftype)) {
     
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
-                                                    your browser does not support the video tag
-                                                </video>
-                                            </div>
-                                            `;
+                            let contents = `<section class="is-vertical el-container ElContainer">
+                                                <main class="el-main" style="overflow:hidden;">
+                                                    <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" controls="controls" autoplay>
+                                                        your browser does not support the video tag
+                                                    </video>
+                                                </main>
+                                            </section>`;
     
                             let _wnd = maxWindow.winApp(item.name, contents, null,null);
     
                         } else if(_.includes(['pdf'], item.ftype)) {
     
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
-                                            </div>`;
+                            let contents = `<section class="is-vertical el-container ElContainer">
+                                                <main class="el-main" style="overflow:hidden;">
+                                                    <iframe class="embed-responsive-item" src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}"></iframe>
+                                                </main>
+                                            </section>`;
     
                             let _wnd = newWindow('fsapp', item.name, contents, null,null);
     
@@ -1753,11 +1756,13 @@
                            self.editIt(item);
     
                         } else if(_.includes(['swf'], item.ftype)) {
-                            let contents = `<div class="embed-responsive embed-responsive-16by9">
-                                                <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            </div>`;
+                            let contents = `<section class="is-vertical el-container">
+                                                <main class="el-main" style="overflow:hidden;">
+                                                    <video src="/fs${path}?type=open&issys=${window.SignedUser_IsAdmin}" width="100%" height="100%" controls="controls" autoplay>
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                </main>
+                                            </section>`;
     
                             let _wnd = maxWindow.winApp(item.name, contents, null,null);
                         } else if(_.includes(['imap','iflow', 'ishow'], item.ftype)) {

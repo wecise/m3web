@@ -1134,6 +1134,7 @@ class Omdb{
                             <el-main style="height:100%;padding:0px;">
                                 <el-table :data="dt.rows" 
                                     stripe
+                                    border
                                     style="width: 100%;"
                                     height="100%"
                                     :row-class-name="rowClassName"
