@@ -288,6 +288,7 @@ class Topological {
                                                 v-model="model.id" 
                                                 :fetch-suggestions="querySearchAsync"
                                                 @select="handleSelect"
+                                                :trigger-on-focus="false"
                                                 style="width:100%;"
                                                 class="topological-analysis-input">
                                     <el-button slot="prepend" icon="el-icon-menu" class="handleSort input-el-button"></el-button>
@@ -412,9 +413,9 @@ class Topological {
             delimiters: ['#{', '}#'],
             template:  `<el-autocomplete placeholder="请输入实体" 
                                         v-model="newModel.id" 
-                                        autofocus
                                         class="input-with-select topological-analysis-input"
                                         :fetch-suggestions="querySearchAsync"
+                                        :trigger-on-focus="false"
                                         @select="handleSelect"
                                         @keyup.enter.native="onNew">
                             <template slot="prepend">
@@ -826,7 +827,8 @@ class Topological {
         Vue.component("topological-search-toolbar-graph",{
             delimiters: ['${', '}'],
             template:   `<div>
-                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
+                                <el-button type="text" icon="el-icon-d-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
                                 <el-input placeholder="选择实体" style="width:100%;" disabled></el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
@@ -847,6 +849,9 @@ class Topological {
                                 
                             </el-footer>
                         </div>`,
+                        created(){
+                            console.log(this.$parent.$parent.control.show)
+                        },
             methods: {
                 onSearch(){
                     this.$refs.searchRef.onSearch();
@@ -862,10 +867,11 @@ class Topological {
                 }
             },
             template:   `<div style="height:100%;">
-                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px;">
+                            <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
+                                <el-button type="text" icon="el-icon-d-arrow-left"  @click="$parent.$parent.control.show=false"></el-button>
                                 <el-input placeholder="图查询语句" style="width:100%;" disabled></el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
-                                    <el-image src="/fs/assets/images/tools/png/path.png?type=open&issys=true" style="width:16px;"></el-image>
+                                    <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
                                 </el-button>
                                 <el-button type="default"
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
@@ -955,7 +961,8 @@ class Topological {
         Vue.component("topological-search-toolbar",{
             delimiters: ['${', '}'],
             template:   `<el-container style="100%;">
-                            <component v-bind:is="currentView" transition="fade" transition-mode="out-in"></component>
+                            <el-button type="text" icon="el-icon-d-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
+                            <component v-bind:is="currentView" class="animated fadeIn" v-show="control.show==true"></component>
                         </el-container>`,
             data(){
                 return{
@@ -981,7 +988,8 @@ class Topological {
                         },
                         graph:{
                             show:false
-                        }
+                        },
+                        show: true
                     }
                 }
             },

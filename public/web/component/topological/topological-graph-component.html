@@ -83,17 +83,23 @@
             height:24px;
         }
 
+        .topological-graph-component .controlBar{
+            position:absolute;
+            z-index:1000;
+			top:5px;
+			right:25px;
+        }
         .topological-graph-component .outlineContainer {
 			position:absolute;
             z-index:1000;
 			overflow:hidden;
-			top:40px;
+			top:35px;
 			right:25px;
 			width: 80px;
 			height:80px;
             padding:5px;
 			background: #ffffff;
-			box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 			border: unset;
             border-radius: 5px;
 		}
@@ -124,7 +130,7 @@
             bottom: 100px;
             -webkit-transform: translateZ(0);
             transform: translateZ(0);
-            box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 0px 6px;
         }
@@ -146,7 +152,7 @@
             right: 25px;
             bottom: 60px;
             -webkit-transform: translateZ(0);
-            box-shadow: 0px 1px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 0px 6px;
         }
@@ -255,6 +261,19 @@
             border:unset;
         }
 
+        .info-popper{
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            background: #fff;
+            padding: 10px;
+        }
+
+        .info-popper .el-divider__text, 
+        .info-popper .el-link {
+            font-weight: unset;
+            font-size: 12px;
+        }
+
         /* mxPopuMenu */
         div.mxPopupMenu{
             -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
@@ -280,7 +299,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="width:100%;height:100%;border:1px solid #ddd;border-left:unset;border-right:unset;position: relative;" ref="container" direction="vertical">
+            <el-container id="container" style="width:100%;height:100%;border-top:1px solid #ddd;position: relative;" ref="container" direction="vertical">
                 <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;display:none;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                 </el-header>
@@ -293,8 +312,38 @@
                 <div id="search-toolbar" class="search-toolbar">
                     <topological-search-toolbar ref="searchToolbar"></topological-search-toolbar>
                 </div>
-                <div id="outlineContainer" class="outlineContainer"></div>
-                <div class="vertical-toolbar">
+                <div id="controlBar" class="controlBar">
+                    <el-tooltip content="切换显示工具栏" open-delay="500">
+                        <el-button type="text" icon="el-icon-menu" @click="model.control.show=!model.control.show"></el-button>
+                    </el-tooltip>
+                </div>
+                <div id="outlineContainer" class="outlineContainer animated fadeIn" v-show="model.control.show"></div>
+                <div class="vertical-toolbar animated fadeIn" v-show="model.control.show">
+                    <el-popover
+                        placement="left"
+                        title="信息"
+                        width="300"
+                        trigger="click"
+                        popper-class="info-popper">
+                        <el-card>
+                            <el-divider content-position="left">实体类型</el-divider>
+                            <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
+                                <el-tag type="default" :key="v" v-for="v in allNodes" style="margin:5px;width:auto;">
+                                    ${v}
+                                </el-tag>
+                            </div>
+                            <el-divider content-position="left">关系</el-divider>
+                            <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
+                                <el-tag type="default" :key="v" v-for="v in allEdges" style="margin:5px;width:auto;">
+                                    ${v}
+                                </el-tag>
+                            </div>
+                        </el-card>
+                        <el-button type="text" slot="reference">
+                            <i class="el-icon-postcard" style="font-size:18px;margin:0 5px;">
+                        </el-button>
+                    </el-popover>
+                    <el-divider></el-divider>
                     <el-tooltip content="放大" open-delay="500" placement="left">
                        <el-button type="text"  @click="onZoomIn">
                             <i class="el-icon-zoom-in" style="font-size:18px;">
@@ -352,17 +401,14 @@
                            style="padding:4px 8px;">
                        </el-color-picker>
                    </el-tooltip>
+                   <el-divider></el-divider>
+                   <el-tooltip content="时间轴" open-delay="500" placement="left">
+                        <el-button type="text"  @click="onTimeLine">
+                            <i :class="['animated fadeIn ', model.graph.footbar.show ? 'el-icon-d-arrow-left' : 'el-icon-d-arrow-right']"></i>
+                        </el-button>
+                    </el-tooltip>
                </div>
-               <div class="horizontal-toolbar">
-                       <el-tooltip content="展开" open-delay="500" placement="left">
-                           <el-button type="text">
-                               <i :class="['animated fadeIn fas', model.graph.footbar.show ? 'fa-angle-double-down' : 'fa-angle-double-up']" style="width: 20px;text-align: center;">
-                           </el-button>
-                       </el-tooltip>
-                       <el-button type="text"  @click="onTimeLine">
-                           时间轴
-                       </el-button>
-               </div>
+               
                <el-dialog
                     title="实体/关系编辑"
                     :visible.sync="entity.dialog.show"
@@ -473,7 +519,8 @@
                     },
                     control: {
                         ifFullScreen: false,
-                        ifIcon: true
+                        ifIcon: true,
+                        show: true
                     }
                 },
                 entity: {
@@ -514,6 +561,27 @@
                     return `el-icon-picture-outline`;
                 } else {
                     return `el-icon-s-help`;
+                }
+            }
+        },
+        computed: {
+            allNodes(){
+                try{
+                    return  _.uniq(_.map(this.model.graph.nodes,(v,k)=>{
+                                return v.getId().split(":")[0];
+                            }));
+                } catch(err){
+                    return [];
+                }
+
+            },
+            allEdges(){
+                try{
+                    return  _.uniq(_.map(this.model.graph.edges,(v,k)=>{
+                                return v.getValue();
+                            }));
+                } catch(err){
+                    return [];
                 }
             }
         },
@@ -618,7 +686,15 @@
             // Defines an icon for creating new connections in the connection handler.
             // This will automatically disable the highlighting of the source vertex.
             mxConnectionHandler.prototype.connectImage = new mxImage('/fs/assets/images/tools/down.gif?type=open&issys=true', 16, 16);
-            
+          
+            // 键盘支持
+            var keyHandler = new mxKeyHandler(this.model.graph.graph);
+                            
+
+            // 编辑属性
+            this.model.graph.graph.getEditingValue = function(cell, evt){
+                return cell.value.DisplayText+","+cell.value.TagName;
+            };
         },
 	    methods: {
             init() {
@@ -918,6 +994,7 @@
                         })
 
                         // 边界
+                        this.model.graph.edges = {};
                         _.forEach(allEdges,(k,index)=>{
                             
                             let source = this.model.graph.nodes[k.source];
@@ -953,11 +1030,11 @@
                             } catch(err){
                                 edge = this.model.graph.graph.insertEdge(this.model.graph.parent, k.id, k.class, source, target, baseEdgeStyle+direction);
                             }
-
+                            
                             // edge directory
                             try{
                                 let id = source.getId() + ':' + target.getId();
-                                _.extend(this.model.graph.edges,{[id]:edge});
+                                _.extend(this.model.graph.edges, { [id]: edge });
                             } catch(err){
                                 console.log(err)
                             }
@@ -971,7 +1048,7 @@
                     
                 }
                 finally {
-
+                    
                     $(this.$refs.graphContainer.$el).after(this.$refs.footer.$el);
 
                     this.toCenter();

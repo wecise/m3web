@@ -1736,7 +1736,203 @@ class System {
 						
 					}
 				})
-				
+
+                // 事件处理-log
+				Vue.component("event-manage-log",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="删除选择的日志">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出日志">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="padding:0px;height:100%;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											<el-table-column type="expand">
+											<template slot-scope="props">
+												<el-form label-position="left">
+													
+												</el-form>
+											</template>
+											</el-table-column>
+											<el-table-column 
+												node-key="id"
+												sortable
+												:label="item.title" 
+												:prop="item.field" 
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<span v-if="item.field=='status'">
+														<el-button type="danger" v-if="scope.row.status==0">失败</el-button>
+														<el-button type="success" v-else>成功</el-button>
+													</span>
+													<span v-else>
+														#{scope.row[item.field]}#
+													</span>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el=container>`,
+					data(){
+						return {
+							dt: {
+								rows:[{
+									id: '1',
+									class: "/matrix/system/notify",
+									status: '1',
+									serial: '2234234',
+                                    name: '事件屏蔽',
+                                    msg: '屏蔽事件390条',
+									vtime: _.now(),
+								},
+								{
+									id: '2',
+									class: "/matrix/system/notify",
+									status: '0',
+									serial: '2234234',
+									name: '事件关闭',
+                                    msg: '事件关闭390条'
+								}],
+								columns: [
+									{
+										field: "status",
+										title: "状态",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "id",
+										title: "ID",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "class",
+										title: "CLASS",
+										width: 120,
+										visible:false
+									},
+									{
+										field: "name",
+										title: "处理方式",
+										width: 160,
+										visible: true
+									},
+									{
+										field: "msg",
+										title: "摘要",
+										visible: true
+									},
+									{
+										field: "vtime",
+										title: "发送时间",
+										width: 160,
+										visible: true
+									}],
+								selected: []
+							}
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						
+					}
+				})
+				// 级别管理
+				Vue.component("severity-manage",{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container style="height:100%;">
+									<el-header style="height:40px;line-height:40px;">
+										<el-tooltip content="新建级别">
+											<el-button type="text" icon="el-icon-plus"></el-button>
+										</el-tooltip>
+										<el-tooltip content="删除选择的级别">
+											<el-button type="text" icon="el-icon-delete"></el-button>
+										</el-tooltip>
+										<el-tooltip content="导出">
+											<el-button type="text" icon="el-icon-download"></el-button>
+										</el-tooltip>
+									</el-header>
+									<el-main  style="height:100%;">
+										<el-table
+											:data="dt.rows"
+											style="width: 100%">
+											<el-table-column type="index"></el-table-column>
+											</el-table-column>
+											<el-table-column 
+												:label="item.title" 
+												:prop="item.field" 
+												sortable
+												v-for="item in dt.columns"
+												v-if="item.visible">
+												<template slot-scope="scope">
+													<el-color-picker
+														:value="scope.row.color"
+														show-alpha
+														v-if="item.field=='color'">
+													</el-color-picker>
+													<span style="font-weight:900;" v-else>#{scope.row[item['field']]}#</span>
+												</template>
+											</el-table-column>
+										</el-table>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							dt: {
+								rows:[],
+								columns: [
+									{
+										field: "name",
+										title: "级别",
+										width: 50,
+										visible: true
+									},
+									{
+										field: "title_en",
+										title: "名称",
+										width: 120,
+										visible:true
+									},
+									{
+										field: "title_cn",
+										title: "中文名称",
+										width: 120,
+										visible:true
+									},
+									{
+										field: "color",
+										title: "颜色",
+										visible:true
+									}],
+								selected: []
+							}
+						}
+					},
+					created(){
+						this.initData();
+					},
+					mounted() {
+						
+					},
+					methods:{
+						initData(){
+							let term = {action:"list", user:window.SignedUser_UserName};
+							this.dt.rows = fsHandler.callFsJScript("/matrix/system/severity-action.js",encodeURIComponent(JSON.stringify(term))).message;
+						}
+					}
+                })
+
 				// 通知管理
 				Vue.component('notify-manage',{
 					delimiters: ['#{', '}#'],
@@ -1749,12 +1945,12 @@ class System {
 										<el-tab-pane label="分类管理" name="type">
 											<notify-manage-type></notify-manage-type>
 										</el-tab-pane>
-										<el-tab-pane label="人员管理" name="person">
+										<!--el-tab-pane label="人员管理" name="person">
 											<notify-manage-person></notify-manage-person>
-										</el-tab-pane>
-										<el-tab-pane label="级别管理" name="severity">
+										</el-tab-pane-->
+										<!--el-tab-pane label="级别管理" name="severity">
 											<notify-manage-severity></notify-manage-severity>
-										</el-tab-pane>
+										</el-tab-pane-->
 										<el-tab-pane label="模板管理" name="template">
 											<notify-manage-template></notify-manage-template>
 										</el-tab-pane>
@@ -1780,7 +1976,46 @@ class System {
 
 						}
 					}
-				})
+                })
+
+                // 事件处理
+				Vue.component('event-manage',{
+					delimiters: ['#{', '}#'],
+					template: 	`<el-container  style="height:100%;">
+									<el-main style="padding:0px;height:100%;overflow:hidden;">
+										<el-tabs v-model="activeName" @tab-click="onTabClick" type="border-card">
+                                        <el-tab-pane label="事件屏蔽" name="filter">
+											
+										</el-tab-pane>
+                                        <el-tab-pane label="事件关闭" name="close">
+											
+										</el-tab-pane>
+										<el-tab-pane label="事件升级" name="up">
+											
+										</el-tab-pane>
+										<el-tab-pane label="事件降级" name="down">
+											
+										</el-tab-pane>
+										<el-tab-pane label="事件处理日志" name="log">
+											<event-manage-log></event-manage-log>
+										</el-tab-pane>
+									</el-tabs>
+									</el-main>
+								</el-container>`,
+					data(){
+						return {
+							activeName:"filter"
+						}
+					},
+					mounted() {
+						
+					},
+					methods:{
+						onTabClick(){
+
+						}
+					}
+                })
 
 				// 公司管理
 				Vue.component("company-manage",{
@@ -3032,6 +3267,14 @@ class System {
 											<el-menu-item index="tools-manage">
 												<i class="el-icon-menu"></i>
 												<span slot="title">应用管理</span>
+											</el-menu-item>
+											<el-menu-item index="severity-manage">
+												<i class="el-icon-warning"></i>
+												<span slot="title">级别管理</span>
+											</el-menu-item>
+											<el-menu-item index="event-manage">
+												<i class="el-icon-s-opportunity"></i>
+												<span slot="title">事件处理</span>
 											</el-menu-item>
 										</el-menu>
 									</el-aside>
