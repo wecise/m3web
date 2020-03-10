@@ -307,7 +307,7 @@
                         style="width:100vw;height:100vh;position:releative;overflow:auto;right: 0px;left: 0px;top: 0px;bottom: 0px;overflow: auto;">
                 </el-main>
                 <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
-                    <topological-timeline :model="model.graph.history" ref="timeline"></topological-timeline>
+                    <topological-timeline :model="allNodesIds" ref="timeline" v-if="!_.isEmpty(allNodesIds)"></topological-timeline>
                 </el-footer>
                 <div id="search-toolbar" class="search-toolbar">
                     <topological-search-toolbar ref="searchToolbar"></topological-search-toolbar>
@@ -404,7 +404,7 @@
                    <el-divider></el-divider>
                    <el-tooltip content="时间轴" open-delay="500" placement="left">
                         <el-button type="text"  @click="onTimeLine">
-                            <i :class="['animated fadeIn ', model.graph.footbar.show ? 'el-icon-d-arrow-left' : 'el-icon-d-arrow-right']"></i>
+                            <i :class="['animated fadeIn ', model.graph.footbar.show ? 'el-icon-d-arrow-right' : 'el-icon-d-arrow-left']"></i>
                         </el-button>
                     </el-tooltip>
                </div>
@@ -575,6 +575,16 @@
                 }
 
             },
+            allNodesIds(){
+                try{
+                    return  _.uniq(_.map(this.model.graph.nodes,(v,k)=>{
+                                return v.getId();
+                            }));
+                } catch(err){
+                    return [];
+                }
+
+            },
             allEdges(){
                 try{
                     return  _.uniq(_.map(this.model.graph.edges,(v,k)=>{
@@ -686,15 +696,7 @@
             // Defines an icon for creating new connections in the connection handler.
             // This will automatically disable the highlighting of the source vertex.
             mxConnectionHandler.prototype.connectImage = new mxImage('/fs/assets/images/tools/down.gif?type=open&issys=true', 16, 16);
-          
-            // 键盘支持
-            var keyHandler = new mxKeyHandler(this.model.graph.graph);
-                            
-
-            // 编辑属性
-            this.model.graph.graph.getEditingValue = function(cell, evt){
-                return cell.value.DisplayText+","+cell.value.TagName;
-            };
+        
         },
 	    methods: {
             init() {
