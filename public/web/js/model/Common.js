@@ -731,3 +731,161 @@ Vue.component("mx-fs-tree",{
         }
     }
 })
+
+
+/* Common Entity new */
+Vue.component("mx-entity-new",{
+    data(){
+        return{
+            classList: fsHandler.callFsJScript("/matrix/entity/entity_class.js",encodeURIComponent("/matrix/entity")).message,
+            defaultProps: {
+                children: 'children',
+                label: 'alias'
+            },
+            model: {
+                selectedNode: {},
+                node: {},
+                form: {
+                    id: "",
+                    name: "",
+                    class: ""
+                }
+            }
+        }
+    },
+    template: `<el-container style="height:100%;max-height:50vh;background:#ffffff;">
+                    <el-aside style="background: transparent;width:200px;" ref="leftView">
+                        <el-container>
+                            <el-header style="height:30px;line-height:30px;padding: 0px 10px;">
+                                选择类
+                            </el-header>
+                            <el-main style="padding:0px;">
+                                <el-tree
+                                    ref="entityTree"
+                                    :data="classList"
+                                    node-key="id"
+                                    accordion
+                                    @node-click="onNodeClick"
+                                    :props="defaultProps"
+                                    style="background-color:transparent;">
+                                </el-tree>
+                            </el-main>
+                        </el-container>
+                    </el-aside>
+                    <el-container ref="container">
+                        <el-main style="padding:10px;">
+                            <el-form ref="form" label-width="100px">
+                                <el-form-item label="Class">
+                                    <el-input v-model="model.form.class"></el-input>
+                                </el-form-item>
+                                <el-form-item label="ID">
+                                    <el-input v-model="model.form.id"></el-input>
+                                </el-form-item>
+                                <el-form-item label="Name">
+                                    <el-input v-model="model.form.name"></el-input>
+                                </el-form-item>
+                            </el-form>
+                            <!--el-form ref="form" :model="model.form" label-width="100px">
+                                <el-form-item :label="item.dispname" v-for="item in model.form" style="margin:5px 0px;">
+                                    <el-date-picker type="datetime" v-model="item.value" v-if="item.type==='date'"></el-date-picker>
+                                    <el-input type="number" v-model="item.value" v-if="item.type==='smallint'" ></el-input>
+                                    <el-input type="string" v-model="item.value" v-if="item.type==='varchar'"></el-input>
+                                    <el-input type="textarea" v-model="item.value" v-if="item.type==='map'" show-word-limit></el-input>
+                                    <el-input type="textarea" v-model="item.value" v-if="item.type==='list'" show-word-limit></el-input>
+                                    <el-input type="textarea" v-model="item.value" v-if="item.type==='set'" show-word-limit></el-input>
+                                </el-form-item>
+                            </el-form-->
+                        </el-main>
+                        <el-footer style="height:40px;line-height:40px;text-align:right;">
+                            <el-button type="default" @click="onCancel">取消</el-button>
+                            <el-button type="primary" @click="onSave">提交</el-button>
+                        </el-footer>
+                    </el-container>
+                </el-container>`,
+    filters:{
+        format(item){
+            return JSON.stringify(item.value,null,2);
+        }
+    },
+    mounted(){
+        _.delay(()=>{
+            Split([this.$refs.leftView.$el, this.$refs.container.$el], {
+                sizes: [20, 80],
+                minSize: [0, 0],
+                gutterSize: 5,
+                gutterStyle: function(dimension, gutterSize) {
+                    return {
+                        'display': 'none'
+                    }
+                },
+                cursor: 'col-resize',
+                direction: 'horizontal',
+            });
+        },1000)
+    },
+    methods:{
+        onNodeClick(node){
+            this.model.selectedNode = node;
+            this.model.node = fsHandler.callFsJScript("/matrix/entity/entity_class_by_cid.js",encodeURIComponent(node.id)).message;
+
+            this.model.form.class = node.class;
+            _.extend(this.model.form,{id:_.last(node.class.split("/"))+":"});
+        },
+        onCancel(){
+            this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
+        },
+        onSave(){
+            // let mql =   _.concat(["INSERT INTO", this.model.selectedNode.class],_.map(this.model.node,function(v){
+            //                     if(v.type == 'int'){
+            //                         return `${v.name}='${v.value}'`;
+            //                     } else if(v.type == 'map' || v.type == 'list' || v.type == 'set'){
+            //                         return `${v.name}='${v.value}'`;
+            //                     } else {
+            //                         return `${v.name}='${v.value}'`;
+            //                     }
+            //             }).join(", ")).join(" ");
+            // console.log(mql)
+
+            if(_.isEmpty(this.model.form.class) || _.isEmpty(this.model.form.id)){
+                this.$message({
+                    type: "info",
+                    message: "请输入实体信息！"
+                });
+                return false;
+            }
+
+            if(_.indexOf(this.model.form.id,":") == -1){
+                this.$message({
+                    type: "info",
+                    message: "请确认ID命名规则：【class:node】"
+                });
+                return false;
+            }
+
+            if(_.endsWith(this.model.form.id,":")){
+                this.$message({
+                    type: "info",
+                    message: "请确认ID命名规则：【class:node】"
+                });
+                return false;
+            }
+
+            _.extend(this.model.form, {type: "new"});
+
+            let rtn = fsHandler.callFsJScript("/matrix/graph/entity-action.js",encodeURIComponent(JSON.stringify(this.model.form)));
+            console.log(rtn,this.$parent.$parent.$parent.$parent.entity.newDialog.show)
+            if(rtn.status == 'ok'){
+                this.$message({
+                    type: "success",
+                    message: "实体插入成功！"
+                })
+                this.$parent.$parent.$parent.$parent.entity.newDialog.show = false;
+            } else {
+                this.$message({
+                    type: "error",
+                    message: "实体插入失败 " + rtn.message
+                })
+            }
+        }
+    }
+})

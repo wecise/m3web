@@ -295,7 +295,9 @@ class Topological {
                                     <el-button slot="append" icon="el-icon-arrow-down"  @click="edge.show = !edge.show" v-if="edge.show"></el-button>
                                     <el-button slot="append" icon="el-icon-arrow-right" @click="edge.show = !edge.show" v-else></el-button>
                                     <el-button slot="append" icon="el-icon-postcard" @click="onDiagnosis(model)"></el-button>
-                                    <el-button slot="append" icon="el-icon-close" @click="onRemove(model.id)"></el-button>
+                                    <el-button slot="append" @click="onRemove(model.id)">
+                                        <i class="el-icon-circle-close" style="font-size:16px;font-weight:600;"></i>
+                                    </el-button>
                                 </el-autocomplete>
                             </el-header>
                             <el-main v-if="edge.show" style="padding:10px;background:#f6f6f6;">
@@ -421,7 +423,9 @@ class Topological {
                             <template slot="prepend">
                                 <i class="el-icon-place"></i>
                             </template>
-                            <el-button slot="append" icon="el-icon-plus" @click="onNew"></el-button>
+                            <el-button slot="append" @click="onNew">
+                                <i class="el-icon-circle-plus-outline" style="font-size:16px;font-weight:600;"></i>
+                            </el-button>
                         </el-input>`,
             data(){
                 return {
@@ -797,7 +801,8 @@ class Topological {
             },
             template:   `<div>
                             <el-header style="height:32px;line-height:32px;padding:0px;display:flex;">
-                                <div style="margin-top:-1px;width:88%;">
+                                <el-button type="text" icon="el-icon-arrow-left"  @click="$parent.$parent.control.show=false" style="width:8%;"></el-button>
+                                <div style="margin-top:-1px;width:84%;">
                                     <el-radio-group v-model="type">
                                         <el-radio-button label="all">全路径</el-radio-button>
                                         <el-radio-button label="short">最短路径</el-radio-button>
@@ -806,12 +811,12 @@ class Topological {
                                     </el-radio-group>
                                 </div>
                                 <div>
-                                    <el-divider direction="vertical"></el-divider>
+                                    <el-divider direction="vertical" style="margin:0;"></el-divider>
                                 </div>
                                 <el-button type="default"
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
                                     @keyup.enter.native="$parent.$parent.search"
-                                    style="width:15%;">
+                                    style="width:8%;padding:0px;">
                                     <i class="el-icon-close" style="font-size:14px;font-weight: 900;"></i>
                                 </el-button>
                             </el-header>
@@ -828,7 +833,7 @@ class Topological {
             delimiters: ['${', '}'],
             template:   `<div>
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
-                                <el-button type="text" icon="el-icon-d-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
+                                <el-button type="text" icon="el-icon-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
                                 <el-input placeholder="选择实体" style="width:100%;" disabled></el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
@@ -842,7 +847,7 @@ class Topological {
                                     <i class="el-icon-search" style="font-weight: 900;font-size:14px;"></i>
                                 </el-button>
                             </el-header>
-                            <el-main ref="mainView" style="width:30vw;padding:0px;border-top:1px solid #f7f7f7;">
+                            <el-main ref="mainView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-main>
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
@@ -868,7 +873,7 @@ class Topological {
             },
             template:   `<div style="height:100%;">
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
-                                <el-button type="text" icon="el-icon-d-arrow-left"  @click="$parent.$parent.control.show=false"></el-button>
+                                <el-button type="text" icon="el-icon-arrow-left"  @click="$parent.$parent.control.show=false"></el-button>
                                 <el-input placeholder="图查询语句" style="width:100%;" disabled></el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
@@ -880,11 +885,12 @@ class Topological {
                                 </el-button>
                                 <el-button type="primary" @click="onSearch('')" 
                                     @keyup.enter.native="onSearch('')" style="margin-left:-1px;">
-                                    高级
+                                    <i class="el-icon-search"></i> <span>高级</span>
                                 </el-button>
                             </el-header>
-                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;width:30vw;height:calc(100vh - 190px);">
-                                <el-row style="padding-bottom:5px;">
+                            <el-main ref="mainView" 
+                                style="border-top:1px solid #409EFF;width:30vw;height:50vh;overflow:hidden;padding:0px 20px;">
+                                <el-row style="padding: 20px 0;">
                                     <el-col :span="24">
                                         <el-input
                                             type="textarea" :rows="4"
@@ -898,7 +904,7 @@ class Topological {
                                     </el-col>
                                 </el-row>
                                 <el-divider content-position="left">历史</el-divider>
-                                <el-row style="padding-top:5px;">
+                                <el-row style="height: 100%;overflow: auto;margin-top: 10px;">
                                     <el-col :span="24" v-for="item in history" style="display:flex;flex-wrap:nowrap;">
                                         <el-popover
                                             placement="top-start"
@@ -961,7 +967,7 @@ class Topological {
         Vue.component("topological-search-toolbar",{
             delimiters: ['${', '}'],
             template:   `<el-container style="100%;">
-                            <el-button type="text" icon="el-icon-d-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
+                            <el-button type="text" icon="el-icon-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
                             <component v-bind:is="currentView" class="animated fadeIn" v-show="control.show==true"></component>
                         </el-container>`,
             data(){
