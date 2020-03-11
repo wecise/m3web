@@ -260,12 +260,42 @@
         .topological-search-toolbar-path .el-radio-button__inner{
             border:unset;
         }
+        .topological-search-toolbar-path .el-radio-button__orig-radio:checked+.el-radio-button__inner {
+            color: #333333;
+            background-color: #ffffff;
+            border-color: #ffffff;
+            -webkit-box-shadow: unset;
+            box-shadow: unset;
+        }
+        .topological-search-toolbar-path .el-radio-button__orig-radio:checked+.el-radio-button__inner:before {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 20px;
+            border-width: 7px 7px 0;
+            border-style: solid;
+            border-color: #2790e2 transparent;
+            display: block;
+            width: 0;
+        }
+        .topological-search-toolbar-path .el-radio-button__orig-radio:checked+.el-radio-button__inner:after {
+            content: "";
+            position: absolute;
+            bottom: -7px;
+            left: 21px;
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
 
         .info-popper{
             box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             background: #fff;
             padding: 10px;
+            outline: unset;
         }
 
         .info-popper .el-divider__text, 
@@ -328,13 +358,21 @@
                         <el-card>
                             <el-divider content-position="left">实体类型</el-divider>
                             <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
-                                <el-tag type="default" :key="v" v-for="v in allNodes" style="margin:5px;width:auto;">
+                                <el-tag type="default" 
+                                    :key="v" v-for="v in allNodes" 
+                                    style="margin:5px;width:auto;cursor:pointer;"
+                                    effect="plain" 
+                                    @click="onTagClick($event,'node',v)">
                                     ${v}
                                 </el-tag>
                             </div>
                             <el-divider content-position="left">关系</el-divider>
                             <div style="display:flex;flex-wrap: wrap; align-items: flex-start;margin:10px 0px;">
-                                <el-tag type="default" :key="v" v-for="v in allEdges" style="margin:5px;width:auto;">
+                                <el-tag type="default" 
+                                    :key="v" v-for="v in allEdges" 
+                                    style="margin:5px;width:auto;cursor:pointer;"
+                                    effect="plain" 
+                                    @click="onTagClick($event,'edge',v)">
                                     ${v}
                                 </el-tag>
                             </div>
@@ -520,7 +558,9 @@
                     control: {
                         ifFullScreen: false,
                         ifIcon: true,
-                        show: true
+                        show: true,
+                        checkedNodes:[],
+                        checkedEdges:[]
                     }
                 },
                 entity: {
@@ -569,7 +609,7 @@
                 try{
                     return  _.uniq(_.map(this.model.graph.nodes,(v,k)=>{
                                 return v.getId().split(":")[0];
-                            }));
+                            })).sort();
                 } catch(err){
                     return [];
                 }
@@ -589,7 +629,7 @@
                 try{
                     return  _.uniq(_.map(this.model.graph.edges,(v,k)=>{
                                 return v.getValue();
-                            }));
+                            })).sort();
                 } catch(err){
                     return [];
                 }
@@ -2028,6 +2068,23 @@
                     })
                 }
 
+            },
+            onTagClick(event,type,value){
+                event.preventDefault();
+                event.stopPropagation();
+                
+                this.model.control.ifIcon = false;
+                this.onReload();
+                this.model.graph.graph.selectAll(null, true);
+                
+                _.forEach(this.model.graph.graph.getSelectionCells(),(v)=>{
+                    if(!_.startsWith(v.getId(),value)){
+                        this.model.graph.graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, "#f6f6f6", [v]);
+                        this.model.graph.graph.setCellStyles(mxConstants.STYLE_FONTCOLOR, "#333333", [v]);
+                        //this.model.graph.graph.getModel().setVisible(v, false);
+                    }    
+                })
+                
             }
 	    }
 	

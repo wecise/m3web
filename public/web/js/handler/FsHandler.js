@@ -706,10 +706,7 @@ class FsHandler {
             dataType: 'json',
             contentType: false,
             beforeSend: function(xhr) {
-                // 忽略
-                if(!_.includes(term,'aiStatusGet')){
-                    // Pace.restart();
-                }
+
             },
             complete: function(xhr, textStatus) {
             },

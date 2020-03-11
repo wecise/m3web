@@ -79,7 +79,9 @@
                         },
                         zoomMax: 1 * 24 * 60 * 60 * 1000,
                         zoomMin: 60 * 1000,
-                        locale: 'zh_CN'
+                        locale: 'zh_CN',
+                        type: 'point',
+                        showMajorLabels: false
                     }
                 },
                 tree: {
@@ -138,9 +140,11 @@
                 let term = this.model.join(";");
                 let items = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
                 this.timeline.items = new vis.DataSet(_.map(items,(v)=>{
+                                        let bgColor = mx.global.register.event.severity[v.severity][2];
                                         return {
                                             id: v.id,
-                                            content: v.host,
+                                            group: 0,
+                                            content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor}">${v.host}</button>`,
                                             start: moment(v.vtime).format("LLL")
                                         }
                                     }));

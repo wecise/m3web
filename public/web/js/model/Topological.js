@@ -815,7 +815,7 @@ class Topological {
                                     <i class="el-icon-close" style="font-size:14px;font-weight: 900;"></i>
                                 </el-button>
                             </el-header>
-                            <el-main ref="mainView" style="border-top:1px solid #f7f7f7;padding:0px;width:30vw;">
+                            <el-main ref="mainView" style="border-top:1px solid #419efe;padding:0px;width:30vw;">
                                 <topological-path class="graphAction" :model="$parent.$parent.mainView.path.model" :pathType="type" ref="pathRef"></topological-path>
                             </el-main>
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
