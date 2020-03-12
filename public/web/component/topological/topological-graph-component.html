@@ -89,6 +89,7 @@
 			top:5px;
 			right:25px;
         }
+
         .topological-graph-component .outlineContainer {
 			position:absolute;
             z-index:1000;
@@ -107,7 +108,7 @@
         .topological-graph-component .search-toolbar{        
             position: absolute;
             width: auto;
-            max-width: 40vw;
+            max-width: 30vw;
             height: auto;
             z-index: 1000;
             top:5px;
@@ -358,7 +359,7 @@
                     <topological-timeline :model="allNodesIds" ref="timeline" v-if="!_.isEmpty(allNodesIds)"></topological-timeline>
                 </el-footer>
                 <div id="search-toolbar" class="search-toolbar">
-                    <topological-search-toolbar ref="searchToolbar"></topological-search-toolbar>
+                    <topological-search-toolbar ref="searchToolbar" style="width:100%;"></topological-search-toolbar>
                 </div>
                 <div id="controlBar" class="controlBar">
                     <el-tooltip content="切换显示工具栏" open-delay="500">
@@ -594,7 +595,12 @@
                         ifIcon: true,
                         show: true,
                         checkedNodes:[],
-                        checkedEdges:[]
+                        checkedEdges:[],
+                        refresh:{
+                            inst: null,
+                            enable: true,
+                            interval: 15*1000
+                        }
                     }
                 },
                 entity: {
@@ -693,9 +699,33 @@
                     }
                 },
                 deep:true
+            },
+            'model.control.refresh.enable':{
+                handler(val,oldVal){
+                    if(val) {
+                        this.model.control.refresh.inst = setInterval(()=>{
+                            this.refreshEntityStatus();
+                        },this.model.control.refresh.interval);
+                        this.$message({
+                            type: "info",
+                            message: "自动刷新开启"
+                        })
+                    } else {
+                        clearInterval(this.model.control.refresh.inst);
+                        this.$message({
+                            type: "info",
+                            message: "自动刷新关闭"
+                        })
+                    }
+                },
+                deep:true
             }
         },
         created(){
+
+            // 状态刷新频率
+            this.model.control.refresh.interval = mx.global.register.topological.status_interval;
+
             eventHub.$on(`PATH-TOGGLE-EVENT-${this.id}-graph-path`,this.addPath);
 
             eventHub.$on("TOPOLOGICAL-ANALYSIS-CALLBACK", this.removePath);
@@ -731,19 +761,19 @@
 	        this.$nextTick(()=>{
 
                 _.delay(()=>{
+                    
                     // 初始化
                     this.init();
+                    
                     // 鹰眼
                     this.outline();
+
                     _.delay(()=>{
                         // 设置主题
                         this.setTheme(this.model.graph.theme.color);
                         // 初始化ToolBar
                         this.nodeTitle();
                     },500)
-                    setInterval(()=>{
-                        this.updateStatus();
-                    },mx.global.register.topological.status_interval);
 
                     // 初始化timeline
                     this.initTimeLine();
@@ -886,36 +916,16 @@
                         this.model.graph.layout.inst = new mxCircleLayout(this.model.graph.graph);
                     }
 
+                    // Animates the changes in the graph model
+                    this.model.graph.graph.getModel().addListener(mxEvent.CHANGE, (sender, evt)=>
+                    {
+                        var changes = evt.getProperty('edit').changes;
+                        mxEffects.animateChanges(this.model.graph.graph, changes);
+                    });
+
                     this.initGraph();
                     this.cellAddEvent();
 
-                }
-            },
-            deleteCells(includeEdges){
-                
-                // Cancels interactive operations
-                this.model.graph.graph.escape();
-
-                var cells = this.model.graph.graph.getDeletableCells(this.model.graph.graph.getSelectionCells());
-
-                if (cells != null && cells.length > 0){
-                    var parents = this.model.graph.graph.model.getParents(cells);
-                    this.model.graph.graph.removeCells(cells, includeEdges);
-                    
-                    // Selects parents for easier editing of groups
-                    if (parents != null) {
-                        var select = [];
-                        
-                        for (var i = 0; i < parents.length; i++) {
-                            if (this.model.graph.graph.model.contains(parents[i]) &&
-                                (this.model.graph.graph.model.isVertex(parents[i]) ||
-                                this.model.graph.graph.model.isEdge(parents[i]))){
-                                select.push(parents[i]);
-                            }
-                        }
-                        
-                        this.model.graph.graph.setSelectionCells(select);
-                    }
                 }
             },
             checkImgExists(name){
@@ -1111,8 +1121,6 @@
 
                     this.model.graph.graph.getModel().endUpdate();
 
-                    this.updateStatus();
-
                     // Executes the layout handler
                     this.executeLayout();
 
@@ -1166,8 +1174,7 @@
             deleteSubtree(cell){
                 // Gets the subtree from cell downwards
                 var cells = [];
-                this.model.graph.graph.traverse(cell, true, function(vertex)
-                {
+                this.model.graph.graph.traverse(cell, true, (vertex)=>{
                     cells.push(vertex);
                     
                     return true;
@@ -1181,7 +1188,7 @@
                 
                 return overlay;
             },
-            updateStatus(){
+            refreshEntityStatus(){
                 const self = this;
 
                 // 图所有节点
@@ -1235,7 +1242,7 @@
                     $(this.$refs.graphContainer.$el).empty();
                     $("#outlineContainer",this.$el).empty();
 
-                    this.deleteCells();
+                    this.deleteCells(true);
                     this.init();
                     
                     this.outline();
@@ -1397,7 +1404,7 @@
                         let source = nodes[k.source];
                         let target = nodes[k.target];
 
-                        let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
+                        let baseEdgeStyle = 'edgeStyle=elbowEdgeStyle;html=1;dashed=1;rounded=1;jettySize=auto;orthogonalLoop=1;endArrow=block;endFill=1;';
                         let direction = '';
 
                         if(k.twoway){
@@ -1584,6 +1591,10 @@
                             menu.addItem('刷新', null, ()=>{
                                 this.$refs.graphViewSearch.search();
                             });
+
+                            menu.addItem('清空', null, ()=>{
+                                this.deleteCells(true);
+                            });
                             
                             menu.addSeparator();
 
@@ -1735,7 +1746,7 @@
                         
                     //     try{
                     //         // 刷新状态
-                    //         this.updateStatus();
+                    //         this.refreshEntityStatus();
                     //     } catch(err){
 
                     //     }
@@ -2021,11 +2032,8 @@
                     // Executes the layout handler
                     this.executeLayout();
                     
-                }
-                finally
-                {
+                } finally {
                     this.model.graph.graph.getModel().endUpdate();
-                    this.updateStatus();
                 }
             },
             removeEdge(sNode,tNode){
@@ -2050,11 +2058,8 @@
                     // Executes the layout handler
                     this.executeLayout();
                     
-                }
-                finally
-                {
+                } finally {
                     this.model.graph.graph.getModel().endUpdate();
-                    this.updateStatus();
                 }
             },
             onFullScreen(){
@@ -2293,6 +2298,34 @@
                     })
                 }
 
+            },
+            // Action For Cells
+            deleteCells(includeEdges){
+                
+                this.model.graph.graph.escape();
+
+                //var cells = this.model.graph.graph.getDeletableCells(this.model.graph.graph.getSelectionCells());
+                let cells = this.model.graph.graph.getChildVertices(this.model.graph.graph.getDefaultParent());
+                console.log(cells)
+                if (cells != null && cells.length > 0){
+                    var parents = this.model.graph.graph.model.getParents(cells);
+                    this.model.graph.graph.removeCells(cells, includeEdges);
+                    
+                    // Selects parents for easier editing of groups
+                    if (parents != null) {
+                        var select = [];
+                        
+                        for (var i = 0; i < parents.length; i++) {
+                            if (this.model.graph.graph.model.contains(parents[i]) &&
+                                (this.model.graph.graph.model.isVertex(parents[i]) ||
+                                this.model.graph.graph.model.isEdge(parents[i]))){
+                                select.push(parents[i]);
+                            }
+                        }
+                        
+                        this.model.graph.graph.setSelectionCells(select);
+                    }
+                }
             },
             onTagClick(event,type,value){
                 event.preventDefault();

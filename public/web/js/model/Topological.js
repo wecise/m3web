@@ -966,7 +966,7 @@ class Topological {
         // 拓扑分析搜索框 newest!
         Vue.component("topological-search-toolbar",{
             delimiters: ['${', '}'],
-            template:   `<el-container style="100%;">
+            template:   `<el-container style="height:100%;">
                             <el-button type="text" icon="el-icon-arrow-right" @click="control.show=!control.show" v-show="control.show==false" style="width:30px;"></el-button>
                             <component v-bind:is="currentView" class="animated fadeIn" v-show="control.show==true"></component>
                         </el-container>`,
