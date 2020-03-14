@@ -61,8 +61,8 @@
                         </el-button>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item @click.native="editor.execute('mxProperties')">打开</el-dropdown-item>
-                        <el-dropdown-item divided>保存</el-dropdown-item>
+                        <el-dropdown-item @click.native="dialogOpen.visible=true">打开</el-dropdown-item>
+                        <el-dropdown-item @click.native="onSave" divided>保存</el-dropdown-item>
                         <el-dropdown-item>另存为</el-dropdown-item>
                         <el-dropdown-item @click.native="editor.execute('print')"divided>打印</el-dropdown-item>
                         <el-dropdown-item divided>关闭</el-dropdown-item>
@@ -123,6 +123,11 @@
                     </div>
     
                     <div class="vertical-toolbar animated fadeIn">
+                        <el-tooltip content="刷新" open-delay="500" placement="left">
+                            <el-button type="text" @click="editor.execute('refresh')">
+                                 <i class="el-icon-refresh" style="font-size:18px;">
+                            </el-button>
+                        </el-tooltip>
                         <el-tooltip content="放大" open-delay="500" placement="left">
                            <el-button type="text" @click="editor.execute('zoomIn')">
                                 <i class="el-icon-zoom-in" style="font-size:18px;">
@@ -153,7 +158,14 @@
                            </el-button>
                        </el-tooltip>
                    </div>
-                   <el-dialog :title="dialogInfo.title" :visible.sync="dialogInfo.visible">
+                   <el-dialog :title="dialogOpen.title" :visible.sync="dialogOpen.visible">
+                        <mx-fs-open dfsRoot="/home/admin/Documents" ref="dfsOpen"></mx-fs-open>
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click="dialogOpen.visible = false">取 消</el-button>
+                            <el-button type="primary" @click="onOpen">打 开</el-button>
+                        </div>
+                    </el-dialog>
+                    <el-dialog :title="dialogInfo.title" :visible.sync="dialogInfo.visible">
                         <el-form>
                             <el-form-item label="">
                                 <el-input type="textarea" rows="12" v-model="dialogInfo.content" autocomplete="off"></el-input>
@@ -176,7 +188,7 @@
                         </div>
                     </el-dialog>
                     <el-dialog :title="dialogProperties.title" :visible.sync="dialogProperties.visible">
-                        <el-form>
+                        <el-form label-position="right" label-width="100px">
                             <el-form-item label="属性">
                                 <el-input  v-model="dialogProperties.model.name" autocomplete="off"></el-input>
                             </el-form-item>
@@ -184,7 +196,13 @@
                                 <el-input  v-model="dialogProperties.model.title" autocomplete="off"></el-input>
                             </el-form-item>
                             <el-form-item label="类型">
-                                <el-input  v-model="dialogProperties.model.ftype" autocomplete="off"></el-input>
+                                <el-select v-model="dialogProperties.model.ftype">
+                                    <el-option :key="item.value" 
+                                        :label="item.label"
+                                        :value="item.value"
+                                        v-for="item in dialogProperties.model.ftypeList">
+                                    </el-option>
+                                </el-select>
                             </el-form-item>
                             <el-form-item label="是否为主键">
                                 <el-checkbox v-model="dialogProperties.model.iskey"></el-checkbox>
@@ -213,7 +231,12 @@
 		data(){
           	return {
                 editor: null,
-                graph: null,
+                doc:null,
+                dialogOpen:{
+                    title: "打开",
+                    content: "",
+                    visible: false
+                },
                 dialogInfo:{
                     title: "",
                     content: "",
@@ -232,14 +255,20 @@
                         title:"",
                         ftype: "varchar",
                         iskey:false,
-                        isindex:false
+                        isindex:false,
+                        ftypeList: [],
                     },
                     visible: false
                 }
 			}
 		},
         created(){
-            
+            try{
+                let ftypeList = fsHandler.callFsJScript("/matrix/omdb/getFileldTypeList.js",null).message;
+                _.extend(this.dialogProperties.model,{ftypeList:_.map(ftypeList,(v,k)=>{ return {value:k,label:k};  })});
+            } catch(err){
+                console.log(err)
+            }
             
         },
 		mounted(){
@@ -247,12 +276,38 @@
                     this.$refs.sidebarContainer);
         },
 		methods: {
-            
             // Program starts here. Creates a sample graph in the
             // DOM node with the specified ID. This function is invoked
             // from the onLoad event handler of the document (see below).
             main(container, sidebar) {
                 const self = this;
+
+                // Defines the column user object
+                function Column(name){
+                    this.name = name;
+                };
+
+                Column.prototype.ftype = 'varchar';
+
+                Column.prototype.title = '';
+                
+                Column.prototype.iskey = false;
+                
+                Column.prototype.isindex = false;
+                
+                Column.prototype.clone = function() {
+                    return mxUtils.clone(this);
+                };
+                
+                // Defines the table user object
+                function Table(name){
+                    console.log(name)
+                    this.name = name;
+                };
+                Table.prototype.clone = function(){
+                    return mxUtils.clone(this);
+                };
+
                 // Checks if the browser is supported
                 if (!mxClient.isBrowserSupported()) {
                     // Displays an error message if the browser is not supported.
@@ -303,9 +358,7 @@
                     // of the UI are custom in this example.
                     let editor = null;
                     this.editor = editor = new mxEditor();
-                    let graph = null;
-                    this.graph = graph = editor.graph;
-                    
+                    let graph = editor.graph;
                     let model = graph.model;
                     
                     // Disables some global features
@@ -344,13 +397,12 @@
                     // Configures the automatic layout for the table columns
                     editor.layoutSwimlanes = true;
                     editor.createSwimlaneLayout = function () {
-                        var layout = new mxStackLayout(this.graph, false);
+                        var layout = new mxStackLayout(editor.graph, false);
                         layout.fill = true;
                         layout.resizeParent = true;
                         
                         // Overrides the function to always return true
-                        layout.isVertexMovable = function(cell)
-                        {
+                        layout.isVertexMovable = function(cell) {
                             return true;
                         };
                         
@@ -359,12 +411,9 @@
                     
                     // Text label changes will go into the name field of the user object
                     graph.model.valueForCellChanged = function(cell, value) {
-                        if (value.name != null)
-                        {
+                        if (value.name != null) {
                             return mxGraphModel.prototype.valueForCellChanged.apply(this, arguments);
-                        }
-                        else
-                        {
+                        } else {
                             var old = cell.value.name;
                             cell.value.name = value;
                             return old;
@@ -472,19 +521,16 @@
 
                     // Adds all required styles to the graph (see below)
                     this.configureStylesheet(graph);
-
+                    
                     // Adds sidebar icon for the table object
                     var tableObject = new Table('CLASSNAME');
                     var table = new mxCell(tableObject, new mxGeometry(0, 0, 200, 28), 'table');
-                    
                     table.setVertex(true);
                     this.addSidebarIcon(graph, sidebar, table, '/fs/assets/images/graph/tools/table.png?type=open&issys=true');
                     
                     // Adds sidebar icon for the column object
                     var columnObject = new Column('COLUMNNAME');
-                    console.log(columnObject)
                     var column = new mxCell(columnObject, new mxGeometry(0, 0, 0, 26));
-                    
                     column.setVertex(true);
                     column.setConnectable(false);
 
@@ -576,11 +622,18 @@
                         this.showDialogSource('源文件', mxUtils.getPrettyXml(node));
                     });
 
+                    // Defines Auto Save XML action
+                    // var mgr = new mxAutoSaveManager(editor.graph);
+                    // mgr.autoSaveDelay = 5;
+                    // mgr.save = function(){
+                    //     self.onSave()
+                    // };
+
                     // Animates the changes in the graph model
-                    graph.getModel().addListener(mxEvent.CHANGE, (sender, evt)=>{
-                        var changes = evt.getProperty('edit').changes;
-                        mxEffects.animateChanges(graph, changes);
-                    });
+                    // graph.getModel().addListener(mxEvent.CHANGE, (sender, evt)=>{
+                    //     var changes = evt.getProperty('edit').changes;
+                    //     mxEffects.animateChanges(graph, changes);
+                    // });
                     
                 }
             }, 
@@ -620,7 +673,7 @@
                     
                     var isTable = graph.isSwimlane(prototype);
                     var name = null;				
-
+                    console.log(12,isTable,prototype,image)
                     if (!isTable) {
                         parent = cell;
                         var pstate = graph.getView().getState(parent);
@@ -639,7 +692,7 @@
 
                         var columnCount = graph.model.getChildCount(parent)+1;
                         //name = mxUtils.prompt('请输入属性名称', 'COLUMN'+columnCount);
-                        name = 'COLUMN'+columnCount;
+                        name = '属性'+columnCount;
                     } else {
                         var tableCount = 0;
                         var childCount = graph.model.getChildCount(parent);
@@ -650,7 +703,7 @@
                             }
                         }
                         
-                        var name = '/Class'+(tableCount+1);
+                        var name = '/新类'+(tableCount+1);
                     }
                     
                     if (name != null) {
@@ -712,7 +765,7 @@
             applyMqlToFile(){
                 let doc = mxUtils.parseXml(this.dialogSource.content);
                 let codec = new mxCodec(doc);
-                codec.decode(doc.documentElement, this.graph.getModel());
+                codec.decode(doc.documentElement, this.editor.graph.getModel());
                 this.dialogSource.visible = false;
             },
             configureStylesheet(graph) {
@@ -800,7 +853,7 @@
                             };
             
                 var parent = graph.model.getParent(cell);
-                var name = parent.value.name + '.' + cell.value.name;
+                var name = parent.value.name + '【' + cell.value.name  + '】';
 
                 this.showDialogProperties(name, model);
             },
@@ -871,6 +924,33 @@
                 
 
                 return mql[0].join('');
+            },
+            onOpen(){
+                try{
+                    this.doc = this.$refs.dfsOpen.node;
+                    let xml = fsHandler.fsContent(this.doc.parent, this.doc.name);
+                    let doc = mxUtils.parseXml(xml);
+                    let codec = new mxCodec(doc);
+                    codec.decode(doc.documentElement, this.editor.graph.getModel());
+                } catch(err){
+                    console.error(err);
+                } finally {
+                    this.dialogOpen.visible = false;
+                }
+                
+            },
+            onSave(){
+                let enc = new mxCodec(mxUtils.createXmlDocument());
+                let node = enc.encode(this.editor.graph.getModel());
+                let xml = mxUtils.getPrettyXml(node);
+                let attr = _.extend(this.doc, {});
+                let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
+                if(rtn == 1){
+                    this.$message({
+                        type:"success",
+                        message: "保存成功！"
+                    })
+                }
             },
             onDelete(){
                 this.editor.execute('delete');

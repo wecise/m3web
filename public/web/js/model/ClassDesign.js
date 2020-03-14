@@ -22,30 +22,7 @@ class ClassDesign {
 
             $(function() {
                 
-                // Defines the column user object
-                function Column(name){
-                    this.name = name;
-                };
-
-                Column.prototype.ftype = 'varchar';
-
-                Column.prototype.title = '';
                 
-                Column.prototype.iskey = false;
-                
-                Column.prototype.isindex = false;
-                
-                Column.prototype.clone = function() {
-                    return mxUtils.clone(this);
-                };
-                
-                // Defines the table user object
-                function Table(name){
-                    this.name = name;
-                };
-                Table.prototype.clone = function(){
-                    return mxUtils.clone(this);
-                };
             })
         })
 

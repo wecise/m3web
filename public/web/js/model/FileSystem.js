@@ -18,7 +18,7 @@ class FileSystem {
 
     init(){
     }
-
+    
     fileNewTo(app, sourceList, loadCallBack){
         let wnd = null;
 
@@ -36,7 +36,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(app)).message,
+                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -227,7 +227,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(app)).message,
+                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
@@ -318,7 +318,7 @@ class FileSystem {
         new Vue({
             delimiters: ['#{', '}#'],
             data:{
-                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(app)).message,
+                classList: fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:app,onlyDir:true}))).message,
                 defaultProps: {
                     children: 'children',
                     label: 'alias'
