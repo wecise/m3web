@@ -363,7 +363,11 @@ class SideBar {
                                 </div>
                                 <div id="ai-robot" style="width:8%;"></div>
                                 <div style="width:12%;">
-                                    <el-menu :default-active="activeIndex" class="topbar-el-menu" mode="horizontal" @select="onSelect">
+                                    <el-menu :default-active="activeIndex" 
+                                            class="topbar-el-menu" 
+                                            mode="horizontal" 
+                                            @select="onSelect"
+                                            menu-trigger="click">
                                         <el-submenu index="2">
                                             <template slot="title">
                                                 #{window.SignedUser_UserName}#

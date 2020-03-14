@@ -111,8 +111,17 @@ class Home extends Matrix {
                                                         </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </el-button>
-                                                <el-button type="default"  @click.native="group.dialogVisible = true" style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;">
-                                                    <span class="fas fa-plus" style="font-size: 20px;"></span>
+                                                <el-button type="default" 
+                                                    style="max-width: 120px;width: 120px;height:90px;border-radius:10px!important;background: rgba(255,255,255,0.3);margin: 5px;">
+                                                    <el-dropdown trigger="hover" placement="top-start">
+                                                        <span class="el-dropdown-link">
+                                                            <i class="el-icon-plus" style="font-size: 20px;"></i>
+                                                        </span>
+                                                        <el-dropdown-menu slot="dropdown">
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newGroup',url:''})">新建组</el-dropdown-item>
+                                                            <el-dropdown-item @click.native="onPlusCommand({type:'newApp',url:'/janesware/system'})">发布应用</el-dropdown-item>
+                                                        </el-dropdown-menu>
+                                                    </el-dropdown>
                                                 </el-button>
                                                 
                                                 <el-dialog :visible.sync="group.dialogVisible" width="30%" destroy-on-close="true" modal="false">
@@ -240,6 +249,14 @@ class Home extends Matrix {
                         init(){
                             this.loadApps();
                         },
+                        onPlusCommand(cmd){
+                            
+                            if(cmd.type === 'newGroup'){
+                                this.group.dialogVisible = true;
+                            } else {
+                                window.open(cmd.url,'_blank');    
+                            }
+                        },  
                         onCommand(item){
                             window.open(item.url,item.target);
                         },
