@@ -231,6 +231,29 @@
                 <span v-if="!_.isEmpty(doc)">
                     <i class="el-icon-notebook-2"></i> ${doc.fullname}
                 </span>
+                <el-divider direction="vertical"></el-divider>
+                <el-dropdown>
+                    <span class="el-dropdown-link" style="cursor: pointer;">
+                        <i class="el-icon-office-building"></i> ${docInfo.classes.list.length}
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item v-for="item in docInfo.classes.list" :key="item" :command="item">
+                            ${item}
+                        <el-dropdown-item
+                    </el-dropdown-menu>
+                </el-dropdown>
+                <el-divider direction="vertical"></el-divider>
+                <el-dropdown>
+                    <span class="el-dropdown-link" style="cursor: pointer;">
+                        <i class="el-icon-notebook-2"></i> ${docInfo.columns.list.length}
+                    </span>
+                    <el-dropdown-menu slot="dropdown">
+                        <el-dropdown-item v-for="item in docInfo.columns.list" :key="item" :command="item">
+                            <span>${item.name}</span>
+                            <span>${item.ftype}</span>
+                        <el-dropdown-item
+                    </el-dropdown-menu>
+                </el-dropdown>
             </el-footer>
         </el-container>
 	</template>
@@ -243,11 +266,19 @@
         	
 		},
 		data(){
-            
-
           	return {
                 editor: null,
                 doc:null,
+                docInfo: {
+                    classes:{
+                        count:0,
+                        list: []
+                    },
+                    columns:{
+                        count: 0,
+                        list: []
+                    }
+                },
                 dialogOpen:{
                     title: "打开",
                     content: "",
@@ -283,7 +314,7 @@
                     visible: false
                 }
 			}
-		},
+        },
         created(){
             try{
                 let ftypeList = fsHandler.callFsJScript("/matrix/omdb/getFileldTypeList.js",null).message;
@@ -484,30 +515,20 @@
                         if (this.isHtmlLabel(cell)) {
                             var label = '';
                             
-                            if (cell.value.primaryKey)
-                            {
+                            if (cell.value.iskey){
                                 label += '<img title="Primary Key" src="/fs/assets/images/graph/tools/key.png?type=open&issys=true" width="16" height="16" align="top">&nbsp;';
-                            }
-                            else
-                            {
+                            } else {
                                 label += '<img src="/fs/assets/images/graph/tools/spacer.gif?type=open&issys=true" width="16" height="1">&nbsp;';
                             }
                                                     
-                            if (cell.value.autoIncrement)
-                            {
-                                label += '<img title="Auto Increment" src="/fs/assets/images/graph/tools/plus.png?type=open&issys=true" width="16" height="16" align="top">&nbsp;';
-                            }
-                            else if (cell.value.unique)
-                            {
-                                label += '<img title="Unique" src="/fs/assets/images/graph/tools/check.png?type=open&issys=true" width="16" height="16" align="top">&nbsp;';
-                            }
-                            else
-                            {
+                            if (cell.value.isindex) {
+                                label += '<img src="/fs/assets/images/graph/tools/index.png?type=open&issys=true" width="16" height="16" align="top">&nbsp;';
+                            } else {
                                 label += '<img src="/fs/assets/images/graph/tools/spacer.gif?type=open&issys=true" width="16" height="1">&nbsp;';
                             }
 
                             return label + mxUtils.htmlEntities(cell.value.name, false) + ': ' +
-                                mxUtils.htmlEntities(cell.value.type, false);
+                                mxUtils.htmlEntities(cell.value.ftype, false);
                         }
                         
                         return mxGraph.prototype.getLabel.apply(this, arguments); // "supercall"
@@ -515,19 +536,12 @@
                     
                     // Removes the source vertex if edges are removed
                     graph.addListener(mxEvent.REMOVE_CELLS, function(sender, evt) {
-                        var cells = evt.getProperty('cells');
-                        
-                        // for (var i = 0; i < cells.length; i++)
-                        // {
-                        //     var cell = cells[i];
-                            
-                        //     if (this.model.isEdge(cell))
-                        //     {
-                        //         var terminal = this.model.getTerminal(cell, true);
-                        //         var parent = this.model.getParent(terminal);
-                        //         this.model.remove(terminal);
-                        //     }
-                        // }
+                        self.summaryInfo();
+                    });
+
+                    // Add the source vertex
+                    graph.addListener(mxEvent.ADD_CELLS, function(sender, evt) {
+                        self.summaryInfo();
                     });
 
                     // Disables drag-and-drop into non-swimlanes.
@@ -660,6 +674,31 @@
                     
                 }
             }, 
+            summaryInfo(){
+                this.docInfo.classes.list = [];
+                this.docInfo.columns.list = [];
+
+                let parent = this.editor.graph.getDefaultParent();
+                let childCount = this.editor.graph.model.getChildCount(parent);
+
+                for(var i=0; i<childCount; i++){
+                    var child = this.editor.graph.model.getChildAt(parent, i);
+                    if (!this.editor.graph.model.isEdge(child)){
+                        
+                        // Classes
+                        this.docInfo.classes.list.push(child.value.name);
+                        
+                        var columnCount = this.editor.graph.model.getChildCount(child);
+
+                        if (columnCount > 0){
+                            for (var j=0; j<columnCount; j++){
+                                // Columns
+                                this.docInfo.columns.list.push(this.editor.graph.model.getChildAt(child, j).value);
+                            }
+                        }
+                    }
+                }
+            },
             showDialogProperties(className, columnName, cell){
                 this.dialogProperties.title = className;
                 _.extend(this.dialogProperties, {cell:cell});
@@ -696,7 +735,7 @@
                     
                     var isTable = graph.isSwimlane(prototype);
                     var name = null;				
-                    console.log(12,isTable,prototype,image)
+                    
                     if (!isTable) {
                         parent = cell;
                         var pstate = graph.getView().getState(parent);
@@ -714,7 +753,6 @@
                         pt.y -= pstate.y;
 
                         var columnCount = graph.model.getChildCount(parent)+1;
-                        //name = mxUtils.prompt('请输入属性名称', 'COLUMN'+columnCount);
                         name = '属性'+columnCount;
                     } else {
                         var tableCount = 0;
@@ -865,16 +903,7 @@
             },
             showProperties(graph, cell){
                 console.log('showProperties ', cell)
-                // Adds a field for the columnname
-                // let model = { 
-                //                 cell: cell,
-                //                 name:  cell.value.name, 
-                //                 title: cell.value.title,
-                //                 ftype: cell.value.ftype,
-                //                 iskey: cell.value.iskey,
-                //                 isindex: cell.value.isindex
-                //             };
-            
+                
                 var parent = graph.model.getParent(cell);
                 var className = parent.value.name;
                 var columnName = cell.value.name;
@@ -895,7 +924,6 @@
                 let mql = [[],[],[]];
                 let parent = graph.getDefaultParent();
                 let childCount = graph.model.getChildCount(parent);
-                console.log(parent,childCount)
 
                 for (var i=0; i<childCount; i++){
                     var child = graph.model.getChildAt(parent, i);
@@ -958,6 +986,10 @@
                     console.error(err);
                 } finally {
                     this.dialogOpen.visible = false;
+
+                    this.summaryInfo();
+
+                    this.editor.graph.fit();
                 }
                 
             },
