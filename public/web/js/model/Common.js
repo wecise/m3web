@@ -484,6 +484,78 @@ Vue.component("mx-fs-open",{
     }
 })
 
+/* Common Fs SaveAs */
+Vue.component("mx-fs-saveas",{
+    delimiters: ['#{', '}#'],
+    props:{
+        dfsRoot:String
+    },
+    data(){
+        return {
+            classList: [],
+            defaultProps: {
+                children: 'children',
+                label: 'alias'
+            },
+            node: {
+                parent: "",
+                name: "新建_"+_.now()+".xml"
+            },
+            form: {
+                name: "",
+                attr: ""
+            }
+        }
+    },
+    template: `<el-container>
+                    <el-header style="height:120px;line-height:120px;padding:10px;">
+                        <el-form ref="form" :model="form" label-width="80px">
+                            <el-form-item label="文件名称">
+                                <el-input v-model="node.name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="选择目录">
+                                <el-input v-model="node.fullname" v-if="!_.isEmpty(node.fullname)"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-header>
+                    <el-main style="padding:10px 0px;height:260px;background:#f6f6f6;">
+                        <el-tree v-if="!_.isEmpty(classList)"
+                            :data="classList"
+                            node-key="id"
+                            :default-expanded-keys="[_.first(classList).id]"
+                            :props="defaultProps"
+                            @node-click="onNodeClick"
+                            accordion="true"
+                            style="background-color:transparent;">
+                            <span slot-scope="{ node, data }">
+                                <span class="el-icon-files"></span>
+                                <span>#{ data.name }#</span>
+                            </span>
+                        </el-tree>
+                    </el-main>
+                </el-container>`,
+    created(){
+        this.initTreeData();
+
+        // 默认创建目录
+        _.extend(this.node,{fullname: this.dfsRoot});
+    },
+    methods:{
+        initTreeData(){
+            this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:true}))).message;
+        },
+        onNodeClick(node){
+            this.node = node;
+        },
+        onCancel(){
+            
+        },
+        onOpen(){
+            
+        }
+    }
+})
+
 /* Common Fs Info */
 Vue.component("mx-fs-info",{
     delimiters: ['#{', '}#'],
