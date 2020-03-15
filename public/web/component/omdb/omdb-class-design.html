@@ -187,7 +187,7 @@
                             <el-button type="primary" @click="applyMqlToFile">更新到当前文件</el-button>
                         </div>
                     </el-dialog>
-                    <el-dialog :title="dialogProperties.title" :visible.sync="dialogProperties.visible">
+                    <el-dialog :title="dialogProperties.title+'【'+ dialogProperties.model.name +'】'" :visible.sync="dialogProperties.visible">
                         <el-form label-position="right" label-width="100px">
                             <el-form-item label="属性">
                                 <el-input  v-model="dialogProperties.model.name" autocomplete="off"></el-input>
@@ -218,6 +218,11 @@
                     </el-dialog>
                 </el-main>
             </el-container>
+            <el-footer style="height:30px;line-height: 30px;background: #f7f7f7;">
+                <span v-if="!_.isEmpty(doc)">
+                    <i class="el-icon-notebook-2"></i> ${doc.fullname}
+                </span>
+            </el-footer>
         </el-container>
 	</template>
 
@@ -229,6 +234,8 @@
         	
 		},
 		data(){
+            
+
           	return {
                 editor: null,
                 doc:null,
@@ -284,7 +291,7 @@
 
                 // Defines the column user object
                 function Column(name){
-                    this.name = name;
+                        this.name = name;
                 };
 
                 Column.prototype.ftype = 'varchar';
@@ -301,7 +308,6 @@
                 
                 // Defines the table user object
                 function Table(name){
-                    console.log(name)
                     this.name = name;
                 };
                 Table.prototype.clone = function(){
@@ -597,6 +603,7 @@
                         }
                         
                         if (graph.isHtmlLabel(cell)) {
+                            console.log(5,cell)
                             this.showProperties(graph, cell);
                         }
                     });
@@ -637,8 +644,8 @@
                     
                 }
             }, 
-            showDialogProperties(title, model){
-                this.dialogProperties.title = title;
+            showDialogProperties(className, columnName, model){
+                this.dialogProperties.title = className;
                 _.extend(this.dialogProperties, {model:model});
                 this.dialogProperties.visible = true;
             },
@@ -853,22 +860,27 @@
                             };
             
                 var parent = graph.model.getParent(cell);
-                var name = parent.value.name + '【' + cell.value.name  + '】';
-
-                this.showDialogProperties(name, model);
+                var className = parent.value.name;
+                var columnName = cell.value.name;
+                this.showDialogProperties(className,columnName, model);
             },
             onUpdateProperties(model){
-                let cell = model.cell;
-                console.log(2323,cell)
-                let clone = cell.value.clone();
+                
+                let clone = model.cell.value.clone();
 				
-                clone.name = model.name;
-				clone.title = model.title;
-				clone.ftype = model.ftype;
-				clone.iskey = model.iskey;
-				clone.isindex = model.isindex;
+                _.extend(clone, _.omit(model,'cell'));
+                // clone.name = cell.name;
+				// clone.title = cell.title;
+				// clone.ftype = cell.ftype;
+				// clone.iskey = cell.iskey;
+				// clone.isindex = cell.isindex;
 				
-				this.graph.model.setValue(cell, clone);
+                this.editor.graph.model.setValue(model.cell, clone);
+                
+                this.onSave();
+
+                this.dialogProperties.visible = false;
+
             },  
             createMql(graph) {
                 let mql = [[],[],[]];
@@ -940,16 +952,24 @@
                 
             },
             onSave(){
-                let enc = new mxCodec(mxUtils.createXmlDocument());
-                let node = enc.encode(this.editor.graph.getModel());
-                let xml = mxUtils.getPrettyXml(node);
-                let attr = _.extend(this.doc, {});
-                let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
-                if(rtn == 1){
+                if(this.doc){
+                    let enc = new mxCodec(mxUtils.createXmlDocument());
+                    let node = enc.encode(this.editor.graph.getModel());
+                    let xml = mxUtils.getPrettyXml(node);
+                    let attr = _.extend(this.doc, {});
+                    let rtn = fsHandler.fsNew('file',this.doc.parent, this.doc.name, xml, attr);
+                    if(rtn == 1){
+                        this.$message({
+                            type:"success",
+                            message: "保存成功！"
+                        })
+                    }
+                } else {
                     this.$message({
-                        type:"success",
-                        message: "保存成功！"
+                        type: "info",
+                        message: "该文档未保存！"
                     })
+                    return false;
                 }
             },
             onDelete(){
