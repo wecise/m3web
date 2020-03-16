@@ -61,11 +61,13 @@
                         </el-button>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item @click.native="dialogOpen.visible=true">打开</el-dropdown-item>
+                        <el-dropdown-item @click.native="onNew">新建</el-dropdown-item>
+                        <el-dropdown-item @click.native="dialogOpen.visible=true" divided>打开</el-dropdown-item>
                         <el-dropdown-item @click.native="onSave" divided>保存</el-dropdown-item>
                         <el-dropdown-item @click.native="dialogSaveAs.visible=true">另存为</el-dropdown-item>
-                        <el-dropdown-item @click.native="editor.execute('print')"divided>打印</el-dropdown-item>
-                        <el-dropdown-item divided>关闭</el-dropdown-item>
+                        <el-dropdown-item @click.native="onDelete" divided>删除</el-dropdown-item>
+                        <el-dropdown-item @click.native="editor.execute('print')" divided>打印</el-dropdown-item>
+                        <el-dropdown-item @click.native="onClose" divided>关闭</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
                 <el-dropdown trigger="click">
@@ -77,7 +79,7 @@
                     <el-dropdown-menu slot="dropdown">
                         <el-dropdown-item @click.native="editor.execute('undo')">撤销</el-dropdown-item>
                         <el-dropdown-item  @click.native="editor.execute('redo')">重做</el-dropdown-item>
-                        <el-dropdown-item  @click.native="onDelete" divided>删除</el-dropdown-item>
+                        <el-dropdown-item  @click.native="onDelete" divided v-if="!_.isEmpty(doc)">删除</el-dropdown-item>
                         <el-dropdown-item divided>关闭</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -146,6 +148,12 @@
                            </el-button>
                        </el-tooltip>
                        <el-divider></el-divider>
+                       <el-tooltip content="适合页面" open-delay="500" placement="left">
+                           <el-button type="text" @click="editor.execute('fit')">
+                                <i class="el-icon-help" style="font-size:18px;">
+                           </el-button>
+                       </el-tooltip>
+                       <el-divider></el-divider>
                        <el-tooltip content="收起所有" open-delay="500" placement="left">
                            <el-button type="text" @click="editor.execute('collapseAll')">
                                 <i class="el-icon-menu" style="font-size:18px;">
@@ -173,22 +181,18 @@
                         </div>
                     </el-dialog>
                     <el-dialog :title="dialogInfo.title" :visible.sync="dialogInfo.visible">
-                        <el-form>
-                            <el-form-item label="">
-                                <el-input type="textarea" rows="12" v-model="dialogInfo.content" autocomplete="off"></el-input>
-                            </el-form-item>
-                        </el-form>
+                        <el-container>
+                            <el-main style="padding:0px;height:300px;border:1px solid #ddd;" ref="dialogInfoEditor"></el-main>
+                        </el-container>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogInfo.visible = false">取 消</el-button>
                             <el-button type="primary" @click="dialogInfo.visible = false">确 定</el-button>
                         </div>
                     </el-dialog>
                     <el-dialog :title="dialogSource.title" :visible.sync="dialogSource.visible">
-                        <el-form>
-                            <el-form-item label="">
-                                <el-input type="textarea" rows="12" v-model="dialogSource.content" autocomplete="off"></el-input>
-                            </el-form-item>
-                        </el-form>
+                        <el-container>
+                            <el-main style="padding:0px;height:300px;border:1px solid #ddd;" ref="dialogSourceEditor"></el-main>
+                        </el-container>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogSource.visible = false">取 消</el-button>
                             <el-button type="primary" @click="applyMqlToFile">更新到当前文件</el-button>
@@ -659,6 +663,11 @@
                         this.showDialogSource('源文件', mxUtils.getPrettyXml(node));
                     });
 
+                    // Defines Delete action
+                    editor.addAction('deleteAll',(editor,cell)=>{
+                        this.deleteCells(true);
+                    })
+
                     // Defines Auto Save XML action
                     // var mgr = new mxAutoSaveManager(editor.graph);
                     // mgr.autoSaveDelay = 5;
@@ -705,20 +714,50 @@
                 this.dialogProperties.visible = true;
             },
             showDialogInfo(title, content) {
+                
                 this.dialogInfo.title = "";
                 this.dialogInfo.content = "";
-
                 this.dialogInfo.title = title;
-                this.dialogInfo.content = content;
                 this.dialogInfo.visible = true;
+                
+                _.delay(()=>{
+                    // Editor
+                    let editor = ace.edit(this.$refs.dialogInfoEditor.$el);
+                    editor.setOptions({
+                        //maxLines: 1000,
+                        minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: true
+                    });
+                    editor.setTheme("ace/theme/tomorrow");
+                    editor.getSession().setMode("ace/mode/mql");
+                    editor.setValue(content);
+                },50)
             },
             showDialogSource(title, content) {
                 this.dialogSource.title = "";
                 this.dialogSource.content = "";
 
                 this.dialogSource.title = title;
-                this.dialogSource.content = content;
                 this.dialogSource.visible = true;
+
+                _.delay(()=>{
+                    // Editor
+                    let editor = ace.edit(this.$refs.dialogSourceEditor.$el);
+                    editor.setOptions({
+                        //maxLines: 1000,
+                        minLines: 20,
+                        autoScrollEditorIntoView: true,
+                        enableBasicAutocompletion: true,
+                        enableSnippets: true,
+                        enableLiveAutocompletion: true
+                    });
+                    editor.setTheme("ace/theme/tomorrow");
+                    editor.getSession().setMode("ace/mode/xml");
+                    editor.setValue(content);
+                },50)
             },
             addSidebarIcon(graph, sidebar, prototype, image){
                 // Function that is executed when the image is dropped on
@@ -894,10 +933,19 @@
                 menu.addItem('重做', null, function(){
                     editor.execute('redo', cell);
                 });
+
+                menu.addSeparator();
+
+                menu.addItem('清空', null, function(){
+                    editor.execute('deleteAll');
+                });
                 
                 menu.addSeparator();
                 
                 menu.addItem('显示MQL', null, function(){
+                    editor.execute('showMql', cell);
+                });	
+                menu.addItem('执行MQL', null, function(){
                     editor.execute('showMql', cell);
                 });	
             },
@@ -975,6 +1023,11 @@
 
                 return mql[0].join('');
             },
+            onNew(){
+                this.deleteCells(true);
+                this.summaryInfo();
+                this.doc = null;
+            },
             onOpen(){
                 try{
                     this.doc = this.$refs.dfsOpen.node;
@@ -989,7 +1042,10 @@
 
                     this.summaryInfo();
 
-                    this.editor.graph.fit();
+                    _.delay(()=>{
+                        this.editor.execute('fit');
+                    },2000)
+                    
                 }
                 
             },
@@ -1025,15 +1081,72 @@
                         })
                     }
                 } else {
-                    this.$message({
-                        type: "info",
-                        message: "该文档未保存！"
-                    })
+                    // this.$message({
+                    //     type: "info",
+                    //     message: "该文档未保存！"
+                    // })
                     this.dialogSaveAs.visible = true;
                 }
             },
+            onClose(){
+                this.editor.execute("deleteAll");
+                this.doc = null;
+                this.summaryInfo();
+            },
             onDelete(){
-                this.editor.execute('delete');
+                if(this.doc){
+
+                    this.$confirm(`确认要删除该设计文档：${this.doc.name}？`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        let rtn = fsHandler.fsDelete(this.doc.parent,this.doc.name);
+    
+                        if (rtn == 1){
+                            this.$message({
+                                type: "success",
+                                message: "删除成功！"
+                            });
+                            this.deleteCells(true);
+                            this.doc = null;
+                            this.summaryInfo();
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: "删除失败 " + rtn.message
+                            })
+                        } 
+                    }).catch(() => {
+                        
+                    });
+                }
+            },
+            deleteCells(includeEdges){
+                
+                // Cancels interactive operations
+                let graph = this.editor.graph;
+                graph.escape();
+                //var cells = graph.getDeletableCells(graph.getSelectionCells());
+                let cells = graph.getChildVertices(graph.getDefaultParent());
+                if (cells != null && cells.length > 0){
+                    var parents = graph.model.getParents(cells);
+                    graph.removeCells(cells, includeEdges);
+                    
+                    // Selects parents for easier editing of groups
+                    if (parents != null){
+                        var select = [];
+                        
+                        for (var i = 0; i < parents.length; i++){
+                            if (graph.model.contains(parents[i]) &&
+                                (graph.model.isVertex(parents[i]) ||
+                                graph.model.isEdge(parents[i]))){
+                                select.push(parents[i]);
+                            }
+                        }
+                        graph.setSelectionCells(select);
+                    }
+                }
             }
 		}
 	
