@@ -348,7 +348,7 @@
 	/*----------  最外层element会自动增加组件同名 class="topological-graph-component"  ----------*/
 	<template>
 		<el-main style="overflow:hidden;padding: 0px;height:100%;">
-            <el-container id="container" style="width:100%;height:100%;border-top:1px solid #ddd;position: relative;" ref="container" direction="vertical">
+            <el-container id="container" style="width:100%;height:100%;position: relative;" ref="container" direction="vertical">
                 <el-header style="height:35px;line-height: 35px;padding:0px;position: relative;display:none;">
                     <graph-view-search class="tools-search" ref="graphViewSearch"></graph-view-search>
                 </el-header>
@@ -2070,14 +2070,18 @@
                     
                         $("#header").show();
                         $("#aside").show();
+                        $("#footer").show();
                         $("#content").css("margin-left","60px");
+                        $(this.$root.$refs.main.$el).css("height","calc(100vh - 85px)");
                     } else {
                         screenfull.request();
                         this.model.control.ifFullScreen = true;
 
                         $("#header").hide();
                         $("#aside").hide();
+                        $("#footer").hide();
                         $("#content").css("margin-left","0px");
+                        $(this.$root.$refs.main.$el).css("height","calc(100vh - 50px)");
                     }   
                 }
                 //this.model.control.ifFullScreen = mx.fullScreenByEl(this.$el);
@@ -2306,7 +2310,7 @@
 
                 //var cells = this.model.graph.graph.getDeletableCells(this.model.graph.graph.getSelectionCells());
                 let cells = this.model.graph.graph.getChildVertices(this.model.graph.graph.getDefaultParent());
-                console.log(cells)
+                
                 if (cells != null && cells.length > 0){
                     var parents = this.model.graph.graph.model.getParents(cells);
                     this.model.graph.graph.removeCells(cells, includeEdges);

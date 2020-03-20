@@ -367,7 +367,7 @@ class SideBar {
                                             class="topbar-el-menu" 
                                             mode="horizontal" 
                                             @select="onSelect"
-                                            menu-trigger="click">
+                                            menu-trigger="hover">
                                         <el-submenu index="2">
                                             <template slot="title">
                                                 #{window.SignedUser_UserName}#

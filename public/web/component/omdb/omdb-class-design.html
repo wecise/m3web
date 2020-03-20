@@ -109,7 +109,7 @@
                 </el-dropdown>
                 
             </el-header>
-            <el-container style="height:100%;border-top:1px solid #fff;">
+            <el-container style="border-top:1px solid #fff;height:calc(100vh - 145px);min-height: calc(100vh - 145px);">
                 <el-aside width="60px" style="height:100%;background:#f7f7f7;">
                     <!-- Creates a container for the toolboox -->
                     <div id="sidebarContainer"
@@ -252,9 +252,18 @@
                         <i class="el-icon-notebook-2"></i> ${docInfo.columns.list.length}
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item v-for="item in docInfo.columns.list" :key="item" :command="item">
-                            <span>${item.name}</span>
-                            <span>${item.ftype}</span>
+                        <el-dropdown-item v-for="(item,key) in allColumns" :key="key" :command="key">
+                            <el-dropdown>
+                                <span class="el-dropdown-link" style="cursor: pointer;">
+                                    <i class="el-icon-notebook-2"></i> <span>${key}</span><i class="el-icon-arrow-right"></i> 
+                                </span>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item v-for="sub in _.uniqBy(item,'name')" :key="sub.name" :command="sub.name">
+                                        <span>${sub.name}</span>
+                                        <span>${sub.ftype}</span>
+                                    <el-dropdown-item
+                                </el-dropdown-menu>
+                            </el-dropdown>
                         <el-dropdown-item
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -318,6 +327,13 @@
                     visible: false
                 }
 			}
+        },
+        computed:{
+            allColumns(){
+                return  _.groupBy(this.docInfo.columns.list,(v)=>{ 
+                            return _.upperCase(v.name.slice(0,1)); 
+                        });
+            }
         },
         created(){
             try{
@@ -499,19 +515,16 @@
                     
                     // Returns the type as the tooltip for column cells
                     graph.getTooltip = function(state) {
-                        if (this.isHtmlLabel(state.cell))
-                        {
-                            return 'Type: '+state.cell.value.type;
-                        }
-                        else if (this.model.isEdge(state.cell))
-                        {
-                            var source = this.model.getTerminal(state.cell, true);
-                            var parent = this.model.getParent(source);
+                        // if (this.isHtmlLabel(state.cell)) {
+                        //     return 'Type: '+state.cell.value.type;
+                        // } else if (this.model.isEdge(state.cell)) {
+                        //     var source = this.model.getTerminal(state.cell, true);
+                        //     var parent = this.model.getParent(source);
                             
-                            return parent.value.name+'.'+source.value.name;
-                        }
+                        //     return parent.value.name+'.'+source.value.name;
+                        // }
                         
-                        return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
+                        // return mxGraph.prototype.getTooltip.apply(this, arguments); // "supercall"
                     };
                     
                     // Creates a dynamic HTML label for column fields
@@ -707,6 +720,7 @@
                         }
                     }
                 }
+
             },
             showDialogProperties(className, columnName, cell){
                 this.dialogProperties.title = className;
@@ -950,8 +964,6 @@
                 });	
             },
             showProperties(graph, cell){
-                console.log('showProperties ', cell)
-                
                 var parent = graph.model.getParent(cell);
                 var className = parent.value.name;
                 var columnName = cell.value.name;
@@ -1015,7 +1027,7 @@
                             
                         }
                         
-                        mql[0].push('\n');
+                        mql[0].push('\n\n');
                     }
                 }
 
@@ -1039,13 +1051,7 @@
                     console.error(err);
                 } finally {
                     this.dialogOpen.visible = false;
-
                     this.summaryInfo();
-
-                    _.delay(()=>{
-                        this.editor.execute('fit');
-                    },2000)
-                    
                 }
                 
             },

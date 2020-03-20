@@ -45,7 +45,7 @@ class Home extends Matrix {
                                                         class="animated flipInX" 
                                                         style="max-width: 120px;width: 120px;max-height:90px;height:90px;margin: 5px;border-radius: 10px!important;background: rgb(36, 44, 70);border:unset;">
                                                         <p style="display: flex;flex-wrap: wrap;max-height:40px;height: 40px;margin:5px 0px;">
-                                                            <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="folder in item.groups"></el-image>
+                                                            <el-image :src="folder.icon | pickIcon" style="margin:3px;width:14px;height:14px;" v-for="(folder,index) in item.groups" v-if="index<8"></el-image>
                                                         </p>
                                                         <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">#{item.title}#（#{item.groups.length}#） <!--i class="el-icon-menu el-icon--right"></i--></p>
                                                         <el-dropdown @command="onGroupCommand" trigger="hover" placement="top-start"  style="position: absolute;right: 5px;top: 5px;">

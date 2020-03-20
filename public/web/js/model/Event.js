@@ -2719,7 +2719,7 @@ class Event {
                                     "z-index": 10,
                                     "top": "unset",
                                     "left": "unset",
-                                    "margin": "0px 0px 0px 60px",
+                                    "margin": "50px 0px 0px 60px",
                                     "padding": "5px 5px 0px 5px!important",
                                     "background": "transparent"
                                 }).addClass("animate fadeInLeft");

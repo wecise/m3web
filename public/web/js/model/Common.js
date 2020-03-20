@@ -467,7 +467,7 @@ Vue.component("mx-fs-open",{
                     </el-main>
                 </el-container>`,
     created(){
-        this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:'xml'}))).message;
+        this.classList = fsHandler.callFsJScript("/matrix/fs/fs_list.js",encodeURIComponent(JSON.stringify({path:this.dfsRoot,onlyDir:false, ftype:['xml']}))).message;
         // 默认创建目录
         _.extend(this.node,{fullname: this.dfsRoot});
     },

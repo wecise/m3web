@@ -2257,7 +2257,7 @@ class Topological {
         let main =  {
             delimiters: ['${', '}'],
             template:   `<el-container style="background: transparent;height: 100%;">
-                            <el-aside style="background-color:transparent;border:1px solid #ddd;border-right:unset;" class="topological-view-edges" ref="left">
+                            <el-aside style="background-color:transparent;border:1px solid #ddd;border-left:unset;border-right:unset;" class="topological-view-edges" ref="left">
                                 <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :style="containerHeight" ref="main">

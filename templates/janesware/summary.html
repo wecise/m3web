@@ -1,0 +1,48 @@
+{{template "base/head" .}}
+
+<style type="text/css" media="screen">
+
+	body {
+		width: 100%;
+        height: 100%;
+        background-image: unset;
+	}
+
+
+	#content.content{
+		padding: 0px!important;
+	}
+
+	/* 全屏模式 */
+	section#header{
+		display:initial!important;
+	}
+	aside>#sidebar{
+		display:initial!important;
+	}
+	footer#footer{
+        display:flex!important;
+    }
+
+</style>
+
+<div id="app"></div>
+
+<script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Summary.js"></script>
+
+<!-- ECharts单文件引入 -->
+<script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
+
+<link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
+
+
+<script>
+	
+	let mxSummary = new Summary();
+	mxSummary.init();
+
+</script>
+
+
+{{template "base/footer" .}}

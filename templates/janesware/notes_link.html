@@ -34,7 +34,7 @@
     }
 
     #content.content {
-        padding: 5px;
+        padding: 0px;
     }
 
     [id="app"] {
@@ -45,8 +45,8 @@
     /* Split Style */
 	.gutter.gutter-horizontal {
         cursor: ew-resize;
-        background-color: unset;
-        background-image: unset;
+        background-color: unset!important;
+        background-image: unset!important;
         background-size: 7px;
         background-position-x: 50%;
         background-position-y: 50%;
@@ -60,8 +60,8 @@
 
     .gutter.gutter-vertical {
         cursor: ns-resize;
-        background-color: unset;
-        background-image: unset;
+        background-color: unset!important;
+        background-image: unset!important;
         background-size: 7px;
         background-position-x: 50%;
         background-position-y: 50%;
@@ -74,16 +74,19 @@
     }
 
     /* 全屏模式 */
-	section#header{
-		display:initial!important;
-	}
-	aside>#sidebar{
-		display:initial!important;
-	}
-    footer#footer{
-        display:flex!important;
+    section#header{
+        display:none;
     }
-
+    aside>#sidebar{
+        display:none;
+    }
+    footer#footer{
+        display: none;
+    }
+    .page-sidebar-minified #content.content{
+        margin-left: 0px;
+        margin-top: 0px;
+    }
 </style>
 
 <main id="content" class="content">
