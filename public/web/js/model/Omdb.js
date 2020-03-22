@@ -17,7 +17,6 @@ class Omdb{
     }
 
     path(id, bid, node){
-
         let _dataset = [];
         let _columns = [];
         let _node = {};
@@ -28,78 +27,75 @@ class Omdb{
             _node = node;
         }
 
-        _columns.unshift({"field": "num", "title": "", render: function (data, type, row, meta) {
-                return meta.row + meta.settings._iDisplayStart + 1;
-            }
-        });
-
         return {
-
             delimiters: ['${', '}'],
             el: '#' + id,
-            template: `<omdb-path-datatables-component :id="id" :bid="bid"
-                                                        :dataset="model.dataset"
-                                                        :columns="model.columns"
-                                                        :options="model.options"
-                                                        contextmenu="null"
-                                                        :result="result"></omdb-path-datatables-component>`,
+            template:   `<el-table
+                            :data="dt.rows"
+                            highlight-current-row="true"
+                            style="width:100%"
+                            :row-class-name="rowClassName"
+                            :header-cell-style="headerRender"
+                            @selection-change="onSelectionChange"
+                            ref="table">
+                            <el-table-column type="selection" width="55">
+                            </el-table-column>
+                            <el-table-column :prop="item.field" 
+                                :label="item.title" 
+                                sortable 
+                                show-overflow-tooltip
+                                v-for="item in dt.columns">
+                            </el-table-column>
+                        </el-table>`,
             data: {
                 id: id,
                 bid: bid,
-                model: {
-                    dataset: _dataset,
+                dt: {
+                    rows: _dataset,
                     columns: _columns,
-                    options: {
-                        info:false,
-                        scrollY: '25vh',
-                        searching: false,
-                    }
+                    selected: []
                 },
                 result: _node
             },
-            created: function(){
-                const self = this;
-
-                eventHub.$on("LAYOUT-RESIZE-TRIGGER-EVENT", self.setScrollY);
-
-                eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
-                eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,self.setData);
+            created(){
+                eventHub.$on(`QUERY-RESULT-TRIGGER-EVENT-${bid}`,this.setData);
+                eventHub.$on(`NEW-QUERY-RESULT-TRIGGER-EVENT-${bid}`,this.setData);
             },
-            mounted: function() {
-                const self = this;
-
-                self.$nextTick(function() {
-                    self.init();
+            mounted() {
+                this.$nextTick(()=> {
+                    this.init();
                 })
             },
             methods: {
-                init: function(){
-                    const self = this;
-
+                rowClassName({row, rowIndex}){
+                    return `row-${rowIndex}`;
+                },
+                headerRender({ row, column, rowIndex, columnIndex }){
+                    if (rowIndex === 0) {
+                        //return 'text-align:center;';
+                    }
+                },
+                onSelectionChange(val){
+                    eventHub.$emit(`PATH-TOGGLE-EVENT-${this.id}`,val);
+                },
+                init(){
                     if(!_.isEmpty(node)) {
-                        self.model.dataset = self.result.data[_.keys(self.result.columns)[0]];
-                        self.model.columns = self.result.columns[_.keys(self.result.columns)[0]];
+                        this.dt.rows = this.result.data[_.keys(this.result.columns)[0]];
+                        this.dt.columns = this.result.columns[_.keys(this.result.columns)[0]];
                     } else {
-                        self.model.dataset = [];
-                        self.model.columns = [];
+                        this.dt.rows = [];
+                        this.dt.columns = [];
                     }
 
                 },
-                setData: function(event){
-                    const self = this;
+                setData(event){
+                    this.dt.rows = event.data[_.keys(event.columns)[0]] || [];
+                    this.dt.columns = event.columns[_.keys(event.columns)[0]] || [];
+                    this.result = event;
 
-                    self.model.dataset = event.data[_.keys(event.columns)[0]] || [];
-                    self.model.columns = event.columns[_.keys(event.columns)[0]] || [];
-                    self.result = event;
-
-                },
-                setScrollY: function(event){
-                    const self = this;
-
-                    self.model.options.scrollY = event.scrollY;
                 }
             }
-        };
+        }
     }
 
     init() {

@@ -5,276 +5,13 @@
 	body {
 		width: 100%;
         height: 100%;
-        overflow: hidden;
-        position: fixed;
+        background-image: unset;
 	}
 
-	#page-container{
-		overflow: hidden;
-		height: 100%;
-	}
 
 	#content.content{
-		padding: 10px!important;
-		overflow: hidden;
-		height: 100%;
+		padding: 0px!important;
 	}
-
-	/* 实体卡片样式 */
-	.el-card__body{
-		padding: 5px;
-		text-align: center;
-		width: 15em;
-		height: 11em;
-		margin: 1px;
-	}
-
-	.el-card__body .bottom{
-		background: #f7f7f7;
-		height: 30px;
-		line-height: 30px;
-	}
-
-	/* For list-view */
-	#list {
-		padding-left:0px;
-		flex-flow: nowrap;
-		display: flex;
-		flex-direction: column;
-	}
-
-	#list ul{
-		padding-left: 0;
-		list-style: none;
-	}
-
-	#list ul > li{
-		width: 20em;
-		float: left;
-		height: 250px;
-		padding: 5px;
-		font-size: 10px;
-		line-height: 1;
-		text-align: center;
-	}
-
-	#list ul > li img {
-		width: 64px;
-	}
-
-	#list .bg-silver {
-		background: rgb(255, 255, 255) !important;
-		border: 1px solid rgb(221, 221, 221);
-	}
-
-	#list .widget-stats.bg-silver .stats-link a{
-		background: rgb(249, 249, 249);
-	}
-
-	#list .tags{
-		border: none;
-	}
-
-	#list .fs-name i {
-		color: rgb(153, 153, 153);
-	}
-
-	/* widget */
-	.widget-stats.bg-info:hover,.widget-stats.bg-info.active {
-        box-shadow: 2px 2px 20px 2px #999999;
-        background-color: rgb(255, 255, 255)!important;
-        /*background-image: linear-gradient(to bottom, rgb(255, 255, 255) 0%, rgb(239, 239, 239) 100%)!important;*/
-    }
-
-    .widget-stats.bg-grey:hover,.widget-stats.bg-grey.active {
-        box-shadow: 2px 2px 2px 2px #999;
-        background-color: rgb(183, 190, 208)!important;
-        background-image: linear-gradient(to bottom, rgb(182, 194, 202) 0%, rgb(244, 244, 244) 100%)!important;
-    }
-	#content .bg-info.dir {
-        background: rgb(255, 255, 255);
-        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
-        background: -webkit-linear-gradient(top, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
-        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(235, 235, 235) 100%);
-    }
-
-    #content .bg-info {
-        background: rgb(255, 255, 255);
-        background: -moz-linear-gradient(top, #b2e1ff 0%, #66b6fc 100%);
-        background: -webkit-linear-gradient(top, rgb(178, 225, 255) 0%,rgb(102, 182, 252) 100%);
-        background: linear-gradient(to bottom, rgb(255, 255, 255) 0%,rgb(201, 233, 249) 100%);
-    }
-
-    #content .col-md-3 {
-        width: 25%;
-        max-width: 350px;
-        min-width: 310px;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-
-    #content .fa-wrench{
-        color: #999999;
-    }
-
-    .widget-stats .stats-desc, .widget-stats .stats-title {
-        color: rgb(0, 0, 0);
-    }
-
-	/* 图样式 */
-	.widget.imap{
-		width: 25em;
-	}
-
-    @media screen and (max-width: 2560px) {
-
-        #content .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 13.5em;
-        }
-    }
-
-    @media screen and (max-width: 1960px) {
-
-        #content .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 13.5em;
-        }
-    }
-
-    @media screen and (max-width: 1280px) {
-
-        #content .stats-title {
-            font-family: 'microsoft yahei';
-            font-size: 22px;
-            color: rgb(0, 0, 0);
-            line-height: 25px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            max-height: 36px;
-            cursor: pointer;
-
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            width: 12em;
-        }
-    }
-
-    #content .stats-subtitle{
-        font-size:12px;
-        color: #999999;
-        line-height: 25px;
-        overflow: hidden;
-        max-height: 46px;
-        min-height: 46px;
-        cursor: pointer;
-
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2
-    }
-
-    #content .media {
-        cursor: pointer;
-        margin-bottom: 0px;
-    }
-
-    #content .media-body{
-        color: #999999;
-    }
-
-    #content .media-body p{
-        margin: 0px 0px 3px 20px;
-    }
-
-    #content .media-object{
-        max-width:75px;
-        min-width:60px;
-    }
-
-    #content .stats-desc {
-        display: -webkit-box;
-        margin: 0px -15px -15px -15px;
-        background-color: rgb(247, 247, 247);
-        padding: 5px 10px;
-        border-top: 0.5px solid rgb(240, 243, 244);
-        color: rgb(124, 124, 124)!important;
-    }
-
-    #content .stats-desc .fa-wrench {
-        color: rgb(144, 144, 144);
-    }
-
-    #content .stats-desc .status {
-        right: -73%;
-        position: relative;
-        color: rgb(124, 124, 124)!important;
-    }
-
-	.col-lg-12 .widget-stats{
-        border: 1px solid rgb(229, 229, 229);
-        border-radius: 10px;
-        max-height: 210px;
-        min-height: 205px;
-    }
-
-    .col-lg-10 .widget-stats{
-        border: 1px solid rgb(240, 240, 240);
-        border-radius: 10px;
-        max-height: 210px;
-        min-height: 200px;
-    }
-
-    /* 时间轴样式 */
-    #result-timeline.el-timeline{
-        padding: 20px 50px!important;
-        background: #fff!important;
-    }
-    #result-timeline .el-timeline-item__content{
-		box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
-	}
-
-    #result-timeline .el-timeline-item__content .el-card__body{
-        text-align: left!important;
-        width: 100%!important;
-        height: auto;
-        min-height: 100px;
-        padding: 10px 10px;
-    }
-    #result-timeline .el-timeline-item__content .el-card__body pre{
-        white-space: pre-line;
-        border:unset;
-    }
-    #result-timeline .el-timeline-item__content .el-card__body small{
-        color: #999999;
-        font-size: 80%;
-    }
-
 
 	/* 全屏模式 */
 	section#header{
@@ -292,23 +29,22 @@
 <div id="app"></div>
 
 <script src="{{AppSubUrl}}/web/js/model/Robot.js"></script>
-<script src="{{AppSubUrl}}/web/js/model/Search.js"></script>
+<script src="{{AppSubUrl}}/web/js/model/Analysis.js"></script>
 
 <!-- ECharts单文件引入 -->
 <script src="{{AppSubUrl}}/web/vendor/echart/echarts.min.js"></script>
 
-<link rel="vc" href="{{AppSubUrl}}/web/component/temp/vue-editor-component.html"></link>
-
-<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-base-component.html"></link>
-<link rel="vc" href="{{AppSubUrl}}/web/component/search/search-preset-component_{{.Lang}}.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/analysis/search-base-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/analysis/search-base-ext-component.html"></link>
+<link rel="vc" href="{{AppSubUrl}}/web/component/analysis/search-preset-component_{{.Lang}}.html"></link>
 
 <link rel="vc" href="{{AppSubUrl}}/web/component/ai/ai-robot-component.html"></link>
 
 
 <script>
 	
-	let mxSearch = new Search();
-	mxSearch.init();
+	let mxAnalysis = new Analysis();
+	mxAnalysis.init();
 
 </script>
 

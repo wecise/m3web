@@ -1,0 +1,223 @@
+<code>
+
+	<style scoped>
+		
+		/* For Search Dropdown Panel */
+        .search-preset .el-collapse-item__header{
+            height: 40px;
+            line-height: 40px;
+            padding:0px 5px;
+
+            border: 1px solid #ccc;
+            border-bottom: 0px;
+            border-radius: 0px;
+
+            /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f9f9f9+0,e5e5e5+100 */
+            background: #f9f9f9; /* Old browsers */
+            background: -moz-linear-gradient(top, #f9f9f9 0%, #e5e5e5 100%); /* FF3.6-15 */
+            background: -webkit-linear-gradient(top, #f9f9f9 0%,#e5e5e5 100%); /* Chrome10-25,Safari5.1-6 */
+            background: linear-gradient(to bottom, #f9f9f9 0%,#e5e5e5 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f9f9f9', endColorstr='#e5e5e5',GradientType=0 ); /* IE6-9 */
+        }
+
+        .search-preset .el-collapse-item__header.is-active {
+            color: #333;
+            border: 1px solid #fff;
+            border-bottom: 1px;
+            background: #def1fb;
+        }
+
+        .search-preset dl > dd > a:hover {
+            cursor: pointer;
+        }
+
+        .search-preset .el-collapse-item__content{
+            padding: 10px;
+        }
+
+        .search-preset .el-button--small{
+            border-radius: 0px;
+        }
+
+		.search-preset{
+            width: 40vw;
+            background: #fff;
+            border:unset;
+            padding: 0px 0!important;
+        }
+        .search-preset .el-dropdown-menu__item:focus, 
+        .search-preset .el-dropdown-menu__item:not(.is-disabled):hover {
+            background: #fff;
+        }
+
+        .search-preset .popper__arrow,
+        .search-preset .popper__arrow::after {
+            border-bottom-color: #fff;
+        }
+		
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="search-preset-component"  ----------*/
+	<template>
+		<el-dropdown placement="bottom" trigger="click" placement="top-end"> 
+			<el-button type="default" style="height:40px;">${options.window.name} <i class="el-icon-arrow-down el-icon--right"></i></el-button>
+			<el-dropdown-menu slot="dropdown" class="search-preset">
+
+				<el-collapse value="1" accordion>
+					<el-collapse-item title="Presets" name="1">
+						<el-row :gutter="20">
+							<el-col :span="8">
+								<h5 style="margin:5px 0px;">Nearest</h5>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.nearest,{value:options.window.value}).name">
+									<p v-for="item in preset.nearest" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+							<el-col :span="8" style="border-left:1px dashed #ccc;">
+								<h5 style="margin:5px 0px;">Real-time</h5 style="margin:5px 0px;>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.realtime,{value:options.window.value}).name">
+									<p v-for="item in preset.realtime" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+							<el-col :span="8" style="border-left:1px dashed #ccc;">
+								<h5 style="margin:5px 0px;">Relative</h5 style="margin:5px 0px;>
+								<el-radio-group v-model="options.window.value" @change="options.window.name = _.find(preset.relative,{value:options.window.value}).name">
+									<p v-for="item in preset.relative" style="margin:5px 0px;"><el-radio :label="item.value">${item.name}</el-radio></p>
+								</el-radio-group>
+							</el-col>
+						</div>
+					</el-collapse-item>
+					<el-collapse-item title="Date Range" name="2">
+						<el-container>
+							<el-main>
+								<el-date-picker
+									v-model="preset.range"
+									type="datetimerange"
+									range-separator="to"
+									start-placeholder="Begining Date"
+									end-placeholder="End Date"
+									:default-time="['00:00:00']">
+								</el-date-picker>
+							</el-main>
+						<el-container>
+					</el-collapse-item>
+					<el-collapse-item title="Advanced" name="3">
+						<el-row :gutter="20">
+							<el-col :span="12">
+								<h5 style="margin:5px 0px;">Search For Time</h5>
+								<el-radio-group v-model="options.others.forTime">
+									<p style="margin:5px 0px;"><el-radio label=" for vtime ">System Time(vtime)</el-radio></p>
+									<p style="margin:5px 0px;"><el-radio label=" for ctime ">User Time(ctime)</el-radio></p>
+									<p style="margin:5px 0px;"><el-radio label=" for firstoccurrence ">Firstoccurrence</el-radio></p>
+									<p style="margin:5px 0px;"><el-radio label=" for lastoccurrence ">Lastoccurrence</el-radio></p>
+								</el-radio-group>
+							</el-col>
+							<el-col :span="12" style="border-left:1px dashed #ddd;">
+								<h5 style="margin:5px 0px;">Other</h5>
+								<p style="margin:5px 0px;"><el-checkbox v-model="options.others.ifHistory">Contains history data</el-checkbox></p>
+							</el-col>
+						</el-row>
+					</el-collapse-item>
+				</el-collapse>
+			</el-dropdown-menu>
+		</el-dropdown>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="search-preset-component">
+	{
+	   
+	    delimiters: ['${', '}'],
+		props:{
+	        options: Object,
+		},
+	    data(){
+	        return { 
+				preset: {
+							nearest: [
+									{"name":"Nearest 30 second", value: " | nearest 30 seconds "},
+									{"name":"Nearest 1 minute", value: " | nearest 1 minutes "},
+									{"name":"Nearest 5 minute", value: " | nearest 5 minutes "},
+									{"name":"Nearest 10 minute", value: " | nearest 10 minutes "},
+									{"name":"Nearest 15 minute", value: " | nearest 15 minutes "},
+									{"name":"Nearest 30 minute", value: " | nearest 30 minutes "},
+									{"name":"Nearest 1 hour", value: " | nearest 1 hour "},
+									{"name":"Nearest 2 hour", value: " | nearest 2 hour "},
+									{"name":"Nearest 8 hour", value: " | nearest 8 hour "},
+									{"name":"Nearest 1 day", value: " | nearest 1 day "}
+							],
+							realtime: [
+									{"name":"30 second window", value: " | within 30seconds "},
+									{"name":"1 minute window", value: " | within 1minutes "},
+									{"name":"5 minute window", value: " | within 5minutes "},
+									{"name":"10 minute window", value: " | within 10minutes "},
+									{"name":"15 minute window", value: " | within 15minutes "},
+									{"name":"30 minute window", value: " | within 30minutes "},
+									{"name":"1 hour window", value: " | within 1hour "},
+									{"name":"2 hour window", value: " | within 2hour "},
+									{"name":"8 hour window", value: " | within 8hour "},
+									{"name":"1 day", value: " | within 1day "},
+									{"name":"1 month", value: " | within 1month "},
+									{"name":"All Time", value: ""}
+							],
+							relative: [
+									{"name":"Today", value: " | today "},
+									{"name":"Yesterday", value: " | yesterday "},
+									{"name":"Week", value: " | week "},
+									{"name":"Last Week", value: " | last week "},
+									{"name":"Month", value: " | month "},
+									{"name":"Last month", value: " | last month "},
+									{"name":"Year", value: " | year "},
+									{"name":"Last Year", value: " | last year "},
+							],
+							range: { from: "", to: ""},
+							others: {
+								ifHistory: false,
+								ifDebug: false,
+								forTime:  ' for vtime ',
+							}
+						}
+	        }
+	    },
+		watch:{
+                'preset.range':{
+                    handler(val,oldVal){
+                        if(val[0] && val[1]){
+                            let value = " window " + moment(val[0]).format(mx.global.register.format) + " to " + moment(val[1]).format(mx.global.register.format);
+                            this.options.window = {name: value, value: value};
+                        }
+                    },
+                    deep:true
+                }
+        },
+		mounted() {
+
+			this.$nextTick(()=>{
+
+				// 搜索预定义
+				$(this.$el).find("a[data-toggle='collapse']").click((event)=>{
+
+						var href = event.target.href.split("#")[1];
+
+						event.stopPropagation();
+						event.preventDefault();
+						$(this.$el).find(".in").removeClass("in");
+						$(this.$el).find("#"+href).collapse("toggle");
+						$(this.$el).find("in").collapse("toggle");
+
+						$(this.$el).find(".panel-heading").removeClass('active');
+						$(this).parent().parent().toggleClass('active');
+
+						$(this.$el).find("i").removeClass('fa-angle-down');
+						$(this.$el).find("i").addClass(' fa-angle-right');
+
+						$(this).parent().parent().find("i").removeClass(' fa-angle-right');
+						$(this).parent().parent().find("i").addClass(' fa-angle-down');
+					}
+				);
+			})
+		}
+    }
+    </script>
+
+</code>

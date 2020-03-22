@@ -1,0 +1,204 @@
+<code>
+
+	<style scoped>
+		/*----------  style  ----------*/
+		.search-base-component .el-input__inner[role="textbox"],
+		.search-base-component .el-input--suffix > .el-input__inner{
+			border-radius: 0px;
+			border: unset;
+		}
+
+		.search-base-component .el-dropdown,.el-input--small{
+			font-size:12px;
+		}
+
+		.search-preset .el-collapse-item__header{
+			height: 30px!important;
+			line-height: 30px!important;
+		}
+
+		.search-base-component .search-base > .el-autocomplete .el-input--small>.el-input__inner{
+			height: 40px;
+			line-height: 40px;
+			border: unset;
+		}
+
+		.search-base div.search-base--select{
+			width: 20%;
+		}
+
+		.search-base div.el-autocomplete{
+			width: 100%;
+		}
+
+		.search-base-component .el-input--small .el-input__inner{
+			height: 40px;
+			line-height: 40px;
+		}
+
+		.search-base-component .el-dropdown.search-preset-component>.el-button--small{
+			border-radius: 0px;
+			border: unset;
+		}
+
+		.search-base .el-button--mini, .el-button--small {
+			border-radius: 0px!important;
+		}
+
+		.search-base-component .search-base--select-popper{
+			padding:20px;
+			left: 0px!important;
+		}
+		.search-base-component .search-base--select-popper li{
+			margin: 10px 0px;
+    		border-radius: 5px;
+		}
+
+	</style>
+
+	
+	/*----------  最外层element会自动增加组件同名 class="search-base-component"  ----------*/
+	<template>
+		<div style="display:flex;width:100%;" class="search-base">
+			<!--搜索范围-->
+			<el-select v-model="options.view.value" placeholder="请选择视图"   popper-class="search-base--select-popper" class="search-base--select" @change="onViewChange" v-if="options.view.show">
+				<el-option :label="item.title" :key="item.name" :value="item.name" v-for="item in view.list" style="height:auto;">
+					<el-card :body-style="{ padding: '5px' }" style="text-align: center;">
+						<span class="el-icon-bank-card" style="font-size:65px;padding:0px 65px;"></span>
+						<div style="padding: 0px;text-align: right;">
+							<p style="margin: 0px;">#{item.title}#</p>
+							<p style="margin: 0px;">
+								<el-tooltip content="视图创建时间">
+									<span>#{moment(item.time).format(mx.global.register.format)}#</span>
+								</el-tooltip>
+								<el-tooltip content="设置为默认视图">
+									<el-button type="text"  icon="el-icon-s-platform" style="margin-left:10px;" @click="onSetDefaultView(item)"></el-button>
+								</el-tooltip>
+								<el-tooltip content="视图管理">
+									<el-button type="text"  icon="el-icon-edit-outline" @click="onChangeView(item)"></el-button>
+								</el-tooltip>
+							</p>  
+						</div>
+					</el-card>
+				</el-option>
+			</el-select>
+			<!--搜索框-->
+			<el-autocomplete class="inline-input" placeholder="搜索" 
+							v-model="options.term" 
+							:fetch-suggestions="onFetchSuggestions"
+							:trigger-on-focus="false"
+							@select="search"
+							@clear="search"
+							clearable
+							autofocus></el-autocomplete>
+			<!--搜索条件预设置-->
+			<search-preset-component :options.sync='options' ref="preSetRef"></search-preset-component>
+			<!--快速过滤条件设置-->
+
+			<!--搜索按钮-->
+			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
+		</div>
+	</template>
+
+	/*----------  id是vue组件的name，内容是vue组件的option参数  ----------*/
+	<script id="search-base-component">
+	{
+	   	delimiters: ['#{', '}#'],
+	    props:{
+			// 搜索设置
+			options: Object
+	    },
+	    data(){
+	        return {
+				result: {},
+	            view: {
+					list: []
+				},
+				suggestions: []
+	        }
+	    },
+	    created(){
+			// 视图列表初始化
+			if(this.options.view.show){
+				let term = JSON.stringify({class:this.options.api.parent,action:"list"});
+				this.view.list = fsHandler.callFsJScript(`/matrix/view/action.js`, encodeURIComponent(term)).message;
+			}
+
+			// 搜索辅助
+			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+	    },
+	    mounted(){
+			   
+			// 预搜索
+			this.search();
+
+			// 搜索Button Enter事件
+			$(document).keypress((event)=> {
+				var keycode = (event.keyCode ? event.keyCode : event.which);
+				if (keycode == 13) {
+					this.search();
+				}
+			})
+
+			// 设置body class
+			$("body").addClass("search-base-component");
+
+	    },
+	    methods: {
+			onSetDefaultView(item){
+				localStorage.setItem("EVENT-DEFAULT-VIEW",item.name);
+				this.$message({
+					type: "info",
+					message: "设置默认视图为：" + item.title
+				})
+			},
+			onChangeView(item){
+				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
+			},
+			onFetchSuggestions(queryString, cb){
+				var suggestions = this.suggestions;
+				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+				// 调用 callback 返回建议列表的数据
+				cb(results);
+			},
+			createFilter(queryString) {
+				return (v) => {
+					return (v.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+				};
+			},
+			onViewChange(evt){
+				this.search();
+			},
+			search(){
+
+				// 预设值
+				let ifHistory = this.options.others.ifHistory?"":"#";
+				let ifDebug = this.options.others.ifDebug?"debug> ":"";
+					
+				let forTime = this.options.others.forTime;
+				
+				// 一键搜索结构
+				let cls = ifHistory=='#'?this.options.class:this.options.class.replace(/#/g,"");
+                let term = {
+					view: this.options.view.value || "all",
+					term: (ifDebug + ifHistory + _.without([cls, this.options.term, this.options.window.value],'').join(" | ")).replace(/##/g,"#").replace(/%/g,'%25')
+				};
+
+			    // 搜索
+				let rtn = fsHandler.callFsJScript(`/matrix/${this.options.api.parent}/${this.options.api.name}`, encodeURIComponent(JSON.stringify(term))).message;
+
+				// 结果
+				this.result = rtn;
+			},
+			resetTerm(){
+				this.preset.term = "";
+				this.search();
+			}
+
+	    }
+	
+	}
+	</script>
+
+</code>
+

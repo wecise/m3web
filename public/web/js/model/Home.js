@@ -61,10 +61,10 @@ class Home extends Matrix {
                                                         <el-dropdown-item :command="subItem" v-for="(subItem,index) in item.groups" :key="subItem.id">
                                                             <template scope="scope">
                                                                 <el-button type="primary" 
-                                                                    @click="onCommand(subItem)"
+                                                                    @click.stop.prevent="onCommand(subItem)"
                                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                                     <el-image :src="subItem.icon | pickIcon" style="width:40px;margin:5px;"></el-image>
-                                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">
+                                                                    <p style="white-space:nowrap;overflow:hidden;margin:5px;">
                                                                         #{subItem.cnname}#
                                                                         <el-dropdown @command="onAppCommand" trigger="hover" placement="top-end" style="color:rgba(255,255,255,.5);">
                                                                             <span class="el-dropdown-link">
@@ -94,7 +94,9 @@ class Home extends Matrix {
                                                     @click="onCommand(item)"
                                                     style="max-width: 120px;width: 120px;height:90px;border-radius: 10px!important;background:rgb(36, 44, 70);border:unset;margin: 5px;">
                                                     <el-image style="width:40px;margin:5px;" :src="item.icon | pickIcon"></el-image>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">#{item.cnname}#</p>
+                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;">
+                                                        #{item.cnname}#
+                                                    </p>
                                                     <el-dropdown @command="onAppCommand" trigger="hover" placement="top-start" style="position: absolute;right: 5px;top: 5px;">
                                                         <span class="el-dropdown-link">
                                                             <i class="el-icon-arrow-down el-icon--right" style="color:rgba(255,255,255,0.5)"></i>
