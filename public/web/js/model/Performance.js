@@ -777,8 +777,12 @@ class Performance extends Matrix {
                     },
                     mounted(){
                         _.delay(()=>{
-                            $('.grid-stack').gridstack();
-                            $('.grid-stack').on('gsresizestop', function(event, elem) {
+                            let grid = GridStack.init({
+                                resizable: {
+                                    handles: 'e, se, s, sw, w'
+                                },
+                            });
+                            grid.on('gsresizestop', function(event, elem) {
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
                             });
                         },500)
@@ -854,8 +858,12 @@ class Performance extends Matrix {
                                 </el-container>`,
                     mounted(){
                         _.delay(()=>{
-                            $('.grid-stack').gridstack();
-                            $('.grid-stack').on('gsresizestop', function(event, elem) {
+                            let grid = GridStack.init({
+                                resizable: {
+                                    handles: 'e, se, s, sw, w'
+                                },
+                            });
+                            grid.on('gsresizestop', function(event, elem) {
                                 eventHub.$emit("WINDOW-RESIZE-EVENT");
                             });
                         },500)

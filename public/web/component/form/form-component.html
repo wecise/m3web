@@ -42,7 +42,7 @@
             </el-header>
             <el-main ref="mainView">
                 <el-form :model="model" ref="form" label-width="140px" :label-position="labelPosition">
-                    <el-form-item :label="item.label" v-for="item in model.components">
+                    <el-form-item :label="item.label" v-for="item in model.components" v-if="item.visible">
                         <el-select v-model="item.data" :placeholder="item.placeholder" v-if="item.type==='select'">
                             <el-option v-for="data in item.data" :key="data">#{data}#</el-option>
                         </el-select>

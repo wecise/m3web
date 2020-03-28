@@ -408,19 +408,8 @@
 <script>
 	$(function() {		
 		
-		
-		jQuery.ajax({
-			url: 'http://47.92.151.165:8080/user/signin?company=wecise&username=admin&password=admin',
-			dataType: 'json',
-			type: 'GET',
-			contentType: false,
-			data: '',
-			success: function(data) {
-				sessionid = data.message;
-				let mxEvent = new Event();
-				mxEvent.init();
-			}
-		});
+		let mxEvent = new Event();
+		mxEvent.init();
 		
 	})
 </script>

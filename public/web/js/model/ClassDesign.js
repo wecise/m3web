@@ -21,6 +21,7 @@ class ClassDesign {
         VueLoader.onloaded(["omdb-class-design"],function() {
 
             $(function() {
+                
                 Column.prototype.clone = function() {
                     return mxUtils.clone(this);
                 };

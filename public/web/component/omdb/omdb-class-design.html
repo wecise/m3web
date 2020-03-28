@@ -29,6 +29,42 @@
             margin: 0px;
         }
 
+        
+        .omdb-class-design .el-collapse {
+            border-top: unset;
+            border-bottom: unset;
+        }
+        .omdb-class-design .el-collapse-item__header{
+            font-size: 12px;
+            font-weight: normal;
+            height:30px;
+            line-height: 30px;
+            padding: 0 10px;
+            white-space: nowrap;
+            background: #f7f7f7;
+        }
+
+        .omdb-class-design .el-collapse-item__content{
+            display: flex;
+            flex-wrap:wrap;
+            align-items: flex-start;
+            background: #fff;
+            height: 100%;
+            overflow: auto;
+        }
+        .omdb-class-design .el-collapse-item__content > img{
+            margin:5px;
+        }
+        .omdb-class-design .el-collapse-item__wrap.transition{
+            background: #f7f7f7;
+            box-shadow: unset!important;
+            text-align: center;
+            height: 60vh;
+        }
+        .omdb-class-design .el-collapse-item .el-collapse-item__wrap{
+            border-bottom: unset!important;
+        }
+
         /* mxPopuMenu */
         div.mxPopupMenu{
             -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1)!important;
@@ -101,7 +137,7 @@
                         </el-button>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item  @click.native="editor.execute('showMql')">生成MQL</el-dropdown-item>
+                        <el-dropdown-item  @click.native="editor.execute('showMql')">MQL</el-dropdown-item>
                         <el-dropdown-item  @click.native="editor.execute('export')" divided>源文件</el-dropdown-item>
                         <el-dropdown-item  @click.native="editor.execute('exportImage')">导出图片</el-dropdown-item>
                         
@@ -110,12 +146,29 @@
                 
             </el-header>
             <el-container style="border-top:1px solid #fff;height:calc(100vh - 145px);min-height: calc(100vh - 145px);">
-                <el-aside width="60px" style="height:100%;background:#f7f7f7;">
+                <el-aside width="100px" style="height:100%;background:#f7f7f7;border-right: 1px solid #ddd;overflow:hidden;">
                     <!-- Creates a container for the toolboox -->
-                    <div id="sidebarContainer"
-                        style="overflow:hidden;max-width:52px;width:56px;padding-top:10px;padding-left:4px;"
-                        ref="sidebarContainer">
-                    </div>
+                    <el-collapse accordion vlaue="1" id="sidebarContainer" ref="sidebarContainer">
+                        <el-collapse-item title="类" name="1" id="tableContainer">
+                        </el-collapse-item>
+                        <el-collapse-item title="属性" name="2" id="columnContainer">
+                        </el-collapse-item>
+                        <el-collapse-item title="属性字典" name="3" id="directoryContainer">
+                            <el-button type="text" v-for="(item,key) in allColumns" :key="key" :command="key" style="width:90%;height:35px;border-bottom: 1px solid #ddd;;margin:5px;">
+                                <el-dropdown>
+                                    <span class="el-dropdown-link" style="cursor: pointer;">
+                                        ${key} &nbsp;&nbsp;<i class="el-icon-arrow-right"></i> 
+                                    </span>
+                                    <el-dropdown-menu slot="dropdown">
+                                        <el-dropdown-item v-for="sub in _.uniqBy(item,'name')" :key="sub.name" :command="sub.name">
+                                            <span>${sub.name}</span>
+                                            <span>${sub.ftype}</span>
+                                        <el-dropdown-item
+                                    </el-dropdown-menu>
+                                </el-dropdown>
+                            </el-button>
+                        </el-collapse-item>
+                    </el-collapse>
                 </el-aside>
                 <el-main style="padding:0px;">
                     
@@ -166,13 +219,15 @@
                            </el-button>
                        </el-tooltip>
                    </div>
+                   <!-- 打开窗口 -->
                    <el-dialog :title="dialogOpen.title" :visible.sync="dialogOpen.visible">
-                        <mx-fs-open dfsRoot="/home/admin/Documents" ref="dfsOpen"></mx-fs-open>
+                        <mx-fs-open dfsRoot="/home/admin/Documents" ref="dfsOpen" v-if="dialogOpen.visible"></mx-fs-open>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogOpen.visible = false">取 消</el-button>
                             <el-button type="primary" @click="onOpen">打 开</el-button>
                         </div>
                     </el-dialog>
+                    <!-- 保存窗口 -->
                     <el-dialog :title="dialogSaveAs.title" :visible.sync="dialogSaveAs.visible">
                         <mx-fs-saveas dfsRoot="/home/admin/Documents" ref="dfsSaveas"></mx-fs-saveas>
                         <div slot="footer" class="dialog-footer">
@@ -180,15 +235,17 @@
                             <el-button type="primary" @click="onSaveAs">另存为</el-button>
                         </div>
                     </el-dialog>
+                    <!-- MQL -->
                     <el-dialog :title="dialogInfo.title" :visible.sync="dialogInfo.visible">
                         <el-container>
                             <el-main style="padding:0px;height:300px;border:1px solid #ddd;" ref="dialogInfoEditor"></el-main>
                         </el-container>
                         <div slot="footer" class="dialog-footer">
                             <el-button @click="dialogInfo.visible = false">取 消</el-button>
-                            <el-button type="primary" @click="dialogInfo.visible = false">确 定</el-button>
+                            <el-button type="primary" @click="onExecute">执行MQL</el-button>
                         </div>
                     </el-dialog>
+                    <!-- 源码窗口 -->
                     <el-dialog :title="dialogSource.title" :visible.sync="dialogSource.visible">
                         <el-container>
                             <el-main style="padding:0px;height:300px;border:1px solid #ddd;" ref="dialogSourceEditor"></el-main>
@@ -198,6 +255,39 @@
                             <el-button type="primary" @click="applyMqlToFile">更新到当前文件</el-button>
                         </div>
                     </el-dialog>
+                    <!-- 类窗口 -->
+                    <el-dialog :title="dialogClassProperties.cell.value.name" 
+                        :visible.sync="dialogClassProperties.visible"
+                        v-if="dialogClassProperties.cell">
+                        <el-form label-position="right" label-width="100px">
+                            <el-form-item label="名称">
+                                <el-input v-model="dialogClassProperties.cell.value.name" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="TTL">
+                                <el-input type="number"  v-model="dialogClassProperties.cell.value.ttl" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="别名">
+                                <el-input  v-model="dialogClassProperties.cell.value.alias" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="简称">
+                                <el-input  v-model="dialogClassProperties.cell.value.nickname" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="分区键(Partition)">
+                                <el-input  v-model="dialogClassProperties.cell.value.partition" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Ckeys">
+                                <el-input  v-model="dialogClassProperties.cell.value.ckeys" autocomplete="off"></el-input>
+                            </el-form-item>
+                            <el-form-item label="是否搜索">
+                                <el-checkbox v-model="dialogClassProperties.cell.value.autosearch"></el-checkbox>
+                            </el-form-item>
+                        </el-form>
+                        <div slot="footer" class="dialog-footer">
+                            <el-button @click="dialogClassProperties.visible = false">取 消</el-button>
+                            <el-button type="primary" @click="onUpdateClassProperties(dialogClassProperties.cell)">确 定</el-button>
+                        </div>
+                    </el-dialog>
+                    <!-- 属性窗口 -->
                     <el-dialog :title="dialogProperties.title+'【'+ dialogProperties.cell.value.name +'】'" 
                         :visible.sync="dialogProperties.visible"
                         v-if="dialogProperties.cell">
@@ -235,6 +325,7 @@
                 <span v-if="!_.isEmpty(doc)">
                     <i class="el-icon-notebook-2"></i> ${doc.fullname}
                 </span>
+                <span>未保存</span>
                 <el-divider direction="vertical"></el-divider>
                 <el-dropdown>
                     <span class="el-dropdown-link" style="cursor: pointer;">
@@ -312,11 +403,23 @@
                     content: "",
                     visible: false
                 },
+                dialogClassProperties: {
+                    cell: null,
+                    model:{
+                        name: "",
+                        ttl:"",
+                        alias:"",
+                        nickname:"",
+                        autosearch: true,
+                        partition: "",
+                        ckeys: ""
+                    },
+                    visible: false
+                },
                 dialogProperties: {
                     title: "",
                     cell: null,
                     model:{
-                        cell: null,
                         name:"",
                         title:"",
                         ftype: "varchar",
@@ -330,7 +433,7 @@
         },
         computed:{
             allColumns(){
-                return  _.groupBy(this.docInfo.columns.list,(v)=>{ 
+                return  _.groupBy(_.sortBy(this.docInfo.columns.list,['name'],['asc']),(v)=>{ 
                             return _.upperCase(v.name.slice(0,1)); 
                         });
             }
@@ -346,7 +449,7 @@
         },
 		mounted(){
             this.main(this.$refs.graphContainer,
-                    this.$refs.sidebarContainer);
+                    this.$refs.sidebarContainer.$el);
         },
 		methods: {
             // Program starts here. Creates a sample graph in the
@@ -354,31 +457,6 @@
             // from the onLoad event handler of the document (see below).
             main(container, sidebar) {
                 const self = this;
-
-                // Defines the column user object
-                function Column(name){
-                        this.name = name;
-                };
-
-                Column.prototype.ftype = 'varchar';
-
-                Column.prototype.title = '';
-                
-                Column.prototype.iskey = false;
-                
-                Column.prototype.isindex = false;
-                
-                Column.prototype.clone = function() {
-                    return mxUtils.clone(this);
-                };
-                
-                // Defines the table user object
-                function Table(name){
-                    this.name = name;
-                };
-                Table.prototype.clone = function(){
-                    return mxUtils.clone(this);
-                };
 
                 // Checks if the browser is supported
                 if (!mxClient.isBrowserSupported()) {
@@ -574,30 +652,8 @@
                     // Adds all required styles to the graph (see below)
                     this.configureStylesheet(graph);
                     
-                    // Adds sidebar icon for the table object
-                    var tableObject = new Table('CLASSNAME');
-                    var table = new mxCell(tableObject, new mxGeometry(0, 0, 200, 28), 'table');
-                    table.setVertex(true);
-                    this.addSidebarIcon(graph, sidebar, table, '/fs/assets/images/graph/tools/table.png?type=open&issys=true');
-                    
-                    // Adds sidebar icon for the column object
-                    var columnObject = new Column('COLUMNNAME');
-                    var column = new mxCell(columnObject, new mxGeometry(0, 0, 0, 26));
-                    column.setVertex(true);
-                    column.setConnectable(false);
-
-                    this.addSidebarIcon(graph, sidebar, column, '/fs/assets/images/graph/tools/column.png?type=open&issys=true');
-                    
-                    // Adds primary key field into table
-                    var firstColumn = column.clone();
-                    
-                    firstColumn.value.name = 'CLASSNAME_ID';
-                    firstColumn.value.title = '';
-                    firstColumn.value.ftype = 'varchar';
-                    firstColumn.value.iskey = true;
-                    firstColumn.value.isindex = false;
-                    
-                    table.insert(firstColumn);
+                    // Init sidebar and Adds sidebar icon for the table object
+                    this.initSideBar(graph,sidebar);
 
                     // Adds child columns for new connections between tables
                     /* graph.addEdge = function(edge, parent, source, target, index) {
@@ -644,19 +700,18 @@
                     
                     // Defines action
                     editor.addAction('mxProperties', (editor, cell)=>{
-                        console.log('mxProperties 1 ',cell)
+                        
                         if (cell == null) {
                             cell = graph.getSelectionCell();
                         }
                         
-                        if (graph.isHtmlLabel(cell)) {
-                            console.log('mxProperties 2 ',cell)
+                        if (graph.isHtmlLabel(cell) || cell.value.constructor.name == 'Table' || cell.value.constructor.name == 'Column') {
                             this.showProperties(graph, cell);
                         }
                     });
                     // Defines a create MQL action
                     editor.addAction('showMql', (editor, cell)=>{
-                        var mql = this.createMql(graph);
+                        var mql = this.createMql(graph,cell);
                         
                         if (mql.length > 0){
                             this.showDialogInfo('MQL', mql);
@@ -675,7 +730,7 @@
                         
                         this.showDialogSource('源文件', mxUtils.getPrettyXml(node));
                     });
-
+                    
                     // Defines Delete action
                     editor.addAction('deleteAll',(editor,cell)=>{
                         this.deleteCells(true);
@@ -696,6 +751,85 @@
                     
                 }
             }, 
+            initSideBar(graph,sidebar){
+                // Defines the column user object
+                function Column(name){
+                        this.name = name;
+                };
+
+                Column.prototype.ftype = 'varchar';
+
+                Column.prototype.title = '';
+                
+                Column.prototype.iskey = false;
+                
+                Column.prototype.isindex = false;
+                
+                Column.prototype.clone = function() {
+                    return mxUtils.clone(this);
+                };
+
+                Table.prototype.ttl = 86400 * 365;
+
+                Table.prototype.alias = '';
+                
+                Table.prototype.nickname = '';
+
+                Table.prototype.autosearch = true;
+
+                Table.prototype.partition = "";
+
+                Table.prototype.ckeys = "";
+
+                Table.prototype.clone = function() {
+                    return mxUtils.clone(this);
+                };
+
+                const self = this;
+                
+                let addIcon = function(name){
+                    var columnObject = new Column('COLUMNNAME');
+                    var column = new mxCell(columnObject, new mxGeometry(0, 0, 0, 26));
+                    column.setVertex(true);
+                    column.value.ftype = name;
+                    column.setConnectable(false);
+
+                    self.addSidebarIcon(graph, $(sidebar).find("#columnContainer .el-collapse-item__content")[0], column, `/fs/assets/images/omdb/${name}.png?type=open&issys=true`);
+
+                    // Adds primary key field into table
+                    if(name=='varchar'){
+                        var firstColumn = column.clone();
+                        
+                        firstColumn.value.name = 'CLASSNAME_ID';
+                        firstColumn.value.title = '';
+                        firstColumn.value.ftype = 'varchar';
+                        firstColumn.value.iskey = true;
+                        firstColumn.value.isindex = false;
+                        
+                        table.insert(firstColumn);
+                    }
+                }
+                
+                // Defines the table user object
+                function Table(name){
+                    this.name = name;
+                };
+                Table.prototype.clone = function(){
+                    return mxUtils.clone(this);
+                };
+
+                // Adds sidebar icon for the table object
+                var tableObject = new Table('CLASSNAME');
+                var table = new mxCell(tableObject, new mxGeometry(0, 0, 200, 28), 'table');
+                table.setVertex(true);
+                this.addSidebarIcon(graph, $(sidebar).find("#tableContainer .el-collapse-item__content")[0], table, '/fs/assets/images/omdb/class.png?type=open&issys=true');
+                
+                // varchar for the column object
+                _.forEach(["bigint", "blob", "boolean", "date", "double", "float", "int", "list", "map", "set", "smallint", "text", "timestamp", "varchar"],(v)=>{
+                    addIcon(v);
+                })
+                
+            },
             summaryInfo(){
                 this.docInfo.classes.list = [];
                 this.docInfo.columns.list = [];
@@ -721,11 +855,6 @@
                     }
                 }
 
-            },
-            showDialogProperties(className, columnName, cell){
-                this.dialogProperties.title = className;
-                _.extend(this.dialogProperties, {cell:cell});
-                this.dialogProperties.visible = true;
             },
             showDialogInfo(title, content) {
                 
@@ -844,12 +973,26 @@
                 }
                 
                 // Creates the image which is used as the sidebar icon (drag source)
+                var div = document.createElement('div');
+                div.style.width = '55px';
+                div.style.height = '55px';
+                div.style.textAlign = 'center';
+                div.style.margin = '5px';
+                div.style.padding = '5px';
+
                 var img = document.createElement('img');
                 img.setAttribute('src', image);
-                img.style.width = '48px';
-                img.style.height = '48px';
-                img.title = 'Drag this to the diagram to create a new vertex';
-                sidebar.appendChild(img);
+                img.style.width = '38px';
+                img.style.height = '38px';
+                img.title = '拖拽到画布生成新的类或属性';
+                div.appendChild(img)
+
+                var sdiv = document.createElement('div');
+                sdiv.innerHTML = prototype.value.ftype?prototype.value.ftype:'新建类';
+                div.appendChild(sdiv);
+
+                sidebar.appendChild(div);
+                
                                     
                 // Creates the image which is used as the drag icon (preview)
                 var dragImage = img.cloneNode(true);
@@ -878,6 +1021,7 @@
             },
             applyMqlToFile(){
                 let doc = mxUtils.parseXml(this.dialogSource.content);
+                console.log(doc)
                 let codec = new mxCodec(doc);
                 codec.decode(doc.documentElement, this.editor.graph.getModel());
                 this.dialogSource.visible = false;
@@ -926,8 +1070,8 @@
             // Function to create the entries in the popupmenu
             createPopupMenu(editor, graph, menu, cell, evt) {
                 if (cell != null) {
-                    
-                    if (graph.isHtmlLabel(cell)){
+
+                    if (graph.isHtmlLabel(cell) || cell.value.constructor.name=='Table' || cell.value.constructor.name=='Column' ){
                         menu.addItem('属性', null, function(){
                             editor.execute('mxProperties', cell);
                         });
@@ -956,21 +1100,31 @@
                 
                 menu.addSeparator();
                 
-                menu.addItem('显示MQL', null, function(){
-                    editor.execute('showMql', cell);
-                });	
-                menu.addItem('执行MQL', null, function(){
+                menu.addItem('MQL', null, function(){
                     editor.execute('showMql', cell);
                 });	
             },
             showProperties(graph, cell){
-                var parent = graph.model.getParent(cell);
-                var className = parent.value.name;
-                var columnName = cell.value.name;
-                this.showDialogProperties(className,columnName, cell);
+
+                if(cell.value.constructor.name == 'Table'){
+                    
+                    this.dialogClassProperties.title = cell.value.name;
+                    _.extend(this.dialogClassProperties, {cell:cell});
+                    this.dialogClassProperties.visible = true;
+
+                } else {
+                    var parent = graph.model.getParent(cell);
+                    var className = parent.value.name;
+                    var columnName = cell.value.name;
+                    
+                    this.dialogProperties.title = className;
+                    _.extend(this.dialogProperties, {cell:cell});
+                    this.dialogProperties.visible = true;
+                }
+
             },
             onUpdateProperties(cell){
-                console.log('onUpdateProperties ',cell.value)
+                
                 let clone = cell.value.clone();
 				
                 this.editor.graph.model.setValue(cell, clone);
@@ -979,19 +1133,56 @@
 
                 this.dialogProperties.visible = false;
 
+            }, 
+            onUpdateClassProperties(cell){
+                
+                let clone = cell.value.clone();
+				
+                this.editor.graph.model.setValue(cell, clone);
+                
+                this.onSave();
+
+                this.dialogClassProperties.visible = false;
+
             },  
-            createMql(graph) {
+            createMql(graph,cell) {
+                console.log(11,cell)
+
                 let mql = [[],[],[]];
-                let parent = graph.getDefaultParent();
-                let childCount = graph.model.getChildCount(parent);
 
-                for (var i=0; i<childCount; i++){
-                    var child = graph.model.getChildAt(parent, i);
-                    
+                if(cell){
+                    var child = cell;
+                        
                     if (!graph.model.isEdge(child)){
-
+                        
                         mql[0].push('CREATE CLASS IF NOT EXISTS '+child.value.name+' (');
                         
+                        // Gen class cfg
+                        let classCfg = [];
+
+                        if(child.value.ttl){
+                            classCfg.push(`ttl=${child.value.ttl}`);
+                        }
+                        if(child.value.alias){
+                            classCfg.push(`alias='${child.value.alias}'`);
+                        }
+                        if(child.value.nickname){
+                            classCfg.push(`nickname='${child.value.nickname}'`);
+                        }
+
+                        if(child.value.autosearch){
+                            classCfg.push(`autosearch=${child.value.autosearch}`);
+                        }
+
+                        if(child.value.partition){
+                            classCfg.push(`partition=${child.value.partition}`);
+                        }
+
+                        if(child.value.ckeys){
+                            classCfg.push(`ckeys=${child.value.ckeys}`);
+                        }
+                        
+                        // Gen column cfg
                         var columnCount = graph.model.getChildCount(child);
 
                         if (columnCount > 0){
@@ -1012,25 +1203,116 @@
                             }
                             // merge key
                             if(!_.isEmpty(mql[1])){
-                                mql[0].push('\n key('+mql[1].join(',')+')');
+                                mql[0].push('\n\t key('+mql[1].join(',')+')');
                                 mql[0].push(',');
                             }
                             // merge index
                             if(!_.isEmpty(mql[2])){
-                                mql[0].push('\n index('+mql[2].join(',')+')');
+                                mql[0].push('\n\t index('+mql[2].join(',')+')');
                                 mql[0].push(',');
                             }
 
                             mql[0].splice(mql[0].length-1, 1);
-                            mql[0].push('\n);');
+
+                            mql[0].push('\n)');
+                            
+                            // class cfg
+                            if(!_.isEmpty(classCfg)){
+                                mql[0].push(` with ${classCfg.join(", ")}`);
+                            }
+
+                            mql[0].push(';');
 
                             
                         }
                         
                         mql[0].push('\n\n');
                     }
-                }
+                } else {
+   
+                    let parent = graph.getDefaultParent();
+                    let childCount = graph.model.getChildCount(parent);
 
+                    for (var i=0; i<childCount; i++){
+                        var child = graph.model.getChildAt(parent, i);
+                        
+                        if (!graph.model.isEdge(child)){
+                            
+                            mql[0].push('CREATE CLASS IF NOT EXISTS '+child.value.name+' (');
+                            
+                            // Gen class cfg
+                            let classCfg = [];
+
+                            if(child.value.ttl){
+                                classCfg.push(`ttl=${child.value.ttl}`);
+                            }
+                            if(child.value.alias){
+                                classCfg.push(`alias='${child.value.alias}'`);
+                            }
+                            if(child.value.nickname){
+                                classCfg.push(`nickname='${child.value.nickname}'`);
+                            }
+
+                            if(child.value.autosearch){
+                                classCfg.push(`autosearch=${child.value.autosearch}`);
+                            }
+
+                            if(child.value.partition){
+                                classCfg.push(`partition=${child.value.partition}`);
+                            }
+
+                            if(child.value.ckeys){
+                                classCfg.push(`ckeys=${child.value.ckeys}`);
+                            }
+                            
+                            // Gen column cfg
+                            var columnCount = graph.model.getChildCount(child);
+
+                            if (columnCount > 0){
+                                for (var j=0; j<columnCount; j++){
+                                    var column = graph.model.getChildAt(child, j).value;
+                                    
+                                    mql[0].push('\n    '+column.name+'  '+column.ftype+'  "'+column.title + '"');
+                                    
+                                    if (column.iskey){
+                                        mql[1].push(column.name);
+                                    }
+                                    
+                                    if (column.isindex) {
+                                        mql[2].push(column.name);
+                                    }
+                                    
+                                    mql[0].push(',');
+                                }
+                                // merge key
+                                if(!_.isEmpty(mql[1])){
+                                    mql[0].push('\n\t key('+mql[1].join(',')+')');
+                                    mql[0].push(',');
+                                }
+                                // merge index
+                                if(!_.isEmpty(mql[2])){
+                                    mql[0].push('\n\t index('+mql[2].join(',')+')');
+                                    mql[0].push(',');
+                                }
+
+                                mql[0].splice(mql[0].length-1, 1);
+
+                                mql[0].push('\n)');
+                                
+                                // class cfg
+                                if(!_.isEmpty(classCfg)){
+                                    mql[0].push(` with ${classCfg.join(", ")}`);
+                                }
+
+                                mql[0].push(';');
+
+                                
+                            }
+                            
+                            mql[0].push('\n\n');
+                        }
+                    }
+                }
                 
 
                 return mql[0].join('');
@@ -1073,6 +1355,56 @@
                 }
                 this.dialogSaveAs.visible = false;
             },
+            onExecute(){
+                let editor = ace.edit(this.$refs.dialogInfoEditor.$el);
+                let mql = editor.getSelectedText();
+
+                if(_.isEmpty(mql)){
+                    mql = editor.getValue();
+                }
+
+                // execute
+                this.$confirm(`确定执行:<br>${mql}`, '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        center: true
+                        }).then(() => {
+
+                            let rtn = omdbHandler.fetchDataByMql(mql);
+                            
+                            // output
+                            if(rtn.status === 'ok'){
+                                
+                                // MQL for  CRUD
+                                if(rtn.meta.type === 'create'){
+                                    this.$message({
+                                        type: "success",
+                                        message: "类创建成功"
+                                    });
+                                    return false;
+                                }
+
+                                if(rtn.meta.type === 'alter'){
+                                    this.$message({
+                                        type: "success",
+                                        message: "属性修改成功"
+                                    });
+                                    return false;
+                                }
+
+                            } else {
+                                this.$message({
+                                    type: "error",
+                                    message: rtn.message,
+                                    showClose: true
+                                })
+                            }
+                        }).catch(() => {
+                        
+                        });
+
+            }, 
             onSave(){
                 if(this.doc){
                     let enc = new mxCodec(mxUtils.createXmlDocument());

@@ -738,30 +738,27 @@ class System {
 									<el-main  style="padding:0px;">
 										<el-table
 											:data="dt.rows"
+											:row-class-name="rowClassName"
+                                            :header-cell-style="headerRender"
 											style="width: 100%">
 											<el-table-column type="index"></el-table-column>
 											<el-table-column type="expand">
-											<template slot-scope="props">
-												<el-form label-position="left">
-													
-												</el-form>
-											</template>
+												<template slot-scope="props">
+													<el-form label-width="120px" style="width:100%;height:300px;overflow:auto;padding:10px;background:#f7f7f7;" >
+														<el-form-item v-for="v,k in props.row" :label="k">
+															<el-input v-model="v"></el-input>
+														</el-form-item>
+													</el-form>
+												</template>
 											</el-table-column>
 											<el-table-column 
 												node-key="id"
 												:label="item.title" 
 												:prop="item.field" 
+												:formatter="item.render"
 												v-for="item in dt.columns"
 												v-if="item.visible">
-												<template slot-scope="scope">
-													<span v-if="item.field=='status'">
-														<el-button type="danger" v-if="scope.row.status==0">停止</el-button>
-														<el-button type="success" v-else>启动</el-button>
-													</span>
-													<span v-else>
-														#{scope.row[item.field]}#
-													</span>
-												</template>
+												
 											</el-table-column>
 										</el-table>
 									</el-main>
@@ -769,76 +766,44 @@ class System {
 					data(){
 						return {
 							dt: {
-								rows:[{
-									id: '1',
-									class: "/matrix/system/notify",
-									name: '运维开放',
-									status: '1',
-									phones: '13923234366',
-									emails: 'wz@13.com',
-									template: '开放'
-								},
-								{
-									id: '2',
-									class: "/matrix/system/notify",
-									name: '运维主机',
-									status: '1',
-									phones: '13923234366',
-									emails: 'wz@13.com',
-									template: '开放'
-								}],
-								columns: [
-									{
-										field: "status",
-										title: "状态",
-										width: 50,
-										visible: true
-									},
-									{
-										field: "id",
-										title: "ID",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "class",
-										title: "CLASS",
-										width: 120,
-										visible:false
-									},
-									{
-										field: "name",
-										title: "规则名称",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "phones",
-										title: "接收人员电话",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "emails",
-										title: "接收人员邮件",
-										width: 160,
-										visible: true
-									},
-									{
-										field: "template",
-										title: "引用模板",
-										width: 160,
-										visible: true
-									}],
+								rows:[],
+								columns: [],
 								selected: []
 							}
 						}
 					},
 					mounted() {
-						
+						this.$nextTick().then(()=>{
+							this.initData();
+						})
 					},
 					methods:{
-						
+						initData(){
+							let rtn = fsHandler.callFsJScript("/matrix/notification/getRuleList.js").message;
+							_.extend(rtn, {columns: _.map(rtn.columns, (v)=>{
+                                    
+								if(_.isUndefined(v.visible)){
+									_.extend(v, { visible: true });
+								}
+
+								if(!v.render){
+									return v;
+								} else {
+									return _.extend(v, { render: eval(v.render) });
+								}
+								
+							})});
+							console.log(1,rtn)
+							_.extend(this.dt, rtn);
+						},
+						rowClassName({row, rowIndex}){
+                            return `row-${rowIndex}`;
+                        },
+                        headerRender({ row, column, rowIndex, columnIndex }){
+                            if (rowIndex === 0) {
+                                //return 'text-align:center;';
+                            }
+                        }
 					}
 				})
 				// 通知管理-type
@@ -3239,7 +3204,7 @@ class System {
 					template: `<el-container style="background-color:#ffffff;height: calc(100vh - 85px);">
 									<el-aside style="width:unset;" ref="leftView">
 										<el-menu
-											default-active="company-manage"
+											:default-active="currentView"
 											@select="toggleView"
 											:collapse="ifCollapse"
 											style="height:100%;"
@@ -3292,6 +3257,19 @@ class System {
 							inst: null
 						},
 						ifCollapse:true
+					},
+					created(){
+
+						// 预设应用
+						try{
+							if(mx.urlParams['preset']){
+								let preset = _.attempt(JSON.parse.bind(null, decodeURIComponent(mx.urlParams['preset'])));
+								this.currentView = preset.view;
+							}
+						} catch(err){
+
+						}
+						
 					},
 					mounted(){
 						

@@ -97,6 +97,8 @@
 
 			<!--搜索按钮-->
 			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">搜索</el-button>
+
+			<el-button type="success" @click="html2Dfs" style="margin-left:0px;">存为文档</el-button>
 		</div>
 	</template>
 
@@ -125,7 +127,7 @@
 			}
 
 			// 搜索辅助
-			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			this.suggestions = fsHandler.callFsJScript("/matrix/analysis/suggestions.js",this.options.api.parent).message;
 	    },
 	    mounted(){
 			   
@@ -156,10 +158,14 @@
 				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
 			},
 			onFetchSuggestions(queryString, cb){
-				var suggestions = this.suggestions;
-				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
-				// 调用 callback 返回建议列表的数据
-				cb(results);
+				try{
+					var suggestions = this.suggestions;
+					var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				} catch(err){
+
+				}
 			},
 			createFilter(queryString) {
 				return (v) => {
@@ -193,6 +199,52 @@
 			resetTerm(){
 				this.preset.term = "";
 				this.search();
+			},
+			html2Dfs(){
+				html2canvas(this.$root.$refs.mainView.$el,{
+					allowTaint: true,
+					useCORS: true,
+					letterRendering: 1,
+					height: window.outerHeight + window.innerHeight + 1000,
+            		windowHeight: window.outerHeight + window.innerHeight + 1000
+				}).then(canvas => {
+					
+					let ftype = "html";
+					let attr = {remark: "", ctime: _.now(), author: window.SignedUser_UserName, type: ftype};
+					let name = '报告_' + moment().format("YYYY-MM-DD HH:MM:SS");
+					let html = `<!DOCTYPE html>
+								<html>
+									<head>
+										<meta charset="UTF-8">
+										<title></title>
+									</head>
+									<body>
+										<img src="${canvas.toDataURL()}" />
+									</body>
+								</html>`;
+
+					let url = fsHandler.fsTemp(ftype, name + "." + ftype, html, attr);
+					
+					// 保存失败
+					if(!url){
+						this.$message({
+							type: "error",
+							message: "保存失败，请确认！",
+							showClose: true
+						});
+						return false;
+					}
+					
+					this.$notify({
+						title: '报告已生成',
+						dangerouslyUseHTMLString: true,
+						duration: 10*1000,
+						message: `<p>目录：${url} </p>
+									<p>点击 <a href="/fs${url}?type=open&issys=${window.SignedUser_IsAdmin}" class="el-button el-button--success el-button--mini" style="text-decoration: none;" target="_blank">确认</a> 查看详细</p>`,
+						position: 'bottom-right'
+					});
+					
+				});
 			}
 
 	    }

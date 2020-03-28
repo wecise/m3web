@@ -1181,9 +1181,9 @@ class Omdb{
                                                 </el-popover>
                                             </span>
                                         </template>
-                                        <template slot-scope="scope">
+                                        <!--template slot-scope="scope">
                                             #{scope.row[item['field']]}#
-                                        </template>
+                                        </template-->
                                     </el-table-column>
                                 </el-table>
                             </el-main>
@@ -1228,12 +1228,11 @@ class Omdb{
                 }
             },
             created(){
-                const self = this;
-
-                if(!_.isEmpty(self.model)) {
-                    self.dt.rows = self.model.data;
-                    self.dt.columns = _.map(self.model.columns[_.keys(self.model.columns)[0]],(v)=>{
-                        console.log(_.now(),v.field,v['field'])
+                
+                if(!_.isEmpty(this.model)) {
+                    this.dt.rows = this.model.data;
+                    this.dt.columns = _.map(this.model.columns[_.keys(this.model.columns)[0]],(v)=>{
+                        
                         //  msg
                         if(_.includes(['msg'],v['field'])){
                             return _.extend(v,{render: function(row, column, cellValue, index){
@@ -1266,6 +1265,8 @@ class Omdb{
 
                         return v;
                     });
+
+                    console.log(11,this.dt)
                 }
             },
             mounted(){
@@ -1288,7 +1289,6 @@ class Omdb{
                 },
                 onUpdate(row){
                     let cx = { columns:_.map(this.dt.columns,(v)=>{ return { [v.field]:v.type }; }), row: row };
-                    //let rtn = fsHandler.callFsJScript("/matrix/omdb/dataUpdate.js",encodeURIComponent)
                 },
                 onDelete(){
                     

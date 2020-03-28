@@ -86,6 +86,21 @@ class Notes {
                         },
                         onInit(){
                             this.treeData = fsHandler.callFsJScript("/matrix/devops/getFsForTree.js", encodeURIComponent(this.root)).message;
+                            
+                            // 默认首页
+                            let homeNode = _.find(_.flattenDeep(_.map(this.treeData,'children')),{name: '系统介绍.md'});
+                            
+                            let item = {
+                                alias: homeNode.alias,
+                                children: homeNode.children,
+                                ftype: homeNode.ftype,
+                                fullname: homeNode.fullname,
+                                id: homeNode.id,
+                                name: homeNode.name,
+                                parent: homeNode.parent,
+                                size: _.find(fsHandler.fsList(homeNode.parent),{name: homeNode.name}).size || 0
+                            };
+                            this.$root.model = {item:homeNode, content:fsHandler.fsContent(homeNode.parent, homeNode.name)};
                         }
                     }
                 });
@@ -106,8 +121,9 @@ class Notes {
                                     </el-header>
                                     <el-main style="height:100%;overflow:hidden;">
                                         <el-container style="height:100%;">
-                                            <el-aside ref="editor"></el-aside>
-                                            <el-main style="width:100%;height:100%;" ref="content" v-html="compiledMarkdown">
+                                            <el-aside style="width:50%;" ref="editor">
+                                            </el-aside>
+                                            <el-main style="width:50%;height:100%;" ref="content" v-html="compiledMarkdown">
                                             </el-main>
                                         </el-container>
                                     </el-main>
@@ -143,17 +159,20 @@ class Notes {
                         mode:{
                             handler(val,oldVal){
                                 if(val === 'view'){
-                                    this.splitInst.setSizes([0, 100]);
+                                    $(this.$refs.editor.$el).hide();
+                                    //this.splitInst.setSizes([0, 100]);
                                 } else {
-                                    this.splitInst.setSizes([50, 50]);
+                                    $(this.$refs.editor.$el).show();
+                                    //this.splitInst.setSizes([50, 50]);
                                 }
                             }
                         }
                     },
                     mounted(){
                         this.$nextTick(()=>{
-                            this.initSplit();
+                            //this.initSplit();
                             this.initEditor();
+                            $(this.$refs.editor.$el).hide();
                         })
                     },
                     methods: {
@@ -200,7 +219,7 @@ class Notes {
                         onSave: _.debounce(function(){
                                     let attr = {remark: '', ctime: _.now(), author: window.SignedUser_UserName};
                                     let rtn = fsHandler.fsNew(this.model.item.ftype, this.model.item.parent, this.model.item.name, this.editor.getValue(), attr);
-                                },2000)
+                                },5000)
     
                     }
                 });
@@ -210,7 +229,7 @@ class Notes {
                     data:{
                         model:{}
                     },
-                    template:   `<el-container style="height:100vh;background:#ffffff;">
+                    template:   `<el-container style="height:calc(100vh - 85px);background:#ffffff;">
                                     <el-main style="padding:0px;overflow:hidden;" ref="mainView">
                                         <notes-view :model="model" ref="viewRef"></notes-view>
                                     </el-main>

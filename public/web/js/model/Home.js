@@ -256,7 +256,8 @@ class Home extends Matrix {
                             if(cmd.type === 'newGroup'){
                                 this.group.dialogVisible = true;
                             } else {
-                                window.open(cmd.url,'_blank');    
+                                let preset = encodeURIComponent(JSON.stringify({view:'tools-manage'}));
+                                window.open(cmd.url+'?preset='+preset,'_blank');    
                             }
                         },  
                         onCommand(item){

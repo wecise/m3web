@@ -96,8 +96,8 @@
 			<!--快速过滤条件设置-->
 
 			<!--搜索按钮-->
-			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNowRef">当前窗口搜索</el-button>
-			<el-button type="primary" @click="search" @keyup.enter.native="search" ref="searchNewRef" style="margin-left:0px;">子窗口搜索</el-button>
+			<el-button type="success" @click="search" @keyup.enter.native="search" ref="searchNowRef">当前窗口搜索</el-button>
+			<el-button type="success" @click="search" @keyup.enter.native="search" ref="searchNewRef" style="margin-left:0px;">子窗口搜索</el-button>
 		</div>
 	</template>
 
@@ -126,7 +126,7 @@
 			}
 
 			// 搜索辅助
-			this.suggestions = fsHandler.callFsJScript("/matrix/search/suggestions.js",this.options.api.parent).message;
+			this.suggestions = fsHandler.callFsJScript("/matrix/analysis/suggestions.js",this.options.api.parent).message;
 	    },
 	    mounted(){
 			   
@@ -157,10 +157,14 @@
 				_.extend(this.$root.options,{ view:{ eidtEnable: true, show: true, value: item.name }});
 			},
 			onFetchSuggestions(queryString, cb){
-				var suggestions = this.suggestions;
-				var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
-				// 调用 callback 返回建议列表的数据
-				cb(results);
+				try{
+					var suggestions = this.suggestions;
+					var results = queryString ? suggestions.filter(this.createFilter(queryString)) : suggestions;
+					// 调用 callback 返回建议列表的数据
+					cb(results);
+				} catch(err){
+					
+				}
 			},
 			createFilter(queryString) {
 				return (v) => {

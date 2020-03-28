@@ -564,7 +564,7 @@ class OmdbHandler {
             type: 'POST',
             data: fm,
             mimeType: "multipart/form-data",
-            async: false,
+            async: true,
             processData:false,
             contentType: false,
             beforeSend:function(xhr){

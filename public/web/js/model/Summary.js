@@ -31,7 +31,7 @@ class Summary {
                         value: Number,
                         unit:String
                     },
-                    template:   `<div style="height:115px;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
                                     <h1 style="font-size:32px;">#{value}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
                                 </div>`
@@ -45,7 +45,7 @@ class Summary {
                         value: Array,
                         unit: Array
                     },
-                    template:   `<div style="height:115px;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
+                    template:   `<div style="height:100%;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title[0]}#</span>
                                     <h1 style="font-size:32px;margin:5px;">#{value[0]}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit[0]}#</span></h1>
                                     <span style="color:rgb(153, 153, 153);">#{title[1]}#</span>
@@ -257,7 +257,7 @@ class Summary {
                         this.chart = echarts.init(this.$el);
                         this.chart.setOption(this.option);
                     },
-                    mothods:{
+                    methods:{
                         checkChart(){
                             if(this.$el){
                                 this.chart.resize();
@@ -275,7 +275,7 @@ class Summary {
                         title: String,
                         height: String
                     },
-                    template: `<div :style="'width:100%;background:#f7f7f7;height:'+height"></div>`,
+                    template: `<div style="'width:100%;background:#f7f7f7;height:100%;"></div>`,
                     data(){
                         return {
                             
@@ -394,8 +394,9 @@ class Summary {
                         this.chart = echarts.init(this.$el);
                         this.chart.setOption(this.option);
                     },
-                    mothods:{
+                    methods:{
                         checkChart(){
+                            console.log(13)
                             if(this.$el){
                                 this.chart.resize();
                             } else {
@@ -411,80 +412,94 @@ class Summary {
                         title: ['占用空间','磁盘使用率'],
                         value: [300,40],
                         unit: ['TB','%'],
+                        control: {
+                            show: false
+                        }
                     },
                     template:   `<el-container id="content" class="content" style="height:calc(100vh - 80px);">
-                                    <el-main style="padding:0px 20px;" ref="mainView">
-                                        <el-row :gutter="10">
-                                            <el-col :span="24" style="padding:0 20px;">
-                                                <h3 style="color:#999;">数据统计</h3>
-                                            </el-col>
-                                        </el-row>    
-                                        <el-row :gutter="10">
-                                            <el-col :span="4">
-                                                <larger-number title="数据吞吐率"
-                                                    value="2000"
-                                                    unit="条/秒">
-                                                </larger-number>
-                                            </el-col>
-                                            <el-col :span="4">
-                                                <larger-number title="数据总量(当日)"
-                                                    value="32"
-                                                    unit="TB">
-                                                </larger-number>
-                                            </el-col>
-                                            <el-col :span="4">
-                                                <larger-muiltnumber 
-                                                    :title="title"
-                                                    :value="value"
-                                                    :unit="unit">
-                                                </larger-muiltnumber>
-                                            </el-col>
-                                            <el-col :span="6">
-                                                <pie-chart title="所有" height="160px"></pie-chart>
-                                            </el-col>
-                                            <el-col :span="6">
-                                                <pie-chart title="当日" height="160px"></pie-chart>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row :gutter="10">
-                                            <el-col :span="24" style="padding:0 20px;">
-                                                <h3 style="color:#999;">数据接入统计</h3>
-                                            </el-col>
-                                        </el-row>    
-                                        <el-row :gutter="10">
-                                            <el-col :span="6">
-                                                <curve-chart title="事件数据" height="220px"></curve-chart>
-                                            </el-col>
-                                            <el-col :span="6">
-                                                <curve-chart title="性能数据" height="220px"></curve-chart>
-                                            </el-col>
-                                            <el-col :span="6">
-                                                <curve-chart title="日志数据" height="220px"></curve-chart>
-                                            </el-col>
-                                            <el-col :span="6">
-                                                <curve-chart title="配置数据" height="220px"></curve-chart>
-                                            </el-col>
-                                        </el-row>
-                                        <el-row :gutter="10">
-                                            <el-col :span="24" style="padding:0 20px;">
-                                                <h3 style="color:#999;">数据访问统计</h3>
-                                            </el-col>
-                                        </el-row>    
-                                        <el-row :gutter="10">
-                                            <el-col :span="12" style="display:flex;flex-wrap:wrap;">
-                                                <curve-chart title="按应用" height="200px"></curve-chart>
-                                            </el-col>
-                                            <el-col :span="12" style="display:flex;flex-wrap:wrap;">
-                                                <curve-chart title="按接口" height="200px"></curve-chart>
-                                            </el-col>
-                                        </el-row>
+                                    
+                                    <el-main style="padding:10px 0px;" ref="mainView">
+                                        
+                                        <el-button type="text" icon="el-icon-plus" style="position:absolute;z-index:1000;top:55px;right:25px;" @click="control.show=!control.show"></el-button>
+                                        
+                                        <div class="d-none d-md-block" style="box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);background:#f7f7f7;height:75vh;position:absolute;top:60px;left:70px;z-index:100;" v-show="control.show">
+                                            
+                                            <div class="newWidget grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                                <div class="grid-stack-item-content">
+                                                    <div>
+                                                        <el-image src="/fs/assets/images/product_screenshot/new.png?type=open&issys=true" style="width:200px;"></el-image>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="grid-stack grid-container" data-gs-animate="yes">
+                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <larger-number title="数据吞吐率"
+                                                        value="2000"
+                                                        unit="条/秒">
+                                                    </larger-number>
+                                                </div>
+                                            </div>
+                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <larger-number title="数据总量(当日)"
+                                                        value="32"
+                                                        unit="TB">
+                                                    </larger-number>
+                                                </div>
+                                            </div>
+                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <larger-muiltnumber 
+                                                        :title="title"
+                                                        :value="value"
+                                                        :unit="unit">
+                                                    </larger-muiltnumber>
+                                                </div>
+                                            </div>
+                                            <div class="grid-stack-item" data-gs-width="4" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <pie-chart title="所有"></pie-chart>
+                                                </div>
+                                            </div>
+                                            <div class="grid-stack-item" data-gs-width="4" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <pie-chart title="当日"></pie-chart>
+                                                </div>
+                                            </div>
+                                        </div>
+                                       
                                   
                                     </el-main>
                                 </el-container>`,
                     mounted() {
                         this.$nextTick().then(()=>{
-                            
+                            this.init();
                         })
+                    },
+                    methods: {
+                        init(){
+                            let grid = GridStack.init({
+                                resizable: {
+                                    handles: 'e, se, s, sw, w'
+                                },
+                                float: true,
+                                acceptWidgets: '.newWidget'
+                            });
+                            grid.on('gsresizestop', (event, elem)=> {
+                                eventHub.$emit("WINDOW-RESIZE-EVENT");
+                            });
+
+                            $('.newWidget').draggable({
+                                revert: 'invalid',
+                                scroll: false,
+                                appendTo: 'body',
+                                helper: 'clone'
+                            });
+
+                        }
                     }
                 }).$mount("#app");
 

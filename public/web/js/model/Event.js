@@ -1245,7 +1245,7 @@ class Event {
                             }
                         }
                     },
-                    template: `<el-container style="height: calc(100vh - 160px);padding:1px;">
+                    template: `<el-container :style="$root.control.view.mode | pickContainerStyle">
                                     <el-aside style="width:300px;background: #f6f6f6;overflow:hidden;" class="split" ref="leftView">
                                         <el-container style="overflow:hidden;height:100%;">
                                             <el-header style="height:30px;line-height:30px;background: #f6f6f6;display:;">
@@ -1258,8 +1258,8 @@ class Event {
                                                 <el-button type="text" :icon="control.ifGroupFullScreen | pickScreenStyle" style="float:right;" @click="onGroupFullScreen"></el-button>
                                             </el-header>
                                             <el-main style="padding:10px;overflow:auto;" ref="groupListRef">
-                                                <el-table-aigroup-component :model="dt" ref="groups" style="height:50%;"></el-table-aigroup-component>
-                                                <el-table-aigroup-component :model="dt" ref="groupsByManual" style="height:50%;"></el-table-aigroup-component>
+                                                <el-table-aigroup-component :model="dt" ref="groups" style="height:100%;"></el-table-aigroup-component>
+                                                <!--el-table-aigroup-component :model="dt" ref="groupsByManual" style="height:50%;"></el-table-aigroup-component-->
                                             </el-main>
                                         </el-container>
                                     </el-aside>
@@ -1291,6 +1291,13 @@ class Event {
                                 return `el-icon-full-screen`;
                             } else {
                                 return `el-icon-copy-document`;
+                            }
+                        },
+                        pickContainerStyle(evt){
+                            if(evt == 'aigroup'){
+                                return `height: calc(100vh - 80px);padding:1px;`;
+                            } else {
+                                return `height: calc(100vh - 160px);padding:1px;`;
                             }
                         }
                     },
@@ -2006,18 +2013,18 @@ class Event {
                     },
                     mounted(){
                         this.$nextTick().then(()=>{
+                            this.toggleSelection(this.model.selected);
                             _.delay(()=>{
-                                this.toggleSelection(this.model.selected);
-                                // console.log($('tbody',this.$el)[0])
-                                // const el = $('tbody',this.$el)[0];
-                                // const self = this;
-                                // Sortable.create(el, {
-                                //     onEnd({ newIndex, oldIndex }) {
-                                //         const currRow = self.model.rows.splice(oldIndex, 1)[0];
-                                //         self.model.rows.splice(newIndex, 0, currRow)
-                                //     }
-                                // })
-                            },1000)
+                                const el = $('tbody',this.$el)[0];
+                                const self = this;
+                                Sortable.create(el, {
+                                    animation: 150,
+                                    onEnd({ newIndex, oldIndex }) {
+                                        const currRow = self.model.rows.splice(oldIndex, 1)[0];
+                                        self.model.rows.splice(newIndex, 0, currRow)
+                                    }
+                                })
+                            },3000)
                         })
                     },
                     methods:{
@@ -2323,7 +2330,7 @@ class Event {
                     delimiters: ['#{', '}#'],
                     template:   `<main id="content" class="content">
                                     <el-container>
-                                        <el-header style="height:40px;line-height:40px;padding: 0px;">
+                                        <el-header style="height:40px;line-height:40px;padding: 0px;" v-show="control.view.mode != 'aigroup'">
                                             <search-base-component :options="options" ref="searchRef" class="grid-content"></search-base-component>
                                         </el-header>
                                         <el-main style="padding:0px;margin: 10px 0px;background: #fff;height: calc(100vh - 135px);overflow:hidden;" v-if="options.view.eidtEnable">
@@ -2466,7 +2473,10 @@ class Event {
                             ifSmart: '0',
                             ifAiGroup: '0',
                             ifRefresh: '0',
-                            viewType: "o"
+                            viewType: "o",
+                            view:{
+                                mode: 'all' // all: all_event_console | console: only_event_console | aigroup: only_aigroup | term: get_term
+                            }
                         },
                         // 搜索组件结构
                         model: {
@@ -2566,11 +2576,12 @@ class Event {
                         }
                     },
                     created(){
-                        try {
+                        /* try {
+                            
                             if(mx.urlParams['cfg']){
                                 event.URL_PARAMS_CFG = _.attempt(JSON.parse.bind(null, decodeURIComponent(window.atob(mx.urlParams['cfg']))));
                             }
-                            
+                        
                             let init = function(){
                     
                                 _.forEach(event.URL_PARAMS_CFG,function(v,k){
@@ -2603,12 +2614,34 @@ class Event {
                             },50)
                         } catch(err){
                             event.URL_PARAMS_CFG = null;
-                        }
+                        } */
 
-                        // 初始化term
+                        // 集成
                         try{
-                            let term = decodeURIComponent(window.atob(mx.urlParams['term']));
-                            this.options.term = term;
+                            if(!_.isEmpty(window.location.search)){
+                                // 接收参数
+                                if(mx.urlParams['term']){
+                                    let term = decodeURIComponent(window.atob(mx.urlParams['term']));
+                                    this.options.term = term;
+                                } 
+                                // 集成AiGroup
+                                else if(mx.urlParams['ids']){
+                                    let term = mx.urlParams['ids'];
+                                    this.options.term = term;
+                                    this.control.ifAiGroup = '1';
+                                    this.control.view.mode = 'aigroup';
+                                    this.layout.main.tabs = [];
+                                    _.delay(()=>{
+                                        this.aiGroup();
+                                    },1000)
+                                } 
+                            } else {
+                                // 集成console模式
+                                if(_.endsWith(window.location.pathname,'_link')){
+                                    this.control.view.mode = 'console';
+                                }
+                            }
+                            
                         } catch(err){
 
                         }
@@ -2828,6 +2861,9 @@ class Event {
                         detailRemove(targetName) {
                             
                             try{
+                                
+                                if(this.layout.main.tabs.length < 2) return false;
+
                                 let tabs = this.layout.main.tabs;
                                 let activeIndex = this.layout.main.activeIndex;
                                 if (activeIndex === targetName) {

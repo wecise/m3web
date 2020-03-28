@@ -386,43 +386,42 @@
                 });
 
 	        },
-            initData: function(node){
-				const self = this;
-
-                _.forEach(node, function(v,k){
+            initData(node){
+				
+                _.forEach(node, (v,k)=>{
 
                     let rtn = omdbHandler.classList(v.cid);
-
+                    
                     if (_.isEmpty(rtn)) {
                         return;
                     }
-
+                    
                     if( v.cid === -1 ) {
 
-                        let _arr = _.map(rtn,function(v){ return _.merge(v,{rtype:'A1', open:true})});
+                        let _arr = _.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1', open:true})});
 
-                        _.merge(self.zNodes[0],{ children: _arr});
-
-                        self.zTree = $.fn.zTree.init($("#" + self.id), self.zSetting, self.zNodes);
+                        _.merge(this.zNodes[0],{ children: _arr});
+                        
+                        this.zTree = $.fn.zTree.init($("#" + this.id), this.zSetting, this.zNodes);
 
                     } else {
 
-	                    let zTree = $.fn.zTree.getZTreeObj(self.id);
+	                    let zTree = $.fn.zTree.getZTreeObj(this.id);
 
                         let nodes = zTree.getSelectedNodes();
 
                         if (nodes && nodes.length>0) {
                             zTree.removeChildNodes(nodes[0]);
                         }
-
+                        
                         // 按name排序
-                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,function(v){ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
+                        zTree.addNodes(v.treeNode, _.orderBy(_.map(rtn,(v)=>{ return _.merge(v,{rtype:'A1'});}),['name'],['asc']));
 
                     }
                 })
 
 	        },
-	        edgeList: function(){
+	        edgeList(){
                 const self = this;
                 let _rtn = null;
                 let _list = omdbHandler.fetchDataByMql('select edge type');
@@ -438,7 +437,7 @@
 
                 return _rtn;
 	        },
-	        ruleList: function(){
+	        ruleList(){
                 const self = this;
 
                 let _list = ruleHandler.ruleList();

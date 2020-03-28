@@ -21,7 +21,8 @@ class Analysis {
         VueLoader.onloaded(["ai-robot-component",
                             "search-preset-component",
                             "search-base-component",
-                            "search-base-ext-component"
+                            "search-base-ext-component",
+                            "topological-graph-component"
                         ],function() {
 
             $(function() {
@@ -63,7 +64,8 @@ class Analysis {
                                 
                             ],
                             control:{
-                                ifFullScreen: false
+                                ifFullScreen: false,
+                                minus: false
                             }
                         }
                     },
@@ -74,25 +76,25 @@ class Analysis {
                                             <search-base-ext-component :options="options" ref="searchRef"></search-base-ext-component>
                                         </span>
                                         <span style="width:15%;text-align:right;"> 
-                                            <el-button type="text" icon="el-icon-minus"></el-button>
+                                            <el-button type="text" icon="el-icon-minus" @click="control.minus=!control.minus"></el-button>
                                             <el-button type="text" :icon="control.ifFullScreen | pickScreenStyle" @click="onFullScreen"></el-button>
                                             <el-button type="text" icon="el-icon-close"></el-button>
                                         </span>
                                     </el-header>
-                                    <el-container style="border-top:1px solid #ddd;height:calc(100% - 40px);">
+                                    <el-container style="border-top:1px solid #ddd;height:calc(100% - 40px);" v-if="!control.minus">
                                         <el-main :style="result | pickMainStyle" ref="mainView">
-                                            <!--template v-for="child in result">
-                                                <component :is="'search-'+model.type" :model="child" :key="child.id"></component>
-                                            </template-->
-                                            <el-card :style="item | pickBgStyle" 
-                                                v-for="item in model.rows" :key="item.id">
-                                                <span class="el-icon-warning" :style="item | pickStyle"></span>
-                                                <p>服务器:#{item.host}#</p>
-                                                <p>IP地址:#{item.ip}#</p>
-                                                <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
-                                                <p>告警内容：#{item.msg}#</p>
-                                                <el-button type="text" @click="onClick(item)">详细</el-button>
-                                            </el-card>
+                                            <el-row :gutter="20">
+                                                <el-col :span="8" v-for="item in model.rows" :key="item.id">
+                                                    <el-card :style="item | pickBgStyle" >
+                                                        <span class="el-icon-warning" :style="item | pickStyle"></span>
+                                                        <p>服务器:#{item.host}#</p>
+                                                        <p>IP地址:#{item.ip}#</p>
+                                                        <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
+                                                        <p>告警内容：#{item.msg}#</p>
+                                                        <el-button type="text" @click="onClick(item)">详细</el-button>
+                                                    </el-card>
+                                                </el-col>
+                                            </el-row>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -138,6 +140,158 @@ class Analysis {
                                     screenfull.request();
                                     this.control.ifFullScreen = true;
                                 }   
+                            }
+                        }
+                    }
+                })
+
+                // 性能 曲线
+                Vue.component("curve-chart",{
+                    delimiters: ['#{','}#'],
+                    props: {
+                        title: String,
+                        model: Object,
+                        height: String,
+                    },
+                    template: `<div :style="'width:100%;background:#f7f7f7;height:'+height"></div>`,
+                    data(){
+                        return {
+                            chart: null,
+                            type: "nearest1hour",
+                            legendData: ['max','min','value'],
+                            colors: ["#F58080", "#47D8BE", "#F9A589"],
+                            option: {
+                                title: {
+                                    text: "",
+                                    left: 'center',
+                                    textStyle: {
+                                        fontSize: '14px',
+                                        color: '#999'
+                                    }
+                                },
+                                tooltip: {
+                                    trigger: 'axis'
+                                },
+                                legend: {
+                                    color: [],
+                                    data: [],
+                                    left: 'center',
+                                    bottom: 'bottom'
+                                },
+                                grid: {
+                                    top: 'middle',
+                                    left: '3%',
+                                    right: '4%',
+                                    bottom: '3%',
+                                    height: '80%',
+                                    containLabel: true
+                                },
+                                xAxis: {
+                                    type: 'category',
+                                    data: [],
+                                    axisLine: {
+                                        lineStyle: {
+                                            color: "#999"
+                                        }
+                                    }
+                                },
+                                yAxis: {
+                                    type: 'value',
+                            
+                                    splitLine: {
+                                        lineStyle: {
+                                            type: 'dashed',
+                                            color: '#DDD'
+                                        }
+                                    },
+                                    axisLine: {
+                                        show: false,
+                                        lineStyle: {
+                                            color: "#333"
+                                        },
+                                    },
+                                    nameTextStyle: {
+                                        color: "#999"
+                                    },
+                                    splitArea: {
+                                        show: false
+                                    }
+                                },
+                                series: []
+                            }
+                        }
+                    },
+                    created(){
+                        // 接收窗体RESIZE事件
+                        eventHub.$on("WINDOW-RESIZE-EVENT", this.checkChart);
+
+                        this.option.title.text=this.title;
+
+                        this.initData();
+                        
+                    },
+                    mounted(){
+                        this.chart = echarts.init(this.$el);
+                        this.chart.setOption(this.option);
+                    },
+                    methods:{
+                        initData(){
+                            let rtn = fsHandler.callFsJScript("/matrix/analysis/performance.js", encodeURIComponent(this.model.id)).message;
+                            let sData = _.sortBy(rtn.rows[this.type].baseline,['vtime'],['asc']);
+                            _.extend(this.option.legend,{data:this.legendData, color:this.colors});
+                            _.extend(this.option.xAxis, {data: _.map(sData,(v)=>{
+                                return moment(v.vtime).format("HH:MM");
+                            })})
+                            console.log(this.option.xAxis)
+                            _.extend(this.option, {
+                                series: _.map(['max','min','value'],(v,index)=>{
+                                    return {
+                                        name: '响应时间',
+                                        type: 'line',
+                                        data: _.map(sData,v),
+                                        lineStyle: {
+                                            normal: {
+                                                width: 1,
+                                                color: {
+                                                    type: 'linear',
+                            
+                                                    colorStops: [{
+                                                            offset: 0,
+                                                            color: this.colors[index] // 0% 处的颜色
+                                                        },
+                                                        {
+                                                            offset: 0.4,
+                                                            color: '#F9A589' // 100% 处的颜色
+                                                        }, {
+                                                            offset: 1,
+                                                            color: '#F9A589' // 100% 处的颜色
+                                                        }
+                                                    ],
+                                                    globalCoord: false // 缺省为 false
+                                                },
+                                                shadowColor: 'rgba(249,165,137, 0.5)',
+                                                shadowBlur: 10,
+                                                shadowOffsetY: 7
+                                            }
+                                        },
+                                        itemStyle: {
+                                            normal: {
+                                                color: this.colors[index],
+                                                borderWidth: 5,
+                                                borderColor: this.colors[index]
+                                            }
+                                        },
+                                        smooth: true
+                                    }
+                                })
+                            })
+
+                        },
+                        checkChart(){
+                            if(this.$el){
+                                this.chart.resize();
+                            } else {
+                                setTimeout(this.checkChart, 50);
                             }
                         }
                     }
@@ -198,24 +352,19 @@ class Analysis {
                                     </el-header>
                                     <el-container style="border-top:1px solid #ddd;height:calc(100% - 40px);">
                                         <el-main :style="result | pickMainStyle" ref="mainView">
-                                            <!--template v-for="child in result">
-                                                <component :is="'search-'+model.type" :model="child" :key="child.id"></component>
-                                            </template-->
-                                            <el-card :style="item | pickBgStyle" 
-                                                v-for="item in model.rows" :key="item.id">
-                                                <span class="el-icon-warning" :style="item | pickStyle"></span>
-                                                <p>服务器:#{item.host}#</p>
-                                                <p>IP地址:#{item.ip}#</p>
-                                                <p>实例：#{item.inst}#</p>
-                                                <p>参数：#{item.param}#</p>
-                                                <p>值：#{item.value}#</p>
-                                                <p>采集时间：#{moment(item.vtime).format("LLL")}#</p>
-                                                <el-button type="text" @click="onClick(item)">详细</el-button>
-                                            </el-card>
+                                            <el-row :gutter="20">
+                                                <el-col :span="8" v-for="item in model.rows" :key="item.id">
+                                                    <curve-chart :title="item | pickTitle" :model="item" height="180px"></curve-chart>
+                                                    <el-button type="text" @click="onClick(item)">详细</el-button>
+                                                </el-col>
+                                            </el-row>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
                     filters:{
+                        pickTitle(item){
+                            return `${item.host} / ${item.inst} / ${item.param}`;
+                        },
                         pickMainStyle(item){
                             if(_.isEmpty(item)){
                                 return `height:100%;`;
@@ -315,20 +464,23 @@ class Analysis {
                                             <el-button type="text" icon="el-icon-close"></el-button>
                                         </span>
                                     </el-header>
-                                    <el-container style="border-top:1px solid #ddd;">
-                                        <el-main style="padding:20px 0px;" ref="mainView">
-                                            <el-button type="default" 
-                                                style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
-                                                @click="forward(item)"
-                                                v-for="item in model.rows" v-if="model.rows">
-                                                <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
-                                                <div>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">ID：#{item.id}#</p>
-                                                    <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建时间：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
-                                                    <!--p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p-->
-                                                </div>
-                                            </el-button>
+                                    <el-container style="border-top:1px solid #ddd;height:calc(100% - 40px);">
+                                        <el-main style="height:100%;" ref="mainView">
+                                            <el-row :gutter="20">
+                                                <el-col :span="6" :key="item.id" v-for="item in model.rows" v-if="model.rows">
+                                                    <el-button type="default" 
+                                                        style="max-width: 20em;width: 20em;height:auto;border-radius: 10px!important;margin: 5px;border: unset;box-shadow: 0 0px 5px 0 rgba(0, 0, 0, 0.05);"
+                                                        @click="forward(item)">
+                                                        <el-image style="width:64px;margin:5px;" :src="item | pickIcon"></el-image>
+                                                        <div>
+                                                            <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">名称：#{item.name}#</p>
+                                                            <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">ID：#{item.id}#</p>
+                                                            <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">创建时间：#{moment(item.vtime).format("YYYY-MM-DD hh:mm:ss")}#</p>
+                                                            <!--p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;">标签：<input type="text" class="tags" name="tags" :value="item|pickTags"></p-->
+                                                        </div>
+                                                    </el-button>
+                                                </el-col>
+                                            </el-row>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -407,18 +559,18 @@ class Analysis {
                                     </el-header>
                                     <el-container style="border-top:1px solid #ddd;">
                                         <el-main :style="result | pickMainStyle" ref="mainView">
-                                            <!--template v-for="child in result">
-                                                <component :is="'search-'+model.type" :model="child" :key="child.id"></component>
-                                            </template-->
-                                            <el-card :style="item | pickBgStyle" 
-                                                v-for="item in model.rows" :key="item.id">
-                                                <span class="el-icon-warning" :style="item | pickStyle"></span>
-                                                <p>服务器:#{item.host}#</p>
-                                                <p>IP地址:#{item.ip}#</p>
-                                                <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
-                                                <p>告警内容：#{item.msg}#</p>
-                                                <el-button type="text" @click="onClick(item)">详细</el-button>
-                                            </el-card>
+                                            <el-row :gutter="20">
+                                                <el-col :span="8" v-for="item in model.rows" :key="item.id">
+                                                    <el-card :style="item | pickBgStyle" >
+                                                        <span class="el-icon-warning" :style="item | pickStyle"></span>
+                                                        <p>服务器:#{item.host}#</p>
+                                                        <p>IP地址:#{item.ip}#</p>
+                                                        <p>告警时间：#{moment(item.vtime).format("LLL")}#</p>
+                                                        <p>告警内容：#{item.msg}#</p>
+                                                        <el-button type="text" @click="onClick(item)">详细</el-button>
+                                                    </el-card>
+                                                </el-col>
+                                            </el-row>
                                         </el-main>
                                     </el-container>
                                 </el-container>`,
@@ -469,8 +621,113 @@ class Analysis {
                     }
                 })
 
+                //  图
+                Vue.component("search-graph",{
+                    delimiters: ['#{', '}#'],
+                    props:{
+                        model:Object
+                    },
+                    data(){
+                        return {
+                            options: {
+                                // 视图定义
+                                view: {
+                                    eidtEnable: false,
+                                    show: false,
+                                    value: "all"
+                                },
+                                // 搜索窗口
+                                window: { name:"所有", value: ""},
+                                // 输入
+                                term: "",
+                                // 指定类
+                                class: "#/matrix/:",
+                                // 指定api
+                                api: {parent: "event",name: "event_list.js"},
+                                // 其它设置
+                                others: {
+                                    // 是否包含历史数据
+                                    ifHistory: false,
+                                    // 是否包含Debug信息
+                                    ifDebug: false,
+                                    // 指定时间戳
+                                    forTime:  ' for vtime ',
+                                }
+                            },
+                            result: [
+                                
+                            ],
+                            control:{
+                                ifFullScreen: false
+                            },
+                            graph:null
+                        }
+                    },
+                    template:   `<el-container style="height:100%;background:#fff;">
+                                    <el-header style="height:40px;line-height:40px;display:flex;flex-wrap:nowrap;">
+                                        <span style="font-size:15px;width:5%;">#{model.title}#</span>
+                                        <span style="width:80%;">
+                                            <search-base-ext-component :options="options" ref="searchRef"></search-base-ext-component>
+                                        </span>
+                                        <span style="width:15%;text-align:right;"> 
+                                            <el-button type="text" icon="el-icon-minus"></el-button>
+                                            <el-button type="text" icon="el-icon-full-screen"></el-button>
+                                            <el-button type="text" icon="el-icon-close"></el-button>
+                                        </span>
+                                    </el-header>
+                                    <el-container style="border-top:1px solid #ddd;height:calc(100% - 40px);">
+                                        <el-main :style="result | pickMainStyle" ref="mainView">
+                                            <div ref="graph"></div>
+                                        </el-main>
+                                    </el-container>
+                                </el-container>`,
+                    filters:{
+                        pickMainStyle(item){
+                            if(_.isEmpty(item)){
+                                return `height:100%;`;
+                            } else {
+                                return `background:#ddd;height:100%;`
+                            }
+                        }
+                    },
+                    watch: {
+                        'model.rows':{
+                            handler(val,oldVal){
+                                this.graph.graphScript = {value: `match (${val}) - [*1] -> ()`};
+                                this.graph.search(this.graph.graphScript[0].value);
+                            }
+                        }
+                    },
+                    mounted(){
+                        this.$nextTick().then(()=>{
+                            this.init();
+                        })
+                    },
+                    methods: {
+                        init(){
+                            this.graph = new Topological();
+                            this.graph .init();
+                            this.graph .graphScript = {value: `match (${this.model.rows}) - [*1] -> ()`};
+                            this.graph .mount(this.$refs.graph);
+                            
+                        },
+                        onFullScreen(){
+                            if (screenfull.isEnabled) {
+                                if(this.control.ifFullScreen){
+                                    screenfull.exit(this.$el);
+                                    this.control.ifFullScreen = false;   
+                                } else {
+                                    screenfull.request();
+                                    this.control.ifFullScreen = true;
+                                }   
+                            }
+                        }
+                    }
+                })
+
+
                 this.app = new Vue({
-                    delimiters: ['${', '}'],
+                    delimiters: ['#{', '}#'],
                     data:{
                         options: {
                             // 视图定义
@@ -484,7 +741,7 @@ class Analysis {
                             // 输入
                             term: "",
                             // 指定类
-                            class: "#/matrix/devops/:",
+                            class: "#/matrix/:",
                             // 指定api
                             api: {parent: "analysis",name: "searchByTerm.js"},
                             // 其它设置
@@ -508,12 +765,18 @@ class Analysis {
                                     <el-header style="height:40px;line-height:40px;padding: 0px;border: 1px solid #ddd;">
                                         <search-base-component :options="options" ref="searchRef"></search-base-component>
                                     </el-header>
-                                    <el-main style="background:#ddd;border-top:2px solid #ddd;" ref="mainView">
+                                    <el-main style="border-top:2px solid #ddd;background:#f7f7f7;border:1px solid #ddd;" ref="mainView">
                                         
-                                        <template v-for="child in result">
-                                            <component :is="'search-'+child.type" :model="child" :key="child.id" v-if="child.show"></component>
-                                            <el-divider v-if="child.show"></el-divider>
-                                        </template>
+                                        <div class="grid-stack">
+                                            <div class="grid-stack-item"
+                                                data-gs-auto-position="true"
+                                                data-gs-width="12" data-gs-height="8"
+                                                v-for="child in result"> 
+                                                <div class="grid-stack-item-content" style="left:0px;border:1px solid #dddddd;overflow:hidden;">
+                                                    <component :is="'search-'+child.type" :model="child" :key="child.id"></component>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                     </el-main>
                                 </el-container>`,
@@ -537,21 +800,35 @@ class Analysis {
                                     this.setData();
                                 }
                             );
+
+                            // Drag View
+                            _.delay(()=>{
+                                let grid = GridStack.init({
+                                    resizable: {
+                                        handles: 'e, se, s, sw, w'
+                                    },
+                                });
+                                grid.on('gsresizestop', function(event, elem) {
+                                    eventHub.$emit("WINDOW-RESIZE-EVENT");
+                                });
+                            },500)
                         })
                     },
                     methods: {
                         setData(){
                             _.extend(this.model, {message:this.$refs.searchRef.result});
                             
-                            this.result = _.map(this.model.message.data,(v,k)=>{
+                            this.result = [];
+                            
+                            this.result = _.filter(_.map(this.model.message.data,(v,k)=>{
                                 let show = false;
                                 if('search-'+k in this.$options.components && !_.isEmpty(v.rows)){
                                     show = true;
                                 }
                                 return {id: objectHash.sha1(k), type: k, title: v.title, rows: v.rows, show: show};
-                            })
+                            }),{show:true});
 
-                            console.log(this.result)
+                            console.table(this.result)
 
                         }
                     }

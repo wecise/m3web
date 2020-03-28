@@ -185,6 +185,14 @@
                 top: 0;
                 left: 0;
             }
+
+            .progress-bar{
+                background: #ddd;
+                height: 16px;
+                line-height: 16px;
+                width: 100%;
+                min-width: 100%;
+            }
     
             #files ul{
                 margin: 10px;
@@ -195,14 +203,14 @@
             #files ul > li{
                 float: left;
                 width: 100pt;
-                height: 100px;
+                height: 108px;
                 font-size: 12px;
                 line-height: 1.4;
                 text-align: center;
                 background-color: rgb(249, 249, 249);
                 border: 1px solid rgb(255, 255, 255);
-                padding-top: 5px;
-                margin: 5px 0px 20px 5px;
+                padding: 10px 0px 0px 0px;
+                margin: 5px;
             }
     
             #files ul > li > canvas {
@@ -783,7 +791,7 @@
                                                             </el-dropdown-menu>
                                                     </el-dropdown>
                                                 </div>
-                                                <el-image style="width:34px;margin:5px;" :src="item | pickIcon"></el-image>
+                                                <el-image style="width:34px;height:34px;margin:5px;" :src="item | pickIcon"></el-image>
                                                 <div>
                                                     <p style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:center;">
                                                         #{item.name}#
@@ -1454,12 +1462,12 @@
                                     _name = _.split(file.name,"",9).join("")+"..."
                                 }
     
-                                var node = $('<li/>')
+                                var node = $('<li class="el-button el-button--default"/>')
                                     .append($(`<p style="padding:0px;margin:0px;"><a href="#" style="border:none;-webkit-box-shadow: unset;box-shadow: unset;"/></p>`)
                                         .text(_name))
                                     .attr("title",file.name)
-                                    .append($(`<div id="progress_${objectHash.sha1(file.name)}">
-                                                    <progress></progress>
+                                    .append($(`<div id="progress_${objectHash.sha1(file.name)}" class="progress-bar">
+                                                    <progress max="100"></progress>
                                                </div>`));
                                 if (!index) {
                                     node
@@ -1500,10 +1508,7 @@
     
                             let _name = objectHash.sha1(data.files[0].name);
                             let progress = parseInt(data.loaded / data.total * 100, 10);
-                            $(`#progress_${_name} .progress-bar`).css(
-                                'width',
-                                progress + '%'
-                            ).html(`<small>${parseInt(data.loaded/1024,10)} KB / ${parseInt(data.total/1024,10)} KB</small>`);
+                            $(`#progress_${_name}.progress-bar`).html(`<small>${parseInt(data.loaded/1024,10)} KB / ${parseInt(data.total/1024,10)} KB</small>`);
                         })
                         .on('fileuploaddone', function (e, data) {
     
@@ -1515,7 +1520,7 @@
                                     //     .prop('href', file.url);
                                     // $(data.context.children()[index])
                                     //     .wrap(link);
-                                    $(`#progress_${objectHash.sha1(file.name)} .progress-bar`).html(`<small>已完成</small>`);
+                                    $(`#progress_${objectHash.sha1(file.name)}.progress-bar`).html(`<small>已完成</small>`);
                                 } else if (file.error) {
                                     var error = $('<span class="text-danger"/>').text(file.error);
                                     $(data.context.children()[index])

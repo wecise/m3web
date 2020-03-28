@@ -145,17 +145,14 @@
                     userForm: {
                         user_name: {{.SignedUser.UserName}},
                         password: {{.SignedUser.Passwd}},
+                        mobile: "",
                         email: ""
                     }
                 }
             },
-            computed: {
-                email: function(){
-                    const self = this;
-                    let email = _.fill([''], {{.SignedUser.Email}});
-
-                    return email.join(",");
-                }
+            created(){
+                this.userForm.mobile = _.fill([''], {{.SignedUser.Mobile}}).join(",");
+                this.userForm.email = _.fill([''], {{.SignedUser.Email}}).join(",");
             },
             mounted(){
                 console.log(this.userForm)
@@ -524,6 +521,10 @@
             {{.CsrfTokenHtml}}
             <el-form-item label="{{.i18n.Tr "username"}}">
                 <el-input id="user_name" name="user_name" v-model="userForm.user_name"  autofocus required disabled></el-input>
+            </el-form-item>
+
+            <el-form-item label="{{.i18n.Tr "mobile"}}">
+                <el-input id="mobile" name="mobile" v-model="userForm.mobile" required></el-input>
             </el-form-item>
 
             <el-form-item label="{{.i18n.Tr "email"}}">
