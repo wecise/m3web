@@ -800,9 +800,9 @@
                         
                         pt.x -= pstate.x;
                         pt.y -= pstate.y;
-
+                        
                         var columnCount = graph.model.getChildCount(parent)+1;
-                        name = '属性'+columnCount;
+                        name = prototype.value.name=='COLUMNNAME'?'属性'+columnCount:prototype.value.name;
                     } else {
                         var tableCount = 0;
                         var childCount = graph.model.getChildCount(parent);
@@ -898,14 +898,15 @@
                     var sdiv = document.createElement('div');
                     sdiv.innerHTML = prototype.value.name;
                     sdiv.style.fontSize = "12px";
+                    sdiv.style.fontWeight = "600";
                     btn.appendChild(sdiv)
 
                     var sdiv = document.createElement('div');
-                    sdiv.innerHTML = prototype.value.ftype?prototype.value.ftype:'新建类';
+                    sdiv.innerHTML = prototype.value.ftype;
+                    sdiv.style.fontSize = "11px";
                     btn.appendChild(sdiv);
 
                     sidebar.appendChild(btn);
-                    
                                         
                     // Creates the image which is used as the drag icon (preview)
                     var dragImage = btn.cloneNode(true);
@@ -1055,7 +1056,7 @@
                 // varchar for the column object
                 _.forEach(item,(v,k)=>{
                     _.forEach(_.uniqBy(v,'name'),(node)=>{
-                        console.log(node)
+                        console.log(11,node)
                         addIcon(node, `#directory-${k}`);
                     });
                 })
