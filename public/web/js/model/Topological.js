@@ -424,7 +424,7 @@ class Topological {
                                 <i class="el-icon-place"></i>
                             </template>
                             <el-button slot="append" @click="onNew">
-                                <i class="el-icon-circle-plus-outline" style="font-size:16px;font-weight:600;"></i>
+                                <i class="el-icon-circle-plus-outline" style="font-size:16px;font-weight:600;color:green;"></i>
                             </el-button>
                         </el-input>`,
             data(){
@@ -492,13 +492,13 @@ class Topological {
                                     <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
-                                <div style="padding:0px 10px;">
+                                <!--div style="padding:0px 10px;">
                                     <el-tooltip content="路劲查询" open-delay="500" placement="top">
                                         <el-button type="primary" @click="onSearch" style="float:right;">
                                             <el-image src="/fs/assets/images/tools/png/path-white.png?type=open&issys=true" style="width:16px;"></el-image>
                                         </el-button>
                                     </el-tooltip> 
-                                </div>
+                                </div-->
                             </el-header>
                             <el-main style="padding:0px 10px;" class="topological-analysis">
                                 <el-table :data="trace.paths.rows" 
@@ -612,6 +612,11 @@ class Topological {
                                     <topological-analysis-input v-for="item in _.uniqBy(trace.nodes,'id')" :model="item" :data-id="item.id" :ref="item.id"></topological-analysis-input>
                                 </div>
                                 <topological-analysis-new-input></topological-analysis-new-input>
+                                <div style="padding:0px 10px;">
+                                    <el-tooltip content="图查询" open-delay="500" placement="top">
+                                        <el-button type="primary" @click="onSearch" style="float:right;" icon="el-icon-search"></el-button>
+                                    </el-tooltip> 
+                                </div>
                             </el-header>
                             <el-main style="padding:0px 10px;" class="topological-analysis">
                                 <el-table :data="trace.paths.rows" 
@@ -674,6 +679,7 @@ class Topological {
             },
             methods:{
                 setTrace(node){
+                    this.trace.nodes = [];
                     this.trace.nodes.push(node);
                 },
                 onSearch(){
@@ -749,7 +755,7 @@ class Topological {
                 }
             },
             created(){
-                eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
+                //eventHub.$on("TOPOLOGICAL-ANALYISS-TRACE",this.setTrace);
             },
             mounted(){
                 
@@ -815,10 +821,21 @@ class Topological {
                                 </div>
                                 <el-button type="default"
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graph')" 
-                                    @keyup.enter.native="$parent.$parent.search"
-                                    style="width:8%;padding:0px;">
+                                    style="width:8%;padding:0px;margin-left:-8px;">
                                     <i class="el-icon-close" style="font-size:14px;font-weight: 900;"></i>
                                 </el-button>
+                                <el-tooltip content="路劲查询" open-delay="500" placement="top">
+                                    <el-button type="primary"
+                                        @click="search"
+                                        style="width: 40px;
+                                                height: 34px;
+                                                padding: 0px;
+                                                position: absolute;
+                                                right: -41px;
+                                                top: -1px;">
+                                        <i class="el-icon-search" style="font-size:14px;font-weight: 900;"></i>
+                                    </el-button>
+                                </el-tooltip>
                             </el-header>
                             <el-main ref="mainView" style="border-top:1px solid #419efe;padding:0px;width:30vw;">
                                 <topological-path class="graphAction" :model="$parent.$parent.mainView.path.model" :pathType="type" ref="pathRef"></topological-path>
@@ -826,15 +843,38 @@ class Topological {
                             <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
                                 
                             </el-footer>
-                        </div>`
+                        </div>`,
+            methods:{
+                search(){
+                    this.$refs.pathRef.onSearch();
+                }
+            }
         })
 
         Vue.component("topological-search-toolbar-graph",{
-            delimiters: ['${', '}'],
+            delimiters: ['#{', '}#'],
+            data(){
+                return {
+                    search:{
+                        term: "",
+                        result: null,
+                        selected: null
+                    },
+                    entity: {
+                        list: [],
+                        timeout:  null
+                    }
+                }
+            },
             template:   `<div>
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
                                 <el-button type="text" icon="el-icon-arrow-left" @click="$parent.$parent.control.show=false"></el-button>
-                                <el-input placeholder="选择实体" style="width:100%;" disabled></el-input>
+                                <el-input v-model="search.term" placeholder="选择实体" style="width:100%;"
+                                    @blur="onSearchEntity"
+                                    @clear="onClear"
+                                    clearable
+                                    autofocus>
+                                </el-input>
                                 <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
                                 </el-button>
@@ -842,24 +882,69 @@ class Topological {
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">
                                     高级
                                 </el-button>
-                                <el-button type="primary" @click="onSearch" 
-                                    @keyup.enter.native="onSearch" style="margin-left:-1px;">
+                                <el-button type="primary" @click="onSearchEntity" 
+                                    @keyup.enter.native="onSearchEntity" style="margin-left:-1px;">
                                     <i class="el-icon-search" style="font-weight: 900;font-size:14px;"></i>
                                 </el-button>
                             </el-header>
-                            <el-main ref="mainView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;">
-                                <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
+                            <el-main ref="mainView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)">
+                                <div style="display:flex;padding:10px 0;cursor:pointer;" v-for="item in search.result" @click="onSelect(item)">
+                                    <el-image :src="item | pickIcon" style="width:48px;" slot="suffix"></el-image>
+                                    <div style="height:48px;line-height:48px;width:60%;padding-left:10px;">#{ item.value }#</span></div>
+                                    <el-tooltip content="拖动到画布" open-delay="500">
+                                        <el-button type="text" icon="el-icon-menu" style="padding-left:10px;cursor:pointer;">
+                                        </el-button>
+                                    </el-tooltip>
+                                </div>
                             </el-main>
-                            <el-footer style="height:30px;line-height:30px;padding:0 5px;color:#999;">
-                                
+                            <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-show="!_.isEmpty(search.selected)">
+                                <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-footer>
                         </div>`,
-                        created(){
-                            console.log(this.$parent.$parent.control.show)
-                        },
+            filters: {
+                pickIcon(item){
+                    let icon = _.last(item.class.split("/"));
+                    return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
+                }
+            },
+            created(){
+                console.log(this.$parent.$parent.control.show)
+            },
             methods: {
                 onSearch(){
                     this.$refs.searchRef.onSearch();
+                },
+                onSelect(item){
+                    this.search.selected = item;
+                    this.$refs.searchRef.setTrace(item);
+                },
+                onClear(){
+                    this.search.result = null;
+                },
+                onSearchEntity() {
+                    
+                    try{
+                        if(_.isEmpty(this.search.term)){
+                            return false;
+                        }
+    
+                        let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
+                        
+                        this.search.result = this.search.term ? entitys.filter(this.createStateFilter(this.search.term)) : entitys;
+
+                        this.search.result = _.map(this.search.result,(v)=>{
+                            return _.extend(v,{cell: {edge:false}});
+                        })
+                
+                    } catch(err){
+
+                    }
+                    
+                },
+                createStateFilter(term) {
+                    return (state) => {
+                      return (state.value.toLowerCase().indexOf(term.toLowerCase()) === 0);
+                    };
                 }
             }
         })
@@ -2260,14 +2345,14 @@ class Topological {
 
         let main =  {
             delimiters: ['${', '}'],
-            template:   `<el-container style="background: transparent;height: 100%;">
-                            <el-aside style="background-color:transparent;border:1px solid #ddd;border-left:unset;border-right:unset;" class="topological-view-edges" ref="left">
+            template:   `<el-container style="background: transparent;height: 100%;"  v-show="control.show">
+                            <el-aside style="width:0px;background-color:transparent;border:1px solid #ddd;border-left:unset;border-right:unset;" class="topological-view-edges" ref="left">
                                 <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :style="containerHeight" ref="main">
                                 <graph-view-container ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside style="height:calc(100vh - 85px);overflow:hidden;background:transparent;border:1px solid #ddd;border-left:unset;" class="topological-view-diagnosis" ref="right">
+                            <el-aside style="width:0px;height:calc(100vh - 85px);overflow:hidden;background:transparent;border:1px solid #ddd;border-left:unset;" class="topological-view-diagnosis" ref="right">
                                 <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,
@@ -2278,14 +2363,17 @@ class Topological {
                 paths: {
                     ports: [],
                     list: []
+                },
+                control:{
+                    show: false
                 }
             },
             computed:{
                 containerHeight: function(){
                     if(_.endsWith(window.location.pathname,"_link")){
-                        return "height: calc(100vh - 10px)";
+                        return "height: calc(100vh - 10px);width:100%;";
                     } else {
-                        return "height: calc(100vh - 85px)";
+                        return "height: calc(100vh - 85px);width:100%;";
                     }
                     
                 }
@@ -2340,6 +2428,11 @@ class Topological {
                     // inst.graphScript = null;
                     // inst.URL_PARAMS_GRAPH = null;
                 }
+
+
+                setTimeout(() => {
+                    this.control.show = true;
+                }, 1000);
             },
             mounted(){
                 _.delay(()=>{

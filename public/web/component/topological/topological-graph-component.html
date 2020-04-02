@@ -11,7 +11,7 @@
         }
 
         .topological-graph-component #graphContainer > svg{
-            min-width: 2618px!important;
+            min-width: 5236px!important;
             min-height: 3316px!important;
         }
         
@@ -113,7 +113,8 @@
             z-index: 1000;
             top:5px;
             left:5px;
-            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+            border: 1px solid #ddd;
             background: #ffffff;
         }
         .topological-graph-component .search-toolbar .el-input__inner,
@@ -537,6 +538,7 @@
             return {
                 id: _.now(),
                 model:{
+                    editor: null,
                     graph:{
                         container: null,
                         model: null,
@@ -544,7 +546,7 @@
                         parent: null,
                         outline: null,
                         layout: {
-                            default: "hierarchical",
+                            default: "tree_vertical",
                             inst: null,
                             edgeStyle: "rounded"
                         },
@@ -587,8 +589,7 @@
                         },
                         show: {
                             type: "image"
-                        },
-                        undoMng:null
+                        }
                     },
                     control: {
                         ifFullScreen: false,
@@ -791,7 +792,12 @@
                     this.model.graph.container = document.getElementById(this.$refs.graphContainer.$el.id);
                     
                     // 初始化Graph
-                    this.model.graph.graph = new mxGraph(this.model.graph.container);
+                    this.model.editor = new mxEditor();
+                    this.model.graph.graph = this.model.editor.graph;
+                    //this.model.graph.graph = new mxGraph(this.model.graph.container);
+
+                    // Sets the graph container and configures the editor
+                    this.model.editor.setGraphContainer(this.model.graph.container);
 
                     this.model.graph.parent = this.model.graph.graph.getDefaultParent();
 
@@ -917,16 +923,208 @@
                     }
 
                     // Animates the changes in the graph model
-                    this.model.graph.graph.getModel().addListener(mxEvent.CHANGE, (sender, evt)=>
-                    {
-                        var changes = evt.getProperty('edit').changes;
-                        mxEffects.animateChanges(this.model.graph.graph, changes);
-                    });
+                    // this.model.graph.graph.getModel().addListener(mxEvent.CHANGE, (sender, evt)=>{
+                    //     var changes = evt.getProperty('edit').changes;
+                    //     mxEffects.animateChanges(this.model.graph.graph, changes);
+                    // });
+
+                    // Installs a popupmenu handler using local function (see below).
+                    const self = this;
+                    // 首先禁用浏览器右键菜单
+                    mxEvent.disableContextMenu(this.$el);
+                    // 右键菜单
+                    //this.model.graph.graph.popupMenuHandler.autoExpand = true;
+                    this.model.graph.graph.popupMenuHandler.factoryMethod = function(menu, cell, evt){
+                        self.createPopupMenu(self.model.editor, self.model.graph.graph, menu, cell, evt);
+                    };
 
                     this.initGraph();
                     this.cellAddEvent();
 
                 }
+            },
+            createPopupMenu(editor, graph, menu, cell, evt){
+                // node/edge menu
+                if (cell != null){
+                    // node
+                    let id = cell.getId();
+                    let value = cell.getValue();
+                    let node = {id: id, value: value, type:'event', cell: cell};
+
+                    // node
+                    if(!cell.edge){
+
+                        menu.addItem('实体分析', null, ()=>{
+                            this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                        });
+
+                        menu.addItem('实体删除', null, ()=>{
+                            this.removeEntity(cell);
+                        });
+                        
+                        menu.addSeparator();
+
+                        var submenuBsearch= menu.addItem('起点图查询', null, null);
+                        menu.addItem('1跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:1});
+                        },submenuBsearch);
+                        menu.addItem('2跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:2});
+                            
+                        },submenuBsearch);
+                        menu.addItem('3跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:3});
+                        },submenuBsearch);
+                        menu.addItem('4跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:4});
+                        },submenuBsearch);
+                        menu.addItem('5跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:5});
+                        },submenuBsearch);
+                        menu.addItem('6跳', null, ()=>{
+                            this.loadSubGraph({direction:"out",node:node,step:6});
+                        },submenuBsearch);
+
+                        var submenuEsearch= menu.addItem('终点图查询', null, null);
+                        menu.addItem('1跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:1});
+                        },submenuEsearch);
+                        menu.addItem('2跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:2});
+                        },submenuEsearch);
+                        menu.addItem('3跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:3});
+                        },submenuEsearch);
+                        menu.addItem('4跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:4});
+                        },submenuEsearch);
+                        menu.addItem('5跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:5});
+                        },submenuEsearch);
+                        menu.addItem('6跳', null, ()=>{
+                            this.loadSubGraph({direction:"in",node:node,step:6});
+                        },submenuEsearch);
+
+                        menu.addSeparator();
+
+                        menu.addItem('关系维护', null, ()=>{
+                            this.$root.$refs.graphEdgesRef.edgesTabAdd( node );
+                        });
+
+                        menu.addSeparator();
+
+                        menu.addItem('选定为路径查询点', null, ()=>{
+                            if(this.$refs.searchToolbar.currentView==='topological-search-toolbar-graphAdv'){
+                                this.$refs.searchToolbar.currentView = "topological-search-toolbar-path";
+                            }
+                            _.delay(()=>{
+                                eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
+                            },500)
+                        });
+
+                    } 
+                    // edge
+                    else {
+                        menu.addItem('实体关系分析', null, ()=>{
+                            this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
+                        });
+
+                        menu.addItem('实体关系删除', null, ()=>{
+                            this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
+                        });
+                    }
+                } 
+                // container menu
+                else {
+                    // menu.addItem('撤销', null, ()=>{
+                    //     this.model.editor.execute('undo');
+                    // });
+                    // menu.addItem('重做', null, ()=>{
+                    //     this.model.editor.execute('redo');
+                    // });
+
+                    menu.addItem('刷新', null, ()=>{
+                        this.onReload();
+                    });
+
+                    menu.addItem('清空', null, ()=>{
+                        this.deleteCells(true);
+                    });
+                    
+                    menu.addSeparator();
+
+                    var submenuEntity = menu.addItem('实体', null, null);
+                    menu.addItem('新建', null, ()=>{
+                        this.entity.newDialog.show = true;
+                    }, submenuEntity);
+                    
+                    menu.addSeparator();
+
+                    var submenuIcon = menu.addItem('显示', null, null);
+                    
+                    menu.addItem('图标', null, ()=>{
+                        this.model.control.ifIcon = true;
+                        localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
+                        this.onReload();
+                    }, submenuIcon);
+                    menu.addItem('图形', null, ()=>{
+                        this.model.control.ifIcon = false;
+                        localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
+                        this.onReload();
+                    }, submenuIcon);
+
+                    menu.addSeparator();
+
+                    var submenuLabel = menu.addItem("标签",null,null);
+                    _.forEach(this.model.graph.default.list,(v)=>{
+                        menu.addItem(v.label, null, ()=>{
+                            this.model.graph.default.title = v.label;
+                            this.onReload();
+                        }, submenuLabel);
+                    })
+
+                    menu.addSeparator();
+                    
+                    var submenuLayout = menu.addItem('布局', null, null);
+                    
+                    var submenuLayoutHierarchical = menu.addItem('分层布局', null, ()=>{
+                        this.onLayout('hierarchical');
+                    },submenuLayout);
+                    menu.addItem('折线', null, ()=>{
+                        this.model.graph.layout.edgeStyle = 2;
+                        localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
+                        this.onReload();
+                    }, submenuLayoutHierarchical);
+                    menu.addItem('直线', null, ()=>{
+                        this.model.graph.layout.edgeStyle = 3;
+                        localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
+                        this.onReload();
+                    }, submenuLayoutHierarchical);
+                    menu.addItem('圆角', null, ()=>{
+                        this.model.graph.layout.edgeStyle = 4;
+                        localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
+                        this.onReload();
+                    }, submenuLayoutHierarchical);
+                    
+                    
+                    var submenuLayoutTree = menu.addItem('树形布局', null, null,submenuLayout);
+
+                    menu.addItem('上下', null, ()=>{
+                        this.onLayout('tree_vertical');
+                    }, submenuLayoutTree);
+                    menu.addItem('左右', null, ()=>{
+                        this.onLayout('tree_horizontal');
+                    }, submenuLayoutTree);
+
+                    menu.addItem('随机布局', null, ()=>{
+                        this.onLayout('organic');
+                    }, submenuLayout);
+                    menu.addItem('圆形布局', null, ()=>{
+                        this.onLayout('circle');
+                    }, submenuLayout);
+
+                }
+                
             },
             checkImgExists(name){
                 let term = {parent:"/assets/images/entity/png", name:name};
@@ -1486,192 +1684,6 @@
                         
                     }
 
-                    // 首先禁用浏览器右键菜单
-                    mxEvent.disableContextMenu(this.$el);
-                    // 右键菜单
-                    this.model.graph.graph.popupMenuHandler.autoExpand = true;
-                    this.model.graph.graph.popupMenuHandler.factoryMethod = (menu, cell, evt)=>{
-                        
-                        // node/edge menu
-                        if (cell != null){
-                            // node
-                            let id = cell.getId();
-                            let value = cell.getValue();
-                            let node = {id: id, value: value, type:'event', cell: cell};
-
-                            // node
-                            if(!cell.edge){
-
-                                menu.addItem('实体分析', null, ()=>{
-                                    this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
-                                });
-
-                                menu.addItem('实体删除', null, ()=>{
-                                    this.removeEntity(cell);
-                                });
-                                
-                                menu.addSeparator();
-
-                                var submenuBsearch= menu.addItem('起点图查询', null, null);
-                                menu.addItem('1跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:1});
-                                },submenuBsearch);
-                                menu.addItem('2跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:2});
-                                    
-                                },submenuBsearch);
-                                menu.addItem('3跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:3});
-                                },submenuBsearch);
-                                menu.addItem('4跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:4});
-                                },submenuBsearch);
-                                menu.addItem('5跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:5});
-                                },submenuBsearch);
-                                menu.addItem('6跳', null, ()=>{
-                                    this.loadSubGraph({direction:"out",node:node,step:6});
-                                },submenuBsearch);
-
-                                var submenuEsearch= menu.addItem('终点图查询', null, null);
-                                menu.addItem('1跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:1});
-                                },submenuEsearch);
-                                menu.addItem('2跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:2});
-                                },submenuEsearch);
-                                menu.addItem('3跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:3});
-                                },submenuEsearch);
-                                menu.addItem('4跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:4});
-                                },submenuEsearch);
-                                menu.addItem('5跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:5});
-                                },submenuEsearch);
-                                menu.addItem('6跳', null, ()=>{
-                                    this.loadSubGraph({direction:"in",node:node,step:6});
-                                },submenuEsearch);
-
-                                menu.addSeparator();
-
-                                menu.addItem('关系维护', null, ()=>{
-                                    this.$root.$refs.graphEdgesRef.edgesTabAdd( node );
-                                });
-
-                                menu.addSeparator();
-
-                                menu.addItem('选定为路径查询点', null, ()=>{
-                                    if(this.$refs.searchToolbar.currentView==='topological-search-toolbar-graphAdv'){
-                                        this.$refs.searchToolbar.currentView = "topological-search-toolbar-path";
-                                    }
-                                    _.delay(()=>{
-                                        eventHub.$emit("TOPOLOGICAL-ANALYISS-TRACE", node);
-                                    },500)
-                                });
-
-                            } 
-                            // edge
-                            else {
-                                menu.addItem('实体关系分析', null, ()=>{
-                                    this.$root.$refs.graphDiagnosisRef.diagnosisAdd( node );
-                                });
-
-                                menu.addItem('实体关系删除', null, ()=>{
-                                    this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.removeEntity(cell);
-                                });
-                            }
-                        } 
-                        // container menu
-                        else {
-                            menu.addItem('撤销', null, ()=>{
-                                this.model.graph.undoMng.undo();
-                            });
-
-                            menu.addItem('刷新', null, ()=>{
-                                this.$refs.graphViewSearch.search();
-                            });
-
-                            menu.addItem('清空', null, ()=>{
-                                this.deleteCells(true);
-                            });
-                            
-                            menu.addSeparator();
-
-                            var submenuEntity = menu.addItem('实体', null, null);
-                            menu.addItem('新建', null, ()=>{
-                                this.entity.newDialog.show = true;
-                            }, submenuEntity);
-                            
-                            menu.addSeparator();
-
-                            var submenuIcon = menu.addItem('显示', null, null);
-                            
-                            menu.addItem('图标', null, ()=>{
-                                this.model.control.ifIcon = true;
-                                localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
-                                this.onReload();
-                            }, submenuIcon);
-                            menu.addItem('图形', null, ()=>{
-                                this.model.control.ifIcon = false;
-                                localStorage.setItem("TOPOLOGICAL-RENDER-TYPE",this.model.control.ifIcon);
-                                this.onReload();
-                            }, submenuIcon);
-
-                            menu.addSeparator();
-
-                            var submenuLabel = menu.addItem("标签",null,null);
-                            _.forEach(this.model.graph.default.list,(v)=>{
-                                menu.addItem(v.label, null, ()=>{
-                                    this.model.graph.default.title = v.label;
-                                    this.onReload();
-                                }, submenuLabel);
-                            })
-
-                            menu.addSeparator();
-                            
-                            var submenuLayout = menu.addItem('布局', null, null);
-                            
-                            var submenuLayoutHierarchical = menu.addItem('分层布局', null, ()=>{
-                                this.onLayout('hierarchical');
-                            },submenuLayout);
-                            menu.addItem('折线', null, ()=>{
-                                this.model.graph.layout.edgeStyle = 2;
-                                localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
-                                this.onReload();
-                            }, submenuLayoutHierarchical);
-                            menu.addItem('直线', null, ()=>{
-                                this.model.graph.layout.edgeStyle = 3;
-                                localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
-                                this.onReload();
-                            }, submenuLayoutHierarchical);
-                            menu.addItem('圆角', null, ()=>{
-                                this.model.graph.layout.edgeStyle = 4;
-                                localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.model.graph.layout.edgeStyle);
-                                this.onReload();
-                            }, submenuLayoutHierarchical);
-                            
-                            
-                            var submenuLayoutTree = menu.addItem('树形布局', null, null,submenuLayout);
-
-                            menu.addItem('上下', null, ()=>{
-                                this.onLayout('tree_vertical');
-                            }, submenuLayoutTree);
-                            menu.addItem('左右', null, ()=>{
-                                this.onLayout('tree_horizontal');
-                            }, submenuLayoutTree);
-
-                            menu.addItem('随机布局', null, ()=>{
-                                this.onLayout('organic');
-                            }, submenuLayout);
-                            menu.addItem('圆形布局', null, ()=>{
-                                this.onLayout('circle');
-                            }, submenuLayout);
-
-                        }
-                        
-                    };
-
                     // 关系编辑
                     this.model.graph.graph.addListener(mxEvent.CELL_CONNECTED, (sender, evt)=>{
                         
@@ -1753,14 +1765,6 @@
                         
                     // },2000);
 
-                    // UNDO监听
-                    this.model.graph.undoMng = new mxUndoManager();   
-                    let listener = (sender, evt)=>{   
-                        this.model.graph.undoMng.undoableEditHappened(evt.getProperty('edit'));   
-                    };   
-                    this.model.graph.graph.getModel().addListener(mxEvent.UNDO, listener);   
-                    this.model.graph.graph.getView().addListener(mxEvent.UNDO, listener);  
-
                 } catch(err){
 
                 }
@@ -1834,7 +1838,7 @@
 
             },
             toCenter(){
-                //this.model.graph.graph.center(true,true,0.5,0.5);//将画布放到容器中间
+                // this.model.graph.graph.center(true,true,0.5,.5);//将画布放到容器中间
                 // var cx = this.model.graph.graph.container.clientWidth / 2;
                 // var cy = this.model.graph.graph.container.clientHeight / 2;
             },
@@ -2134,7 +2138,7 @@
                 this.entity.soure = {};
                 this.entity.target = {};
                 if(this.entity.dialog.ifClose == true){
-                    this.model.graph.undoMng.undo();
+                    this.model.editor.execute('undo');
                 }
             },
             removeEntity(cell){
