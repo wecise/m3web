@@ -888,7 +888,12 @@ class Topological {
                                 </el-button>
                             </el-header>
                             <el-main ref="mainView" style="width:30vw;height:40vh;padding:10px;border-top:1px solid #409EFF;" v-show="!_.isEmpty(search.result)">
-                                <div style="display:flex;padding:10px 0;cursor:pointer;" v-for="item in search.result" @click="onSelect(item)">
+                                <div class="div-hover-effect" style="display:flex;padding:10px 0;cursor:pointer;" 
+                                    v-for="item in search.result"
+                                    @click="onSelect(item)"
+                                    draggable="true" 
+                                    @dragstart="onDragStart(item,$event)"
+                                    @dragend="onDragEnd($event)">
                                     <el-image :src="item | pickIcon" style="width:48px;" slot="suffix"></el-image>
                                     <div style="height:48px;line-height:48px;width:60%;padding-left:10px;">#{ item.value }#</span></div>
                                     <el-tooltip content="拖动到画布" open-delay="500">
@@ -897,7 +902,7 @@ class Topological {
                                     </el-tooltip>
                                 </div>
                             </el-main>
-                            <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-show="!_.isEmpty(search.selected)">
+                            <el-footer ref="footerView" style="width:30vw;padding:0px;border-top:1px solid #409EFF;height:auto;" v-if="!_.isEmpty(search.selected)">
                                 <topological-graph class="graphAction" :model="$parent.$parent.mainView.search.model" ref="searchRef"></topological-graph>
                             </el-footer>
                         </div>`,
@@ -908,17 +913,40 @@ class Topological {
                 }
             },
             created(){
-                console.log(this.$parent.$parent.control.show)
+                
             },
             methods: {
+                onDragStart(item,event){
+                    event.target.style.opacity = .5;
+                    event.dataTransfer.setData("Text",JSON.stringify(item));
+                },
+                onDragEnd(event){
+                    event.target.style.opacity = 1;
+                },
                 onSearch(){
                     this.$refs.searchRef.onSearch();
                 },
                 onSelect(item){
                     this.search.selected = item;
-                    this.$refs.searchRef.setTrace(item);
+                    _.delay(()=>{
+                        this.$refs.searchRef.setTrace(item);
+                    },50)
+
+                    // 定位cell
+                    let graph = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                    let cell = graph.getModel().getCell(item.id)
+                    graph.scrollCellToVisible(cell);
+                    graph.setSelectionCells([cell]);
+                    let x = -cell.geometry.x + ($('#graphContainer').width()-cell.geometry.width)/2;
+                    let y = -cell.geometry.y + ($('#graphContainer').height()-cell.geometry.height)/2;
+                    graph.getView().setTranslate(x,y);
+
+                    let cStyle = [[mxConstants.STYLE_FONTCOLOR,"#ff0000"]];
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.seCellStyle(cell, cStyle);
+                                        
                 },
                 onClear(){
+                    this.search.selected = null;
                     this.search.result = null;
                 },
                 onSearchEntity() {
@@ -2346,13 +2374,13 @@ class Topological {
         let main =  {
             delimiters: ['${', '}'],
             template:   `<el-container style="background: transparent;height: 100%;"  v-show="control.show">
-                            <el-aside style="width:0px;background-color:transparent;border:1px solid #ddd;border-left:unset;border-right:unset;" class="topological-view-edges" ref="left">
+                            <el-aside style="width:0px;background-color:#FFF;border:1px solid #ddd;border-left:unset;border-right:unset;" class="topological-view-edges" ref="left">
                                 <graph-view-edges ref="graphEdgesRef"></graph-view-edges>
                             </el-aside>
                             <el-container :style="containerHeight" ref="main">
                                 <graph-view-container ref="graphViewRef"></graph-view-container>
                             </el-container>
-                            <el-aside style="width:0px;height:calc(100vh - 85px);overflow:hidden;background:transparent;border:1px solid #ddd;border-left:unset;" class="topological-view-diagnosis" ref="right">
+                            <el-aside style="width:0px;height:calc(100vh - 85px);overflow:hidden;background:#FFF;border:1px solid #ddd;border-left:unset;" class="topological-view-diagnosis" ref="right">
                                 <graph-view-diagnosis ref="graphDiagnosisRef"></graph-view-diagnosis>
                             </el-aside>
                         </el-container>`,

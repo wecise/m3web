@@ -1022,3 +1022,4 @@ Vue.component("mx-entity-new",{
         }
     }
 })
+
