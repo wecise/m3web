@@ -942,7 +942,7 @@ class Topological {
                     graph.getView().setTranslate(x,y);
 
                     let cStyle = [[mxConstants.STYLE_FONTCOLOR,"#ff0000"]];
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.seCellStyle(cell, cStyle);
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.setCellStyle(cell, cStyle);
                                         
                 },
                 onClear(){

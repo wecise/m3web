@@ -175,6 +175,10 @@
             margin-left: 5px;
         }
 
+        .topological-graph-component svg foreignObject div {
+            user-select: none;
+        }
+
         .el-tooltip__popper.is-light {
             background: #FFF;
             /* border: 1px solid #303133; */
@@ -1600,7 +1604,7 @@
 
                     // 绘制节点
                     let fillColor = `fillColor=${_.sample(this.model.graph.theme.predefineColors)}`;
-                    let size = 30;
+                    let size = 50;
                     _.forEach(allNodes,(v)=>{
 
                         let _type = v._icon || 'matrix';
@@ -1745,7 +1749,7 @@
 
                     // 关系编辑
                     graph.addListener(mxEvent.CELL_CONNECTED, (sender, evt)=>{
-                        console.log(20,evt.getProperty('edge'))
+                        
                         let edge = evt.getProperty('edge');
                         let sCell = edge.source;
                         let tCell = edge.target;
@@ -1761,13 +1765,13 @@
                             if(_.indexOf(id,":") == -1){
                                 tId = sCell.getId() + `_copy_${moment().format("SSS")}`;
                                 tValue = sCell.getValue() + `_copy_${moment().format("SSS")}`;
+                                tCell.setValue(tValue);
                                 type = "new";
                             } else {
                                 tId = tCell.getId();
                                 tValue = tCell.getValue();
                             }
                             _.extend(this.entity, {target: {id: tId, value: tValue, type: type}});
-                            console.log(21,this.entity)
                             this.entity.dialog.show = true;
                         }
                     })
@@ -1849,7 +1853,6 @@
                             evt.preventDefault();
 
                             // Gets drop location point for vertex
-                            console.log(graph.container,mxEvent.getClientX(evt), mxEvent.getClientY(evt))
                             var pt = mxUtils.convertPoint(graph.container, mxEvent.getClientX(evt), mxEvent.getClientY(evt));
                             var tr = graph.view.translate;
                             var scale = graph.view.scale;

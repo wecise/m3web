@@ -314,6 +314,31 @@
                                         v-for="item in dialogProperties.model.ftypeList">
                                     </el-option>
                                 </el-select>
+                                <div v-if="dialogProperties.cell.value.ftype == 'set' || dialogProperties.cell.value.ftype == 'list'">
+                                    <el-select v-model="dialogProperties.cell.value.ftypeOption.value1">
+                                        <el-option :key="item.value" 
+                                            :label="item.label"
+                                            :value="item.value"
+                                            v-for="item in dialogProperties.model.ftypeList">
+                                        </el-option>
+                                    </el-select>
+                                </div>
+                                <div v-if="dialogProperties.cell.value.ftype == 'map'">
+                                    <el-select v-model="dialogProperties.cell.value.ftypeOption.value1">
+                                        <el-option :key="item.value" 
+                                            :label="item.label"
+                                            :value="item.value"
+                                            v-for="item in dialogProperties.model.ftypeList">
+                                        </el-option>
+                                    </el-select>
+                                    <el-select v-model="dialogProperties.cell.value.ftypeOption.value2">
+                                        <el-option :key="item.value" 
+                                            :label="item.label"
+                                            :value="item.value"
+                                            v-for="item in dialogProperties.model.ftypeList">
+                                        </el-option>
+                                    </el-select>
+                                </div>
                             </el-form-item>
                             <el-form-item label="是否为主键">
                                 <el-checkbox v-model="dialogProperties.cell.value.iskey"></el-checkbox>
@@ -436,6 +461,10 @@
                         name:"",
                         title:"",
                         ftype: "varchar",
+                        ftypeOption: {
+                            value1: "",
+                            value2: ""
+                        },
                         iskey:false,
                         isindex:false,
                         ftypeList: [],
@@ -467,14 +496,13 @@
                 let node = _.map(val,(v)=>{
                     return _.uniqBy(v,'name');
                 })
-                console.log(JSON.stringify(val),JSON.stringify(node))
                 this.addDirectoryToSidebar(val);
             }
         },
         created(){
             try{
                 let ftypeList = fsHandler.callFsJScript("/matrix/omdb/getFileldTypeList.js",null).message;
-                _.extend(this.dialogProperties.model,{ftypeList:_.map(ftypeList,(v,k)=>{ return {value:k,label:k};  })});
+                _.extend( this.dialogProperties.model,{ftypeList:ftypeList} );
             } catch(err){
                 
             }
@@ -669,6 +697,20 @@
 
                     // Add the source vertex
                     graph.addListener(mxEvent.ADD_CELLS, function(sender, evt) {
+                        let target = evt.getProperty("target");
+                        
+                        if (target != null && graph.isSwimlane(target)) {
+                            
+                            let name = mxUtils.prompt('请输入类名称', '');
+
+                            if(!_.isEmpty(name)){
+                                target.value.name = name;
+                            }
+                            
+                            graph.setSelectionCell(target);
+                        }
+                        evt.consume();
+
                         self.summaryInfo();
                     });
 
@@ -819,7 +861,6 @@
                         pt.x -= pstate.x;
                         pt.y -= pstate.y;
                         
-                        console.log(13,cell)
                         // 判断是否已经有该属性
                         if(cell.children){
                             _.forEach(cell.children,(v)=>{
@@ -1080,6 +1121,8 @@
 
                 Column.prototype.ftype = 'varchar';
 
+                Column.prototype.ftypeOption = {value1: "",value2: ""};
+
                 Column.prototype.title = '';
                 
                 Column.prototype.iskey = false;
@@ -1124,6 +1167,7 @@
                         firstColumn.value.name = 'CLASSNAME_ID';
                         firstColumn.value.title = '';
                         firstColumn.value.ftype = 'varchar';
+                        firstColumn.value.ftypeOption = {value1: "",value2: ""};;
                         firstColumn.value.iskey = true;
                         firstColumn.value.isindex = false;
                         
@@ -1160,6 +1204,8 @@
 
                 Column.prototype.ftype = 'varchar';
 
+                Column.prototype.ftypeOption = {value1: "",value2: ""};;
+
                 Column.prototype.title = '';
                 
                 Column.prototype.iskey = false;
@@ -1179,6 +1225,7 @@
                     column.value.name = node.name;
                     column.value.title = node.title;
                     column.value.ftype = node.ftype;
+                    column.value.ftypeOption = node.ftypeOption;
                     column.value.iskey = node.iskey;
                     column.value.isindex = node.isindex;
                     column.setConnectable(false);
@@ -1442,7 +1489,7 @@
 
                 if(cell){
                     var child = cell;
-                    console.log(child)
+                    
                     if (!graph.model.isEdge(child)){
                         
                         mql[0].push('CREATE CLASS IF NOT EXISTS '+child.value.name+' (');
@@ -1451,7 +1498,7 @@
                         let classCfg = [];
 
                         if(child.value.ttl){
-                            classCfg.push(`ttl=${child.value.ttl}`);
+                            classCfg.push(`ttl=${child.value.ttl / 86400} day`);
                         }
                         if(child.value.alias){
                             classCfg.push(`alias='${child.value.alias}'`);
@@ -1461,7 +1508,7 @@
                         }
 
                         if(child.value.autosearch){
-                            classCfg.push(`autosearch=${child.value.autosearch}`);
+                            classCfg.push(`autosearch=${child.value.autosearch==1?true:false}`);
                         }
 
                         if(child.value.partition){
@@ -1477,9 +1524,19 @@
 
                         if (columnCount > 0){
                             for (var j=0; j<columnCount; j++){
-                                var column = graph.model.getChildAt(child, j).value;
+                                var column = (graph.model.getChildAt(child, j).value).clone();
                                 
-                                mql[0].push('\n    '+column.name+'  '+column.ftype+'  "'+column.title + '"');
+                                if(_.includes(['list','set'],column.ftype)){
+                                    console.log(_.values(column.ftypeOption))
+                                    column.ftype += `<${_.values(column.ftypeOption).join(",").slice(0,-1)}>`;
+                                }
+
+                                if(_.includes(['map'],column.ftype)){
+                                    console.log(_.values(column.ftypeOption))
+                                    column.ftype += `<${_.values(column.ftypeOption).join(",")}>`;
+                                }
+
+                                mql[0].push('\n    '+`"${column.name}"`+'  '+column.ftype+'  "'+column.title + '"');
                                 
                                 if (column.iskey){
                                     mql[1].push(column.name);
@@ -1560,9 +1617,19 @@
 
                             if (columnCount > 0){
                                 for (var j=0; j<columnCount; j++){
-                                    var column = graph.model.getChildAt(child, j).value;
+                                    var column = (graph.model.getChildAt(child, j).value).clone();
                                     
-                                    mql[0].push('\n    '+column.name+'  '+column.ftype+'  "'+column.title + '"');
+                                    if(_.includes(['list','set'],column.ftype)){
+                                        console.log(_.values(column.ftypeOption))
+                                        column.ftype += `<${_.values(column.ftypeOption).join(",").slice(0,-1)}>`;
+                                    }
+
+                                    if(_.includes(['map'],column.ftype)){
+                                        console.log(_.values(column.ftypeOption))
+                                        column.ftype += `<${_.values(column.ftypeOption).join(",")}>`;
+                                    }
+
+                                    mql[0].push('\n    '+`"${column.name}"`+'  '+column.ftype+'  "'+column.title + '"');
                                     
                                     if (column.iskey){
                                         mql[1].push(column.name);

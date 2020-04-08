@@ -31,10 +31,23 @@ class Summary {
                         value: Number,
                         unit:String
                     },
+                    data(){
+                        return {
+                            valueTween: 0
+                        }
+                    },
                     template:   `<div style="height:100%;padding:20px;text-align: center;background:#f7f7f7;margin:5px;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
-                                    <h1 style="font-size:32px;">#{value}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
-                                </div>`
+                                    <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
+                                </div>`,
+                    watch: {
+                        value: {
+                            handler:function(newValue,oldValue) {
+                                TweenLite.to(this.$data, 1, { valueTween: newValue });
+                            },
+                            immediate:true
+                        }
+                    }
                 })
 
                 // 大号数字 多值
@@ -62,10 +75,23 @@ class Summary {
                         value: Number,
                         unit:String
                     },
+                    data(){
+                        return {
+                            valueTween: 0
+                        }
+                    },
                     template:   `<div style="height:100%;text-align: center;background:#f7f7f7;">
                                     <span style="color:rgb(153, 153, 153);">#{title}#</span>
-                                    <h1 style="font-size:32px;">#{value}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
-                                </div>`
+                                    <h1 style="font-size:32px;">#{valueTween}# <span style="color:rgb(153, 153, 153);font-size:x-small;">#{unit}#</span></h1>
+                                </div>`,
+                    watch: {
+                        value: {
+                            handler:function(newValue,oldValue) {
+                                TweenLite.to(this.$data, 1, { valueTween: newValue });
+                            },
+                            immediate:true
+                        }
+                    }
                 })
 
                 // 曲线 byday
@@ -182,10 +208,19 @@ class Summary {
                                             data: [this.model[v]],
                                             color: this.colors[index],
                                             top: '10%',
-                                            bottomo: '20%',
+                                            bottomo: '30%',
+                                            areaStyle: {
+                                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                                    offset: 0,
+                                                    color: this.colors[index]
+                                                }, {
+                                                    offset: 1,
+                                                    color: '#fff'
+                                                }])
+                                            },
                                             lineStyle: {
                                                 normal: {
-                                                    width: 1,
+                                                    width: .5,
                                                     color: {
                                                         type: 'linear',
                                 
@@ -209,7 +244,7 @@ class Summary {
                                             itemStyle: {
                                                 normal: {
                                                     color: this.colors[index],
-                                                    borderWidth: 2,
+                                                    borderWidth: 1,
                                                     /*shadowColor: 'rgba(72,216,191, 0.3)',
                                                     shadowBlur: 100,*/
                                                     borderColor: this.colors[index]
@@ -355,10 +390,19 @@ class Summary {
                                             data: [this.model[v].value],
                                             color: this.colors[index],
                                             top: '10%',
-                                            bottomo: '20%',
+                                            bottomo: '30%',
+                                            areaStyle: {
+                                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                                    offset: 0,
+                                                    color: this.colors[index]
+                                                }, {
+                                                    offset: 1,
+                                                    color: '#fff'
+                                                }])
+                                            },
                                             lineStyle: {
                                                 normal: {
-                                                    width: 1,
+                                                    width: .5,
                                                     color: {
                                                         type: 'linear',
                                 
@@ -382,7 +426,7 @@ class Summary {
                                             itemStyle: {
                                                 normal: {
                                                     color: this.colors[index],
-                                                    borderWidth: 2,
+                                                    borderWidth: 1,
                                                     /*shadowColor: 'rgba(72,216,191, 0.3)',
                                                     shadowBlur: 100,*/
                                                     borderColor: this.colors[index]
@@ -597,11 +641,19 @@ class Summary {
                                                     </larger-number>
                                                 </div>
                                             </div>
-                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                            <!--div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
                                                     <larger-number title="磁盘大小"
                                                         :value="model.byDay.disk_volume | pickValue"
                                                         :unit="model.byDay.disk_volume | pickUnit">
+                                                    </larger-number>
+                                                </div>
+                                            </div-->
+                                            <div class="grid-stack-item" data-gs-width="2" data-gs-height="2">
+                                                <div class="grid-stack-item-content" style="overflow:hidden;">
+                                                    <larger-number title="磁盘利用率"
+                                                        :value="model.byDay.disk_volume_percent | pickValue"
+                                                        unit="%">
                                                     </larger-number>
                                                 </div>
                                             </div>
@@ -625,8 +677,8 @@ class Summary {
                                             style="background:#f7f7f7;margin:0px 20px;border-top:1px solid #fff;" >
                                             <div class="grid-stack-item" data-gs-width="12" data-gs-height="3">
                                                 <div class="grid-stack-item-content" style="overflow:hidden;">
-                                                    <h5 style="margin:0px;padding:5px 20px;">#{_.upperCase(api)}#</h5>
-                                                    <el-row :gutter="0">
+                                                    <h5 style="margin:0px;padding:10px 20px;">#{_.upperCase(api)}#</h5>
+                                                    <el-row :gutter="0" style="display:flex;align-items:center;">
                                                         <el-col :span="3">
                                                             <larger-column-number :title="item.volume.title"
                                                                 :value="item.volume.value"
@@ -640,7 +692,7 @@ class Summary {
                                                             </larger-column-number>
                                                         </el-col>
                                                         <el-col :span="12">
-                                                            <curve-chart-byapi title="当日趋势" height="200px" :model="model.byApi[api]" ref="curveChart"></curve-chart-byapi>
+                                                            <curve-chart-byapi title="当日趋势" height="180px" :model="model.byApi[api]" ref="curveChart"></curve-chart-byapi>
                                                         </el-col>
                                                     </el-row>
                                                 </div>
