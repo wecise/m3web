@@ -11,6 +11,14 @@
  *
  */
 
+Vue.directive('focus', {
+    // 当被绑定的元素插入到DOM中时
+    update: function (el, binding, vnode, oldVnode) {
+        // 聚焦元素
+        el.focus();
+    }
+});
+
  /* Common FS Editor */
 Vue.component("mx-fs-editor",{
     delimiters: ['#{', '}#'],

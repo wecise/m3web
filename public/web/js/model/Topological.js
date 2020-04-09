@@ -872,18 +872,20 @@ class Topological {
                                 <el-input v-model="search.term" placeholder="选择实体" style="width:100%;"
                                     @blur="onSearchEntity"
                                     @clear="onClear"
+                                    @keyup.enter.native="onSearchEntity" 
                                     clearable
                                     autofocus>
                                 </el-input>
-                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
+                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')"  style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
                                 </el-button>
                                 <el-button type="default" 
                                     @click="$parent.$parent.onToggleView('topological-search-toolbar-graphAdv')" style="margin-left:-1px;">
                                     高级
                                 </el-button>
-                                <el-button type="primary" @click="onSearchEntity" 
-                                    @keyup.enter.native="onSearchEntity" style="margin-left:-1px;">
+                                <el-button type="primary" 
+                                    @click="onSearchEntity" 
+                                    style="margin-left:-1px;">
                                     <i class="el-icon-search" style="font-weight: 900;font-size:14px;"></i>
                                 </el-button>
                             </el-header>
@@ -912,16 +914,23 @@ class Topological {
                     return `/fs/assets/images/entity/png/${icon}.png?type=open&issys=true`;
                 }
             },
+            watch: {
+                'search.term':function(val,oldVal){
+                    if(_.isEmpty(val)){
+                        this.onClear();
+                    }
+                }
+            },
             created(){
                 
             },
             methods: {
                 onDragStart(item,event){
-                    event.target.style.opacity = .5;
+                    //event.target.style.opacity = .5;
                     event.dataTransfer.setData("Text",JSON.stringify(item));
                 },
                 onDragEnd(event){
-                    event.target.style.opacity = 1;
+                    //event.target.style.opacity = 1;
                 },
                 onSearch(){
                     this.$refs.searchRef.onSearch();
@@ -941,8 +950,9 @@ class Topological {
                     let y = -cell.geometry.y + ($('#graphContainer').height()-cell.geometry.height)/2;
                     graph.getView().setTranslate(x,y);
 
-                    let cStyle = [[mxConstants.STYLE_FONTCOLOR,"#ff0000"]];
-                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.setCellStyle(cell, cStyle);
+                    // 选择节点突出显示
+                    // let cStyle = [[mxConstants.STYLE_FONTCOLOR,"#ff0000"]];
+                    // inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.setCellStyle(cell, cStyle);
                                         
                 },
                 onClear(){
@@ -958,14 +968,14 @@ class Topological {
     
                         let entitys = fsHandler.callFsJScript("/matrix/graph/entity-search-by-term.js",encodeURIComponent(this.search.term)).message;
                         
-                        this.search.result = this.search.term ? entitys.filter(this.createStateFilter(this.search.term)) : entitys;
+                        this.search.result = entitys;//this.search.term ? entitys.filter(this.createStateFilter(this.search.term)) : entitys;
 
                         this.search.result = _.map(this.search.result,(v)=>{
                             return _.extend(v,{cell: {edge:false}});
                         })
                 
                     } catch(err){
-
+                        console.log(err)
                     }
                     
                 },
@@ -988,7 +998,7 @@ class Topological {
                             <el-header style="width:100%;display:flex;height:35px;line-height:35px;padding:0px 0px 0px 10px;">
                                 <el-button type="text" icon="el-icon-arrow-left"  @click="$parent.$parent.control.show=false"></el-button>
                                 <el-input placeholder="图查询语句" style="width:100%;" disabled></el-input>
-                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" @keyup.enter.native="$parent.$parent.search" style="margin-left:-1px;">
+                                <el-button type="default" @click="$parent.$parent.onToggleView('topological-search-toolbar-path')" style="margin-left:-1px;">
                                     <el-image src="/fs/assets/images/tools/png/path-blue.png?type=open&issys=true" style="width:16px;"></el-image>
                                 </el-button>
                                 <el-button type="default"

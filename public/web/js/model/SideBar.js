@@ -502,7 +502,7 @@ class SideBar {
                                 </el-dropdown-menu>
                             </el-dropdown>
 
-                            <el-link :href="'http://'+company.website" target="_blank" :underline="false" style="font-size:12px;">
+                            <el-link :href="company.website" target="_blank" :underline="false" style="font-size:12px;">
                                 <i class="el-icon-user el-icon--right"></i> #{company.fullName}#
                             </el-link>
                             

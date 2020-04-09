@@ -152,6 +152,8 @@
 
         .topological-graph-component .footerbar {
             width: 100%;
+            height: 200px!important;
+            line-height: 200px!important;
             padding: 0px;
             background: #f7f7f7;
         }
@@ -359,8 +361,8 @@
                 <el-main id="graphContainer" ref="graphContainer" 
                         style="width:100vw;height:100vh;min-width:100vw;position:releative;overflow:hidden;padding:0px;">
                 </el-main>
-                <el-footer class="footerbar" :style="{display: model.graph.footbar.show?'':'none'}" ref="footer">
-                    <topological-timeline :model="allNodesIds" ref="timeline" v-if="!_.isEmpty(allNodesIds)"></topological-timeline>
+                <el-footer class="footerbar" ref="footer" v-if="model.graph.footbar.show">
+                    <topological-timeline :model="model.graph.allNodesIds" ref="timeline"></topological-timeline>
                 </el-footer>
                 <div id="search-toolbar" class="search-toolbar">
                     <topological-search-toolbar ref="searchToolbar" style="width:100%;"></topological-search-toolbar>
@@ -417,9 +419,9 @@
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
-                   <el-tooltip content="刷新" open-delay="500" placement="left">
-                       <el-button type="text"  @click="onReload">
-                            <i class="el-icon-refresh" style="font-size:18px;">
+                   <el-tooltip content="将图居中显示"" open-delay="500" placement="left">
+                       <el-button type="text"  @click="toCenter">
+                            <i class="el-icon-rank" style="font-size:18px;">
                        </el-button>
                    </el-tooltip>
                    <el-divider></el-divider>
@@ -570,10 +572,11 @@
                         parent: null,
                         outline: null,
                         layout: {
-                            default: "tree_vertical",
+                            default: "hierarchical",
                             inst: null,
-                            edgeStyle: "rounded"
+                            edgeStyle: "4"
                         },
+                        allNodesIds: [],
                         nodes:null,
                         edges:null,                        
                         path: {
@@ -701,16 +704,6 @@
                 }
 
             },
-            allNodesIds(){
-                try{
-                    return  _.uniq(_.map(this.model.graph.nodes,(v,k)=>{
-                                return v.getId();
-                            }));
-                } catch(err){
-                    return [];
-                }
-
-            },
             allEdges(){
                 try{
                     return  _.uniq(_.map(this.model.graph.edges,(v,k)=>{
@@ -751,6 +744,11 @@
                     }
                 },
                 deep:true
+            },
+            'model.graph.footbar.show':function(val,oldVal){
+                if(val){
+                    this.model.control.show = !this.model.control.show;
+                }
             }
         },
         created(){
@@ -814,6 +812,9 @@
 
                     // 初始化timeline
                     this.initTimeLine();
+
+                    // 初始化滚轮图缩放事件监听
+                    this.addScrollListener(this.model.graph.container, this.wheelHandle);
                 },500)
 	            
 	        })
@@ -858,9 +859,6 @@
                     // 是否允许平移。true：表示按住Shift+左键拖动时，整个graph移动；
                     // false：按住Shift+左键拖动时，选中的图形水平方向或者垂直方向平移。
                     this.model.graph.graph.setPanning(true);
-                    
-                    // 鼠标拖拉，手机浏览器拖拉
-                    this.model.graph.graph.setPanning(true);
                     mxPanningHandler.prototype.isPanningTrigger = function(me) {
                         var evt = me.getEvent();
                         return true;
@@ -872,7 +870,7 @@
                     // 允许连线的目标和源是同一元素 
                     this.model.graph.graph.setAllowLoops(true); 
                     // 居中缩放
-                    this.model.graph.graph.centerZoom = false;
+                    this.model.graph.graph.centerZoom = true;
                     // Tooltips on touch devices
                     this.model.graph.graph.setTooltips(!mxClient.IS_TOUCH);
                     // 支持Html
@@ -917,8 +915,8 @@
                         // Layout hierarchical
                         this.model.graph.layout.inst = new mxHierarchicalLayout(this.model.graph.graph);
                         this.model.graph.layout.inst.edgeStyle = this.model.graph.layout.edgeStyle;
-                        this.model.graph.layout.inst.intraCellSpacing = 60;
-                        this.model.graph.layout.inst.interRankCellSpacing = 60;
+                        this.model.graph.layout.inst.intraCellSpacing = 80;
+                        this.model.graph.layout.inst.interRankCellSpacing = 80;
                     } else if(this.model.graph.layout.default === 'organic'){
                         // Layout Organic
                         this.model.graph.layout.inst = new mxFastOrganicLayout(this.model.graph.graph);
@@ -986,6 +984,50 @@
                     this.initGraph();
                     this.graphEvent(this.model.editor.graph);
 
+                }
+            },
+            addScrollListener(element, wheelHandle) {
+                if (typeof element != 'object') return;
+                if (typeof wheelHandle != 'function') return;
+
+                // 监测浏览器
+                if (typeof arguments.callee.browser == 'undefined') {
+                    var user = navigator.userAgent;
+                    var b = {};
+                    b.opera = user.indexOf("Opera") > -1 && typeof window.opera == "object";
+                    b.khtml = (user.indexOf("KHTML") > -1 || user.indexOf("AppleWebKit") > -1 || user.indexOf("Konqueror") > -1) && !b.opera;
+                    b.ie = user.indexOf("MSIE") > -1 && !b.opera;
+                    b.gecko = user.indexOf("Gecko") > -1 && !b.khtml;
+                    arguments.callee.browser = b;
+                }
+                if (element == window)
+                    element = document;
+                if (arguments.callee.browser.ie)
+                    element.attachEvent('onmousewheel', wheelHandle);
+                else
+                    element.addEventListener(arguments.callee.browser.gecko ? 'DOMMouseScroll' : 'mousewheel', wheelHandle, false);
+            },
+            wheelHandle(e) {
+                var upcheck;
+
+                if (e.wheelDelta) {
+                    upcheck = e.wheelDelta > 0 ? 1 : 0;
+                } else {
+                    upcheck = e.detail < 0 ? 1 : 0;
+                }
+                if (upcheck) {
+                    this.model.graph.graph.zoomIn();
+                }
+                else {
+                    this.model.graph.graph.zoomOut();
+                }
+
+                if (window.event) {
+                    e.returnValue = false;
+                    window.event.cancelBubble = true;
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
                 }
             },
             createPopupMenu(editor, graph, menu, cell, evt){
@@ -1069,6 +1111,15 @@
 
                         menu.addSeparator();
 
+                        // menu.addItem('撤销', null, ()=>{
+                        //     this.model.editor.execute('undo');
+                        // });
+                        // menu.addItem('重做', null, ()=>{
+                        //     this.model.editor.execute('redo');
+                        // });
+
+                        // menu.addSeparator();
+                        
                         menu.addItem('节点隐藏', null, ()=>{
                             // graph action
                             cell.removeFromParent();
@@ -1096,22 +1147,22 @@
                 } 
                 // container menu
                 else {
-                    // menu.addItem('撤销', null, ()=>{
-                    //     this.model.editor.execute('undo');
-                    // });
-                    // menu.addItem('重做', null, ()=>{
-                    //     this.model.editor.execute('redo');
-                    // });
-
-                    menu.addItem('刷新', null, ()=>{
-                        this.onReload();
-                    });
-
-                    menu.addItem('清空', null, ()=>{
-                        this.deleteCells(true);
-                    });
                     
-                    menu.addSeparator();
+
+                    if(!_.isEmpty(this.graphData.nodes)){
+                        menu.addItem('刷新', null, ()=>{
+                            this.onReload();
+                        });
+                    }
+                    
+                    let cells = this.model.graph.graph.getChildVertices(this.model.graph.graph.getDefaultParent())
+                    if(!_.isEmpty(cells)){
+                        menu.addItem('清空', null, ()=>{
+                            this.model.editor.execute("selectAll");
+                            this.model.editor.execute("delete");
+                        });
+                        menu.addSeparator();
+                    }
 
                     var submenuEntity = menu.addItem('实体', null, null);
                     menu.addItem('新建实体', null, ()=>{
@@ -1361,7 +1412,6 @@
                             }
                             
                             // edge directory
-                            console.log(123,source,target)
                             try{
                                 let id = source.getId() + ':' + target.getId();
                                 _.extend(this.model.graph.edges, { [id]: edge });
@@ -1380,11 +1430,11 @@
                 }
                 finally {
                     
-                    $(this.$refs.graphContainer.$el).after(this.$refs.footer.$el);
-
-                    this.toCenter();
+                    //$(this.$refs.graphContainer.$el).after(this.$refs.footer.$el);
 
                     this.model.graph.graph.getModel().endUpdate();
+
+                    this.toCenter();
 
                 }
             },
@@ -1504,7 +1554,11 @@
                     $(this.$refs.graphContainer.$el).empty();
                     $("#outlineContainer",this.$el).empty();
 
-                    this.deleteCells(true);
+                    // 清空
+                    this.model.editor.execute("selectAll");
+                    this.model.editor.execute("delete");
+
+                    // 重新初始化
                     this.init();
                     
                     this.outline();
@@ -1707,6 +1761,9 @@
                         }
                         
                     })
+
+                    // Executes the layout handler
+                    this.executeLayout();
                     
                 }
                 finally {
@@ -1715,6 +1772,7 @@
 
                     this.model.graph.graph.getModel().mergeChildren(graph.getModel().getRoot().getChildAt(0), this.model.graph.graph.getDefaultParent());
 
+                    
                     // Executes the layout handler
                     this.executeLayout();
 
@@ -1729,6 +1787,9 @@
                     }
                     // Search Step
                     this.global.count = this.global.count + 1;
+
+                    // 加入高级搜索定义
+                    this.$refs.searchToolbar.term = term;
                 }
             },
             // 图事件
@@ -1746,6 +1807,16 @@
                         }
                         
                     }
+
+                    // Removes the source vertex 
+                    graph.addListener(mxEvent.REMOVE_CELLS, (sender, evt)=> {
+                        this.getAllCellIds();
+                    });
+
+                    // Add the source vertex
+                    graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
+                        this.getAllCellIds();
+                    });
 
                     // 关系编辑
                     graph.addListener(mxEvent.CELL_CONNECTED, (sender, evt)=>{
@@ -1816,26 +1887,26 @@
                     });
 
                     // 鼠标停留到元素上边缘高亮显示
-                    // let track = new mxCellTracker(graph);
-                    // track.mouseMove = _.debounce((sender, me)=> {
+                    let track = new mxCellTracker(graph);
+                    track.mouseMove = _.debounce((sender, me)=> {
                         
-                    //     try{
-                    //         // 刷新状态
-                    //         this.refreshEntityStatus();
-                    //     } catch(err){
+                        try{
+                            // 刷新状态
+                            this.refreshEntityStatus();
+                        } catch(err){
 
-                    //     }
+                        }
                         
-                    // },2000);
+                    },2000);
 
                     // 滚轮缩放
                     mxEvent.addMouseWheelListener((evt, up)=> {
-                        if (up) {
-                            graph.zoomIn();
-                        } else {
-                            graph.zoomOut();
-                        }
-                        mxEvent.consume(evt);
+                        // if (up) {
+                        //     graph.zoomIn();
+                        // } else {
+                        //     graph.zoomOut();
+                        // }
+                        // mxEvent.consume(evt);
                     });
 
                     // 监听拖拽事件
@@ -1929,11 +2000,11 @@
                                     })
                                 
                                     
+                                } catch(err){
+
                                 } finally {
                                     graph.getModel().endUpdate();
                                 }
-
-                                return 
                             };
 
                             var items = [JSON.parse(event.dataTransfer.getData("Text"))];
@@ -1944,18 +2015,28 @@
 
                 } catch(err){}
             },
+            // 获取所有cell ids
+            getAllCellIds(){
+                try{
+                    let cells = this.model.graph.graph.getModel().cells;
+                    this.model.graph.allNodesIds = _.xor(_.keys(cells),['0','1']);
+                    console.log(333,this.model.graph.allNodesIds)
+                } catch(err){
+                    this.model.graph.allNodesIds = [];
+                }
+            },
             onTimeLine(){
                 this.model.graph.footbar.show = !this.model.graph.footbar.show;
                 if(this.model.graph.footbar.show){
-                    this.layout.splitInst = Split([this.$refs.graphContainer.$el, this.$refs.footer.$el], {
-                        sizes: [60,40],
-                        minSize: [0, 0],
-                        gutterSize: 5,
-                        cursor: 'col-resize',
-                        direction: 'vertical'
-                    });
+                    // this.layout.splitInst = Split([this.$refs.graphContainer.$el, this.$refs.footer.$el], {
+                    //     sizes: [60,40],
+                    //     minSize: [0, 0],
+                    //     gutterSize: 5,
+                    //     cursor: 'col-resize',
+                    //     direction: 'vertical'
+                    // });
                 } else {
-                    this.layout.splitInst.destroy();
+                    // this.layout.splitInst.destroy();
                 }
             },
             forward(item){
@@ -2013,18 +2094,18 @@
 
             },
             toCenter(){
-                //this.model.graph.graph.center(true,false,0.5,0.5);//将画布放到容器中间
-                // var cx = this.model.graph.graph.container.clientWidth / 2;
-                // var cy = this.model.graph.graph.container.clientHeight / 2;
+                this.model.graph.graph.center(true,false,0.5,0.5);//将画布放到容器中间
+                /* var cx = '50vw';//this.model.graph.graph.container.clientWidth / 2;
+                var cy = '50vh';//this.model.graph.graph.container.clientHeight / 2;
 
-                /* $("#graphContainer > svg").css({
-                    'transform': 'translate(30vw,20px)'
-                }) */
+                $("#graphContainer > svg").css({
+                    'transform': `translate(${cx},${cy})`
+                })*/
 
-                //this.model.graph.graph.fit();//自适应
-                //this.model.graph.graph.center(true,false,0.5,0.5);//将画布放到容器中间
-                //var sc = this.model.graph.graph.getView().getScale();//获取当前的缩放比例
-                //this.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
+                // this.model.graph.graph.fit();//自适应
+                // this.model.graph.graph.center(true,false,0.1,0.5);//将画布放到容器中间
+                // var sc = this.model.graph.graph.getView().getScale();//获取当前的缩放比例
+                // this.model.graph.graph.zoomTo(Math.round(sc/2));//在缩放一半，否则是满屏状态，不好看
             },
             // 绘制路径
             addPath(paths){
@@ -2178,6 +2259,9 @@
             },
             onZoomOut(){
                 this.model.graph.graph.zoomOut();
+            },
+            onFit(){
+                this.model.editor.execute("fit");
             },
             editIt(){
                 let item = { 
@@ -2536,34 +2620,6 @@
                     })
                 }
 
-            },
-            // Action For Cells
-            deleteCells(includeEdges){
-                
-                this.model.graph.graph.escape();
-
-                //var cells = this.model.graph.graph.getDeletableCells(this.model.graph.graph.getSelectionCells());
-                let cells = this.model.graph.graph.getChildVertices(this.model.graph.graph.getDefaultParent());
-                
-                if (cells != null && cells.length > 0){
-                    var parents = this.model.graph.graph.model.getParents(cells);
-                    this.model.graph.graph.removeCells(cells, includeEdges);
-                    
-                    // Selects parents for easier editing of groups
-                    if (parents != null) {
-                        var select = [];
-                        
-                        for (var i = 0; i < parents.length; i++) {
-                            if (this.model.graph.graph.model.contains(parents[i]) &&
-                                (this.model.graph.graph.model.isVertex(parents[i]) ||
-                                this.model.graph.graph.model.isEdge(parents[i]))){
-                                select.push(parents[i]);
-                            }
-                        }
-                        
-                        this.model.graph.graph.setSelectionCells(select);
-                    }
-                }
             },
             onTagClick(event,type,value){
                 event.preventDefault();

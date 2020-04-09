@@ -17,6 +17,18 @@
             border-top: 1px solid #ddd;
             border-left: 1px solid #ddd;
             background: #fff;
+            
+        }
+
+        .vis-background.vis-item-content {
+            z-index: 11111;
+            height: 100%!important;
+            width: 100%!important;
+        }
+
+        .vis-item {
+            border-color: #ff0000;
+            background-color: #ff0000;
         }
 
         .topological-timeline .el-color-picker--mini > .el-color-picker__trigger {
@@ -27,32 +39,63 @@
             border:unset;
         }
 
+        .topological-timeline .el-divider.el-divider--vertical{
+            margin: 8px 12px;
+        }
+
 	</style>
 
 	
 	/*----------  最外层element会自动增加组件同名 class="topological-timeline"  ----------*/
 	<template>
-        <el-container>
+        <el-container style="height:100%;width:100%;">
             <el-aside width="200px">
                 <el-tree 
                     show-checkbox
-                    @check-change="onNodeCheckChange"
                     default-expand-all 
                     :data="tree.data" :props="tree.defaultProps"
                     @node-click="onNodeClick"
-                    style="background: transparent;">
+                    @check-change="onNodeCheckChange"
+                    style="background: transparent;"
+                    ref="tree">
                     <span slot-scope="{ node, data }" style="width:100%;height:30px;line-height: 30px;">
                         <span>#{node.label}#</span>
                         <el-color-picker v-model="data.color" size="mini" v-if="data.children.length==0"></el-color-picker>
                     </span>  
                 </el-tree>
             </el-aside>
-            <el-container>
-                <el-header style="height:30px;line-height: 30px;">
-                    <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
+            <el-container style="width:100%;height:100%;">
+                <el-header style="height:30px;line-height: 30px;display: flex;">
+                    <div class="block" style="width:95%;display: flex;">
+                        <el-date-picker
+                            v-model="timeline.daterange"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            popper-class="timeLineDateRange el-picker-panel el-date-range-picker el-popper">
+                        </el-date-picker>
+                    
+                        <el-divider direction="vertical"></el-divider>
+                        <el-tooltip content="放大" open-delay="500">
+                            <el-button type="text" icon="el-icon-zoom-in" @click="onTimelineZoomin(0.2)" style="padding:5px 0px;"></el-button>
+                        </el-tooltip>
+                        <el-tooltip content="缩小" open-delay="500">
+                            <el-button type="text" icon="el-icon-zoom-out" @click="onTimelineZoomout(0.2)" style="padding:5px 0px;"></el-button>
+                        </el-tooltip>
+                        <el-divider direction="vertical"></el-divider>
+                        <el-checkbox v-model="timeline.showDiff">显示差异</el-checkbox>
+                    </div>
+                    <div style="width:5%;text-align: right;">
+                        <el-tooltip content="关闭" open-delay="500">
+                            <el-button type="text" icon="el-icon-close" style="float:right;" @click="onClose"></el-button>
+                        </el-tooltip>
+                    </div>
                 </el-header>
-                <el-main style="padding:0px;">
-                    <div ref="timeline" style="width:100%;height:100%;"></div>
+                <el-main style="width:100%;height:100%;padding:0px;display: flex;">
+                    <el-button type="text" icon="el-icon-arrow-left" @sclick="onTimeLineMove(0.2)"></el-button>
+                    <div id="timeline" ref="timeline" style="width:100%;"></div>
+                    <el-button type="text" icon="el-icon-arrow-right" @click="onTimeLineMove(-0.2)"></el-button>
                 </el-main>
             </el-container>
         </el-container>
@@ -69,33 +112,32 @@
             return {
                 timeline:{
                     showDiff:false,
+                    daterange: "",
                     inst: null,
-                    items:  [],
+                    items:  new vis.DataSet(),
                     options: {
-                        width: '100%',
-                        height: '100%',
-                        margin: {
-                            item: 20
-                        },
-                        zoomMax: 1 * 24 * 60 * 60 * 1000,
-                        zoomMin: 60 * 1000,
-                        locale: 'zh_CN',
-                        type: 'point',
-                        showMajorLabels: false
+                        type: "point",
+                        editable: true,
+                        showCurrentTime: true,
+                        showWeekScale: true,
+                        locale: 'zh_CN'
                     }
                 },
                 tree: {
                     data: [{
                         id: 1,
+                        name: 'all',
                         label:'实体关联数据',
                         children: [{
                             id: 11,
+                            name: 'event',
                             label: '事件',
                             children: [],
                             color:"#ff0000"
                         },
                         {
                             id: 12,
+                            name: 'ticket',
                             label: '工单',
                             children: [],
                             color:"#ffff00"
@@ -104,56 +146,95 @@
                     defaultProps: {
                         children: 'children',
                         label: 'label'
-                    }
+                    },
+                    selected:null
                 }
             }
         },
-        // watch: {
-        //     // model: {
-        //     //     handler:function(val,oldVal){
-        //     //         //this.initItems();
-        //     //     },
-        //     //     deep:true,
-        //     //     immediate:true
-        //     // }
-        // },
+        watch: {
+            model: function(val,oldVal){
+                this.setItems();
+            },
+            'tree.selected': function(val,oldVal){
+                this.setItems();
+            }
+        },
         created(){
-            this.initItems();
+            this.setItems();
 	    },
 	    mounted() {
             this.$nextTick(() => {
+            
                 this.timeline.inst = new vis.Timeline(this.$refs.timeline, this.timeline.items, this.timeline.options);
-                
+                this.timeline.inst.fit();
                 this.timeline.inst.on('select', this.onSelect);
-                $(this.$refs.timeline).on("click",(event)=> {
-                    var props = this.timeline.inst.getEventProperties(event)
-                    this.onClick(props);
-                })
+                // $(this.$refs.timeline).on("click",(event)=> {
+                //     var props = this.timeline.inst.getEventProperties(event)
+                //     //this.onClick(props);
+                // })
+                
             })
 	        
 	    },
 	    methods: {
             onNodeCheckChange(data, checked, indeterminate){
-                console.log(data, checked, indeterminate )
-            },
-            initItems(){
-                let term = this.model.join(";");
-                let items = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
-                this.timeline.items = new vis.DataSet(_.map(items,(v)=>{
-                                        let bgColor = mx.global.register.event.severity[v.severity][2];
-                                        return {
-                                            id: v.id,
-                                            group: 0,
-                                            content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor}">${v.host}</button>`,
-                                            start: moment(v.vtime).format("LLL")
-                                        }
-                                    }));
+                this.tree.selected = _.groupBy(this.$refs.tree.getCheckedNodes(),'name');
             },
             onNodeClick(data) {
                 console.log(data);
             },
             add(){
-                this.timeline.items.push();
+                //this.timeline.items.pLOWERh();
+            },
+            setItems(){
+
+                this.timeline.items.clear();
+
+                // 判断是否勾选，勾选的数据才显示到时间轴上
+                if(_.isEmpty(this.tree.selected)) {
+                    return false;
+                }
+
+                let term = this.model.join(";");
+                let diagnosisData = fsHandler.callFsJScript("/matrix/graph/getDiagnosisDataByIds.js",encodeURIComponent(term)).message;
+                _.forEach(diagnosisData,(v,k)=>{
+                    
+                    // 判断是否勾选，勾选的数据才显示到时间轴上
+                    if(this.tree.selected[k]){
+                        let items  = _.map(v,(val)=>{
+                            let bgColor = mx.global.register.event.severity[val.severity][2];
+                            let item = {
+                                id: v.id,
+                                group: k,
+                                content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
+                                            ${val.host}<br>
+                                            ${val.msg}<br>
+                                            ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
+                                        </button>`,
+                                start: val.vtime
+                            };
+                            return item;
+                        });
+                        this.timeline.items.add(items);
+                    }
+
+                }); 
+
+            },
+            onTimelineZoomin(percentage){
+                this.timeline.inst.zoomIn(percentage);
+            },
+            onTimelineZoomout(percentage){
+                this.timeline.inst.zoomOut(percentage);
+            },
+            onTimeLineMove(percentage){
+                let range = this.timeline.inst.getWindow();
+                let interval = range.end - range.start;
+
+                this.timeline.inst.setWindow({
+                    start: range.start.valueOf() - interval * percentage,
+                    end:   range.end.valueOf()   - interval * percentage
+                });
             },
             onSelect(properties) {
                 console.log('selected items: ' + properties.items);
@@ -173,6 +254,10 @@
                     this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.$refs.graphViewSearch.term = term;
                 },500)
 
+            },
+            onClose(){
+                this.$parent.$parent.$parent.$parent.model.graph.footbar.show = false;
+                this.$parent.$parent.$parent.$parent.model.control.show = true;
             }
 	    }
 	
