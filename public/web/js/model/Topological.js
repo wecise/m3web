@@ -936,23 +936,15 @@ class Topological {
                     this.$refs.searchRef.onSearch();
                 },
                 onSelect(item){
+                    
                     this.search.selected = item;
+
                     _.delay(()=>{
                         this.$refs.searchRef.setTrace(item);
                     },50)
 
                     // 定位cell
-                    let graph = inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
-                    let cell = graph.getModel().getCell(item.id)
-                    graph.scrollCellToVisible(cell);
-                    graph.setSelectionCells([cell]);
-                    let x = -cell.geometry.x + ($('#graphContainer').width()-cell.geometry.width)/2;
-                    let y = -cell.geometry.y + ($('#graphContainer').height()-cell.geometry.height)/2;
-                    graph.getView().setTranslate(x,y);
-
-                    // 选择节点突出显示
-                    // let cStyle = [[mxConstants.STYLE_FONTCOLOR,"#ff0000"]];
-                    // inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.setCellStyle(cell, cStyle);
+                    inst.app.$refs.graphViewRef.$refs.graphViewContainerInst.onPosition(item.id);
                                         
                 },
                 onClear(){
@@ -1006,8 +998,7 @@ class Topological {
                                     style="margin-left:-1px;">
                                     <i class="el-icon-search" style="font-weight: 900;"></i>
                                 </el-button>
-                                <el-button type="primary" @click="onSearch('')" 
-                                    @keyup.enter.native="onSearch('')" style="margin-left:-1px;">
+                                <el-button type="primary" @click="onSearch('')" style="margin-left:-1px;">
                                     <i class="el-icon-search"></i> <span>高级</span>
                                 </el-button>
                             </el-header>
@@ -1020,6 +1011,7 @@ class Topological {
                                             v-model="$parent.$parent.term"
                                             placeholder="图搜索"
                                             @clear="$parent.$parent.onClear"
+                                            @keyup.enter.native="onSearch('')" 
                                             style="width:100%;"
                                             clearable
                                             ref="graphSearch">
@@ -1126,7 +1118,7 @@ class Topological {
                 
                 // 更新选择列表
                 eventHub.$on("GRAPH-VIEW-SEARCH-UPDATE-EVENT", term => {
-                    this.term = term;
+                    this.term = _.trim(term);
                 });
 
                 // 初始化图搜索脚本
@@ -1979,9 +1971,12 @@ class Topological {
             },
             template:   `<el-container style="height:calc(100vh - 150px);">
                             <el-main style="height:100%;overflow:hidden;">
-                                <el-input v-model="term" clearable placeholder="实体关键字" @blur="searchByTerm" style="margin-bottom:10px;height:32px;">
+                                <el-input v-model="term" clearable placeholder="实体关键字" 
+                                    @blur="searchByTerm" 
+                                    @keyup.enter.native="searchByTerm" 
+                                    style="margin-bottom:10px;height:32px;">
                                     <template slot="prepend">搜索实体</template>
-                                    <el-button slot="append" icon="el-icon-search" @click="searchByTerm" @keyup.enter.native="searchByTerm"></el-button>
+                                    <el-button slot="append" icon="el-icon-search" @click="searchByTerm"></el-button>
                                 </el-input>
                                 <el-transfer v-model="selected" 
                                 :titles="['实体列表',type]"
@@ -2214,7 +2209,7 @@ class Topological {
                     } catch(err){
                         console.log(err)
                     } finally{
-                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                        let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.graph;
                         //graph.getView().setTranslate(20,20);//将画布放到容器中间
                         // 访问过的节点高亮
                         var highlight = new mxCellHighlight(graph, '#2790e1', 1);
@@ -2494,7 +2489,7 @@ class Topological {
                     this.model = _.extend(this.model, this.$refs.searchRef.result);
                 },
                 cellSelect(cell){
-                    let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.graph.graph;
+                    let graph = this.$root.$refs.graphViewRef.$refs.graphViewContainerInst.model.editor.graph;
                     
                     if (cell != null){
 						var overlays = graph.getCellOverlays(cell);

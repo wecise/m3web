@@ -114,7 +114,7 @@ class Notes {
                     template:   `<el-container style="height:100%;">
                                     <el-header style="height:40px;line-height:40px;">
                                         <span style="font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:5px;text-align:left;" v-if="!_.isEmpty(model)">
-                                            #{model.item.name}#
+                                            #{model.item.name | pickName}#
                                         </span>
                                         <el-button type="text" icon="el-icon-s-platform" @click="mode='view'" style="margin-left:10px;float:right;"></el-button>
                                         <el-button type="text" icon="el-icon-edit" @click="mode='edit'" style="float:right;"></el-button>
@@ -128,6 +128,15 @@ class Notes {
                                         </el-container>
                                     </el-main>
                                 </el-container>`,
+                    filters: {
+                        pickName(name){
+                            try{
+                                return _.head(name.split(".md"));
+                            } catch(err){
+                                return name;
+                            }
+                        }
+                    },
                     data(){
                         return {
                             editor: null,

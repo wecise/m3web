@@ -18,8 +18,7 @@ class Search {
 
     init() {
 
-        VueLoader.onloaded(["vue-editor-component",
-                            "search-preset-component",
+        VueLoader.onloaded(["search-preset-component",
                             "search-base-component",
                             "ai-robot-component"],function() {
 

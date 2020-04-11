@@ -18,8 +18,7 @@ class System {
 
     init() {
 
-        VueLoader.onloaded(["vue-editor-component",
-							"vue-base-datatables-component",
+        VueLoader.onloaded(["vue-base-datatables-component",
 							"vue-common-form-component",
 							"ai-robot-component"
 							],function() {

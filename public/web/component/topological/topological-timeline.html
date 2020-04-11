@@ -201,21 +201,38 @@
                     
                     // 判断是否勾选，勾选的数据才显示到时间轴上
                     if(this.tree.selected[k]){
-                        let items  = _.map(v,(val)=>{
-                            let bgColor = mx.global.register.event.severity[val.severity][2];
-                            let item = {
-                                id: v.id,
-                                group: k,
-                                content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
-                                            ${val.host}<br>
-                                            ${val.msg}<br>
-                                            ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
-                                        </button>`,
-                                start: val.vtime
-                            };
-                            return item;
-                        });
-                        this.timeline.items.add(items);
+                        if(k==='event'){
+                            let items  = _.map(v,(val)=>{
+                                let bgColor = mx.global.register.event.severity[val.severity][2];
+                                let item = {
+                                    id: v.id,
+                                    group: k,
+                                    content: `<button type="button" class="el-button el-button--mini" style="background:${bgColor};float:left;text-align:left;">
+                                                ${val.host}<br>
+                                                ${val.msg || val.desc}<br>
+                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
+                                            </button>`,
+                                    start: val.vtime
+                                };
+                                return item;
+                            });
+                            this.timeline.items.add(items);
+                        } else {
+                            let items  = _.map(v,(val)=>{
+                                let item = {
+                                    id: v.id,
+                                    group: k,
+                                    content: `<button type="button" class="el-button el-button--mini" style="float:left;text-align:left;">
+                                                ${val.host}<br>
+                                                ${val.msg || val.desc}<br>
+                                                ${moment(val.vtime).format("YYY-MM-DD HH:MM:SS")}
+                                            </button>`,
+                                    start: val.vtime
+                                };
+                                return item;
+                            });
+                            this.timeline.items.add(items);
+                        }
                     }
 
                 }); 
