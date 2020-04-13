@@ -69,10 +69,13 @@
                     <div class="block" style="width:95%;display: flex;">
                         <el-date-picker
                             v-model="timeline.daterange"
-                            type="daterange"
+                            type="datetimerange"
+                            :picker-options="timeline.pickerOptions"
                             range-separator="至"
                             start-placeholder="开始日期"
                             end-placeholder="结束日期"
+                            @change="onDateRangeChange"
+                            align="right"
                             popper-class="timeLineDateRange el-picker-panel el-date-range-picker el-popper">
                         </el-date-picker>
                     
@@ -113,6 +116,62 @@
                 timeline:{
                     showDiff:false,
                     daterange: "",
+                    pickerOptions: {
+                        shortcuts: [
+                            {
+                                text: '最近5小时',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 5);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }, 
+                            {
+                                text: '最近12小时',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 12);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }, 
+                            {
+                                text: '最近24小时',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 24);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }, 
+                            {
+                                text: '最近一周',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }, {
+                                text: '最近一个月',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }, {
+                                text: '最近三个月',
+                                onClick(picker) {
+                                    const end = new Date();
+                                    const start = new Date();
+                                    start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                                    picker.$emit('pick', [start, end]);
+                                }
+                            }
+                        ]
+                    },
                     inst: null,
                     items:  new vis.DataSet(),
                     options: {
@@ -185,6 +244,9 @@
             },
             add(){
                 //this.timeline.items.pLOWERh();
+            },
+            onDateRangeChange(evt){
+                this.timeline.inst.setOptions({start:evt[0],end:evt[1]});
             },
             setItems(){
 

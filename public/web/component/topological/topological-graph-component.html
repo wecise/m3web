@@ -1109,6 +1109,7 @@
                         menu.addItem('刷新', null, ()=>{
                             this.onReload();
                         });
+                        menu.addSeparator();
                     }
                     
                     let cells = this.model.editor.graph.getChildVertices(this.model.editor.graph.getDefaultParent())
@@ -1118,6 +1119,14 @@
                         });
                         menu.addSeparator();
                     }
+
+                    menu.addItem('撤销', null, ()=>{
+                        this.model.editor.execute("undo");
+                    });
+                    menu.addItem('重做', null, ()=>{
+                        this.model.editor.execute("redo");
+                    });
+                    menu.addSeparator();
 
                     var submenuEntity = menu.addItem('实体', null, null);
                     menu.addItem('新建实体', null, ()=>{
@@ -1394,7 +1403,7 @@
                     
                     this.model.editor.graph.getModel().endUpdate();
 
-                    //this.toCenter();
+                    this.toCenter();
 
                 }
             },
@@ -1517,23 +1526,6 @@
                         graph.getModel().endUpdate();
                     }
                 }
-
-                /* console.log(_.now(),layout.default, layout.edgeStyle)
-                this.model.editor.graph.getModel().beginUpdate();
-                try{
-                    if(layout.default === 'hierarchical' 
-                        || layout.default === 'organic'
-                        || layout.default === 'circle'
-                        || layout.default === 'composite'){
-                        layout.inst.execute(parent);
-                    }
-                }
-                catch (e){
-                    console.log(e)
-                }
-                finally{
-                    this.model.editor.graph.getModel().endUpdate();
-                } */
                 
             },
             addChild(graph, cell){
@@ -1748,7 +1740,7 @@
                     }
 
                     // 绘制节点
-                    let fillColor = `fillColor=${_.sample(this.model.graph.theme.predefineColors)}`;
+                    let fillColor = "";//`fillColor=${_.sample(this.model.graph.theme.predefineColors)}`;
                     let size = 50;
                     _.forEach(allNodes,(v)=>{
 
@@ -2121,12 +2113,12 @@
             },
             onPosition(id){
                 
+                let graph = this.model.editor.graph;
+                let cell = graph.getModel().getCell(id);
+
                 try{
                     // 恢复图实际大小
-                    this.model.editor.execute("actualSize");
-
-                    let graph = this.model.editor.graph;
-                    let cell = graph.getModel().getCell(id);
+                    this.model.editor.execute("actualSize");    
                     
                     let containerW = $(this.$refs.graphContainer.$el).width();
                     let containerH = $(this.$refs.graphContainer.$el).height();
@@ -2145,7 +2137,7 @@
                     // 当前画布中不包含该实体
                     this.$message({
                         type: "info",
-                        message: "画布没有该实体 " + err
+                        message: "画布没有该实体 "
                     })
                 }
                 
@@ -2219,7 +2211,10 @@
 
             },
             toCenter(){
-                this.model.editor.graph.center(true,false,0.5,0.5);//将画布放到容器中间
+                this.model.editor.execute("fit");
+                _.delay(()=>{
+                    this.model.editor.graph.center(true,false,0.5,0.5);//将画布放到容器中间
+                },500)
                 /* var cx = '50vw';//this.model.editor.graph.container.clientWidth / 2;
                 var cy = '50vh';//this.model.editor.graph.container.clientHeight / 2;
 

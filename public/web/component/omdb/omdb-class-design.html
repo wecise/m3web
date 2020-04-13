@@ -178,11 +178,11 @@
                         </el-collapse-item>
                     </el-collapse>
                 </el-aside>
-                <el-main style="padding:0px;">
+                <el-main style="padding:0px;overflow: hidden;">
                     
                     <!-- Creates a container for the graph -->
                     <div id="graphContainer"
-                        style="height:100%;" ref="graphContainer">
+                        style="width:100vw;height:100vh;min-width:100vw;position:releative;overflow:hidden;padding:0px;" ref="graphContainer">
                     </div>
     
                     <div class="vertical-toolbar animated fadeIn">
@@ -405,11 +405,12 @@
 		data(){
           	return {
                 editor: null,
+                defaultExpand: false,
                 doc:null,
                 layout: {
                     default: "tree_horizontal",
                     inst: null,
-                    edgeStyle: "rounded"
+                    edgeStyle: 4
                 },
                 docInfo: {
                     classes:{
@@ -497,13 +498,20 @@
                     return _.uniqBy(v,'name');
                 })
                 this.addDirectoryToSidebar(val);
+            },
+            defaultExpand:function(val,oldVal){
+                if(val){
+                    this.editor.execute('expandAll');
+                } else {
+                    this.editor.execute('collapseAll')
+                }
             }
         },
         created(){
             try{
                 let ftypeList = fsHandler.callFsJScript("/matrix/omdb/getFileldTypeList.js",null).message;
                 _.extend( this.dialogProperties.model,{ftypeList:ftypeList} );
-            } catch(err){
+            } catch(err) {
                 
             }
             
@@ -511,6 +519,14 @@
 		mounted(){
             this.main(this.$refs.graphContainer,
                     this.$refs.sidebarContainer.$el);
+
+            this.$nextTick(()=>{
+
+                _.delay(()=>{
+                    // 初始化滚轮图缩放事件监听
+                    this.addScrollListener(this.$refs.graphContainer, this.wheelHandle);
+                },1500)
+            })
         },
 		methods: {
             // Program starts here. Creates a sample graph in the
@@ -578,6 +594,8 @@
                     graph.setCellsCloneable(false);
                     graph.swimlaneNesting = false;
                     graph.dropEnabled = true;
+                    // 容器大小自适应 
+                    graph.setResizeContainer(false);
 
                     // Does not allow dangling edges
                     graph.setAllowDanglingEdges(false);
@@ -654,6 +672,7 @@
                     
                     // Returns the type as the tooltip for column cells
                     graph.getTooltip = function(state) {
+                        
                         // if (this.isHtmlLabel(state.cell)) {
                         //     return 'Type: '+state.cell.value.type;
                         // } else if (this.model.isEdge(state.cell)) {
@@ -691,17 +710,17 @@
                     };
                     
                     // Removes the source vertex if edges are removed
-                    graph.addListener(mxEvent.REMOVE_CELLS, function(sender, evt) {
-                        self.summaryInfo();
+                    graph.addListener(mxEvent.REMOVE_CELLS, (sender, evt)=> {
+                        this.summaryInfo();
                     });
 
                     // Add the source vertex
-                    graph.addListener(mxEvent.ADD_CELLS, function(sender, evt) {
+                    graph.addListener(mxEvent.ADD_CELLS, (sender, evt)=> {
                         let target = evt.getProperty("target");
                         
                         if (target != null && graph.isSwimlane(target)) {
                             
-                            let name = mxUtils.prompt('请输入类名称', '');
+                            let name = mxUtils.prompt('请输入类名称', '/matrix');
 
                             if(!_.isEmpty(name)){
                                 target.value.name = name;
@@ -711,8 +730,13 @@
                         }
                         evt.consume();
 
-                        self.summaryInfo();
+                        this.summaryInfo();
                     });
+
+                    // MOUSE_DOWN for graph
+                    graph.addListener(mxEvent.CELLS_FOLDED,(sender,evt)=>{
+                        this.toCenter();
+                    })
 
                     // Disables drag-and-drop into non-swimlanes.
                     graph.isValidDropTarget = function(cell, cells, evt) {
@@ -827,8 +851,167 @@
                     // 自动打开最后一次打开文件
                     this.doc = JSON.parse(localStorage.getItem("CLASS-DESIGN-OPEN-FILE"))
                     this.onOpen(true);
+
+                    // 是否展开节点
+                    if(this.defaultExpand){
+                        this.editor.execute('expandAll');
+                    } else {
+                        this.editor.execute('collapseAll')
+                    }
                 }
             }, 
+            addScrollListener(element, wheelHandle) {
+                if (typeof element != 'object') return;
+                if (typeof wheelHandle != 'function') return;
+
+                // 监测浏览器
+                if (typeof arguments.callee.browser == 'undefined') {
+                    var user = navigator.userAgent;
+                    var b = {};
+                    b.opera = user.indexOf("Opera") > -1 && typeof window.opera == "object";
+                    b.khtml = (user.indexOf("KHTML") > -1 || user.indexOf("AppleWebKit") > -1 || user.indexOf("Konqueror") > -1) && !b.opera;
+                    b.ie = user.indexOf("MSIE") > -1 && !b.opera;
+                    b.gecko = user.indexOf("Gecko") > -1 && !b.khtml;
+                    arguments.callee.browser = b;
+                }
+                if (element == window)
+                    element = document;
+                if (arguments.callee.browser.ie)
+                    element.attachEvent('onmousewheel', wheelHandle);
+                else
+                    element.addEventListener(arguments.callee.browser.gecko ? 'DOMMouseScroll' : 'mousewheel', wheelHandle, false);
+            },
+            wheelHandle(e) {
+                var upcheck;
+
+                if (e.wheelDelta) {
+                    upcheck = e.wheelDelta > 0 ? 1 : 0;
+                } else {
+                    upcheck = e.detail < 0 ? 1 : 0;
+                }
+                if (upcheck) {
+                    this.editor.graph.zoomIn();
+                }
+                else {
+                    this.editor.graph.zoomOut();
+                }
+
+                if (window.event) {
+                    e.returnValue = false;
+                    window.event.cancelBubble = true;
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            },
+            toCenter(){
+                this.editor.graph.center(false,true,0.5,0.5);//将画布放到容器中间
+            },
+            executeLayout(){
+                let graph = this.editor.graph;
+                let parent = this.editor.graph.getDefaultParent();
+                let layout = this.layout;
+                console.log(1,graph)
+                // 布局定义
+                if(layout.default === 'hierarchical'){
+                    // Layout hierarchical
+                    graph.getModel().beginUpdate();
+                    try {
+                        layout.inst = new mxHierarchicalLayout(graph);
+                        layout.inst.edgeStyle = layout.edgeStyle;
+                        layout.inst.intraCellSpacing = 80;
+                        layout.inst.interRankCellSpacing = 80;
+                        layout.inst.execute(parent);
+                    } catch (e) {
+                        throw e;
+                    } finally {
+                        var morph = new mxMorphing(graph);  
+                        morph.addListener(mxEvent.DONE, function(){  
+                            graph.getModel().endUpdate();  
+                        });  
+                            
+                        morph.startAnimation();  
+                    }
+                    
+                } else if(layout.default === 'organic'){
+                    // Layout Organic
+                    graph.getModel().beginUpdate();
+                    try {
+                        layout.inst = new mxFastOrganicLayout(graph);
+                        layout.inst.forceConstant = 140;
+                        layout.inst.execute(parent);
+                    } catch (e) {
+                        throw e;
+                    } finally {
+                        graph.getModel().endUpdate();
+                    }
+                    
+                } else if(layout.default === 'tree_vertical'){
+                    /* Layout tree vertical */
+                    graph.getModel().beginUpdate();
+                    try {
+                        layout.inst = new mxCompactTreeLayout(graph, false, false);
+                        layout.inst.useBoundingBox = true;
+                        layout.inst.edgeRouting = false;
+                        layout.inst.levelDistance = 40;
+                        layout.inst.nodeDistance = 60;
+                        layout.edgeStyle = 4;
+                        layout.inst.execute(parent);
+                        layout.inst.isVertexMovable = function(cell){
+                            return true;
+                        };
+                        var layoutMgr = new mxLayoutManager(graph);
+
+                        layoutMgr.getLayout = function(cell){
+                            if (cell.getChildCount() > 0){
+                                return layout.inst;
+                            }
+                        };
+                    } catch (e) {
+                        throw e;
+                    } finally {
+                        graph.getModel().endUpdate();
+                    }
+                } else if(layout.default === 'tree_horizontal'){
+                    /* Layout tree horizontal */
+                    graph.getModel().beginUpdate();
+                    try {
+                        layout.inst = new mxCompactTreeLayout(graph, true, false);
+                        layout.inst.useBoundingBox = true;
+                        layout.inst.edgeRouting = false;
+                        layout.inst.levelDistance = 40;
+                        layout.inst.nodeDistance = 60;
+                        layout.edgeStyle = 4;
+                        layout.inst.execute(parent);
+                        layout.inst.isVertexMovable = function(cell){
+                            return true;
+                        };
+                        var layoutMgr = new mxLayoutManager(graph);
+
+                        layoutMgr.getLayout = function(cell){
+                            if (cell.getChildCount() > 0){
+                                return layout.inst;
+                            }
+                        };
+                        
+                    } catch (e) {
+                        throw e;
+                    } finally {
+                        graph.getModel().endUpdate();
+                    }
+                } else {
+                    /* Layout Circle */
+                    graph.getModel().beginUpdate();
+                    try {
+                        layout.inst = new mxCircleLayout(graph);
+                        layout.inst.execute(parent);
+                    } catch (e) {
+                        throw e;
+                    } finally {
+                        graph.getModel().endUpdate();
+                    }
+                }
+            },
             addSidebarIcon(graph, sidebar, prototype, image){
                 // Function that is executed when the image is dropped on
                 // the graph. The cell argument points to the cell under
@@ -1050,68 +1233,6 @@
                         }
                     }
                 }
-            },
-            executeLayout(editor,type,edgeStyle){
-                
-                // // 布局定义
-                // if(type === 'hierarchical'){
-                //     // Layout hierarchical
-                //     this.layout.inst = new mxHierarchicalLayout(editor.graph);
-                //     this.layout.inst.edgeStyle = this.layout.edgeStyle;
-                //     this.layout.inst.intraCellSpacing = 60;
-                //     this.layout.inst.interRankCellSpacing = 60;
-                // } else if(type === 'organic'){
-                //     // Layout Organic
-                //     this.layout.inst = new mxFastOrganicLayout(editor.graph);
-                //     this.layout.inst.forceConstant = 140;
-                // } else if(type === 'tree_vertical'){
-                //     /* Layout tree vertical */
-                //     var layout = new mxCompactTreeLayout(editor.graph, false, false);
-                //     layout.useBoundingBox = true;
-                //     layout.edgeRouting = false;
-                //     layout.levelDistance = 40;
-                //     layout.nodeDistance = 60;
-                //     layout.isVertexMovable = function(cell){
-                //         return true;
-                //     };
-                //     var layoutMgr = new mxLayoutManager(editor.graph);
-
-                //     layoutMgr.getLayout = function(cell){
-                //         if (cell.getChildCount() > 0){
-                //             return layout;
-                //         }
-                //     };
-                // } else if(type === 'tree_horizontal'){
-                //     /* Layout tree horizontal */
-                //     var layout = new mxCompactTreeLayout(editor.graph, true, false);
-                //     layout.useBoundingBox = true;
-                //     layout.edgeRouting = false;
-                //     layout.levelDistance = 40;
-                //     layout.nodeDistance = 60;
-                //     layout.isVertexMovable = function(cell){
-                //         return true;
-                //     };
-                //     var layoutMgr = new mxLayoutManager(editor.graph);
-
-                //     layoutMgr.getLayout = function(cell){
-                //         if (cell.getChildCount() > 0){
-                //             return layout;
-                //         }
-                //     };
-                // } else if(type === 'composite'){
-                //     /* Layout partition */
-                //     let first = new mxHierarchicalLayout(editor.graph);
-                //     let second = new mxCircleLayout(editor.graph);
-                //     this.layout.inst = new mxCompositeLayout(editor.graph, [first, second], first);
-                // } else {
-                //     /* Layout Circle */
-                //     this.layout.inst = new mxCircleLayout(editor.graph);
-                // }
-
-                // if(this.layout.inst){
-                //     this.layout.inst.execute(editor.graph.getDefaultParent());
-                // }
-
             },
             initSideBar(graph,sidebar){
                 // Defines the column user object
@@ -1408,19 +1529,23 @@
                     
                 var submenuLayout = menu.addItem('布局', null, null);
                 
-                var submenuLayoutHierarchical = menu.addItem('分层布局', null, ()=>{
-                    this.executeLayout(this.editor,'hierarchical',this.layout.edgeStyle);
-                },submenuLayout);
+                var submenuLayoutHierarchical = menu.addItem('分层布局', null, null,submenuLayout);
                 menu.addItem('折线', null, ()=>{
-                    this.executeLayout(this.editor,'hierarchical',2);
+                    this.layout.default = 'hierarchical';
+                    this.layout.edgeStyle = 2;
+                    this.executeLayout();
                     localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.layout.edgeStyle);
                 }, submenuLayoutHierarchical);
                 menu.addItem('直线', null, ()=>{
-                    this.executeLayout(this.editor,'hierarchical',3);
+                    this.layout.default = 'hierarchical';
+                    this.layout.edgeStyle = 3;
+                    this.executeLayout();
                     localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.layout.edgeStyle);
                 }, submenuLayoutHierarchical);
                 menu.addItem('圆角', null, ()=>{
-                    this.executeLayout(this.editor,'hierarchical',4);
+                    this.layout.default = 'hierarchical';
+                    this.layout.edgeStyle = 4;
+                    this.executeLayout();
                     localStorage.setItem("TOPOLOGICAL-RENDER-EDGESTYLE",this.layout.edgeStyle);
                 }, submenuLayoutHierarchical);
                 
@@ -1428,17 +1553,21 @@
                 var submenuLayoutTree = menu.addItem('树形布局', null, null,submenuLayout);
 
                 menu.addItem('上下', null, ()=>{
-                    this.executeLayout(this.editor,'tree_vertical',this.layout.edgeStyle);
+                    this.layout.default = 'tree_vertical';
+                    this.executeLayout();
                 }, submenuLayoutTree);
                 menu.addItem('左右', null, ()=>{
-                    this.executeLayout(this.editor,'tree_horizontal',this.layout.edgeStyle);
+                    this.layout.default = 'tree_horizontal';
+                    this.executeLayout();
                 }, submenuLayoutTree);
 
                 menu.addItem('随机布局', null, ()=>{
-                    this.executeLayout(this.editor,'organic',this.layout.edgeStyle);
+                    this.layout.default = 'organic';
+                    this.executeLayout();
                 }, submenuLayout);
                 menu.addItem('圆形布局', null, ()=>{
-                    this.executeLayout(this.editor,'circle',this.layout.edgeStyle);
+                    this.layout.default = 'circle';
+                    this.executeLayout();
                 }, submenuLayout);
             },
             showProperties(graph, cell){
@@ -1697,9 +1826,10 @@
                     this.dialogOpen.visible = false;
                     this.summaryInfo();
 
-                    this.executeLayout(this.editor,this.layout.default,this.layout.edgeStyle);
+                    
                     _.delay(()=>{
-                        
+                        this.executeLayout();
+                        this.toCenter();
                     },500)
 
 
